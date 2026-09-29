@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scroll.companynerve.com/contracts/insight.schema.json",
+  "title": "Source insight output v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "sourceId",
+    "processingRunId",
+    "coverage",
+    "summary",
+    "insights",
+    "warnings"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "sourceId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "processingRunId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "coverage": {
+      "enum": [
+        "full_sampled",
+        "audio_only",
+        "visual_only",
+        "caption_only",
+        "metadata_only"
+      ]
+    },
+    "summary": {
+      "type": "string",
+      "maxLength": 1500
+    },
+    "warnings": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "string",
+        "maxLength": 500
+      }
+    },
+    "insights": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "title",
+          "claim",
+          "interpretation",
+          "categories",
+          "evidence",
+          "confidence",
+          "verificationNeeds"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 160
+          },
+          "claim": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "interpretation": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "categories": {
+            "type": "array",
+            "maxItems": 5,
+            "items": {
+              "enum": [
+                "coding",
+                "ai",
+                "video_editing",
+                "sales",
+                "business_operations",
+                "marketing",
+                "product_design",
+                "general_advice",
+                "other"
+              ]
+            }
+          },
+          "evidence": {
+            "type": "array",
+            "maxItems": 30,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "id",
+                "startMs",
+                "endMs"
+              ],
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "transcript",
+                    "frame",
+                    "caption",
+                    "user_note"
+                  ]
+                },
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "startMs": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 0
+                },
+                "endMs": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 0
+                }
+              }
+            }
+          },
+          "confidence": {
+            "enum": [
+              "supported",
+              "uncertain",
+              "unsupported"
+            ]
+          },
+          "verificationNeeds": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        }
+      }
+    }
+  }
+}

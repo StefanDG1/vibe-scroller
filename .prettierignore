@@ -1,0 +1,8 @@
+node_modules
+.next
+.agents
+pnpm-lock.yaml
+convex/_generated
+.env*
+work
+outputs

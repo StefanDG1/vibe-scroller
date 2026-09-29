@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "1.0.0",
+  "currency": "EUR",
+  "priceMode": "tax_inclusive_where_applicable",
+  "legalStatus": "proposal_pending_live_gate",
+  "tiers": {
+    "starter": {
+      "weekly_price_eur": 5.99,
+      "monthly_price_eur": 19,
+      "annual_price_eur": 190,
+      "weekly_credits": 65,
+      "monthly_credits": 250
+    },
+    "pro": {
+      "weekly_price_eur": 11.99,
+      "monthly_price_eur": 39,
+      "annual_price_eur": 390,
+      "weekly_credits": 150,
+      "monthly_credits": 600
+    }
+  },
+  "topups": [
+    {
+      "price_eur": 10,
+      "credits": 200
+    },
+    {
+      "price_eur": 25,
+      "credits": 550
+    }
+  ],
+  "limits": {
+    "starter": {
+      "repositories": 3,
+      "retained_storage_gb": 1,
+      "sources": 1000,
+      "concurrent_processing": 1
+    },
+    "pro": {
+      "repositories": 15,
+      "retained_storage_gb": 5,
+      "sources": 10000,
+      "concurrent_processing": 2
+    }
+  },
+  "trial": {
+    "credits": 30,
+    "max_sources": 3,
+    "automatic_paid_conversion": false
+  },
+  "annual_credit_grant": "monthly",
+  "automatic_topups": false
+}

@@ -1,0 +1,39 @@
+{
+  "name": "vibe-scroller",
+  "version": "0.1.0-alpha.1",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "packageManager": "pnpm@12.3.4",
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @companynerve/starter dev",
+    "dev:marketing": "pnpm --filter @companynerve/marketing dev",
+    "build": "pnpm --filter @companynerve/marketing build && pnpm --filter @companynerve/starter build",
+    "typecheck": "tsc --noEmit && pnpm -r --if-present typecheck",
+    "test": "vitest run && vitest run --config apps/starter/vitest.auth.config.ts",
+    "validate": "node scripts/validate.mjs",
+    "check": "pnpm validate && pnpm typecheck && pnpm test && pnpm build",
+    "convex:dev": "convex dev",
+    "template:export": "node scripts/export-template.mjs",
+    "format": "prettier --write .",
+    "setup:local": "node scripts/setup-local.mjs"
+  },
+  "dependencies": {
+    "@workos-inc/node": "10.13.0",
+    "convex": "1.45.0",
+    "stripe": "22.6.2",
+    "zod": "4.6.1"
+  },
+  "devDependencies": {
+    "@edge-runtime/vm": "5.0.0",
+    "@types/node": "24.13.4",
+    "convex-test": "0.0.57",
+    "prettier": "3.9.6",
+    "typescript": "7.0.2",
+    "vite": "8.2.2",
+    "vitest": "5.0.0"
+  }
+}

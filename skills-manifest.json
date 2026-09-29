@@ -1,0 +1,128 @@
+{
+  "snapshotDate": "2026-09-11",
+  "skills": [
+    {
+      "name": "frontend-design",
+      "source": "global-skills/frontend-design",
+      "files": {
+        "LICENSE.txt": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
+        "SKILL.md": "d91970639e9f5c37682ac7ab60094d35f1c7c1f38d731bd56396563aee10c1d3"
+      },
+      "notices": ["LICENSE.txt"]
+    },
+    {
+      "name": "unslop",
+      "source": "global-skills/unslop",
+      "files": {
+        "SKILL.md": "181883e539caec8258ec9129e3ba5f133409144a2cbf2aa361158ab94cfc3441"
+      },
+      "notices": []
+    },
+    {
+      "name": "technical-writing",
+      "source": "global-skills/technical-writing",
+      "files": {
+        "SKILL.md": "bd0cb21034f4fe6695cfdf8cd3561026eec943f0bb6e9300bc78a2b3340865a7"
+      },
+      "notices": []
+    },
+    {
+      "name": "principle-foundational-thinking",
+      "source": "global-skills/principle-foundational-thinking",
+      "files": {
+        "SKILL.md": "a522488c9d4481e8bfcbe35cbf3838169c8e3801ee0738ae2859067684144579"
+      },
+      "notices": []
+    },
+    {
+      "name": "principle-fix-root-causes",
+      "source": "global-skills/principle-fix-root-causes",
+      "files": {
+        "SKILL.md": "cfae13b5a3e27bc88d069092cae97b3e95246879d5bf14f0e9a4db719c781952"
+      },
+      "notices": []
+    },
+    {
+      "name": "principle-subtract-before-you-add",
+      "source": "global-skills/principle-subtract-before-you-add",
+      "files": {
+        "SKILL.md": "3999888dc21ced33b86054c2ffde1a3cb438e16bed1213f5dab2b5c000446292"
+      },
+      "notices": []
+    },
+    {
+      "name": "principle-redesign-from-first-principles",
+      "source": "global-skills/principle-redesign-from-first-principles",
+      "files": {
+        "SKILL.md": "9ae97b35d6338cc9e34c7023c995a39cb7afdaf4bfd41e1d3d665da04d7515d5"
+      },
+      "notices": []
+    },
+    {
+      "name": "browser-harness",
+      "source": "global-skills/browser-harness",
+      "files": {
+        "SKILL.md": "b3a8d211f3c3bed61f4f491bbdebc8390762c8fe396f577c475382a69944a1eb"
+      },
+      "notices": []
+    },
+    {
+      "name": "nextjs",
+      "source": "vercel/0.21.4/skills/nextjs",
+      "files": {
+        "SKILL.md": "cdd014ce090e4a137abd81682238d994a41fcd73a626cd70a2af47e2451bbb0c",
+        "agents/openai.yaml": "f3b76bb6fce9d078fb213868ea7d24ef253ba03655186b00f03ee512fc809015",
+        "references/app-router-files.md": "d11b45d535b41d047fbe22e062de5c72716d64b39b85e9c259cc8e1f5362a567",
+        "references/async-patterns.md": "3a5e4a91d8399f0922c4a3b15b3490fbeb7396f976139a92311ea34cfa300584",
+        "references/bundling.md": "5496b337073985068c61527e0a89fbf7088faa47b9f92d2dd09a7d070cb48a7c",
+        "references/data-patterns.md": "538c8e24cd60eded9825a9461f2c644f5e6e5203d95aa4bf7c9486412bcc7aa1",
+        "references/debug-tricks.md": "62617a7cb131a2111f9f033617404fadb3458d56aeb0643f75aa5b2e43abf192",
+        "references/directives.md": "60b82ee24a8d43631da59beeec11f46ab25ce83c8000578f2222ecb6b6cadf4d",
+        "references/error-handling.md": "30b4e825b625df01d4a7c441591ac46782aab4f913432e96f408153d5fa62098",
+        "references/file-conventions.md": "95eeb1c6e1c98571192662c8ba3cbf6a034f754596aba54a35077a50a5266de3",
+        "references/font.md": "cb1f8d43e8fbca39839056b4621724837858bdace13e73bf3faf69abca318a21",
+        "references/functions.md": "39a8a418af501d7132d289f4b5dd6cae59d1bfa6fda941d502fc29bb0204e079",
+        "references/hydration-error.md": "d4baec07ab818045e284c45dd24422685ac934a38ea325139651f664a94eff57",
+        "references/image.md": "231a15ddea67fe0b965762cc89993ca5aaeb0c35c0e67767bd53ca138ec04c05",
+        "references/metadata.md": "19b00274877056f222f2284be5ade2479690e79e86af9a0466bc9d209506a95d",
+        "references/parallel-routes.md": "d8a1c2546d90af2b37e22a4a56a1978555af0d62a7683e349ce3e3287ab8a4af",
+        "references/route-handlers.md": "976a17de8024b3a65063350ae0fb6b9b617293f06358305800c858f58b015680",
+        "references/rsc-boundaries.md": "2b50b0310884609efc9f2620fbb81ef83a30a810544e449ff669c55935d5b920",
+        "references/runtime-selection.md": "7abb95f9af0f4769e7e9e91aba94a5787ed16e2c4009a140c8577a3a49828060",
+        "references/scripts.md": "fff3bc7530d5af472e2825fde69a26218c9e58acba74d60913f403baab4628a3",
+        "references/self-hosting.md": "f59e9afa0ff4dcbe20374dff13517ccec3ac6a239ef6d02e0ee8863cf9fc7082",
+        "references/suspense-boundaries.md": "63e2e7125b1a1a9d652dd301814ad7140f8ab3ad6726b2b53df76a89d9bc262a"
+      },
+      "notices": []
+    },
+    {
+      "name": "shadcn",
+      "source": "vercel/0.21.4/skills/shadcn",
+      "files": {
+        "SKILL.md": "f624e06541dcf3c3c8cb3978fe924fa2fded979048f360ae4919f27edbb67fb2",
+        "agents/openai.yaml": "43088258a439701d62146ea2527901671c3186ff299b1a59098886e0eea33527"
+      },
+      "notices": []
+    },
+    {
+      "name": "seo-audit",
+      "source": "https://github.com/coreyhaines31/marketingskills/tree/5b2c0007766c6a1cf1d53fd8fc73e979e0821022/skills/seo-audit",
+      "files": {
+        "evals/evals.json": "b808dfa7ee1e312cda39cfac57f44674bd3cee6eaa151af7008760a9514bb6cf",
+        "LICENSE": "b70d71e24e40fce5da8f4b6f9cd862096a048e433db7f3c8cac5e348e6d34591",
+        "references/ai-writing-detection.md": "f1e273f56ce7e2215ff218bf903680ddcec0fd026ab90c3ebfb3439ed0edfaa4",
+        "references/international-seo.md": "d2fc76f40eccc422ae0f1d7e5b770095e89a045f38e1d0370811203da57996ff",
+        "SKILL.md": "9420a6c1ffcf7212766bcb618c28766ecb084631bed8045f3115d42b1230d368"
+      },
+      "notices": ["LICENSE"]
+    },
+    {
+      "name": "companynerve-launch",
+      "source": "CompanyNerve authored MIT guidance",
+      "files": {
+        "SKILL.md": "57792b5edbee97dfb96e6f65a9c3f3078f2dd140d36c668b1d07f5aa27c94c9a"
+      },
+      "notices": []
+    }
+  ]
+}

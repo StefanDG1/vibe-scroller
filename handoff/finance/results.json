@@ -1,0 +1,1613 @@
+{
+  "as_of": "2026-09-30",
+  "scenarios": [
+    {
+      "inputs": {
+        "consumer_vat_rate": 0.21,
+        "refund_rate": 0.02,
+        "card_rate": 0.018,
+        "billing_rate": 0.007,
+        "tax_fee_rate": 0.005,
+        "payment_fixed_ron": 1.0,
+        "eur_ron": 5.0,
+        "fx_reserve_rate": 0.005,
+        "dispute_probability": 0.001,
+        "dispute_fee_eur": 20.0,
+        "credit_cost_eur": 0.01,
+        "utilization": 0.6,
+        "starter_service_eur": 0.55,
+        "pro_service_eur": 0.95,
+        "fixed_monthly_eur": 30.0,
+        "starter_share": 0.7,
+        "weekly_share": 0.15,
+        "monthly_share": 0.65,
+        "target_margin": 0.6,
+        "days_year": 365.25,
+        "days_week": 7.0,
+        "months_year": 12.0,
+        "usd_eur": 0.9,
+        "supplier_tax_uplift": 0.21,
+        "retry_buffer": 0.2,
+        "asr_usd_minute": 0.003,
+        "model_input_usd_million": 0.75,
+        "model_output_usd_million": 4.5,
+        "sandbox_cpu_usd_second": 1.4e-05,
+        "sandbox_memory_usd_second": 4.5e-06,
+        "clip_minutes": 1.5,
+        "clip_input_tokens": 12000.0,
+        "clip_output_tokens": 1500.0,
+        "clip_sandbox_seconds": 60.0,
+        "sandbox_vcpus": 2.0,
+        "sandbox_gib": 1.0,
+        "extra_provider_cost_usd": 0.002
+      },
+      "tiers": [
+        {
+          "tier": "starter",
+          "gross": 19.423537202380952,
+          "payments": 1.3188988095238094,
+          "credits": 254.89508928571428,
+          "revenue": 15.73145988292011,
+          "refunds_net": 0.3210502016922472,
+          "pct_fees": 0.5827061160714285,
+          "fixed_fees": 0.2637797619047619,
+          "fx": 0.09711768601190476,
+          "dispute": 0.02637797619047619,
+          "compute": 1.5293705357142857,
+          "service": 0.55,
+          "variable": 3.049352075892857,
+          "contribution": 12.682107807027252
+        },
+        {
+          "tier": "pro",
+          "gross": 39.670263392857144,
+          "payments": 1.3188988095238094,
+          "credits": 607.8348214285714,
+          "revenue": 32.12963481404959,
+          "refunds_net": 0.6557068329397876,
+          "pct_fees": 1.1901079017857144,
+          "fixed_fees": 0.2637797619047619,
+          "fx": 0.19835131696428573,
+          "dispute": 0.02637797619047619,
+          "compute": 3.6470089285714287,
+          "service": 0.95,
+          "variable": 6.275625885416667,
+          "contribution": 25.854008928632922
+        }
+      ],
+      "mix": {
+        "gross": 25.497555059523812,
+        "payments": 1.3188988095238094,
+        "credits": 360.7770089285715,
+        "revenue": 20.650912362258953,
+        "refunds_net": 0.4214471910665093,
+        "pct_fees": 0.7649266517857143,
+        "fixed_fees": 0.2637797619047619,
+        "fx": 0.12748777529761907,
+        "dispute": 0.02637797619047619,
+        "compute": 2.164662053571429,
+        "service": 0.67,
+        "variable": 4.0172342187500005,
+        "contribution": 16.633678143508952
+      },
+      "fixed": 30.0,
+      "breakeven": 2,
+      "users_for_target": 8,
+      "ceiling_margin": 0.805469407439267,
+      "counts": [
+        {
+          "users": 0,
+          "revenue": 0.0,
+          "costs": 30.0,
+          "profit": -30.0,
+          "margin": null
+        },
+        {
+          "users": 1,
+          "revenue": 20.650912362258953,
+          "costs": 34.01723421875,
+          "profit": -13.366321856491044,
+          "margin": -0.6472509118250374
+        },
+        {
+          "users": 5,
+          "revenue": 103.25456181129476,
+          "costs": 50.08617109375,
+          "profit": 53.16839071754476,
+          "margin": 0.5149253435864061
+        },
+        {
+          "users": 10,
+          "revenue": 206.50912362258953,
+          "costs": 70.1723421875,
+          "profit": 136.3367814350895,
+          "margin": 0.6601973755128364
+        },
+        {
+          "users": 25,
+          "revenue": 516.2728090564739,
+          "costs": 130.43085546875,
+          "profit": 385.8419535877239,
+          "margin": 0.7473605946686949
+        },
+        {
+          "users": 50,
+          "revenue": 1032.5456181129477,
+          "costs": 230.86171093750002,
+          "profit": 801.6839071754478,
+          "margin": 0.776415001053981
+        },
+        {
+          "users": 100,
+          "revenue": 2065.0912362258955,
+          "costs": 431.72342187500004,
+          "profit": 1633.3678143508955,
+          "margin": 0.790942204246624
+        },
+        {
+          "users": 250,
+          "revenue": 5162.7280905647385,
+          "costs": 1034.3085546875,
+          "profit": 4128.419535877239,
+          "margin": 0.7996585261622098
+        },
+        {
+          "users": 500,
+          "revenue": 10325.456181129477,
+          "costs": 2038.6171093750002,
+          "profit": 8286.839071754477,
+          "margin": 0.8025639668007385
+        }
+      ],
+      "name": "Base mixed intervals"
+    },
+    {
+      "inputs": {
+        "consumer_vat_rate": 0.21,
+        "refund_rate": 0.02,
+        "card_rate": 0.018,
+        "billing_rate": 0.007,
+        "tax_fee_rate": 0.005,
+        "payment_fixed_ron": 1.0,
+        "eur_ron": 5.0,
+        "fx_reserve_rate": 0.005,
+        "dispute_probability": 0.001,
+        "dispute_fee_eur": 20.0,
+        "credit_cost_eur": 0.01,
+        "utilization": 0.6,
+        "starter_service_eur": 0.55,
+        "pro_service_eur": 0.95,
+        "fixed_monthly_eur": 8,
+        "starter_share": 0.7,
+        "weekly_share": 0.15,
+        "monthly_share": 0.65,
+        "target_margin": 0.6,
+        "days_year": 365.25,
+        "days_week": 7.0,
+        "months_year": 12.0,
+        "usd_eur": 0.9,
+        "supplier_tax_uplift": 0.21,
+        "retry_buffer": 0.2,
+        "asr_usd_minute": 0.003,
+        "model_input_usd_million": 0.75,
+        "model_output_usd_million": 4.5,
+        "sandbox_cpu_usd_second": 1.4e-05,
+        "sandbox_memory_usd_second": 4.5e-06,
+        "clip_minutes": 1.5,
+        "clip_input_tokens": 12000.0,
+        "clip_output_tokens": 1500.0,
+        "clip_sandbox_seconds": 60.0,
+        "sandbox_vcpus": 2.0,
+        "sandbox_gib": 1.0,
+        "extra_provider_cost_usd": 0.002
+      },
+      "tiers": [
+        {
+          "tier": "starter",
+          "gross": 19.423537202380952,
+          "payments": 1.3188988095238094,
+          "credits": 254.89508928571428,
+          "revenue": 15.73145988292011,
+          "refunds_net": 0.3210502016922472,
+          "pct_fees": 0.5827061160714285,
+          "fixed_fees": 0.2637797619047619,
+          "fx": 0.09711768601190476,
+          "dispute": 0.02637797619047619,
+          "compute": 1.5293705357142857,
+          "service": 0.55,
+          "variable": 3.049352075892857,
+          "contribution": 12.682107807027252
+        },
+        {
+          "tier": "pro",
+          "gross": 39.670263392857144,
+          "payments": 1.3188988095238094,
+          "credits": 607.8348214285714,
+          "revenue": 32.12963481404959,
+          "refunds_net": 0.6557068329397876,
+          "pct_fees": 1.1901079017857144,
+          "fixed_fees": 0.2637797619047619,
+          "fx": 0.19835131696428573,
+          "dispute": 0.02637797619047619,
+          "compute": 3.6470089285714287,
+          "service": 0.95,
+          "variable": 6.275625885416667,
+          "contribution": 25.854008928632922
+        }
+      ],
+      "mix": {
+        "gross": 25.497555059523812,
+        "payments": 1.3188988095238094,
+        "credits": 360.7770089285715,
+        "revenue": 20.650912362258953,
+        "refunds_net": 0.4214471910665093,
+        "pct_fees": 0.7649266517857143,
+        "fixed_fees": 0.2637797619047619,
+        "fx": 0.12748777529761907,
+        "dispute": 0.02637797619047619,
+        "compute": 2.164662053571429,
+        "service": 0.67,
+        "variable": 4.0172342187500005,
+        "contribution": 16.633678143508952
+      },
+      "fixed": 8,
+      "breakeven": 1,
+      "users_for_target": 2,
+      "ceiling_margin": 0.805469407439267,
+      "counts": [
+        {
+          "users": 0,
+          "revenue": 0.0,
+          "costs": 8.0,
+          "profit": -8.0,
+          "margin": null
+        },
+        {
+          "users": 1,
+          "revenue": 20.650912362258953,
+          "costs": 12.017234218750001,
+          "profit": 8.633678143508952,
+          "margin": 0.4180773223021191
+        },
+        {
+          "users": 5,
+          "revenue": 103.25456181129476,
+          "costs": 28.086171093750004,
+          "profit": 75.16839071754475,
+          "margin": 0.7279909904118373
+        },
+        {
+          "users": 10,
+          "revenue": 206.50912362258953,
+          "costs": 48.17234218750001,
+          "profit": 158.3367814350895,
+          "margin": 0.7667301989255522
+        },
+        {
+          "users": 25,
+          "revenue": 516.2728090564739,
+          "costs": 108.43085546875001,
+          "profit": 407.8419535877239,
+          "margin": 0.7899737240337812
+        },
+        {
+          "users": 50,
+          "revenue": 1032.5456181129477,
+          "costs": 208.86171093750002,
+          "profit": 823.6839071754478,
+          "margin": 0.7977215657365241
+        },
+        {
+          "users": 100,
+          "revenue": 2065.0912362258955,
+          "costs": 409.72342187500004,
+          "profit": 1655.3678143508955,
+          "margin": 0.8015954865878956
+        },
+        {
+          "users": 250,
+          "revenue": 5162.7280905647385,
+          "costs": 1012.3085546875001,
+          "profit": 4150.419535877239,
+          "margin": 0.8039198390987184
+        },
+        {
+          "users": 500,
+          "revenue": 10325.456181129477,
+          "costs": 2016.6171093750002,
+          "profit": 8308.839071754477,
+          "margin": 0.8046946232689928
+        }
+      ],
+      "name": "Lean budget host"
+    },
+    {
+      "inputs": {
+        "consumer_vat_rate": 0.21,
+        "refund_rate": 0.02,
+        "card_rate": 0.018,
+        "billing_rate": 0.007,
+        "tax_fee_rate": 0.005,
+        "payment_fixed_ron": 1.0,
+        "eur_ron": 5.0,
+        "fx_reserve_rate": 0.005,
+        "dispute_probability": 0.001,
+        "dispute_fee_eur": 20.0,
+        "credit_cost_eur": 0.01,
+        "utilization": 0.6,
+        "starter_service_eur": 0.55,
+        "pro_service_eur": 0.95,
+        "fixed_monthly_eur": 80,
+        "starter_share": 0.7,
+        "weekly_share": 0.15,
+        "monthly_share": 0.65,
+        "target_margin": 0.6,
+        "days_year": 365.25,
+        "days_week": 7.0,
+        "months_year": 12.0,
+        "usd_eur": 0.9,
+        "supplier_tax_uplift": 0.21,
+        "retry_buffer": 0.2,
+        "asr_usd_minute": 0.003,
+        "model_input_usd_million": 0.75,
+        "model_output_usd_million": 4.5,
+        "sandbox_cpu_usd_second": 1.4e-05,
+        "sandbox_memory_usd_second": 4.5e-06,
+        "clip_minutes": 1.5,
+        "clip_input_tokens": 12000.0,
+        "clip_output_tokens": 1500.0,
+        "clip_sandbox_seconds": 60.0,
+        "sandbox_vcpus": 2.0,
+        "sandbox_gib": 1.0,
+        "extra_provider_cost_usd": 0.002
+      },
+      "tiers": [
+        {
+          "tier": "starter",
+          "gross": 19.423537202380952,
+          "payments": 1.3188988095238094,
+          "credits": 254.89508928571428,
+          "revenue": 15.73145988292011,
+          "refunds_net": 0.3210502016922472,
+          "pct_fees": 0.5827061160714285,
+          "fixed_fees": 0.2637797619047619,
+          "fx": 0.09711768601190476,
+          "dispute": 0.02637797619047619,
+          "compute": 1.5293705357142857,
+          "service": 0.55,
+          "variable": 3.049352075892857,
+          "contribution": 12.682107807027252
+        },
+        {
+          "tier": "pro",
+          "gross": 39.670263392857144,
+          "payments": 1.3188988095238094,
+          "credits": 607.8348214285714,
+          "revenue": 32.12963481404959,
+          "refunds_net": 0.6557068329397876,
+          "pct_fees": 1.1901079017857144,
+          "fixed_fees": 0.2637797619047619,
+          "fx": 0.19835131696428573,
+          "dispute": 0.02637797619047619,
+          "compute": 3.6470089285714287,
+          "service": 0.95,
+          "variable": 6.275625885416667,
+          "contribution": 25.854008928632922
+        }
+      ],
+      "mix": {
+        "gross": 25.497555059523812,
+        "payments": 1.3188988095238094,
+        "credits": 360.7770089285715,
+        "revenue": 20.650912362258953,
+        "refunds_net": 0.4214471910665093,
+        "pct_fees": 0.7649266517857143,
+        "fixed_fees": 0.2637797619047619,
+        "fx": 0.12748777529761907,
+        "dispute": 0.02637797619047619,
+        "compute": 2.164662053571429,
+        "service": 0.67,
+        "variable": 4.0172342187500005,
+        "contribution": 16.633678143508952
+      },
+      "fixed": 80,
+      "breakeven": 5,
+      "users_for_target": 19,
+      "ceiling_margin": 0.805469407439267,
+      "counts": [
+        {
+          "users": 0,
+          "revenue": 0.0,
+          "costs": 80.0,
+          "profit": -80.0,
+          "margin": null
+        },
+        {
+          "users": 1,
+          "revenue": 20.650912362258953,
+          "costs": 84.01723421875,
+          "profit": -63.366321856491055,
+          "margin": -3.068451443932212
+        },
+        {
+          "users": 5,
+          "revenue": 103.25456181129476,
+          "costs": 100.08617109375001,
+          "profit": 3.168390717544753,
+          "margin": 0.030685237164971152
+        },
+        {
+          "users": 10,
+          "revenue": 206.50912362258953,
+          "costs": 120.1723421875,
+          "profit": 86.33678143508952,
+          "margin": 0.4180773223021191
+        },
+        {
+          "users": 25,
+          "revenue": 516.2728090564739,
+          "costs": 180.43085546875,
+          "profit": 335.8419535877239,
+          "margin": 0.6505125733844079
+        },
+        {
+          "users": 50,
+          "revenue": 1032.5456181129477,
+          "costs": 280.8617109375,
+          "profit": 751.6839071754478,
+          "margin": 0.7279909904118375
+        },
+        {
+          "users": 100,
+          "revenue": 2065.0912362258955,
+          "costs": 481.72342187500004,
+          "profit": 1583.3678143508955,
+          "margin": 0.7667301989255523
+        },
+        {
+          "users": 250,
+          "revenue": 5162.7280905647385,
+          "costs": 1084.3085546875,
+          "profit": 4078.4195358772386,
+          "margin": 0.7899737240337812
+        },
+        {
+          "users": 500,
+          "revenue": 10325.456181129477,
+          "costs": 2088.617109375,
+          "profit": 8236.839071754477,
+          "margin": 0.7977215657365241
+        }
+      ],
+      "name": "Growing operations"
+    },
+    {
+      "inputs": {
+        "consumer_vat_rate": 0.21,
+        "refund_rate": 0.02,
+        "card_rate": 0.018,
+        "billing_rate": 0.007,
+        "tax_fee_rate": 0.005,
+        "payment_fixed_ron": 1.0,
+        "eur_ron": 5.0,
+        "fx_reserve_rate": 0.005,
+        "dispute_probability": 0.001,
+        "dispute_fee_eur": 20.0,
+        "credit_cost_eur": 0.01,
+        "utilization": 1,
+        "starter_service_eur": 0.55,
+        "pro_service_eur": 0.95,
+        "fixed_monthly_eur": 30.0,
+        "starter_share": 0.7,
+        "weekly_share": 0.15,
+        "monthly_share": 0.65,
+        "target_margin": 0.6,
+        "days_year": 365.25,
+        "days_week": 7.0,
+        "months_year": 12.0,
+        "usd_eur": 0.9,
+        "supplier_tax_uplift": 0.21,
+        "retry_buffer": 0.2,
+        "asr_usd_minute": 0.003,
+        "model_input_usd_million": 0.75,
+        "model_output_usd_million": 4.5,
+        "sandbox_cpu_usd_second": 1.4e-05,
+        "sandbox_memory_usd_second": 4.5e-06,
+        "clip_minutes": 1.5,
+        "clip_input_tokens": 12000.0,
+        "clip_output_tokens": 1500.0,
+        "clip_sandbox_seconds": 60.0,
+        "sandbox_vcpus": 2.0,
+        "sandbox_gib": 1.0,
+        "extra_provider_cost_usd": 0.002
+      },
+      "tiers": [
+        {
+          "tier": "starter",
+          "gross": 19.423537202380952,
+          "payments": 1.3188988095238094,
+          "credits": 254.89508928571428,
+          "revenue": 15.73145988292011,
+          "refunds_net": 0.3210502016922472,
+          "pct_fees": 0.5827061160714285,
+          "fixed_fees": 0.2637797619047619,
+          "fx": 0.09711768601190476,
+          "dispute": 0.02637797619047619,
+          "compute": 2.548950892857143,
+          "service": 0.55,
+          "variable": 4.068932433035714,
+          "contribution": 11.662527449884395
+        },
+        {
+          "tier": "pro",
+          "gross": 39.670263392857144,
+          "payments": 1.3188988095238094,
+          "credits": 607.8348214285714,
+          "revenue": 32.12963481404959,
+          "refunds_net": 0.6557068329397876,
+          "pct_fees": 1.1901079017857144,
+          "fixed_fees": 0.2637797619047619,
+          "fx": 0.19835131696428573,
+          "dispute": 0.02637797619047619,
+          "compute": 6.078348214285715,
+          "service": 0.95,
+          "variable": 8.706965171130953,
+          "contribution": 23.422669642918635
+        }
+      ],
+      "mix": {
+        "gross": 25.497555059523812,
+        "payments": 1.3188988095238094,
+        "credits": 360.7770089285715,
+        "revenue": 20.650912362258953,
+        "refunds_net": 0.4214471910665093,
+        "pct_fees": 0.7649266517857143,
+        "fixed_fees": 0.2637797619047619,
+        "fx": 0.12748777529761907,
+        "dispute": 0.02637797619047619,
+        "compute": 3.6077700892857143,
+        "service": 0.67,
+        "variable": 5.460342254464286,
+        "contribution": 15.190570107794668
+      },
+      "fixed": 30.0,
+      "breakeven": 2,
+      "users_for_target": 11,
+      "ceiling_margin": 0.7355883285600757,
+      "counts": [
+        {
+          "users": 0,
+          "revenue": 0.0,
+          "costs": 30.0,
+          "profit": -30.0,
+          "margin": null
+        },
+        {
+          "users": 1,
+          "revenue": 20.650912362258953,
+          "costs": 35.46034225446429,
+          "profit": -14.809429892205333,
+          "margin": -0.7171319907042288
+        },
+        {
+          "users": 5,
+          "revenue": 103.25456181129476,
+          "costs": 57.30171127232143,
+          "profit": 45.95285053897334,
+          "margin": 0.44504426470721475
+        },
+        {
+          "users": 10,
+          "revenue": 206.50912362258953,
+          "costs": 84.60342254464285,
+          "profit": 121.90570107794667,
+          "margin": 0.5903162966336453
+        },
+        {
+          "users": 25,
+          "revenue": 516.2728090564739,
+          "costs": 166.50855636160713,
+          "profit": 349.76425269486674,
+          "margin": 0.6774795157895035
+        },
+        {
+          "users": 50,
+          "revenue": 1032.5456181129477,
+          "costs": 303.01711272321427,
+          "profit": 729.5285053897335,
+          "margin": 0.7065339221747896
+        },
+        {
+          "users": 100,
+          "revenue": 2065.0912362258955,
+          "costs": 576.0342254464285,
+          "profit": 1489.057010779467,
+          "margin": 0.7210611253674327
+        },
+        {
+          "users": 250,
+          "revenue": 5162.7280905647385,
+          "costs": 1395.0855636160716,
+          "profit": 3767.642526948667,
+          "margin": 0.7297774472830185
+        },
+        {
+          "users": 500,
+          "revenue": 10325.456181129477,
+          "costs": 2760.171127232143,
+          "profit": 7565.285053897334,
+          "margin": 0.7326828879215471
+        }
+      ],
+      "name": "Full allowance use"
+    },
+    {
+      "inputs": {
+        "consumer_vat_rate": 0.21,
+        "refund_rate": 0.02,
+        "card_rate": 0.018,
+        "billing_rate": 0.007,
+        "tax_fee_rate": 0.005,
+        "payment_fixed_ron": 1.0,
+        "eur_ron": 5.0,
+        "fx_reserve_rate": 0.005,
+        "dispute_probability": 0.001,
+        "dispute_fee_eur": 20.0,
+        "credit_cost_eur": 0.01,
+        "utilization": 1,
+        "starter_service_eur": 0.55,
+        "pro_service_eur": 0.95,
+        "fixed_monthly_eur": 30.0,
+        "starter_share": 0.7,
+        "weekly_share": 0,
+        "monthly_share": 0,
+        "target_margin": 0.6,
+        "days_year": 365.25,
+        "days_week": 7.0,
+        "months_year": 12.0,
+        "usd_eur": 0.9,
+        "supplier_tax_uplift": 0.21,
+        "retry_buffer": 0.2,
+        "asr_usd_minute": 0.003,
+        "model_input_usd_million": 0.75,
+        "model_output_usd_million": 4.5,
+        "sandbox_cpu_usd_second": 1.4e-05,
+        "sandbox_memory_usd_second": 4.5e-06,
+        "clip_minutes": 1.5,
+        "clip_input_tokens": 12000.0,
+        "clip_output_tokens": 1500.0,
+        "clip_sandbox_seconds": 60.0,
+        "sandbox_vcpus": 2.0,
+        "sandbox_gib": 1.0,
+        "extra_provider_cost_usd": 0.002
+      },
+      "tiers": [
+        {
+          "tier": "starter",
+          "gross": 15.833333333333332,
+          "payments": 0.08333333333333333,
+          "credits": 250.0,
+          "revenue": 12.823691460055096,
+          "refunds_net": 0.26170798898071623,
+          "pct_fees": 0.4749999999999999,
+          "fixed_fees": 0.016666666666666666,
+          "fx": 0.07916666666666666,
+          "dispute": 0.0016666666666666666,
+          "compute": 2.5,
+          "service": 0.55,
+          "variable": 3.6225,
+          "contribution": 9.201191460055096
+        },
+        {
+          "tier": "pro",
+          "gross": 32.5,
+          "payments": 0.08333333333333333,
+          "credits": 600.0,
+          "revenue": 26.322314049586776,
+          "refunds_net": 0.5371900826446281,
+          "pct_fees": 0.975,
+          "fixed_fees": 0.016666666666666666,
+          "fx": 0.1625,
+          "dispute": 0.0016666666666666666,
+          "compute": 6.0,
+          "service": 0.95,
+          "variable": 8.105833333333333,
+          "contribution": 18.216480716253443
+        }
+      ],
+      "mix": {
+        "gross": 20.833333333333336,
+        "payments": 0.08333333333333333,
+        "credits": 355.0,
+        "revenue": 16.8732782369146,
+        "refunds_net": 0.3443526170798898,
+        "pct_fees": 0.625,
+        "fixed_fees": 0.016666666666666666,
+        "fx": 0.10416666666666667,
+        "dispute": 0.0016666666666666666,
+        "compute": 3.5500000000000003,
+        "service": 0.67,
+        "variable": 4.967499999999999,
+        "contribution": 11.9057782369146
+      },
+      "fixed": 30.0,
+      "breakeven": 3,
+      "users_for_target": 17,
+      "ceiling_margin": 0.7055995918367346,
+      "counts": [
+        {
+          "users": 0,
+          "revenue": 0.0,
+          "costs": 30.0,
+          "profit": -30.0,
+          "margin": null
+        },
+        {
+          "users": 1,
+          "revenue": 16.8732782369146,
+          "costs": 34.9675,
+          "profit": -18.0942217630854,
+          "margin": -1.0723595918367348
+        },
+        {
+          "users": 5,
+          "revenue": 84.366391184573,
+          "costs": 54.8375,
+          "profit": 29.528891184573006,
+          "margin": 0.35000775510204085
+        },
+        {
+          "users": 10,
+          "revenue": 168.732782369146,
+          "costs": 79.675,
+          "profit": 89.05778236914601,
+          "margin": 0.5278036734693877
+        },
+        {
+          "users": 25,
+          "revenue": 421.831955922865,
+          "costs": 154.1875,
+          "profit": 267.644455922865,
+          "margin": 0.6344812244897959
+        },
+        {
+          "users": 50,
+          "revenue": 843.66391184573,
+          "costs": 278.375,
+          "profit": 565.28891184573,
+          "margin": 0.6700404081632653
+        },
+        {
+          "users": 100,
+          "revenue": 1687.32782369146,
+          "costs": 526.75,
+          "profit": 1160.57782369146,
+          "margin": 0.68782
+        },
+        {
+          "users": 250,
+          "revenue": 4218.31955922865,
+          "costs": 1271.8749999999998,
+          "profit": 2946.44455922865,
+          "margin": 0.6984877551020409
+        },
+        {
+          "users": 500,
+          "revenue": 8436.6391184573,
+          "costs": 2513.7499999999995,
+          "profit": 5922.8891184573,
+          "margin": 0.7020436734693878
+        }
+      ],
+      "name": "All annual, full use"
+    },
+    {
+      "inputs": {
+        "consumer_vat_rate": 0.21,
+        "refund_rate": 0.02,
+        "card_rate": 0.018,
+        "billing_rate": 0.007,
+        "tax_fee_rate": 0.005,
+        "payment_fixed_ron": 1.0,
+        "eur_ron": 5.0,
+        "fx_reserve_rate": 0.005,
+        "dispute_probability": 0.001,
+        "dispute_fee_eur": 20.0,
+        "credit_cost_eur": 0.01,
+        "utilization": 1,
+        "starter_service_eur": 0.55,
+        "pro_service_eur": 0.95,
+        "fixed_monthly_eur": 30.0,
+        "starter_share": 1,
+        "weekly_share": 0,
+        "monthly_share": 0,
+        "target_margin": 0.6,
+        "days_year": 365.25,
+        "days_week": 7.0,
+        "months_year": 12.0,
+        "usd_eur": 0.9,
+        "supplier_tax_uplift": 0.21,
+        "retry_buffer": 0.2,
+        "asr_usd_minute": 0.003,
+        "model_input_usd_million": 0.75,
+        "model_output_usd_million": 4.5,
+        "sandbox_cpu_usd_second": 1.4e-05,
+        "sandbox_memory_usd_second": 4.5e-06,
+        "clip_minutes": 1.5,
+        "clip_input_tokens": 12000.0,
+        "clip_output_tokens": 1500.0,
+        "clip_sandbox_seconds": 60.0,
+        "sandbox_vcpus": 2.0,
+        "sandbox_gib": 1.0,
+        "extra_provider_cost_usd": 0.002
+      },
+      "tiers": [
+        {
+          "tier": "starter",
+          "gross": 15.833333333333332,
+          "payments": 0.08333333333333333,
+          "credits": 250.0,
+          "revenue": 12.823691460055096,
+          "refunds_net": 0.26170798898071623,
+          "pct_fees": 0.4749999999999999,
+          "fixed_fees": 0.016666666666666666,
+          "fx": 0.07916666666666666,
+          "dispute": 0.0016666666666666666,
+          "compute": 2.5,
+          "service": 0.55,
+          "variable": 3.6225,
+          "contribution": 9.201191460055096
+        },
+        {
+          "tier": "pro",
+          "gross": 32.5,
+          "payments": 0.08333333333333333,
+          "credits": 600.0,
+          "revenue": 26.322314049586776,
+          "refunds_net": 0.5371900826446281,
+          "pct_fees": 0.975,
+          "fixed_fees": 0.016666666666666666,
+          "fx": 0.1625,
+          "dispute": 0.0016666666666666666,
+          "compute": 6.0,
+          "service": 0.95,
+          "variable": 8.105833333333333,
+          "contribution": 18.216480716253443
+        }
+      ],
+      "mix": {
+        "gross": 15.833333333333332,
+        "payments": 0.08333333333333333,
+        "credits": 250.0,
+        "revenue": 12.823691460055096,
+        "refunds_net": 0.26170798898071623,
+        "pct_fees": 0.4749999999999999,
+        "fixed_fees": 0.016666666666666666,
+        "fx": 0.07916666666666666,
+        "dispute": 0.0016666666666666666,
+        "compute": 2.5,
+        "service": 0.55,
+        "variable": 3.6225,
+        "contribution": 9.201191460055096
+      },
+      "fixed": 30.0,
+      "breakeven": 4,
+      "users_for_target": 20,
+      "ceiling_margin": 0.7175150375939849,
+      "counts": [
+        {
+          "users": 0,
+          "revenue": 0.0,
+          "costs": 30.0,
+          "profit": -30.0,
+          "margin": null
+        },
+        {
+          "users": 1,
+          "revenue": 12.823691460055096,
+          "costs": 33.6225,
+          "profit": -20.798808539944908,
+          "margin": -1.6219049409237383
+        },
+        {
+          "users": 5,
+          "revenue": 64.11845730027548,
+          "costs": 48.1125,
+          "profit": 16.005957300275483,
+          "margin": 0.2496310418904404
+        },
+        {
+          "users": 10,
+          "revenue": 128.23691460055096,
+          "costs": 66.225,
+          "profit": 62.011914600550966,
+          "margin": 0.4835730397422127
+        },
+        {
+          "users": 25,
+          "revenue": 320.59228650137743,
+          "costs": 120.5625,
+          "profit": 200.02978650137743,
+          "margin": 0.6239382384532761
+        },
+        {
+          "users": 50,
+          "revenue": 641.1845730027549,
+          "costs": 211.125,
+          "profit": 430.05957300275486,
+          "margin": 0.6707266380236305
+        },
+        {
+          "users": 100,
+          "revenue": 1282.3691460055097,
+          "costs": 392.25,
+          "profit": 890.1191460055097,
+          "margin": 0.6941208378088077
+        },
+        {
+          "users": 250,
+          "revenue": 3205.9228650137743,
+          "costs": 935.625,
+          "profit": 2270.2978650137743,
+          "margin": 0.7081573576799141
+        },
+        {
+          "users": 500,
+          "revenue": 6411.845730027549,
+          "costs": 1841.25,
+          "profit": 4570.595730027549,
+          "margin": 0.7128361976369495
+        }
+      ],
+      "name": "All Starter annual, full use"
+    },
+    {
+      "inputs": {
+        "consumer_vat_rate": 0,
+        "refund_rate": 0.02,
+        "card_rate": 0.018,
+        "billing_rate": 0.007,
+        "tax_fee_rate": 0,
+        "payment_fixed_ron": 1.0,
+        "eur_ron": 5.0,
+        "fx_reserve_rate": 0.005,
+        "dispute_probability": 0.001,
+        "dispute_fee_eur": 20.0,
+        "credit_cost_eur": 0.01,
+        "utilization": 0.6,
+        "starter_service_eur": 0.55,
+        "pro_service_eur": 0.95,
+        "fixed_monthly_eur": 30.0,
+        "starter_share": 0.7,
+        "weekly_share": 0.15,
+        "monthly_share": 0.65,
+        "target_margin": 0.6,
+        "days_year": 365.25,
+        "days_week": 7.0,
+        "months_year": 12.0,
+        "usd_eur": 0.9,
+        "supplier_tax_uplift": 0.21,
+        "retry_buffer": 0.2,
+        "asr_usd_minute": 0.003,
+        "model_input_usd_million": 0.75,
+        "model_output_usd_million": 4.5,
+        "sandbox_cpu_usd_second": 1.4e-05,
+        "sandbox_memory_usd_second": 4.5e-06,
+        "clip_minutes": 1.5,
+        "clip_input_tokens": 12000.0,
+        "clip_output_tokens": 1500.0,
+        "clip_sandbox_seconds": 60.0,
+        "sandbox_vcpus": 2.0,
+        "sandbox_gib": 1.0,
+        "extra_provider_cost_usd": 0.002
+      },
+      "tiers": [
+        {
+          "tier": "starter",
+          "gross": 19.423537202380952,
+          "payments": 1.3188988095238094,
+          "credits": 254.89508928571428,
+          "revenue": 19.035066458333333,
+          "refunds_net": 0.38847074404761905,
+          "pct_fees": 0.4855884300595238,
+          "fixed_fees": 0.2637797619047619,
+          "fx": 0.09711768601190476,
+          "dispute": 0.02637797619047619,
+          "compute": 1.5293705357142857,
+          "service": 0.55,
+          "variable": 2.952234389880952,
+          "contribution": 16.08283206845238
+        },
+        {
+          "tier": "pro",
+          "gross": 39.670263392857144,
+          "payments": 1.3188988095238094,
+          "credits": 607.8348214285714,
+          "revenue": 38.876858125,
+          "refunds_net": 0.7934052678571429,
+          "pct_fees": 0.9917565848214285,
+          "fixed_fees": 0.2637797619047619,
+          "fx": 0.19835131696428573,
+          "dispute": 0.02637797619047619,
+          "compute": 3.6470089285714287,
+          "service": 0.95,
+          "variable": 6.077274568452381,
+          "contribution": 32.79958355654762
+        }
+      ],
+      "mix": {
+        "gross": 25.497555059523812,
+        "payments": 1.3188988095238094,
+        "credits": 360.7770089285715,
+        "revenue": 24.98760395833333,
+        "refunds_net": 0.5099511011904763,
+        "pct_fees": 0.6374388764880952,
+        "fixed_fees": 0.2637797619047619,
+        "fx": 0.12748777529761907,
+        "dispute": 0.02637797619047619,
+        "compute": 2.164662053571429,
+        "service": 0.67,
+        "variable": 3.889746443452381,
+        "contribution": 21.09785751488095
+      },
+      "fixed": 30.0,
+      "breakeven": 2,
+      "users_for_target": 5,
+      "ceiling_margin": 0.8443329560553902,
+      "counts": [
+        {
+          "users": 0,
+          "revenue": 0.0,
+          "costs": 30.0,
+          "profit": -30.0,
+          "margin": null
+        },
+        {
+          "users": 1,
+          "revenue": 24.98760395833333,
+          "costs": 33.88974644345238,
+          "profit": -8.90214248511905,
+          "margin": -0.35626234912172117
+        },
+        {
+          "users": 5,
+          "revenue": 124.93801979166665,
+          "costs": 49.448732217261906,
+          "profit": 75.48928757440474,
+          "margin": 0.6042138950199679
+        },
+        {
+          "users": 10,
+          "revenue": 249.8760395833333,
+          "costs": 68.89746443452381,
+          "profit": 180.97857514880948,
+          "margin": 0.724273425537679
+        },
+        {
+          "users": 25,
+          "revenue": 624.6900989583332,
+          "costs": 127.24366108630953,
+          "profit": 497.4464378720237,
+          "margin": 0.7963091438483056
+        },
+        {
+          "users": 50,
+          "revenue": 1249.3801979166665,
+          "costs": 224.48732217261906,
+          "profit": 1024.8928757440474,
+          "margin": 0.820321049951848
+        },
+        {
+          "users": 100,
+          "revenue": 2498.760395833333,
+          "costs": 418.9746443452381,
+          "profit": 2079.785751488095,
+          "margin": 0.8323270030036191
+        },
+        {
+          "users": 250,
+          "revenue": 6246.900989583332,
+          "costs": 1002.4366108630953,
+          "profit": 5244.464378720237,
+          "margin": 0.8395305748346816
+        },
+        {
+          "users": 500,
+          "revenue": 12493.801979166665,
+          "costs": 1974.8732217261906,
+          "profit": 10518.928757440473,
+          "margin": 0.8419317654450359
+        }
+      ],
+      "name": "Exemption scenario"
+    },
+    {
+      "inputs": {
+        "consumer_vat_rate": 0.27,
+        "refund_rate": 0.02,
+        "card_rate": 0.018,
+        "billing_rate": 0.007,
+        "tax_fee_rate": 0.005,
+        "payment_fixed_ron": 1.0,
+        "eur_ron": 5.0,
+        "fx_reserve_rate": 0.005,
+        "dispute_probability": 0.001,
+        "dispute_fee_eur": 20.0,
+        "credit_cost_eur": 0.01,
+        "utilization": 1,
+        "starter_service_eur": 0.55,
+        "pro_service_eur": 0.95,
+        "fixed_monthly_eur": 30.0,
+        "starter_share": 0.7,
+        "weekly_share": 0.15,
+        "monthly_share": 0.65,
+        "target_margin": 0.6,
+        "days_year": 365.25,
+        "days_week": 7.0,
+        "months_year": 12.0,
+        "usd_eur": 0.9,
+        "supplier_tax_uplift": 0.21,
+        "retry_buffer": 0.2,
+        "asr_usd_minute": 0.003,
+        "model_input_usd_million": 0.75,
+        "model_output_usd_million": 4.5,
+        "sandbox_cpu_usd_second": 1.4e-05,
+        "sandbox_memory_usd_second": 4.5e-06,
+        "clip_minutes": 1.5,
+        "clip_input_tokens": 12000.0,
+        "clip_output_tokens": 1500.0,
+        "clip_sandbox_seconds": 60.0,
+        "sandbox_vcpus": 2.0,
+        "sandbox_gib": 1.0,
+        "extra_provider_cost_usd": 0.002
+      },
+      "tiers": [
+        {
+          "tier": "starter",
+          "gross": 19.423537202380952,
+          "payments": 1.3188988095238094,
+          "credits": 254.89508928571428,
+          "revenue": 14.988241305774277,
+          "refunds_net": 0.3058824756280465,
+          "pct_fees": 0.5827061160714285,
+          "fixed_fees": 0.2637797619047619,
+          "fx": 0.09711768601190476,
+          "dispute": 0.02637797619047619,
+          "compute": 2.548950892857143,
+          "service": 0.55,
+          "variable": 4.068932433035714,
+          "contribution": 10.919308872738563
+        },
+        {
+          "tier": "pro",
+          "gross": 39.670263392857144,
+          "payments": 1.3188988095238094,
+          "credits": 607.8348214285714,
+          "revenue": 30.61169931102362,
+          "refunds_net": 0.6247285573678291,
+          "pct_fees": 1.1901079017857144,
+          "fixed_fees": 0.2637797619047619,
+          "fx": 0.19835131696428573,
+          "dispute": 0.02637797619047619,
+          "compute": 6.078348214285715,
+          "service": 0.95,
+          "variable": 8.706965171130953,
+          "contribution": 21.904734139892668
+        }
+      ],
+      "mix": {
+        "gross": 25.497555059523812,
+        "payments": 1.3188988095238094,
+        "credits": 360.7770089285715,
+        "revenue": 19.67527870734908,
+        "refunds_net": 0.4015363001499813,
+        "pct_fees": 0.7649266517857143,
+        "fixed_fees": 0.2637797619047619,
+        "fx": 0.12748777529761907,
+        "dispute": 0.02637797619047619,
+        "compute": 3.6077700892857143,
+        "service": 0.67,
+        "variable": 5.460342254464286,
+        "contribution": 14.214936452884796
+      },
+      "fixed": 30.0,
+      "breakeven": 3,
+      "users_for_target": 13,
+      "ceiling_margin": 0.7224770060093357,
+      "counts": [
+        {
+          "users": 0,
+          "revenue": 0.0,
+          "costs": 30.0,
+          "profit": -30.0,
+          "margin": null
+        },
+        {
+          "users": 1,
+          "revenue": 19.67527870734908,
+          "costs": 35.46034225446429,
+          "profit": -15.785063547115207,
+          "margin": -0.8022790315655958
+        },
+        {
+          "users": 5,
+          "revenue": 98.3763935367454,
+          "costs": 57.30171127232143,
+          "profit": 41.07468226442397,
+          "margin": 0.41752579849434934
+        },
+        {
+          "users": 10,
+          "revenue": 196.7527870734908,
+          "costs": 84.60342254464285,
+          "profit": 112.14936452884794,
+          "margin": 0.5700014022518425
+        },
+        {
+          "users": 25,
+          "revenue": 491.881967683727,
+          "costs": 166.50855636160713,
+          "profit": 325.37341132211986,
+          "margin": 0.6614867645063384
+        },
+        {
+          "users": 50,
+          "revenue": 983.763935367454,
+          "costs": 303.01711272321427,
+          "profit": 680.7468226442397,
+          "margin": 0.691981885257837
+        },
+        {
+          "users": 100,
+          "revenue": 1967.527870734908,
+          "costs": 576.0342254464285,
+          "profit": 1391.4936452884795,
+          "margin": 0.7072294456335864
+        },
+        {
+          "users": 250,
+          "revenue": 4918.81967683727,
+          "costs": 1395.0855636160716,
+          "profit": 3523.7341132211986,
+          "margin": 0.7163779818590359
+        },
+        {
+          "users": 500,
+          "revenue": 9837.63935367454,
+          "costs": 2760.171127232143,
+          "profit": 7077.468226442397,
+          "margin": 0.7194274939341858
+        }
+      ],
+      "name": "Higher-tax stress"
+    },
+    {
+      "inputs": {
+        "consumer_vat_rate": 0.21,
+        "refund_rate": 0.02,
+        "card_rate": 0.0315,
+        "billing_rate": 0.007,
+        "tax_fee_rate": 0.005,
+        "payment_fixed_ron": 1.0,
+        "eur_ron": 5.0,
+        "fx_reserve_rate": 0.02,
+        "dispute_probability": 0.001,
+        "dispute_fee_eur": 20.0,
+        "credit_cost_eur": 0.01,
+        "utilization": 1,
+        "starter_service_eur": 1.55,
+        "pro_service_eur": 2.95,
+        "fixed_monthly_eur": 80,
+        "starter_share": 0.7,
+        "weekly_share": 0.15,
+        "monthly_share": 0.65,
+        "target_margin": 0.6,
+        "days_year": 365.25,
+        "days_week": 7.0,
+        "months_year": 12.0,
+        "usd_eur": 0.9,
+        "supplier_tax_uplift": 0.21,
+        "retry_buffer": 0.2,
+        "asr_usd_minute": 0.003,
+        "model_input_usd_million": 0.75,
+        "model_output_usd_million": 4.5,
+        "sandbox_cpu_usd_second": 1.4e-05,
+        "sandbox_memory_usd_second": 4.5e-06,
+        "clip_minutes": 1.5,
+        "clip_input_tokens": 12000.0,
+        "clip_output_tokens": 1500.0,
+        "clip_sandbox_seconds": 60.0,
+        "sandbox_vcpus": 2.0,
+        "sandbox_gib": 1.0,
+        "extra_provider_cost_usd": 0.002
+      },
+      "tiers": [
+        {
+          "tier": "starter",
+          "gross": 19.423537202380952,
+          "payments": 1.3188988095238094,
+          "credits": 254.89508928571428,
+          "revenue": 15.73145988292011,
+          "refunds_net": 0.3210502016922472,
+          "pct_fees": 0.8449238683035714,
+          "fixed_fees": 0.2637797619047619,
+          "fx": 0.38847074404761905,
+          "dispute": 0.02637797619047619,
+          "compute": 2.548950892857143,
+          "service": 1.55,
+          "variable": 5.622503243303571,
+          "contribution": 10.108956639616538
+        },
+        {
+          "tier": "pro",
+          "gross": 39.670263392857144,
+          "payments": 1.3188988095238094,
+          "credits": 607.8348214285714,
+          "revenue": 32.12963481404959,
+          "refunds_net": 0.6557068329397876,
+          "pct_fees": 1.7256564575892857,
+          "fixed_fees": 0.2637797619047619,
+          "fx": 0.7934052678571429,
+          "dispute": 0.02637797619047619,
+          "compute": 6.078348214285715,
+          "service": 2.95,
+          "variable": 11.837567677827382,
+          "contribution": 20.292067136222208
+        }
+      ],
+      "mix": {
+        "gross": 25.497555059523812,
+        "payments": 1.3188988095238094,
+        "credits": 360.7770089285715,
+        "revenue": 20.650912362258953,
+        "refunds_net": 0.4214471910665093,
+        "pct_fees": 1.1091436450892855,
+        "fixed_fees": 0.2637797619047619,
+        "fx": 0.5099511011904763,
+        "dispute": 0.02637797619047619,
+        "compute": 3.6077700892857143,
+        "service": 1.9700000000000002,
+        "variable": 7.487022573660715,
+        "contribution": 13.16388978859824
+      },
+      "fixed": 80,
+      "breakeven": 7,
+      "users_for_target": 104,
+      "ceiling_margin": 0.6374483392150851,
+      "counts": [
+        {
+          "users": 0,
+          "revenue": 0.0,
+          "costs": 80.0,
+          "profit": -80.0,
+          "margin": null
+        },
+        {
+          "users": 1,
+          "revenue": 20.650912362258953,
+          "costs": 87.48702257366071,
+          "profit": -66.83611021140176,
+          "margin": -3.2364725121563938
+        },
+        {
+          "users": 5,
+          "revenue": 103.25456181129476,
+          "costs": 117.43511286830358,
+          "profit": -14.180551057008813,
+          "margin": -0.13733583105921077
+        },
+        {
+          "users": 10,
+          "revenue": 206.50912362258953,
+          "costs": 154.87022573660715,
+          "profit": 51.638897885982374,
+          "margin": 0.25005625407793713
+        },
+        {
+          "users": 25,
+          "revenue": 516.2728090564739,
+          "costs": 267.1755643415179,
+          "profit": 249.097244714956,
+          "margin": 0.48249150516022593
+        },
+        {
+          "users": 50,
+          "revenue": 1032.5456181129477,
+          "costs": 454.35112868303577,
+          "profit": 578.194489429912,
+          "margin": 0.5599699221876555
+        },
+        {
+          "users": 100,
+          "revenue": 2065.0912362258955,
+          "costs": 828.7022573660715,
+          "profit": 1236.388978859824,
+          "margin": 0.5987091307013702
+        },
+        {
+          "users": 250,
+          "revenue": 5162.7280905647385,
+          "costs": 1951.7556434151788,
+          "profit": 3210.9724471495597,
+          "margin": 0.6219526558095991
+        },
+        {
+          "users": 500,
+          "revenue": 10325.456181129477,
+          "costs": 3823.5112868303577,
+          "profit": 6501.944894299119,
+          "margin": 0.629700497512342
+        }
+      ],
+      "name": "High payment and service cost"
+    },
+    {
+      "inputs": {
+        "consumer_vat_rate": 0.21,
+        "refund_rate": 0.02,
+        "card_rate": 0.018,
+        "billing_rate": 0.007,
+        "tax_fee_rate": 0.005,
+        "payment_fixed_ron": 1.0,
+        "eur_ron": 5.0,
+        "fx_reserve_rate": 0.005,
+        "dispute_probability": 0.001,
+        "dispute_fee_eur": 20.0,
+        "credit_cost_eur": 0.03,
+        "utilization": 1,
+        "starter_service_eur": 0.55,
+        "pro_service_eur": 0.95,
+        "fixed_monthly_eur": 30.0,
+        "starter_share": 0.7,
+        "weekly_share": 0.15,
+        "monthly_share": 0.65,
+        "target_margin": 0.6,
+        "days_year": 365.25,
+        "days_week": 7.0,
+        "months_year": 12.0,
+        "usd_eur": 0.9,
+        "supplier_tax_uplift": 0.21,
+        "retry_buffer": 0.2,
+        "asr_usd_minute": 0.003,
+        "model_input_usd_million": 0.75,
+        "model_output_usd_million": 4.5,
+        "sandbox_cpu_usd_second": 1.4e-05,
+        "sandbox_memory_usd_second": 4.5e-06,
+        "clip_minutes": 1.5,
+        "clip_input_tokens": 12000.0,
+        "clip_output_tokens": 1500.0,
+        "clip_sandbox_seconds": 60.0,
+        "sandbox_vcpus": 2.0,
+        "sandbox_gib": 1.0,
+        "extra_provider_cost_usd": 0.002
+      },
+      "tiers": [
+        {
+          "tier": "starter",
+          "gross": 19.423537202380952,
+          "payments": 1.3188988095238094,
+          "credits": 254.89508928571428,
+          "revenue": 15.73145988292011,
+          "refunds_net": 0.3210502016922472,
+          "pct_fees": 0.5827061160714285,
+          "fixed_fees": 0.2637797619047619,
+          "fx": 0.09711768601190476,
+          "dispute": 0.02637797619047619,
+          "compute": 7.646852678571428,
+          "service": 0.55,
+          "variable": 9.16683421875,
+          "contribution": 6.56462566417011
+        },
+        {
+          "tier": "pro",
+          "gross": 39.670263392857144,
+          "payments": 1.3188988095238094,
+          "credits": 607.8348214285714,
+          "revenue": 32.12963481404959,
+          "refunds_net": 0.6557068329397876,
+          "pct_fees": 1.1901079017857144,
+          "fixed_fees": 0.2637797619047619,
+          "fx": 0.19835131696428573,
+          "dispute": 0.02637797619047619,
+          "compute": 18.235044642857144,
+          "service": 0.95,
+          "variable": 20.863661599702382,
+          "contribution": 11.265973214347206
+        }
+      ],
+      "mix": {
+        "gross": 25.497555059523812,
+        "payments": 1.3188988095238094,
+        "credits": 360.7770089285715,
+        "revenue": 20.650912362258953,
+        "refunds_net": 0.4214471910665093,
+        "pct_fees": 0.7649266517857143,
+        "fixed_fees": 0.2637797619047619,
+        "fx": 0.12748777529761907,
+        "dispute": 0.02637797619047619,
+        "compute": 10.823310267857142,
+        "service": 0.67,
+        "variable": 12.675882433035714,
+        "contribution": 7.97502992922324
+      },
+      "fixed": 30.0,
+      "breakeven": 4,
+      "users_for_target": null,
+      "ceiling_margin": 0.386182934164119,
+      "counts": [
+        {
+          "users": 0,
+          "revenue": 0.0,
+          "costs": 30.0,
+          "profit": -30.0,
+          "margin": null
+        },
+        {
+          "users": 1,
+          "revenue": 20.650912362258953,
+          "costs": 42.67588243303571,
+          "profit": -22.024970070776757,
+          "margin": -1.0665373851001854
+        },
+        {
+          "users": 5,
+          "revenue": 103.25456181129476,
+          "costs": 93.37941216517856,
+          "profit": 9.8751496461162,
+          "margin": 0.09563887031125806
+        },
+        {
+          "users": 10,
+          "revenue": 206.50912362258953,
+          "costs": 156.75882433035713,
+          "profit": 49.7502992922324,
+          "margin": 0.24091090223768852
+        },
+        {
+          "users": 25,
+          "revenue": 516.2728090564739,
+          "costs": 346.8970608258928,
+          "profit": 169.37574823058105,
+          "margin": 0.32807412139354686
+        },
+        {
+          "users": 50,
+          "revenue": 1032.5456181129477,
+          "costs": 663.7941216517856,
+          "profit": 368.7514964611621,
+          "margin": 0.35712852777883297
+        },
+        {
+          "users": 100,
+          "revenue": 2065.0912362258955,
+          "costs": 1297.5882433035713,
+          "profit": 767.5029929223242,
+          "margin": 0.371655730971476
+        },
+        {
+          "users": 250,
+          "revenue": 5162.7280905647385,
+          "costs": 3198.970608258928,
+          "profit": 1963.7574823058103,
+          "margin": 0.3803720528870618
+        },
+        {
+          "users": 500,
+          "revenue": 10325.456181129477,
+          "costs": 6367.941216517856,
+          "profit": 3957.5149646116206,
+          "margin": 0.38327749352559043
+        }
+      ],
+      "name": "Uncontrolled compute stress"
+    }
+  ],
+  "clip_example": {
+    "asr_usd": 0.0045000000000000005,
+    "inference_usd": 0.01575,
+    "sandbox_usd": 0.00195,
+    "total_usd": 0.0242,
+    "buffered_eur": 0.031624559999999996,
+    "quote_credits": 4
+  }
+}

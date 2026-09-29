@@ -1,0 +1,343 @@
+{
+  "product": "VibeScroller",
+  "specification_version": "1.0.0",
+  "artifact_status": "Implementation specification, not an implemented application",
+  "hash_algorithm": "SHA-256",
+  "files": [
+    {
+      "path": ".env.example",
+      "bytes": 1243,
+      "sha256": "d68a9bd3ee3c07c9d88188e18014e12362c78e5e3f472e027c77bee5e51cc162"
+    },
+    {
+      "path": "AGENTS.md",
+      "bytes": 4034,
+      "sha256": "8b2bf1f231ae6b49a36987d34efdf1c73ad7ce95c598304fdc85aa3dbd0bc7f7"
+    },
+    {
+      "path": "IMPLEMENTATION-PROMPT.md",
+      "bytes": 2307,
+      "sha256": "5b65b39c7f9cb0b1ef9c90b74f432c18aa53c70c95fabe5094d3754d3f0f4c3f"
+    },
+    {
+      "path": "README.md",
+      "bytes": 3201,
+      "sha256": "d16f757d7e1dee4f53742a3b503da4eb697624c53a08b435fe8abab3a75a00b4"
+    },
+    {
+      "path": "contracts/README.md",
+      "bytes": 866,
+      "sha256": "d74e0c75327530451282f5510204cbe2c1512bec5bb77b9d18221106dc84c7eb"
+    },
+    {
+      "path": "contracts/insight.schema.json",
+      "bytes": 3631,
+      "sha256": "e3a281212ba03b1557a934ca4dd9a8da6599a18f305ebb9eaef264d5376a5140"
+    },
+    {
+      "path": "contracts/pricing.json",
+      "bytes": 1098,
+      "sha256": "95714bd9e0d5e1c334132d218a88704e4b62254bf42e2b1483c52fef271702ff"
+    },
+    {
+      "path": "contracts/proposal.schema.json",
+      "bytes": 3718,
+      "sha256": "a87502da29548da5761fab5f1165fd7fb09ffc07dadb5d86956c6285287a77e4"
+    },
+    {
+      "path": "contracts/runner-job.schema.json",
+      "bytes": 2239,
+      "sha256": "e7d7859158c475d3817a984e243ad1fadad2f9d961e7705492111a9024ae06a9"
+    },
+    {
+      "path": "contracts/runtime-policy.json",
+      "bytes": 1371,
+      "sha256": "32b44fc0ffbe1095556ab111d13ada9ec157d938b653ee848ca5975df88bf5a9"
+    },
+    {
+      "path": "docs/ACCEPTANCE-TESTS.md",
+      "bytes": 11017,
+      "sha256": "1ff118499db994a4c1bcbce33bfa5a086725fd15aab2405300752932d5215804"
+    },
+    {
+      "path": "docs/AI-PROVIDERS.md",
+      "bytes": 5883,
+      "sha256": "5fce55f961bc13c67d43a802209cd624f2726429f0914082d5d3f131404124da"
+    },
+    {
+      "path": "docs/API-CONTRACTS.md",
+      "bytes": 5645,
+      "sha256": "ff8ca6b1195cdee2fc770b977df5585cb74b2d82e3b1807414e386083812ff7e"
+    },
+    {
+      "path": "docs/ARCHITECTURE.md",
+      "bytes": 8359,
+      "sha256": "240f2558e6aace7d5158ecedc6dcc8efe2082c74d9cc061120a78b17260b04b9"
+    },
+    {
+      "path": "docs/BILLING-AND-TAX.md",
+      "bytes": 9545,
+      "sha256": "5ee2d8d3b7a765bef77ea9736e9cf2797f6c3967166ed3c0bab4c1f8db0051f6"
+    },
+    {
+      "path": "docs/CACHING-AND-RETENTION.md",
+      "bytes": 5273,
+      "sha256": "ae2899d97641370bbbbbab5a4c70f72ddcf5df8082444ba6bf95ca4e3ad11c98"
+    },
+    {
+      "path": "docs/CAPTURE-AND-MEDIA.md",
+      "bytes": 7936,
+      "sha256": "6ebe8134eab2bc13c63631219d94c1328c3507890dd0072e25d38269736658a8"
+    },
+    {
+      "path": "docs/CLOUD-RUNNER.md",
+      "bytes": 4761,
+      "sha256": "35d560461f8f6f657d8ef93783a0abdad5c6eb9992aee23e50166ac336451d17"
+    },
+    {
+      "path": "docs/DASHBOARD-AND-MOBILE-UX.md",
+      "bytes": 12028,
+      "sha256": "f1238a95a86c5d4018c2eca4b6d0da5f5fb4922b1f8deee1298526d04628436d"
+    },
+    {
+      "path": "docs/DATA-MODEL.md",
+      "bytes": 8285,
+      "sha256": "84f4757f039eb7f0248ea855dd3bc46495760baf0c0a7af667433fb853cfa68a"
+    },
+    {
+      "path": "docs/DECISIONS.md",
+      "bytes": 4647,
+      "sha256": "e0c27233f6ff4f3430ea6276257748ea243aa237ffb84640231aab2abfd4a58a"
+    },
+    {
+      "path": "docs/DEPLOYMENT-AND-OPERATIONS.md",
+      "bytes": 5957,
+      "sha256": "a2eae2a5c9e0dd1e184322b3cfd2d883079599555375a5656a30b53256d9dc78"
+    },
+    {
+      "path": "docs/FEEDBACK-AND-EVALUATION.md",
+      "bytes": 5208,
+      "sha256": "9e313f17814ccc7a1d840949b517a50cd5739a57e33563a8a718e83a8717f385"
+    },
+    {
+      "path": "docs/IMPLEMENTATION-PLAN.md",
+      "bytes": 6962,
+      "sha256": "5eff06cb6cc49b79b0dd1cecbbd7b8a15e060309efd026abc3aa1f6b8e22fdde"
+    },
+    {
+      "path": "docs/LAUNCH-CHECKLIST.md",
+      "bytes": 3604,
+      "sha256": "acc0b0019b53c256ce3d39adae87483a6d1ee2cfaf795e876010cc152db27c2b"
+    },
+    {
+      "path": "docs/LOCAL-RUNNER.md",
+      "bytes": 7299,
+      "sha256": "01090a2f3b1822283e103834caa2be9e52fc3c703d800f9b922c813d9267bafb"
+    },
+    {
+      "path": "docs/PACKAGE-VALIDATION.md",
+      "bytes": 3708,
+      "sha256": "69e3327dfefe1b9383fd844d1b19f2055b1ade89c1e4b620fd1d967ea347632d"
+    },
+    {
+      "path": "docs/PRD.md",
+      "bytes": 11669,
+      "sha256": "e1fb6086da6de611b7447fd1d607dd75f0f53d10e7363ffdacb5c3ec698d9276"
+    },
+    {
+      "path": "docs/PROVIDER-SETUP.md",
+      "bytes": 4323,
+      "sha256": "d24b1057b5fc6c1d26c847546d1ff3137a402349c12d4f55546cd5b34d15b129"
+    },
+    {
+      "path": "docs/REPOSITORY-INTELLIGENCE.md",
+      "bytes": 5734,
+      "sha256": "1c73f380ccb5a49029c21529323f8692240c30b011cf457cca6a2d46f93efd2f"
+    },
+    {
+      "path": "docs/REQUIREMENTS-MAP.md",
+      "bytes": 1403,
+      "sha256": "2f0b43d240c839e5996170803403542f4952d9e87efcef8ef84fd590bc2a16f9"
+    },
+    {
+      "path": "docs/SECURITY.md",
+      "bytes": 7331,
+      "sha256": "8bd3d5c3116cb4831a76f6ddc066f9e921aec6cbf9a8f99ad977317dedfc01b8"
+    },
+    {
+      "path": "docs/SOURCES.md",
+      "bytes": 12237,
+      "sha256": "45200d72737018bcfd40392cd72b7f45242be625b234daef06586a63f285dac8"
+    },
+    {
+      "path": "docs/START-HERE.md",
+      "bytes": 2653,
+      "sha256": "02b7197a8a2fec28b505eca235596a65248800df5711650201e7973552408e16"
+    },
+    {
+      "path": "docs/STATE-MACHINES.md",
+      "bytes": 4428,
+      "sha256": "49ece55dd79148a6b6092abf99d4301c9d67389c730188c86510fe8bc8944856"
+    },
+    {
+      "path": "docs/UNIT-ECONOMICS.md",
+      "bytes": 5644,
+      "sha256": "4b8d873c4fe67bf7c15a9749e505e5deb4dfec3f69c4cc445ccbaa04541fcc0e"
+    },
+    {
+      "path": "docs/V2-ROADMAP.md",
+      "bytes": 6592,
+      "sha256": "840f15ebd3dd1b1fa81979a381e421df754da5cbad9bd0a8e1c15835c68823dc"
+    },
+    {
+      "path": "docs/WEBSITE-AND-COPY.md",
+      "bytes": 7428,
+      "sha256": "1c83cccdb1fe49e8a4483da6c08960cdd7c93a81b49bb1906765b13df1cc2b9d"
+    },
+    {
+      "path": "docs/WRITING-STANDARD.md",
+      "bytes": 1296,
+      "sha256": "a86083bc2962d3e2a2b8340d967f7c9d1b84a367e9dc8e2cf81f21ea0aac56e0"
+    },
+    {
+      "path": "finance/RESULTS.md",
+      "bytes": 2482,
+      "sha256": "822b04c6b5cdb5cba3f97a73d894ccaade2670ea9aaed4f75b8260b47691fb6b"
+    },
+    {
+      "path": "finance/VibeScroller-unit-economics.xlsx",
+      "bytes": 80028,
+      "sha256": "093c17b3245e1663c150216f6fd715b0ffbb6e6b48d1e709743b1509597a06cd"
+    },
+    {
+      "path": "finance/assumptions.json",
+      "bytes": 11523,
+      "sha256": "2b6898c7687d7ef363b940f208f826b97364623265bfd28fe11aa712b4d5cbc9"
+    },
+    {
+      "path": "finance/calculate.py",
+      "bytes": 6374,
+      "sha256": "40cc5397953558868bb06eb037c37adbb3365d566e5defd0fd3ab3b2eb11b2f5"
+    },
+    {
+      "path": "finance/results.json",
+      "bytes": 48760,
+      "sha256": "a56a397eca5ff1b83a538b9470e86216e49844e85cb832f209c6edc8563b3ab9"
+    },
+    {
+      "path": "finance/test_model.py",
+      "bytes": 1932,
+      "sha256": "ebe2793097717bbd149336b675083b661b35737e203832379b3709eb1638f755"
+    },
+    {
+      "path": "fixtures/dashboard.json",
+      "bytes": 2618,
+      "sha256": "b977c84f4b6060be9f37619b318f3c891ee6c38dc45b0a3e152fbedc8a87a0a2"
+    },
+    {
+      "path": "fixtures/insight.json",
+      "bytes": 1167,
+      "sha256": "f4a01bf2481130b1486838ef019cc9f5d760e415b0e292b0e8c9b8d304c64eb6"
+    },
+    {
+      "path": "fixtures/proposal.json",
+      "bytes": 1548,
+      "sha256": "07eb2158d8f98b5873699d7b17fe6630cbc042ad28960ebd8fed65ed82c5cc94"
+    },
+    {
+      "path": "fixtures/runner-job.json",
+      "bytes": 744,
+      "sha256": "ed91010f4b46047f8818fe5b87b3bb7aa7327cc4511d40305e40b124e298eaca"
+    },
+    {
+      "path": "legal/ACCEPTABLE-USE.md",
+      "bytes": 1700,
+      "sha256": "79e54a805c20fbde2de04f0e1cbc7e37462836a27b1da23cc990242a2aec90c5"
+    },
+    {
+      "path": "legal/COOKIES.md",
+      "bytes": 1852,
+      "sha256": "c892daf202372417c420d2206c0130611df0ba6377ed6eb86c2e933855e5a3b4"
+    },
+    {
+      "path": "legal/COPYRIGHT.md",
+      "bytes": 1828,
+      "sha256": "d5c4324f3997055f207727b43154160a05f0edefaec34bbd4289ee27553dba7b"
+    },
+    {
+      "path": "legal/DPA.md",
+      "bytes": 5124,
+      "sha256": "2a08008b2ff452e4806bf6f9c9ceafa9c5de059c2d73a24a8d22ab90ed8dc48a"
+    },
+    {
+      "path": "legal/LEGAL-NOTICE.md",
+      "bytes": 1289,
+      "sha256": "90d2212045a7ba9e6aa682bb8e597cdc4497b3778be9d908553681bc8a605fa6"
+    },
+    {
+      "path": "legal/POLICY-IMPLEMENTATION.md",
+      "bytes": 3205,
+      "sha256": "f00b27692e256cd5fc9ed4d50eb242c71fbf4662eaa2aa6d88cabb45c302a0bc"
+    },
+    {
+      "path": "legal/PRIVACY.md",
+      "bytes": 6642,
+      "sha256": "4978c425aa69a9997a041f0d6b8c314566d3d445f0f4306ad16a61f0925787f2"
+    },
+    {
+      "path": "legal/REFUNDS.md",
+      "bytes": 3323,
+      "sha256": "a6dad01afb85e72018ba7a3be7813148372c9143ace07cafcc1cc6815d4742ce"
+    },
+    {
+      "path": "legal/SUBPROCESSORS.md",
+      "bytes": 2448,
+      "sha256": "66419dd6c5620ececafb85a095fe06066e50e770c3adf120e0db4716285f03c2"
+    },
+    {
+      "path": "legal/TERMS.md",
+      "bytes": 7607,
+      "sha256": "21489aa086fb60aeba030560cb6b576d24c6a1272d99dac05479cb6ede6fa369"
+    },
+    {
+      "path": "prompts/EXTRACT.md",
+      "bytes": 1300,
+      "sha256": "0c964865febfdd55571105ed7c122385918ef6326017b161f615a1e8ef341f39"
+    },
+    {
+      "path": "prompts/IMPLEMENT.md",
+      "bytes": 1284,
+      "sha256": "b603aa4e60fa63201f44c0e7797bf5710cd88b941378bae732df0ee0e8ef6a73"
+    },
+    {
+      "path": "prompts/MARKETING-V2.md",
+      "bytes": 928,
+      "sha256": "d79b1bcf08b1244b237fcdd0c8bbf52256494b10a4031ad36cf9e2e15c396907"
+    },
+    {
+      "path": "prompts/MATCH.md",
+      "bytes": 1250,
+      "sha256": "7392ce31829443449121328db7697b40e0fc97e64c1f82331f9df83c8e9c3f71"
+    },
+    {
+      "path": "prompts/PLAN.md",
+      "bytes": 1223,
+      "sha256": "0ff5acf9146b584238ea21a9ed0ccf410ee72a6c621257dc80b7e51d47004e5e"
+    },
+    {
+      "path": "prompts/README.md",
+      "bytes": 732,
+      "sha256": "effcf176ec719462e7a5a5442a195085beb27cbf37df3594ed5e1dede45e654c"
+    },
+    {
+      "path": "prompts/REVIEW.md",
+      "bytes": 808,
+      "sha256": "b6e95fb1e3fca498c7038dad08ccfcfc1ff38b949270d84ab503697b24b79071"
+    },
+    {
+      "path": "scripts/validate_package.py",
+      "bytes": 4230,
+      "sha256": "6e5daeb7b4f1c5aa331cde570154b0f15ae6f2bf3b9677dfd65c21a066c7b513"
+    }
+  ]
+}

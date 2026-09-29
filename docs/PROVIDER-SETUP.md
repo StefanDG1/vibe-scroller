@@ -1,0 +1,53 @@
+# Configure provider accounts
+
+Mode: how-to. These steps are external setup work, not evidence that configuration already exists.
+
+## Record setup states
+
+For each provider, record `not_started`, `user_attested`, `connected`, `verified`, `test_passed`, and `live_ready`. A checkbox can move a manual task to `user_attested`. It cannot grant `verified` or `test_passed` without evidence.
+
+Store evidence references and dates, not screenshots containing secrets. Keep production and sandbox state separate.
+
+## Configure WorkOS
+
+Create VibeScroller's own environment. Enable email one-time codes and Google sign-in. Disable password login for the intended product policy. Configure the actual callback and logout origins and a product-specific Google consent client where required.
+
+Set credentials in the deployment secret store. Complete a real browser sign-in, refresh, sign-out, email delivery, and account-deletion test. Source-presence checks do not prove provider settings are enabled.
+
+## Configure GitHub
+
+Register an app for selected repositories. Grant metadata and content read for analysis. Add content, pull-request, and optional issue write only for approved publication features. Do not request administration or workflow write by default.
+
+Configure signed webhooks and store the private key only in the trusted backend. Install on a disposable test repository and verify access removal. Show selected repositories in onboarding and let the user pause each one.
+
+## Configure AI
+
+Set the managed API credential and allowed model registry. Record pricing, data terms, and spending limits. Test transcription, image input, structured output, rate-limit handling, and cancellation accounting with bounded paid calls.
+
+For local coding, let the runner start official Codex authentication. Verify a supported session without exporting its token. Keep broader hosted subscription inference disabled until the official commercial contract and tests are recorded.
+
+For BYO keys, test encryption, rotation, redaction, revocation, and provider-cost disclosure. Do not ask users to send a key in Telegram or support email.
+
+## Configure storage and execution
+
+Create the private EU-jurisdiction bucket and restricted upload/download identities. Enable lifecycle rules and verify deletion. Configure the cloud sandbox account with conservative resource and spend limits. Build the pinned images and test isolation before enabling the cloud button.
+
+## Configure Stripe
+
+Use Exponential Education SRL's merchant account only to sell VibeScroller subscriptions. Verify the legal entity, bank payout details, currency, tax configuration, support contact, and statement descriptor in the actual account. Do not alter another product's existing prices or webhook routing.
+
+Create the six subscription prices and optional top-up products in sandbox first. Add stable metadata identifying VibeScroller and the catalogue version. Use separate environment IDs. Configure customer portal actions and the signature-protected webhook endpoint.
+
+Test payments, retries, proration, renewal, cancellation, refunds, failed cards, and wrong-mode events. Record the actual tax status and required invoice workflow before enabling live checkout. The owner reports live readiness, but a VibeScroller-specific live journey remains a separate test.
+
+## Configure notifications
+
+Create the Telegram bot, secret webhook, and pairing flow. Test numeric-user binding, duplicate updates, unlinking, safe previews, and a malicious URL. Configure transactional email with a verified sender. Keep optional marketing separate.
+
+## V2 account ownership
+
+Generated customer businesses must use their own Stripe merchant accounts, GitHub repositories, hosting projects, WorkOS environments, database projects, email providers, analytics, and advertising accounts.
+
+The setup assistant guides users to official account creation and authorization pages. It can record a completed manual step and then verify the connection. It cannot fabricate business identity, bypass KYC, defeat CAPTCHA, or accept provider terms on someone's behalf without appropriate authorization.
+
+Never substitute the operator's Stripe account when a customer has not connected theirs. Keep the generated business in setup mode until required customer-owned accounts are verified.

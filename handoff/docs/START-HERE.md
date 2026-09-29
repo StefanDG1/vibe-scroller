@@ -1,0 +1,38 @@
+# Start the implementation
+
+Mode: how-to. Version: 1.0.0.
+
+## Establish the repository
+
+1. Read [Decisions](DECISIONS.md).
+2. Read [PRD](PRD.md).
+3. Inspect CompanyNerve's current README, status record, and export command.
+4. Export the foundation into a new empty repository named `vibe-scroller`.
+5. Add this package without overwriting upstream licence notices.
+6. Record the source commit and lockfile in `docs/implementation-status.md`.
+
+Do not alter the upstream CompanyNerve production application. Keep VibeScroller provider projects and secrets separate.
+
+## Follow the reading order
+
+Read [Architecture](ARCHITECTURE.md), [Data model](DATA-MODEL.md), [API contracts](API-CONTRACTS.md), and [State machines](STATE-MACHINES.md) before implementing backend behavior.
+
+Read [Dashboard and mobile UX](DASHBOARD-AND-MOBILE-UX.md) and [Website and copy](WEBSITE-AND-COPY.md) before implementing screens. Both are required product work.
+
+Read the capture, repository, provider, runner, security, retention, and billing documents when beginning their work packages. Use [Implementation plan](IMPLEMENTATION-PLAN.md) to choose the next package. Use [Acceptance tests](ACCEPTANCE-TESTS.md) to decide whether it is complete.
+
+Read [Provider setup](PROVIDER-SETUP.md) and [Launch checklist](LAUNCH-CHECKLIST.md) before changing any external account.
+
+## Use the models and contracts
+
+Run `python finance/calculate.py` from the package root to regenerate the planning scenarios. Run `python scripts/validate_package.py` to check document links, JSON, required files, and finance invariants. These commands validate the handoff, not the future application.
+
+Treat `contracts/*.schema.json` as proposed serialized contracts. Generate runtime validators in the application and test that they reject unknown or invalid fields. Use `fixtures/` only in tests or explicitly labeled demo mode.
+
+Keep the editable finance workbook beside `finance/assumptions.json`. Changing a workbook assumption does not update application billing. Change production price configuration through a reviewed migration and preserve existing customers' terms.
+
+## Track external gates without blocking local development
+
+Implement simulated responses for unavailable external accounts only in tests. Keep the real feature disabled and explain its state in the setup dashboard. Do not report a simulated integration as working.
+
+The unresolved gates are provider registration and scopes, production credentials, actual tax evidence, legal publication review, source-access rights, and production security checks. They are listed individually in [Launch checklist](LAUNCH-CHECKLIST.md).

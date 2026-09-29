@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "1.0.0",
+  "mode": "proposed_defaults",
+  "media": {
+    "max_upload_bytes": 250000000,
+    "max_duration_seconds": 600,
+    "initial_frame_target": 24,
+    "max_initial_frames": 120,
+    "sandbox_vcpu": 2,
+    "sandbox_memory_gib": 1,
+    "decoder_network": "disabled_after_acquisition"
+  },
+  "coding": {
+    "default_runtime_seconds": 1200,
+    "max_approved_extension_seconds": 3600,
+    "cloud_vcpu": 2,
+    "cloud_memory_gib": 4,
+    "concurrent_local_runs_per_device": 1,
+    "default_publication": "review_required",
+    "auto_merge": false,
+    "production_deploy": false
+  },
+  "runner": {
+    "pairing_expiry_seconds": 600,
+    "approval_claim_expiry_seconds": 86400,
+    "heartbeat_seconds": 15,
+    "lease_seconds": 90,
+    "transport": "outbound_https",
+    "app_server_transport": "stdio"
+  },
+  "retention": {
+    "temporary_media_hours": 24,
+    "intermediate_cache_days": 7,
+    "run_log_days": 14,
+    "security_audit_days": 90,
+    "active_deletion_target_days": 7,
+    "backup_max_days": 30
+  },
+  "capabilities": {
+    "shared_cross_workspace_cache": false,
+    "instagram_auto_sync": false,
+    "tiktok_portability": false,
+    "hosted_chatgpt_inference": false,
+    "v2_business_creation": false
+  },
+  "note": "Actual provider enforcement and legal configuration must pass release gates. Values do not create permissions."
+}

@@ -1,0 +1,379 @@
+{
+  "version": "1.0.0",
+  "as_of": "2026-09-30",
+  "description": "Planning assumptions, not observed financial results. FX and tax rates are scenarios, not verified company settings.",
+  "inputs": {
+    "consumer_vat_rate": {
+      "value": 0.21,
+      "unit": "fraction",
+      "kind": "scenario",
+      "source": "docs/SOURCES.md#s34-eu-one-stop-shop",
+      "note": "Illustrative consumer VAT. Also test exemption and 27 percent scenarios."
+    },
+    "refund_rate": {
+      "value": 0.02,
+      "unit": "fraction of gross billings",
+      "kind": "assumption",
+      "source": "Owner planning model",
+      "note": "Reduces net revenue. Original processing fees remain in costs."
+    },
+    "card_rate": {
+      "value": 0.018,
+      "unit": "fraction of gross billings",
+      "kind": "assumption",
+      "source": "https://stripe.com/ro/pricing",
+      "note": "Blended estimate above 1.5 percent standard EEA rate; test higher-card-cost scenario."
+    },
+    "billing_rate": {
+      "value": 0.007,
+      "unit": "fraction of gross billings",
+      "kind": "published",
+      "source": "https://stripe.com/en-ro/billing/pricing",
+      "note": "Pay-as-you-go Billing; confirm account terms."
+    },
+    "tax_fee_rate": {
+      "value": 0.005,
+      "unit": "fraction of gross billings",
+      "kind": "assumption",
+      "source": "https://stripe.com/tax/pricing",
+      "note": "Conservative reserve for selected Tax integration, not filing service."
+    },
+    "payment_fixed_ron": {
+      "value": 1.0,
+      "unit": "RON per successful payment",
+      "kind": "published",
+      "source": "https://stripe.com/ro/pricing",
+      "note": "Standard price component; actual provider contract controls."
+    },
+    "eur_ron": {
+      "value": 5.0,
+      "unit": "RON per EUR",
+      "kind": "scenario",
+      "source": "Planning assumption, not a current FX quote",
+      "note": "Editable conversion for fixed payment fees."
+    },
+    "fx_reserve_rate": {
+      "value": 0.005,
+      "unit": "fraction of gross billings",
+      "kind": "assumption",
+      "source": "Planning assumption",
+      "note": "Operational FX and payment-currency buffer. Not a quoted Stripe rate."
+    },
+    "dispute_probability": {
+      "value": 0.001,
+      "unit": "disputes per payment",
+      "kind": "assumption",
+      "source": "Planning assumption",
+      "note": "Revenue loss is included in refund assumption. This adds dispute handling fee exposure."
+    },
+    "dispute_fee_eur": {
+      "value": 20.0,
+      "unit": "EUR per dispute",
+      "kind": "assumption",
+      "source": "Planning reserve, verify merchant schedule",
+      "note": "Not a provider quote."
+    },
+    "credit_cost_eur": {
+      "value": 0.01,
+      "unit": "EUR all-in metered cost per credit",
+      "kind": "design",
+      "source": "docs/BILLING-AND-TAX.md",
+      "note": "Internal ceiling includes compute, model, tool, relevant tax, FX and retry exposure; do not add the same cost twice."
+    },
+    "utilization": {
+      "value": 0.6,
+      "unit": "fraction of included credits consumed",
+      "kind": "assumption",
+      "source": "No production observations yet",
+      "note": "Also calculate 100 percent consumption."
+    },
+    "starter_service_eur": {
+      "value": 0.55,
+      "unit": "EUR per active user-month",
+      "kind": "assumption",
+      "source": "Planning reserve",
+      "note": "0.35 storage/backend/email/monitoring plus 0.20 support and invoice handling. Metered jobs excluded."
+    },
+    "pro_service_eur": {
+      "value": 0.95,
+      "unit": "EUR per active user-month",
+      "kind": "assumption",
+      "source": "Planning reserve",
+      "note": "0.55 storage/backend/email/monitoring plus 0.40 support and invoice handling. Metered jobs excluded."
+    },
+    "fixed_monthly_eur": {
+      "value": 30.0,
+      "unit": "EUR per month",
+      "kind": "scenario",
+      "source": "https://vercel.com/pricing",
+      "note": "New paid host plus small overhead reserve. Test EUR 8 lean and EUR 80 growing-operations profiles."
+    },
+    "starter_share": {
+      "value": 0.7,
+      "unit": "fraction of paying users",
+      "kind": "assumption",
+      "source": "No production observations yet",
+      "note": "Pro share is the remainder."
+    },
+    "weekly_share": {
+      "value": 0.15,
+      "unit": "fraction of paying users",
+      "kind": "assumption",
+      "source": "No production observations yet",
+      "note": "Interval mix, not payment cash timing."
+    },
+    "monthly_share": {
+      "value": 0.65,
+      "unit": "fraction of paying users",
+      "kind": "assumption",
+      "source": "No production observations yet",
+      "note": "Annual share is the remainder."
+    },
+    "target_margin": {
+      "value": 0.6,
+      "unit": "fraction of revenue net of VAT and refunds",
+      "kind": "owner_decision",
+      "source": "Owner instructions",
+      "note": "Before company tax, excluding founder salary, marketing and development."
+    },
+    "days_year": {
+      "value": 365.25,
+      "unit": "days per planning year",
+      "kind": "assumption",
+      "source": "Planning normalization",
+      "note": "For monthly equivalents only; actual weekly periods are seven days."
+    },
+    "days_week": {
+      "value": 7.0,
+      "unit": "days per weekly period",
+      "kind": "design",
+      "source": "Product catalogue",
+      "note": "Stripe week interval."
+    },
+    "months_year": {
+      "value": 12.0,
+      "unit": "months per year",
+      "kind": "design",
+      "source": "Product catalogue",
+      "note": "Annual revenue recognized over twelve months."
+    },
+    "usd_eur": {
+      "value": 0.9,
+      "unit": "EUR per USD",
+      "kind": "scenario",
+      "source": "Planning assumption, not current FX quote",
+      "note": "Only used in example provider-cost calculations."
+    },
+    "supplier_tax_uplift": {
+      "value": 0.21,
+      "unit": "fraction of taxable supplier cost",
+      "kind": "scenario",
+      "source": "Conservative unrecoverable-input-tax scenario",
+      "note": "Only provider example. Included-credit ceiling already includes applicable supplier tax."
+    },
+    "retry_buffer": {
+      "value": 0.2,
+      "unit": "fraction of base provider cost",
+      "kind": "assumption",
+      "source": "Planning contingency",
+      "note": "Example quote buffer, not measured retries."
+    },
+    "asr_usd_minute": {
+      "value": 0.003,
+      "unit": "USD per audio minute",
+      "kind": "published_estimate",
+      "source": "https://developers.openai.com/api/docs/pricing",
+      "note": "gpt-4o-mini-transcribe estimate."
+    },
+    "model_input_usd_million": {
+      "value": 0.75,
+      "unit": "USD per million input tokens",
+      "kind": "published",
+      "source": "https://developers.openai.com/api/docs/models/gpt-5.4-mini",
+      "note": "Standard candidate price at review."
+    },
+    "model_output_usd_million": {
+      "value": 4.5,
+      "unit": "USD per million output tokens",
+      "kind": "published",
+      "source": "https://developers.openai.com/api/docs/models/gpt-5.4-mini",
+      "note": "Include billed reasoning tokens where applicable."
+    },
+    "sandbox_cpu_usd_second": {
+      "value": 1.4e-05,
+      "unit": "USD per vCPU-second",
+      "kind": "published",
+      "source": "https://e2b.dev/pricing",
+      "note": "Base resource price, verify current invoice."
+    },
+    "sandbox_memory_usd_second": {
+      "value": 4.5e-06,
+      "unit": "USD per GiB-second",
+      "kind": "published",
+      "source": "https://e2b.dev/pricing",
+      "note": "Additional disk, minimum billing or network charges must be added if applicable."
+    },
+    "clip_minutes": {
+      "value": 1.5,
+      "unit": "minutes",
+      "kind": "example",
+      "source": "Owner workload example",
+      "note": "Illustrative short video, not measured median."
+    },
+    "clip_input_tokens": {
+      "value": 12000,
+      "unit": "tokens including image budget",
+      "kind": "assumption",
+      "source": "Unbenchmarked request budget",
+      "note": "Actual image tokenization and provider usage replace this estimate."
+    },
+    "clip_output_tokens": {
+      "value": 1500,
+      "unit": "tokens",
+      "kind": "assumption",
+      "source": "Unbenchmarked request budget",
+      "note": "Source understanding only, excludes project planning and coding."
+    },
+    "clip_sandbox_seconds": {
+      "value": 60,
+      "unit": "seconds",
+      "kind": "assumption",
+      "source": "Unbenchmarked media preparation",
+      "note": "Default example 2 vCPU and 1 GiB."
+    },
+    "sandbox_vcpus": {
+      "value": 2,
+      "unit": "vCPU",
+      "kind": "design",
+      "source": "Media worker initial default",
+      "note": "Resource quote can change per authorized task."
+    },
+    "sandbox_gib": {
+      "value": 1,
+      "unit": "GiB",
+      "kind": "design",
+      "source": "Media worker initial default",
+      "note": "Large builds require a new quote."
+    },
+    "extra_provider_cost_usd": {
+      "value": 0.002,
+      "unit": "USD per example source",
+      "kind": "assumption",
+      "source": "Network, storage, and minimum-billing reserve",
+      "note": "Example only. Actual cost ledger replaces this input."
+    }
+  },
+  "tiers": {
+    "starter": {
+      "weekly_price_eur": 5.99,
+      "monthly_price_eur": 19,
+      "annual_price_eur": 190,
+      "weekly_credits": 65,
+      "monthly_credits": 250
+    },
+    "pro": {
+      "weekly_price_eur": 11.99,
+      "monthly_price_eur": 39,
+      "annual_price_eur": 390,
+      "weekly_credits": 150,
+      "monthly_credits": 600
+    }
+  },
+  "scenarios": [
+    {
+      "name": "Base mixed intervals",
+      "overrides": {}
+    },
+    {
+      "name": "Lean budget host",
+      "overrides": {
+        "fixed_monthly_eur": 8
+      }
+    },
+    {
+      "name": "Growing operations",
+      "overrides": {
+        "fixed_monthly_eur": 80
+      }
+    },
+    {
+      "name": "Full allowance use",
+      "overrides": {
+        "utilization": 1
+      }
+    },
+    {
+      "name": "All annual, full use",
+      "overrides": {
+        "weekly_share": 0,
+        "monthly_share": 0,
+        "utilization": 1
+      }
+    },
+    {
+      "name": "All Starter annual, full use",
+      "overrides": {
+        "starter_share": 1,
+        "weekly_share": 0,
+        "monthly_share": 0,
+        "utilization": 1
+      }
+    },
+    {
+      "name": "Exemption scenario",
+      "overrides": {
+        "consumer_vat_rate": 0,
+        "tax_fee_rate": 0
+      }
+    },
+    {
+      "name": "Higher-tax stress",
+      "overrides": {
+        "consumer_vat_rate": 0.27,
+        "utilization": 1
+      }
+    },
+    {
+      "name": "High payment and service cost",
+      "overrides": {
+        "card_rate": 0.0315,
+        "fx_reserve_rate": 0.02,
+        "starter_service_eur": 1.55,
+        "pro_service_eur": 2.95,
+        "utilization": 1,
+        "fixed_monthly_eur": 80
+      }
+    },
+    {
+      "name": "Uncontrolled compute stress",
+      "overrides": {
+        "credit_cost_eur": 0.03,
+        "utilization": 1
+      }
+    }
+  ],
+  "customer_counts": [
+    0,
+    1,
+    5,
+    10,
+    25,
+    50,
+    100,
+    250,
+    500
+  ],
+  "excluded": [
+    "Founder salary",
+    "Marketing",
+    "Initial development",
+    "Company income or turnover tax",
+    "Recovery of unquoted initial legal or security review"
+  ],
+  "not_assumed": [
+    "Cross-customer cache savings",
+    "Promotional cloud credits",
+    "Founder subscription as customer inference pool",
+    "Unlimited included cloud coding"
+  ]
+}

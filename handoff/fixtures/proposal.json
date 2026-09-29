@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "1.0.0",
+  "repositoryId": "repo_demo_planner",
+  "baseSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "profileVersion": 1,
+  "insightIds": [
+    "ins_demo_001"
+  ],
+  "disposition": "relevant",
+  "title": "Test a populated example in the first-run view",
+  "currentProblem": "The synthetic repository fixture shows an empty first-run state.",
+  "repositoryEvidence": [
+    {
+      "path": "src/app/start/page.tsx",
+      "startLine": 10,
+      "endLine": 22,
+      "observation": "The test fixture renders an empty-state component. This path is synthetic, not an inspected customer repository."
+    }
+  ],
+  "sourceEvidence": [
+    {
+      "kind": "transcript",
+      "id": "seg_demo_001",
+      "startMs": 12000,
+      "endMs": 19000
+    },
+    {
+      "kind": "frame",
+      "id": "frame_demo_15000",
+      "startMs": 15000,
+      "endMs": 15000
+    }
+  ],
+  "proposedChange": "Add an optional example view behind a feature flag without changing authentication or billing.",
+  "benefitHypothesis": "First useful action may occur sooner. Measure rather than assume.",
+  "risks": [
+    "The example may confuse users who expect an empty project."
+  ],
+  "nonGoals": [
+    "No authentication changes",
+    "No automatic production deployment"
+  ],
+  "acceptanceCriteria": [
+    "Existing first-run behavior remains available when the flag is off.",
+    "A user can clear the example without affecting another workspace."
+  ],
+  "verificationNeeds": [
+    "Inspect the real current repository before using this plan."
+  ]
+}

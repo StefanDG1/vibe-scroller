@@ -1,0 +1,22 @@
+name: Bug report
+description: Report a reproducible template problem.
+body:
+  - type: markdown
+    attributes:
+      value: "For vulnerabilities, use private security reporting. Never include secrets or customer data."
+  - type: input
+    id: version
+    attributes:
+      label: Template version or commit
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Synthetic reproduction and expected/actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Runtime and provider environment (no secret values)

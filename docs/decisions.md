@@ -1,0 +1,45 @@
+# Product decisions
+
+Mode: reference. These decisions supersede earlier alternatives in the discussion.
+
+| ID | Decision | Basis |
+| --- | --- | --- |
+| D01 | Product name VibeScroller, motto Make scrolling productive, proposed `scroll.companynerve.com` | Owner choice |
+| D02 | Separate repository and provider projects derived from CompanyNerve | Owner choice and upstream boundary |
+| D03 | Responsive web app first, installable PWA optional, no required native client | Latest owner instruction |
+| D04 | English interface, adult EU consumers first, business enquiry option, other markets gated | Owner choice |
+| D05 | URLs, uploads, bulk imports, and Telegram capture ship in V1 | Owner-approved practical capture fallback |
+| D06 | Automatic Instagram Saved synchronization is experimental and disabled by default | Access, reliability, and rights are not established |
+| D07 | TikTok official portability adapter is designed but gated by approval | External provider requirement |
+| D08 | Audio plus visual evidence, original transcription preserved, no caption-only video claims | Core requirement |
+| D09 | Selected repos, business profiles, no forced match, evidence-backed proposals | Core requirement |
+| D10 | Integrated draft PR creation ships in V1 after approval | Latest execution decision |
+| D11 | Optional local Codex runner is the default coding route; explicit prepaid cloud execution is available | Cost and owner preference |
+| D12 | WorkOS account identity is separate from GitHub and AI authorization | Security architecture |
+| D13 | No general ChatGPT subscription inference promise outside verified official access | Research limitation |
+| D14 | Same-workspace deduplication ships. Cross-workspace cache reuse stays off | Privacy and rights default |
+| D15 | MIT for V1-authored source; upstream notices preserved | CV/public-source priority and later proprietary V2 |
+| D16 | Supported fully self-hosted distribution is deferred | Owner's revised priority |
+| D17 | Two individual tiers with weekly, monthly, annual billing. Business pricing by contact | Owner choice |
+| D18 | No unlimited AI, no automatic paid fallback, no shared founder subscription | Financial and authorization boundary |
+| D19 | Target at least 60% operating margin before company tax, excluding salary, marketing, and development | Owner-defined metric |
+| D20 | Under EUR 10 incremental pre-customer spending is a target, not a claim that a new Vercel Pro plan fits | Budget conflict resolved explicitly |
+| D21 | Vercel remains supported. Reuse an eligible existing plan if confirmed; otherwise offer the documented budget host profile | Deployment policy, no silent vendor switch |
+| D22 | Intended initial tax strategy uses the Romanian small-business exemption when the official record permits it | Recommendation, not verified tax status |
+| D23 | All legal and tax modes are concrete, but production activation needs matching evidence | No invented legal facts |
+| D24 | V2-created businesses use customer-owned service and merchant accounts | Owner's explicit boundary |
+| D25 | V2 is proprietary, paid-only, and excluded from V1 implementation | Owner choice |
+| D26 | Preserve the exact V2 mode label `full retard mode` internally, with finite permissions and spending | Owner's requested wording |
+| D27 | Mark Builds Brands permission is owner-attested; no unsupported affiliation or licence identification | Owner's permission statement |
+
+## Known operator context
+
+The founder uses an Android OnePlus 13 and a Lenovo Yoga Pro 9i 2024 with 32 GB RAM and an RTX 4070 laptop GPU. Typical personal input is one to five English videos daily. These are sizing assumptions, not limits on other customers' devices.
+
+The founder reports an existing ChatGPT Pro x5 subscription costing EUR 121 per month. It is an existing personal expense and does not fund shared customer inference. The founder reports a live-ready Stripe account. This package does not independently verify either entitlement.
+
+Company details come from CompanyNerve's published configuration. They require confirmation before legal-page publication. The VAT statements in the conversation conflict. No document resolves that conflict by guessing a registration number or removing an existing registration.
+
+## Explicit nonclaims
+
+The product has not been built by this documentation task. Automatic imports have not been tested against the founder's account. Model accuracy, demand, production unit costs, and margins are not measured. Domain availability, trademark rights, provider commercial approval, tax registration, and legal clearance are not established.

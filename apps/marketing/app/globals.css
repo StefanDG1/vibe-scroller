@@ -1,0 +1,23 @@
+@import "tailwindcss";
+@import "@companynerve/design-recipes/styles.css";
+@source "../**/*.{ts,tsx}";
+
+.operator-details {
+  margin-block: 2rem;
+  overflow-wrap: anywhere;
+}
+.operator-details dt {
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+  margin-top: 1.25rem;
+}
+.operator-details dd {
+  margin: 0.25rem 0 0;
+}
+.doc > .navlinks {
+  flex-wrap: wrap;
+  margin-block: 1.5rem 2.5rem;
+}
+.footer .navlinks {
+  flex-wrap: wrap;
+}

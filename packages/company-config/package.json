@@ -1,0 +1,12 @@
+{
+  "name": "@companynerve/company-config",
+  "version": "0.1.0-alpha.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "dependencies": {
+    "zod": "4.6.1"
+  }
+}
