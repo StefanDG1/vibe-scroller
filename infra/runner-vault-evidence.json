@@ -1,0 +1,12 @@
+{
+  "environment": "Windows staging on operator laptop",
+  "observedAt": "2026-09-30T06:26:00Z",
+  "provider": "Windows Credential Manager, generic per-user credential",
+  "randomSyntheticCredential": true,
+  "writeReadEqualityVerified": true,
+  "deletionVerified": true,
+  "secretsPrinted": false,
+  "persistentTestCredentialRemaining": false,
+  "isolationVerified": false,
+  "codingExecuted": false
+}

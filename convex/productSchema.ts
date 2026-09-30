@@ -196,6 +196,17 @@ export const productTables = {
     manifest: v.array(v.string()),
     context: v.string(),
     contextFiles: v.optional(v.array(v.string())),
+    contextExcerpts: v.optional(
+      v.array(
+        v.object({
+          path: v.string(),
+          startLine: v.number(),
+          endLine: v.number(),
+          content: v.string(),
+          blobSha: v.string(),
+        }),
+      ),
+    ),
     status: v.string(),
   })
     .index("by_org", ["organizationId"])
@@ -244,6 +255,7 @@ export const productTables = {
     expiresAt: v.number(),
     leaseUntil: v.number(),
     deviceId: v.optional(v.id("devices")),
+    runtimeExpiresAt: v.optional(v.number()),
     patch: v.optional(v.string()),
     changes: v.optional(v.any()),
     report: v.optional(v.string()),
@@ -257,7 +269,9 @@ export const productTables = {
   })
     .index("by_org", ["organizationId"])
     .index("by_state", ["state"])
-    .index("by_pr", ["repositoryId", "prNumber"]),
+    .index("by_pr", ["repositoryId", "prNumber"])
+    .index("by_org_state", ["organizationId", "state"])
+    .index("by_device_state", ["deviceId", "state"]),
   wallets: defineTable({
     ...tenant,
     granted: v.number(),
@@ -328,6 +342,8 @@ export const productTables = {
     expiresAt: v.number(),
     lastSeenAt: v.number(),
     capabilities: v.array(v.string()),
+    isolationEvidenceHash: v.optional(v.string()),
+    activeRunId: v.optional(v.id("runs")),
   })
     .index("by_org", ["organizationId"])
     .index("by_code", ["codeHash"])

@@ -149,8 +149,13 @@ export const match = action({
       Object.assign(
         schema.properties.repositoryEvidence.items.properties.path,
         {
-          enum: context.repo.contextFiles ?? context.repo.manifest.slice(0, 40),
+          enum: (context.repo.contextExcerpts ?? []).map((e) => e.path),
         },
+      );
+      ensure(
+        context.repo.contextExcerpts?.length,
+        "CONTEXT_REQUIRED",
+        "Refresh this repository to obtain verified line-bounded excerpts before matching.",
       );
       const trustedEvidence = context.source.analysis.insights.flatMap(
         (insight: any) => insight.evidence,
@@ -175,8 +180,7 @@ export const match = action({
             sha: context.repo.sha,
             profileVersion: context.repo.profileVersion,
             profile: context.repo.profile,
-            context: context.repo.context.slice(0, 45000),
-            contextFiles: context.repo.contextFiles ?? [],
+            excerpts: context.repo.contextExcerpts ?? [],
             contextLimit:
               "Only the supplied excerpts were read. Missing evidence requires needs_context.",
           },

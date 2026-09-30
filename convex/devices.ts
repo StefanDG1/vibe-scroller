@@ -55,7 +55,7 @@ export const approve = mutation({
   handler: async (ctx, a) => {
     const d = await ctx.db.get(a.id);
     if (!d) fail("Device unavailable.");
-    const u = await writeAccess(ctx, d.organizationId);
+    const u = await writeAccess(ctx, d.organizationId, ["owner", "admin"]);
     await recentAuthentication(ctx);
     ensure(
       d.owner === u.actor._id &&
@@ -66,7 +66,18 @@ export const approve = mutation({
       "PAIRING_INVALID",
       "The device challenge is invalid or expired.",
     );
+    ensure(
+      !(await ctx.db
+        .query("devices")
+        .withIndex("by_credential", (q) =>
+          q.eq("credentialHash", a.credentialHash),
+        )
+        .first()),
+      "PAIRING_INVALID",
+      "Credential is already bound to a device.",
+    );
     await ctx.db.patch(d._id, {
+      capabilities: ["protocol:1.0.0"],
       state: "paired",
       credentialHash: a.credentialHash,
       codeHash: "",

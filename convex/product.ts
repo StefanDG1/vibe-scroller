@@ -6,6 +6,7 @@ import {
 } from "./_generated/server";
 import { v } from "convex/values";
 import { workflow } from "./workflows";
+import { validateRepositoryEvidence } from "../packages/repositories/context";
 import { access, fail, limit, audit, writeAccess } from "./lib";
 import { productLimits } from "./limitsV1";
 import { internal } from "./_generated/api";
@@ -645,11 +646,16 @@ export const processSource = mutation({
       generation: s.generation + 1,
       error: undefined,
     });
-    await workflow.start(ctx, internal.workflows.sourceAnalysis, {
-      id: s._id,
-      generation: s.generation + 1,
-      media: s.kind === "upload",
-    });
+    await workflow.start(
+      ctx,
+      internal.workflows.sourceAnalysis,
+      {
+        id: s._id,
+        generation: s.generation + 1,
+        media: s.kind === "upload",
+      },
+      { onComplete: internal.workflows.completed, context: null },
+    );
   },
 });
 export const workerSource = internalQuery({
@@ -1227,12 +1233,7 @@ export const addProposal = internalMutation({
       "BASE_CHANGED",
       "Matching context changed.",
     );
-    for (const e of d.repositoryEvidence)
-      ensure(
-        r.manifest.includes(e.path),
-        "INVALID_EVIDENCE",
-        "Invented repository evidence.",
-      );
+    validateRepositoryEvidence(d.repositoryEvidence, r.contextExcerpts ?? []);
     const insights = s.analysis?.insights ?? [];
     const insightIds = new Set(insights.map((i: any) => i.id));
     const evidenceKey = (e: any) =>

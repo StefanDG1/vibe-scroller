@@ -1,13 +1,17 @@
 {
   "protocolVersion": "1.0.0",
   "codexVersion": "0.142.3",
-  "server": "https://scroll.companynerve.com",
+  "server": "https://YOUR-CONVEX-DEPLOYMENT.convex.site",
   "deviceName": "My computer",
-  "credentialVaultAdapter": null,
+  "credentialVaultAdapter": "windows-credential-manager",
   "isolation": {
     "launcher": null,
     "launcherArgs": [],
-    "verifiedEvidence": null
+    "verifiedEvidence": null,
+    "adapter": null,
+    "adapterSha256": null
   },
-  "repositories": []
+  "repositories": [],
+  "credentialTarget": null,
+  "workspaceId": null
 }

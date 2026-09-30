@@ -118,7 +118,11 @@ export const retentionPage = internalMutation({
           await redactSource(ctx, id);
       } else if ("context" in row) {
         if (row.context && row.updatedAt < Date.now() - 86400000)
-          await ctx.db.patch(row._id, { context: "", contextFiles: [] });
+          await ctx.db.patch(row._id, {
+            context: "",
+            contextFiles: [],
+            contextExcerpts: [],
+          });
       } else if (
         row.updatedAt < Date.now() - 14 * 86400000 &&
         ["completed", "failed", "canceled"].includes(row.state)

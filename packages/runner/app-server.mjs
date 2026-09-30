@@ -1,7 +1,11 @@
 import { spawn } from "node:child_process";
 import { createInterface } from "node:readline";
 export class AppServer {
-  constructor(binary, args = ["app-server", "--listen", "stdio://"]) {
+  constructor(
+    binary,
+    args = ["app-server", "--listen", "stdio://"],
+    options = {},
+  ) {
     this.next = 1;
     this.pending = new Map();
     this.listeners = new Set();
@@ -9,6 +13,24 @@ export class AppServer {
       stdio: ["pipe", "pipe", "pipe"],
       shell: false,
       windowsHide: true,
+      env:
+        options.env ??
+        Object.fromEntries(
+          [
+            "PATH",
+            "SystemRoot",
+            "WINDIR",
+            "COMSPEC",
+            "TEMP",
+            "TMP",
+            "USERPROFILE",
+            "APPDATA",
+            "LOCALAPPDATA",
+            "CODEX_HOME",
+          ]
+            .filter((key) => process.env[key] !== undefined)
+            .map((key) => [key, process.env[key]]),
+        ),
     });
     createInterface({ input: this.proc.stdout }).on("line", (line) => {
       if (line.length > 1000000) return;
@@ -28,6 +50,8 @@ export class AppServer {
         }
       } else for (const listener of this.listeners) listener(m);
     });
+    this.proc.stderr.resume();
+    this.proc.on("error", () => this.close());
     this.proc.on("exit", () => {
       for (const p of this.pending.values()) {
         clearTimeout(p.timer);
@@ -77,6 +101,7 @@ export class AppServer {
       model,
       sandbox: "workspace-write",
       approvalPolicy: "on-request",
+      ephemeral: true,
     });
     const threadId = result.thread.id;
     const turn = await this.request("turn/start", {
@@ -89,8 +114,24 @@ export class AppServer {
     return this.request("turn/interrupt", { threadId, turnId });
   }
   deny(message) {
-    if (message.id !== undefined)
-      this.send({ id: message.id, result: { decision: "decline" } });
+    if (message.id !== undefined) {
+      if (
+        [
+          "item/commandExecution/requestApproval",
+          "item/fileChange/requestApproval",
+        ].includes(message.method)
+      )
+        this.send({ id: message.id, result: { decision: "decline" } });
+      else
+        this.send({
+          id: message.id,
+          error: {
+            code: -32601,
+            message:
+              "This operation is unavailable under the current bounded execution policy.",
+          },
+        });
+    }
   }
   close() {
     this.proc.stdin.end();

@@ -1,3 +1,4 @@
+import { excerpt, type RepositoryExcerpt } from "../repositories/context";
 import { createPrivateKey, sign } from "node:crypto";
 import {
   ensure,
@@ -98,6 +99,8 @@ export async function snapshot(
   const manifest = files.map((f: any) => f.path);
   let context = "";
   const contextFiles: string[] = [];
+  const contextExcerpts: RepositoryExcerpt[] = [];
+  let remaining = 40000;
   for (const f of files
     .filter((f: any) => /README|package\.json|\.(tsx?|py|md)$/.test(f.path))
     .sort((a: any, b: any) => {
@@ -110,15 +113,26 @@ export async function snapshot(
       return score(a.path) - score(b.path) || a.path.localeCompare(b.path);
     })
     .slice(0, 40)) {
-    if (context.length > 90000) break;
+    if (remaining < 100) break;
     const b = await github(`/repos/${fullName}/git/blobs/${f.sha}`, token);
     const text = Buffer.from(b.content, "base64").toString("utf8");
     if (!containsSecret(text)) {
+      const selected = excerpt(f.path, text, f.sha, remaining);
+      if (!selected) continue;
+      remaining -= selected.content.length + 1;
+      contextExcerpts.push(selected);
       contextFiles.push(f.path);
-      context += `\nFile: ${f.path}\n${text.slice(0, 10000)}\n`;
+      context += `\nFile: ${f.path}, lines ${selected.startLine}-${selected.endLine}\n${selected.content}\n`;
     }
   }
-  return { sha, branch: repo.default_branch, manifest, context, contextFiles };
+  return {
+    sha,
+    branch: repo.default_branch,
+    manifest,
+    context,
+    contextFiles,
+    contextExcerpts,
+  };
 }
 export async function publish(input: {
   installationId: number;
@@ -173,6 +187,29 @@ export async function publish(input: {
     "The repository base changed. Refresh and approve the plan again.",
   );
   const commit = await github(`${root}/git/commits/${input.baseSha}`, token);
+  const baseTree = await github(
+    `${root}/git/trees/${commit.tree.sha}?recursive=1`,
+    token,
+  );
+  ensure(
+    !baseTree.truncated,
+    "REPO_TOO_LARGE",
+    "Cannot verify file modes in a truncated repository tree.",
+  );
+  const modes = new Map<string, string>();
+  for (const file of input.files) {
+    const original = baseTree.tree.find(
+      (entry: any) => entry.path === file.path,
+    );
+    ensure(
+      !original ||
+        (original.type === "blob" &&
+          ["100644", "100755"].includes(original.mode)),
+      "POLICY_BLOCKED",
+      "Changes to symbolic links, submodules or directories are unavailable.",
+    );
+    modes.set(file.path, original?.mode ?? "100644");
+  }
   const entries = [];
   for (const f of input.files) {
     const blob =
@@ -184,7 +221,7 @@ export async function publish(input: {
           });
     entries.push({
       path: f.path,
-      mode: "100644",
+      mode: modes.get(f.path),
       type: "blob",
       sha: blob?.sha ?? null,
     });

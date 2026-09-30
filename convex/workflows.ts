@@ -1,3 +1,5 @@
+import { internalMutation } from "./_generated/server";
+import { vWorkflowId, vResultValidator } from "@convex-dev/workflow";
 import { WorkflowManager } from "@convex-dev/workflow";
 import { components, internal } from "./_generated/api";
 import { v } from "convex/values";
@@ -60,3 +62,19 @@ export const coding = workflow
     }
     return null;
   });
+
+export const completed = internalMutation({
+  args: { workflowId: vWorkflowId, result: vResultValidator, context: v.any() },
+  handler: async (ctx, a) => {
+    // Keep only one day of ID-only orchestration history for staging diagnostics.
+    await ctx.scheduler.runAfter(86400000, internal.workflows.cleanup, {
+      workflowId: a.workflowId,
+    });
+  },
+});
+export const cleanup = internalMutation({
+  args: { workflowId: vWorkflowId },
+  handler: async (ctx, a) => {
+    await workflow.cleanup(ctx, a.workflowId);
+  },
+});

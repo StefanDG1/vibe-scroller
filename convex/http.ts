@@ -80,4 +80,63 @@ http.route({
     return resend.handleResendEventWebhook(ctx, req);
   }),
 });
+http.route({
+  path: "/runner/v1",
+  method: "POST",
+  handler: httpAction(async (ctx, req) => {
+    const token = req.headers
+      .get("authorization")
+      ?.match(/^Bearer ([A-Za-z0-9_-]{43})$/)?.[1];
+    const reply = (body: unknown, status = 200) =>
+      new Response(JSON.stringify(body), {
+        status,
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store",
+        },
+      });
+    if (!token) return reply({ error: "Invalid device credential." }, 401);
+    if (Number(req.headers.get("content-length") ?? 0) > 1000000)
+      return reply({ error: "Payload too large." }, 413);
+    const raw = await req.text();
+    if (new TextEncoder().encode(raw).byteLength > 1000000)
+      return reply({ error: "Payload too large." }, 413);
+    try {
+      const body = JSON.parse(raw);
+      if (
+        body.protocolVersion !== "1.0.0" ||
+        !body.args ||
+        typeof body.args !== "object"
+      )
+        return reply({ error: "Unsupported protocol." }, 400);
+      const hash = await crypto.subtle.digest(
+        "SHA-256",
+        new TextEncoder().encode(token),
+      );
+      const credentialHash = Array.from(new Uint8Array(hash), (b) =>
+        b.toString(16).padStart(2, "0"),
+      ).join("");
+      const result =
+        body.operation === "complete"
+          ? await ctx.runAction(internal.localResults.accept, {
+              ...body.args,
+              credentialHash,
+            })
+          : await ctx.runMutation(internal.runnerProtocol.dispatch, {
+              ...body.args,
+              credentialHash,
+              operation: body.operation,
+            });
+      return reply(result);
+    } catch {
+      return reply(
+        {
+          error:
+            "Device request rejected. Reconcile its lease before resuming.",
+        },
+        403,
+      );
+    }
+  }),
+});
 export default http;

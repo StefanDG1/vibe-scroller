@@ -22,6 +22,8 @@ const operations = {
   feedback: ["mutation", api.product.feedback],
   preferences: ["mutation", api.commerce.preferences],
   revokeDevice: ["mutation", api.devices.revoke],
+  startDevice: ["mutation", api.devices.start],
+  approveDevice: ["mutation", api.devices.approve],
 } as const;
 export async function POST(req: NextRequest) {
   if (req.headers.get("origin") !== new URL(req.url).origin)

@@ -46,6 +46,17 @@ export const saveRepository = internalMutation({
     manifest: v.array(v.string()),
     context: v.string(),
     contextFiles: v.optional(v.array(v.string())),
+    contextExcerpts: v.optional(
+      v.array(
+        v.object({
+          path: v.string(),
+          startLine: v.number(),
+          endLine: v.number(),
+          content: v.string(),
+          blobSha: v.string(),
+        }),
+      ),
+    ),
   },
   handler: async (ctx, a) => {
     const old = await ctx.db
@@ -168,6 +179,8 @@ export const revoke = mutation({
           enabled: false,
           status: "revoked",
           context: "",
+          contextFiles: [],
+          contextExcerpts: [],
           manifest: [],
         });
     }
@@ -372,10 +385,15 @@ export const approve = mutation({
     });
     await reserve(ctx, p.organizationId, `run:${runId}`, a.maxCredits);
     if (a.executor === "cloud")
-      await workflow.start(ctx, internal.workflows.coding, {
-        id: runId,
-        generation: 1,
-      });
+      await workflow.start(
+        ctx,
+        internal.workflows.coding,
+        {
+          id: runId,
+          generation: 1,
+        },
+        { onComplete: internal.workflows.completed, context: null },
+      );
     return runId;
   },
 });

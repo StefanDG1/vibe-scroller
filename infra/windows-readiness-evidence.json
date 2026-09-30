@@ -1,0 +1,24 @@
+{
+  "observedAt": "2026-09-30T07:15:00Z",
+  "codexVersion": "0.142.3",
+  "officialAppServerMethod": "windowsSandbox/readiness",
+  "readiness": "ready",
+  "configuredMode": "elevated",
+  "isolationVerified": false,
+  "failedAttempts": [
+    "The sandbox CLI has no windows subcommand; it treated windows as a command.",
+    "The actual sandbox CLI rejected a probe without a named permissions profile before running it."
+  ],
+  "actualProbeExecuted": true,
+  "secretsRead": false,
+  "probeResults": {
+    "inside_write": true,
+    "outside_write_denied": true,
+    "home_read_denied": true,
+    "network_denied": true,
+    "unrelated_read_denied": false
+  },
+  "probeContent": "Only owned synthetic canaries; no customer files or credentials inspected",
+  "dedicatedProfileResult": "Command failed before returning probe results; no authentication copied",
+  "localExecutionEnabled": false
+}

@@ -631,6 +631,8 @@ summary {
   color: var(--muted);
 }
 .panel {
+  min-width: 0;
+  overflow-wrap: anywhere;
   background: var(--panel);
   border: 1px solid var(--line);
   padding: 24px;

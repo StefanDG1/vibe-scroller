@@ -41,6 +41,166 @@ async function setup() {
   return { t, a, b, org, other };
 }
 describe("VibeScroller product boundaries", () => {
+  it("fences a local device lease and requires termination before another claim", async () => {
+    const { t, org } = await setup();
+    const a = t.withIdentity({
+      subject: "a",
+      auth_time: Math.floor(Date.now() / 1000),
+    });
+    const deviceId = await a.mutation(api.devices.start, {
+      organizationId: org,
+      name: "Synthetic protocol device",
+      fingerprint: "a".repeat(64),
+      codeHash: "b".repeat(64),
+    });
+    await a.mutation(api.devices.approve, {
+      id: deviceId,
+      fingerprint: "a".repeat(64),
+      credentialHash: "c".repeat(64),
+    });
+    expect(
+      await t.mutation(internal.runnerProtocol.dispatch, {
+        credentialHash: "c".repeat(64),
+        operation: "poll",
+      }),
+    ).toMatchObject({ lease: null, blocked: expect.any(String) });
+    const repositoryId = await t.mutation(internal.jobs.saveRepository, {
+      organizationId: org,
+      installationId: 1,
+      providerId: 1,
+      fullName: "test/synthetic",
+      sha: "a".repeat(40),
+      branch: "main",
+      manifest: ["docs/note.md"],
+      context: "Synthetic",
+    });
+    const runId = await t.run(async (ctx) => {
+      const now = Date.now(),
+        owner = (await ctx.db.get(deviceId))!.owner;
+      await ctx.db.patch(deviceId, {
+        capabilities: ["windows_isolation_verified"],
+        isolationEvidenceHash: "d".repeat(64),
+      });
+      await ctx.db.patch(repositoryId, { confirmed: true });
+      const sourceId = await ctx.db.insert("sources", {
+        organizationId: org,
+        createdAt: now,
+        updatedAt: now,
+        key: "local-fixture",
+        canonical: "local-fixture",
+        kind: "text",
+        title: "Synthetic",
+        state: "ready",
+        coverage: "caption_only",
+        tags: [],
+        rightsAttested: true,
+        generation: 1,
+      });
+      const proposalId = await ctx.db.insert("proposals", {
+        organizationId: org,
+        createdAt: now,
+        updatedAt: now,
+        sourceId,
+        repositoryId,
+        baseSha: "a".repeat(40),
+        profileVersion: 1,
+        disposition: "relevant",
+        title: "Synthetic",
+        detail: {},
+        review: "accepted",
+        version: 1,
+        planHash: "e".repeat(64),
+        plan: {
+          files: [{ path: "docs/note.md", isNew: false }],
+          tests: ["Synthetic bounded check"],
+        },
+      });
+      return ctx.db.insert("runs", {
+        organizationId: org,
+        createdAt: now,
+        updatedAt: now,
+        proposalId,
+        repositoryId,
+        approvedBy: owner,
+        planHash: "e".repeat(64),
+        baseSha: "a".repeat(40),
+        version: 1,
+        executor: "local",
+        fundingRoute: "local_codex_subscription",
+        maxCredits: 0,
+        allowedPaths: ["docs/note.md"],
+        highRisk: false,
+        state: "waiting_for_laptop",
+        generation: 1,
+        expiresAt: now + 86400000,
+        leaseUntil: 0,
+        events: [],
+      });
+    });
+    const prior = process.env.LOCAL_ISOLATION_VERIFIED;
+    process.env.LOCAL_ISOLATION_VERIFIED = "true";
+    try {
+      const first: any = await t.mutation(internal.runnerProtocol.dispatch, {
+        credentialHash: "c".repeat(64),
+        operation: "poll",
+      });
+      expect(first.lease.envelope.jobId).toBe(runId);
+      expect(first.lease.envelope.leaseGeneration).toBe(2);
+      expect(first.lease.envelope.maxCredits).toBe(0);
+      expect(
+        await t.mutation(internal.runnerProtocol.dispatch, {
+          credentialHash: "c".repeat(64),
+          operation: "poll",
+        }),
+      ).toMatchObject({ lease: null, reconcile: { id: runId } });
+      await a.mutation(api.jobs.cancel, { id: runId });
+      await expect(
+        t.mutation(internal.runnerProtocol.dispatch, {
+          credentialHash: "c".repeat(64),
+          operation: "heartbeat",
+          id: runId,
+          generation: 2,
+        }),
+      ).rejects.toThrow();
+      expect(
+        await t.mutation(internal.runnerProtocol.dispatch, {
+          credentialHash: "c".repeat(64),
+          operation: "poll",
+        }),
+      ).toMatchObject({ lease: null, reconcile: { state: "canceled" } });
+      await expect(
+        t.mutation(internal.runnerProtocol.dispatch, {
+          credentialHash: "c".repeat(64),
+          operation: "fail",
+          id: runId,
+          generation: 2,
+          terminated: false,
+        }),
+      ).rejects.toThrow();
+      expect(
+        await t.mutation(internal.runnerProtocol.dispatch, {
+          credentialHash: "c".repeat(64),
+          operation: "fail",
+          id: runId,
+          generation: 2,
+          terminated: true,
+        }),
+      ).toEqual({ stopped: true });
+      await t.run(async (ctx) => {
+        expect((await ctx.db.get(deviceId))!.activeRunId).toBeUndefined();
+      });
+      await a.mutation(api.devices.revoke, { id: deviceId });
+      await expect(
+        t.mutation(internal.runnerProtocol.dispatch, {
+          credentialHash: "c".repeat(64),
+          operation: "status",
+        }),
+      ).rejects.toThrow();
+    } finally {
+      if (prior === undefined) delete process.env.LOCAL_ISOLATION_VERIFIED;
+      else process.env.LOCAL_ISOLATION_VERIFIED = prior;
+    }
+  });
   it("allows viewers to read their workspace while denying source, plan and execution mutations", async () => {
     const { t, a, b, org } = await setup();
     const id = await a.mutation(api.product.capture, {
@@ -1368,6 +1528,16 @@ describe("persisted matching jobs", () => {
       branch: "main",
       manifest: proposalFixture.repositoryEvidence.map((e) => e.path),
       context: "Synthetic context only",
+      contextExcerpts: proposalFixture.repositoryEvidence.map((e) => ({
+        path: e.path,
+        startLine: 1,
+        endLine: 25,
+        content: Array.from(
+          { length: 25 },
+          () => "Synthetic fixture line",
+        ).join("\n"),
+        blobSha: "b".repeat(40),
+      })),
     });
     await a.mutation(api.product.saveProfile, {
       id: repositoryId,
@@ -1394,6 +1564,20 @@ describe("persisted matching jobs", () => {
       insightIds: fixture.insights.map((i) => i.id),
       sourceEvidence: fixture.insights.flatMap((i) => i.evidence),
     };
+    for (const repositoryEvidence of [
+      [{ ...detail.repositoryEvidence[0], endLine: 999999 }],
+      [{ ...detail.repositoryEvidence[0], startLine: 24, endLine: 22 }],
+      [{ ...detail.repositoryEvidence[0], path: "unread-in-manifest.ts" }],
+    ])
+      await expect(
+        t.mutation(internal.product.addProposal, {
+          sourceId,
+          repositoryId,
+          detail: { ...detail, repositoryEvidence },
+          matchKey: retry.semanticKey,
+          sourceGeneration: 1,
+        }),
+      ).rejects.toThrow();
     const proposalId = await t.mutation(internal.product.addProposal, {
       sourceId,
       repositoryId,

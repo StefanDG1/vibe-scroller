@@ -32,6 +32,7 @@ import type * as lib from "../lib.js";
 import type * as lib_githubAuthorization from "../lib/githubAuthorization.js";
 import type * as lib_inference from "../lib/inference.js";
 import type * as limitsV1 from "../limitsV1.js";
+import type * as localResults from "../localResults.js";
 import type * as maintenance from "../maintenance.js";
 import type * as media from "../media.js";
 import type * as organizations from "../organizations.js";
@@ -41,6 +42,7 @@ import type * as product from "../product.js";
 import type * as productSchema from "../productSchema.js";
 import type * as projects from "../projects.js";
 import type * as reconciliation from "../reconciliation.js";
+import type * as runnerProtocol from "../runnerProtocol.js";
 import type * as workflows from "../workflows.js";
 
 import type {
@@ -74,6 +76,7 @@ declare const fullApi: ApiFromModules<{
   "lib/githubAuthorization": typeof lib_githubAuthorization;
   "lib/inference": typeof lib_inference;
   limitsV1: typeof limitsV1;
+  localResults: typeof localResults;
   maintenance: typeof maintenance;
   media: typeof media;
   organizations: typeof organizations;
@@ -83,6 +86,7 @@ declare const fullApi: ApiFromModules<{
   productSchema: typeof productSchema;
   projects: typeof projects;
   reconciliation: typeof reconciliation;
+  runnerProtocol: typeof runnerProtocol;
   workflows: typeof workflows;
 }>;
 
