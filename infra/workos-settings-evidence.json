@@ -1,0 +1,18 @@
+{
+  "observedAt": "2026-09-30T07:30:00Z",
+  "environment": "VibeScroller dedicated staging",
+  "applicationName": "VibeScroller",
+  "oauthProviders": {
+    "google": "enabled with staging demo credentials",
+    "github": "disabled",
+    "apple": "disabled",
+    "microsoft": "disabled"
+  },
+  "emailPassword": "disabled",
+  "magicAuth": "enabled",
+  "verification": "WorkOS provider UI readback; staging sign-in previously completed",
+  "limitations": [
+    "Dedicated production Google credentials not verified",
+    "Session expiry, logout and recovery full acceptance remains incomplete"
+  ]
+}

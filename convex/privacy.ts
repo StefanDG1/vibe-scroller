@@ -120,6 +120,8 @@ export const retentionPage = internalMutation({
         if (row.context && row.updatedAt < Date.now() - 86400000)
           await ctx.db.patch(row._id, {
             context: "",
+            contextTree: "",
+            manifestEntries: [],
             contextFiles: [],
             contextExcerpts: [],
           });

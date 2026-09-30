@@ -41,6 +41,97 @@ async function setup() {
   return { t, a, b, org, other };
 }
 describe("VibeScroller product boundaries", () => {
+  it("quotes a profile draft once, denies foreign access and discards stale output without confirming a profile", async () => {
+    const { t, a, b, org } = await setup();
+    const id = await t.mutation(internal.jobs.saveRepository, {
+      organizationId: org,
+      installationId: 1,
+      providerId: 1,
+      fullName: "test/synthetic-profile",
+      sha: "a".repeat(40),
+      branch: "main",
+      manifest: ["README.md"],
+      context: "Synthetic test only",
+      contextFiles: ["README.md"],
+      contextExcerpts: [
+        {
+          path: "README.md",
+          startLine: 1,
+          endLine: 1,
+          content: "Synthetic owned repository",
+          blobSha: "b".repeat(40),
+        },
+      ],
+    });
+    await expect(
+      b.mutation(api.profiles.start, {
+        id,
+        key: "synthetic-key-001",
+        maxCredits: 10,
+      }),
+    ).rejects.toThrow();
+    await expect(
+      a.mutation(api.profiles.start, {
+        id,
+        key: "synthetic-key-001",
+        maxCredits: 1,
+      }),
+    ).rejects.toThrow("QUOTE_CHANGED");
+    const first = await a.mutation(api.profiles.start, {
+      id,
+      key: "synthetic-key-001",
+      maxCredits: 10,
+    });
+    await expect(
+      a.mutation(api.profiles.start, {
+        id,
+        key: "synthetic-key-002",
+        maxCredits: 10,
+      }),
+    ).rejects.toThrow("SOURCE_BUSY");
+    await a.mutation(api.product.saveProfile, {
+      id,
+      profile: "Owner correction",
+      confirmed: false,
+      enabled: true,
+    });
+    expect(
+      await t.mutation(internal.profiles.finish, {
+        id,
+        organizationId: org,
+        key: first.key,
+        sha: first.repo.sha,
+        version: first.repo.profileVersion,
+        profile: "Stale unconfirmed draft",
+        credits: 0,
+      }),
+    ).toEqual({ saved: false });
+    const second = await a.mutation(api.profiles.start, {
+      id,
+      key: "synthetic-key-002",
+      maxCredits: 10,
+    });
+    expect(
+      await t.mutation(internal.profiles.finish, {
+        id,
+        organizationId: org,
+        key: second.key,
+        sha: second.repo.sha,
+        version: second.repo.profileVersion,
+        profile: "Synthetic unconfirmed draft",
+        credits: 0,
+      }),
+    ).toEqual({ saved: true });
+    const cached = await a.mutation(api.profiles.start, {
+      id,
+      key: "synthetic-key-003",
+      maxCredits: 10,
+    });
+    expect(cached.cached).toBe(true);
+    const repo = await t.run((ctx) => ctx.db.get(id));
+    expect(repo?.profile).toBe("Owner correction");
+    expect(repo?.confirmed).toBe(false);
+  });
   it("fences a local device lease and requires termination before another claim", async () => {
     const { t, org } = await setup();
     const a = t.withIdentity({

@@ -42,6 +42,7 @@ const Button = ({
   busy?: boolean;
 }) => (
   <button
+    type="button"
     disabled={busy || disabled}
     className={primary ? "primary" : "secondary"}
     onClick={onClick}
@@ -710,11 +711,60 @@ export function Console({
                 >
                   <h2>{r.fullName}</h2>
                   <p className="code-label">Base {r.sha}</p>
+                  <Button
+                    busy={busy}
+                    disabled={readOnly || !r.enabled || !!r.profileDraftKey}
+                    onClick={() =>
+                      call("draftProfile", { id: id(r), maxCredits: 10 })
+                    }
+                  >
+                    Draft a business profile · reserve up to 10 credits
+                  </Button>
+                  {r.profileDraft &&
+                    r.profileDraftSha === r.sha &&
+                    r.profileDraftVersion === r.profileVersion && (
+                      <details>
+                        <summary>
+                          Unconfirmed AI draft. Edit the profile below before
+                          confirming.
+                        </summary>
+                        <pre>{r.profileDraft}</pre>
+                        <Button
+                          busy={busy}
+                          onClick={() => {
+                            const form =
+                              document.querySelector<HTMLTextAreaElement>(
+                                `textarea[data-repository="${id(r)}"]`,
+                              );
+                            if (form) {
+                              form.value = r.profileDraft;
+                              const confirmation =
+                                form.form?.querySelector<HTMLInputElement>(
+                                  'input[name="confirmed"]',
+                                );
+                              if (confirmation) confirmation.checked = false;
+                              form.focus();
+                            }
+                          }}
+                        >
+                          Copy draft into the editable profile
+                        </Button>
+                      </details>
+                    )}
                   <label>
-                    Purpose, audience, goals, constraints and non-goals
+                    Purpose, audience, stage, goals, business model, constraints
+                    and non-goals
                     <textarea
+                      data-repository={id(r)}
                       name="profile"
                       defaultValue={r.profile}
+                      onChange={(event) => {
+                        const confirmation =
+                          event.currentTarget.form?.querySelector<HTMLInputElement>(
+                            'input[name="confirmed"]',
+                          );
+                        if (confirmation) confirmation.checked = false;
+                      }}
                       rows={7}
                     />
                   </label>

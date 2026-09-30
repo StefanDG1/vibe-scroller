@@ -1,12 +1,11 @@
 import { excerpt, type RepositoryExcerpt } from "../repositories/context";
-import { createPrivateKey, sign } from "node:crypto";
 import {
-  ensure,
-  excludedPath,
-  containsSecret,
-  prState,
-  validatePaths,
-} from "../policy";
+  repositoryIgnores,
+  preparedTree,
+  EXTRACTION_VERSION,
+} from "../repositories/prepare";
+import { createPrivateKey, sign } from "node:crypto";
+import { ensure, containsSecret, prState, validatePaths } from "../policy";
 export async function github(
   path: string,
   token: string,
@@ -89,14 +88,52 @@ export async function snapshot(
     "REPO_TOO_LARGE",
     "Repository requires a bounded snapshot selection.",
   );
+  const ignorePatterns: string[] = [];
+  for (const name of [".gitignore", ".repomixignore"]) {
+    const entry = tree.tree.find(
+      (f: any) =>
+        f.path === name &&
+        f.type === "blob" &&
+        f.mode === "100644" &&
+        f.size <= 20000,
+    );
+    if (entry) {
+      const blob = await github(
+        `/repos/${fullName}/git/blobs/${entry.sha}`,
+        token,
+      );
+      const patterns = Buffer.from(blob.content, "base64").toString("utf8");
+      ensure(
+        patterns.length <= 20000,
+        "REPO_TOO_LARGE",
+        "Ignore rules exceed the snapshot policy.",
+      );
+      ignorePatterns.push(patterns);
+    }
+  }
+  const ignored = repositoryIgnores(ignorePatterns);
   const files = tree.tree.filter(
     (f: any) =>
       f.type === "blob" &&
       f.mode !== "120000" &&
-      !excludedPath(f.path) &&
+      !ignored(f.path) &&
       f.size <= 100000,
   );
   const manifest = files.map((f: any) => f.path);
+  const manifestEntries = files.map((f: any) => ({
+    path: f.path,
+    blobSha: f.sha,
+    mode: f.mode,
+    size: f.size,
+  }));
+  ensure(
+    manifestEntries.length <= 5000 &&
+      Buffer.byteLength(
+        JSON.stringify(manifestEntries) + JSON.stringify(manifest),
+      ) <= 600000,
+    "REPO_TOO_LARGE",
+    "Select a smaller repository snapshot before analysis.",
+  );
   let context = "";
   const contextFiles: string[] = [];
   const contextExcerpts: RepositoryExcerpt[] = [];
@@ -129,9 +166,12 @@ export async function snapshot(
     sha,
     branch: repo.default_branch,
     manifest,
+    manifestEntries,
     context,
     contextFiles,
     contextExcerpts,
+    contextTree: preparedTree(contextExcerpts),
+    extractionVersion: EXTRACTION_VERSION,
   };
 }
 export async function publish(input: {

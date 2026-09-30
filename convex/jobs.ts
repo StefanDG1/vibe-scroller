@@ -44,7 +44,19 @@ export const saveRepository = internalMutation({
     sha: v.string(),
     branch: v.string(),
     manifest: v.array(v.string()),
+    manifestEntries: v.optional(
+      v.array(
+        v.object({
+          path: v.string(),
+          blobSha: v.string(),
+          mode: v.string(),
+          size: v.number(),
+        }),
+      ),
+    ),
     context: v.string(),
+    contextTree: v.optional(v.string()),
+    extractionVersion: v.optional(v.string()),
     contextFiles: v.optional(v.array(v.string())),
     contextExcerpts: v.optional(
       v.array(
@@ -179,9 +191,11 @@ export const revoke = mutation({
           enabled: false,
           status: "revoked",
           context: "",
+          contextTree: "",
           contextFiles: [],
           contextExcerpts: [],
           manifest: [],
+          manifestEntries: [],
         });
     }
   },

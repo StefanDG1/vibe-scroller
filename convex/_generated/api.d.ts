@@ -40,6 +40,7 @@ import type * as payments from "../payments.js";
 import type * as privacy from "../privacy.js";
 import type * as product from "../product.js";
 import type * as productSchema from "../productSchema.js";
+import type * as profiles from "../profiles.js";
 import type * as projects from "../projects.js";
 import type * as reconciliation from "../reconciliation.js";
 import type * as runnerProtocol from "../runnerProtocol.js";
@@ -84,6 +85,7 @@ declare const fullApi: ApiFromModules<{
   privacy: typeof privacy;
   product: typeof product;
   productSchema: typeof productSchema;
+  profiles: typeof profiles;
   projects: typeof projects;
   reconciliation: typeof reconciliation;
   runnerProtocol: typeof runnerProtocol;

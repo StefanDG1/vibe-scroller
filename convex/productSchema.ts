@@ -191,10 +191,27 @@ export const productTables = {
     sha: v.string(),
     enabled: v.boolean(),
     profile: v.string(),
+    profileDraft: v.optional(v.string()),
+    profileDraftSha: v.optional(v.string()),
+    profileDraftVersion: v.optional(v.number()),
+    profileDraftKey: v.optional(v.string()),
+    profileDraftActor: v.optional(v.id("users")),
     profileVersion: v.number(),
     confirmed: v.boolean(),
     manifest: v.array(v.string()),
+    manifestEntries: v.optional(
+      v.array(
+        v.object({
+          path: v.string(),
+          blobSha: v.string(),
+          mode: v.string(),
+          size: v.number(),
+        }),
+      ),
+    ),
     context: v.string(),
+    contextTree: v.optional(v.string()),
+    extractionVersion: v.optional(v.string()),
     contextFiles: v.optional(v.array(v.string())),
     contextExcerpts: v.optional(
       v.array(

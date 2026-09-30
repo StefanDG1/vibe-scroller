@@ -10,6 +10,7 @@ const operations = {
   deleteSource: ["mutation", api.product.deleteSource],
   connectRepository: ["action", api.integrations.connectRepository],
   saveProfile: ["mutation", api.product.saveProfile],
+  draftProfile: ["action", api.integrations.draftProfile],
   match: ["action", api.integrations.match],
   decide: ["mutation", api.product.decide],
   editPlan: ["mutation", api.product.editPlan],

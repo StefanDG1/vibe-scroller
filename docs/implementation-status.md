@@ -10,12 +10,26 @@ Repository: https://github.com/StefanDG1/vibe-scroller
 
 ## Work packages
 
-| Package   | State                                   | Evidence                                                                                                                                                                                                           |
-| --------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| WP01      | implemented, final checks pending       | Export committed before implementation; frozen install passed                                                                                                                                                      |
-| WP02      | implemented, browser acceptance pending | Labeled synthetic demo, responsive website and private app shell                                                                                                                                                   |
-| WP03-WP17 | in_progress                             | Real tenant functions, source lifecycle, strict contracts, repository snapshots, approval fences, execution adapters, credit pools, deletion and webhook reconciliation implemented; acceptance remains incomplete |
-| WP18      | blocked_external                        | Tax record, provider setup, legal publication and production authorization absent                                                                                                                                  |
+| Package | State            | Evidence                                                                                                              |
+| ------- | ---------------- | --------------------------------------------------------------------------------------------------------------------- |
+| WP01    | verified_staging | Export preserved; frozen install, CI, builds and secret scanning passed                                               |
+| WP02    | in_progress      | 60 hosted responsive view checks passed; full accessibility acceptance remains                                        |
+| WP03    | in_progress      | Real hosted WorkOS login; tenant tests; recovery/logout acceptance incomplete                                         |
+| WP04    | in_progress      | Real owned uploads and import manifest; physical Android share test pending                                           |
+| WP05    | in_progress      | Atomic reservations, stage commits and workflows; interruption/cost reconciliation pending                            |
+| WP06    | blocked_external | Real isolated decode and transcription; vision license and usage verification pending                                 |
+| WP07    | in_progress      | Search, pagination, export, retention and deletion implemented; full browser/deletion evidence pending                |
+| WP08    | in_progress      | Selected GitHub App, hashed excerpts and Repomix tree; AI profile draft implemented, staging confirmation pending     |
+| WP09    | in_progress      | Evidence-bound matching and plans; complete abstention and quality evaluation pending                                 |
+| WP10    | in_progress      | Real free managed route; encrypted keys stored, customer-key execution route incomplete                               |
+| WP11    | blocked_external | Pairing/lease/result code and vault test; actual native isolation failed                                              |
+| WP12    | in_progress      | Real isolated metered cloud coding produced a reviewed patch; cost calibration and outage cases remain                |
+| WP13    | in_progress      | Real draft PR 3 and automatic reopen/closure; merge/revert/access-loss staging remains                                |
+| WP14    | in_progress      | Private inbox and generic email integration; hosted email opt-in test pending; Telegram deferred by user              |
+| WP15    | in_progress      | Real six-price sandbox renewals, top-up, refund and plan changes; multi-payment invoice refund reconciliation remains |
+| WP16    | in_progress      | Security/privacy boundaries and private evidence; isolated restore and complete tenant/rotation matrix remain         |
+| WP17    | in_progress      | 85 tests and both builds; benchmark, physical devices and final artifact review incomplete                            |
+| WP18    | blocked_external | Official company/tax evidence, legal publication and production verification remain                                   |
 
 ## Evidence
 
@@ -36,7 +50,7 @@ Provider sign-in pages opened before implementation. GitHub CLI is authenticated
 - Dedicated GitHub App registered with Contents and Pull requests write, Metadata read, and a pull-request webhook. New product-only credentials configured in staging. Installation scope and real PR lifecycle testing are still pending.
 - Vercel CLI authentication passed. Cloudflare browser consent completed, but its local Wrangler callback failed; CLI authentication and resource creation remain unverified.
 
-## Current activation gates
+## Historical activation gates at initial implementation
 
 Live checkout remains disabled. Official Exponential Education company details, actual VAT evidence, applicable registrations, reviewed publication details and invoice submission setup are absent. Legal draft rendering is not legal review.
 
@@ -214,3 +228,19 @@ The official Codex 0.142.3 Windows readiness endpoint returned ready. Two actual
 PR publication now inspects the trusted base tree and preserves regular-file executable modes, while rejecting symbolic-link, submodule and directory changes. Complete end-to-end local execution, device certification and a reviewed Windows adapter remain unresolved. Moondream license consent and verified usage pricing remain pending.
 
 At this checkpoint, `pnpm check` passed 75 document checks, 12 skill snapshots, zero-warning lint, all type checks, 75 root tests and 10 auth tests, and both production builds. Three provider integration tests were skipped by default. `pnpm audit --prod` reported no known vulnerabilities. `git diff --check` passed. The full-repository Prettier check failed on 69 existing files, including preserved handoff files. Those originals were not rewritten. Changed-code formatting is checked separately. The native Windows sandbox failures above remain release blockers.
+
+## Hosted checkpoint at 2026-09-30 07:30 UTC
+
+Commit `fffcc5ebd183a9629687a43b36456e96d1a7d046` passed GitHub CI `36683097952` and Linux packaging `36683098131`. Convex deployed at 07:19 UTC. The exact package deployed to Worker version `a49f8786-661b-4dc0-97a8-6e1fff2bea14`, startup 19 ms, upload 15,203.25 KiB and gzip 3,301.96 KiB. Byte comparison across 3,947 artifact files found zero configured credential occurrences; this does not resolve the earlier scanner candidate-provenance review. The staged diff passed Gitleaks.
+
+All 60 private-screen layout/navigation checks passed at requested widths 320, 360, 390, 412, 768 and 1440, comparing document width to the requested width. This verifies the earlier Runs & PRs wrapping fix. `infra/browser-responsive-evidence.json` records each view; it does not claim full journeys or accessibility at every width. WorkOS name is now VibeScroller; Google and email codes remain enabled, while GitHub, Apple and Microsoft sign-in are disabled. Production provider credentials and full recovery/logout acceptance remain separate gates.
+
+The work-package table above now distinguishes remaining implementation from real staging evidence. The paid V1 release is not complete. Internal gaps include Repomix/profile drafting, customer-key execution routing, benchmark quality evaluation, invoice reconciliation and restore tests. External blockers include native Windows isolation, vision consent/pricing, fresh GitHub callback confirmation and official legal/tax evidence. Deployment instructions are in docs/operations/vibescroller-deployment.md. No production or legal approval is asserted.
+
+## Profile drafting and Repomix checkpoint at 2026-09-30 07:43 UTC
+
+The quoted profile-draft action uses only inspected repository excerpts and a strict seven-field schema. It preserves unknowns rather than inventing business facts. A single pending reservation prevents duplicate attempts; SHA/profile-version changes discard late output. Drafting never confirms or replaces the saved profile. Copying or editing text clears its confirmation checkbox. Shared action buttons now use type=button, preventing a connection-revoke action from also submitting a credential form. No customer API key was configured or sent.
+
+Repomix 1.18.1 prepares the actual inspected tree through its public programmatic API. Root Git ignore and Repomix ignore rules are applied independently with ignore 7.0.10. Manifest entries preserve blob hashes, regular-file modes and sizes within a 5,000-file/600-KB metadata ceiling. No checkout, hooks, history commands or customer code run. ADR 008 records the limited context-preparation scope and unfinished semantic retrieval.
+
+The first check stopped on an unused import, which was removed. The next check failed because ignore rules supplied as whole array strings did not split multiline policies, and a test assumed a trailing newline absent from Repomix output. Splitting rules fixed the real exclusion bug; the output assertion now follows actual upstream behavior. The subsequent pnpm check passed 76 documents, 12 skill snapshots, zero-warning lint, types, 78 root tests plus 10 auth tests, and both production builds. Three staging integrations were skipped by default. pnpm audit --prod reported no known vulnerabilities. The final checkbox change requires its targeted frontend check before packaging. Actual hosted AI drafting, updated snapshot refresh and the new frontend remain pending.

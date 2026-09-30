@@ -1,0 +1,555 @@
+{
+  "observedAt": "2026-09-30T07:25:00Z",
+  "commit": "fffcc5ebd183a9629687a43b36456e96d1a7d046",
+  "host": "https://vibescroller-staging.danistefangheorghiu.workers.dev",
+  "workerVersion": "a49f8786-661b-4dc0-97a8-6e1fff2bea14",
+  "environment": "authenticated staging, synthetic private records",
+  "method": "Chrome browser-harness CDP; real navigation, device-width comparison",
+  "checks": [
+    {
+      "document": 320,
+      "viewport": 320,
+      "heading": "Home",
+      "width": 320,
+      "view": "Home",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 320,
+      "viewport": 320,
+      "heading": "Library",
+      "width": 320,
+      "view": "Library",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 320,
+      "viewport": 320,
+      "heading": "Projects",
+      "width": 320,
+      "view": "Projects",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 320,
+      "viewport": 320,
+      "heading": "Proposals",
+      "width": 320,
+      "view": "Proposals",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 320,
+      "viewport": 320,
+      "heading": "Runs & PRs",
+      "width": 320,
+      "view": "Runs & PRs",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 320,
+      "viewport": 320,
+      "heading": "Inbox",
+      "width": 320,
+      "view": "Inbox",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 320,
+      "viewport": 320,
+      "heading": "Usage",
+      "width": 320,
+      "view": "Usage",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 320,
+      "viewport": 320,
+      "heading": "Connections",
+      "width": 320,
+      "view": "Connections",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 320,
+      "viewport": 320,
+      "heading": "Computers",
+      "width": 320,
+      "view": "Computers",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 320,
+      "viewport": 320,
+      "heading": "Privacy",
+      "width": 320,
+      "view": "Privacy",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 360,
+      "viewport": 360,
+      "heading": "Home",
+      "width": 360,
+      "view": "Home",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 360,
+      "viewport": 360,
+      "heading": "Library",
+      "width": 360,
+      "view": "Library",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 360,
+      "viewport": 360,
+      "heading": "Projects",
+      "width": 360,
+      "view": "Projects",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 360,
+      "viewport": 360,
+      "heading": "Proposals",
+      "width": 360,
+      "view": "Proposals",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 360,
+      "viewport": 360,
+      "heading": "Runs & PRs",
+      "width": 360,
+      "view": "Runs & PRs",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 360,
+      "viewport": 360,
+      "heading": "Inbox",
+      "width": 360,
+      "view": "Inbox",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 360,
+      "viewport": 360,
+      "heading": "Usage",
+      "width": 360,
+      "view": "Usage",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 360,
+      "viewport": 360,
+      "heading": "Connections",
+      "width": 360,
+      "view": "Connections",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 360,
+      "viewport": 360,
+      "heading": "Computers",
+      "width": 360,
+      "view": "Computers",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 360,
+      "viewport": 360,
+      "heading": "Privacy",
+      "width": 360,
+      "view": "Privacy",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 390,
+      "viewport": 390,
+      "heading": "Home",
+      "width": 390,
+      "view": "Home",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 390,
+      "viewport": 390,
+      "heading": "Library",
+      "width": 390,
+      "view": "Library",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 390,
+      "viewport": 390,
+      "heading": "Projects",
+      "width": 390,
+      "view": "Projects",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 390,
+      "viewport": 390,
+      "heading": "Proposals",
+      "width": 390,
+      "view": "Proposals",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 390,
+      "viewport": 390,
+      "heading": "Runs & PRs",
+      "width": 390,
+      "view": "Runs & PRs",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 390,
+      "viewport": 390,
+      "heading": "Inbox",
+      "width": 390,
+      "view": "Inbox",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 390,
+      "viewport": 390,
+      "heading": "Usage",
+      "width": 390,
+      "view": "Usage",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 390,
+      "viewport": 390,
+      "heading": "Connections",
+      "width": 390,
+      "view": "Connections",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 390,
+      "viewport": 390,
+      "heading": "Computers",
+      "width": 390,
+      "view": "Computers",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 390,
+      "viewport": 390,
+      "heading": "Privacy",
+      "width": 390,
+      "view": "Privacy",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 412,
+      "viewport": 412,
+      "heading": "Home",
+      "width": 412,
+      "view": "Home",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 412,
+      "viewport": 412,
+      "heading": "Library",
+      "width": 412,
+      "view": "Library",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 412,
+      "viewport": 412,
+      "heading": "Projects",
+      "width": 412,
+      "view": "Projects",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 412,
+      "viewport": 412,
+      "heading": "Proposals",
+      "width": 412,
+      "view": "Proposals",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 412,
+      "viewport": 412,
+      "heading": "Runs & PRs",
+      "width": 412,
+      "view": "Runs & PRs",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 412,
+      "viewport": 412,
+      "heading": "Inbox",
+      "width": 412,
+      "view": "Inbox",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 412,
+      "viewport": 412,
+      "heading": "Usage",
+      "width": 412,
+      "view": "Usage",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 412,
+      "viewport": 412,
+      "heading": "Connections",
+      "width": 412,
+      "view": "Connections",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 412,
+      "viewport": 412,
+      "heading": "Computers",
+      "width": 412,
+      "view": "Computers",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 412,
+      "viewport": 412,
+      "heading": "Privacy",
+      "width": 412,
+      "view": "Privacy",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 753,
+      "viewport": 768,
+      "heading": "Home",
+      "width": 768,
+      "view": "Home",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 753,
+      "viewport": 768,
+      "heading": "Library",
+      "width": 768,
+      "view": "Library",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 753,
+      "viewport": 768,
+      "heading": "Projects",
+      "width": 768,
+      "view": "Projects",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 753,
+      "viewport": 768,
+      "heading": "Proposals",
+      "width": 768,
+      "view": "Proposals",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 753,
+      "viewport": 768,
+      "heading": "Runs & PRs",
+      "width": 768,
+      "view": "Runs & PRs",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 753,
+      "viewport": 768,
+      "heading": "Inbox",
+      "width": 768,
+      "view": "Inbox",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 753,
+      "viewport": 768,
+      "heading": "Usage",
+      "width": 768,
+      "view": "Usage",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 753,
+      "viewport": 768,
+      "heading": "Connections",
+      "width": 768,
+      "view": "Connections",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 753,
+      "viewport": 768,
+      "heading": "Computers",
+      "width": 768,
+      "view": "Computers",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 768,
+      "viewport": 768,
+      "heading": "Privacy",
+      "width": 768,
+      "view": "Privacy",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 1425,
+      "viewport": 1440,
+      "heading": "Home",
+      "width": 1440,
+      "view": "Home",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 1425,
+      "viewport": 1440,
+      "heading": "Library",
+      "width": 1440,
+      "view": "Library",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 1425,
+      "viewport": 1440,
+      "heading": "Projects",
+      "width": 1440,
+      "view": "Projects",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 1440,
+      "viewport": 1440,
+      "heading": "Proposals",
+      "width": 1440,
+      "view": "Proposals",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 1425,
+      "viewport": 1440,
+      "heading": "Runs & PRs",
+      "width": 1440,
+      "view": "Runs & PRs",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 1425,
+      "viewport": 1440,
+      "heading": "Inbox",
+      "width": 1440,
+      "view": "Inbox",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 1425,
+      "viewport": 1440,
+      "heading": "Usage",
+      "width": 1440,
+      "view": "Usage",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 1425,
+      "viewport": 1440,
+      "heading": "Connections",
+      "width": 1440,
+      "view": "Connections",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 1425,
+      "viewport": 1440,
+      "heading": "Computers",
+      "width": 1440,
+      "view": "Computers",
+      "reached": true,
+      "overflow": false
+    },
+    {
+      "document": 1440,
+      "viewport": 1440,
+      "heading": "Privacy",
+      "width": 1440,
+      "view": "Privacy",
+      "reached": true,
+      "overflow": false
+    }
+  ],
+  "limitations": [
+    "Layout and navigation checks, not full capture/approval journey at every width",
+    "No physical-device or complete accessibility audit",
+    "Earlier 4c63506 run-ID overflow failed and is retained in implementation record"
+  ]
+}
