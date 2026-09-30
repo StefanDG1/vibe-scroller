@@ -10,6 +10,8 @@ The official [Oblio API](https://www.oblio.eu/api) supports company/series/VAT c
 
 ## Confirm the existing settings
 
+The implemented private queue is `/account/invoices`. Configure verified WorkOS subjects in server-side `INVOICE_OPERATOR_SUBJECTS_JSON`; empty or malformed configuration denies access. The staging owner's verified identity is its sole operator, with identifiers retained privately. Runtime authorization uses subjects, never matching emails or customer workspace ownership. The paginated queue shows Stripe source links and deadlines. Receipt recording requires recent sign-in, is rate limited and audited, and retains the original reference. It does not verify ANAF acceptance or create Oblio documents. See [ADR 010](../adr/010-invoice-operator-access.md).
+
 1. Confirm the domestic regime, Article 317 status, enabled B2B/B2C markets, qualifying turnover and applicable OSS/EX approvals. Existing SPV tax-vector evidence and dated confirmation can satisfy this; identity records are already held privately.
 2. Confirm the Oblio company identifier, invoice series, service description, currency/exchange-rate rule, invoice wording/tax basis and payment category.
 3. Confirm who creates/sends invoices, which transactions enter RO e-Factura, who monitors deadlines/rejections and how actual receipt references reach the compliance queue.

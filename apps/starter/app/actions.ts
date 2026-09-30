@@ -10,6 +10,21 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import type { FormState } from "@/components/action-form";
 const val = (d: FormData, key: string) => String(d.get(key) ?? "");
 const org = (d: FormData) => val(d, "organizationId") as Id<"organizations">;
+export async function recordInvoiceReceipt(_: FormState, d: FormData) {
+  return run(async () => {
+    await (
+      await backend()
+    ).mutation(api.commerce.submitReceipt, {
+      id: val(d, "invoiceTaskId") as Id<"invoiceTasks">,
+      receipt: val(d, "receipt"),
+    });
+    revalidatePath("/account/invoices");
+    return {
+      message:
+        "Submission reference recorded. Its authenticity is not automatically verified.",
+    };
+  });
+}
 export async function quoteV1Change(_: FormState, d: FormData) {
   return run(async () => {
     const id = await (

@@ -25,4 +25,6 @@ The free Worker returned HTTP resource-limit error 1102 on September 30. Public 
 
 ## Roll back
 
+Configure `INVOICE_OPERATOR_SUBJECTS_JSON` only in the intended backend, using explicitly approved active WorkOS subjects. Customer workspace ownership grants no operator permission. Verify private `/account/invoices` access, recent authentication and accountant receipt handling separately per environment. Do not copy staging identities or private PDFs into production source/artifacts.
+
 Redeploy the previous reviewed Worker package and retain the dedicated backend's compatible schema. Web rollback does not undo schema migrations, reservations, provider charges, PRs or webhook events. Reconcile uncertain usage before releasing cost holds. Never automatically retry a coding task that may still be running.

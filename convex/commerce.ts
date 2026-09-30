@@ -5,7 +5,8 @@ import {
   internalQuery,
 } from "./_generated/server";
 import { v } from "convex/values";
-import { access, writeAccess } from "./lib";
+import { access, writeAccess, audit, recentAuthentication, limit } from "./lib";
+import { requireInvoiceOperator } from "./lib/invoiceOperator";
 import { wallet } from "./product";
 import { pricing, ensure } from "../packages/policy";
 import type { MutationCtx } from "./_generated/server";
@@ -275,19 +276,37 @@ export const invoiceTasks = query({
 export const submitReceipt = mutation({
   args: { id: v.id("invoiceTasks"), receipt: v.string() },
   handler: async (ctx, a) => {
+    const actor = await requireInvoiceOperator(ctx);
+    await recentAuthentication(ctx);
     const task = await ctx.db.get(a.id);
     ensure(task, "NOT_FOUND", "Invoice task unavailable.");
-    await writeAccess(ctx, task.organizationId, ["owner"]);
+    const reference = a.receipt.trim();
     ensure(
-      a.receipt.trim().length >= 10 && a.receipt.length < 1000,
+      reference.length >= 10 && reference.length < 1000,
       "EVIDENCE_REQUIRED",
       "Supply the actual submission receipt reference.",
     );
+    if (task.state === "submitted") {
+      ensure(
+        task.receipt === reference,
+        "EVIDENCE_LOCKED",
+        "The previous reference is retained. Reconcile corrections with the accountant.",
+      );
+      return;
+    }
+    await limit(ctx, `invoice-receipt:${actor._id}`, 10);
     await ctx.db.patch(a.id, {
       state: "submitted",
-      receipt: a.receipt,
+      receipt: reference,
       updatedAt: Date.now(),
     });
+    await audit(
+      ctx,
+      task.organizationId,
+      actor._id,
+      "invoice.receipt_recorded",
+      a.id,
+    );
   },
 });
 

@@ -96,7 +96,7 @@ The [official DevKit licence at the inspected commit](https://github.com/openai/
 
 The proposed preview lets users inspect a real output before subscribing. Plans can be reviewed and exported before execution. Bounded quotes, explicit approval, selected repository access, and honest failures reduce uncertainty. They do not guarantee correctness, business results, or an accepted PR.
 
-Publish cancellation, refund, retention, and consumer-rights terms only after operator and legal evidence is confirmed. Do not invent a money-back guarantee or use the preview to waive statutory rights. The intended Exponential Education operator and tax position still need official records. Physical Android verification is deferred to V1.1 by the user and must not be marked passed.
+Publish cancellation, refund, retention, and consumer-rights terms only after operator and legal evidence is confirmed. Do not invent a money-back guarantee or use the preview to waive statutory rights. Official identity records for the intended Exponential Education operator have now been supplied privately. Current ordinary VAT registry evidence was obtained; remaining tax, invoice and legal publication checks are still required. Physical Android verification is deferred to V1.1 by the user and must not be marked passed.
 
 ## Potential headline and subheadline ideas
 

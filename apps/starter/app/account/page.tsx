@@ -4,14 +4,31 @@ import { Header, RecipePicker } from "@/components/header";
 import { ActionForm } from "@/components/action-form";
 import { deleteAccount, logout } from "@/app/actions";
 import { Card, Input, Label, Button } from "@companynerve/ui";
+export const metadata = { robots: { index: false, follow: false } };
 export default async function Page() {
-  const data = await (await backend()).query(api.accounts.current, {});
+  const c = await backend();
+  const [data, invoiceAccess] = await Promise.all([
+    c.query(api.accounts.current, {}),
+    c.query(api.invoiceOperations.status, {}),
+  ]);
   return (
     <div className="container">
       <Header />
       <main id="main" className="doc">
         <h1>Your account</h1>
         <div className="stack">
+          {invoiceAccess.allowed && (
+            <Card>
+              <h2 style={{ marginTop: 0 }}>Invoice operations</h2>
+              <p>
+                Review reporting deadlines and record the accountant's
+                submission reference.
+              </p>
+              <Link href="/account/invoices" prefetch={false}>
+                Open private invoice queue
+              </Link>
+            </Card>
+          )}
           <Card>
             <h2 style={{ marginTop: 0 }}>{data.user.name}</h2>
             <p className="muted">{data.user.email}</p>
