@@ -23,6 +23,8 @@ export class LocalChatGPT {
     model: string;
     input: string;
     instructions?: string;
+    frames?: { dataUrl: string; timestampMs: number }[];
+    reasoningEffort?: "low" | "medium" | "high";
   }): Promise<{ text: string; responseId?: string; usage?: unknown }>;
   disconnect(): Promise<{ remoteRevoked: boolean; manageUsage?: string }>;
 }

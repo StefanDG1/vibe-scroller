@@ -1,12 +1,12 @@
 # Test your Instagram library privately
 
-Mode: how-to. Checked September 30, 2026. The owner requires OpenAI models and accepts a laptop-assisted personal test with local OpenAI Whisper and eligible ChatGPT-plan reasoning. Do not interpret the saved ChatGPT preference as an active funding route or run managed analysis as a substitute.
+Mode: how-to. Checked October 1, 2026. See the shorter [owner testing guide](owner-testing-guide.md) for current steps. The owner requires OpenAI models and accepts a laptop-assisted personal test with local OpenAI Whisper and eligible ChatGPT-plan reasoning. Do not interpret the saved ChatGPT preference as an active funding route or run managed analysis as a substitute.
 
 ## What can be tested now
 
 The deployed development app supports mobile sign-in, URL capture, a normalized CSV/JSON link import and library review. It does not offer a working Instagram-account connection or automatic Saved synchronization. Imported links wait for permitted media or supplied text; saving is not analysis.
 
-The separate Windows utility passed actual owner ChatGPT consent, model discovery and text inference. It is not connected to browser jobs and cannot decode or transcribe videos. Hosted activation is false. No phone-only, subscription-funded video-analysis journey has passed.
+The separate Windows utility passed actual owner ChatGPT consent, model discovery, text inference and a synthetic-image request using GPT-5.6 Sol with medium reasoning. The image request reported 47 tokens. The account catalogue does not expose GPT-6.1 Sol on this route. It is not connected to browser jobs and cannot decode or transcribe videos. Hosted activation is false. No phone-only, subscription-funded video-analysis journey has passed.
 
 ## Test a few links on your phone
 
@@ -25,9 +25,11 @@ In Instagram's profile/settings menu, open Accounts Center or Meta Account, then
 
 Keep the archive local. Use only saved-post/collection files, not messages, contacts or login records. This is a request for saved metadata; do not assume it supplies creator video files or contains every historical/deleted/shared-collection item. Inspect the actual export and compare counts.
 
-The current app accepts a JSON array of objects with `url` and optional `title`, `collection`, `saved_at`, or equivalent CSV. Dates must be UTC ISO strings. It does not directly accept Meta's archive ZIP or nested native export format. Convert only the relevant metadata before import. A native-export adapter remains implementation work; providing the saved files locally allows its mapping to be verified against your actual export rather than guessed.
+The new local build accepts the archive ZIP, native Saved JSON or Saved HTML as well as normalized CSV/JSON links. It reads only recognized Saved metadata locally and previews normalized links before submission. ZIPs are bounded to 3 GB, individual Saved metadata to 8 MB, with restricted entry/compression/CRC checks. ZIP64 and multidisk archives require extracting the Saved file first. HTML is parsed without executing scripts or loading remote resources; unknown dates remain unknown.
 
-Import limits are 500 rows and 140 KB per file, plus the workspace's source allowance and rate limits. A manifest reports duplicates, invalid/unsupported rows and waiting records. Some waiting rows may not have been saved because the allowance was reached; inspect accepted counts. Begin with a small sample before splitting the full library into batches. No import promises automatic media access or analysis of every saved video.
+The actual owner ZIP produced four distinct links, three Reels and one post with unverified media type. A 390-pixel browser test saved all four to the development workspace with zero analysis credits. The network request contained 1,103 bytes of normalized metadata and no ZIP. This does not establish complete Saved history, media access, deployed import support or physical phone testing. Synthetic HTML tests passed; no actual owner HTML export was supplied.
+
+Each submission is bounded to 500 links and 65 KB of normalized JSON, leaving room for request encoding. Workspace allowance and rate limits still apply. The manifest reports accepted, duplicate, invalid, unsupported and waiting records. The archive is not uploaded or retained by the app. A copied private archive and raw Saved extraction were removed after verification; the original user download remains untouched.
 
 ## Use your plan for the currently supported text test
 
@@ -49,7 +51,7 @@ A possible OpenAI-only local design is permitted media acquisition, isolated non
 
 The owner accepted keeping the Windows computer on while testing from the phone. This establishes the desired personal-test architecture, not a completed bridge, commercial permission, unlimited usage or an exception to isolation. A later hosted release still needs the complete browser-usable hosted option.
 
-Remaining implementation includes the native export adapter, device/browser pairing for inference, source-bound approved jobs/results, image-input support, compatible transcription, provenance, revocation/limit tests and a real phone journey. Local credentials must stay on the trusted computer. No model or paid funding fallback is authorized for this personal test.
+The native export adapter and bounded local image-input support now have local evidence. Remaining implementation includes their deployment, device/browser pairing for inference, source-bound approved jobs/results, compatible transcription, retained private screenshots/crops, provenance, revocation/limit tests and a real phone journey. Local credentials must stay on the trusted computer. No model or paid funding fallback is authorized for this personal test.
 
 ## Release owner actions
 

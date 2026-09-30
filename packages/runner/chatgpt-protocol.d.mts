@@ -29,6 +29,8 @@ export function inferenceRequest(
   model: string,
   input: string,
   instructions?: string,
+  frames?: { dataUrl: string; timestampMs: number }[],
+  reasoningEffort?: "low" | "medium" | "high",
 ): object;
 export function completedResponse(
   response: Response,

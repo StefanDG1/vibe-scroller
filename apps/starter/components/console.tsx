@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useEffectEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Brand } from "./site";
+import type { ImportPreview } from "../../../packages/instagram-import";
 type Initial = {
   aiPreference?: {
     preferChatGPTPlan: boolean;
@@ -1615,6 +1616,12 @@ function CaptureForm({
   const [kind, setKind] = useState(existingSourceId ? "upload" : "url");
   const [manifest, setManifest] = useState<any>(null);
   const [importError, setImportError] = useState("");
+  const [preview, setPreview] = useState<ImportPreview | null>(null);
+  const [previewBusy, setPreviewBusy] = useState(false);
+  const [importBusy, setImportBusy] = useState(false);
+  const [importOffset, setImportOffset] = useState(0);
+  const importAbort = useRef<AbortController | null>(null);
+  useEffect(() => () => importAbort.current?.abort(), []);
   return (
     <form
       className="form-grid"
@@ -1627,30 +1634,45 @@ function CaptureForm({
           return;
         }
         if (kind === "import") {
+          if (!preview || importBusy || previewBusy) return;
+          setImportBusy(true);
           try {
             setImportError("");
-            const file = f.get("import") as File;
-            if (!file || file.size > 140000)
-              throw new Error(
-                "Choose a CSV or JSON file within 140 KB, with up to 500 links.",
-              );
-            const text = new TextDecoder("utf-8", { fatal: true }).decode(
-              await file.arrayBuffer(),
-            );
+            const { importBatch } =
+              await import("../../../packages/instagram-import");
+            const batch = importBatch(preview.links, importOffset);
+            if (!batch.count) return;
             const result = await call("importLinks", {
               organizationId,
               key: crypto.randomUUID(),
-              format: file.name.toLowerCase().endsWith(".json")
-                ? "json"
-                : "csv",
-              text,
+              format: "json",
+              text: batch.text,
               rightsAttested: f.get("rights") === "on",
             });
-            if (result) setManifest(result);
+            if (result) {
+              setManifest((previous: any) => ({
+                ...result,
+                accepted: (previous?.accepted ?? 0) + result.accepted,
+                duplicate: (previous?.duplicate ?? 0) + result.duplicate,
+                invalid: (previous?.invalid ?? 0) + result.invalid,
+                unsupported: (previous?.unsupported ?? 0) + result.unsupported,
+                waiting: (previous?.waiting ?? 0) + result.waiting,
+                entries: [
+                  ...(previous?.entries ?? []),
+                  ...result.entries.map((entry: any) => ({
+                    ...entry,
+                    row: importOffset + entry.row,
+                  })),
+                ],
+              }));
+              setImportOffset(importOffset + batch.count);
+            }
           } catch (error) {
             setImportError(
               error instanceof Error ? error.message : "Import failed.",
             );
+          } finally {
+            setImportBusy(false);
           }
           return;
         }
@@ -1726,10 +1748,14 @@ function CaptureForm({
     >
       <label>
         Source type
-        <select value={kind} onChange={(e) => setKind(e.target.value)}>
+        <select
+          disabled={importBusy}
+          value={kind}
+          onChange={(e) => setKind(e.target.value)}
+        >
           {!existingSourceId && <option value="url">Video URL</option>}
           {!existingSourceId && (
-            <option value="import">CSV or JSON link import</option>
+            <option value="import">Instagram export or link import</option>
           )}
           <option value="upload">Permitted media upload</option>
           <option value="text">Supplied transcript</option>
@@ -1742,19 +1768,106 @@ function CaptureForm({
         </label>
       )}
       {kind === "import" ? (
-        <label>
-          CSV or JSON, up to 500 links
-          <input
-            name="import"
-            type="file"
-            accept=".csv,.json,text/csv,application/json"
-            required
-          />
-          <span className="fine">
-            Use url with optional title, collection, saved_at. Original dates
-            use UTC ISO timestamps. Links are saved without analysis charges.
-          </span>
-        </label>
+        <div className="form-grid">
+          <label>
+            Instagram ZIP, Saved JSON or HTML, or CSV links
+            <input
+              name="import"
+              type="file"
+              accept=".zip,.csv,.json,.html,.htm,application/zip,text/csv,application/json,text/html"
+              required
+              disabled={importBusy}
+              onChange={async (event) => {
+                importAbort.current?.abort();
+                const controller = new AbortController();
+                importAbort.current = controller;
+                setPreview(null);
+                setManifest(null);
+                setImportOffset(0);
+                setImportError("");
+                const file = event.currentTarget.files?.[0];
+                if (!file) {
+                  setPreviewBusy(false);
+                  return;
+                }
+                setPreviewBusy(true);
+                try {
+                  const { previewLinkFile, SAVED_TEXT_LIMIT } =
+                    await import("../../../packages/instagram-import");
+                  let next: ImportPreview;
+                  if (/\.zip$/i.test(file.name)) {
+                    const { previewInstagramZip } =
+                      await import("../../../packages/instagram-zip");
+                    next = await previewInstagramZip(file, controller.signal);
+                  } else {
+                    if (file.size > SAVED_TEXT_LIMIT)
+                      throw new Error(
+                        "Choose Saved metadata within 8 MB. For a larger account export, select its ZIP.",
+                      );
+                    next = previewLinkFile(
+                      new TextDecoder("utf-8", { fatal: true }).decode(
+                        await file.arrayBuffer(),
+                      ),
+                      file.name,
+                    );
+                  }
+                  if (!controller.signal.aborted) setPreview(next);
+                } catch (error) {
+                  if (!controller.signal.aborted)
+                    setImportError(
+                      error instanceof Error
+                        ? error.message
+                        : "Cannot read this export.",
+                    );
+                } finally {
+                  if (!controller.signal.aborted) setPreviewBusy(false);
+                }
+              }}
+            />
+            <span className="fine">
+              The export stays on this device. Only Saved links selected for
+              import are sent to your workspace. ZIPs can be up to 3 GB; Saved
+              metadata up to 8 MB per file. JSON is preferred. Messages and
+              contacts are excluded.
+            </span>
+          </label>
+          {previewBusy && (
+            <output>Reading Saved metadata on this device...</output>
+          )}
+          {preview && (
+            <section aria-label="Import preview">
+              <h3>Review your import</h3>
+              <p>
+                {preview.format}: {preview.rows.length} records,{" "}
+                {preview.links.length} distinct valid links,{" "}
+                {preview.duplicates} repeated links, {preview.invalid} invalid,{" "}
+                {preview.unsupported} unsupported.
+              </p>
+              <p>
+                {preview.reels} Reel links; {preview.posts} post links with
+                unverified media type. An export does not establish video access
+                or complete Saved history. HTML dates are left unknown.
+              </p>
+              <p className="fine">
+                Up to 500 links per batch, within your workspace allowance.{" "}
+                {importOffset} of {preview.links.length} links submitted. Saving
+                links uses no analysis credits. Permitted media or a transcript
+                is still needed before analysis.
+              </p>
+              <ol>
+                {preview.links
+                  .slice(importOffset, importOffset + 10)
+                  .map((link) => (
+                    <li key={link.url}>
+                      {link.title || "Saved Instagram link"}
+                      <br />
+                      <span className="fine">{link.url}</span>
+                    </li>
+                  ))}
+              </ol>
+            </section>
+          )}
+        </div>
       ) : kind === "url" ? (
         <label>
           Source URL
@@ -1790,11 +1903,24 @@ function CaptureForm({
         Saving is separate from analysis. Review the quote before processing.
         Supplied text has no implied audio or visual coverage.
       </p>
-      <button className="primary">
+      <button
+        className="primary"
+        disabled={
+          kind === "import" &&
+          (previewBusy ||
+            importBusy ||
+            !preview?.links.length ||
+            importOffset >= preview.links.length)
+        }
+      >
         {demo
           ? "Save synthetic demo source"
           : kind === "import"
-            ? "Import permitted links"
+            ? importBusy
+              ? "Importing links..."
+              : importOffset
+                ? "Import next batch"
+                : "Import reviewed links"
             : existingSourceId
               ? "Attach permitted content"
               : "Save source"}

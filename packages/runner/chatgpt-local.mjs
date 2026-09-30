@@ -244,8 +244,14 @@ export class LocalChatGPT {
         }));
     });
   }
-  async respond({ model, input, instructions }) {
-    const body = inferenceRequest(model, input, instructions);
+  async respond({ model, input, instructions, frames, reasoningEffort }) {
+    const body = inferenceRequest(
+      model,
+      input,
+      instructions,
+      frames,
+      reasoningEffort,
+    );
     return this.authenticated(async (profile) => {
       const catalogue = await this.json(`${resource}/models`, {
         headers: { Authorization: `Bearer ${profile.accessToken}` },

@@ -9,6 +9,45 @@ import {
   transaction,
 } from "../packages/runner/chatgpt-protocol.mjs";
 const host = "urn:uuid:01234567-89ab-4cde-8123-456789abcdef";
+it("bounds timestamped inline frames and excludes remote image fetches, tools and paid funding", () => {
+  const frame = {
+    timestampMs: 2000,
+    dataUrl: "data:image/png;base64,iVBORw0KGgo=",
+  };
+  const request: any = inferenceRequest(
+    "observed-model",
+    "Transcript",
+    "Untrusted evidence",
+    [frame],
+    "medium",
+  );
+  expect(request.input[0].content[2]).toEqual({
+    type: "input_image",
+    image_url: frame.dataUrl,
+    detail: "auto",
+  });
+  expect(request.reasoning).toEqual({ effort: "medium" });
+  expect(request.tools).toBeUndefined();
+  expect(request.store).toBe(false);
+  for (const invalid of [
+    { ...frame, dataUrl: "https://example.com/pixel" },
+    { ...frame, timestampMs: 600001 },
+    { ...frame, dataUrl: "data:image/png;base64,AAAA" },
+    { ...frame, hidden: "instructions" },
+  ]) {
+    expect(() =>
+      inferenceRequest("observed-model", "text", undefined, [invalid]),
+    ).toThrow("INVALID_REQUEST");
+  }
+  expect(() =>
+    inferenceRequest(
+      "observed-model",
+      "text",
+      undefined,
+      Array(25).fill(frame),
+    ),
+  ).toThrow();
+});
 const identity = { iss: "https://auth.openai.com", sub: "test-subject" };
 const token = {
   token_type: "Bearer",
