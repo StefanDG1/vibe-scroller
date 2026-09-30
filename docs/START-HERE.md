@@ -19,6 +19,8 @@ Read [Architecture](architecture.md), [Data model](DATA-MODEL.md), [API contract
 
 Read [Dashboard and mobile UX](DASHBOARD-AND-MOBILE-UX.md) and [Website and copy](WEBSITE-AND-COPY.md) before implementing screens. Both are required product work.
 
+For app text and marketing, also read all four [foundational documents](foundational/README.md). Use [the idea review process](foundational/COPY-AND-IDEAS.md) to record new ideas, conflicts and evidence, and keep the brief current.
+
 Read the capture, repository, provider, runner, security, retention, and billing documents when beginning their work packages. Use [Implementation plan](IMPLEMENTATION-PLAN.md) to choose the next package. Use [Acceptance tests](ACCEPTANCE-TESTS.md) to decide whether it is complete.
 
 Read [Provider setup](PROVIDER-SETUP.md) and [Launch checklist](LAUNCH-CHECKLIST.md) before changing any external account.
