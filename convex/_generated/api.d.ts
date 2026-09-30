@@ -41,6 +41,7 @@ import type * as product from "../product.js";
 import type * as productSchema from "../productSchema.js";
 import type * as projects from "../projects.js";
 import type * as reconciliation from "../reconciliation.js";
+import type * as workflows from "../workflows.js";
 
 import type {
   ApiFromModules,
@@ -82,6 +83,7 @@ declare const fullApi: ApiFromModules<{
   productSchema: typeof productSchema;
   projects: typeof projects;
   reconciliation: typeof reconciliation;
+  workflows: typeof workflows;
 }>;
 
 /**
@@ -113,4 +115,5 @@ export declare const internal: FilterApi<
 export declare const components: {
   rateLimiter: import("@convex-dev/rate-limiter/_generated/component.js").ComponentApi<"rateLimiter">;
   resend: import("@convex-dev/resend/_generated/component.js").ComponentApi<"resend">;
+  workflow: import("@convex-dev/workflow/_generated/component.js").ComponentApi<"workflow">;
 };

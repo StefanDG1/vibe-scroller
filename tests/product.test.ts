@@ -1,3 +1,4 @@
+import workflowTest from "@convex-dev/workflow/test";
 import rateLimiterTest from "@convex-dev/rate-limiter/test";
 import { describe, it, expect } from "vitest";
 import { convexTest } from "convex-test";
@@ -26,6 +27,7 @@ const modules = import.meta.glob("../convex/**/*.ts");
 async function setup() {
   const t = convexTest(schema, modules);
   rateLimiterTest.register(t);
+  workflowTest.register(t);
   for (const subject of ["a", "b"])
     await t.mutation(internal.accounts.syncUser, {
       subject,
@@ -39,6 +41,144 @@ async function setup() {
   return { t, a, b, org, other };
 }
 describe("VibeScroller product boundaries", () => {
+  it("allows viewers to read their workspace while denying source, plan and execution mutations", async () => {
+    const { t, a, b, org } = await setup();
+    const id = await a.mutation(api.product.capture, {
+      organizationId: org,
+      key: "viewer-source",
+      kind: "text",
+      title: "Synthetic viewer record",
+      text: "Private workspace text",
+      rightsAttested: true,
+    });
+    await t.run(async (ctx) => {
+      const user = (await ctx.db
+        .query("users")
+        .withIndex("by_subject", (q) => q.eq("subject", "b"))
+        .unique())!;
+      await ctx.db.insert("memberships", {
+        organizationId: org,
+        userId: user._id,
+        role: "viewer",
+      });
+    });
+    expect(
+      (await b.query(api.product.library, { organizationId: org })).items,
+    ).toHaveLength(1);
+    expect((await b.query(api.product.detail, { id })).text).toBe(
+      "Private workspace text",
+    );
+    await expect(
+      b.mutation(api.product.capture, {
+        organizationId: org,
+        key: "viewer-write",
+        kind: "text",
+        title: "Denied",
+        text: "Denied",
+        rightsAttested: true,
+      }),
+    ).rejects.toThrow();
+    await expect(
+      b.mutation(api.product.editSource, { id, summary: "Denied", tags: [] }),
+    ).rejects.toThrow();
+    await expect(
+      b.mutation(api.product.processSource, { id, maxCredits: 10 }),
+    ).rejects.toThrow();
+    await expect(
+      b.mutation(api.product.deleteSource, { id }),
+    ).rejects.toThrow();
+    await expect(
+      b.mutation(api.assets.grant, {
+        organizationId: org,
+        key: `${org}/denied`,
+        size: 100,
+        type: "audio/wav",
+      }),
+    ).rejects.toThrow();
+    await expect(
+      b.query(api.billing.authorize, { organizationId: org }),
+    ).rejects.toThrow();
+  });
+  it("exports all pages with owner checks, deletion filtering and private evidence redaction", async () => {
+    const { t, a, b, org, other } = await setup();
+    await t.run(async (ctx) => {
+      for (let n = 0; n < 14; n++)
+        await ctx.db.insert("sources", {
+          organizationId: org,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+          key: `export:${n}`,
+          coverage: "caption_only",
+          tags: [],
+          title: `Synthetic export ${n}`,
+          kind: "text",
+          canonical: `export:${n}`,
+          state: n === 5 ? "deleted" : "saved",
+          generation: 1,
+          text: "x".repeat(60000),
+          objectKey: `${org}/private/${n}`,
+          rightsAttested: true,
+        });
+    });
+    const asOf = Date.now();
+    let cursor: string | null = null;
+    const records: unknown[] = [];
+    let pages = 0;
+    do {
+      const page: { page: unknown[]; isDone: boolean; continueCursor: string } =
+        await a.query(api.jobs.exportPage, {
+          organizationId: org,
+          section: "sources",
+          cursor,
+          asOf,
+        });
+      records.push(...page.page);
+      cursor = page.isDone ? null : page.continueCursor;
+      pages++;
+    } while (cursor !== null);
+    expect(pages).toBe(3);
+    expect(records).toHaveLength(13);
+    expect(JSON.stringify(records)).not.toContain("objectKey");
+    await expect(
+      b.query(api.jobs.exportPage, {
+        organizationId: org,
+        section: "sources",
+        cursor: null,
+        asOf,
+      }),
+    ).rejects.toThrow();
+    expect(
+      (
+        await b.query(api.jobs.exportPage, {
+          organizationId: other,
+          section: "sources",
+          cursor: null,
+          asOf,
+        })
+      ).page,
+    ).toHaveLength(0);
+    await t.run(async (ctx) => {
+      const user = (await ctx.db
+        .query("users")
+        .withIndex("by_subject", (q) => q.eq("subject", "a"))
+        .unique())!;
+      const membership = (await ctx.db
+        .query("memberships")
+        .withIndex("by_pair", (q) =>
+          q.eq("organizationId", org).eq("userId", user._id),
+        )
+        .unique())!;
+      await ctx.db.patch(membership._id, { role: "viewer" });
+    });
+    await expect(
+      a.query(api.jobs.exportPage, {
+        organizationId: org,
+        section: "sources",
+        cursor: null,
+        asOf,
+      }),
+    ).rejects.toThrow();
+  });
   it("reuses only fingerprinted media stages and settles the prior compute hold once", async () => {
     const { t, a, org } = await setup();
     const sourceId = await t.run(async (ctx) => {
@@ -379,6 +519,20 @@ describe("VibeScroller product boundaries", () => {
         );
       return ids;
     });
+    expect(
+      await t.query(internal.jobs.workerRun, { id: ids[0] }),
+    ).not.toBeNull();
+    await t.run(async (ctx) => {
+      const run = (await ctx.db.get(ids[0]))!;
+      const membership = (await ctx.db
+        .query("memberships")
+        .withIndex("by_pair", (q) =>
+          q.eq("organizationId", org).eq("userId", run.approvedBy),
+        )
+        .unique())!;
+      await ctx.db.patch(membership._id, { role: "viewer" });
+    });
+    expect(await t.query(internal.jobs.workerRun, { id: ids[0] })).toBeNull();
     const delivery = {
       delivery: "synthetic-delivery",
       installationId: 11,
@@ -679,7 +833,12 @@ describe("VibeScroller product boundaries", () => {
       b.query(api.product.repositories, { organizationId: org }),
       b.query(api.product.proposals, { organizationId: org }),
       b.query(api.product.usage, { organizationId: org }),
-      b.query(api.jobs.exportData, { organizationId: org }),
+      b.query(api.jobs.exportPage, {
+        organizationId: org,
+        section: "sources",
+        cursor: null,
+        asOf: Date.now(),
+      }),
     ])
       await expect(promise).rejects.toThrow();
     expect(
@@ -756,6 +915,56 @@ describe("VibeScroller product boundaries", () => {
       expect(source?.text).toBeUndefined();
       expect((await ctx.db.query("tombstones").collect())[0].target).toBe(id);
     });
+  });
+  it("walks restore tombstones beyond the first page and ignores a foreign tombstone target", async () => {
+    const { t, a, b, org, other } = await setup();
+    const source = await a.mutation(api.product.capture, {
+      organizationId: org,
+      key: "restore-source",
+      kind: "text",
+      title: "Synthetic restored",
+      text: "restored private content",
+      rightsAttested: true,
+    });
+    const foreign = await b.mutation(api.product.capture, {
+      organizationId: other,
+      key: "foreign-restore",
+      kind: "text",
+      title: "Foreign",
+      text: "must stay intact",
+      rightsAttested: true,
+    });
+    await t.run(async (ctx) => {
+      for (let n = 0; n < 7; n++)
+        await ctx.db.insert("tombstones", {
+          organizationId: org,
+          target: "invalid-target-" + n,
+          at: Date.now(),
+        });
+      await ctx.db.insert("tombstones", {
+        organizationId: org,
+        target: source,
+        at: Date.now(),
+      });
+      await ctx.db.insert("tombstones", {
+        organizationId: org,
+        target: foreign,
+        at: Date.now(),
+      });
+    });
+    const first = await t.mutation(internal.privacy.retentionPage, {
+      section: "tombstones",
+      cursor: null,
+    });
+    expect(first.isDone).toBe(false);
+    await t.mutation(internal.privacy.retentionPage, {
+      section: "tombstones",
+      cursor: first.continueCursor,
+    });
+    await expect(a.query(api.product.detail, { id: source })).rejects.toThrow();
+    expect((await b.query(api.product.detail, { id: foreign })).text).toBe(
+      "must stay intact",
+    );
   });
   it("does not call a metadata link an analyzed video", async () => {
     const { a, org } = await setup();

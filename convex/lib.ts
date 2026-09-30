@@ -51,6 +51,13 @@ export const billingFor = (ctx: QueryCtx, id: Id<"organizations">) =>
     .query("billing")
     .withIndex("by_org", (q) => q.eq("organizationId", id))
     .unique();
+export async function writeAccess(
+  ctx: MutationCtx,
+  organizationId: Id<"organizations">,
+  roles = ["owner", "admin", "member"],
+) {
+  return access(ctx, organizationId, roles);
+}
 export async function paid(ctx: QueryCtx, id: Id<"organizations">) {
   if (!isPaid(await billingFor(ctx, id)))
     fail("This action requires an active Pro subscription.");

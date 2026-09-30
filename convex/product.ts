@@ -5,7 +5,8 @@ import {
   internalMutation,
 } from "./_generated/server";
 import { v } from "convex/values";
-import { access, fail, limit, audit } from "./lib";
+import { workflow } from "./workflows";
+import { access, fail, limit, audit, writeAccess } from "./lib";
 import { productLimits } from "./limitsV1";
 import { internal } from "./_generated/api";
 import { safeSourceUrl, ensure, containsSecret } from "../packages/policy";
@@ -615,7 +616,7 @@ export const processSource = mutation({
   handler: async (ctx, a) => {
     const s = await ctx.db.get(a.id);
     if (!s || s.state === "deleted") fail("Source unavailable.");
-    await access(ctx, s.organizationId, ["owner", "admin", "member"]);
+    await writeAccess(ctx, s.organizationId, ["owner", "admin", "member"]);
     ensure(
       a.maxCredits === 10,
       "QUOTE_CHANGED",
@@ -644,13 +645,11 @@ export const processSource = mutation({
       generation: s.generation + 1,
       error: undefined,
     });
-    await ctx.scheduler.runAfter(
-      0,
-      s.kind === "upload"
-        ? internal.media.analyze
-        : internal.integrations.analyze,
-      { id: s._id, generation: s.generation + 1 },
-    );
+    await workflow.start(ctx, internal.workflows.sourceAnalysis, {
+      id: s._id,
+      generation: s.generation + 1,
+      media: s.kind === "upload",
+    });
   },
 });
 export const workerSource = internalQuery({
@@ -778,7 +777,7 @@ export const editSource = mutation({
   handler: async (ctx, a) => {
     const s = await ctx.db.get(a.id);
     if (!s || s.state === "deleted") fail("Source unavailable.");
-    const actor = await access(ctx, s.organizationId);
+    const actor = await writeAccess(ctx, s.organizationId);
     ensure(
       a.summary.length <= 1500 &&
         !containsSecret(a.summary) &&
@@ -865,7 +864,7 @@ export const attachSource = mutation({
   handler: async (ctx, a) => {
     const s = await ctx.db.get(a.id);
     ensure(s && s.state !== "deleted", "FORBIDDEN", "Source unavailable.");
-    const { actor } = await access(ctx, s.organizationId);
+    const { actor } = await writeAccess(ctx, s.organizationId);
     await limit(ctx, `source-attach:${actor._id}`, 10);
     ensure(
       a.rightsAttested && !!a.text !== !!a.objectKey,
@@ -940,7 +939,7 @@ export const deleteSource = mutation({
   handler: async (ctx, { id }) => {
     const s = await ctx.db.get(id);
     if (!s) return;
-    await access(ctx, s.organizationId);
+    await writeAccess(ctx, s.organizationId);
     await redactSource(ctx, id);
   },
 });
@@ -1041,7 +1040,7 @@ export const saveProfile = mutation({
   handler: async (ctx, a) => {
     const repo = await ctx.db.get(a.id);
     if (!repo) fail("Repository unavailable.");
-    await access(ctx, repo.organizationId, ["owner", "admin"]);
+    await writeAccess(ctx, repo.organizationId, ["owner", "admin"]);
     ensure(a.profile.length <= 8000, "INVALID_INPUT", "Profile too long.");
     await ctx.db.patch(a.id, {
       profile: a.profile,
@@ -1093,7 +1092,7 @@ export const decide = mutation({
   handler: async (ctx, a) => {
     const p = await ctx.db.get(a.id);
     if (!p) fail("Proposal unavailable.");
-    const u = await access(ctx, p.organizationId);
+    const u = await writeAccess(ctx, p.organizationId);
     ensure(
       p.version === a.version,
       "APPROVAL_STALE",
@@ -1166,7 +1165,7 @@ export const editPlan = mutation({
   handler: async (ctx, a) => {
     const p = await ctx.db.get(a.id);
     if (!p) fail("Proposal unavailable.");
-    await access(ctx, p.organizationId);
+    await writeAccess(ctx, p.organizationId);
     ensure(
       p.version === a.version && p.review === "accepted",
       "APPROVAL_STALE",
@@ -1284,7 +1283,7 @@ export const feedback = mutation({
     benefit: v.string(),
   },
   handler: async (ctx, a) => {
-    const u = await access(ctx, a.organizationId);
+    const u = await writeAccess(ctx, a.organizationId);
     ensure(
       ["not_measured", "positive", "negative", "inconclusive"].includes(
         a.benefit,

@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-09-30T05:44:09.436Z",
+  "synthetic": true,
+  "sourceId": "mx71w2epdd1fesqz9p8rbb4n198fdvzz",
+  "title": "Synthetic staging: owned audiovisual upload",
+  "state": "ready",
+  "coverage": "audio_only",
+  "transcriptLength": 262,
+  "insights": 0,
+  "warnings": [
+    "Visual analysis is incomplete. Check the model license, free-unit budget and provider availability. No model license was accepted automatically and no provider fallback was used."
+  ],
+  "hostedBrowserUpload": true,
+  "explicitTenCreditApproval": true,
+  "generatedOwnedVideo": true
+}

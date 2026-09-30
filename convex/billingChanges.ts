@@ -1,6 +1,6 @@
 import { query, internalQuery, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
-import { access } from "./lib";
+import { access, writeAccess } from "./lib";
 import { ensure } from "../packages/policy";
 const fields = {
   organizationId: v.id("organizations"),
@@ -23,7 +23,7 @@ const fields = {
 export const create = internalMutation({
   args: fields,
   handler: async (ctx, a) => {
-    await access(ctx, a.organizationId, ["owner"]);
+    await writeAccess(ctx, a.organizationId, ["owner"]);
     ensure(
       Number.isSafeInteger(a.amount) &&
         a.currency === "eur" &&
@@ -54,7 +54,7 @@ export const claim = internalMutation({
   handler: async (ctx, a) => {
     const q = await ctx.db.get(a.id);
     ensure(q, "NOT_FOUND", "Quote unavailable.");
-    await access(ctx, q.organizationId, ["owner"]);
+    await writeAccess(ctx, q.organizationId, ["owner"]);
     ensure(
       q.state === "quoted" && q.expiresAt > Date.now(),
       "QUOTE_EXPIRED",

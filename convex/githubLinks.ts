@@ -5,14 +5,17 @@ import {
   query,
 } from "./_generated/server";
 import { v } from "convex/values";
-import { access, limit } from "./lib";
+import { access, limit, writeAccess } from "./lib";
 import { digest } from "./product";
 import { ensure } from "../packages/policy";
 const org = { organizationId: v.id("organizations") };
 export const begin = mutation({
   args: org,
   handler: async (ctx, a) => {
-    const { actor } = await access(ctx, a.organizationId, ["owner", "admin"]);
+    const { actor } = await writeAccess(ctx, a.organizationId, [
+      "owner",
+      "admin",
+    ]);
     await limit(ctx, `github-link:${actor._id}`, 5);
     const state = crypto.randomUUID() + crypto.randomUUID();
     await ctx.db.insert("githubLinks", {

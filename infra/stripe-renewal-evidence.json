@@ -147,5 +147,14 @@
       "verified": true
     }
   ],
-  "completedAt": "2026-09-30T05:22:46.698Z"
+  "completedAt": "2026-09-30T05:22:46.698Z",
+  "positiveProration": {
+    "subscriptionId": "sub_1ULFqsBINq6evjJtKlrewlAv",
+    "clockTime": 1803823260,
+    "quoted": 1994,
+    "paid": 1994,
+    "currency": "eur",
+    "status": "paid",
+    "invoiceId": "in_1ULGACBINq6evjJt87dK7cPb"
+  }
 }

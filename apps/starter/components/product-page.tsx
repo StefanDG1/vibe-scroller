@@ -24,6 +24,7 @@ export async function ProductPage({
     usage,
     devices,
     githubChoices,
+    organization,
   ] = await Promise.all([
     c.query(api.product.library, {
       organizationId,
@@ -36,6 +37,7 @@ export async function ProductPage({
     c.query(api.product.usage, { organizationId }),
     c.query(api.devices.list, { organizationId }),
     c.query(api.githubLinks.choices, { organizationId }),
+    c.query(api.organizations.details, { organizationId }),
   ]);
   return (
     <Console
@@ -45,6 +47,7 @@ export async function ProductPage({
       initialFilter={filter}
       organizationId={org}
       initialView={view}
+      readOnly={organization.role === "viewer"}
       initial={{
         sources: library.items,
         libraryNext: library.next,

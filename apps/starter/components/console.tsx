@@ -52,6 +52,7 @@ const Button = ({
 
 export function Console({
   demo = false,
+  readOnly = false,
   initial,
   organizationId,
   initialView = "home",
@@ -60,6 +61,7 @@ export function Console({
   initialFilter = "",
 }: {
   demo?: boolean;
+  readOnly?: boolean;
   initial: Initial;
   organizationId: string;
   initialView?: string;
@@ -77,7 +79,9 @@ export function Console({
     [filter, setFilter] = useState(initialFilter),
     [notice, setNotice] = useState(""),
     [busy, setBusy] = useState(false),
-    [captureOpen, setCaptureOpen] = useState(Boolean(initialSharedDraft)),
+    [captureOpen, setCaptureOpen] = useState(
+      !readOnly && Boolean(initialSharedDraft),
+    ),
     [planText, setPlanText] = useState(JSON.stringify(blankPlan, null, 2)),
     [dark, setDark] = useState(false);
   const seenNotifications = useRef(new Set(initial.notifications.map(id)));
@@ -236,6 +240,12 @@ export function Console({
     setPlanText(JSON.stringify(selected?.plan ?? blankPlan, null, 2));
   }
   async function call(operation: string, args: any) {
+    if (readOnly) {
+      setNotice(
+        "Your viewer role allows reading. Ask a workspace owner to change your role before making changes.",
+      );
+      return;
+    }
     setBusy(true);
     setNotice("");
     try {
@@ -350,10 +360,21 @@ export function Console({
             </span>
             <p>Make scrolling productive.</p>
           </div>
-          <Button busy={busy} primary onClick={() => setCaptureOpen(true)}>
+          <Button
+            busy={busy}
+            disabled={readOnly}
+            primary
+            onClick={() => setCaptureOpen(true)}
+          >
             ＋ Add source
           </Button>
         </header>
+        {readOnly && (
+          <p className="demo-banner">
+            Viewer access. You can read this workspace. Captures, edits,
+            approvals, execution and billing changes require another role.
+          </p>
+        )}
         {demo && (
           <p className="demo-banner">
             Synthetic data only. No real videos, customer repositories, measured
@@ -507,7 +528,11 @@ export function Console({
                         </button>
                         <p>
                           {s.summary ??
-                            "This source needs an upload. Metadata is not an analysis."}
+                            (s.state === "needs_upload"
+                              ? "This source needs permitted content. Metadata is not an analysis."
+                              : s.state === "failed"
+                                ? "Analysis needs attention. Open the source for its next step."
+                                : "Source saved. Review and approve analysis to get its summary.")}
                         </p>
                         <ul className="point-preview">
                           {s.mainPoints?.slice(0, 3).map((p: string) => (
@@ -1521,6 +1546,23 @@ function SourceDetail({ source, demo, org, repos, call, onProposal }: any) {
           {detail.summary ??
             "No analysis available. Upload permitted content or supply a transcript."}
         </p>
+        {detail.error && (
+          <p className="error" role="alert">
+            {detail.error}
+          </p>
+        )}
+        {!!detail.analysis?.warnings?.length && (
+          <section aria-label="Analysis limitations">
+            <h3>Limitations and uncertainty</h3>
+            <ul>
+              {detail.analysis.warnings.map(
+                (warning: string, index: number) => (
+                  <li key={index}>{warning}</li>
+                ),
+              )}
+            </ul>
+          </section>
+        )}
         {detail.url && (
           <a href={detail.url} target="_blank" rel="noopener noreferrer">
             Original source
@@ -1649,7 +1691,7 @@ function SourceDetail({ source, demo, org, repos, call, onProposal }: any) {
             Transcript correction, retained beside the original
             <textarea
               name="correction"
-              maxLength={120000}
+              maxLength={60000}
               defaultValue={detail.analysis?.correctedText ?? ""}
             />
           </label>

@@ -5,6 +5,7 @@ export const role = v.union(
   v.literal("owner"),
   v.literal("admin"),
   v.literal("member"),
+  v.literal("viewer"),
 );
 export default defineSchema({
   ...productTables,
@@ -40,7 +41,7 @@ export default defineSchema({
   invitations: defineTable({
     organizationId: v.id("organizations"),
     email: v.string(),
-    role: v.union(v.literal("admin"), v.literal("member")),
+    role: v.union(v.literal("admin"), v.literal("member"), v.literal("viewer")),
     tokenHash: v.string(),
     expiresAt: v.number(),
     createdBy: v.id("users"),

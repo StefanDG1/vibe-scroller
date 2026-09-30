@@ -16,7 +16,7 @@ export default async function Page({
   return (
     <>
       <h1>{p.name}</h1>
-      {info.role === "member" ? (
+      {["member", "viewer"].includes(info.role) ? (
         <p style={{ whiteSpace: "pre-wrap" }}>
           {p.description || "No description yet."}
         </p>

@@ -6,3 +6,4 @@ convex/_generated
 .env*
 work
 outputs
+packages/runner/protocol

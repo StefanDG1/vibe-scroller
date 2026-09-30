@@ -1,4 +1,5 @@
 import { internal } from "./_generated/api";
+import { workflow } from "./workflows";
 import {
   query,
   mutation,
@@ -6,10 +7,30 @@ import {
   internalMutation,
 } from "./_generated/server";
 import { v } from "convex/values";
-import { access, fail } from "./lib";
+import { access, fail, writeAccess } from "./lib";
 import { ensure, validatePaths, containsSecret } from "../packages/policy";
 import { reserve, settle, digest, wallet } from "./product";
 const org = { organizationId: v.id("organizations") };
+async function approvalActive(
+  ctx: import("./_generated/server").QueryCtx,
+  run: import("./_generated/dataModel").Doc<"runs">,
+) {
+  const organization = await ctx.db.get(run.organizationId);
+  const actor = await ctx.db.get(run.approvedBy);
+  const membership = await ctx.db
+    .query("memberships")
+    .withIndex("by_pair", (q) =>
+      q.eq("organizationId", run.organizationId).eq("userId", run.approvedBy),
+    )
+    .unique();
+  return (
+    organization?.status === "active" &&
+    actor?.status === "active" &&
+    !!membership &&
+    ["owner", "admin", "member"].includes(membership.role)
+  );
+}
+
 export const authorizeOwner = query({
   args: org,
   handler: (ctx, a) => access(ctx, a.organizationId, ["owner", "admin"]),
@@ -118,7 +139,7 @@ export const connections = query({
 export const revoke = mutation({
   args: { ...org, provider: v.string() },
   handler: async (ctx, a) => {
-    await access(ctx, a.organizationId, ["owner"]);
+    await writeAccess(ctx, a.organizationId, ["owner"]);
     const rows = await ctx.db
       .query("connections")
       .withIndex("by_provider", (q) =>
@@ -168,7 +189,7 @@ export const reserveMatch = mutation({
       source.organizationId !== repo.organizationId
     )
       fail("Matching context unavailable.");
-    await access(ctx, source.organizationId);
+    await writeAccess(ctx, source.organizationId);
     ensure(
       repo.enabled && repo.confirmed,
       "CONTEXT_REQUIRED",
@@ -266,7 +287,7 @@ export const approve = mutation({
   handler: async (ctx, a) => {
     const p = await ctx.db.get(a.id);
     if (!p) fail("Proposal unavailable.");
-    const actor = await access(ctx, p.organizationId);
+    const actor = await writeAccess(ctx, p.organizationId);
     const repo = await ctx.db.get(p.repositoryId);
     ensure(
       repo &&
@@ -351,7 +372,10 @@ export const approve = mutation({
     });
     await reserve(ctx, p.organizationId, `run:${runId}`, a.maxCredits);
     if (a.executor === "cloud")
-      await ctx.scheduler.runAfter(0, internal.cloud.execute, { id: runId });
+      await workflow.start(ctx, internal.workflows.coding, {
+        id: runId,
+        generation: 1,
+      });
     return runId;
   },
 });
@@ -373,7 +397,7 @@ export const cancel = mutation({
   handler: async (ctx, a) => {
     const r = await ctx.db.get(a.id);
     if (!r) fail("Run unavailable.");
-    await access(ctx, r.organizationId);
+    await writeAccess(ctx, r.organizationId);
     ensure(
       !["publishing", "completed"].includes(r.state),
       "PUBLICATION_IN_PROGRESS",
@@ -400,7 +424,12 @@ export const authorizePublication = mutation({
   handler: async (ctx, a) => {
     const r = await ctx.db.get(a.id);
     if (!r) fail("Run unavailable.");
-    await access(ctx, r.organizationId);
+    await writeAccess(ctx, r.organizationId);
+    ensure(
+      await approvalActive(ctx, r),
+      "FORBIDDEN",
+      "The original execution approval is no longer authorized. Review a new plan approval.",
+    );
     ensure(
       process.env.DISABLE_PUBLICATION !== "true",
       "POLICY_BLOCKED",
@@ -541,36 +570,65 @@ export const runFailure = internalMutation({
       await ctx.db.patch(a.id, { error: a.error, updatedAt: Date.now() });
   },
 });
-export const exportData = query({
-  args: org,
+// Every page rechecks ownership. Small pages bound Convex's read/response budget.
+export const exportPage = query({
+  args: {
+    ...org,
+    section: v.union(
+      v.literal("sources"),
+      v.literal("proposals"),
+      v.literal("feedback"),
+    ),
+    cursor: v.union(v.string(), v.null()),
+    asOf: v.number(),
+  },
   handler: async (ctx, a) => {
     await access(ctx, a.organizationId, ["owner"]);
+    ensure(
+      Number.isSafeInteger(a.asOf) && a.asOf <= Date.now(),
+      "INVALID_INPUT",
+      "Invalid export timestamp.",
+    );
+    const rows = await ctx.db
+      .query(a.section)
+      .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
+      .paginate({ cursor: a.cursor, numItems: 5 });
+    // Preserve useful evidence metadata without exposing storage bearer capabilities.
+    const redact = (value: unknown): unknown => {
+      if (Array.isArray(value)) return value.map(redact);
+      if (value && typeof value === "object")
+        return Object.fromEntries(
+          Object.entries(value)
+            .filter(
+              ([key]) =>
+                !["objectKey", "ciphertext", "signedUrl"].includes(key),
+            )
+            .map(([key, item]) => [key, redact(item)]),
+        );
+      return value;
+    };
     return {
-      schemaVersion: "1.0.0",
-      exportedAt: Date.now(),
-      sources: (
-        await ctx.db
-          .query("sources")
-          .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
-          .take(10000)
-      )
-        .filter((s) => s.state !== "deleted")
-        .map(({ objectKey: _objectKey, ...s }) => s),
-      proposals: await ctx.db
-        .query("proposals")
-        .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
-        .take(1000),
-      feedback: await ctx.db
-        .query("feedback")
-        .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
-        .take(1000),
+      page: rows.page
+        .filter(
+          (row) =>
+            Math.floor(row._creationTime) <= a.asOf &&
+            !("state" in row && row.state === "deleted"),
+        )
+        .map(redact),
+      isDone: rows.isDone,
+      continueCursor: rows.continueCursor,
     };
   },
 });
 
 export const workerRun = internalQuery({
   args: { id: v.id("runs") },
-  handler: (ctx, a) => ctx.db.get(a.id),
+  handler: async (ctx, a) => {
+    const run = await ctx.db.get(a.id);
+    if (!run) return null;
+    if (!(await approvalActive(ctx, run))) return null;
+    return run;
+  },
 });
 export const claimCloud = internalMutation({
   args: { id: v.id("runs") },
@@ -592,20 +650,10 @@ export const claimCloud = internalMutation({
       "APPROVAL_STALE",
       "Execution context changed.",
     );
-    const organization = await ctx.db.get(r.organizationId);
-    const actor = await ctx.db.get(r.approvedBy);
-    const membership = await ctx.db
-      .query("memberships")
-      .withIndex("by_pair", (q) =>
-        q.eq("organizationId", r.organizationId).eq("userId", r.approvedBy),
-      )
-      .unique();
     ensure(
-      organization?.status === "active" &&
-        actor?.status === "active" &&
-        membership,
+      await approvalActive(ctx, r),
       "FORBIDDEN",
-      "The approving member no longer has access.",
+      "The approving member no longer has execution permission.",
     );
     const computeReserve = Math.min(
       Number(process.env.CLOUD_COMPUTE_RESERVE_CREDITS ?? "10000"),
@@ -659,6 +707,11 @@ export const completeCloud = internalMutation({
       r.leaseUntil < Date.now()
     )
       return;
+    ensure(
+      await approvalActive(ctx, r),
+      "FORBIDDEN",
+      "The original execution approval is no longer authorized.",
+    );
     ensure(
       a.credits <= r.maxCredits,
       "BUDGET_EXCEEDED",

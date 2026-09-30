@@ -156,14 +156,14 @@ export async function renameOrganization(_: FormState, d: FormData) {
 export async function changeMember(_: FormState, d: FormData) {
   return run(async () => {
     const role = val(d, "role");
-    if (!["owner", "admin", "member", "remove"].includes(role))
+    if (!["owner", "admin", "member", "viewer", "remove"].includes(role))
       return { error: "Choose a role." };
     await (
       await backend()
     ).mutation(api.organizations.changeMember, {
       organizationId: org(d),
       membershipId: val(d, "membershipId") as Id<"memberships">,
-      role: role as "owner" | "admin" | "member" | "remove",
+      role: role as "owner" | "admin" | "member" | "viewer" | "remove",
     });
     return { message: "Membership updated." };
   });
@@ -171,7 +171,7 @@ export async function changeMember(_: FormState, d: FormData) {
 export async function inviteMember(_: FormState, d: FormData) {
   return run(async () => {
     const role = val(d, "role");
-    if (role !== "admin" && role !== "member")
+    if (role !== "admin" && role !== "member" && role !== "viewer")
       return { error: "Choose a role." };
     const token = randomBytes(32).toString("hex");
     await (

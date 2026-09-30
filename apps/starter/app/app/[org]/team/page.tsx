@@ -58,6 +58,7 @@ export default async function Page({
                           </label>
                           <Select id={m.id} name="role" defaultValue={m.role}>
                             <option value="member">Member</option>
+                            <option value="viewer">Viewer</option>
                             <option value="admin">Admin</option>
                             <option value="owner">Owner</option>
                             <option value="remove">Remove access</option>
@@ -71,8 +72,9 @@ export default async function Page({
             </table>
           </div>
           <p className="muted" style={{ fontSize: ".8rem", marginTop: 20 }}>
-            Members can read projects. Admins can manage projects and invite
-            members. Owners also manage billing and team roles.
+            Viewers can read workspace records. Members can capture and review
+            content. Admins can manage projects and invite members. Owners also
+            manage billing and team roles.
           </p>
         </Card>
         <Card>
@@ -97,6 +99,7 @@ export default async function Page({
               <Label htmlFor="role">Role</Label>
               <Select id="role" name="role">
                 <option value="member">Member</option>
+                <option value="viewer">Viewer</option>
                 {info.role === "owner" && <option value="admin">Admin</option>}
               </Select>
             </div>

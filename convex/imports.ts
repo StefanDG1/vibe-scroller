@@ -1,6 +1,6 @@
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { access, limit, audit } from "./lib";
+import { limit, audit, writeAccess } from "./lib";
 import { ensure } from "../packages/policy";
 import { parseLinkImport } from "../packages/imports";
 import { captureOne } from "./product";
@@ -14,7 +14,7 @@ export const links = mutation({
     rightsAttested: v.boolean(),
   },
   handler: async (ctx, a) => {
-    const actor = await access(ctx, a.organizationId, [
+    const actor = await writeAccess(ctx, a.organizationId, [
       "owner",
       "admin",
       "member",

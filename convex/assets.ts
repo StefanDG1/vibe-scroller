@@ -1,6 +1,6 @@
 import { query, mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
-import { access, limit, fail } from "./lib";
+import { access, limit, fail, writeAccess } from "./lib";
 import { ensure } from "../packages/policy";
 import { internal } from "./_generated/api";
 import type { MutationCtx } from "./_generated/server";
@@ -29,7 +29,7 @@ export const grant = mutation({
     type: v.string(),
   },
   handler: async (ctx, a) => {
-    const u = await access(ctx, a.organizationId);
+    const u = await writeAccess(ctx, a.organizationId);
     await limit(ctx, `upload:${u.actor._id}`, 10);
     const entitlement = await wallet(ctx, a.organizationId);
     const retained = await ctx.db

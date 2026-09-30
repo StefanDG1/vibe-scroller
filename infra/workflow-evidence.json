@@ -1,0 +1,20 @@
+{
+  "environment": "synthetic staging, not customer data",
+  "observedAt": "2026-09-30T06:16:00Z",
+  "sourceId": "mx79ca9f0c2cct8d7dhx4p0v198fcpfy",
+  "workflowId": "jd7bj3j2pf9ca6fq5jy66chawd8fc528",
+  "workflowResult": "success",
+  "sourceState": "ready",
+  "coverage": "caption_only",
+  "mainPoints": 3,
+  "provider": "cloudflare_free",
+  "automaticActionRetries": false,
+  "maxParallelism": 2,
+  "browserOrigin": "https://vibescroller-staging.danistefangheorghiu.workers.dev",
+  "credentialsUploaded": false,
+  "limitations": [
+    "Coding dispatch uses the same manager but has not been repeated after this change.",
+    "No worker-kill staging test has been performed.",
+    "Unknown provider usage holds remain for operator reconciliation."
+  ]
+}

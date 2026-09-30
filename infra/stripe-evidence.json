@@ -57,5 +57,15 @@
     "subscriptionUpdateEnabled": false,
     "invoiceHistory": true,
     "cancelAtPeriodEnd": true
+  },
+  "browserChanges": {
+    "downgradeQuote": "q5712rfnh36cbwz1jr4pf14djx8fcks7",
+    "scheduledAtRenewal": true,
+    "cancellationReleasedSchedule": true,
+    "upgradeQuote": "q577mrsb3apwn2dztsn58v622s8fc1ne",
+    "providerQuotedZeroForPriorFullyPaidPro": true,
+    "applied": true,
+    "allowanceStayed600": true,
+    "cancelAtEndRestored": true
   }
 }

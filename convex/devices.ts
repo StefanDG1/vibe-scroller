@@ -1,6 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { access, fail, limit, recentAuthentication } from "./lib";
+import { access, fail, limit, recentAuthentication, writeAccess } from "./lib";
 import { ensure } from "../packages/policy";
 export const list = query({
   args: { organizationId: v.id("organizations") },
@@ -23,7 +23,7 @@ export const start = mutation({
     codeHash: v.string(),
   },
   handler: async (ctx, a) => {
-    const u = await access(ctx, a.organizationId, ["owner", "admin"]);
+    const u = await writeAccess(ctx, a.organizationId, ["owner", "admin"]);
     await recentAuthentication(ctx);
     await limit(ctx, `pair:${u.actor._id}`, 3);
     ensure(
@@ -55,7 +55,7 @@ export const approve = mutation({
   handler: async (ctx, a) => {
     const d = await ctx.db.get(a.id);
     if (!d) fail("Device unavailable.");
-    const u = await access(ctx, d.organizationId);
+    const u = await writeAccess(ctx, d.organizationId);
     await recentAuthentication(ctx);
     ensure(
       d.owner === u.actor._id &&
@@ -79,7 +79,7 @@ export const revoke = mutation({
   handler: async (ctx, a) => {
     const d = await ctx.db.get(a.id);
     if (!d) fail("Device unavailable.");
-    await access(ctx, d.organizationId, ["owner"]);
+    await writeAccess(ctx, d.organizationId, ["owner"]);
     await ctx.db.patch(d._id, {
       state: "revoked",
       credentialHash: "",

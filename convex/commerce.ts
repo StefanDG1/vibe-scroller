@@ -5,7 +5,7 @@ import {
   internalQuery,
 } from "./_generated/server";
 import { v } from "convex/values";
-import { access } from "./lib";
+import { access, writeAccess } from "./lib";
 import { wallet } from "./product";
 import { pricing, ensure } from "../packages/policy";
 import type { MutationCtx } from "./_generated/server";
@@ -201,7 +201,7 @@ export const preferences = mutation({
     legalVersion: v.string(),
   },
   handler: async (ctx, a) => {
-    await access(ctx, a.organizationId, ["owner"]);
+    await writeAccess(ctx, a.organizationId, ["owner"]);
     const row = await ctx.db
       .query("preferences")
       .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
@@ -231,7 +231,7 @@ export const submitReceipt = mutation({
   handler: async (ctx, a) => {
     const task = await ctx.db.get(a.id);
     ensure(task, "NOT_FOUND", "Invoice task unavailable.");
-    await access(ctx, task.organizationId, ["owner"]);
+    await writeAccess(ctx, task.organizationId, ["owner"]);
     ensure(
       a.receipt.trim().length >= 10 && a.receipt.length < 1000,
       "EVIDENCE_REQUIRED",
@@ -269,7 +269,7 @@ export const recordAcceptance = internalMutation({
     immediateService: v.boolean(),
   },
   handler: async (ctx, a) => {
-    const actor = await access(ctx, a.organizationId, ["owner"]);
+    const actor = await writeAccess(ctx, a.organizationId, ["owner"]);
     await ctx.db.insert("legalAcceptances", {
       ...a,
       actor: actor.actor._id,

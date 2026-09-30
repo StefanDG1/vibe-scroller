@@ -1,7 +1,16 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { role } from "./schema";
-import { access, user, fail, short, limit, audit, billingFor } from "./lib";
+import {
+  access,
+  user,
+  fail,
+  short,
+  limit,
+  audit,
+  billingFor,
+  writeAccess,
+} from "./lib";
 import { internal } from "./_generated/api";
 export const create = mutation({
   args: { name: v.string() },
@@ -46,7 +55,7 @@ export const details = query({
 export const rename = mutation({
   args: { organizationId: v.id("organizations"), name: v.string() },
   handler: async (ctx, { organizationId, name }) => {
-    const a = await access(ctx, organizationId, ["owner", "admin"]);
+    const a = await writeAccess(ctx, organizationId, ["owner", "admin"]);
     await limit(ctx, `org-edit:${a.actor._id}`);
     await ctx.db.patch(organizationId, { name: short(name) });
     await audit(
@@ -86,7 +95,7 @@ export const changeMember = mutation({
     role: v.union(role, v.literal("remove")),
   },
   handler: async (ctx, args) => {
-    const a = await access(ctx, args.organizationId, ["owner"]);
+    const a = await writeAccess(ctx, args.organizationId, ["owner"]);
     await limit(ctx, `member:${a.actor._id}`);
     const target = await ctx.db.get(args.membershipId);
     if (!target || target.organizationId !== args.organizationId)
@@ -114,13 +123,13 @@ export const invite = mutation({
   args: {
     organizationId: v.id("organizations"),
     email: v.string(),
-    role: v.union(v.literal("admin"), v.literal("member")),
+    role: v.union(v.literal("admin"), v.literal("member"), v.literal("viewer")),
     tokenHash: v.string(),
   },
   handler: async (ctx, args) => {
-    const a = await access(ctx, args.organizationId, ["owner", "admin"]);
+    const a = await writeAccess(ctx, args.organizationId, ["owner", "admin"]);
     await limit(ctx, `invite:${a.actor._id}`, 10);
-    if (a.membership.role === "admin" && args.role !== "member")
+    if (a.membership.role === "admin" && args.role === "admin")
       fail("Only an owner can invite an admin.");
     const email = args.email.trim().toLowerCase();
     if (
@@ -176,7 +185,7 @@ export const invitations = query({
 export const revokeInvite = mutation({
   args: { organizationId: v.id("organizations"), id: v.id("invitations") },
   handler: async (ctx, { organizationId, id }) => {
-    const a = await access(ctx, organizationId, ["owner", "admin"]);
+    const a = await writeAccess(ctx, organizationId, ["owner", "admin"]);
     const inv = await ctx.db.get(id);
     if (!inv || inv.organizationId !== organizationId)
       fail("Invitation unavailable.");
@@ -249,7 +258,7 @@ export const exportData = query({
 export const remove = mutation({
   args: { organizationId: v.id("organizations"), confirmation: v.string() },
   handler: async (ctx, { organizationId, confirmation }) => {
-    const a = await access(ctx, organizationId, ["owner"]);
+    const a = await writeAccess(ctx, organizationId, ["owner"]);
     if (confirmation !== a.organization.name)
       fail("Type the organization name to confirm.");
     const b = await billingFor(ctx, organizationId);

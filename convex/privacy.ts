@@ -68,16 +68,14 @@ export const sweep = internalMutation({
       )
       .take(100);
     for (const asset of assets) {
-      await ctx.db.patch(asset._id, { state: "deleting" });
+      await ctx.db.patch(asset._id, { state: "deleting", expiresAt: 0 });
       await queueDeletion(ctx, asset.key);
     }
-    const tombstones = await ctx.db.query("tombstones").take(1000);
-    for (const tomb of tombstones) {
-      const id = ctx.db.normalizeId("sources", tomb.target);
-      if (!id) continue;
-      const source = await ctx.db.get(id);
-      if (source && source.state !== "deleted") await redactSource(ctx, id);
-    }
+    for (const section of ["tombstones", "repositories", "runs"] as const)
+      await ctx.scheduler.runAfter(0, internal.privacy.retentionPage, {
+        section,
+        cursor: null,
+      });
     for (const job of await ctx.db
       .query("objectDeletions")
       .withIndex("by_state", (q) => q.eq("state", "pending"))
@@ -90,21 +88,54 @@ export const sweep = internalMutation({
         key: job.key,
       });
     }
-    const repos = await ctx.db.query("repositories").take(1000);
-    for (const repo of repos)
-      if (repo.context && repo.updatedAt < Date.now() - 86400000)
-        await ctx.db.patch(repo._id, { context: "" });
-    const runs = await ctx.db.query("runs").take(1000);
-    for (const run of runs)
-      if (
-        run.updatedAt < Date.now() - 14 * 86400000 &&
-        ["completed", "failed", "canceled"].includes(run.state)
-      )
-        await ctx.db.patch(run._id, {
+  },
+});
+
+export const retentionPage = internalMutation({
+  args: {
+    section: v.union(
+      v.literal("tombstones"),
+      v.literal("repositories"),
+      v.literal("runs"),
+    ),
+    cursor: v.union(v.string(), v.null()),
+  },
+  handler: async (ctx, a) => {
+    const result = await ctx.db
+      .query(a.section)
+      .paginate({ cursor: a.cursor, numItems: 5 });
+    for (const row of result.page) {
+      if ("target" in row) {
+        const id = ctx.db.normalizeId("sources", row.target);
+        if (!id) continue;
+        const source = await ctx.db.get(id);
+        // Bind tombstone ownership as well as the target ID before restore redaction.
+        if (
+          source &&
+          source.organizationId === row.organizationId &&
+          source.state !== "deleted"
+        )
+          await redactSource(ctx, id);
+      } else if ("context" in row) {
+        if (row.context && row.updatedAt < Date.now() - 86400000)
+          await ctx.db.patch(row._id, { context: "", contextFiles: [] });
+      } else if (
+        row.updatedAt < Date.now() - 14 * 86400000 &&
+        ["completed", "failed", "canceled"].includes(row.state)
+      ) {
+        await ctx.db.patch(row._id, {
           events: [],
           patch: undefined,
           changes: undefined,
           report: undefined,
         });
+      }
+    }
+    if (!result.isDone)
+      await ctx.scheduler.runAfter(0, internal.privacy.retentionPage, {
+        section: a.section,
+        cursor: result.continueCursor,
+      });
+    return { isDone: result.isDone, continueCursor: result.continueCursor };
   },
 });

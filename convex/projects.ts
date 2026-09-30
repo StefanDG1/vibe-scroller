@@ -1,6 +1,15 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { access, fail, short, limit, audit, billingFor, paid } from "./lib";
+import {
+  access,
+  fail,
+  short,
+  limit,
+  audit,
+  billingFor,
+  paid,
+  writeAccess,
+} from "./lib";
 import { company, isPaid } from "../packages/company-config";
 export const list = query({
   args: { organizationId: v.id("organizations") },
@@ -30,7 +39,7 @@ export const save = mutation({
     description: v.string(),
   },
   handler: async (ctx, args) => {
-    const a = await access(ctx, args.organizationId, ["owner", "admin"]);
+    const a = await writeAccess(ctx, args.organizationId, ["owner", "admin"]);
     await limit(ctx, `project:${a.actor._id}`);
     const name = short(args.name);
     if (args.description.length > 2000)
@@ -77,7 +86,7 @@ export const save = mutation({
 export const remove = mutation({
   args: { organizationId: v.id("organizations"), id: v.id("projects") },
   handler: async (ctx, { organizationId, id }) => {
-    const a = await access(ctx, organizationId, ["owner", "admin"]);
+    const a = await writeAccess(ctx, organizationId, ["owner", "admin"]);
     await limit(ctx, `project:${a.actor._id}`);
     const p = await ctx.db.get(id);
     if (!p || p.organizationId !== organizationId) fail("Project unavailable.");
