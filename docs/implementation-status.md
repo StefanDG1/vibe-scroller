@@ -138,3 +138,13 @@ Still incomplete: the full optional laptop runner, imports, all media paths and 
 At 03:58 UTC, `pnpm check` passed document validation, zero-warning lint, all type checks, 64 unit/auth tests, and both production builds on Next.js 16.3.6. Three provider integrations were skipped by default. The real browser completed a Stripe sandbox EUR 10 top-up using the official test card and the agent disclosure checkbox; its signed webhook granted 200 purchased credits separately from the included allowance. The private storage and source content tests remain labeled synthetic.
 
 Cloudflare packaging remains unverified. Windows directory-junction packaging got past symlink privileges but failed on native Sharp bundling. The separate Linux workflow is prepared without any provider secrets. The available Vercel Hobby team is not used for commercial deployment. See ADR 005 for the host evaluation and compatible dependency patch.
+
+## Import and host packaging checkpoint at 2026-09-30 04:10 UTC
+
+Commit `8a36dc54ea5d70b8b6a19556abb7c00d2f6577bb` passed GitHub CI run `36666804216`. Linux Cloudflare packaging run `36666804764` also passed, including Wrangler dry-run. The archive is private and has a two-day retention. Local Windows packaging failures remain recorded above; production hosting is not established by these results.
+
+Artifact scanning found 54 candidates in generated Next.js manifests and bundled dependencies. A separate byte comparison found zero occurrences of configured provider secrets in the artifact. Candidate review and runtime checks remain necessary; this is not a clean Gitleaks result for the artifact.
+
+The new CSV/JSON import accepts up to 500 links and 140 KB of strict UTF-8 input. It validates original UTC saved dates, titles and collections, rejects unrelated archive fields, and displays a row manifest. Imported links stay `needs_upload`; saving does not pretend to acquire media or charge analysis credits. Quota-limited rows explicitly say they were not saved. Source quotas now use an atomic active/lifetime counter after initialization for the pre-release workspace.
+
+`pnpm exec vitest run tests/product.test.ts tests/imports.test.ts` passed 27 tests before the additional full-batch test. The subsequent `pnpm exec vitest run tests/product.test.ts` passed 26 product tests, including 500 accepted rows and 500 duplicate rows on replay without a reservation. `pnpm typecheck` and zero-warning lint passed. Convex deployed the import and counter schema at 04:09 UTC. Browser import and updated production builds are still pending.

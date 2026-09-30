@@ -39,6 +39,73 @@ async function setup() {
   return { t, a, b, org, other };
 }
 describe("VibeScroller product boundaries", () => {
+  it("imports a full 500-row paid batch and deduplicates it without per-row credit use", async () => {
+    const { t, a, org } = await setup();
+    const start = Date.now();
+    await t.mutation(internal.commerce.grantPeriod, {
+      organizationId: org,
+      subscription: "sub_bulk_test",
+      tier: "pro",
+      interval: "monthly",
+      start,
+      end: start + 31 * 86400000,
+      verifiedPayment: true,
+    });
+    const rows = Array.from({ length: 500 }, (_, i) => ({
+      url: `https://youtube.com/watch?v=synthetic${i}`,
+    }));
+    const args = {
+      organizationId: org,
+      key: "bulk-500-test",
+      format: "json" as const,
+      text: JSON.stringify(rows),
+      rightsAttested: true,
+    };
+    expect((await a.mutation(api.imports.links, args)).accepted).toBe(500);
+    const replay = await a.mutation(api.imports.links, args);
+    expect(replay.duplicate).toBe(500);
+    await t.run(async (ctx) => {
+      expect((await ctx.db.query("sourceCounts").collect())[0].active).toBe(
+        500,
+      );
+      expect((await ctx.db.query("reservations").collect()).length).toBe(0);
+    });
+  });
+  it("imports links with a tenant-scoped manifest and no analysis charges", async () => {
+    const { a, b, org } = await setup();
+    const args = {
+      organizationId: org,
+      key: "import-001",
+      format: "json" as const,
+      rightsAttested: true,
+      text: JSON.stringify([
+        {
+          url: "https://youtube.com/watch?v=one",
+          title: "Synthetic imported link",
+          collection: "Research",
+          saved_at: "2025-01-01T00:00:00Z",
+        },
+        { url: "https://youtube.com/watch?v=one" },
+        { url: "https://example.com/private" },
+        { url: "file:///secret" },
+      ]),
+    };
+    await expect(b.mutation(api.imports.links, args)).rejects.toThrow();
+    const manifest = await a.mutation(api.imports.links, args);
+    expect(manifest).toMatchObject({
+      accepted: 1,
+      duplicate: 1,
+      unsupported: 1,
+      invalid: 1,
+      analysisCreditsCharged: 0,
+    });
+    const source = await a.query(api.product.detail, {
+      id: manifest.entries[0].sourceId as any,
+    });
+    expect(source.originalSavedAt).toBe(Date.UTC(2025, 0, 1));
+    expect(source.state).toBe("needs_upload");
+    expect(source.tags).toEqual(["Research"]);
+  });
   it("grants paid upgrade differences once and blocks new work on failed payment", async () => {
     const { t, a, org } = await setup();
     const start = Date.now(),

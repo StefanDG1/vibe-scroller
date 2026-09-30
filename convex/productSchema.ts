@@ -17,6 +17,11 @@ const sourceState = v.union(
   ].map((s) => v.literal(s)),
 );
 export const productTables = {
+  sourceCounts: defineTable({
+    organizationId: v.id("organizations"),
+    active: v.number(),
+    lifetime: v.number(),
+  }).index("by_org", ["organizationId"]),
   matchingJobs: defineTable({
     ...tenant,
     key: v.string(),
@@ -129,6 +134,7 @@ export const productTables = {
     kind: v.string(),
     title: v.string(),
     url: v.optional(v.string()),
+    originalSavedAt: v.optional(v.number()),
     text: v.optional(v.string()),
     objectKey: v.optional(v.string()),
     state: sourceState,

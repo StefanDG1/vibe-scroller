@@ -23,6 +23,7 @@ import type * as githubLinks from "../githubLinks.js";
 import type * as githubOAuth from "../githubOAuth.js";
 import type * as http from "../http.js";
 import type * as identity from "../identity.js";
+import type * as imports from "../imports.js";
 import type * as inferenceBudget from "../inferenceBudget.js";
 import type * as integrations from "../integrations.js";
 import type * as jobs from "../jobs.js";
@@ -62,6 +63,7 @@ declare const fullApi: ApiFromModules<{
   githubOAuth: typeof githubOAuth;
   http: typeof http;
   identity: typeof identity;
+  imports: typeof imports;
   inferenceBudget: typeof inferenceBudget;
   integrations: typeof integrations;
   jobs: typeof jobs;

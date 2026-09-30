@@ -3,6 +3,7 @@ import { backend, api, configured } from "@/lib/backend";
 import { withAuth } from "@workos-inc/authkit-nextjs";
 const operations = {
   capture: ["mutation", api.product.capture],
+  importLinks: ["mutation", api.imports.links],
   process: ["mutation", api.product.processSource],
   editSource: ["mutation", api.product.editSource],
   attachSource: ["mutation", api.product.attachSource],

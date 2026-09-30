@@ -1294,6 +1294,8 @@ function CaptureForm({
   sharedDraft,
 }: any) {
   const [kind, setKind] = useState(existingSourceId ? "upload" : "url");
+  const [manifest, setManifest] = useState<any>(null);
+  const [importError, setImportError] = useState("");
   return (
     <form
       className="form-grid"
@@ -1303,6 +1305,34 @@ function CaptureForm({
         if (demo) {
           await call("capture", { synthetic: true });
           onDone();
+          return;
+        }
+        if (kind === "import") {
+          try {
+            setImportError("");
+            const file = f.get("import") as File;
+            if (!file || file.size > 140000)
+              throw new Error(
+                "Choose a CSV or JSON file within 140 KB, with up to 500 links.",
+              );
+            const text = new TextDecoder("utf-8", { fatal: true }).decode(
+              await file.arrayBuffer(),
+            );
+            const result = await call("importLinks", {
+              organizationId,
+              key: crypto.randomUUID(),
+              format: file.name.toLowerCase().endsWith(".json")
+                ? "json"
+                : "csv",
+              text,
+              rightsAttested: f.get("rights") === "on",
+            });
+            if (result) setManifest(result);
+          } catch (error) {
+            setImportError(
+              error instanceof Error ? error.message : "Import failed.",
+            );
+          }
           return;
         }
         if (kind === "upload") {
@@ -1379,17 +1409,34 @@ function CaptureForm({
         Source type
         <select value={kind} onChange={(e) => setKind(e.target.value)}>
           {!existingSourceId && <option value="url">Video URL</option>}
+          {!existingSourceId && (
+            <option value="import">CSV or JSON link import</option>
+          )}
           <option value="upload">Permitted media upload</option>
           <option value="text">Supplied transcript</option>
         </select>
       </label>
-      {!existingSourceId && (
+      {!existingSourceId && kind !== "import" && (
         <label>
           Title
           <input name="title" required maxLength={160} />
         </label>
       )}
-      {kind === "url" ? (
+      {kind === "import" ? (
+        <label>
+          CSV or JSON, up to 500 links
+          <input
+            name="import"
+            type="file"
+            accept=".csv,.json,text/csv,application/json"
+            required
+          />
+          <span className="fine">
+            Use url with optional title, collection, saved_at. Original dates
+            use UTC ISO timestamps. Links are saved without analysis charges.
+          </span>
+        </label>
+      ) : kind === "url" ? (
         <label>
           Source URL
           <input
@@ -1427,10 +1474,31 @@ function CaptureForm({
       <button className="primary">
         {demo
           ? "Save synthetic demo source"
-          : existingSourceId
-            ? "Attach permitted content"
-            : "Save source"}
+          : kind === "import"
+            ? "Import permitted links"
+            : existingSourceId
+              ? "Attach permitted content"
+              : "Save source"}
       </button>
+      {importError && <p role="alert">{importError}</p>}
+      {manifest && (
+        <section aria-label="Import manifest">
+          <output>
+            {manifest.accepted} saved, {manifest.duplicate} duplicates,{" "}
+            {manifest.invalid} invalid, {manifest.unsupported} unsupported,{" "}
+            {manifest.waiting} waiting. Analysis credits charged:{" "}
+            {manifest.analysisCreditsCharged}.
+          </output>
+          <ol>
+            {manifest.entries.map((entry: any) => (
+              <li key={entry.row}>
+                Row {entry.row}: {entry.status}
+                {entry.message ? `. ${entry.message}` : ""}
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
     </form>
   );
 }

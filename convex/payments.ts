@@ -21,6 +21,11 @@ const appUrl = () => {
   return new URL(url).origin;
 };
 async function refresh(ctx: ActionCtx, customerId: string, eventId?: string) {
+  // The exported legacy catalogue must never overwrite V1 allowance state.
+  if (process.env.STRIPE_V1_WEBHOOK_SECRET) {
+    await ctx.runAction(internal.reconciliation.customer, { customerId });
+    return;
+  }
   const reservation = await ctx.runMutation(internal.billing.reserveRefresh, {
     customerId,
   });

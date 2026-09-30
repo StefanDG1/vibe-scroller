@@ -445,124 +445,154 @@ export const capture = mutation({
     objectKey: v.optional(v.string()),
     rightsAttested: v.boolean(),
   },
-  handler: async (ctx, a) => {
-    const actor = await access(ctx, a.organizationId, [
-      "owner",
-      "admin",
-      "member",
-    ]);
-    ensure(
-      process.env.DISABLE_CAPTURE !== "true",
-      "POLICY_BLOCKED",
-      "Capture is paused.",
-    );
+  handler: (ctx, a) => captureOne(ctx, a),
+});
+export async function captureOne(
+  ctx: MutationCtx,
+  a: {
+    organizationId: Id<"organizations">;
+    key: string;
+    kind: string;
+    url?: string;
+    title: string;
+    text?: string;
+    objectKey?: string;
+    rightsAttested: boolean;
+  },
+  bulk = false,
+) {
+  const actor = await access(ctx, a.organizationId, [
+    "owner",
+    "admin",
+    "member",
+  ]);
+  ensure(
+    process.env.DISABLE_CAPTURE !== "true",
+    "POLICY_BLOCKED",
+    "Capture is paused.",
+  );
+  if (!bulk)
     await productLimits.limit(ctx, "capture", {
       key: actor.actor._id,
       throws: true,
     });
-    ensure(
-      a.rightsAttested,
-      "RIGHTS_REQUIRED",
-      "Confirm that you may submit this content.",
-    );
-    ensure(
-      ["url", "text", "upload"].includes(a.kind) &&
-        a.title.length > 0 &&
-        a.title.length <= 160 &&
-        a.key.length >= 8 &&
-        a.key.length <= 100,
-      "INVALID_INPUT",
-      "Invalid capture input.",
-    );
-    const old = await ctx.db
-      .query("sources")
-      .withIndex("by_key", (q) =>
-        q.eq("organizationId", a.organizationId).eq("key", a.key),
-      )
+  ensure(
+    a.rightsAttested,
+    "RIGHTS_REQUIRED",
+    "Confirm that you may submit this content.",
+  );
+  ensure(
+    ["url", "text", "upload"].includes(a.kind) &&
+      a.title.length > 0 &&
+      a.title.length <= 160 &&
+      a.key.length >= 8 &&
+      a.key.length <= 100,
+    "INVALID_INPUT",
+    "Invalid capture input.",
+  );
+  const old = await ctx.db
+    .query("sources")
+    .withIndex("by_key", (q) =>
+      q.eq("organizationId", a.organizationId).eq("key", a.key),
+    )
+    .unique();
+  if (old && old.state !== "deleted") return old._id;
+  let canonical =
+    a.kind === "url"
+      ? safeSourceUrl(a.url ?? "")
+      : a.kind === "text"
+        ? `text:${await digest(a.text ?? "")}`
+        : `object:${a.objectKey}`;
+  ensure(
+    !a.text || (a.text.length <= 60000 && !containsSecret(a.text)),
+    "POLICY_BLOCKED",
+    "Supplied text is too large or contains a credential.",
+  );
+  ensure(
+    a.kind !== "text" || !!a.text,
+    "INVALID_INPUT",
+    "Supply a transcript.",
+  );
+  ensure(
+    a.kind !== "upload" ||
+      (!!a.objectKey && a.objectKey.startsWith(`${a.organizationId}/`)),
+    "FORBIDDEN",
+    "Upload unavailable.",
+  );
+  if (a.kind === "upload") {
+    const asset = await ctx.db
+      .query("assets")
+      .withIndex("by_key", (q) => q.eq("key", a.objectKey!))
       .unique();
-    if (old && old.state !== "deleted") return old._id;
-    let canonical =
-      a.kind === "url"
-        ? safeSourceUrl(a.url ?? "")
-        : a.kind === "text"
-          ? `text:${await digest(a.text ?? "")}`
-          : `object:${a.objectKey}`;
     ensure(
-      !a.text || (a.text.length <= 60000 && !containsSecret(a.text)),
-      "POLICY_BLOCKED",
-      "Supplied text is too large or contains a credential.",
+      asset &&
+        asset.organizationId === a.organizationId &&
+        asset.state === "complete" &&
+        asset.expiresAt !== undefined &&
+        asset.expiresAt > Date.now(),
+      "UPLOAD_INVALID",
+      "Complete a verified upload first.",
     );
-    ensure(
-      a.kind !== "text" || !!a.text,
-      "INVALID_INPUT",
-      "Supply a transcript.",
-    );
-    ensure(
-      a.kind !== "upload" ||
-        (!!a.objectKey && a.objectKey.startsWith(`${a.organizationId}/`)),
-      "FORBIDDEN",
-      "Upload unavailable.",
-    );
-    if (a.kind === "upload") {
-      const asset = await ctx.db
-        .query("assets")
-        .withIndex("by_key", (q) => q.eq("key", a.objectKey!))
-        .unique();
-      ensure(
-        asset &&
-          asset.organizationId === a.organizationId &&
-          asset.state === "complete" &&
-          asset.expiresAt !== undefined &&
-          asset.expiresAt > Date.now(),
-        "UPLOAD_INVALID",
-        "Complete a verified upload first.",
-      );
-    }
-    const dup = await ctx.db
-      .query("sources")
-      .withIndex("by_canonical", (q) =>
-        q.eq("organizationId", a.organizationId).eq("canonical", canonical),
-      )
-      .unique();
-    if (dup && dup.state !== "deleted") return dup._id;
-    const w = await wallet(ctx, a.organizationId);
+  }
+  const dup = await ctx.db
+    .query("sources")
+    .withIndex("by_canonical", (q) =>
+      q.eq("organizationId", a.organizationId).eq("canonical", canonical),
+    )
+    .unique();
+  if (dup && dup.state !== "deleted") return dup._id;
+  const w = await wallet(ctx, a.organizationId);
+  let counts = await ctx.db
+    .query("sourceCounts")
+    .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
+    .unique();
+  if (!counts) {
+    // Initial migration for the pre-release workspace. Future captures use one counter row.
     const rows = await ctx.db
       .query("sources")
       .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
-      .take(w.tier === "trial" ? 4 : 10001);
-    ensure(
-      (w.tier !== "trial" || w.granted > 0) &&
-        (w.tier === "trial"
-          ? rows.length
-          : rows.filter((s) => s.state !== "deleted").length) <
-          (w.tier === "trial" ? 3 : w.tier === "pro" ? 10000 : 1000),
-      "QUOTA_EXCEEDED",
-      "Source allowance reached.",
-    );
-    const now = Date.now();
-    const id = await ctx.db.insert("sources", {
-      ...a,
-      canonical,
-      searchable: [a.title, a.text].filter(Boolean).join(" "),
-      state: a.kind === "url" ? "needs_upload" : "saved",
-      coverage: a.kind === "text" ? "caption_only" : "metadata_only",
-      tags: [],
-      generation: 0,
-      createdAt: now,
-      updatedAt: now,
+      .take(10001);
+    const countId = await ctx.db.insert("sourceCounts", {
+      organizationId: a.organizationId,
+      active: rows.filter((s) => s.state !== "deleted").length,
+      lifetime: rows.length,
     });
-    if (a.kind === "upload") {
-      const asset = await ctx.db
-        .query("assets")
-        .withIndex("by_key", (q) => q.eq("key", a.objectKey!))
-        .unique();
-      if (asset)
-        await ctx.db.patch(asset._id, { sourceId: id, updatedAt: now });
-    }
-    await audit(ctx, a.organizationId, actor.actor._id, "source.captured", id);
-    return id;
-  },
-});
+    counts = (await ctx.db.get(countId))!;
+  }
+  ensure(
+    (w.tier !== "trial" || w.granted > 0) &&
+      (w.tier === "trial" ? counts.lifetime : counts.active) <
+        (w.tier === "trial" ? 3 : w.tier === "pro" ? 10000 : 1000),
+    "QUOTA_EXCEEDED",
+    "Source allowance reached.",
+  );
+  const now = Date.now();
+  const id = await ctx.db.insert("sources", {
+    ...a,
+    canonical,
+    searchable: [a.title, a.text].filter(Boolean).join(" "),
+    state: a.kind === "url" ? "needs_upload" : "saved",
+    coverage: a.kind === "text" ? "caption_only" : "metadata_only",
+    tags: [],
+    generation: 0,
+    createdAt: now,
+    updatedAt: now,
+  });
+  await ctx.db.patch(counts._id, {
+    active: counts.active + 1,
+    lifetime: counts.lifetime + 1,
+  });
+  if (a.kind === "upload") {
+    const asset = await ctx.db
+      .query("assets")
+      .withIndex("by_key", (q) => q.eq("key", a.objectKey!))
+      .unique();
+    if (asset) await ctx.db.patch(asset._id, { sourceId: id, updatedAt: now });
+  }
+  await audit(ctx, a.organizationId, actor.actor._id, "source.captured", id);
+  return id;
+}
+
 export async function digest(text: string) {
   const b = await crypto.subtle.digest(
     "SHA-256",
@@ -872,6 +902,16 @@ export const deleteSource = mutation({
 export async function redactSource(ctx: MutationCtx, id: Id<"sources">) {
   const s = await ctx.db.get(id);
   if (!s) return;
+  if (s.state !== "deleted") {
+    const counts = await ctx.db
+      .query("sourceCounts")
+      .withIndex("by_org", (q) => q.eq("organizationId", s.organizationId))
+      .unique();
+    if (counts)
+      await ctx.db.patch(counts._id, {
+        active: Math.max(0, counts.active - 1),
+      });
+  }
   if (
     !(await ctx.db
       .query("tombstones")
