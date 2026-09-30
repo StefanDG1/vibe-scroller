@@ -1,0 +1,34 @@
+{
+  "observedAt": "2026-09-30T10:16:50.370Z",
+  "environment": "dedicated Stripe sandbox",
+  "synthetic": true,
+  "accountId": "acct_1ULEK7BINq6evjJt",
+  "invoiceId": "in_1ULIftBINq6evjJtZ9hR3dRN",
+  "invoiceStatus": "paid",
+  "invoicePaid": 1000,
+  "currency": "eur",
+  "payments": [
+    {
+      "id": "pi_3ULKZ6BINq6evjJt0NO4kCTN",
+      "amount": 500,
+      "chargeId": "ch_3ULKZ6BINq6evjJt05BSVLYX",
+      "attached": true,
+      "refundId": "re_3ULKZ6BINq6evjJt0FlhKsfX"
+    },
+    {
+      "id": "pi_3ULKZ8BINq6evjJt1GTiWE2D",
+      "amount": 500,
+      "chargeId": "ch_3ULKZ8BINq6evjJt1EdMUY9m",
+      "attached": true,
+      "refundId": "re_3ULKZ8BINq6evjJt1CP4Dud8"
+    }
+  ],
+  "aggregateRefunded": 500,
+  "invoiceRefundFraction": "500/1000",
+  "providerChecksPassed": true,
+  "limitations": [
+    "Provider invoice allocation and cumulative refunds only",
+    "Customer has no application billing link; application credit projection is verified separately in unit tests",
+    "No live charges, emails or production tax validation"
+  ]
+}

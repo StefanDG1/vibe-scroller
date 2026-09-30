@@ -10,6 +10,60 @@ import { wallet } from "./product";
 import { pricing, ensure } from "../packages/policy";
 import type { MutationCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
+async function invoiceRefundFraction(
+  ctx: MutationCtx,
+  organizationId: Id<"organizations">,
+  invoiceId: string,
+) {
+  const rows = await ctx.db
+    .query("billingReversals")
+    .withIndex("by_invoice", (q) => q.eq("invoiceId", invoiceId))
+    .collect();
+  if (!rows.length) return { refunded: BigInt(0), total: BigInt(1) };
+  ensure(
+    rows.every((r) => r.organizationId === organizationId),
+    "FORBIDDEN",
+    "Invoice belongs to another workspace.",
+  );
+  const totals = [
+    ...new Set(
+      rows
+        .map((r) => r.invoiceTotal)
+        .filter((n): n is number => n !== undefined),
+    ),
+  ];
+  ensure(
+    totals.length <= 1 && (totals.length === 1 || rows.length === 1),
+    "REFUND_RECONCILIATION_REQUIRED",
+    "Verify the invoice's paid total before reconciling multiple payments.",
+  );
+  const total = totals[0] ?? rows[0].total;
+  ensure(
+    Number.isSafeInteger(total) && total > 0,
+    "REFUND_INVALID",
+    "Invoice paid total is invalid.",
+  );
+  const numerator = rows.reduce(
+    (sum, r) => sum + BigInt(r.refunded),
+    BigInt(0),
+  );
+  const denominator = BigInt(total);
+  return {
+    refunded: numerator > denominator ? denominator : numerator,
+    total: denominator,
+  };
+}
+function revokedCredits(
+  credits: number,
+  ratio: { refunded: bigint; total: bigint },
+) {
+  ensure(
+    Number.isSafeInteger(credits) && credits >= 0,
+    "REFUND_INVALID",
+    "Invalid invoice credit contribution.",
+  );
+  return Number((BigInt(credits) * ratio.refunded) / ratio.total);
+}
 async function fundInvoice(
   ctx: MutationCtx,
   organizationId: Id<"organizations">,
@@ -24,18 +78,10 @@ async function fundInvoice(
     .withIndex("by_key", (q) => q.eq("key", key))
     .unique();
   if (old) return old.revoked;
-  const reversal = await ctx.db
-    .query("billingReversals")
-    .withIndex("by_invoice", (q) => q.eq("invoiceId", invoiceId))
-    .unique();
-  ensure(
-    !reversal || reversal.organizationId === organizationId,
-    "FORBIDDEN",
-    "Invoice belongs to another workspace.",
+  const revoked = revokedCredits(
+    credits,
+    await invoiceRefundFraction(ctx, organizationId, invoiceId),
   );
-  const revoked = reversal
-    ? Math.floor((credits * reversal.refunded) / reversal.total)
-    : 0;
   await ctx.db.insert("creditFunding", {
     organizationId,
     poolId,
@@ -350,6 +396,7 @@ export const reversePayment = internalMutation({
     refunded: v.number(),
     total: v.number(),
     invoiceId: v.optional(v.string()),
+    invoiceTotal: v.optional(v.number()),
   },
   handler: async (ctx, a) => {
     ensure(
@@ -362,6 +409,12 @@ export const reversePayment = internalMutation({
       "Invalid cumulative provider refund.",
     );
     const key = `refund:${a.paymentId}`;
+    ensure(
+      !a.invoiceId ||
+        (Number.isSafeInteger(a.invoiceTotal) && a.invoiceTotal! >= a.total),
+      "REFUND_RECONCILIATION_REQUIRED",
+      "Verify invoice allocation and paid total before reversing credits.",
+    );
     const old = await ctx.db
       .query("billingReversals")
       .withIndex("by_key", (q) => q.eq("key", key))
@@ -371,10 +424,20 @@ export const reversePayment = internalMutation({
       "FORBIDDEN",
       "Payment belongs to another workspace.",
     );
+    ensure(
+      !old ||
+        (old.invoiceId === a.invoiceId &&
+          old.total === a.total &&
+          (old.invoiceTotal === undefined ||
+            old.invoiceTotal === a.invoiceTotal)),
+      "REFUND_RECONCILIATION_REQUIRED",
+      "Payment allocation changed; reconcile before applying another reversal.",
+    );
     if (old && old.refunded >= a.refunded) return;
     if (old)
       await ctx.db.patch(old._id, {
         refunded: a.refunded,
+        invoiceTotal: a.invoiceTotal,
         updatedAt: Date.now(),
       });
     else
@@ -386,6 +449,11 @@ export const reversePayment = internalMutation({
       });
     if (a.invoiceId) {
       const invoiceId = a.invoiceId;
+      const fraction = await invoiceRefundFraction(
+        ctx,
+        a.organizationId,
+        invoiceId,
+      );
       const grants = await ctx.db
         .query("creditFunding")
         .withIndex("by_invoice", (q) => q.eq("invoiceId", invoiceId))
@@ -398,7 +466,7 @@ export const reversePayment = internalMutation({
           "FORBIDDEN",
           "Invoice grant belongs to another workspace.",
         );
-        const revoked = Math.floor((grant.credits * a.refunded) / a.total),
+        const revoked = revokedCredits(grant.credits, fraction),
           delta = revoked - grant.revoked;
         if (delta <= 0) continue;
         const pool = await ctx.db.get(grant.poolId);

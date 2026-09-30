@@ -4,6 +4,8 @@ import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import { authorizeRepository } from "./lib/githubAuthorization";
 import { infer } from "./lib/inference";
+import { customerStructured } from "../packages/providers/customerAi";
+import { decrypt } from "../packages/providers/secrets";
 import {
   createCodingSandbox,
   codeChanges,
@@ -42,8 +44,50 @@ export const execute = internalAction({
         allowedPaths: run.allowedPaths,
         highRisk: run.highRisk,
         maxCredits: run.maxCredits,
-        generate: (schema, prompt, input, maxOutput) =>
-          infer(ctx, schema, prompt, input, maxOutput),
+        generate: async (schema, prompt, input, maxOutput) => {
+          if (run.fundingRoute !== "customer_api_key")
+            return infer(ctx, schema, prompt, input, maxOutput);
+          const credential = await ctx.runMutation(
+            internal.jobs.startCustomerRequest,
+            { id: run._id, generation: run.generation },
+          );
+          const abort = new AbortController();
+          const timer = setInterval(() => {
+            void ctx
+              .runQuery(internal.jobs.customerRequestActive, {
+                id: run._id,
+                generation: run.generation,
+              })
+              .then((active) => {
+                if (!active) abort.abort();
+              })
+              .catch(() => abort.abort());
+          }, 2000);
+          try {
+            const result = await customerStructured(
+              decrypt(
+                credential.ciphertext,
+                credential.keyVersion,
+                credential.organizationId,
+                "openai",
+              ),
+              credential.model,
+              credential.maxUsdCents,
+              schema,
+              prompt,
+              input,
+              abort.signal,
+            );
+            await ctx.runMutation(internal.jobs.recordCustomerUsage, {
+              id: run._id,
+              generation: run.generation,
+              cents: result.providerUsdCents,
+            });
+            return result;
+          } finally {
+            clearInterval(timer);
+          }
+        },
       });
       credits = generated.credits;
       if (credits + run.computeReserve > run.maxCredits)

@@ -55,6 +55,33 @@ export const stripeEvent = internalAction({
             ? payments.data[0].invoice
             : payments.data[0].invoice.id
           : undefined;
+      ensure(
+        !payments?.has_more && (payments?.data.length ?? 0) <= 1,
+        "REFUND_RECONCILIATION_REQUIRED",
+        "A payment spans multiple invoices; review its allocation before reversing credits.",
+      );
+      let invoiceTotal: number | undefined;
+      if (invoiceId) {
+        const invoice = await client.invoices.retrieve(invoiceId);
+        const customer =
+          typeof invoice.customer === "string"
+            ? invoice.customer
+            : invoice.customer?.id;
+        const chargeCustomer =
+          typeof charge.customer === "string"
+            ? charge.customer
+            : charge.customer?.id;
+        ensure(
+          invoice.status === "paid" &&
+            customer === chargeCustomer &&
+            invoice.currency === charge.currency &&
+            payments?.data[0].amount_paid === charge.amount &&
+            invoice.amount_paid >= charge.amount,
+          "REFUND_RECONCILIATION_REQUIRED",
+          "Invoice payment allocation cannot be verified.",
+        );
+        invoiceTotal = invoice.amount_paid;
+      }
       if (linked && paymentId && charge.amount_refunded > 0)
         await ctx.runMutation(internal.commerce.reversePayment, {
           organizationId: linked.organizationId,
@@ -62,6 +89,7 @@ export const stripeEvent = internalAction({
           refunded: charge.amount_refunded,
           total: charge.amount,
           invoiceId,
+          invoiceTotal,
         });
     }
     if (

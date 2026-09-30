@@ -14,6 +14,10 @@ type Initial = {
   devices?: any[];
   measured?: number;
   githubChoices?: { id: number; fullName: string; installationId: number }[];
+  customerRoutes?: {
+    status: string;
+    models: { id: string; version: string; maxProviderUsdCents: number }[];
+  };
 };
 const id = (o: any) => o._id ?? o.id;
 const label = (s: string) => s.replaceAll("_", " ");
@@ -1055,7 +1059,11 @@ export function Console({
                   Export plan
                 </Button>
               </section>
-              <ExecutionApproval proposal={selected} call={call} demo={demo} />
+              <ExecutionApproval
+                proposal={selected}
+                call={call}
+                routes={data.customerRoutes}
+              />
             </>
           )}
           {view === "runs" && (
@@ -1188,7 +1196,13 @@ export function Console({
                 <h2>Your OpenAI API credential</h2>
                 <p>
                   Provider charges are separate. The server encrypts this
-                  credential; the browser does not retain it.
+                  credential; the browser does not retain it. Saving does not
+                  activate execution. Sign in again before saving or testing.
+                </p>
+                <p>
+                  Status: {label(data.customerRoutes?.status ?? "disconnected")}
+                  . {data.customerRoutes?.models.length ?? 0} reviewed models
+                  available.
                 </p>
                 <label>
                   API key
@@ -1202,6 +1216,18 @@ export function Console({
                 <button className="primary" disabled={busy}>
                   Encrypt and save credential
                 </button>
+                <Button
+                  busy={busy}
+                  onClick={() => call("testKey", { organizationId })}
+                >
+                  Verify credential with a model-list request
+                </Button>
+                <p className="fine">
+                  Verification sends no inference request. Coding requires a
+                  separate USD provider ceiling and platform compute allowance.
+                  No reviewed available model means this route stays
+                  unavailable.
+                </p>
                 <Button
                   busy={busy}
                   onClick={() =>
@@ -1936,9 +1962,12 @@ function SourceDetail({ source, demo, org, repos, call, onProposal }: any) {
     </>
   );
 }
-function ExecutionApproval({ proposal, call }: any) {
+function ExecutionApproval({ proposal, call, routes }: any) {
   const [executor, setExecutor] = useState("local"),
-    [ceiling, setCeiling] = useState(100);
+    [ceiling, setCeiling] = useState(100),
+    [modelId, setModelId] = useState("");
+  const model = routes?.models.find((m: any) => m.id === modelId);
+  const cloud = executor !== "local";
   return (
     <section className="panel">
       <h2>Separate execution approval</h2>
@@ -1955,9 +1984,39 @@ function ExecutionApproval({ proposal, call }: any) {
         <select value={executor} onChange={(e) => setExecutor(e.target.value)}>
           <option value="local">Paired laptop, own local Codex session</option>
           <option value="cloud">Metered cloud, managed API</option>
+          <option value="customer" disabled={!routes?.models.length}>
+            Metered cloud, your OpenAI API credential
+          </option>
         </select>
       </label>
-      {executor === "cloud" && (
+      {executor === "customer" && (
+        <>
+          <label>
+            Reviewed model
+            <select
+              value={modelId}
+              onChange={(e) => setModelId(e.target.value)}
+            >
+              <option value="">Choose a verified model</option>
+              {routes?.models.map((m: any) => (
+                <option key={m.id} value={m.id}>
+                  {m.id} · {m.version}
+                </option>
+              ))}
+            </select>
+          </label>
+          <p>
+            Separate provider ceiling:{" "}
+            {model
+              ? `USD ${(model.maxProviderUsdCents / 100).toFixed(2)}`
+              : "Choose a model"}
+            . OpenAI bills your API account directly. Platform credits cover
+            isolated compute; they do not pay this provider charge. One
+            generation request, no automatic retry or fallback.
+          </p>
+        </>
+      )}
+      {cloud && (
         <label>
           Maximum platform credits
           <input
@@ -1975,16 +2034,27 @@ function ExecutionApproval({ proposal, call }: any) {
       </p>
       <button
         className="primary"
+        disabled={executor === "customer" && !model}
         onClick={() =>
           call("approve", {
             id: id(proposal),
             version: proposal.version,
             planHash: proposal.planHash ?? "",
             baseSha: proposal.baseSha ?? "",
-            executor,
+            executor: cloud ? "cloud" : "local",
             fundingRoute:
-              executor === "local" ? "local_codex_subscription" : "managed_api",
-            maxCredits: executor === "local" ? 0 : ceiling,
+              executor === "local"
+                ? "local_codex_subscription"
+                : executor === "customer"
+                  ? "customer_api_key"
+                  : "managed_api",
+            ...(executor === "customer"
+              ? {
+                  modelId: model.id,
+                  maxProviderUsdCents: model.maxProviderUsdCents,
+                }
+              : {}),
+            maxCredits: cloud ? ceiling : 0,
             allowedPaths: proposal.plan?.files.map((f: any) => f.path) ?? [],
             highRisk: false,
           })
@@ -2007,6 +2077,15 @@ function RunCard({ run, call }: any) {
         {run.executor} · {label(run.fundingRoute)} · Ceiling {run.maxCredits}{" "}
         credits
       </p>
+      {run.fundingRoute === "customer_api_key" && (
+        <p>
+          Customer API model: {run.customerModel?.id}. Provider ceiling USD{" "}
+          {((run.maxProviderUsdCents ?? 0) / 100).toFixed(2)}.{" "}
+          {run.providerRequestState === "settled"
+            ? `Reported provider usage USD ${(run.providerUsdCents / 100).toFixed(2)}.`
+            : `Provider request: ${label(run.providerRequestState ?? "unissued")}. Unknown usage requires reconciliation.`}
+        </p>
+      )}
       <p>Benefit: not measured</p>
       <ul>
         {run.events?.map((e: string, i: number) => (

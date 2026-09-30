@@ -1,7 +1,8 @@
 import { Sandbox } from "e2b";
 import { hardenSandbox } from "./isolation";
-import { ensure, excludedPath, containsSecret, validatePaths } from "../policy";
+import { ensure, containsSecret, validatePaths } from "../policy";
 import { github, installationToken } from "./github";
+import { inspectedIgnorePolicy } from "../repositories/prepare";
 const changesSchema = {
   type: "object",
   additionalProperties: false,
@@ -49,11 +50,20 @@ export async function codeChanges(input: {
     "REPO_TOO_LARGE",
     "The repository needs a reviewed larger snapshot quote.",
   );
+  const ignored = await inspectedIgnorePolicy(tree.tree, async (sha) => {
+    const blob = await github(`${root}/git/blobs/${sha}`, token);
+    return Buffer.from(blob.content, "base64").toString("utf8");
+  });
+  ensure(
+    input.allowedPaths.every((path) => !ignored(path)),
+    "POLICY_BLOCKED",
+    "An approved path is excluded by the repository ignore policy.",
+  );
   const items = tree.tree.filter(
     (f: any) =>
       f.type === "blob" &&
       f.mode !== "120000" &&
-      !excludedPath(f.path) &&
+      !ignored(f.path) &&
       !/\.(png|jpe?g|gif|webp|ico|pdf|zip|xlsx?|woff2?|ttf|mp[34]|wav)$/i.test(
         f.path,
       ),

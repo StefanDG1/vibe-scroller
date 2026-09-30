@@ -7,7 +7,12 @@ import {
   internalMutation,
 } from "./_generated/server";
 import { v } from "convex/values";
-import { access, fail, writeAccess } from "./lib";
+import { access, fail, writeAccess, recentAuthentication } from "./lib";
+import {
+  customerModels,
+  customerQuote,
+  currentCustomerModel,
+} from "../packages/providers/customerAi";
 import { ensure, validatePaths, containsSecret } from "../packages/policy";
 import { reserve, settle, digest, wallet } from "./product";
 const org = { organizationId: v.id("organizations") };
@@ -34,6 +39,35 @@ async function approvalActive(
 export const authorizeOwner = query({
   args: org,
   handler: (ctx, a) => access(ctx, a.organizationId, ["owner", "admin"]),
+});
+export const authorizeCredential = query({
+  args: org,
+  handler: async (ctx, a) => {
+    const actor = await access(ctx, a.organizationId, ["owner"]);
+    await recentAuthentication(ctx);
+    return actor.actor._id;
+  },
+});
+export const customerRoutes = query({
+  args: org,
+  handler: async (ctx, a) => {
+    await access(ctx, a.organizationId);
+    const key = await ctx.db
+      .query("connections")
+      .withIndex("by_provider", (q) =>
+        q.eq("organizationId", a.organizationId).eq("provider", "openai"),
+      )
+      .unique();
+    return {
+      status: key?.status ?? "disconnected",
+      models:
+        key?.status === "verified"
+          ? customerModels()
+              .filter((m) => key.availableModels?.includes(m.id))
+              .map((m) => ({ ...m, maxProviderUsdCents: customerQuote(m) }))
+          : [],
+    };
+  },
 });
 export const saveRepository = internalMutation({
   args: {
@@ -115,14 +149,70 @@ export const secret = internalQuery({
       )
       .unique(),
 });
+export const rotationPage = internalQuery({
+  args: { cursor: v.union(v.string(), v.null()) },
+  handler: (ctx, a) =>
+    ctx.db.query("connections").paginate({ cursor: a.cursor, numItems: 25 }),
+});
+export const rotateCiphertext = internalMutation({
+  args: {
+    id: v.id("connections"),
+    previous: v.string(),
+    ciphertext: v.string(),
+    keyVersion: v.string(),
+  },
+  handler: async (ctx, a) => {
+    const old = await ctx.db.get(a.id);
+    if (!old || old.ciphertext !== a.previous) return false;
+    await ctx.db.patch(a.id, {
+      ciphertext: a.ciphertext,
+      keyVersion: a.keyVersion,
+    });
+    return true;
+  },
+});
 export const storeSecret = internalMutation({
   args: {
     ...org,
     provider: v.string(),
     ciphertext: v.string(),
     keyVersion: v.string(),
+    actorId: v.optional(v.id("users")),
   },
   handler: async (ctx, a) => {
+    if (a.provider === "openai") {
+      ensure(a.actorId, "FORBIDDEN", "Credential owner required.");
+      const actor = await ctx.db.get(a.actorId);
+      const organization = await ctx.db.get(a.organizationId);
+      const membership = await ctx.db
+        .query("memberships")
+        .withIndex("by_pair", (q) =>
+          q.eq("organizationId", a.organizationId).eq("userId", a.actorId!),
+        )
+        .unique();
+      ensure(
+        actor?.status === "active" &&
+          organization?.status === "active" &&
+          membership?.role === "owner",
+        "FORBIDDEN",
+        "Credential owner access changed.",
+      );
+      const active = await ctx.db
+        .query("runs")
+        .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
+        .collect();
+      for (const run of active)
+        if (
+          run.fundingRoute === "customer_api_key" &&
+          !["completed", "canceled", "failed"].includes(run.state)
+        )
+          await ctx.db.patch(run._id, {
+            state: "canceled",
+            generation: run.generation + 1,
+            updatedAt: Date.now(),
+          });
+    }
+    const { actorId: _actorId, ...stored } = a;
     const old = await ctx.db
       .query("connections")
       .withIndex("by_provider", (q) =>
@@ -131,17 +221,66 @@ export const storeSecret = internalMutation({
       .unique();
     if (old)
       await ctx.db.patch(old._id, {
-        ...a,
-        status: "connected",
+        ...stored,
+        revision: crypto.randomUUID(),
+        availableModels: [],
+        status: a.provider === "openai" ? "stored" : "connected",
         updatedAt: Date.now(),
       });
     else
       await ctx.db.insert("connections", {
-        ...a,
-        status: "connected",
+        ...stored,
+        revision: crypto.randomUUID(),
+        availableModels: [],
+        status: a.provider === "openai" ? "stored" : "connected",
         createdAt: Date.now(),
         updatedAt: Date.now(),
       });
+  },
+});
+export const verifiedCredential = internalMutation({
+  args: {
+    ...org,
+    actorId: v.id("users"),
+    revision: v.string(),
+    models: v.array(v.string()),
+  },
+  handler: async (ctx, a) => {
+    const membership = await ctx.db
+      .query("memberships")
+      .withIndex("by_pair", (q) =>
+        q.eq("organizationId", a.organizationId).eq("userId", a.actorId),
+      )
+      .unique();
+    const actor = await ctx.db.get(a.actorId),
+      organization = await ctx.db.get(a.organizationId);
+    ensure(
+      actor?.status === "active" &&
+        organization?.status === "active" &&
+        membership?.role === "owner",
+      "FORBIDDEN",
+      "Connection owner access changed.",
+    );
+    const key = await ctx.db
+      .query("connections")
+      .withIndex("by_provider", (q) =>
+        q.eq("organizationId", a.organizationId).eq("provider", "openai"),
+      )
+      .unique();
+    ensure(
+      key?.revision === a.revision,
+      "APPROVAL_STALE",
+      "Credential changed during verification.",
+    );
+    const models = a.models.filter((id) =>
+      customerModels().some((m) => m.id === id),
+    );
+    await ctx.db.patch(key._id, {
+      status: "verified",
+      availableModels: models,
+      updatedAt: Date.now(),
+    });
+    return { verified: true, availableModels: models.length };
   },
 });
 export const connections = query({
@@ -175,7 +314,11 @@ export const revoke = mutation({
       .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
       .collect();
     for (const r of runs)
-      if (!["completed", "canceled"].includes(r.state)) {
+      if (
+        (a.provider === "github" ||
+          (a.provider === "openai" && r.fundingRoute === "customer_api_key")) &&
+        !["completed", "canceled"].includes(r.state)
+      ) {
         await ctx.db.patch(r._id, {
           state: "canceled",
           generation: r.generation + 1,
@@ -310,6 +453,8 @@ export const approve = mutation({
     maxCredits: v.number(),
     allowedPaths: v.array(v.string()),
     highRisk: v.boolean(),
+    modelId: v.optional(v.string()),
+    maxProviderUsdCents: v.optional(v.number()),
   },
   handler: async (ctx, a) => {
     const p = await ctx.db.get(a.id);
@@ -342,7 +487,7 @@ export const approve = mutation({
     ensure(
       a.executor === "local"
         ? a.fundingRoute === "local_codex_subscription"
-        : a.fundingRoute === "managed_api",
+        : ["managed_api", "customer_api_key"].includes(a.fundingRoute),
       "FUNDING_REQUIRED",
       "Choose an explicit funding route.",
     );
@@ -376,6 +521,36 @@ export const approve = mutation({
       "Local subscription execution has no invented platform inference cost.",
     );
     const now = Date.now();
+    let customerModel, credentialRevision;
+    if (a.fundingRoute === "customer_api_key") {
+      customerModel = customerModels().find((m) => m.id === a.modelId);
+      const key = await ctx.db
+        .query("connections")
+        .withIndex("by_provider", (q) =>
+          q.eq("organizationId", p.organizationId).eq("provider", "openai"),
+        )
+        .unique();
+      ensure(
+        customerModel &&
+          key?.status === "verified" &&
+          key.revision &&
+          key.availableModels?.includes(customerModel.id),
+        "SETUP_REQUIRED",
+        "Verify the customer credential and model first.",
+      );
+      ensure(
+        a.maxProviderUsdCents === customerQuote(customerModel),
+        "QUOTE_CHANGED",
+        "Review the current separate provider quote.",
+      );
+      credentialRevision = key.revision;
+    } else {
+      ensure(
+        a.modelId === undefined && a.maxProviderUsdCents === undefined,
+        "INVALID_INPUT",
+        "Provider fields require the customer-key route.",
+      );
+    }
     const runId = await ctx.db.insert("runs", {
       organizationId: p.organizationId,
       createdAt: now,
@@ -388,6 +563,10 @@ export const approve = mutation({
       version: a.version,
       executor: a.executor,
       fundingRoute: a.fundingRoute,
+      customerModel,
+      credentialRevision,
+      maxProviderUsdCents: a.maxProviderUsdCents,
+      providerRequestState: customerModel ? "reserved" : undefined,
       maxCredits: a.maxCredits,
       allowedPaths: a.allowedPaths,
       highRisk: a.highRisk,
@@ -662,6 +841,99 @@ export const workerRun = internalQuery({
     return run;
   },
 });
+async function customerCredential(
+  ctx: import("./_generated/server").QueryCtx,
+  id: import("./_generated/dataModel").Id<"runs">,
+  generation: number,
+) {
+  const run = await ctx.db.get(id);
+  ensure(
+    run &&
+      run.generation === generation &&
+      run.state === "running" &&
+      run.leaseUntil > Date.now() &&
+      run.fundingRoute === "customer_api_key" &&
+      (await approvalActive(ctx, run)),
+    "APPROVAL_STALE",
+    "Customer-funded execution authorization changed.",
+  );
+  const key = await ctx.db
+    .query("connections")
+    .withIndex("by_provider", (q) =>
+      q.eq("organizationId", run.organizationId).eq("provider", "openai"),
+    )
+    .unique();
+  ensure(
+    key?.status === "verified" &&
+      key.revision === run.credentialRevision &&
+      key.availableModels?.includes(run.customerModel?.id),
+    "FORBIDDEN",
+    "Approved credential was revoked or replaced.",
+  );
+  ensure(
+    currentCustomerModel(run.customerModel),
+    "QUOTE_CHANGED",
+    "Model pricing or capability verification changed.",
+  );
+  return { run, key };
+}
+export const customerRequestActive = internalQuery({
+  args: { id: v.id("runs"), generation: v.number() },
+  handler: async (ctx, a) => {
+    try {
+      await customerCredential(ctx, a.id, a.generation);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+});
+export const startCustomerRequest = internalMutation({
+  args: { id: v.id("runs"), generation: v.number() },
+  handler: async (ctx, a) => {
+    const { run, key } = await customerCredential(ctx, a.id, a.generation);
+    ensure(
+      run.providerRequestState === "reserved",
+      "COST_RECONCILIATION_REQUIRED",
+      "An earlier provider request may have consumed this authorization. No automatic retry.",
+    );
+    await ctx.db.patch(run._id, {
+      providerRequestState: "started",
+      updatedAt: Date.now(),
+    });
+    return {
+      ciphertext: key.ciphertext,
+      keyVersion: key.keyVersion,
+      organizationId: run.organizationId,
+      model: run.customerModel,
+      maxUsdCents: run.maxProviderUsdCents!,
+    };
+  },
+});
+export const recordCustomerUsage = internalMutation({
+  args: { id: v.id("runs"), generation: v.number(), cents: v.number() },
+  handler: async (ctx, a) => {
+    const run = await ctx.db.get(a.id);
+    ensure(
+      run?.fundingRoute === "customer_api_key" &&
+        Number.isSafeInteger(a.cents) &&
+        a.cents >= 0 &&
+        a.cents <= run.maxProviderUsdCents!,
+      "COST_RECONCILIATION_REQUIRED",
+      "Invalid customer-provider usage receipt.",
+    );
+    // A cancellation can race an already issued request. Preserve its receipt, never revive the run.
+    if (
+      run.providerRequestState === "started" &&
+      (run.generation === a.generation || run.state === "canceled")
+    )
+      await ctx.db.patch(run._id, {
+        providerUsdCents: a.cents,
+        providerRequestState: "settled",
+        updatedAt: Date.now(),
+      });
+  },
+});
 export const claimCloud = internalMutation({
   args: { id: v.id("runs") },
   handler: async (ctx, a) => {
@@ -692,6 +964,21 @@ export const claimCloud = internalMutation({
       Math.floor(r.maxCredits - 1),
     );
     const rate = Number(process.env.E2B_CREDITS_PER_SECOND ?? "1");
+    if (r.fundingRoute === "customer_api_key") {
+      const key = await ctx.db
+        .query("connections")
+        .withIndex("by_provider", (q) =>
+          q.eq("organizationId", r.organizationId).eq("provider", "openai"),
+        )
+        .unique();
+      ensure(
+        key?.status === "verified" &&
+          key.revision === r.credentialRevision &&
+          currentCustomerModel(r.customerModel),
+        "APPROVAL_STALE",
+        "Customer credential or model configuration changed.",
+      );
+    }
     ensure(
       Number.isFinite(rate) &&
         rate > 0 &&

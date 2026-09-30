@@ -1,6 +1,6 @@
 import { excerpt, type RepositoryExcerpt } from "../repositories/context";
 import {
-  repositoryIgnores,
+  inspectedIgnorePolicy,
   preparedTree,
   EXTRACTION_VERSION,
 } from "../repositories/prepare";
@@ -88,30 +88,10 @@ export async function snapshot(
     "REPO_TOO_LARGE",
     "Repository requires a bounded snapshot selection.",
   );
-  const ignorePatterns: string[] = [];
-  for (const name of [".gitignore", ".repomixignore"]) {
-    const entry = tree.tree.find(
-      (f: any) =>
-        f.path === name &&
-        f.type === "blob" &&
-        f.mode === "100644" &&
-        f.size <= 20000,
-    );
-    if (entry) {
-      const blob = await github(
-        `/repos/${fullName}/git/blobs/${entry.sha}`,
-        token,
-      );
-      const patterns = Buffer.from(blob.content, "base64").toString("utf8");
-      ensure(
-        patterns.length <= 20000,
-        "REPO_TOO_LARGE",
-        "Ignore rules exceed the snapshot policy.",
-      );
-      ignorePatterns.push(patterns);
-    }
-  }
-  const ignored = repositoryIgnores(ignorePatterns);
+  const ignored = await inspectedIgnorePolicy(tree.tree, async (sha) => {
+    const blob = await github(`/repos/${fullName}/git/blobs/${sha}`, token);
+    return Buffer.from(blob.content, "base64").toString("utf8");
+  });
   const files = tree.tree.filter(
     (f: any) =>
       f.type === "blob" &&

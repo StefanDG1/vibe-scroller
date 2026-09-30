@@ -8,7 +8,8 @@ import {
   github,
   installationToken,
 } from "../packages/providers/github";
-import { encrypt } from "../packages/providers/secrets";
+import { encrypt, decrypt } from "../packages/providers/secrets";
+import { discoverCustomerModels } from "../packages/providers/customerAi";
 import { deleteObject as removeStoredObject } from "../packages/providers/storage";
 import { objectMetadata } from "../packages/providers/storage";
 import { ensure, prState } from "../packages/policy";
@@ -307,7 +308,7 @@ export const match = action({
 export const saveKey = action({
   args: { organizationId: v.id("organizations"), secret: v.string() },
   handler: async (ctx, a): Promise<void> => {
-    await ctx.runQuery(api.jobs.authorizeOwner, {
+    const actorId = await ctx.runQuery(api.jobs.authorizeCredential, {
       organizationId: a.organizationId,
     });
     ensure(
@@ -319,8 +320,47 @@ export const saveKey = action({
     await ctx.runMutation(internal.jobs.storeSecret, {
       organizationId: a.organizationId,
       provider: "openai",
+      actorId,
       ...encrypted,
     });
+  },
+});
+export const testKey = action({
+  args: { organizationId: v.id("organizations") },
+  handler: async (
+    ctx,
+    a,
+  ): Promise<{ verified: boolean; availableModels: number }> => {
+    const actorId = await ctx.runQuery(api.jobs.authorizeCredential, a);
+    const connection = await ctx.runQuery(internal.jobs.secret, {
+      ...a,
+      provider: "openai",
+    });
+    ensure(
+      connection?.revision,
+      "SETUP_REQUIRED",
+      "Save a credential before testing it.",
+    );
+    try {
+      const models = await discoverCustomerModels(
+        decrypt(
+          connection.ciphertext,
+          connection.keyVersion,
+          a.organizationId,
+          "openai",
+        ),
+      );
+      return await ctx.runMutation(internal.jobs.verifiedCredential, {
+        ...a,
+        actorId,
+        revision: connection.revision,
+        models,
+      });
+    } catch {
+      throw new Error(
+        "PROVIDER_ERROR: Credential verification failed or changed. No inference request was sent.",
+      );
+    }
   },
 });
 export const publishRun = action({

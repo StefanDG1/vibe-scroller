@@ -19,6 +19,7 @@ const operations = {
   publish: ["action", api.integrations.publishRun],
   refreshPR: ["action", api.integrations.refreshPR],
   saveKey: ["action", api.integrations.saveKey],
+  testKey: ["action", api.integrations.testKey],
   revoke: ["mutation", api.jobs.revoke],
   feedback: ["mutation", api.product.feedback],
   preferences: ["mutation", api.commerce.preferences],

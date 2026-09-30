@@ -264,6 +264,11 @@ export const productTables = {
     version: v.number(),
     executor: v.string(),
     fundingRoute: v.string(),
+    customerModel: v.optional(v.any()),
+    credentialRevision: v.optional(v.string()),
+    maxProviderUsdCents: v.optional(v.number()),
+    providerUsdCents: v.optional(v.number()),
+    providerRequestState: v.optional(v.string()),
     maxCredits: v.number(),
     allowedPaths: v.array(v.string()),
     highRisk: v.boolean(),
@@ -344,6 +349,8 @@ export const productTables = {
     provider: v.string(),
     ciphertext: v.string(),
     keyVersion: v.string(),
+    revision: v.optional(v.string()),
+    availableModels: v.optional(v.array(v.string())),
     status: v.string(),
   })
     .index("by_org", ["organizationId"])
@@ -447,6 +454,7 @@ export const productTables = {
     key: v.string(),
     paymentId: v.string(),
     invoiceId: v.optional(v.string()),
+    invoiceTotal: v.optional(v.number()),
     refunded: v.number(),
     total: v.number(),
   })

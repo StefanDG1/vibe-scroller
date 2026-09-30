@@ -15,6 +15,7 @@ export async function GET(
       usage,
       devices,
       githubChoices,
+      customerRoutes,
     ] = await Promise.all([
       c.query(api.product.library, { organizationId }),
       c.query(api.product.repositories, { organizationId }),
@@ -23,6 +24,7 @@ export async function GET(
       c.query(api.product.usage, { organizationId }),
       c.query(api.devices.list, { organizationId }),
       c.query(api.githubLinks.choices, { organizationId }),
+      c.query(api.jobs.customerRoutes, { organizationId }),
     ]);
     return Response.json(
       {
@@ -35,6 +37,7 @@ export async function GET(
         usage,
         devices,
         githubChoices,
+        customerRoutes,
         measured: overview.measured,
       },
       {

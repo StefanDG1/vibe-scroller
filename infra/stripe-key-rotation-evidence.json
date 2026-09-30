@@ -1,0 +1,12 @@
+{
+  "observedAt": "2026-09-30T08:02:00.976115+00:00",
+  "environment": "dedicated Stripe sandbox acct_1ULEK7BINq6evjJt",
+  "incident": "Signed-in official Stripe documentation personalized an example with its sandbox credential; unfiltered documentation text exposed the example in tool output",
+  "action": "Rotated key with immediate expiration; replacement saved only in ignored local environments and Convex secret store",
+  "oldCredentialRejected": true,
+  "replacementAccountVerified": true,
+  "workerHadStripeCredential": false,
+  "productionCredentialInvolved": false,
+  "replacementPrinted": false,
+  "followup": "Never print signed-in provider documentation examples without credential redaction; source history and deployment artifacts require their usual scans"
+}

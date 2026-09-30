@@ -1,6 +1,6 @@
 import workflowTest from "@convex-dev/workflow/test";
 import rateLimiterTest from "@convex-dev/rate-limiter/test";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { convexTest } from "convex-test";
 import schema from "../convex/schema";
 import { api, internal } from "../convex/_generated/api";
@@ -41,6 +41,229 @@ async function setup() {
   return { t, a, b, org, other };
 }
 describe("VibeScroller product boundaries", () => {
+  it("requires fresh owner authentication, binds customer requests to credential revisions and preserves managed runs on AI revocation", async () => {
+    const model = {
+      id: "synthetic-model",
+      version: "synthetic-v1",
+      inputUsdCentsPerMillion: 75,
+      outputUsdCentsPerMillion: 450,
+      maxInputBytes: 10000,
+      maxOutputTokens: 4000,
+      verifiedAt: Date.now(),
+      structuredOutput: true,
+      dataPolicyUrl: "https://example.test/policy",
+    };
+    vi.stubEnv("OPENAI_CUSTOMER_MODELS_JSON", JSON.stringify([model]));
+    try {
+      const { t, a, b, org } = await setup();
+      await expect(
+        a.query(api.jobs.authorizeCredential, { organizationId: org }),
+      ).rejects.toThrow("Sign in again");
+      const fresh = t.withIdentity({
+        subject: "a",
+        auth_time: Math.floor(Date.now() / 1000),
+      });
+      const owner = await fresh.query(api.jobs.authorizeCredential, {
+        organizationId: org,
+      });
+      await expect(
+        b.query(api.jobs.customerRoutes, { organizationId: org }),
+      ).rejects.toThrow();
+      await expect(
+        t.mutation(internal.jobs.storeSecret, {
+          organizationId: org,
+          provider: "openai",
+          ciphertext: "synthetic-ciphertext",
+          keyVersion: "synthetic",
+        }),
+      ).rejects.toThrow("FORBIDDEN");
+      await t.mutation(internal.jobs.storeSecret, {
+        organizationId: org,
+        provider: "openai",
+        actorId: owner,
+        ciphertext: "synthetic-ciphertext",
+        keyVersion: "synthetic",
+      });
+      const saved = (await t.query(internal.jobs.secret, {
+        organizationId: org,
+        provider: "openai",
+      }))!;
+      expect(
+        await a.query(api.jobs.customerRoutes, { organizationId: org }),
+      ).toEqual({ status: "stored", models: [] });
+      await expect(
+        t.mutation(internal.jobs.verifiedCredential, {
+          organizationId: org,
+          actorId: owner,
+          revision: "stale",
+          models: [model.id],
+        }),
+      ).rejects.toThrow("APPROVAL_STALE");
+      await t.mutation(internal.jobs.verifiedCredential, {
+        organizationId: org,
+        actorId: owner,
+        revision: saved.revision!,
+        models: [model.id, "invented"],
+      });
+      const routes = await a.query(api.jobs.customerRoutes, {
+        organizationId: org,
+      });
+      expect(routes.models).toHaveLength(1);
+      expect(JSON.stringify(routes)).not.toContain("synthetic-ciphertext");
+      const repositoryId = await t.mutation(internal.jobs.saveRepository, {
+        organizationId: org,
+        installationId: 1,
+        providerId: 1,
+        fullName: "test/synthetic-key",
+        sha: "a".repeat(40),
+        branch: "main",
+        manifest: ["README.md"],
+        context: "Synthetic",
+      });
+      const runs = await t.run(async (ctx) => {
+        const now = Date.now();
+        const sourceId = await ctx.db.insert("sources", {
+          organizationId: org,
+          createdAt: now,
+          updatedAt: now,
+          key: "synthetic-byo",
+          canonical: "synthetic-byo",
+          kind: "text",
+          title: "Synthetic",
+          state: "ready",
+          coverage: "caption_only",
+          tags: [],
+          rightsAttested: true,
+          generation: 1,
+        });
+        const proposalId = await ctx.db.insert("proposals", {
+          organizationId: org,
+          createdAt: now,
+          updatedAt: now,
+          sourceId,
+          repositoryId,
+          baseSha: "a".repeat(40),
+          profileVersion: 1,
+          disposition: "relevant",
+          title: "Synthetic",
+          detail: {},
+          review: "accepted",
+          version: 1,
+        });
+        const base = {
+          organizationId: org,
+          createdAt: now,
+          updatedAt: now,
+          proposalId,
+          repositoryId,
+          approvedBy: owner,
+          planHash: "b".repeat(64),
+          baseSha: "a".repeat(40),
+          version: 1,
+          executor: "cloud",
+          maxCredits: 20,
+          allowedPaths: ["README.md"],
+          highRisk: false,
+          state: "running",
+          generation: 1,
+          expiresAt: now + 60000,
+          leaseUntil: now + 60000,
+          events: [],
+        };
+        return {
+          customer: await ctx.db.insert("runs", {
+            ...base,
+            fundingRoute: "customer_api_key",
+            credentialRevision: saved.revision,
+            customerModel: model,
+            maxProviderUsdCents: routes.models[0].maxProviderUsdCents,
+            providerRequestState: "reserved",
+          }),
+          managed: await ctx.db.insert("runs", {
+            ...base,
+            fundingRoute: "managed_api",
+          }),
+        };
+      });
+      await t.mutation(internal.jobs.startCustomerRequest, {
+        id: runs.customer,
+        generation: 1,
+      });
+      await expect(
+        t.mutation(internal.jobs.startCustomerRequest, {
+          id: runs.customer,
+          generation: 1,
+        }),
+      ).rejects.toThrow("COST_RECONCILIATION_REQUIRED");
+      await t.mutation(internal.jobs.storeSecret, {
+        organizationId: org,
+        provider: "openai",
+        actorId: owner,
+        ciphertext: "synthetic-replacement-ciphertext",
+        keyVersion: "synthetic",
+      });
+      const replacement = (await t.query(internal.jobs.secret, {
+        organizationId: org,
+        provider: "openai",
+      }))!;
+      expect(replacement.revision).not.toBe(saved.revision);
+      expect(
+        await t.mutation(internal.jobs.rotateCiphertext, {
+          id: replacement._id,
+          previous: saved.ciphertext,
+          ciphertext: "synthetic-migration",
+          keyVersion: "next",
+        }),
+      ).toBe(false);
+      expect(
+        await t.mutation(internal.jobs.rotateCiphertext, {
+          id: replacement._id,
+          previous: replacement.ciphertext,
+          ciphertext: "synthetic-migration",
+          keyVersion: "next",
+        }),
+      ).toBe(true);
+      expect(
+        (
+          await t.query(internal.jobs.secret, {
+            organizationId: org,
+            provider: "openai",
+          })
+        )?.revision,
+      ).toBe(replacement.revision);
+      await a.mutation(api.jobs.revoke, {
+        organizationId: org,
+        provider: "openai",
+      });
+      expect(
+        await t.query(internal.jobs.customerRequestActive, {
+          id: runs.customer,
+          generation: 1,
+        }),
+      ).toBe(false);
+      await t.mutation(internal.jobs.recordCustomerUsage, {
+        id: runs.customer,
+        generation: 1,
+        cents: 1,
+      });
+      const states = await t.run(async (ctx) => ({
+        customer: await ctx.db.get(runs.customer),
+        managed: await ctx.db.get(runs.managed),
+      }));
+      expect(states.customer).toMatchObject({
+        state: "canceled",
+        generation: 2,
+        providerRequestState: "settled",
+        providerUsdCents: 1,
+      });
+      expect(states.managed?.state).toBe("running");
+      expect(
+        await a.query(api.jobs.customerRoutes, { organizationId: org }),
+      ).toEqual({ status: "disconnected", models: [] });
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
   it("quotes a profile draft once, denies foreign access and discards stale output without confirming a profile", async () => {
     const { t, a, b, org } = await setup();
     const id = await t.mutation(internal.jobs.saveRepository, {
@@ -599,6 +822,7 @@ describe("VibeScroller product boundaries", () => {
       invoiceId: "in_upgrade",
       total: 1000,
       refunded: 1000,
+      invoiceTotal: 1000,
     });
     await t.run(async (ctx) => {
       const pool = (await ctx.db.query("creditPools").collect())[0];
@@ -611,6 +835,7 @@ describe("VibeScroller product boundaries", () => {
       invoiceId: "in_initial",
       total: 19000,
       refunded: 19000,
+      invoiceTotal: 19000,
     });
     await t.mutation(internal.commerce.grantPeriod, {
       ...base,
@@ -666,6 +891,100 @@ describe("VibeScroller product boundaries", () => {
     await t.run(async (ctx) => {
       expect((await ctx.db.query("billingReversals").collect()).length).toBe(1);
     });
+  });
+  it("aggregates several refunded payments against the invoice total and preserves reversals on later allowances", async () => {
+    const { t, org } = await setup();
+    const start = Date.now(),
+      end = start + 30 * 86400000;
+    const grant = {
+      organizationId: org,
+      subscription: "sub_synthetic_multi",
+      tier: "starter" as const,
+      interval: "monthly" as const,
+      start,
+      end,
+      verifiedPayment: true,
+      invoiceId: "in_synthetic_multi",
+    };
+    await t.mutation(internal.commerce.grantPeriod, grant);
+    const refund = {
+      organizationId: org,
+      invoiceId: grant.invoiceId,
+      invoiceTotal: 1000,
+      total: 500,
+      refunded: 250,
+    };
+    await t.mutation(internal.commerce.reversePayment, {
+      ...refund,
+      paymentId: "pi_synthetic_first",
+    });
+    const pool = () =>
+      t.run(async (ctx) => (await ctx.db.query("creditPools").collect())[0]);
+    expect((await pool()).revoked).toBe(62);
+    await t.mutation(internal.commerce.reversePayment, {
+      ...refund,
+      paymentId: "pi_synthetic_second",
+    });
+    expect((await pool()).revoked).toBe(125);
+    await t.mutation(internal.commerce.reversePayment, {
+      ...refund,
+      paymentId: "pi_synthetic_first",
+      refunded: 100,
+    });
+    expect((await pool()).revoked).toBe(125);
+    await expect(
+      t.mutation(internal.commerce.reversePayment, {
+        ...refund,
+        paymentId: "pi_synthetic_first",
+        invoiceId: "in_changed",
+        refunded: 500,
+      }),
+    ).rejects.toThrow("REFUND_RECONCILIATION_REQUIRED");
+    for (const paymentId of ["pi_synthetic_first", "pi_synthetic_second"])
+      await t.mutation(internal.commerce.reversePayment, {
+        ...refund,
+        paymentId,
+        refunded: 500,
+      });
+    expect((await pool()).revoked).toBe(250);
+    await t.mutation(internal.commerce.grantPeriod, {
+      ...grant,
+      start: end,
+      end: end + 30 * 86400000,
+    });
+    const all = await t.run((ctx) => ctx.db.query("creditPools").collect());
+    expect(all.every((p) => p.revoked === p.granted)).toBe(true);
+    expect(
+      await t.run((ctx) => ctx.db.query("billingReversals").collect()),
+    ).toHaveLength(2);
+    await t.mutation(internal.commerce.grantPeriod, {
+      ...grant,
+      subscription: "sub_exact_synthetic",
+      tier: "pro",
+      invoiceId: "in_exact_synthetic",
+      start: end + 30 * 86400000,
+      end: end + 60 * 86400000,
+    });
+    await t.mutation(internal.commerce.reversePayment, {
+      organizationId: org,
+      paymentId: "pi_exact_synthetic",
+      invoiceId: "in_exact_synthetic",
+      invoiceTotal: 1000,
+      total: 1000,
+      refunded: 290,
+    });
+    const contribution = await t.run(
+      async (ctx) =>
+        (
+          await ctx.db
+            .query("creditFunding")
+            .withIndex("by_invoice", (q) =>
+              q.eq("invoiceId", "in_exact_synthetic"),
+            )
+            .collect()
+        )[0],
+    );
+    expect(contribution.revoked).toBe(174);
   });
   it("binds plan-change quotes to the owner and claims each approval once", async () => {
     const { t, a, b, org } = await setup();
