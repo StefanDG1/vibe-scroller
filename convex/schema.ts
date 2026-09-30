@@ -15,6 +15,7 @@ export default defineSchema({
     name: v.string(),
     status: v.union(v.literal("active"), v.literal("deleting")),
     createdAt: v.number(),
+    preferChatGPTPlan: v.optional(v.boolean()),
   }).index("by_subject", ["subject"]),
   organizations: defineTable({
     name: v.string(),

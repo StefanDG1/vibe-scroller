@@ -1,0 +1,17 @@
+# Official ChatGPT-plan protocol
+
+Status: local adapter implemented; real account and hosted commercial activation unverified. Date: 2026-09-30.
+
+The owner requested the newly announced Sign in with ChatGPT capability, prefers each user's own eligible plan allowance, and explicitly reports no OpenAI commercial approval. This supersedes the earlier assumption that the public subscription-funded inference contract was unavailable. It does not supersede WorkOS identity, execution isolation or separate approval.
+
+The [official overview](https://developers.openai.com/siwc/token-sharing-open-source) documents optional direct Responses access for eligible open-source/local applications and directs paid/remotely hosted applications to the interest process. Account identity and plan authorization are distinct. Neither grants access to ChatGPT conversation history. Model discovery does not establish completed inference.
+
+The [cookbook](https://developers.openai.com/cookbook/articles/sign-in-with-chatgpt) links a DevKit. Its [license at inspected commit f723814](https://github.com/openai/sign-in-with-chatgpt-devkit/blob/f723814abdccec135b519c451fb6e1992ee5e933/LICENSE) excludes development for an intended commercial application from noncommercial purposes. Do not import, copy, vendor or relicense that SDK in this product. This implementation is independently authored against the published protocol and uses the existing lockfile's maintained `jose` version 6.2.12 for ID-token verification.
+
+The Windows local adapter uses stable host identity, loopback authorization with PKCE/state/nonce, per-registration verified identity and DPAPI encrypted storage outside repositories. It retains issued client registrations across failed exchanges/sign-out, serializes rotation and checkpoints uncertain refresh before contacting the provider. Reconnection is required after an uncertain refresh; it never retries the predecessor. Tokens stay in the trusted local process and are never uploaded to Convex or supplied to untrusted coding workers.
+
+Requests use only public OpenAI model discovery and Responses endpoints, account-specific observed models, `store:false`, `stream:true`, bounded input/output/time and no tool execution. Only a completed nonempty response counts as success. No API or operator funding fallback exists in this adapter. Preview support for text/images/files does not establish audio/video or transcription support; the initial local utility exposes text summary only.
+
+Hosted activation remains disabled. An open-source code license or a settings preference does not establish approval to offer user-plan usage through the paid hosted service. Before activation, record permitted deployment/workloads, account ownership and revocation, data handling, models/limits, official approval where required, and actual successful/revoked/exhausted-account tests. Do not advertise measured savings or unlimited usage.
+
+The normal browser workflow continues using its explicitly authorized managed/API routes. Local coding remains separately blocked by failed Windows isolation evidence. This inference utility does not cure that failure or complete browser-connected inference dispatch.

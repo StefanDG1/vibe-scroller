@@ -10,26 +10,26 @@ Repository: https://github.com/StefanDG1/vibe-scroller
 
 ## Work packages
 
-| Package | State            | Evidence                                                                                                              |
-| ------- | ---------------- | --------------------------------------------------------------------------------------------------------------------- |
-| WP01    | verified_staging | Export preserved; frozen install, CI, builds and secret scanning passed                                               |
-| WP02    | in_progress      | 60 hosted responsive view checks passed; full accessibility acceptance remains                                        |
-| WP03    | in_progress      | Real hosted WorkOS login; tenant tests; recovery/logout acceptance incomplete                                         |
-| WP04    | in_progress      | Real owned uploads and import manifest; physical Android share test pending                                           |
-| WP05    | in_progress      | Atomic reservations, stage commits and workflows; interruption/cost reconciliation pending                            |
-| WP06    | blocked_external | Real isolated decode and transcription; vision license and usage verification pending                                 |
-| WP07    | in_progress      | Search, pagination, export, retention and deletion implemented; full browser/deletion evidence pending                |
-| WP08    | in_progress      | Selected GitHub App, nested exclusions, hash reuse and Repomix tree; real profile draft passed; quality benchmark pending     |
-| WP09    | in_progress      | Semantic selection returned honest no-fit; reviewed AI draft plan implemented; live matching limited by free allowance                                 |
-| WP10    | in_progress      | Real free managed route; revision-bound customer-key broker implemented; funded customer request not tested                               |
-| WP11    | blocked_external | Pairing/lease/result code and vault test; actual native isolation failed                                              |
-| WP12    | in_progress      | Real isolated metered cloud coding produced a reviewed patch; cost calibration and outage cases remain                |
-| WP13    | in_progress      | Real draft PR 3 and automatic reopen/closure; merge/revert/access-loss staging remains                                |
-| WP14    | in_progress      | Private inbox and generic email integration; hosted email opt-in test pending; Telegram deferred by user              |
-| WP15    | in_progress      | Real six-price sandbox lifecycle and two-payment invoice refunds; ledger tests passed; complete app invoice reconciliation pending |
-| WP16    | in_progress      | Deletion markers, locked recovery, offline encrypted restore and runtime key rotation passed; hosted restore and tenant matrix remain         |
-| WP17    | in_progress      | 85 tests and both builds; benchmark, physical devices and final artifact review incomplete                            |
-| WP18    | blocked_external | Official company/tax evidence, legal publication and production verification remain                                   |
+| Package | State            | Evidence                                                                                                                              |
+| ------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| WP01    | verified_staging | Export preserved; frozen install, CI, builds and secret scanning passed                                                               |
+| WP02    | in_progress      | 60 hosted responsive view checks passed; full accessibility acceptance remains                                                        |
+| WP03    | in_progress      | Real hosted WorkOS login; tenant tests; recovery/logout acceptance incomplete                                                         |
+| WP04    | in_progress      | Real owned uploads and import manifest; physical Android share test pending                                                           |
+| WP05    | in_progress      | Atomic reservations, stage commits and workflows; interruption/cost reconciliation pending                                            |
+| WP06    | blocked_external | Real isolated decode and transcription; vision license and usage verification pending                                                 |
+| WP07    | in_progress      | Search, pagination, export, retention and deletion implemented; full browser/deletion evidence pending                                |
+| WP08    | in_progress      | Selected GitHub App, nested exclusions, hash reuse and Repomix tree; real profile draft passed; quality benchmark pending             |
+| WP09    | in_progress      | Semantic selection returned honest no-fit; reviewed AI draft plan implemented; live matching limited by free allowance                |
+| WP10    | in_progress      | Real free managed route; revision-bound customer-key broker implemented; funded customer request not tested                           |
+| WP11    | blocked_external | Pairing/lease/result code and vault test; actual native isolation failed                                                              |
+| WP12    | in_progress      | Real isolated metered cloud coding produced a reviewed patch; cost calibration and outage cases remain                                |
+| WP13    | in_progress      | Real draft PR 3 and automatic reopen/closure; merge/revert/access-loss staging remains                                                |
+| WP14    | in_progress      | Private inbox and generic email integration; hosted email opt-in test pending; Telegram deferred by user                              |
+| WP15    | in_progress      | Real six-price sandbox lifecycle and two-payment invoice refunds; ledger tests passed; complete app invoice reconciliation pending    |
+| WP16    | in_progress      | Deletion markers, locked recovery, offline encrypted restore and runtime key rotation passed; hosted restore and tenant matrix remain |
+| WP17    | in_progress      | 85 tests and both builds; benchmark, physical devices and final artifact review incomplete                                            |
+| WP18    | blocked_external | Official company/tax evidence, legal publication and production verification remain                                                   |
 
 ## Evidence
 
@@ -298,3 +298,23 @@ The exact 9a60946 artifact scan still reports 38 generic API candidates and 16 p
 The subsequent source review accounts for all 54 scanner candidates in the exact 9a60946 artifact. Sixteen private-key matches are WorkOS PKCS#8 validation header expressions, not serialized private-key data. Generic matches include sixteen generated Next runtime-key occurrences, thirteen WorkOS variable assignments and nine framework expressions. The four generated framework values have zero occurrences in public assets. See infra/artifact-review-9a60946.json. This resolves candidate provenance for this package only, not a full security audit or future artifact review.
 
 GitHub CI `36712207700` passed `pnpm check` on implementation commit `8fbc9e5858f430b8163a6b9e32267d06b20c75d9`: 79 documents, 12 skill snapshots, lint, all types, 97 root tests plus 10 authentication tests and both production builds. Three credential-dependent staging tests were skipped. Later artifact-review documentation does not change runtime behavior. The current full-suite evidence is 107 passed tests, with staged Gitleaks passing each checkpoint.
+
+## ChatGPT-plan, brand and SEO checkpoint at 2026-09-30
+
+The latest official SIWC overview, registration, account/session, token and inference contracts were fetched again, along with the September 28 cookbook and current plugin authentication/submission guides. GitHub issue #5 remains the relevant open funding issue. The public Responses contract now exists for eligible local/open-source apps; paid/remotely hosted activation still requires the official commercial process. The inspected DevKit commit f723814 has a noncommercial license that excludes development for an intended commercial product. No SDK source or branded assets were copied into this repository.
+
+An independently authored Windows local text-inference adapter now implements PKCE/state/nonce and loopback callbacks, retained per-account registrations, verified identity, DPAPI storage, serialized/checkpointed refresh, account-specific discovery, bounded public Responses streaming and disconnection. It refuses interrupted/incomplete output and never switches to operator/API funding. This is an optional local utility, not completed browser inference dispatch or an enabled hosted commercial route. No real OpenAI account consent or completed customer-plan inference request has passed. Windows coding isolation remains a separate failed gate.
+
+The authenticated app now stores a personal, initially off "prefer my ChatGPT plan when available" setting. The server returns hosted activation as false regardless of the saved preference. A foreign workspace cannot write it; saving it grants no consent and changes no job funding. The preference is included in account export. The connection UI explains the commercial gate and separate transcription/storage/cloud costs.
+
+The user-requested GPT-6.1 Sol medium agent completed all four Mark Builds Brands foundational documents, using the original SOP, Research Part 1/2 and avatar/offer templates plus current public research. The original Drive SOP was also fetched and its September 1 revision confirmed the sequence. Research is 4,003 words; document QA checked templates, six beliefs and local links. Seven adapted prompts/intermediate results and source snapshots/hashes remain in ignored outputs/brand. No supplied sales-page PDF or dedicated Deep Research run was claimed.
+
+The agent's live sales-page visit returned Cloudflare 1102 at 16:12:01 UTC, Ray a43481bf6d7b29d3. The free-plan 10 ms CPU limit is now an explicit hosting release blocker. Removing the root theme cookie dependency allows public pages to prerender. Browser-only theme selection retains the preview without forcing public SSR. The build confirms static homepage/demo and 16 generated public slug routes; authenticated routes remain dynamic, private and uncached. This optimization does not establish sufficient authenticated CPU capacity.
+
+Canonical metadata, sitemap, Open Graph/Twitter data and the verified 1200×630 static social card use scroll.companynerve.com. Staging indexing stays off by default; production indexing requires a reviewed build-time opt-in. No final domain/TLS/callback verification or Search Console submission has passed. Parent DNS is at Namecheap; no subdomain CNAME was found, and Namecheap is currently signed out. Cloudflare custom-domain configuration requires an owned Cloudflare zone. No unsupported CNAME, parent nameserver change or purchase was made. See operations/domain-and-seo.md.
+
+`pnpm check` passed 89 document checks and 12 skill snapshots, zero-warning lint, all TypeScript checks, 108 root tests plus 10 auth tests, and both production builds. Three credential-dependent staging tests were skipped. Output: outputs/check-20260930-chatgpt-seo.log. The first formatter glob included PowerShell files with no parser and the first lint run found one unused expression; both are retained in task output and corrected. `pnpm audit --prod` found no known vulnerabilities. Native DPAPI protect/unprotect and atomic encrypted-state persistence passed without printing credentials; safe status showed zero connected accounts.
+
+After that full checkpoint, one real loopback-listener test with synthetic OAuth exchange was added. `pnpm exec vitest run tests/chatgpt-local.test.ts` passed 11 tests. Together with the backend preference test, 12 new tests exist, but the full checkpoint above remains 118 passed until CI verifies the final test addition. These tests are not actual OpenAI inference evidence.
+
+VAT options and the operator/accountant questions are documented in operations/operator-tax-and-publication.md using current ANAF/European Commission sources. The authoritative legal publication checklist is legal/POLICY-IMPLEMENTATION.md and was opened in Codex. No company/VAT registration, professional review or live checkout activation was invented. Optional ChatGPT plugin implementation/publication requirements are documented in operations/chatgpt-plugin-investigation.md; no MCP OAuth server, developer-mode integration or marketplace submission is claimed.

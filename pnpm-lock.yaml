@@ -158,6 +158,9 @@ importers:
       ignore:
         specifier: 7.0.10
         version: 7.0.10
+      jose:
+        specifier: 6.2.12
+        version: 6.2.12
       repomix:
         specifier: 1.18.1
         version: 1.18.1(supports-color@10.2.2)(typescript@7.0.2)

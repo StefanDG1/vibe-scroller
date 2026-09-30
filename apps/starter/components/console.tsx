@@ -4,6 +4,11 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Brand } from "./site";
 type Initial = {
+  aiPreference?: {
+    preferChatGPTPlan: boolean;
+    hostedStatus: string;
+    active: boolean;
+  };
   sources: any[];
   libraryNext?: string | null;
   repositories: any[];
@@ -1200,6 +1205,57 @@ export function Console({
           )}
           {view === "connections" && (
             <>
+              <section className="panel">
+                <h2>Your ChatGPT plan</h2>
+                <p>
+                  Prefer your own allowance for eligible AI requests and keep
+                  VibeScroller inference credits for other work. ChatGPT limits
+                  still apply; transcription, storage and cloud execution have
+                  separate costs.
+                </p>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={data.aiPreference?.preferChatGPTPlan ?? false}
+                    disabled={demo || busy}
+                    onChange={async (event) => {
+                      const preferChatGPTPlan = event.target.checked;
+                      const result = await call("aiPreference", {
+                        organizationId,
+                        preferChatGPTPlan,
+                      });
+                      if (result)
+                        setData((current) => ({
+                          ...current,
+                          aiPreference: {
+                            preferChatGPTPlan,
+                            hostedStatus: "awaiting_commercial_access",
+                            active: false,
+                          },
+                        }));
+                    }}
+                  />
+                  Prefer my ChatGPT plan when available
+                </label>
+                <p className="notice">
+                  Hosted connection is awaiting OpenAI commercial access. Saving
+                  this preference does not connect an account, grant consent, or
+                  change the funding route of a current task.
+                </p>
+                <p>
+                  The optional local text adapter is in the source repository.
+                  It requires an eligible deployment, official account consent
+                  and a completed inference test. Coding still requires verified
+                  isolation and separate approval.
+                </p>
+                <a
+                  href="https://chatgpt.com/settings/usage"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Manage ChatGPT app access and usage
+                </a>
+              </section>
               <div className="panel">
                 <h2>GitHub</h2>
                 <p>

@@ -8,7 +8,6 @@ import { ConvexError } from "convex/values";
 import { backend, api } from "@/lib/backend";
 import type { Id } from "../../../convex/_generated/dataModel";
 import type { FormState } from "@/components/action-form";
-import { recipes } from "@companynerve/design-recipes";
 const val = (d: FormData, key: string) => String(d.get(key) ?? "");
 const org = (d: FormData) => val(d, "organizationId") as Id<"organizations">;
 export async function quoteV1Change(_: FormState, d: FormData) {
@@ -268,16 +267,4 @@ export async function deleteAccount(_: FormState, d: FormData) {
 }
 export async function logout() {
   await signOut({ returnTo: signOutUrl() });
-}
-export async function changeRecipe(d: FormData) {
-  const recipe = val(d, "recipe");
-  if (!recipes.some((r) => r.id === recipe)) return;
-  (await cookies()).set("recipe", recipe, {
-    sameSite: "lax",
-    httpOnly: true,
-    path: "/",
-    maxAge: 31536000,
-    secure: process.env.NODE_ENV === "production",
-  });
-  revalidatePath("/", "layout");
 }

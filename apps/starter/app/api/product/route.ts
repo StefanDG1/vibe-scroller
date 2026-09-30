@@ -25,6 +25,7 @@ const operations = {
   revoke: ["mutation", api.jobs.revoke],
   feedback: ["mutation", api.product.feedback],
   preferences: ["mutation", api.commerce.preferences],
+  aiPreference: ["mutation", api.aiPreferences.save],
   revokeDevice: ["mutation", api.devices.revoke],
   startDevice: ["mutation", api.devices.start],
   approveDevice: ["mutation", api.devices.approve],

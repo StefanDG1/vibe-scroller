@@ -16,6 +16,7 @@
     "test": "vitest run && vitest run --config apps/starter/vitest.auth.config.ts",
     "validate": "node scripts/validate.mjs",
     "benchmark": "node scripts/evaluate-benchmark.ts",
+    "chatgpt:local": "node packages/runner/chatgpt-cli.mjs",
     "check": "pnpm validate && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "convex:dev": "convex dev",
     "template:export": "node scripts/export-template.mjs",
@@ -34,6 +35,7 @@
     "diff": "9.0.0",
     "e2b": "2.51.0",
     "ignore": "7.0.10",
+    "jose": "6.2.12",
     "repomix": "1.18.1",
     "stripe": "22.6.2",
     "zod": "4.6.1"

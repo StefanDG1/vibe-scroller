@@ -61,6 +61,12 @@ const pages: Record<string, { title: string; body: string[] }> = {
     ],
   },
 };
+export const dynamicParams = false;
+export function generateStaticParams() {
+  return [...Object.keys(pages), ...Object.keys(legal), "pricing"].map(
+    (slug) => ({ slug }),
+  );
+}
 export async function generateMetadata({
   params,
 }: {
@@ -69,7 +75,10 @@ export async function generateMetadata({
   const { slug } = await params;
   return {
     title: pages[slug]?.title ?? slug.replaceAll("-", " "),
-    robots: { index: !legal[slug], follow: true },
+    robots: {
+      index: process.env.SEO_PUBLIC_INDEXING === "true" && !legal[slug],
+      follow: true,
+    },
     alternates: { canonical: `https://scroll.companynerve.com/${slug}` },
   };
 }

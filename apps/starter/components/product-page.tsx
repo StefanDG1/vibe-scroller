@@ -26,6 +26,7 @@ export async function ProductPage({
     githubChoices,
     organization,
     customerRoutes,
+    aiPreference,
   ] = await Promise.all([
     c.query(api.product.library, {
       organizationId,
@@ -40,6 +41,7 @@ export async function ProductPage({
     c.query(api.githubLinks.choices, { organizationId }),
     c.query(api.organizations.details, { organizationId }),
     c.query(api.jobs.customerRoutes, { organizationId }),
+    c.query(api.aiPreferences.read, { organizationId }),
   ]);
   return (
     <Console
@@ -61,6 +63,7 @@ export async function ProductPage({
         devices,
         githubChoices,
         customerRoutes,
+        aiPreference,
         measured: overview.measured,
       }}
     />

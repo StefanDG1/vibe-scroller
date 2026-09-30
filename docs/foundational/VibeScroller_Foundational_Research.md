@@ -1,0 +1,164 @@
+# VibeScroller foundational research
+
+Research date 30 September 2026. This document recommends an initial audience and sales argument for VibeScroller. The strongest candidate is an adult independent developer or technical founder who saves practical videos on a phone and owns an active GitHub project. The proposed value is a reviewable connection between a source, the current project, an implementation plan, and an approved draft pull request. Demand for that complete workflow remains unvalidated.
+
+This is a market research document, not a release certificate. Product requirements describe the intended service. Staging records describe specific tests. Public comments describe individual experiences. None supplies paying-customer evidence for VibeScroller. Read this with the [avatar](VibeScroller_Foundational_Avatar.md), [offer](VibeScroller_Foundational_Offer.md), [beliefs](VibeScroller_Foundational_Beliefs.md), and [process ledger](README.md).
+
+## Evidence and method
+
+The Mark Builds Brands Research Part 1 and Part 2 documents ask for customer attitudes, hopes, failures, alternatives, objections, customer language, curiosity, and outside forces. The SOP then uses that research to complete the original avatar and offer templates and derive at most six purchase beliefs. Those source documents were read from the supplied Downloads folder; exact extracted text and prompts are retained privately under `outputs/brand`.
+
+Research used public pages opened through browser-harness on 30 September 2026. Primary product documentation establishes what competitors advertise. The Stack Overflow survey supplies broader developer attitudes. METR supplies a research warning about measuring AI productivity. Two public Reddit threads supply firsthand language and counterexamples. Comments in those threads often promote the author's own app. They are useful for discovering objections, not estimating their prevalence. Search snippets and AI search summaries were not treated as evidence.
+
+Evidence labels used here are product fact, public observation, interpretation, and hypothesis. Product fact means a recorded requirement or owner instruction, unless explicitly identified as tested staging behavior. Public observation means the cited source was read, not that its claims were independently tested. Interpretation connects evidence to the proposed positioning. Hypothesis means a proposition to test with prospective users. Missing information is stated rather than filled with a plausible demographic, quote, or metric.
+
+The source selection is purposeful and small. It favors close substitutes and comments that both support and challenge the problem. It is not a representative interview sample, systematic review, total addressable market calculation, or competitor revenue audit. No private customer data, purchased research, ad account, or social account was used.
+
+## What the product actually aims to sell
+
+The [PRD](../PRD.md) specifies a mobile browser application. A user can collect content before connecting GitHub. Sources include permitted URLs, uploads, and text; unavailable media must return a clear status. Derived summaries and main points retain evidence. The system evaluates relevance to explicitly selected repositories and can return no fit, already implemented, unsupported, or deferred. The user reviews a proposal, edits a plan, and separately authorizes coding. A trusted publisher creates a draft PR; merge status and claimed benefit remain separate facts.
+
+The complete hosted product requires a metered isolated cloud execution option. A normal library and planning session must not require a laptop runner. WorkOS account identity is separate from GitHub authorization and AI funding. The optional official local Codex route remains gated where native isolation fails. Existing [implementation records](../implementation-status.md) include real staging evidence and unresolved gates; the presence of a requirement does not prove universal availability.
+
+Latest owner steering prefers official user ChatGPT-plan funding when eligibility and consent permit it. That preference is conditional. Personal-plan text and image Responses access for eligible open-source or local applications does not establish approved access for a paid remotely hosted application. Hosted access remains subject to the official interest or waitlist process, which has not been granted for this product. Raw audio, video, and transcription cannot be marketed as included under that route. A paid transcription or cloud route needs its own disclosed budget. See the ledger for the distinction between current steering and older provider specifications.
+
+The chosen product name and motto are VibeScroller and "Make scrolling productive." The selected origin is `scroll.companynerve.com`. That does not certify DNS, trademark, company particulars, legal review, or tax treatment. Exponential Education is the intended operator; official records remain outstanding. Public-source V1 authored code is intended to use MIT with upstream notices preserved. Supported independent self-hosting is deferred.
+
+## Customer and demographic findings
+
+The intended first audience is adult individual developers and founders in the EU, using English. This is a product decision, not a researched distribution of buyers. No narrower age band, gender mix, income, monthly business revenue, country concentration, or family status has been established. The founder's OnePlus phone, laptop, and one-to-five daily English videos are a starting workload, not a customer persona.
+
+A useful behavioral definition is more specific than an age range. The candidate saves technical demonstrations, engineering advice, product ideas, or founder lessons. They have a project they can change and enough judgment to review a proposed implementation. Their phone is where they encounter ideas; their repository is where those ideas would need to become concrete work. Each part of that description is a targeting hypothesis. It should be verified by observing their current workflow rather than by asking whether a new AI app sounds useful.
+
+The [Stack Overflow 2025 AI results](https://survey.stackoverflow.co/2025/ai) show high use alongside distrust. The survey reports 84% using or planning to use AI, and 51% of professional developers using it daily. These are survey responses, not all developers or VibeScroller prospects. More respondents distrust output accuracy than trust it. That tension suggests an audience may accept AI assistance while still wanting evidence and control. It does not establish willingness to give VibeScroller repository access.
+
+The [survey methodology](https://survey.stackoverflow.co/2025/methodology) reports 49,009 responses from 177 countries, collected 29 May to 23 June 2025. Recruitment primarily used Stack Overflow's own channels, making engaged users more likely to participate. Individual AI questions have smaller response counts. Do not turn this survey into a claim that a stated percentage of EU technical founders will buy VibeScroller.
+
+Religious, political, romantic, and family beliefs are unresearched and unnecessary for this technical purchase argument. The original research framework asks for them; a responsible completion records the gap. It does not invent identity traits from forum participation. The more useful working attitude is a preference for inspectable work, limited permissions, and spending control. That remains an interpretation until confirmed with prospects.
+
+## The problem in the market's language
+
+In a [BookmarkManagers discussion](https://www.reddit.com/r/BookmarkManagers/comments/1vv75ls/how_do_you_deal_with_saving_too_many_articles_and/), Lanky_Cartoonist777 describes saved articles and social posts scattered between bookmarks, Reddit, X, Notion, and read-later apps. The person says the list grows and is rarely revisited. SetAdministrative502 says Raindrop improved collection and storage while revisiting still failed. These are two accounts in one small discussion, not a measured retention problem across a market.
+
+In a [ProductivityApps discussion](https://www.reddit.com/r/ProductivityApps/comments/1um7nye/you_save_posts_on_instagramyoutubex_and_never/), RightGirl19 describes saved posts as a "maybe someday folder." DevKokooo describes intending to move resources into Obsidian, often saving on mobile, and leaving most items untouched. Their comments suggest that capturing a resource and processing it are different jobs. They do not establish that the person wants coding automation or would pay EUR 19 monthly.
+
+The same thread contains a useful counterexample. jinnvk says this is not a problem they want to solve and objects to requiring intent at capture time. That dissent matters. A product cannot assume every unreviewed save causes distress. Some people save casually, value the option to return later, or have no active project. Adding a decision to every save may create more friction than value. VibeScroller should let people capture first and decide later.
+
+Several commenters recommend one inbox, tags, search, a weekly review, or deleting low-value items. Others advertise tools they built. This supports two possible explanations. Retrieval friction can make old content hard to use. A review habit can also be missing even when storage works well. The product should test whether a project-specific proposal reduces enough of that review work to justify the service. Better capture alone may leave the second problem unchanged.
+
+The intended emotional driver is relief at knowing what deserves attention. Quiet pride in completing a deliberate change is a possible secondary driver. Neither is measured. Shame about scrolling should not be the central message. The product can acknowledge an unfinished queue without telling a prospect that saving videos makes them lazy or unsuccessful.
+
+## Existing solutions and what they already do
+
+| Alternative | Publicly documented strength | Implication for VibeScroller |
+| --- | --- | --- |
+| Native saved lists and browser bookmarks | Familiar capture and storage without a new subscription | The first demonstration must show value after saving |
+| Raindrop.io | Collections, tags, search, previews, media uploads, duplicate detection, integrations, and searchable YouTube speech | Organizing and finding content are established functions |
+| Readwise Reader | YouTube transcript synchronized with playback, highlights, improved transcripts, and language selection | Timestamped text and reading workflows are credible substitutes |
+| Gemini Notebook, formerly NotebookLM | Source-based summaries and questions, public captioned YouTube import, uploaded audio and documents | Summarization and source-grounded research are already accessible |
+| SavedThat | Advertised cross-platform video library, speech search, exact moment links, Android sharing, and web capture | A close video-library rival, not merely a bookmark app |
+| GitHub Copilot cloud agent | Repository research, implementation planning, code changes, checks, and PR creation | AI planning and PR creation alone cannot support a uniqueness claim |
+| Manual combination of reading and coding tools | User controls the transfer from source to repository | The real comparison includes the tools prospects already own |
+
+[Raindrop's current site](https://raindrop.io/) advertises a free starting tier with unlimited bookmarks, collections, and devices, with premium features available separately. Its feature set means VibeScroller should avoid claiming that existing bookmark managers cannot search within video content. The site is vendor evidence; this research did not install or benchmark it. A narrow claim about the source-to-repository workflow is more defensible than a broad claim about every competitor.
+
+[Readwise's video documentation](https://docs.readwise.io/reader/docs/faqs/videos) explains synchronized YouTube transcripts, navigation to transcript fragments, enhanced transcripts, and caption-language choice. It also explains that available languages depend on captions on the original video. Those details illustrate why reliable source access and extraction quality deserve prominent treatment. Reader's enhanced transcript is an alternative to raw captions; VibeScroller cannot imply that all rivals simply dump unformatted text.
+
+[Readwise pricing](https://readwise.io/pricing) showed USD 9.99 monthly equivalent billed annually for the full Readwise plan, which includes Reader. The displayed Lite tier was USD 5.59 equivalent billed annually. Those are different tiers and billing commitments. This is a posted price snapshot, not a checkout quote or proof of willingness to pay among VibeScroller's audience. No currency conversion or assumed tax equivalence is used.
+
+[Google's current help page](https://support.google.com/gemininotebook/answer/16215270?hl=en) calls the product Gemini Notebook. It supports source-based work with multiple file types and public YouTube videos. For YouTube URL import, the page explicitly says only the transcript is imported and captions are required. Uploaded audio is transcribed. This creates a meaningful product comparison around visual demonstrations and repository relevance, while avoiding an unsupported claim that Google cannot handle any audio or images.
+
+[SavedThat's current homepage](https://savedthat.app/), updated 22 September 2026 by its founder, advertises Instagram Reels, TikTok, YouTube, transcription, semantic and keyword search, and links to exact moments. It lists USD 9.99 monthly or USD 5.92 monthly equivalent billed annually for its Pro offering, with 300 videos monthly; Power is listed separately. These are vendor statements, not independently verified integration reliability, legal clearance, growth, or revenue. Its testimonials and aggregate usage claims were not adopted as VibeScroller evidence.
+
+[GitHub's current cloud-agent documentation](https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-cloud-agent) says the agent can research a repository, plan, make branch changes, run checks, and create PRs. GitHub has expanded the workflow beyond simply assigning a coding issue. This weakens a "we bridge planning to code uniquely" argument. The remaining candidate difference is preserving the saved source, its evidence, project applicability, review decision, approved execution, and subsequent PR outcome in one library.
+
+The manual stack remains a serious alternative. A prospect can save in Raindrop or Readwise, summarize in a notebook or assistant, and ask a coding agent to implement a selected idea. There is no evidence that this stack fails for everyone. VibeScroller must earn its subscription by reducing repeated transfers and helping reject irrelevant advice. The research has not measured that reduction or compared the complete workflows on identical tasks.
+
+## What people may like and dislike
+
+Public comments favor a central inbox, search, useful tags, and periodic review. Vendor offerings emphasize these same functions. That alignment supports familiarity with the category, but not demand for a new service. The prospect may like keeping their existing tools and using VibeScroller only when a saved source has potential project relevance. Exportable plans and library data make that usage easier to evaluate.
+
+Dislikes inferred from the threads include scattering, accumulating another list, manual categorization, and additional decisions at capture time. The product should demonstrate a low-friction permitted capture and a later review card rather than front-loading GitHub, project setup, provider connection, and execution approval before the first source can be saved. This follows the PRD's library-first state; it is also a hypothesis about conversion friction.
+
+The developer survey reports that 66% of respondents to its frustration question encountered outputs that were nearly correct, and 45.2% encountered debugging AI code that took more time. The question had 31,476 responses. These results support showing source references, repository references, risk, acceptance tests, and reasons to reject an idea. They are not product accuracy measures or proof that VibeScroller solves those frustrations. [Stack Overflow AI results](https://survey.stackoverflow.co/2025/ai)
+
+Existing solutions may work perfectly well for saving and reviewing. A stronger argument acknowledges the step they leave to the user in this particular workflow: deciding whether advice applies to the current repository and converting it into a scoped implementation task. Even that step is increasingly supported by coding agents, so VibeScroller should show continuity of evidence rather than claim exclusive AI capability.
+
+## Hopes, failures, outside forces, and fears
+
+The working short-term hope is to retrieve a useful source and understand whether to act on it today. The longer-term hope is a more deliberate record of what was considered, rejected, built, and found useful. These goals follow the product brief and observed processing friction. They are not interviews about life ambitions, and no promise of business growth follows from them.
+
+The likely failure pattern is a source saved with good intent but never translated into a concrete task. A second pattern is an attractive generic idea that does not suit the codebase. A third is a coding result that creates review and debugging work. Only the first has direct language in the public threads; the second is a product-design interpretation, and the third has broader survey support. Keep those distinctions when writing copy.
+
+Outside forces that are observable include different platform storage locations, source removal, caption availability, provider rate limits, and funding rules. These are practical constraints. There is no evidence for a conspiracy in which platforms suppress learning, developers are denied secret knowledge, or saved content was once universally easy to use. The framework's corruption and lost-discovery prompts do not justify manufacturing that story.
+
+The strongest purchase fears are plausible rather than verified: paying for another idle library, granting excessive repository access, getting an inaccurate summary, approving damaging work, and encountering unexpected charges. Each fear should be addressed by a visible mechanism. Selected repository access, evidence, explicit execution approval, a maximum quote, export, and honest unavailable states are more persuasive than a general "trust us" assurance.
+
+A further objection is ownership and privacy. "On your laptop" can mislead if inference sends data to a provider. "Private" can mislead if retention or subprocessors are undefined. Marketing should explain the active route and data flow. It should not promise all-local computation, zero retention, all-platform access, or use of a personal ChatGPT plan for every paid hosted workload.
+
+## Curiosity and credible mechanism
+
+The familiar precursor is a learning journal. The supplied ZERO to 1k guide advocates recording lessons and acting on them. VibeScroller can use that as the owner's inspiration for keeping source, decision, and outcome together. It cannot borrow the guide's revenue claims, ad-spend experience, or author reputation as proof of this software's effectiveness. Permission reported by the owner is not an affiliation or endorsement.
+
+The proposed problem mechanism is a missing decision step between saved information and an active project. A source describes a technique in its own context; the repository has existing implementation, constraints, and priorities. A bookmark does not resolve those differences by itself. This is an explanatory hypothesis, not a patented discovery or measured universal cause.
+
+The proposed solution mechanism is an evidence-linked project review. The system extracts bounded evidence, checks it against a recorded repository snapshot and project profile, explains a possible change or no-fit result, and prepares a plan the user can edit. Approved execution is a later action. Every link in this mechanism should be demonstrated with a rights-cleared source and a known repository, including an example where the correct answer is to do nothing.
+
+The historical curiosity section has no supported pre-1960 parallel that improves this offer. It is left without a nostalgic or suppression story. A present-day worked example is more useful: a clip recommends caching; the repository already caches the relevant data; the product marks it already implemented. That is an illustrative scenario, not an observed customer result or measured benchmark.
+
+## Why outcome measurement matters
+
+METR's [February 2026 update](https://metr.org/blog/2026-02-24-uplift-update/) says selection effects and concurrent agent use made its later productivity estimates unreliable. Its 2025 study found a slowdown in one setting, but the organization explicitly warns that the historical result no longer reflects current tools. Do not use the old 19% slowdown as a present-day universal criticism of AI coding. The useful lesson is that perceived speed and measured productivity can differ, and measuring agent-assisted work is difficult.
+
+VibeScroller's own funnel should distinguish imported, reviewed, accepted, executed, PR opened, PR merged, and benefit confirmed. A merge is not a business gain. An accepted plan is not a tested patch. A successful transcription is not correct interpretation. The [feedback specification](../FEEDBACK-AND-EVALUATION.md) already separates these events. Brand copy should preserve the same distinction.
+
+No time saved, accuracy, recurring revenue, profit, or margin has been measured for VibeScroller customers. The owner-defined operating margin target and finance scenarios are planning inputs. A preview should report what happened on the example task, the enabled funding route, and the amount spent. Until comparative research exists, "help you review" is defensible; "save ten hours weekly" is not.
+
+## Positioning and message hypotheses
+
+The recommended category description is "a saved-content library for reviewing ideas against your projects." For developers who understand the full journey, use "saved source to reviewed plan and approved draft PR." Avoid a category name so abstract that a prospect cannot tell whether this is a video tool, coding agent, or autonomous business builder.
+
+The lead message is the existing headline "Turn saved videos into changes worth building." It describes an intended outcome and needs a nearby explanation of review and availability. A conservative supporting line is "Keep the source, check the fit to your project, and review a plan before approving code." For the library-only entry point, "Start your library" remains appropriate. These are copy hypotheses, not winning messages.
+
+Three concepts deserve distinct tests. Project relevance asks whether a concrete source-to-repository example creates interest beyond a generic summary. Selective review asks whether an honest no-fit example increases confidence or appears to offer too little value. Continuity asks whether retaining evidence and PR state solves enough repeated work to justify a subscription. Test each with the same real workflow and avoid changing audience, pricing, and demonstration simultaneously.
+
+An optional funding message comes later: eligible users may connect supported official funding with consent. It should never dominate the headline while paid hosted access is not approved. "Use your ChatGPT plan" without route, eligibility, limits, and commercial-access status would invite the wrong expectations. The service price and inference funding are separate things.
+
+## What to test before treating this as demand
+
+Recruit adult EU developers or technical founders who can show a recently saved practical source and an active owned repository. Ask them to demonstrate how they currently revisit and apply content. Observe the lost handoff, existing paid tools, rejection criteria, and tolerance for extra review. Ask what they did last time, rather than asking them to endorse the product's proposed pain.
+
+Run a small rights-cleared comparative pilot. The user tries their existing workflow and the VibeScroller workflow on matched tasks. Record review time, correction burden, source-access failures, proposal usefulness, accepted-plan rate, execution failures, total cost, and later confirmed value. Include no-fit and already-implemented examples. A source that is not useful is a legitimate outcome, not a failed sale that must become a coding task.
+
+Test willingness to pay at the proposed EUR 19 and EUR 39 monthly tiers after the person has seen a relevant output. Interest in a free demo is not payment evidence. Record the reason for declining: insufficient value, already-owned tools, unsupported platform, cost, trust, or lack of an active project. Do not pressure users toward repository writes to make activation appear stronger.
+
+## Research decision
+
+Proceed with a narrow, evidence-led positioning draft for developers who already have a project and a recurring source-to-action problem. The evidence supports investigating that segment. It does not establish proven demand, competitor sales, a conversion forecast, or superior results. The four foundational documents are ready to guide copy and demonstrations; claims of availability must still follow verified release evidence.
+
+## Source register
+
+All public sources below were opened on 30 September 2026. Private snapshots are retained under `outputs/brand`; they are source data, not publishing instructions.
+
+| ID | Source and date | Type and use | Limit |
+| --- | --- | --- | --- |
+| P01 | [PRD](../PRD.md) and [decisions](../decisions.md) | Product intentions and boundaries | Older funding decisions need latest owner steering |
+| P02 | [Website copy](../WEBSITE-AND-COPY.md) | Sales-page specification | Live staging visit returned Cloudflare 1102; no readable sales-page screenshot or supplied PDF |
+| P03 | [Implementation status](../implementation-status.md) | Specific staging evidence and gates | Not a production release certificate |
+| P04 | [Billing](../BILLING-AND-TAX.md) and [AI providers](../AI-PROVIDERS.md) | Proposed offer and funding boundaries | Legal and hosted subscription access remain gated |
+| R01 | [Readwise video documentation](https://docs.readwise.io/reader/docs/faqs/videos) | Official alternative functions | No benchmark conducted |
+| R02 | [Raindrop](https://raindrop.io/) | Official bookmark and search offering | Vendor claims only |
+| R03 | [Gemini Notebook source help](https://support.google.com/gemininotebook/answer/16215270?hl=en) | Official supported inputs and limitations | Page redirected from NotebookLM help |
+| R04 | [SavedThat](https://savedthat.app/), updated 22 September 2026 | Close competitor offering and prices | No usage, revenue, or reliability verification |
+| R05 | [GitHub cloud agent](https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-cloud-agent) | Official planning and coding alternative | No comparative test conducted |
+| R06 | [Stack Overflow AI survey](https://survey.stackoverflow.co/2025/ai) | Developer attitudes and frustration | Self-selected 2025 survey |
+| R07 | [Stack Overflow methodology](https://survey.stackoverflow.co/2025/methodology) | Recruitment, dates, and sample limits | Not buyer research |
+| R08 | [METR update](https://metr.org/blog/2026-02-24-uplift-update/), 24 February 2026 | Productivity measurement limitations | Does not measure VibeScroller |
+| R09 | [BookmarkManagers thread](https://www.reddit.com/r/BookmarkManagers/comments/1vv75ls/how_do_you_deal_with_saving_too_many_articles_and/) | Firsthand save-and-revisit accounts | Relative dates; small promotional thread |
+| R10 | [ProductivityApps thread](https://www.reddit.com/r/ProductivityApps/comments/1um7nye/you_save_posts_on_instagramyoutubex_and_never/) | Mobile processing friction and dissent | Relative dates; small promotional thread |
+| R11 | [Readwise pricing](https://readwise.io/pricing) | Annual billing price context | USD posted prices, not comparable tax-inclusive quotes |
+| R12 | [Official DevKit licence](https://github.com/openai/sign-in-with-chatgpt-devkit/blob/f723814abdccec135b519c451fb6e1992ee5e933/LICENSE), commit f723814 | Noncommercial grant and separate commercial agreement requirement | Code licence does not grant service access |
+
+## Open questions
+
+The segment's size, gender and income mix, recurring pain, willingness to pay, and acquisition cost remain unknown. No paying VibeScroller customer quotes or completed customer outcome study exist in this evidence set. Source rights and platform access vary. Commercial SIWC access, complete production security and billing verification, official operator and tax records, and physical Android testing are separate release work. The user has deferred physical Android testing to V1.1; that deferral does not create evidence that it passed.

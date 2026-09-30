@@ -3,7 +3,6 @@ import { PublicPage } from "@/components/site";
 export const metadata = {
   title: "Make scrolling productive",
   description: "Review saved ideas and approve changes worth building.",
-  robots: { index: true, follow: true },
   alternates: { canonical: "https://scroll.companynerve.com" },
 };
 export default function Home() {
@@ -154,7 +153,7 @@ export default function Home() {
           ],
           [
             "Can I use my ChatGPT subscription?",
-            "Supported local Codex sessions use your own eligible account. Hosted inference uses a separately disclosed API funding route.",
+            "Eligible local open-source tools can request your permission to use your ChatGPT plan. Hosted VibeScroller support is awaiting commercial access. API funding remains separate; your ChatGPT allowance is not unlimited and does not cover transcription or cloud compute.",
           ],
           [
             "Does merging mean the idea helped?",

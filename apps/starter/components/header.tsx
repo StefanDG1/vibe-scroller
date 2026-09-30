@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { company } from "@companynerve/company-config";
-import { recipes } from "@companynerve/design-recipes";
-import { Button, Select } from "@companynerve/ui";
-import { changeRecipe } from "@/app/actions";
+export { RecipePicker } from "./recipe-picker";
 export function Header() {
   return (
     <header className="topbar">
@@ -15,24 +13,5 @@ export function Header() {
         <Link href="/account">Account</Link>
       </nav>
     </header>
-  );
-}
-export function RecipePicker() {
-  return (
-    <form action={changeRecipe} className="actions">
-      <label htmlFor="recipe" className="sr-only">
-        Design recipe
-      </label>
-      <Select id="recipe" name="recipe" style={{ width: 220 }}>
-        {recipes.map((r) => (
-          <option value={r.id} key={r.id}>
-            {r.name}
-          </option>
-        ))}
-      </Select>
-      <Button variant="outline" type="submit">
-        Apply recipe
-      </Button>
-    </form>
   );
 }

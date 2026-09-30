@@ -72,6 +72,7 @@ export const exportAccount = query({
         name: actor.name,
         email: actor.email,
         createdAt: actor.createdAt,
+        preferChatGPTPlan: actor.preferChatGPTPlan ?? false,
       },
       memberships: memberships.map((m) => ({
         organizationId: m.organizationId,
