@@ -4,7 +4,7 @@ Mode: how-to. Version: 1.0.0.
 
 ## Establish the repository
 
-1. Read [Decisions](DECISIONS.md).
+1. Read [Decisions](decisions.md).
 2. Read [PRD](PRD.md).
 3. Inspect CompanyNerve's current README, status record, and export command.
 4. Export the foundation into a new empty repository named `vibe-scroller`.
@@ -15,7 +15,7 @@ Do not alter the upstream CompanyNerve production application. Keep VibeScroller
 
 ## Follow the reading order
 
-Read [Architecture](ARCHITECTURE.md), [Data model](DATA-MODEL.md), [API contracts](API-CONTRACTS.md), and [State machines](STATE-MACHINES.md) before implementing backend behavior.
+Read [Architecture](architecture.md), [Data model](DATA-MODEL.md), [API contracts](API-CONTRACTS.md), and [State machines](STATE-MACHINES.md) before implementing backend behavior.
 
 Read [Dashboard and mobile UX](DASHBOARD-AND-MOBILE-UX.md) and [Website and copy](WEBSITE-AND-COPY.md) before implementing screens. Both are required product work.
 

@@ -37,6 +37,23 @@ for (const file of docs) {
     const path = resolve(dirname(file), decodeURIComponent(href));
     if (!existsSync(path))
       errors.push(`Broken link in ${relative(root, file)}: ${href}`);
+    else {
+      // Windows resolves the wrong case; Linux CI and deployment do not.
+      let directory = root;
+      for (const part of relative(root, path).split(/[\\/]/)) {
+        if (part === "..") {
+          directory = dirname(directory);
+          continue;
+        }
+        if (!readdirSync(directory).includes(part)) {
+          errors.push(
+            `Filename case mismatch in ${relative(root, file)}: ${href}`,
+          );
+          break;
+        }
+        directory = join(directory, part);
+      }
+    }
   }
 }
 for (const required of [

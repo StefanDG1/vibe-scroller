@@ -12,3 +12,6 @@ playwright-report/
 *.log
 work/
 outputs/
+
+__pycache__/
+*.py[cod]

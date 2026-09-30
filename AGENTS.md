@@ -1,6 +1,6 @@
 # Agent instructions
 
-Read [START-HERE](docs/START-HERE.md), [PRD](docs/PRD.md), [Decisions](docs/DECISIONS.md), and the relevant implementation work package before changing code.
+Read [START-HERE](docs/START-HERE.md), [PRD](docs/PRD.md), [Decisions](docs/decisions.md), and the relevant implementation work package before changing code.
 
 ## Build the specified product
 
