@@ -18,10 +18,12 @@ export const execute = internalAction({
     let sandbox;
     let credits = 0;
     let computeStarted = 0;
+    let stage = "authorization";
     try {
       await authorizeRepository(ctx, run.repo);
+      stage = "sandbox";
       computeStarted = Date.now();
-      sandbox = await createCodingSandbox();
+      sandbox = await createCodingSandbox(run.maxSeconds);
       await ctx.runMutation(internal.jobs.sandboxStarted, {
         id: run._id,
         generation: run.generation,
@@ -32,6 +34,7 @@ export const execute = internalAction({
         generation: run.generation,
         sandboxId: sandbox.sandboxId,
       });
+      stage = "snapshot_and_generation";
       const generated = await codeChanges({
         repo: run.repo,
         baseSha: run.baseSha,
@@ -55,6 +58,7 @@ export const execute = internalAction({
       )
         throw new Error("Run canceled.");
       await authorizeRepository(ctx, run.repo);
+      stage = "isolated_checks";
       const checked = await checkPatch(
         sandbox,
         generated.base,
@@ -77,13 +81,24 @@ export const execute = internalAction({
         report: `${checked.report}\n\nLimitations: ${generated.limitations.join("; ")}`,
         credits: cost,
       });
-    } catch {
+    } catch (error) {
+      const category =
+        error instanceof Error
+          ? ([
+              "REPO_TOO_LARGE",
+              "POLICY_BLOCKED",
+              "PROVIDER_LIMIT",
+              "PROVIDER_ERROR",
+              "FORBIDDEN",
+              "SETUP_REQUIRED",
+            ].find((code) => error.message.includes(code)) ?? error.name)
+          : "UnknownError";
+      console.error(JSON.stringify({ stage, category }));
       await ctx.runMutation(internal.jobs.failCloud, {
         id: run._id,
         generation: run.generation,
         credits,
-        error:
-          "Cloud task failed or stopped. Review provider and measured usage; no draft PR was published.",
+        error: `Cloud task failed or stopped at ${stage} (${category}). Review provider and usage; no draft PR was published.`,
       });
     } finally {
       if (sandbox) await sandbox.kill();

@@ -628,6 +628,51 @@ describe("persisted matching jobs", () => {
       proposalId: proposalId!,
     });
     expect((await a.mutation(api.jobs.reserveMatch, args)).cached).toBe(true);
+    await t.run(async (ctx) => {
+      const proposal = await ctx.db.get(proposalId!);
+      await ctx.db.patch(proposalId!, {
+        disposition: "no_fit",
+        detail: { ...proposal!.detail, disposition: "no_fit" },
+      });
+    });
+    await expect(
+      a.mutation(api.product.decide, {
+        id: proposalId!,
+        version: 1,
+        decision: "accepted",
+        note: "",
+      }),
+    ).rejects.toThrow();
+    await expect(
+      a.mutation(api.product.decide, {
+        id: proposalId!,
+        version: 1,
+        decision: "accepted",
+        disposition: "relevant",
+        note: "",
+      }),
+    ).rejects.toThrow();
+    await a.mutation(api.product.decide, {
+      id: proposalId!,
+      version: 1,
+      decision: "accepted",
+      disposition: "relevant",
+      note: "The reviewer checked the repository and the proposed document is absent.",
+    });
+    const corrected = await t.run((ctx) => ctx.db.get(proposalId!));
+    expect(corrected!.version).toBe(2);
+    expect(corrected!.detail.disposition).toBe("no_fit");
+    expect(corrected!.reviewerCorrection!.from).toBe("no_fit");
+    expect(corrected!.disposition).toBe("relevant");
+    await expect(
+      a.mutation(api.product.decide, {
+        id: proposalId!,
+        version: 1,
+        decision: "accepted",
+        note: "",
+      }),
+    ).rejects.toThrow();
+
     expect(
       await t.run((ctx) => ctx.db.query("proposals").collect()),
     ).toHaveLength(1);

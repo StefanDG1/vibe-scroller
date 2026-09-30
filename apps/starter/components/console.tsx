@@ -787,6 +787,64 @@ export function Console({
           {view === "proposal" && selected && (
             <>
               <span className="status">{label(selected.disposition)}</span>
+              {selected.reviewerCorrection && (
+                <p className="notice">
+                  Reviewer correction: {label(selected.reviewerCorrection.to)}.
+                  Original model assessment:{" "}
+                  {label(selected.reviewerCorrection.from)}. Reason:{" "}
+                  {selected.reviewerCorrection.reason}
+                </p>
+              )}
+              {!demo && (
+                <form
+                  className="panel form-grid"
+                  onSubmit={async (event) => {
+                    event.preventDefault();
+                    const form = new FormData(event.currentTarget);
+                    await call("decide", {
+                      id: id(selected),
+                      version: selected.version,
+                      decision: "accepted",
+                      disposition: form.get("disposition"),
+                      note: form.get("reason"),
+                    });
+                  }}
+                >
+                  <h2>Review the assessment</h2>
+                  <label>
+                    Reviewer assessment
+                    <select
+                      name="disposition"
+                      defaultValue={selected.disposition}
+                    >
+                      {[
+                        "relevant",
+                        "no_fit",
+                        "already_implemented",
+                        "unsupported_claim",
+                        "needs_context",
+                        "defer",
+                      ].map((value) => (
+                        <option key={value} value={value}>
+                          {label(value)}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    Evidence and reason for any correction
+                    <textarea
+                      name="reason"
+                      maxLength={2000}
+                      placeholder="Explain the source and repository evidence. Changing an assessment requires a reason."
+                    />
+                  </label>
+                  <button className="primary" disabled={busy} type="submit">
+                    Accept reviewed relevant proposal
+                  </button>
+                </form>
+              )}
+
               <section className="panel">
                 <h2>Why this project?</h2>
                 <p>{selected.detail?.currentProblem}</p>

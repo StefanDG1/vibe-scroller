@@ -239,7 +239,12 @@ export const saveKey = action({
   },
 });
 export const publishRun = action({
-  args: { id: v.id("runs"), generation: v.number(), patchDigest: v.string() },
+  args: {
+    id: v.id("runs"),
+    generation: v.number(),
+    patchDigest: v.string(),
+    reviewNote: v.optional(v.string()),
+  },
   handler: async (ctx, a): Promise<void> => {
     const run = await ctx.runMutation(api.jobs.authorizePublication, a);
     try {

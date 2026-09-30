@@ -920,6 +920,7 @@ export const decide = mutation({
     version: v.number(),
     decision: v.string(),
     note: v.string(),
+    disposition: v.optional(v.string()),
   },
   handler: async (ctx, a) => {
     const p = await ctx.db.get(a.id);
@@ -935,7 +936,51 @@ export const decide = mutation({
       "INVALID_INPUT",
       "Choose a decision.",
     );
-    await ctx.db.patch(p._id, { review: a.decision, updatedAt: Date.now() });
+    const disposition = a.disposition ?? p.disposition;
+    ensure(
+      [
+        "relevant",
+        "no_fit",
+        "already_implemented",
+        "unsupported_claim",
+        "needs_context",
+        "defer",
+      ].includes(disposition),
+      "INVALID_INPUT",
+      "Choose a supported assessment.",
+    );
+    const changed = disposition !== p.disposition;
+    ensure(
+      !changed ||
+        (a.note.trim().length >= 20 &&
+          a.note.length <= 2000 &&
+          !containsSecret(a.note)),
+      "EVIDENCE_REQUIRED",
+      "Explain the evidence for changing this assessment.",
+    );
+    ensure(
+      a.decision !== "accepted" || disposition === "relevant",
+      "CONTEXT_REQUIRED",
+      "A no-fit or uncertain assessment needs an explicit, explained reviewer correction before accepting a coding proposal.",
+    );
+    await ctx.db.patch(p._id, {
+      review: a.decision,
+      disposition,
+      ...(changed
+        ? {
+            reviewerCorrection: {
+              from: p.detail.disposition,
+              to: disposition,
+              reason: a.note.trim(),
+              actor: u.actor._id,
+              at: Date.now(),
+            },
+            version: p.version + 1,
+            planHash: undefined,
+          }
+        : {}),
+      updatedAt: Date.now(),
+    });
     await ctx.db.insert("feedback", {
       organizationId: p.organizationId,
       createdAt: Date.now(),

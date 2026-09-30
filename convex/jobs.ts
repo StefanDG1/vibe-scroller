@@ -391,7 +391,12 @@ export const cancel = mutation({
   },
 });
 export const authorizePublication = mutation({
-  args: { id: v.id("runs"), generation: v.number(), patchDigest: v.string() },
+  args: {
+    id: v.id("runs"),
+    generation: v.number(),
+    patchDigest: v.string(),
+    reviewNote: v.optional(v.string()),
+  },
   handler: async (ctx, a) => {
     const r = await ctx.db.get(a.id);
     if (!r) fail("Run unavailable.");
@@ -435,11 +440,27 @@ export const authorizePublication = mutation({
       "POLICY_BLOCKED",
       "Patch contains a credential.",
     );
-    await ctx.db.patch(r._id, { state: "publishing", updatedAt: Date.now() });
+    ensure(
+      !a.reviewNote ||
+        (a.reviewNote.length <= 2000 && !containsSecret(a.reviewNote)),
+      "POLICY_BLOCKED",
+      "Publication notes must be bounded and contain no credentials.",
+    );
+    const report = a.reviewNote
+      ? `${r.report ?? ""}\n\nReviewer publication note: ${a.reviewNote}`
+      : r.report;
+    await ctx.db.patch(r._id, {
+      state: "publishing",
+      report,
+      updatedAt: Date.now(),
+    });
     return {
       ...r,
       repo,
-      title: p.title,
+      title: p.plan?.scope?.startsWith("Synthetic staging")
+        ? `Synthetic staging: ${p.title}`.slice(0, 160)
+        : p.title,
+      report,
       changes: r.changes as { path: string; content: string | null }[],
     };
   },
@@ -573,25 +594,27 @@ export const claimCloud = internalMutation({
       "FORBIDDEN",
       "The approving member no longer has access.",
     );
-    const computeReserve = Number(
-      process.env.CLOUD_COMPUTE_RESERVE_CREDITS ?? "10000",
+    const computeReserve = Math.min(
+      Number(process.env.CLOUD_COMPUTE_RESERVE_CREDITS ?? "10000"),
+      Math.floor(r.maxCredits - 1),
     );
     const rate = Number(process.env.E2B_CREDITS_PER_SECOND ?? "1");
     ensure(
       Number.isFinite(rate) &&
         rate > 0 &&
         Number.isSafeInteger(computeReserve) &&
-        computeReserve >= Math.ceil(1200 * rate) &&
+        computeReserve >= Math.ceil(30 * rate) &&
         computeReserve < r.maxCredits,
       "INSUFFICIENT_CREDITS",
       "Review a quote that covers the full bounded compute reservation.",
     );
+    const maxSeconds = Math.min(1200, Math.floor(computeReserve / rate));
     await ctx.db.patch(r._id, {
       state: "running",
-      leaseUntil: Date.now() + 1200000,
+      leaseUntil: Date.now() + maxSeconds * 1000,
       updatedAt: Date.now(),
     });
-    return { ...r, repo, plan: p.plan, computeReserve };
+    return { ...r, repo, plan: p.plan, computeReserve, maxSeconds };
   },
 });
 export const sandboxStarted = internalMutation({

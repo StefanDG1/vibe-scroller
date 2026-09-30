@@ -60,27 +60,36 @@ export async function codeChanges(input: {
   );
   ensure(
     items.length <= 2048 &&
-      items.every((f: any) => f.size <= 500000) &&
+      items.every((f: any) => f.size <= 1000000) &&
       items.reduce((n: number, f: any) => n + f.size, 0) <= 20000000,
     "REPO_TOO_LARGE",
-    "The cloud worker supports at most 2,048 safe text files and 20 MB. Binary files and symlinks require another reviewed profile.",
+    "The cloud worker supports at most 2,048 safe text files, 1 MB per file and 20 MB total. Binary files and symlinks require another reviewed profile.",
   );
   const base: { path: string; content: string }[] = [];
+  const omitted: string[] = [];
   // Bound trusted GitHub reads without passing credentials into the sandbox.
   for (let offset = 0; offset < items.length; offset += 8) {
     const batch = await Promise.all(
       items.slice(offset, offset + 8).map(async (f: any) => {
         const b = await github(`${root}/git/blobs/${f.sha}`, token);
         const content = Buffer.from(b.content, "base64").toString("utf8");
-        ensure(
-          !content.includes("\0") && !containsSecret(content),
-          "POLICY_BLOCKED",
-          "The snapshot contains a binary or credential.",
-        );
+        if (content.includes("\0") || containsSecret(content)) {
+          ensure(
+            !input.allowedPaths.includes(f.path),
+            "POLICY_BLOCKED",
+            "An approved file contains binary or credential data.",
+          );
+          omitted.push(f.path);
+          return null;
+        }
         return { path: f.path, content };
       }),
     );
-    base.push(...batch);
+    base.push(
+      ...batch.filter(
+        (file): file is { path: string; content: string } => file !== null,
+      ),
+    );
   }
   const result = await input.generate(
     changesSchema,
@@ -113,19 +122,31 @@ export async function codeChanges(input: {
   return {
     base,
     changes: result.output.files as { path: string; content: string | null }[],
-    limitations: result.output.limitations,
+    limitations: [
+      ...result.output.limitations,
+      ...(omitted.length
+        ? [
+            `The isolated text snapshot excluded ${omitted.length} binary or credential-bearing files. Checks requiring those files cannot establish full repository coverage. Omitted paths: ${omitted.join(", ")}`,
+          ]
+        : []),
+    ],
     credits: result.credits,
   };
 }
-export async function createCodingSandbox() {
+export async function createCodingSandbox(maxSeconds = 1200) {
   ensure(
     process.env.E2B_API_KEY && process.env.E2B_CODING_TEMPLATE,
     "SETUP_REQUIRED",
     "Configure the pinned coding image and sandbox account.",
   );
+  ensure(
+    Number.isSafeInteger(maxSeconds) && maxSeconds >= 30 && maxSeconds <= 1200,
+    "QUOTE_CHANGED",
+    "Review the bounded execution time.",
+  );
   const sandbox = await Sandbox.create(process.env.E2B_CODING_TEMPLATE, {
     apiKey: process.env.E2B_API_KEY,
-    timeoutMs: 1200000,
+    timeoutMs: maxSeconds * 1000,
     secure: true,
     allowInternetAccess: false,
     metadata: { product: "vibescroller", class: "coding" },

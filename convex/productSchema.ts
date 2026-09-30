@@ -172,6 +172,15 @@ export const productTables = {
     baseSha: v.string(),
     profileVersion: v.number(),
     disposition: v.string(),
+    reviewerCorrection: v.optional(
+      v.object({
+        from: v.string(),
+        to: v.string(),
+        reason: v.string(),
+        actor: v.id("users"),
+        at: v.number(),
+      }),
+    ),
     title: v.string(),
     detail: v.any(),
     review: v.string(),

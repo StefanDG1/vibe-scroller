@@ -64,11 +64,38 @@ export async function POST(req: NextRequest) {
       { result },
       { headers: { "Cache-Control": "no-store" } },
     );
-  } catch {
+  } catch (error) {
+    const messages: Record<string, string> = {
+      PROVIDER_LIMIT:
+        "The verified free inference allowance is reserved or exhausted. Try after it resets; no paid provider was used.",
+      INSUFFICIENT_CREDITS:
+        "The available allowance cannot cover this reservation. Review usage and the maximum budget.",
+      QUOTA_EXCEEDED:
+        "This workspace has reached its source or repository allowance.",
+      BASE_CHANGED:
+        "The repository changed. Refresh its snapshot and review a new plan.",
+      APPROVAL_STALE:
+        "This plan or request is stale. Review its current version before continuing.",
+      MATCH_IN_PROGRESS:
+        "Matching is already running for this source and repository.",
+      RETRY_EXHAUSTED:
+        "This matching job reached its retry limit. Review the source and provider setup before creating a new attempt.",
+      ISOLATION_UNAVAILABLE:
+        "The selected executor has not passed the required isolation checks.",
+      FORBIDDEN:
+        "This action is unavailable with your current workspace or repository access.",
+    };
+    const category =
+      error instanceof Error
+        ? Object.keys(messages).find((code) =>
+            error.message.includes(`${code}:`),
+          )
+        : undefined;
     return NextResponse.json(
       {
-        error:
-          "The operation could not be completed. Check the current source, plan, allowance, and connection status before retrying.",
+        error: category
+          ? messages[category]
+          : "The operation could not be completed. Check the current source, plan, allowance, and connection status before retrying.",
       },
       { status: 400, headers: { "Cache-Control": "no-store" } },
     );
