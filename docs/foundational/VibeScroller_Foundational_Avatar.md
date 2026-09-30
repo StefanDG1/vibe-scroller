@@ -6,14 +6,14 @@ This completes the original Mark Builds Brands Avatar Sheet Template using the [
 
 ## Demographic and general information
 
-| Template field | Completion | Basis |
-| --- | --- | --- |
-| Age range | Adults only; a narrower age range is unknown | Product |
-| Gender | No verified distribution; do not gender the copy | Unknown |
-| Location | EU first; English interface and initial content language | Product, not measured demand |
-| Monthly revenue | Not known; personal salary and project revenue must not be conflated | Unknown |
-| Professional backgrounds | Independent development and technical product founding are the intended focus | Product and hypothesis |
-| Typical identities | Person with permission to change a selected repository and responsibility for reviewing the change | Behavioral hypothesis |
+| Template field           | Completion                                                                                         | Basis                        |
+| ------------------------ | -------------------------------------------------------------------------------------------------- | ---------------------------- |
+| Age range                | Adults only; a narrower age range is unknown                                                       | Product                      |
+| Gender                   | No verified distribution; do not gender the copy                                                   | Unknown                      |
+| Location                 | EU first; English interface and initial content language                                           | Product, not measured demand |
+| Monthly revenue          | Not known; personal salary and project revenue must not be conflated                               | Unknown                      |
+| Professional backgrounds | Independent development and technical product founding are the intended focus                      | Product and hypothesis       |
+| Typical identities       | Person with permission to change a selected repository and responsibility for reviewing the change | Behavioral hypothesis        |
 
 The first-person identity used for copy exploration is "I build a project and keep finding ideas I might use." This is drafted language, not a customer quote. Do not infer that the buyer runs a profitable SaaS, works full time, has a particular education, or is already subscribed to ChatGPT. Business enquiries are possible, but enterprise administration and team governance cannot be invented to broaden this avatar.
 
@@ -101,12 +101,12 @@ Unqualified audiences include casual entertainment savers, people satisfied with
 
 ## Typical emotional journey
 
-| Template stage | Working journey | What would validate it |
-| --- | --- | --- |
-| Awareness | Notices that a potentially useful source stays unprocessed | Shows a recent example and current workaround |
-| Frustration | Retrieval or deciding relevance takes effort | Observed task friction, not agreement with a leading question |
-| Desperation and seeking solutions | Compares search, notebooks, and agents; desperation itself is unverified | Describes an actual search or trial |
-| Relief and commitment | A relevant proposal helps the person make a decision | Uses the output and chooses a next action |
+| Template stage                    | Working journey                                                          | What would validate it                                        |
+| --------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------- |
+| Awareness                         | Notices that a potentially useful source stays unprocessed               | Shows a recent example and current workaround                 |
+| Frustration                       | Retrieval or deciding relevance takes effort                             | Observed task friction, not agreement with a leading question |
+| Desperation and seeking solutions | Compares search, notebooks, and agents; desperation itself is unverified | Describes an actual search or trial                           |
+| Relief and commitment             | A relevant proposal helps the person make a decision                     | Uses the output and chooses a next action                     |
 
 No emotional progression is guaranteed. A no-fit result may be useful, disappointing, or irrelevant to the user. The pilot should record that response rather than impose a success story.
 

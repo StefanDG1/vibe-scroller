@@ -1,6 +1,6 @@
 # Confirm tax treatment and publish the policies
 
-Mode: how-to. Checked 30 September 2026. The operator intends to use EXPONENTIAL EDUCATION S.R.L.; its current registration and tax status have not been verified. Live checkout remains disabled.
+Mode: how-to. Checked 30 September 2026. Owner-supplied ONRC records establish the intended operator's identity and listed software activities. The official ANAF Article 316 registry matched that company and reported ordinary VAT registration false and inactive status false for September 30. This does not establish Article 317, OSS/EX status, turnover eligibility or invoice treatment for every market. Live checkout remains disabled pending those applicable checks.
 
 VAT is not one yes/no setting. Domestic treatment, business purchases, customer location and customer business status can produce different obligations at the same time. This is an implementation checklist for discussion with the company's accountant, not a determination of its status.
 
@@ -25,6 +25,10 @@ For EU business customers, establish their business status and place of supply; 
 
 ## Request one accountant confirmation
 
+Identity documents are now supplied; do not request them again. Originals, extracted fields and the dated registry response stay in ignored `private/company-records`, outside GitHub. The fiscal annex is an incorporation request dated May 20, with ordinary VAT options unchecked on visual inspection; it is not a current complete tax determination. No independent digital-signature verification or later-change certificate is claimed.
+
+Ask for an existing **Situația vectorului fiscal** from ANAF/SPV, any applicable **Certificat de înregistrare în scopuri de TVA** (Article 316 or special Article 317), and existing OSS/EX approval if applicable. If a registration does not apply, record a dated accountant confirmation and its basis; do not request a new registration merely for this checklist. Confirm enabled countries/customer types, qualifying turnover, invoice series and RO e-Factura responsibility. See [the Oblio handover](oblio-invoicing.md).
+
 Ask the accountant to provide a dated answer to these questions:
 
 1. What is the legal company name, registered address, trade-register identifier, tax identifier and current Article 310/316 treatment? Attach the current official record or reference.
@@ -34,6 +38,8 @@ Ask the accountant to provide a dated answer to these questions:
 5. What invoice wording, RO e-Factura workflow and filing calendar should the app enforce?
 
 Record the evidence and effective dates in the tax configuration. The implementation already supports exemption-target and ordinary modes with separate registration evidence. Tests cannot create a registration or substitute for this confirmation.
+
+A false e-Factura registry membership result is not a determination that reporting obligations are absent. Confirm the applicable transaction scope with the accountant; do not use registry absence to disable a required invoice workflow.
 
 ## Complete legal publication
 

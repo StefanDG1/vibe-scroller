@@ -1,6 +1,6 @@
 # Official ChatGPT-plan protocol
 
-Status: local adapter implemented; real account and hosted commercial activation unverified. Date: 2026-09-30.
+Status: local adapter implemented; actual owner consent and text inference verified; hosted commercial activation unverified. Date: 2026-09-30.
 
 The owner requested the newly announced Sign in with ChatGPT capability, prefers each user's own eligible plan allowance, and explicitly reports no OpenAI commercial approval. This supersedes the earlier assumption that the public subscription-funded inference contract was unavailable. It does not supersede WorkOS identity, execution isolation or separate approval.
 
@@ -15,3 +15,5 @@ Requests use only public OpenAI model discovery and Responses endpoints, account
 Hosted activation remains disabled. An open-source code license or a settings preference does not establish approval to offer user-plan usage through the paid hosted service. Before activation, record permitted deployment/workloads, account ownership and revocation, data handling, models/limits, official approval where required, and actual successful/revoked/exhausted-account tests. Do not advertise measured savings or unlimited usage.
 
 The normal browser workflow continues using its explicitly authorized managed/API routes. Local coding remains separately blocked by failed Windows isolation evidence. This inference utility does not cure that failure or complete browser-connected inference dispatch.
+
+The owner completed official consent on September 30. Model discovery and a completed nonempty GPT-5.6-Luna response passed, with reported usage of 16 input and 10 output tokens. The provider omitted Content-Type on HTTP 200, exposing an adapter compatibility failure. The corrected parser permits a missing header only when actual SSE framing produces completed nonempty output; incompatible content types and headerless JSON remain rejected. Regression tests pass. Earlier failed diagnostic requests are not successful inference or evidence of zero allowance consumption. This result does not establish hosted commercial eligibility, revocation/exhaustion behavior or browser dispatch.

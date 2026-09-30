@@ -1,0 +1,27 @@
+{
+  "testedAt": "2026-09-30T17:07:00Z",
+  "baseCommit": "eacf130b73605a1e92c5f0f79323eae43a399e98",
+  "modifiedAdapter": "packages/runner/chatgpt-protocol.mjs",
+  "environment": "Windows local trusted utility",
+  "officialConsent": true,
+  "accountSpecificModels": true,
+  "model": "gpt-5.6-luna",
+  "completedNonemptyResponse": true,
+  "usage": {
+    "inputTokens": 16,
+    "outputTokens": 10,
+    "totalTokens": 26
+  },
+  "apiKeyUsed": false,
+  "alternateFundingRoute": false,
+  "regressionCommand": "pnpm exec vitest run tests/chatgpt-local.test.ts",
+  "regressionTestsPassed": 12,
+  "limitations": [
+    "Earlier requests failed on missing response Content-Type; their allowance consumption is not determined",
+    "Only local text inference tested",
+    "Hosted commercial approval unavailable",
+    "Browser-connected dispatch not implemented",
+    "Real account exhaustion and revocation tests not completed",
+    "Local coding isolation remains separately gated"
+  ]
+}

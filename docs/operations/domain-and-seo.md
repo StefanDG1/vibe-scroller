@@ -12,6 +12,8 @@ The free Worker returned Cloudflare 1102 during the brand research visit. [Worke
 
 ## Select an eligible deployment
 
+Latest check, September 30: Namecheap is now signed in. Its companynerve.com records include existing upstream root/app/launch/www entries and no scroll entry; none was changed. Hosting Subscriptions shows no records. Vercel lists one Hobby team and no eligible paid team. The latest Worker version 63d68b65-0f8f-429c-b956-3f24a60e8d52 serves the public homepage and authenticated workspace list, but the actual Connections route still returned 1102 at 16:56:05 UTC. Authentication itself is not sufficient hosting-capacity evidence. The no-new-purchases constraint still applies.
+
 Prefer an existing eligible hosting plan if the operator has one. An eligible Vercel deployment can use the selected subdomain through its prescribed external DNS record without moving the parent zone. The previously inspected team had Hobby; do not assume this provides the required commercial permission. Alternatively, a reviewed Cloudflare zone migration plus an adequate Worker plan needs separate operator approval and a full DNS/service inventory first. Do not upgrade a plan automatically.
 
 Once the chosen host supplies exact DNS values, record the existing subdomain records, add only its required record, verify HTTPS/certificate and remove any conflicting subdomain record only after review. Configure the production WorkOS callbacks/session origins, selected-repository GitHub App callback, Convex app URL and CORS, private R2 CORS, webhook endpoints, cancellation/checkout return URLs and email links. Test each on the final domain. Keep staging credentials and synthetic data separate from production.

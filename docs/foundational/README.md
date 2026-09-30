@@ -7,6 +7,8 @@ The four deliverables follow the supplied Mark Builds Brands sequence and origin
 - [Offer](VibeScroller_Foundational_Offer.md)
 - [Necessary beliefs](VibeScroller_Foundational_Beliefs.md)
 
+Use all four for app-copy and marketing tasks, as required by [AGENTS.md](../../AGENTS.md). Keep them current through [the review process](COPY-AND-IDEAS.md), [idea backlog](idea-backlog.md) and [change log](change-log.md). Owner ideas can be added directly or reviewed by Codex; conflicts and missing evidence stay visible.
+
 Research date 30 September 2026. Executed by the user-requested GPT-6.1 Sol agent at medium reasoning. No live campaign, social account, purchase, deployment, code edit, or commit was performed by this document task.
 
 ## Process provenance
@@ -19,15 +21,15 @@ The full adapted prompts and intermediate results are in `outputs/brand/stage-pr
 
 ## Stage ledger
 
-| SOP stage | Actual input and adapted action | Result and limits |
-| --- | --- | --- |
-| Research prompt 1 | Critique the existing VibeScroller sales-page copy as a direct-response software offer for adult EU developers/founders | Reviewed `WEBSITE-AND-COPY.md` and product constraints. No sales-page PDF was supplied. Later live staging visit returned Cloudflare 1102 at 16:12:01 UTC; preserved privately. No visual sales-page review is claimed |
-| Research prompt 2 | Read the two original research training documents and identify their usable method for software | Completed method analysis covering customer language, alternatives, positives, negatives, objections, curiosity, and evidence limits. Demographics and dramatic narratives require evidence; ecommerce examples do not transfer |
-| Research prompt 3 | Write a detailed research prompt, then conduct source research and compile at least six pages equivalent | Full prompt retained privately. Manual browser-harness public research completed. Research contains more than 3,500 words, with no fixed page claim for Markdown. No dedicated Deep Research tool was available |
-| Avatar prompt 1 | Complete the original Avatar Sheet Template using the research | Every template section is present. Unknown demographics and unavailable client quotes remain explicit; firsthand public comments are separately attributed |
-| Offer prompt 2 | Complete the original Offer Brief Template after avatar | Every template field is present. Name/domain fixed by user. Prices remain proposals; unique mechanism and emotional arguments remain hypotheses |
-| Beliefs prompt 1 | Analyze the supplied Agora argument-versus-word-choice transcript | Completed analysis prioritizing a coherent inspectable argument. Rejects invented superiority and concealed counterevidence |
-| Beliefs prompt 2 | Use the preceding three documents to derive no more than six first-person necessary beliefs | Six statements beginning "I believe that" with corresponding proof needs and limits |
+| SOP stage         | Actual input and adapted action                                                                                         | Result and limits                                                                                                                                                                                                               |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Research prompt 1 | Critique the existing VibeScroller sales-page copy as a direct-response software offer for adult EU developers/founders | Reviewed `WEBSITE-AND-COPY.md` and product constraints. No sales-page PDF was supplied. Later live staging visit returned Cloudflare 1102 at 16:12:01 UTC; preserved privately. No visual sales-page review is claimed          |
+| Research prompt 2 | Read the two original research training documents and identify their usable method for software                         | Completed method analysis covering customer language, alternatives, positives, negatives, objections, curiosity, and evidence limits. Demographics and dramatic narratives require evidence; ecommerce examples do not transfer |
+| Research prompt 3 | Write a detailed research prompt, then conduct source research and compile at least six pages equivalent                | Full prompt retained privately. Manual browser-harness public research completed. Research contains more than 3,500 words, with no fixed page claim for Markdown. No dedicated Deep Research tool was available                 |
+| Avatar prompt 1   | Complete the original Avatar Sheet Template using the research                                                          | Every template section is present. Unknown demographics and unavailable client quotes remain explicit; firsthand public comments are separately attributed                                                                      |
+| Offer prompt 2    | Complete the original Offer Brief Template after avatar                                                                 | Every template field is present. Name/domain fixed by user. Prices remain proposals; unique mechanism and emotional arguments remain hypotheses                                                                                 |
+| Beliefs prompt 1  | Analyze the supplied Agora argument-versus-word-choice transcript                                                       | Completed analysis prioritizing a coherent inspectable argument. Rejects invented superiority and concealed counterevidence                                                                                                     |
+| Beliefs prompt 2  | Use the preceding three documents to derive no more than six first-person necessary beliefs                             | Six statements beginning "I believe that" with corresponding proof needs and limits                                                                                                                                             |
 
 The first sales-page critique used the specification before market synthesis. The supplementary live visit happened later when the parent supplied the staging URL. That ordering is recorded rather than represented as an earlier successful screenshot analysis.
 

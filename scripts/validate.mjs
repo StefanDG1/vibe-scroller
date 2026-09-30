@@ -1,8 +1,17 @@
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { resolve, dirname, relative, join } from "node:path";
 import { createHash } from "node:crypto";
+import { execFileSync } from "node:child_process";
 const root = resolve(import.meta.dirname, "..");
 const errors = [];
+if (existsSync(join(root, ".git"))) {
+  const tracked = execFileSync("git", ["ls-files", "-z"], {
+    cwd: root,
+    encoding: "utf8",
+  }).split("\0");
+  if (tracked.some((file) => file.startsWith("private/")))
+    errors.push("Private operator records must not be tracked by Git.");
+}
 const manifest = JSON.parse(
   readFileSync(join(root, "skills-manifest.json"), "utf8"),
 );

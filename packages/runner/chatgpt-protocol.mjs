@@ -120,10 +120,11 @@ export function inferenceRequest(model, input, instructions) {
   };
 }
 export async function completedResponse(response) {
+  const contentType = response.headers.get("content-type");
   if (
     !response.ok ||
     !response.body ||
-    !response.headers.get("content-type")?.startsWith("text/event-stream")
+    (contentType && !contentType.startsWith("text/event-stream"))
   )
     throw new Error(
       response.status === 429

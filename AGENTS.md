@@ -40,6 +40,10 @@ Do not create live billing products, change DNS, send public marketing, run paid
 
 ## Write usable documentation
 
+Before writing or changing app text, marketing copy, SEO content, onboarding, email copy or sales material, read the four [foundational documents](docs/foundational/README.md): Research, Avatar, Offer and Beliefs. Use their audience, language, objections and evidence requirements as the copy brief. Technical instructions, pricing, legal statements and enabled-feature claims must also match the current contracts and implementation evidence. A marketing hypothesis cannot override an explicit owner instruction, verified provider restriction or actual product behavior.
+
+Keep these documents living. When new research, owner ideas, verified outcomes or product changes affect the brief, use [the copy and idea review process](docs/foundational/COPY-AND-IDEAS.md), record conflicts and evidence, update affected documents together, and append the change log. Put unvalidated ideas in the backlog; do not silently promote them to facts, testimonials or promises. Preserve dissent and unresolved decisions. Recording an idea does not authorize a campaign or public release.
+
 Use the product's exact terms. Keep one primary documentation mode per file. Use sentence-case headings, plain verbs, and explicit subjects. Keep implementation facts separate from plans. Avoid filler, em dashes, invented customer statistics, and unsupported productivity claims.
 
 The owner expects the complete package to work without further product-design questions. Use the specified defaults. External legal or provider evidence remains a release gate, not permission to fabricate a value.

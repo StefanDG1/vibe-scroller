@@ -2,6 +2,8 @@
 
 Mode: how-to. This is a Windows local text-inference utility. Hosted product dispatch and commercial activation are not enabled. Check [ADR 009](../adr/009-chatgpt-plan-protocol.md) before offering it commercially.
 
+Actual owner consent, model discovery and a completed GPT-5.6-Luna verification response passed on September 30, 2026. Earlier inference attempts failed before the response-header fix. This covers local text inference, not browser dispatch, coding isolation or commercial permission.
+
 Use Node 24 with the repository's frozen lockfile. Your existing eligible ChatGPT account is sufficient for a consent/inference test; you do not need a new ChatGPT account or an API key. OAuth approval must happen in the official browser consent screen. Do not send tokens or codes to support.
 
 ```powershell

@@ -72,11 +72,11 @@ Authorized coding runs in a verified isolated environment. The publisher creates
 
 These are planned catalogue values from [Billing and tax](../BILLING-AND-TAX.md), not live purchase offers or proof of margin.
 
-| Tier | Weekly | Monthly | Annual | Core planned limits |
-| --- | --- | --- | --- | --- |
-| Starter | EUR 5.99 every seven days | EUR 19 | EUR 190 | 3 repos, 1 GB, 1,000 source records, 1 processing job; 65 weekly or 250 monthly credits |
-| Pro | EUR 11.99 every seven days | EUR 39 | EUR 390 | 15 repos, 5 GB, 10,000 source records, 2 processing jobs; 150 weekly or 600 monthly credits |
-| Business | Enquiry | Enquiry | Enquiry | Signed scope; no invented enterprise bundle |
+| Tier     | Weekly                     | Monthly | Annual  | Core planned limits                                                                         |
+| -------- | -------------------------- | ------- | ------- | ------------------------------------------------------------------------------------------- |
+| Starter  | EUR 5.99 every seven days  | EUR 19  | EUR 190 | 3 repos, 1 GB, 1,000 source records, 1 processing job; 65 weekly or 250 monthly credits     |
+| Pro      | EUR 11.99 every seven days | EUR 39  | EUR 390 | 15 repos, 5 GB, 10,000 source records, 2 processing jobs; 150 weekly or 600 monthly credits |
+| Business | Enquiry                    | Enquiry | Enquiry | Signed scope; no invented enterprise bundle                                                 |
 
 Annual allowances replenish monthly. Included credits expire at the entitlement boundary. Credits are service units, not money. Metadata-only saved links do not consume analysis credits. Optional metered execution and processing have disclosed quotes; a platform subscription does not imply unlimited model or sandbox usage.
 
@@ -85,6 +85,8 @@ The specified preview is at most three sources and 30 credits, with no automatic
 ### Funding and availability
 
 The preferred optional route is official user ChatGPT-plan funding when the application, user, and workload are eligible and the user consents. For a paid remotely hosted product, current official commercial access requires the interest or waitlist process. Access is not granted here. Do not offer an enabled SIWC button or imply that connecting identity unlocks all inference.
+
+Evidence update, September 30: the independently authored Windows local text utility completed owner-authorized OAuth, account-specific model discovery and a real nonempty response using the owner's plan. This verifies that narrow local route. It does not establish hosted commercial access, browser-connected dispatch, video transcription, coding isolation or customer savings. The [idea backlog](idea-backlog.md) records the proposed funding message and its limits.
 
 Eligible text and image Responses work does not cover raw audio, video, or transcription. Those stages need a separately supported route. Normal web library and planning use must work without a laptop runner. Metered isolated cloud coding is the complete hosted alternative. The ordinary local Codex route is a separate integration and remains gated on Windows isolation failure. Never pool the founder's plan or silently switch to a paid API.
 
@@ -106,23 +108,23 @@ Keep "Start your library" as the primary initial action. Use "See the workflow" 
 
 ## Objections and answers
 
-| Prospect objection | Honest answer or proof needed |
-| --- | --- |
+| Prospect objection                              | Honest answer or proof needed                                                                      |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------- |
 | I already have Readwise, Raindrop, or SavedThat | Compare the full source-to-project review on a real example; existing search may already be enough |
-| I already pay for a coding agent | Show the evidence and decision record; do not sell ordinary PR creation as exclusive |
-| This is another inbox I will ignore | Let a prospect try one relevant source and record whether the review creates value |
-| Advice may be wrong | Show evidence, uncertainty, source claim versus interpretation, and reasons to reject |
-| You will create busywork | Show no-fit and already-implemented cases, not only changes |
-| I do not want broad GitHub access | Select repositories explicitly; demonstrate read-only value and separate write approval |
-| I do not want code changed automatically | Plan acceptance does not authorize execution; merge and deploy remain the user's decision |
-| I want to use it from a phone | Core library and review work in the mobile browser; publish actual test scope honestly |
-| My laptop is asleep | Use the web workflow; funded cloud execution requires its own availability and quote |
-| Does my ChatGPT plan pay for this? | Only eligible official workloads with consent; paid hosted access remains gated |
-| Are uploads and all platforms supported? | Show supported types, duration and size limits, and explicit unavailable states |
-| Will costs surprise me? | Show route and maximum before work; new spending needs authorization |
-| Will this make money or save hours? | No such result is measured or guaranteed; record actual outcomes |
-| What happens when I cancel? | Explain the published retention, purchased-credit and export policy before checkout |
-| Can I self-host it? | Public-source V1 intent does not mean supported self-hosting is available |
+| I already pay for a coding agent                | Show the evidence and decision record; do not sell ordinary PR creation as exclusive               |
+| This is another inbox I will ignore             | Let a prospect try one relevant source and record whether the review creates value                 |
+| Advice may be wrong                             | Show evidence, uncertainty, source claim versus interpretation, and reasons to reject              |
+| You will create busywork                        | Show no-fit and already-implemented cases, not only changes                                        |
+| I do not want broad GitHub access               | Select repositories explicitly; demonstrate read-only value and separate write approval            |
+| I do not want code changed automatically        | Plan acceptance does not authorize execution; merge and deploy remain the user's decision          |
+| I want to use it from a phone                   | Core library and review work in the mobile browser; publish actual test scope honestly             |
+| My laptop is asleep                             | Use the web workflow; funded cloud execution requires its own availability and quote               |
+| Does my ChatGPT plan pay for this?              | Only eligible official workloads with consent; paid hosted access remains gated                    |
+| Are uploads and all platforms supported?        | Show supported types, duration and size limits, and explicit unavailable states                    |
+| Will costs surprise me?                         | Show route and maximum before work; new spending needs authorization                               |
+| Will this make money or save hours?             | No such result is measured or guaranteed; record actual outcomes                                   |
+| What happens when I cancel?                     | Explain the published retention, purchased-credit and export policy before checkout                |
+| Can I self-host it?                             | Public-source V1 intent does not mean supported self-hosting is available                          |
 
 ## Belief chains
 

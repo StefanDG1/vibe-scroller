@@ -153,6 +153,34 @@ it("rejects allowance failures after deltas and never returns partial success", 
     store: false,
   });
 });
+it("validates completed SSE when the live provider omits its content-type header", async () => {
+  const source = stream([
+    { type: "response.output_text.delta", delta: "Connected" },
+    {
+      type: "response.completed",
+      response: { id: "test-response", status: "completed" },
+    },
+  ]);
+  const response = await completedResponse(new Response(source.body));
+  expect(response.text).toBe("Connected");
+  await expect(
+    completedResponse(Response.json({ status: "completed", output: "fake" })),
+  ).rejects.toThrow("REQUEST_FAILED");
+  await expect(
+    completedResponse(
+      new Response(
+        new ReadableStream({
+          start(controller) {
+            controller.enqueue(
+              new TextEncoder().encode('{"status":"completed"}'),
+            );
+            controller.close();
+          },
+        }),
+      ),
+    ),
+  ).rejects.toThrow("INCOMPLETE");
+});
 it("exposes safe account metadata while keeping local tokens private", async () => {
   const store = memoryStore(profile()),
     client = new LocalChatGPT({ store });
