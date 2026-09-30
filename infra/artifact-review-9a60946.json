@@ -1,0 +1,341 @@
+{
+  "commit": "9a609467f10372db04bc10a13903c37440add430",
+  "environment": "dedicated staging Linux package",
+  "observedAt": "2026-09-30T12:06:30.444177+00:00",
+  "scanCandidateCount": 54,
+  "configuredCredentialOccurrences": 0,
+  "generatedFrameworkValues": 4,
+  "publicAssetOccurrences": 0,
+  "candidateProvenanceReviewed": true,
+  "limitations": [
+    "Review applies only to this exact artifact",
+    "Generated runtime keys remain confidential server data",
+    "This review is not a full security audit or production authorization"
+  ],
+  "findings": [
+    {
+      "rule": "generic-api-key",
+      "file": "middleware/apps/starter/.next/server/server-reference-manifest.json",
+      "line": 1181,
+      "classification": "Generated Next preview or server-action runtime key; private server artifact, zero public asset occurrences"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "middleware/apps/starter/.next/prerender-manifest.json",
+      "line": 165,
+      "classification": "Generated Next preview or server-action runtime key; private server artifact, zero public asset occurrences"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "middleware/apps/starter/.next/prerender-manifest.json",
+      "line": 166,
+      "classification": "Generated Next preview or server-action runtime key; private server artifact, zero public asset occurrences"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "server-functions/default/apps/starter/.next/prerender-manifest.json",
+      "line": 165,
+      "classification": "Generated Next preview or server-action runtime key; private server artifact, zero public asset occurrences"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "server-functions/default/apps/starter/.next/prerender-manifest.json",
+      "line": 166,
+      "classification": "Generated Next preview or server-action runtime key; private server artifact, zero public asset occurrences"
+    },
+    {
+      "rule": "private-key",
+      "file": "middleware/apps/starter/.next/server/chunks/0tvx_@workos-inc_node_lib_webapi-BlhUk1KL_mjs_0pk4p6j._.js",
+      "line": 3,
+      "classification": "WorkOS PKCS#8 input-validation header expression; decoded source contains no literal base64 private key"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "server-functions/default/apps/starter/.next/server/server-reference-manifest.json",
+      "line": 1181,
+      "classification": "Generated Next preview or server-action runtime key; private server artifact, zero public asset occurrences"
+    },
+    {
+      "rule": "private-key",
+      "file": "server-functions/default/apps/starter/.next/server/chunks/0tvx_@workos-inc_node_lib_webapi-BlhUk1KL_mjs_124_kra._.js",
+      "line": 3,
+      "classification": "WorkOS PKCS#8 input-validation header expression; decoded source contains no literal base64 private key"
+    },
+    {
+      "rule": "private-key",
+      "file": "server-functions/default/apps/starter/.next/server/chunks/0tvx_@workos-inc_node_lib_webapi-BlhUk1KL_mjs_0pk4p6j._.js",
+      "line": 3,
+      "classification": "WorkOS PKCS#8 input-validation header expression; decoded source contains no literal base64 private key"
+    },
+    {
+      "rule": "private-key",
+      "file": "server-functions/default/apps/starter/.next/server/chunks/ssr/0tvx_@workos-inc_node_lib_webapi-BlhUk1KL_mjs_1k-foit._.js",
+      "line": 3,
+      "classification": "WorkOS PKCS#8 input-validation header expression; decoded source contains no literal base64 private key"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "server-functions/default/apps/starter/index.mjs",
+      "line": 1285,
+      "classification": "Generated Next preview or server-action runtime key; private server artifact, zero public asset occurrences"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "server-functions/default/apps/starter/index.mjs",
+      "line": 1285,
+      "classification": "Generated Next preview or server-action runtime key; private server artifact, zero public asset occurrences"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "server-functions/default/apps/starter/handler.mjs",
+      "line": 201,
+      "classification": "Compiled framework route/module/configuration/HTTP/header/storage expression; no credential literal"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "server-functions/default/apps/starter/handler.mjs",
+      "line": 201,
+      "classification": "Compiled framework route/module/configuration/HTTP/header/storage expression; no credential literal"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "server-functions/default/apps/starter/handler.mjs",
+      "line": 201,
+      "classification": "Compiled framework route/module/configuration/HTTP/header/storage expression; no credential literal"
+    },
+    {
+      "rule": "private-key",
+      "file": "deployment/worker.js.map",
+      "line": 5,
+      "classification": "WorkOS PKCS#8 input-validation header expression; decoded source contains no literal base64 private key"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "deployment/worker.js",
+      "line": 14530,
+      "classification": "Generated Next preview or server-action runtime key; private server artifact, zero public asset occurrences"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "deployment/worker.js",
+      "line": 14530,
+      "classification": "Generated Next preview or server-action runtime key; private server artifact, zero public asset occurrences"
+    },
+    {
+      "rule": "private-key",
+      "file": "server-functions/default/apps/starter/handler.mjs",
+      "line": 204,
+      "classification": "WorkOS PKCS#8 input-validation header expression; decoded source contains no literal base64 private key"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "deployment/worker.js",
+      "line": 14533,
+      "classification": "Compiled framework route/module/configuration/HTTP/header/storage expression; no credential literal"
+    },
+    {
+      "rule": "private-key",
+      "file": "deployment/worker.js",
+      "line": 16415,
+      "classification": "WorkOS PKCS#8 input-validation header expression; decoded source contains no literal base64 private key"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "deployment/worker.js",
+      "line": 21282,
+      "classification": "WorkOS request idempotency or encrypted-key variable assignment; no credential literal"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "deployment/worker.js",
+      "line": 22422,
+      "classification": "WorkOS request idempotency or encrypted-key variable assignment; no credential literal"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "middleware/handler.mjs",
+      "line": 55462,
+      "classification": "WorkOS request idempotency or encrypted-key variable assignment; no credential literal"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "middleware/handler.mjs",
+      "line": 56551,
+      "classification": "WorkOS request idempotency or encrypted-key variable assignment; no credential literal"
+    },
+    {
+      "rule": "private-key",
+      "file": "middleware/handler.mjs",
+      "line": 62990,
+      "classification": "WorkOS PKCS#8 input-validation header expression; decoded source contains no literal base64 private key"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "middleware/handler.mjs",
+      "line": 63978,
+      "classification": "Generated Next preview or server-action runtime key; private server artifact, zero public asset occurrences"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "middleware/handler.mjs",
+      "line": 63978,
+      "classification": "Generated Next preview or server-action runtime key; private server artifact, zero public asset occurrences"
+    },
+    {
+      "rule": "private-key",
+      "file": "deployment/worker.js.map",
+      "line": 5,
+      "classification": "WorkOS PKCS#8 input-validation header expression; decoded source contains no literal base64 private key"
+    },
+    {
+      "rule": "private-key",
+      "file": "server-functions/default/apps/starter/handler.mjs",
+      "line": 1148,
+      "classification": "WorkOS PKCS#8 input-validation header expression; decoded source contains no literal base64 private key"
+    },
+    {
+      "rule": "private-key",
+      "file": "deployment/worker.js.map",
+      "line": 5,
+      "classification": "WorkOS PKCS#8 input-validation header expression; decoded source contains no literal base64 private key"
+    },
+    {
+      "rule": "private-key",
+      "file": "server-functions/default/apps/starter/handler.mjs",
+      "line": 1169,
+      "classification": "WorkOS PKCS#8 input-validation header expression; decoded source contains no literal base64 private key"
+    },
+    {
+      "rule": "private-key",
+      "file": "deployment/worker.js",
+      "line": 78430,
+      "classification": "WorkOS PKCS#8 input-validation header expression; decoded source contains no literal base64 private key"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "deployment/worker.js",
+      "line": 89662,
+      "classification": "WorkOS request idempotency or encrypted-key variable assignment; no credential literal"
+    },
+    {
+      "rule": "private-key",
+      "file": "deployment/worker.js",
+      "line": 95039,
+      "classification": "WorkOS PKCS#8 input-validation header expression; decoded source contains no literal base64 private key"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "deployment/worker.js",
+      "line": 98581,
+      "classification": "WorkOS request idempotency or encrypted-key variable assignment; no credential literal"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "deployment/worker.js",
+      "line": 99728,
+      "classification": "WorkOS request idempotency or encrypted-key variable assignment; no credential literal"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "deployment/worker.js",
+      "line": 112787,
+      "classification": "WorkOS request idempotency or encrypted-key variable assignment; no credential literal"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "deployment/worker.js",
+      "line": 113934,
+      "classification": "WorkOS request idempotency or encrypted-key variable assignment; no credential literal"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "deployment/worker.js",
+      "line": 131076,
+      "classification": "WorkOS request idempotency or encrypted-key variable assignment; no credential literal"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "server-functions/default/apps/starter/handler.mjs",
+      "line": 1873,
+      "classification": "Compiled framework route/module/configuration/HTTP/header/storage expression; no credential literal"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "server-functions/default/apps/starter/handler.mjs",
+      "line": 1873,
+      "classification": "Compiled framework route/module/configuration/HTTP/header/storage expression; no credential literal"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "deployment/worker.js",
+      "line": 140048,
+      "classification": "WorkOS request idempotency or encrypted-key variable assignment; no credential literal"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "deployment/worker.js",
+      "line": 158222,
+      "classification": "Compiled framework route/module/configuration/HTTP/header/storage expression; no credential literal"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "deployment/worker.js",
+      "line": 159748,
+      "classification": "Generated Next preview or server-action runtime key; private server artifact, zero public asset occurrences"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "deployment/worker.js",
+      "line": 159748,
+      "classification": "Generated Next preview or server-action runtime key; private server artifact, zero public asset occurrences"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "deployment/worker.js.map",
+      "line": 5,
+      "classification": "Compiled framework route/module/configuration/HTTP/header/storage expression; no credential literal"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "deployment/worker.js.map",
+      "line": 5,
+      "classification": "Compiled framework route/module/configuration/HTTP/header/storage expression; no credential literal"
+    },
+    {
+      "rule": "private-key",
+      "file": "deployment/worker.js.map",
+      "line": 5,
+      "classification": "WorkOS PKCS#8 input-validation header expression; decoded source contains no literal base64 private key"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "deployment/worker.js",
+      "line": 219777,
+      "classification": "WorkOS request idempotency or encrypted-key variable assignment; no credential literal"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "deployment/worker.js",
+      "line": 220916,
+      "classification": "WorkOS request idempotency or encrypted-key variable assignment; no credential literal"
+    },
+    {
+      "rule": "private-key",
+      "file": "deployment/worker.js",
+      "line": 227888,
+      "classification": "WorkOS PKCS#8 input-validation header expression; decoded source contains no literal base64 private key"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "deployment/worker.js",
+      "line": 228911,
+      "classification": "Generated Next preview or server-action runtime key; private server artifact, zero public asset occurrences"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "deployment/worker.js",
+      "line": 228911,
+      "classification": "Generated Next preview or server-action runtime key; private server artifact, zero public asset occurrences"
+    }
+  ]
+}
