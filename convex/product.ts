@@ -1030,10 +1030,30 @@ export const repositories = query({
   args: org,
   handler: async (ctx, a) => {
     await access(ctx, a.organizationId);
-    return ctx.db
+    const rows = await ctx.db
       .query("repositories")
       .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
       .collect();
+    return rows.map((r) => ({
+      _id: r._id,
+      organizationId: r.organizationId,
+      installationId: r.installationId,
+      providerId: r.providerId,
+      fullName: r.fullName,
+      branch: r.branch,
+      sha: r.sha,
+      enabled: r.enabled,
+      confirmed: r.confirmed,
+      profile: r.profile,
+      profileVersion: r.profileVersion,
+      profileDraft: r.profileDraft,
+      profileDraftSha: r.profileDraftSha,
+      profileDraftVersion: r.profileDraftVersion,
+      profileDraftKey: r.profileDraftKey ? "pending" : undefined,
+      status: r.status,
+      createdAt: r.createdAt,
+      updatedAt: r.updatedAt,
+    }));
   },
 });
 export const saveProfile = mutation({

@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
         { error: "Unknown operation." },
         { status: 400 },
       );
-    const c = await backend();
+    const c = await backend(auth);
     const result =
       entry[0] === "action"
         ? await c.action(entry[1] as any, args)

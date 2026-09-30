@@ -1,0 +1,16 @@
+{
+  "observedAt": "2026-09-30T07:52:12.754Z",
+  "environment": "dedicated authenticated staging; selected synthetic project",
+  "method": "Hosted selected-repository snapshot action, followed by readonly operator metadata query",
+  "confirmed": true,
+  "extractionVersion": "repomix-1.18.1/excerpts-v1",
+  "inspectedExcerpts": 14,
+  "manifestEntries": 748,
+  "preparedTreePresent": true,
+  "repositoryId": "mh7d9zjykear7y5ca70j07yw298fdzmt",
+  "sha": "f299310304f607639ceadf4719742848aa6c5837",
+  "limitations": [
+    "No nested ignore policy or semantic selection benchmark claimed",
+    "No full repository pack or customer code execution"
+  ]
+}

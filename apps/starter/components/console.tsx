@@ -267,6 +267,24 @@ export function Console({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ operation, args }),
       });
+      if (res.redirected || res.status === 401 || res.status === 403) {
+        setSelected(null);
+        setData({
+          sources: [],
+          repositories: [],
+          proposals: [],
+          runs: [],
+          notifications: [],
+          usage: null,
+        });
+        throw new Error(
+          "Your session or access changed. Sign in again to continue.",
+        );
+      }
+      if (!res.headers.get("content-type")?.includes("application/json"))
+        throw new Error(
+          "The application host is temporarily unavailable. No success was confirmed. Check the inbox before retrying this action.",
+        );
       const body = await res.json();
       if (!res.ok) throw new Error(body.error);
       await refreshData();

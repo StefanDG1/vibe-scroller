@@ -131,6 +131,12 @@ describe("VibeScroller product boundaries", () => {
     const repo = await t.run((ctx) => ctx.db.get(id));
     expect(repo?.profile).toBe("Owner correction");
     expect(repo?.confirmed).toBe(false);
+    const publicRows = await a.query(api.product.repositories, {
+      organizationId: org,
+    });
+    expect(publicRows[0]).not.toHaveProperty("context");
+    expect(publicRows[0]).not.toHaveProperty("contextExcerpts");
+    expect(publicRows[0]).not.toHaveProperty("manifestEntries");
   });
   it("fences a local device lease and requires termination before another claim", async () => {
     const { t, org } = await setup();
