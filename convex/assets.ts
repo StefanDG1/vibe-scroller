@@ -38,7 +38,9 @@ export const grant = mutation({
       .collect();
     const retainedBytes = retained
       .filter(
-        (asset) => asset.state !== "deleted" && asset.expiresAt > Date.now(),
+        (asset) =>
+          asset.state !== "deleted" &&
+          (asset.expiresAt === undefined || asset.expiresAt > Date.now()),
       )
       .reduce((sum, asset) => sum + asset.size, 0);
     ensure(
@@ -68,13 +70,15 @@ export const grant = mutation({
       "UPLOAD_INVALID",
       "Upload keys cannot be reused.",
     );
-    return ctx.db.insert("assets", {
+    const id = await ctx.db.insert("assets", {
       ...a,
       state: "pending",
       createdAt: Date.now(),
       updatedAt: Date.now(),
       expiresAt: Date.now() + 86400000,
     });
+    await ctx.scheduler.runAfter(86400000, internal.assets.expireAsset, { id });
+    return id;
   },
 });
 export const complete = internalMutation({
@@ -93,6 +97,7 @@ export const complete = internalMutation({
     ensure(
       asset &&
         asset.organizationId === a.organizationId &&
+        asset.expiresAt !== undefined &&
         asset.expiresAt > Date.now() &&
         asset.size === a.size &&
         asset.type === a.type,
@@ -140,7 +145,11 @@ export const evidence = query({
   args: { id: v.id("assets") },
   handler: async (ctx, a) => {
     const asset = await ctx.db.get(a.id);
-    if (!asset || asset.state !== "complete" || asset.expiresAt < Date.now())
+    if (
+      !asset ||
+      asset.state !== "complete" ||
+      (asset.expiresAt !== undefined && asset.expiresAt < Date.now())
+    )
       fail("Evidence unavailable.");
     await access(ctx, asset.organizationId);
     if (asset.sourceId) {
@@ -148,5 +157,97 @@ export const evidence = query({
       if (!source || source.state === "deleted") fail("Evidence unavailable.");
     }
     return { key: asset.key, type: asset.type };
+  },
+});
+
+export const registerEvidence = internalMutation({
+  args: {
+    sourceId: v.id("sources"),
+    generation: v.number(),
+    key: v.string(),
+    size: v.number(),
+    etag: v.string(),
+  },
+  handler: async (ctx, a) => {
+    const source = await ctx.db.get(a.sourceId);
+    if (
+      !source ||
+      source.state === "deleted" ||
+      source.generation !== a.generation
+    ) {
+      await queueDeletion(ctx, a.key);
+      return null;
+    }
+    ensure(
+      a.key.startsWith(`${source.organizationId}/`) &&
+        a.size > 0 &&
+        a.size <= 1000000,
+      "INVALID_EVIDENCE",
+      "Invalid bounded frame object.",
+    );
+    const entitlement = await wallet(ctx, source.organizationId);
+    const retained = await ctx.db
+      .query("assets")
+      .withIndex("by_org", (q) => q.eq("organizationId", source.organizationId))
+      .collect();
+    const bytes = retained
+      .filter((asset) => asset.state !== "deleted")
+      .reduce((sum, asset) => sum + asset.size, 0);
+    if (bytes + a.size > (entitlement.tier === "pro" ? 5 : 1) * 1000000000) {
+      await queueDeletion(ctx, a.key);
+      return null;
+    }
+    return ctx.db.insert("assets", {
+      organizationId: source.organizationId,
+      sourceId: source._id,
+      key: a.key,
+      size: a.size,
+      etag: a.etag,
+      type: "image/jpeg",
+      state: "complete",
+      kind: "evidence",
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+  },
+});
+export const queueEvidenceDeletion = internalMutation({
+  args: { key: v.string() },
+  handler: (ctx, a) => queueDeletion(ctx, a.key),
+});
+export const expireOriginal = internalMutation({
+  args: { sourceId: v.id("sources"), generation: v.number() },
+  handler: async (ctx, a) => {
+    const source = await ctx.db.get(a.sourceId);
+    if (
+      !source ||
+      source.state !== "ready" ||
+      source.generation !== a.generation ||
+      !source.objectKey
+    )
+      return;
+    const asset = await ctx.db
+      .query("assets")
+      .withIndex("by_key", (q) => q.eq("key", source.objectKey!))
+      .unique();
+    if (asset) {
+      await ctx.db.patch(asset._id, {
+        expiresAt: Date.now() + 86400000,
+        updatedAt: Date.now(),
+      });
+      await ctx.scheduler.runAfter(86400000, internal.assets.expireAsset, {
+        id: asset._id,
+      });
+    }
+  },
+});
+export const expireAsset = internalMutation({
+  args: { id: v.id("assets") },
+  handler: async (ctx, a) => {
+    const asset = await ctx.db.get(a.id);
+    if (!asset || asset.expiresAt === undefined || asset.expiresAt > Date.now())
+      return;
+    await ctx.db.patch(asset._id, { state: "deleting", updatedAt: Date.now() });
+    await queueDeletion(ctx, asset.key);
   },
 });

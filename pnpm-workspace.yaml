@@ -4,4 +4,9 @@ packages:
 
 allowBuilds:
   esbuild: true
+  rclone.js: false
   sharp: true
+  workerd: true
+
+minimumReleaseAgeExclude:
+  - '@opennextjs/cloudflare@1.20.7'

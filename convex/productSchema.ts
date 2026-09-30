@@ -116,7 +116,8 @@ export const productTables = {
     type: v.string(),
     state: v.string(),
     etag: v.optional(v.string()),
-    expiresAt: v.number(),
+    expiresAt: v.optional(v.number()),
+    kind: v.optional(v.string()),
   })
     .index("by_org", ["organizationId"])
     .index("by_key", ["key"])
@@ -135,6 +136,19 @@ export const productTables = {
     summary: v.optional(v.string()),
     searchable: v.optional(v.string()),
     analysis: v.optional(v.any()),
+    mediaEvidence: v.optional(
+      v.array(
+        v.object({
+          kind: v.string(),
+          id: v.string(),
+          startMs: v.number(),
+          endMs: v.number(),
+        }),
+      ),
+    ),
+    mediaCoverage: v.optional(v.string()),
+    originalText: v.optional(v.string()),
+    correctionAuthor: v.optional(v.id("users")),
     tags: v.array(v.string()),
     error: v.optional(v.string()),
     rightsAttested: v.boolean(),

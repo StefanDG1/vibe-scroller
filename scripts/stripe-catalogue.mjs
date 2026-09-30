@@ -4,7 +4,7 @@ const pricing = JSON.parse(
   await readFile(new URL("../contracts/pricing.json", import.meta.url)),
 );
 const key = process.env.STRIPE_SECRET_KEY;
-if (!key?.startsWith("sk_test_"))
+if (!key || !/^[sr]k_test_/.test(key))
   throw new Error(
     "Catalogue setup requires an explicitly supplied sandbox secret key. Live products are never created by this script.",
   );

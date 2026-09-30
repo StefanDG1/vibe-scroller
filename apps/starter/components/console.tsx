@@ -1488,6 +1488,15 @@ function SourceDetail({ source, demo, org, repos, call, onProposal }: any) {
                   {e.startMs === null
                     ? "Supplied text"
                     : `${e.startMs / 1000}s`}
+                  {e.kind === "frame" && !demo && (
+                    <a
+                      href={`/api/evidence/${encodeURIComponent(e.id)}?view=true`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      View private frame
+                    </a>
+                  )}
                 </li>
               ))}
             </ul>
@@ -1496,8 +1505,7 @@ function SourceDetail({ source, demo, org, repos, call, onProposal }: any) {
         <details>
           <summary>Original transcript and corrections</summary>
           <p style={{ whiteSpace: "pre-wrap" }}>
-            {detail.text ??
-              "Original transcript is unavailable for this synthetic card."}
+            {detail.text ?? "Original transcript is unavailable."}
           </p>
           {detail.analysis?.correctedText && (
             <p>Confirmed correction: {detail.analysis.correctedText}</p>

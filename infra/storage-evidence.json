@@ -1,0 +1,14 @@
+{
+  "time": "2026-09-30T03:15:55.900Z",
+  "synthetic": true,
+  "jurisdiction": "EU",
+  "bucket": "vibescroller-staging-private",
+  "checks": {
+    "privateUnsignedDenied": true,
+    "expiredGrantDenied": true,
+    "scopedCors": true,
+    "readWrite": true,
+    "deleteConfirmed": true
+  },
+  "bytes": 62
+}

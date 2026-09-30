@@ -31,6 +31,7 @@ import type * as lib_githubAuthorization from "../lib/githubAuthorization.js";
 import type * as lib_inference from "../lib/inference.js";
 import type * as limitsV1 from "../limitsV1.js";
 import type * as maintenance from "../maintenance.js";
+import type * as media from "../media.js";
 import type * as organizations from "../organizations.js";
 import type * as payments from "../payments.js";
 import type * as privacy from "../privacy.js";
@@ -69,6 +70,7 @@ declare const fullApi: ApiFromModules<{
   "lib/inference": typeof lib_inference;
   limitsV1: typeof limitsV1;
   maintenance: typeof maintenance;
+  media: typeof media;
   organizations: typeof organizations;
   payments: typeof payments;
   privacy: typeof privacy;

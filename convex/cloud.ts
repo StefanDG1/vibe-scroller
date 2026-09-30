@@ -123,3 +123,24 @@ export const watchdog = internalAction({
     await ctx.scheduler.runAfter(15000, internal.cloud.watchdog, a);
   },
 });
+export const waiveStagingFailure = internalAction({
+  args: { id: v.id("runs"), reason: v.string() },
+  handler: async (ctx, a) => {
+    const run = await ctx.runQuery(internal.jobs.workerRun, { id: a.id });
+    if (
+      !run ||
+      run.state !== "failed" ||
+      run.organizationId !== process.env.STAGING_TEST_ORGANIZATION_ID
+    )
+      throw new Error("Configured failed staging run required.");
+    const event = run.events.find((e) =>
+      e.startsWith("Isolated sandbox started: "),
+    );
+    const sandboxId = event?.slice("Isolated sandbox started: ".length);
+    if (!sandboxId || !/^[a-z0-9-]{1,128}$/.test(sandboxId))
+      throw new Error("Recorded sandbox termination evidence required.");
+    await killSandbox(sandboxId);
+    await ctx.runMutation(internal.jobs.waiveStagingFailure, a);
+    return { serviceChargeWaived: true, operatorCostReconciled: false };
+  },
+});

@@ -1,0 +1,44 @@
+{
+  "timestamp": "2026-09-30T03:40:45.701Z",
+  "environment": "dedicated sandbox",
+  "accountId": "acct_1ULEK7BINq6evjJt",
+  "webhookId": "we_1ULENcBINq6evjJtpaxb9V47",
+  "prices": {
+    "STRIPE_STARTER_WEEKLY_PRICE_ID": "price_1ULEMcBINq6evjJtdkskbW8h",
+    "STRIPE_STARTER_MONTHLY_PRICE_ID": "price_1ULEMdBINq6evjJtLLrBlaLu",
+    "STRIPE_STARTER_ANNUAL_PRICE_ID": "price_1ULEMdBINq6evjJtqCSYZJEk",
+    "STRIPE_PRO_WEEKLY_PRICE_ID": "price_1ULEMeBINq6evjJtGiQohJuD",
+    "STRIPE_PRO_MONTHLY_PRICE_ID": "price_1ULEMeBINq6evjJtf0O9QPAE",
+    "STRIPE_PRO_ANNUAL_PRICE_ID": "price_1ULEMfBINq6evjJtmBPfdN28",
+    "STRIPE_TOPUP_200_PRICE_ID": "price_1ULEMfBINq6evjJt9vFCoLop",
+    "STRIPE_TOPUP_550_PRICE_ID": "price_1ULEMgBINq6evjJt3wJqIJSn"
+  },
+  "liveCheckoutEnabled": false,
+  "lifecycleTests": "pending",
+  "initialSubscription": {
+    "customerId": "cus_VLwI9A9hxg8xWG",
+    "subscriptionId": "sub_1ULERFBINq6evjJt3AwycGtc",
+    "organizationId": "kx73ewf64rjn1w8y3g7dtn31bn8fd16p",
+    "paidEventId": "evt_1ULERHBINq6evjJtwb4IjenV",
+    "status": "active",
+    "paidThroughRealSandboxPaymentMethod": true
+  },
+  "webhook": {
+    "automaticDeliveryGranted600": true,
+    "replayStatus": 200,
+    "invalidSignatureStatus": 400,
+    "replayDuplicatedCredits": false
+  },
+  "cancelAtPeriodEnd": {
+    "providerStatus": "active",
+    "cancelAtPeriodEnd": true
+  },
+  "topup": {
+    "sessionId": "cs_test_a1p0U413H2j0K2yfDazeJljgc9AlrxzF5jKSGUZMwfIJwnUMvjR50iC1vd",
+    "paymentId": "pi_3ULEavBINq6evjJt1Z11rw3z",
+    "credits": 200,
+    "amount": 1000,
+    "browserCheckout": true,
+    "signedWebhookGrantedOnce": true
+  }
+}

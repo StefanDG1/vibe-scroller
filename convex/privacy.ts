@@ -56,7 +56,9 @@ export const sweep = internalMutation({
   handler: async (ctx) => {
     const assets = await ctx.db
       .query("assets")
-      .withIndex("by_expiry", (q) => q.lt("expiresAt", Date.now()))
+      .withIndex("by_expiry", (q) =>
+        q.gt("expiresAt", 0).lt("expiresAt", Date.now()),
+      )
       .take(100);
     for (const asset of assets) {
       await ctx.db.patch(asset._id, { state: "deleting" });

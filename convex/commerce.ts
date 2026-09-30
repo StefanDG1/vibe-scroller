@@ -16,7 +16,7 @@ export const catalogue = query({
     liveEnabled: false,
     sandboxEnabled:
       process.env.STRIPE_MODE !== "live" &&
-      (process.env.STRIPE_SECRET_KEY ?? "").startsWith("sk_test_") &&
+      /^[sr]k_test_/.test(process.env.STRIPE_SECRET_KEY ?? "") &&
       !!process.env.STRIPE_V1_WEBHOOK_SECRET &&
       [
         "STARTER_WEEKLY",
@@ -45,18 +45,45 @@ export const grantPeriod = internalMutation({
       "Verified payment is required.",
     );
     const key = `${a.subscription}:${a.start}`;
-    if (
-      await ctx.db
-        .query("billingPeriods")
-        .withIndex("by_key", (q) => q.eq("key", key))
-        .unique()
-    )
-      return;
+    const existing = await ctx.db
+      .query("billingPeriods")
+      .withIndex("by_key", (q) => q.eq("key", key))
+      .unique();
     const w = await wallet(ctx, a.organizationId);
     const credits =
       a.interval === "weekly"
         ? pricing.tiers[a.tier].weekly_credits
         : pricing.tiers[a.tier].monthly_credits;
+    if (existing) {
+      ensure(
+        existing.organizationId === a.organizationId && existing.end === a.end,
+        "STALE_BILLING",
+        "Entitlement identity mismatch.",
+      );
+      if (credits > existing.credits) {
+        const delta = credits - existing.credits;
+        const pool = await ctx.db
+          .query("creditPools")
+          .withIndex("by_key", (q) => q.eq("key", key))
+          .unique();
+        ensure(
+          pool && pool.organizationId === a.organizationId,
+          "LEDGER_INVALID",
+          "Entitlement pool unavailable.",
+        );
+        await ctx.db.patch(pool._id, {
+          granted: pool.granted + delta,
+          updatedAt: Date.now(),
+        });
+        await ctx.db.patch(existing._id, { credits, updatedAt: Date.now() });
+        await ctx.db.patch(w._id, {
+          tier: a.tier,
+          granted: w.granted + delta,
+          updatedAt: Date.now(),
+        });
+      }
+      return;
+    }
     ensure(
       a.start >= w.createdAt - 86400000 &&
         (w.tier === "trial" || a.end > w.periodEnd),
@@ -251,5 +278,36 @@ export const settleUsage = internalMutation({
   handler: async (ctx, a) => {
     const { settle } = await import("./product");
     return settle(ctx, a.organizationId, a.key, a.credits);
+  },
+});
+export const stagingBillingEvidence = internalQuery({
+  args: { organizationId: v.id("organizations") },
+  handler: async (ctx, a) => {
+    ensure(
+      a.organizationId === process.env.STAGING_TEST_ORGANIZATION_ID &&
+        process.env.STRIPE_MODE === "test",
+      "FORBIDDEN",
+      "Only the dedicated synthetic staging workspace is permitted.",
+    );
+    const billing = await ctx.db
+      .query("billing")
+      .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
+      .unique();
+    const pools = await ctx.db
+      .query("creditPools")
+      .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
+      .collect();
+    return {
+      status: billing?.status,
+      subscriptionId: billing?.subscriptionId,
+      pools: pools.map((p) => ({
+        key: p.key,
+        granted: p.granted,
+        spent: p.spent,
+        reserved: p.reserved,
+        kind: p.kind,
+        expiresAt: p.expiresAt,
+      })),
+    };
   },
 });

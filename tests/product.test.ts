@@ -3,6 +3,7 @@ import { describe, it, expect } from "vitest";
 import { convexTest } from "convex-test";
 import schema from "../convex/schema";
 import { api, internal } from "../convex/_generated/api";
+import { reserve } from "../convex/product";
 import {
   safeSourceUrl,
   safePath,
@@ -38,6 +39,111 @@ async function setup() {
   return { t, a, b, org, other };
 }
 describe("VibeScroller product boundaries", () => {
+  it("grants paid upgrade differences once and blocks new work on failed payment", async () => {
+    const { t, a, org } = await setup();
+    const start = Date.now(),
+      end = start + 7 * 86400000;
+    const base = {
+      organizationId: org,
+      subscription: "sub_synthetic",
+      interval: "weekly" as const,
+      start,
+      end,
+      verifiedPayment: true,
+    };
+    await t.mutation(internal.commerce.grantPeriod, {
+      ...base,
+      tier: "starter",
+    });
+    await Promise.all([
+      t.mutation(internal.commerce.grantPeriod, { ...base, tier: "pro" }),
+      t.mutation(internal.commerce.grantPeriod, { ...base, tier: "pro" }),
+    ]);
+    await t.run(async (ctx) => {
+      const pool = (await ctx.db.query("creditPools").collect())[0];
+      expect(pool.granted).toBe(150);
+      expect((await ctx.db.query("billingPeriods").collect()).length).toBe(1);
+    });
+    await t.mutation(internal.commerce.grantPeriod, {
+      ...base,
+      tier: "starter",
+    });
+    await t.run(async (ctx) => {
+      expect((await ctx.db.query("creditPools").collect())[0].granted).toBe(
+        150,
+      );
+    });
+    await t.mutation(internal.billing.attach, {
+      organizationId: org,
+      customerId: "cus_synthetic",
+    });
+    await t.mutation(internal.billing.apply, {
+      customerId: "cus_synthetic",
+      status: "past_due",
+      periodEnd: end,
+      revision: 1,
+    });
+    await expect(
+      t.mutation(internal.commerce.budgetFixture, {
+        organizationId: org,
+        key: "failed-payment-work",
+        max: 1,
+      }),
+    ).rejects.toThrow("PAYMENT_REQUIRED");
+    expect(
+      (await a.query(api.product.library, { organizationId: org })).total,
+    ).toBe(0);
+  });
+  it("preserves original transcript and invalidates old analysis after correction", async () => {
+    const { t, a, b, org } = await setup();
+    const id = await a.mutation(api.product.capture, {
+      organizationId: org,
+      key: "correction-001",
+      kind: "text",
+      title: "Correction test",
+      text: "Original evidence",
+      rightsAttested: true,
+    });
+    await expect(
+      b.mutation(api.product.editSource, {
+        id,
+        summary: "Edited",
+        tags: [],
+        correctedText: "Corrected evidence",
+      }),
+    ).rejects.toThrow();
+    await a.mutation(api.product.editSource, {
+      id,
+      summary: "Edited",
+      tags: [],
+      correctedText: "Corrected evidence",
+    });
+    await t.run(async (ctx) => {
+      const source = await ctx.db.get(id);
+      expect(source?.originalText).toBe("Original evidence");
+      expect(source?.text).toBe("Corrected evidence");
+      expect(source?.generation).toBe(1);
+      expect(source?.analysis).toBeUndefined();
+      expect(source?.state).toBe("saved");
+    });
+    await a.mutation(api.product.editSource, {
+      id,
+      summary: "Edited again",
+      tags: [],
+      correctedText: "Second correction",
+    });
+    await t.run(async (ctx) => {
+      expect((await ctx.db.get(id))?.originalText).toBe("Original evidence");
+    });
+    await expect(
+      a.mutation(api.product.editSource, {
+        id,
+        summary: "",
+        tags: [],
+        correctedText: " ",
+      }),
+    ).rejects.toThrow();
+  });
   it("validates supplied schemas and rejects model privilege additions", () => {
     expect(insightOutput.safeParse(fixture).success).toBe(true);
     expect(proposalOutput.safeParse(proposalFixture).success).toBe(true);
@@ -676,5 +782,108 @@ describe("persisted matching jobs", () => {
     expect(
       await t.run((ctx) => ctx.db.query("proposals").collect()),
     ).toHaveLength(1);
+  });
+});
+
+describe("verified media evidence", () => {
+  it("rejects foreign frames, stale generations and invented timing before committing a funded analysis", async () => {
+    const { t, a, b, org, other } = await setup();
+    const create = (organizationId: typeof org) =>
+      t.run((ctx) =>
+        ctx.db.insert("sources", {
+          organizationId,
+          key: crypto.randomUUID(),
+          canonical: crypto.randomUUID(),
+          kind: "upload",
+          title: "Synthetic media test",
+          state: "queued",
+          coverage: "metadata_only",
+          tags: [],
+          rightsAttested: true,
+          generation: 1,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        }),
+      );
+    const sourceId = await create(org),
+      foreignSource = await create(other);
+    const frame = await t.mutation(internal.assets.registerEvidence, {
+      sourceId,
+      generation: 1,
+      key: `${org}/synthetic-frame`,
+      size: 32,
+      etag: "synthetic",
+    });
+    const foreign = await t.mutation(internal.assets.registerEvidence, {
+      sourceId: foreignSource,
+      generation: 1,
+      key: `${other}/synthetic-frame`,
+      size: 32,
+      etag: "synthetic",
+    });
+    await expect(
+      b.query(api.assets.evidence, { id: frame! }),
+    ).rejects.toThrow();
+    await expect(
+      t.mutation(internal.product.stageMedia, {
+        id: sourceId,
+        generation: 1,
+        transcript: "",
+        coverage: "visual_only",
+        evidence: [{ kind: "frame", id: foreign!, startMs: 0, endMs: 0 }],
+      }),
+    ).rejects.toThrow();
+    expect(
+      await t.mutation(internal.product.stageMedia, {
+        id: sourceId,
+        generation: 0,
+        transcript: "",
+        coverage: "visual_only",
+        evidence: [],
+      }),
+    ).toBe(false);
+    await t.mutation(internal.product.stageMedia, {
+      id: sourceId,
+      generation: 1,
+      transcript: "",
+      coverage: "visual_only",
+      evidence: [{ kind: "frame", id: frame!, startMs: 100, endMs: 100 }],
+    });
+    await t.run((ctx) => reserve(ctx, org, `source:${sourceId}:1`, 10));
+    const output = {
+      ...fixture,
+      sourceId,
+      processingRunId: `${sourceId}:1`,
+      coverage: "visual_only",
+      insights: fixture.insights.map((i) => ({
+        ...i,
+        evidence: [{ kind: "frame", id: frame!, startMs: 999, endMs: 999 }],
+      })),
+    };
+    await expect(
+      t.mutation(internal.product.commitAnalysis, {
+        id: sourceId,
+        generation: 1,
+        output,
+        credits: 0,
+      }),
+    ).rejects.toThrow();
+    output.insights = output.insights.map((i) => ({
+      ...i,
+      evidence: [{ kind: "frame", id: frame!, startMs: 100, endMs: 100 }],
+    }));
+    await t.mutation(internal.product.commitAnalysis, {
+      id: sourceId,
+      generation: 1,
+      output,
+      credits: 0,
+    });
+    expect((await a.query(api.product.detail, { id: sourceId })).coverage).toBe(
+      "visual_only",
+    );
+    await a.mutation(api.product.deleteSource, { id: sourceId });
+    await expect(
+      a.query(api.assets.evidence, { id: frame! }),
+    ).rejects.toThrow();
   });
 });

@@ -87,6 +87,16 @@ export async function reserve(
     return old._id;
   }
   const w = await wallet(ctx, id);
+  const billing = await ctx.db
+    .query("billing")
+    .withIndex("by_org", (q) => q.eq("organizationId", id))
+    .unique();
+  ensure(
+    !billing ||
+      !["past_due", "unpaid", "incomplete", "paused"].includes(billing.status),
+    "PAYMENT_REQUIRED",
+    "New funded work is paused until the unresolved payment failure is resolved. Your library remains available.",
+  );
   const month = new Date().toISOString().slice(0, 7);
   const operatorKeys = [
     `all:${month}`,
@@ -502,6 +512,7 @@ export const capture = mutation({
         asset &&
           asset.organizationId === a.organizationId &&
           asset.state === "complete" &&
+          asset.expiresAt !== undefined &&
           asset.expiresAt > Date.now(),
         "UPLOAD_INVALID",
         "Complete a verified upload first.",
@@ -595,10 +606,13 @@ export const processSource = mutation({
       generation: s.generation + 1,
       error: undefined,
     });
-    await ctx.scheduler.runAfter(0, internal.integrations.analyze, {
-      id: s._id,
-      generation: s.generation + 1,
-    });
+    await ctx.scheduler.runAfter(
+      0,
+      s.kind === "upload"
+        ? internal.media.analyze
+        : internal.integrations.analyze,
+      { id: s._id, generation: s.generation + 1 },
+    );
   },
 });
 export const workerSource = internalQuery({
@@ -612,6 +626,7 @@ export const commitAnalysis = internalMutation({
     output: v.optional(v.any()),
     error: v.optional(v.string()),
     credits: v.number(),
+    retainReservation: v.optional(v.boolean()),
   },
   handler: async (ctx, a) => {
     const s = await ctx.db.get(a.id);
@@ -620,32 +635,45 @@ export const commitAnalysis = internalMutation({
     if (a.output) {
       analysis = insightOutput.parse(a.output);
       ensure(
-        analysis.sourceId === s._id,
+        analysis.sourceId === s._id &&
+          analysis.processingRunId === `${s._id}:${a.generation}`,
         "INVALID_EVIDENCE",
         "Wrong source reference.",
       );
       ensure(
-        s.kind === "text" && analysis.coverage === "caption_only",
+        s.kind === "text"
+          ? analysis.coverage === "caption_only"
+          : s.kind === "upload" && analysis.coverage === s.mediaCoverage,
         "INVALID_EVIDENCE",
-        "Text analysis cannot claim audiovisual coverage.",
+        "Analysis coverage does not match verified processing.",
+      );
+      const permitted = new Set(
+        (s.mediaEvidence ?? []).map((e) =>
+          JSON.stringify([e.kind, e.id, e.startMs, e.endMs]),
+        ),
       );
       for (const i of analysis.insights)
         for (const e of i.evidence)
           ensure(
-            e.id === "supplied_text" &&
-              e.kind === "user_note" &&
-              e.startMs === null &&
-              e.endMs === null,
+            s.kind === "text"
+              ? e.id === "supplied_text" &&
+                  e.kind === "user_note" &&
+                  e.startMs === null &&
+                  e.endMs === null
+              : permitted.has(
+                  JSON.stringify([e.kind, e.id, e.startMs, e.endMs]),
+                ),
             "INVALID_EVIDENCE",
             "Unverified evidence reference.",
           );
     }
-    await settle(
-      ctx,
-      s.organizationId,
-      `source:${s._id}:${a.generation}`,
-      a.credits,
-    );
+    if (!a.retainReservation)
+      await settle(
+        ctx,
+        s.organizationId,
+        `source:${s._id}:${a.generation}`,
+        a.credits,
+      );
     await ctx.db.patch(s._id, {
       state: analysis ? "ready" : "failed",
       analysis,
@@ -687,24 +715,67 @@ export const editSource = mutation({
     ensure(
       a.summary.length <= 1500 &&
         a.tags.length <= 20 &&
-        a.tags.every((t) => t.length <= 40),
+        a.tags.every((t) => t.length <= 40) &&
+        (a.correctedText === undefined ||
+          (a.correctedText.trim().length > 0 &&
+            a.correctedText.length <= 100000)),
       "INVALID_INPUT",
       "Too much text.",
     );
+    const corrected =
+      a.correctedText !== undefined && a.correctedText !== s.text;
+    if (corrected) {
+      ensure(
+        !["queued", "processing"].includes(s.state),
+        "SOURCE_BUSY",
+        "Wait for analysis to stop before correcting its input.",
+      );
+      const proposals = await ctx.db
+        .query("proposals")
+        .withIndex("by_source", (q) => q.eq("sourceId", s._id))
+        .collect();
+      const ids = new Set(proposals.map((p) => p._id));
+      for (const run of await ctx.db
+        .query("runs")
+        .withIndex("by_org", (q) => q.eq("organizationId", s.organizationId))
+        .collect()) {
+        if (ids.has(run.proposalId) && !run.prNumber)
+          await ctx.db.patch(run._id, {
+            state: "canceled",
+            generation: run.generation + 1,
+            patch: undefined,
+            changes: undefined,
+            updatedAt: Date.now(),
+          });
+      }
+      for (const proposal of proposals)
+        await ctx.db.patch(proposal._id, {
+          review: "superseded",
+          planHash: undefined,
+          updatedAt: Date.now(),
+        });
+    }
     await ctx.db.patch(s._id, {
       summary: a.summary,
       searchable: [s.title, a.summary, a.correctedText ?? s.text, ...a.tags]
         .filter(Boolean)
         .join(" "),
       tags: a.tags,
-      analysis: a.correctedText
+      ...(corrected
         ? {
-            ...s.analysis,
-            correctedText: a.correctedText,
+            text: a.correctedText,
+            originalText: s.originalText ?? s.text,
             correctionAuthor: actor.actor._id,
-            originalText: s.text,
+            kind: "text",
+            state: "saved",
+            coverage: "caption_only",
+            analysis: undefined,
+            mediaCoverage: undefined,
+            mediaEvidence: undefined,
+            generation: s.generation + 1,
+            error: undefined,
           }
-        : s.analysis,
+        : {}),
       updatedAt: Date.now(),
     });
   },
@@ -746,6 +817,7 @@ export const attachSource = mutation({
         asset &&
           asset.organizationId === s.organizationId &&
           asset.state === "complete" &&
+          asset.expiresAt !== undefined &&
           asset.expiresAt > Date.now() &&
           (!asset.sourceId || asset.sourceId === s._id),
         "UPLOAD_INVALID",
@@ -841,6 +913,10 @@ export async function redactSource(ctx: MutationCtx, id: Id<"sources">) {
     summary: undefined,
     text: undefined,
     analysis: undefined,
+    mediaEvidence: undefined,
+    mediaCoverage: undefined,
+    originalText: undefined,
+    correctionAuthor: undefined,
     url: undefined,
     tags: [],
     generation: s.generation + 1,
@@ -1163,5 +1239,70 @@ export const usage = query({
         .order("desc")
         .take(100),
     };
+  },
+});
+
+export const stageMedia = internalMutation({
+  args: {
+    id: v.id("sources"),
+    generation: v.number(),
+    transcript: v.string(),
+    coverage: v.string(),
+    evidence: v.array(
+      v.object({
+        kind: v.string(),
+        id: v.string(),
+        startMs: v.number(),
+        endMs: v.number(),
+      }),
+    ),
+  },
+  handler: async (ctx, a) => {
+    const source = await ctx.db.get(a.id);
+    if (
+      !source ||
+      source.state === "deleted" ||
+      source.generation !== a.generation
+    )
+      return false;
+    ensure(
+      a.transcript.length <= 60000 &&
+        !containsSecret(a.transcript) &&
+        ["full_sampled", "audio_only", "visual_only"].includes(a.coverage) &&
+        a.evidence.length <= 224,
+      "INVALID_EVIDENCE",
+      "Invalid media evidence.",
+    );
+    for (const e of a.evidence) {
+      ensure(
+        ["frame", "transcript"].includes(e.kind) &&
+          Number.isSafeInteger(e.startMs) &&
+          Number.isSafeInteger(e.endMs) &&
+          e.startMs >= 0 &&
+          e.endMs >= e.startMs &&
+          e.endMs <= 600000,
+        "INVALID_EVIDENCE",
+        "Invalid evidence timing.",
+      );
+      if (e.kind === "frame") {
+        const id = ctx.db.normalizeId("assets", e.id),
+          asset = id ? await ctx.db.get(id) : null;
+        ensure(
+          asset?.sourceId === source._id &&
+            asset.organizationId === source.organizationId &&
+            asset.state === "complete" &&
+            asset.kind === "evidence",
+          "INVALID_EVIDENCE",
+          "Frame evidence is unavailable.",
+        );
+      }
+    }
+    await ctx.db.patch(source._id, {
+      text: a.transcript,
+      mediaCoverage: a.coverage,
+      mediaEvidence: a.evidence,
+      updatedAt: Date.now(),
+    });
+    return true;
   },
 });

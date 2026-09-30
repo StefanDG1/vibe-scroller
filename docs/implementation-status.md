@@ -116,3 +116,25 @@ Trusted publication created **draft PR https://github.com/StefanDG1/vibe-scrolle
 Before publication, formatting of implementation files, lint, types, 61 tests and both production builds passed again. Two credential-dependent tests were skipped by the normal test command. GitHub CI on the generated draft failed on uppercase documentation links that Windows had accepted. The links are corrected and the validator now checks exact filename case on Windows too. Generated Python bytecode is removed from tracking and ignored; preserved source and the original handoff archive remain available.
 
 A separate private Cloudflare R2 staging bucket, `vibescroller-staging-private`, was created in the EU jurisdiction using Standard storage. Public access remains disabled. Configuration and private upload integration are still in progress. Existing shared account usage was approximately 318 MB before this bounded free test; no paid plan or purchase was made.
+
+## Real upload and sandbox billing at 2026-09-30 03:48 UTC
+
+Working tree based on `0465123`. GitHub CI run `36661777263` passed on that commit. Later changes below remain subject to another full check and commit.
+
+Private EU R2 storage is configured with a new credential scoped only to `vibescroller-staging-private`. CORS permits the staging browser origin. The opt-in `VIBE_STAGING_TEST=storage` integration passed actual signed PUT/HEAD/GET, unsigned and expired denial, CORS, and deletion with HEAD 404. `infra/storage-evidence.json` records the provider checks. No customer content was used.
+
+The real browser uploaded an owned synthetic speech WAV, then requested analysis. Source `mx74gg25wtcqtvkws3k0m1q9e18fc1a1`, labeled "Synthetic staging: owned speech upload", became `ready` with `audio_only` coverage, a real transcript and four grounded points. The decoder ran in the verified E2B sandbox, acknowledged destruction, and Cloudflare Whisper and structured inference returned real output. No vision license consent was sent. This proves the audio path, not the complete video or visual interpretation path. Private frame evidence is now brokered through an authenticated short-lived URL. Its full browser video test remains pending.
+
+A support adjustment waived the customer service reservation for the first failed synthetic coding run. Its unmeasured operator cost capacity remains held for reconciliation. This was restricted to the dedicated staging workspace; no fictitious provider usage or customer credit purchase was recorded.
+
+A dedicated Stripe sandbox `acct_1ULEK7BINq6evjJt` now contains the six specified subscription prices and two top-up prices. Live checkout remains disabled. A real sandbox Visa payment created an active Pro monthly subscription. Automatic signed webhook delivery granted exactly 600 included credits to the labeled staging workspace. Replaying the real event returned 200 without another grant; an invalid signature returned 400. Provider cancellation at period end preserved active status. `infra/stripe-evidence.json` records these checks. This does not verify the remaining renewal, top-up, proration, refund, invoice or tax lifecycle cases.
+
+Transcript corrections now preserve original text, invalidate old analysis and plan approvals, and cancel unpublished execution tied to stale proposals. Expiring uploads have a scheduled deletion check in addition to the sweeper. Frame registration checks retained storage allowance. The correction test initially failed because its test callback returned a nonserializable Vitest assertion object; the callback was corrected without changing the product boundary.
+
+Latest checks: `pnpm exec vitest run tests/product.test.ts` passed 24 tests; `pnpm typecheck` passed root and both apps; `pnpm lint` passed with zero warnings. Production builds and the entire unit suite need a fresh pass for this working tree.
+
+Still incomplete: the full optional laptop runner, imports, all media paths and retry reuse, accurate proration/refund ledger behavior, all PR lifecycle webhook cases, complete privacy/export and accessibility verification, hosted staging, and production release gates. No legal review or production approval has occurred.
+
+At 03:58 UTC, `pnpm check` passed document validation, zero-warning lint, all type checks, 64 unit/auth tests, and both production builds on Next.js 16.3.6. Three provider integrations were skipped by default. The real browser completed a Stripe sandbox EUR 10 top-up using the official test card and the agent disclosure checkbox; its signed webhook granted 200 purchased credits separately from the included allowance. The private storage and source content tests remain labeled synthetic.
+
+Cloudflare packaging remains unverified. Windows directory-junction packaging got past symlink privileges but failed on native Sharp bundling. The separate Linux workflow is prepared without any provider secrets. The available Vercel Hobby team is not used for commercial deployment. See ADR 005 for the host evaluation and compatible dependency patch.

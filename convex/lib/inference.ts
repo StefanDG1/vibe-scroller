@@ -5,6 +5,7 @@ import {
   cfStructured,
   cfQuote,
   freeCloudflare,
+  cfRun,
 } from "../../packages/providers/cloudflare";
 import { ensure } from "../../packages/policy";
 export async function infer(
@@ -35,4 +36,33 @@ export async function infer(
     neurons: result.usage.neurons,
   });
   return result;
+}
+
+// Retain the full free-unit hold when a media endpoint omits measured usage.
+// Never represent a quote as provider-reported consumption.
+export async function inferMedia(
+  ctx: ActionCtx,
+  model: string,
+  input: unknown,
+  maxNeurons: number,
+) {
+  ensure(
+    process.env.MANAGED_INFERENCE_ROUTE === "cloudflare_free",
+    "SETUP_REQUIRED",
+    "Media needs the explicitly selected free Workers AI route.",
+  );
+  freeCloudflare();
+  const key = crypto.randomUUID();
+  await ctx.runMutation(internal.inferenceBudget.reserve, {
+    key,
+    max: maxNeurons,
+  });
+  const result = await cfRun(model, input);
+  const measured = result.usage?.neurons;
+  if (Number.isFinite(measured) && measured >= 0)
+    await ctx.runMutation(internal.inferenceBudget.settle, {
+      key,
+      neurons: measured,
+    });
+  return { result, usageVerified: Number.isFinite(measured) && measured >= 0 };
 }

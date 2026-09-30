@@ -691,3 +691,58 @@ export const failCloud = internalMutation({
       });
   },
 });
+// Operator-only staging support adjustment. Customer permissions cannot call this.
+export const waiveStagingFailure = internalMutation({
+  args: { id: v.id("runs"), reason: v.string() },
+  handler: async (ctx, a) => {
+    const run = await ctx.db.get(a.id);
+    ensure(
+      run &&
+        run.state === "failed" &&
+        run.organizationId === process.env.STAGING_TEST_ORGANIZATION_ID &&
+        !run.prNumber,
+      "FORBIDDEN",
+      "Only the configured failed staging test is eligible.",
+    );
+    ensure(
+      a.reason.length >= 20 &&
+        a.reason.length <= 1000 &&
+        !containsSecret(a.reason),
+      "INVALID_INPUT",
+      "Record a bounded support reason.",
+    );
+    const key = `run:${run._id}`;
+    const reservation = await ctx.db
+      .query("reservations")
+      .withIndex("by_key", (q) =>
+        q.eq("organizationId", run.organizationId).eq("key", key),
+      )
+      .unique();
+    if (!reservation || reservation.state !== "active") return;
+    // Keep operator cost capacity reserved until provider reconciliation.
+    await ctx.db.patch(reservation._id, { operatorKeys: [] });
+    await settle(ctx, run.organizationId, key, 0);
+    await ctx.db.patch(reservation._id, {
+      operatorKeys: reservation.operatorKeys,
+    });
+    await ctx.db.insert("costEntries", {
+      organizationId: run.organizationId,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      key: `operator-unreconciled:${key}`,
+      credits: 0,
+      provider: "staging_support_adjustment",
+      units: reservation.max,
+      unitType: "reserved_service_credit_ceiling",
+      costCeilingEur: reservation.max * 0.01,
+      costStatus: "unreconciled_operator_hold",
+    });
+    await ctx.db.patch(run._id, {
+      events: [
+        ...run.events,
+        `Staging service charge waived: ${a.reason}. Operator cost reservation remains held.`,
+      ],
+      updatedAt: Date.now(),
+    });
+  },
+});

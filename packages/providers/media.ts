@@ -10,6 +10,8 @@ export async function prepareMedia(objectKey: string, decoder: string) {
     "MEDIA_UNAVAILABLE",
     "Verify the pinned isolated media image before processing.",
   );
+  const started = Date.now();
+  let killed = false;
   const sandbox = await Sandbox.create(process.env.E2B_MEDIA_TEMPLATE, {
     apiKey: process.env.E2B_API_KEY,
     allowInternetAccess: false,
@@ -27,36 +29,31 @@ export async function prepareMedia(objectKey: string, decoder: string) {
       "SOURCE_UNAVAILABLE",
       "Source object is unavailable or exceeds the limit.",
     );
-    const chunks: Uint8Array[] = [];
     let bytes = 0;
-    const reader = res.body!.getReader();
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      bytes += value.length;
-      if (bytes > 250000000) {
-        await reader.cancel();
-        throw new Error("Media exceeds byte limit.");
-      }
-      chunks.push(value);
-    }
-    const input = Buffer.concat(chunks);
+    const stream = res.body!.pipeThrough(
+      new TransformStream<Uint8Array, Uint8Array>({
+        transform(chunk, controller) {
+          bytes += chunk.byteLength;
+          ensure(
+            bytes <= 250000000,
+            "SOURCE_UNAVAILABLE",
+            "Source exceeds its byte limit.",
+          );
+          controller.enqueue(chunk);
+        },
+      }),
+    );
     await sandbox.commands.run("mkdir -p /home/user/media", {
       user: "user",
       timeoutMs: 10000,
     });
-    await sandbox.files.write(
-      "/home/user/media/input",
-      input.buffer.slice(
-        input.byteOffset,
-        input.byteOffset + input.byteLength,
-      ) as ArrayBuffer,
-      { user: "user" },
-    );
+    await sandbox.files.write("/home/user/media/input", stream, {
+      user: "user",
+    });
     await sandbox.files.write("/home/user/media/decode.py", decoder, {
       user: "user",
     });
-    await sandbox.commands.run("python /home/user/media/decode.py", {
+    await sandbox.commands.run("python3 /home/user/media/decode.py", {
       user: "user",
       timeoutMs: 240000,
     });
@@ -75,9 +72,16 @@ export async function prepareMedia(objectKey: string, decoder: string) {
       });
       frames.push({ ...f, data: Buffer.from(data).toString("base64") });
     }
-    return { manifest, audio, frames };
-  } finally {
     await sandbox.kill();
+    killed = true;
+    return {
+      manifest,
+      audio,
+      frames,
+      computeSeconds: Math.ceil((Date.now() - started) / 1000),
+    };
+  } finally {
+    if (!killed) await sandbox.kill();
   }
 }
 export async function transcribe(audio: Uint8Array, key: string) {
