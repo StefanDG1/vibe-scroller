@@ -306,10 +306,10 @@ export const refreshPR = action({
   },
 });
 export const reconcilePRs = internalAction({
-  args: {},
-  handler: async (ctx) => {
-    const runs = await ctx.runQuery(internal.jobs.prRuns, {});
-    for (const r of runs) {
+  args: { cursor: v.optional(v.string()) },
+  handler: async (ctx, a): Promise<void> => {
+    const runs = await ctx.runQuery(internal.jobs.prRuns, a);
+    for (const r of runs.page) {
       try {
         const token = await installationToken(r.repo.installationId),
           p = await github(
@@ -329,6 +329,37 @@ export const reconcilePRs = internalAction({
           observedAt: Date.now(),
         });
       }
+    }
+    if (!runs.isDone)
+      await ctx.scheduler.runAfter(0, internal.integrations.reconcilePRs, {
+        cursor: runs.continueCursor,
+      });
+  },
+});
+export const reconcilePRRun = internalAction({
+  args: { id: v.id("runs") },
+  handler: async (ctx, a) => {
+    const run = await ctx.runQuery(internal.jobs.prRun, a);
+    if (!run) return;
+    const observedAt = Date.now();
+    try {
+      const token = await installationToken(run.repo.installationId);
+      const pr = await github(
+        `/repos/${run.repo.fullName}/pulls/${run.prNumber}`,
+        token,
+      );
+      await ctx.runMutation(internal.jobs.projectPR, {
+        id: run._id,
+        state: prState(pr),
+        mergedAt: pr.merged_at ?? undefined,
+        observedAt,
+      });
+    } catch {
+      await ctx.runMutation(internal.jobs.projectPR, {
+        id: run._id,
+        state: "access_lost",
+        observedAt,
+      });
     }
   },
 });

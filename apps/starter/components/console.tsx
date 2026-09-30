@@ -1527,8 +1527,13 @@ function SourceDetail({ source, demo, org, repos, call, onProposal }: any) {
           </a>
         )}
         <p className="fine">
-          Capture date is not the original save date. Sampled evidence is not
-          exhaustive analysis.
+          {detail.createdAt
+            ? `Captured ${new Date(detail.createdAt).toLocaleString()}.`
+            : "Synthetic example; no real capture date."}
+          {detail.originalSavedAt
+            ? ` Original save date supplied by the import: ${new Date(detail.originalSavedAt).toLocaleString()}.`
+            : " Original save date unknown."}{" "}
+          Sampled evidence is not exhaustive analysis.
         </p>
       </div>
       <section className="panel">
@@ -1573,8 +1578,19 @@ function SourceDetail({ source, demo, org, repos, call, onProposal }: any) {
         <details>
           <summary>Original transcript and corrections</summary>
           <p style={{ whiteSpace: "pre-wrap" }}>
-            {detail.text ?? "Original transcript is unavailable."}
+            {detail.originalText ??
+              detail.text ??
+              "Original transcript is unavailable."}
           </p>
+          {detail.originalText && <p>Current user correction: {detail.text}</p>}
+          {(detail.originalMediaEvidence ?? detail.mediaEvidence)
+            ?.filter((e: any) => e.kind === "transcript")
+            .map((e: any) => (
+              <p key={e.id} className="fine">
+                Original transcript segment: {(e.startMs / 1000).toFixed(1)}–
+                {(e.endMs / 1000).toFixed(1)} seconds.
+              </p>
+            ))}
           {detail.analysis?.correctedText && (
             <p>Confirmed correction: {detail.analysis.correctedText}</p>
           )}

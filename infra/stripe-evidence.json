@@ -39,6 +39,23 @@
     "credits": 200,
     "amount": 1000,
     "browserCheckout": true,
-    "signedWebhookGrantedOnce": true
+    "signedWebhookGrantedOnce": true,
+    "partialRefund": {
+      "timestamp": "2026-09-30T05:11:24.681Z",
+      "synthetic": true,
+      "accountId": "acct_1ULEK7BINq6evjJt",
+      "paymentId": "pi_3ULEavBINq6evjJt1Z11rw3z",
+      "refundId": "re_3ULEavBINq6evjJt1TV4QbZv",
+      "amount": 500,
+      "status": "succeeded",
+      "signedWebhookRevokedCredits": 100,
+      "auditGrantPreserved": 200
+    }
+  },
+  "portal": {
+    "configured": true,
+    "subscriptionUpdateEnabled": false,
+    "invoiceHistory": true,
+    "cancelAtPeriodEnd": true
   }
 }

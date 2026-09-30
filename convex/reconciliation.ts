@@ -30,6 +30,40 @@ export const stripeEvent = internalAction({
     const own = await client.accounts.retrieve(account);
     if (own.id !== account) return { status: 400 };
     const object = event.data.object as any;
+    if (event.type === "charge.refunded") {
+      const charge = await client.charges.retrieve(object.id);
+      const linked = await ctx.runQuery(internal.billing.byCustomer, {
+        customerId:
+          typeof charge.customer === "string"
+            ? charge.customer
+            : (charge.customer?.id ?? ""),
+      });
+      const paymentId =
+        typeof charge.payment_intent === "string"
+          ? charge.payment_intent
+          : charge.payment_intent?.id;
+      const payments = paymentId
+        ? await client.invoicePayments.list({
+            payment: { type: "payment_intent", payment_intent: paymentId },
+            status: "paid",
+            limit: 2,
+          })
+        : null;
+      const invoiceId =
+        payments?.data.length === 1
+          ? typeof payments.data[0].invoice === "string"
+            ? payments.data[0].invoice
+            : payments.data[0].invoice.id
+          : undefined;
+      if (linked && paymentId && charge.amount_refunded > 0)
+        await ctx.runMutation(internal.commerce.reversePayment, {
+          organizationId: linked.organizationId,
+          paymentId,
+          refunded: charge.amount_refunded,
+          total: charge.amount,
+          invoiceId,
+        });
+    }
     if (
       event.type === "checkout.session.completed" &&
       object.mode === "payment"
@@ -103,8 +137,8 @@ export const customer = internalAction({
     if (!sub || sub.status !== "active") return;
     const invoice = sub.latest_invoice as Stripe.Invoice;
     if (!invoice || invoice.status !== "paid") return;
-    const tier = sub.metadata.tier,
-      interval = sub.metadata.interval;
+    const tier = sub.items.data[0]?.price.metadata.tier,
+      interval = sub.items.data[0]?.price.metadata.interval;
     if (
       !["starter", "pro"].includes(tier) ||
       !["weekly", "monthly", "annual"].includes(interval)
@@ -126,6 +160,11 @@ export const customer = internalAction({
       start = monthlyAnchor(base, n);
       periodEnd = Math.min(end, monthlyAnchor(base, n + 1));
     }
+    const upgrade = await ctx.runQuery(internal.billingChanges.paidUpgrade, {
+      subscriptionId: sub.id,
+      invoiceId: invoice.id,
+      price: item.price.id,
+    });
     if (periodEnd > Date.now())
       await ctx.runMutation(internal.commerce.grantPeriod, {
         organizationId: reserved.organizationId,
@@ -135,6 +174,10 @@ export const customer = internalAction({
         start,
         end: periodEnd,
         verifiedPayment: true,
+        upgradeAt: upgrade
+          ? Math.max(start, upgrade.prorationDate * 1000)
+          : undefined,
+        invoiceId: invoice.id,
       });
     if (process.env.RO_INVOICE_SCOPE_VERIFIED === "true")
       await ctx.runMutation(internal.privacy.invoiceTask, {

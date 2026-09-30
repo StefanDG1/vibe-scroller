@@ -11,6 +11,24 @@ import type { FormState } from "@/components/action-form";
 import { recipes } from "@companynerve/design-recipes";
 const val = (d: FormData, key: string) => String(d.get(key) ?? "");
 const org = (d: FormData) => val(d, "organizationId") as Id<"organizations">;
+export async function quoteV1Change(_: FormState, d: FormData) {
+  return run(async () => {
+    const id = await (
+      await backend()
+    ).action(api.billingV1.quoteChange, {
+      organizationId: org(d),
+      tier: val(d, "tier") as "starter" | "pro",
+    });
+    return { path: `/app/${org(d)}/billing/change/${id}` };
+  });
+}
+export async function applyV1Change(_: FormState, d: FormData) {
+  return run(async () =>
+    (await backend()).action(api.billingV1.applyChange, {
+      id: val(d, "quoteId") as Id<"billingChanges">,
+    }),
+  );
+}
 export async function startV1Checkout(_: FormState, d: FormData) {
   let url;
   try {

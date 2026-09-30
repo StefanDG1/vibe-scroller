@@ -54,6 +54,13 @@ export const invoiceTask = internalMutation({
 export const sweep = internalMutation({
   args: {},
   handler: async (ctx) => {
+    for (const stage of await ctx.db
+      .query("mediaStages")
+      .withIndex("by_updated", (q) =>
+        q.lt("updatedAt", Date.now() - 7 * 86400000),
+      )
+      .take(100))
+      await ctx.db.delete(stage._id);
     const assets = await ctx.db
       .query("assets")
       .withIndex("by_expiry", (q) =>

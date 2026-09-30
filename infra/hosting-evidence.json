@@ -1,0 +1,19 @@
+{
+  "timestamp": "2026-09-30T04:36:27.601Z",
+  "environment": "staging",
+  "url": "https://vibescroller-staging.danistefangheorghiu.workers.dev",
+  "worker": "vibescroller-staging",
+  "artifactCommit": "8a36dc54ea5d70b8b6a19556abb7c00d2f6577bb",
+  "packagingRun": 36666804764,
+  "nodeVersion": 24,
+  "nextVersion": "16.3.6",
+  "freePlan": true,
+  "liveCheckoutEnabled": false,
+  "authenticationVerified": true,
+  "configuredSecretMatchesInArtifact": 0,
+  "scopedDeploymentCredentialRolled": true,
+  "authenticatedWorkspaceRendered": true,
+  "unauthenticatedAppRedirectsToWorkOS": true,
+  "healthStatus": 200,
+  "runtimeVerifiedAt": "2026-09-30T04:40:52.411Z"
+}

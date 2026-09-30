@@ -1,0 +1,151 @@
+{
+  "accountId": "acct_1ULEK7BINq6evjJt",
+  "synthetic": true,
+  "startedAt": "2026-09-30T05:14:37.994Z",
+  "clocks": [
+    {
+      "interval": "weekly",
+      "clockId": "clock_1ULFqkBINq6evjJt1Jq9uzZV",
+      "initial": [
+        {
+          "tier": "starter",
+          "customerId": "cus_VLxmPr2h7hMSmw",
+          "subscriptionId": "sub_1ULFqlBINq6evjJtgEKha30B",
+          "invoiceId": "in_1ULFqlBINq6evjJtN4Llnobx",
+          "paid": true,
+          "amount": 599,
+          "start": 1801396800,
+          "end": 1802001600
+        },
+        {
+          "tier": "pro",
+          "customerId": "cus_VLxmFsUiwEf0xD",
+          "subscriptionId": "sub_1ULFqoBINq6evjJtoiUK3bKe",
+          "invoiceId": "in_1ULFqpBINq6evjJt5loKc6po",
+          "paid": true,
+          "amount": 1199,
+          "start": 1801396800,
+          "end": 1802001600
+        }
+      ],
+      "frozenTime": 1801396800,
+      "advancedTo": 1802008860,
+      "results": [
+        {
+          "tier": "starter",
+          "paid": true,
+          "initialAmount": 599,
+          "amount": 599,
+          "start": 1802001600,
+          "end": 1802606400
+        },
+        {
+          "tier": "pro",
+          "paid": true,
+          "initialAmount": 1199,
+          "amount": 1199,
+          "start": 1802001600,
+          "end": 1802606400
+        }
+      ],
+      "verified": true
+    },
+    {
+      "interval": "monthly",
+      "clockId": "clock_1ULFqrBINq6evjJtVJjvAvn2",
+      "initial": [
+        {
+          "tier": "starter",
+          "customerId": "cus_VLxmMXLYqzpQWf",
+          "subscriptionId": "sub_1ULFqsBINq6evjJtKlrewlAv",
+          "invoiceId": "in_1ULFqsBINq6evjJtEWFRzpyk",
+          "paid": true,
+          "amount": 1900,
+          "start": 1801396800,
+          "end": 1803816000
+        },
+        {
+          "tier": "pro",
+          "customerId": "cus_VLxm1L3JaGyAV1",
+          "subscriptionId": "sub_1ULFqvBINq6evjJtyVc7AAXv",
+          "invoiceId": "in_1ULFqvBINq6evjJtWr3aSsEi",
+          "paid": true,
+          "amount": 3900,
+          "start": 1801396800,
+          "end": 1803816000
+        }
+      ],
+      "frozenTime": 1801396800,
+      "advancedTo": 1803823260,
+      "results": [
+        {
+          "tier": "starter",
+          "paid": true,
+          "initialAmount": 1900,
+          "amount": 1900,
+          "start": 1803816000,
+          "end": 1806494400
+        },
+        {
+          "tier": "pro",
+          "paid": true,
+          "initialAmount": 3900,
+          "amount": 3900,
+          "start": 1803816000,
+          "end": 1806494400
+        }
+      ],
+      "verified": true
+    },
+    {
+      "interval": "annual",
+      "clockId": "clock_1ULFqyBINq6evjJtxhO7wUDX",
+      "initial": [
+        {
+          "tier": "starter",
+          "customerId": "cus_VLxmvZ0c9tztDX",
+          "subscriptionId": "sub_1ULFqzBINq6evjJt9KcBABfO",
+          "invoiceId": "in_1ULFqzBINq6evjJt7bqnq7tC",
+          "paid": true,
+          "amount": 19000,
+          "start": 1801396800,
+          "end": 1832932800
+        },
+        {
+          "tier": "pro",
+          "customerId": "cus_VLxmp0jQEfFxaH",
+          "subscriptionId": "sub_1ULFr2BINq6evjJtEmWEvdAq",
+          "invoiceId": "in_1ULFr2BINq6evjJtTaGgcWb5",
+          "paid": true,
+          "amount": 39000,
+          "start": 1801396800,
+          "end": 1832932800
+        }
+      ],
+      "frozenTime": 1801396800,
+      "advancedTo": 1803816060,
+      "results": [
+        {
+          "tier": "starter",
+          "paid": true,
+          "initialAmount": 19000,
+          "amount": 19000,
+          "start": 1801396800,
+          "end": 1832932800,
+          "annualDidNotInvoiceMonthly": true
+        },
+        {
+          "tier": "pro",
+          "paid": true,
+          "initialAmount": 39000,
+          "amount": 39000,
+          "start": 1801396800,
+          "end": 1832932800,
+          "annualDidNotInvoiceMonthly": true
+        }
+      ],
+      "verified": true
+    }
+  ],
+  "completedAt": "2026-09-30T05:22:46.698Z"
+}

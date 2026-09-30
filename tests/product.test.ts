@@ -39,6 +39,392 @@ async function setup() {
   return { t, a, b, org, other };
 }
 describe("VibeScroller product boundaries", () => {
+  it("reuses only fingerprinted media stages and settles the prior compute hold once", async () => {
+    const { t, a, org } = await setup();
+    const sourceId = await t.run(async (ctx) => {
+      const now = Date.now(),
+        key = `${org}/synthetic-media`;
+      const id = await ctx.db.insert("sources", {
+        organizationId: org,
+        createdAt: now,
+        updatedAt: now,
+        key: "synthetic-cache",
+        canonical: "synthetic-cache",
+        kind: "upload",
+        title: "Synthetic cache test",
+        state: "failed",
+        coverage: "metadata_only",
+        rightsAttested: true,
+        tags: [],
+        generation: 1,
+        objectKey: key,
+      });
+      await ctx.db.insert("assets", {
+        organizationId: org,
+        sourceId: id,
+        createdAt: now,
+        updatedAt: now,
+        key,
+        state: "complete",
+        etag: "verified-synthetic-fingerprint",
+        size: 100,
+        type: "audio/wav",
+      });
+      return id;
+    });
+    await t.mutation(internal.commerce.budgetFixture, {
+      organizationId: org,
+      key: `source:${sourceId}:1`,
+      max: 10,
+    });
+    const evidence = [
+      {
+        kind: "transcript",
+        id: `transcript:${sourceId}:1:0`,
+        startMs: 0,
+        endMs: 1000,
+      },
+    ];
+    const payload = {
+      transcript: [
+        {
+          id: evidence[0].id,
+          text: "Synthetic evidence",
+          startMs: 0,
+          endMs: 1000,
+        },
+      ],
+      observations: [],
+      evidence,
+      warnings: [],
+      computeCredits: 2,
+    };
+    await t.mutation(internal.product.stageMedia, {
+      id: sourceId,
+      generation: 1,
+      transcript: "Synthetic evidence",
+      coverage: "audio_only",
+      evidence,
+      cache: { pipelineVersion: "synthetic-v1", payload },
+    });
+    expect(
+      await t.query(internal.product.cachedMediaStage, {
+        id: sourceId,
+        pipelineVersion: "wrong-version",
+      }),
+    ).toBeNull();
+    expect(
+      await t.query(internal.product.cachedMediaStage, {
+        id: sourceId,
+        pipelineVersion: "synthetic-v1",
+      }),
+    ).not.toBeNull();
+    await t.run(async (ctx) => {
+      await ctx.db.patch(sourceId, { generation: 2, state: "queued" });
+    });
+    expect(
+      await t.mutation(internal.product.stageMedia, {
+        id: sourceId,
+        generation: 1,
+        transcript: "Late stale text",
+        coverage: "audio_only",
+        evidence,
+      }),
+    ).toBe(false);
+    await t.mutation(internal.commerce.budgetFixture, {
+      organizationId: org,
+      key: `source:${sourceId}:2`,
+      max: 10,
+    });
+    const output = {
+      ...fixture,
+      sourceId,
+      processingRunId: `${sourceId}:2`,
+      coverage: "audio_only",
+      insights: fixture.insights.map((i) => ({ ...i, evidence })),
+    };
+    await t.mutation(internal.product.commitAnalysis, {
+      id: sourceId,
+      generation: 2,
+      output,
+      credits: 1,
+      reusedMediaGeneration: 1,
+    });
+    await t.mutation(internal.product.commitAnalysis, {
+      id: sourceId,
+      generation: 2,
+      output,
+      credits: 1,
+      reusedMediaGeneration: 1,
+    });
+    await t.run(async (ctx) => {
+      const wallet = await ctx.db.query("wallets").first();
+      expect(wallet?.spent).toBe(3);
+      expect(wallet?.reserved).toBe(0);
+    });
+    await a.mutation(api.product.deleteSource, { id: sourceId });
+    expect(
+      await t.query(internal.product.cachedMediaStage, {
+        id: sourceId,
+        pipelineVersion: "synthetic-v1",
+      }),
+    ).toBeNull();
+    await t.run(async (ctx) => {
+      expect(await ctx.db.query("mediaStages").collect()).toHaveLength(0);
+    });
+  });
+  it("reverses only the refunded invoice's allowance contribution and does not revive annual grants", async () => {
+    const { t, org } = await setup();
+    const start = Date.now(),
+      end = start + 30 * 86400000;
+    const base = {
+      organizationId: org,
+      subscription: "sub_invoice_refund",
+      start,
+      end,
+      interval: "monthly" as const,
+      verifiedPayment: true,
+    };
+    await t.mutation(internal.commerce.grantPeriod, {
+      ...base,
+      tier: "starter",
+      invoiceId: "in_initial",
+    });
+    await t.mutation(internal.commerce.grantPeriod, {
+      ...base,
+      tier: "pro",
+      upgradeAt: start + (end - start) / 2,
+      invoiceId: "in_upgrade",
+    });
+    await t.mutation(internal.commerce.reversePayment, {
+      organizationId: org,
+      paymentId: "pi_upgrade",
+      invoiceId: "in_upgrade",
+      total: 1000,
+      refunded: 1000,
+    });
+    await t.run(async (ctx) => {
+      const pool = (await ctx.db.query("creditPools").collect())[0];
+      expect(pool.granted).toBe(425);
+      expect(pool.revoked).toBe(175);
+    });
+    await t.mutation(internal.commerce.reversePayment, {
+      organizationId: org,
+      paymentId: "pi_initial",
+      invoiceId: "in_initial",
+      total: 19000,
+      refunded: 19000,
+    });
+    await t.mutation(internal.commerce.grantPeriod, {
+      ...base,
+      start: end,
+      end: end + 30 * 86400000,
+      tier: "starter",
+      invoiceId: "in_initial",
+    });
+    await t.run(async (ctx) => {
+      const pools = await ctx.db.query("creditPools").collect();
+      expect(pools.every((p) => p.revoked === p.granted)).toBe(true);
+    });
+  });
+  it("reverses cumulative purchased-credit refunds once, including reordered grant delivery", async () => {
+    const { t, org, other } = await setup();
+    const args = {
+      organizationId: org,
+      paymentId: "pi_synthetic_refund",
+      total: 1000,
+      refunded: 500,
+    };
+    await t.mutation(internal.commerce.reversePayment, args);
+    await t.mutation(internal.commerce.grantTopup, {
+      organizationId: org,
+      paymentId: args.paymentId,
+      credits: 200,
+    });
+    await t.mutation(internal.commerce.reversePayment, args);
+    await t.run(async (ctx) => {
+      const pool = (await ctx.db.query("creditPools").collect())[0];
+      expect(pool.granted).toBe(200);
+      expect(pool.revoked).toBe(100);
+    });
+    await t.mutation(internal.commerce.reversePayment, {
+      ...args,
+      refunded: 1000,
+    });
+    await t.mutation(internal.commerce.reversePayment, args);
+    await expect(
+      t.mutation(internal.commerce.reversePayment, {
+        ...args,
+        organizationId: other,
+        refunded: 1000,
+      }),
+    ).rejects.toThrow();
+    await expect(
+      t.mutation(internal.commerce.budgetFixture, {
+        organizationId: org,
+        key: "refunded-budget",
+        max: 31,
+      }),
+    ).rejects.toThrow("INSUFFICIENT_CREDITS");
+    await t.run(async (ctx) => {
+      expect((await ctx.db.query("billingReversals").collect()).length).toBe(1);
+    });
+  });
+  it("binds plan-change quotes to the owner and claims each approval once", async () => {
+    const { t, a, b, org } = await setup();
+    const now = Math.floor(Date.now() / 1000);
+    const args = {
+      organizationId: org,
+      subscriptionId: "sub_synthetic",
+      itemId: "si_synthetic",
+      oldPrice: "price_old",
+      newPrice: "price_new",
+      tier: "pro" as const,
+      interval: "monthly" as const,
+      prorationDate: now,
+      periodStart: now - 86400,
+      periodEnd: now + 86400,
+      amount: 200,
+      currency: "eur",
+    };
+    const quoteId = await a.mutation(internal.billingChanges.create, args);
+    await expect(
+      b.query(api.billingChanges.quote, { id: quoteId }),
+    ).rejects.toThrow();
+    await expect(
+      b.mutation(internal.billingChanges.claim, { id: quoteId }),
+    ).rejects.toThrow();
+    await a.mutation(internal.billingChanges.claim, { id: quoteId });
+    await expect(
+      a.mutation(internal.billingChanges.claim, { id: quoteId }),
+    ).rejects.toThrow();
+    const expired = await a.mutation(internal.billingChanges.create, args);
+    await t.run(async (ctx) => {
+      await ctx.db.patch(expired, { expiresAt: Date.now() - 1 });
+    });
+    await expect(
+      a.mutation(internal.billingChanges.claim, { id: expired }),
+    ).rejects.toThrow("QUOTE_EXPIRED");
+  });
+  it("scopes and deduplicates PR webhooks, pages reconciliation, and rejects stale observations", async () => {
+    const { t, org } = await setup();
+    const repositoryId = await t.mutation(internal.jobs.saveRepository, {
+      organizationId: org,
+      installationId: 11,
+      providerId: 22,
+      fullName: "test/synthetic",
+      sha: "a".repeat(40),
+      branch: "main",
+      manifest: [],
+      context: "Synthetic test only",
+    });
+    const ids = await t.run(async (ctx) => {
+      const now = Date.now(),
+        actor = (await ctx.db.query("users").first())!._id;
+      const sourceId = await ctx.db.insert("sources", {
+        organizationId: org,
+        createdAt: now,
+        updatedAt: now,
+        key: "webhook-source",
+        canonical: "webhook-source",
+        title: "Synthetic",
+        kind: "text",
+        state: "ready",
+        coverage: "caption_only",
+        tags: [],
+        rightsAttested: true,
+        generation: 0,
+      });
+      const proposalId = await ctx.db.insert("proposals", {
+        organizationId: org,
+        createdAt: now,
+        updatedAt: now,
+        sourceId,
+        repositoryId,
+        baseSha: "a".repeat(40),
+        profileVersion: 1,
+        disposition: "relevant",
+        title: "Synthetic",
+        detail: {},
+        review: "approved",
+        version: 1,
+      });
+      const ids = [];
+      for (let n = 1; n <= 51; n++)
+        ids.push(
+          await ctx.db.insert("runs", {
+            organizationId: org,
+            createdAt: now,
+            updatedAt: now,
+            proposalId,
+            repositoryId,
+            approvedBy: actor,
+            planHash: "synthetic",
+            baseSha: "a".repeat(40),
+            version: 1,
+            executor: "cloud",
+            fundingRoute: "prepaid",
+            maxCredits: 1,
+            allowedPaths: [],
+            highRisk: false,
+            state: "completed",
+            generation: 1,
+            expiresAt: now,
+            leaseUntil: now,
+            events: [],
+            prNumber: n,
+            prState: "draft",
+            observedAt: 100,
+          }),
+        );
+      return ids;
+    });
+    const delivery = {
+      delivery: "synthetic-delivery",
+      installationId: 11,
+      repositoryId: 22,
+      prNumber: 1,
+    };
+    await t.mutation(internal.jobs.enqueuePR, {
+      ...delivery,
+      delivery: "foreign-delivery",
+      installationId: 99,
+    });
+    await t.run(async (ctx) => {
+      expect(
+        await ctx.db.system.query("_scheduled_functions").collect(),
+      ).toHaveLength(0);
+    });
+    await t.mutation(internal.jobs.enqueuePR, delivery);
+    await t.mutation(internal.jobs.enqueuePR, delivery);
+    await t.run(async (ctx) => {
+      expect(
+        await ctx.db.system.query("_scheduled_functions").collect(),
+      ).toHaveLength(1);
+    });
+    const first = await t.query(internal.jobs.prRuns, {});
+    expect(first.page).toHaveLength(50);
+    expect(first.isDone).toBe(false);
+    const second = await t.query(internal.jobs.prRuns, {
+      cursor: first.continueCursor,
+    });
+    expect(second.page).toHaveLength(1);
+    expect(second.isDone).toBe(true);
+    await t.mutation(internal.jobs.projectPR, {
+      id: ids[0],
+      state: "merged",
+      mergedAt: "2026-09-30T00:00:00Z",
+      observedAt: 200,
+    });
+    await t.mutation(internal.jobs.projectPR, {
+      id: ids[0],
+      state: "draft",
+      observedAt: 150,
+    });
+    await t.run(async (ctx) => {
+      expect((await ctx.db.get(ids[0]))?.prState).toBe("merged");
+    });
+  });
   it("imports a full 500-row paid batch and deduplicates it without per-row credit use", async () => {
     const { t, a, org } = await setup();
     const start = Date.now();
@@ -123,12 +509,22 @@ describe("VibeScroller product boundaries", () => {
       tier: "starter",
     });
     await Promise.all([
-      t.mutation(internal.commerce.grantPeriod, { ...base, tier: "pro" }),
-      t.mutation(internal.commerce.grantPeriod, { ...base, tier: "pro" }),
+      t.mutation(internal.commerce.grantPeriod, {
+        ...base,
+        tier: "pro",
+        upgradeAt: start + (end - start) / 2,
+        invoiceId: "in_paid_synthetic",
+      }),
+      t.mutation(internal.commerce.grantPeriod, {
+        ...base,
+        tier: "pro",
+        upgradeAt: start + (end - start) / 2,
+        invoiceId: "in_paid_synthetic",
+      }),
     ]);
     await t.run(async (ctx) => {
       const pool = (await ctx.db.query("creditPools").collect())[0];
-      expect(pool.granted).toBe(150);
+      expect(pool.granted).toBe(107);
       expect((await ctx.db.query("billingPeriods").collect()).length).toBe(1);
     });
     await t.mutation(internal.commerce.grantPeriod, {
@@ -137,7 +533,7 @@ describe("VibeScroller product boundaries", () => {
     });
     await t.run(async (ctx) => {
       expect((await ctx.db.query("creditPools").collect())[0].granted).toBe(
-        150,
+        107,
       );
     });
     await t.mutation(internal.billing.attach, {
@@ -210,6 +606,18 @@ describe("VibeScroller product boundaries", () => {
         correctedText: " ",
       }),
     ).rejects.toThrow();
+    for (const correctedText of [
+      "-----BEGIN PRIVATE KEY-----",
+      "x".repeat(60001),
+    ])
+      await expect(
+        a.mutation(api.product.editSource, {
+          id,
+          summary: "",
+          tags: [],
+          correctedText,
+        }),
+      ).rejects.toThrow();
   });
   it("validates supplied schemas and rejects model privilege additions", () => {
     expect(insightOutput.safeParse(fixture).success).toBe(true);

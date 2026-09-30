@@ -11,6 +11,7 @@
 import type * as accounts from "../accounts.js";
 import type * as assets from "../assets.js";
 import type * as billing from "../billing.js";
+import type * as billingChanges from "../billingChanges.js";
 import type * as billingV1 from "../billingV1.js";
 import type * as cloud from "../cloud.js";
 import type * as commerce from "../commerce.js";
@@ -51,6 +52,7 @@ declare const fullApi: ApiFromModules<{
   accounts: typeof accounts;
   assets: typeof assets;
   billing: typeof billing;
+  billingChanges: typeof billingChanges;
   billingV1: typeof billingV1;
   cloud: typeof cloud;
   commerce: typeof commerce;

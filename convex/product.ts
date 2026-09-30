@@ -17,6 +17,7 @@ import {
 import type { MutationCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 import { queueDeletion } from "./assets";
+import { mediaStagePayload } from "../packages/media/stages";
 const org = { organizationId: v.id("organizations") };
 export async function wallet(ctx: MutationCtx, id: Id<"organizations">) {
   let w = await ctx.db
@@ -149,14 +150,21 @@ export async function reserve(
     .filter((p) => p.expiresAt === undefined || p.expiresAt > Date.now())
     .sort((a, b) => (a.expiresAt ?? Infinity) - (b.expiresAt ?? Infinity));
   ensure(
-    valid.reduce((n, p) => n + p.granted - p.spent - p.reserved, 0) >= max,
+    valid.reduce(
+      (n, p) =>
+        n + Math.max(0, p.granted - (p.revoked ?? 0) - p.spent - p.reserved),
+      0,
+    ) >= max,
     "INSUFFICIENT_CREDITS",
     "There are not enough unexpired available credits.",
   );
   let remaining = max;
   const allocations: { poolId: Id<"creditPools">; credits: number }[] = [];
   for (const pool of valid) {
-    const take = Math.min(remaining, pool.granted - pool.spent - pool.reserved);
+    const take = Math.min(
+      remaining,
+      pool.granted - (pool.revoked ?? 0) - pool.spent - pool.reserved,
+    );
     if (take > 0) {
       allocations.push({ poolId: pool._id, credits: take });
       await ctx.db.patch(pool._id, {
@@ -657,10 +665,17 @@ export const commitAnalysis = internalMutation({
     error: v.optional(v.string()),
     credits: v.number(),
     retainReservation: v.optional(v.boolean()),
+    reusedMediaGeneration: v.optional(v.number()),
   },
   handler: async (ctx, a) => {
     const s = await ctx.db.get(a.id);
-    if (!s || s.state === "deleted" || s.generation !== a.generation) return;
+    if (
+      !s ||
+      s.state === "deleted" ||
+      s.state === "ready" ||
+      s.generation !== a.generation
+    )
+      return;
     let analysis: any;
     if (a.output) {
       analysis = insightOutput.parse(a.output);
@@ -696,6 +711,28 @@ export const commitAnalysis = internalMutation({
             "INVALID_EVIDENCE",
             "Unverified evidence reference.",
           );
+    }
+    if (analysis && a.reusedMediaGeneration !== undefined) {
+      const stage = await ctx.db
+        .query("mediaStages")
+        .withIndex("by_source", (q) => q.eq("sourceId", s._id))
+        .unique();
+      ensure(
+        stage &&
+          stage.organizationId === s.organizationId &&
+          stage.objectKey === s.objectKey &&
+          stage.generation === a.reusedMediaGeneration &&
+          stage.generation < a.generation,
+        "CACHE_STALE",
+        "Media stage changed before settlement.",
+      );
+      const payload = mediaStagePayload.parse(stage.payload);
+      await settle(
+        ctx,
+        s.organizationId,
+        `source:${s._id}:${stage.generation}`,
+        payload.computeCredits,
+      );
     }
     if (!a.retainReservation)
       await settle(
@@ -744,17 +781,24 @@ export const editSource = mutation({
     const actor = await access(ctx, s.organizationId);
     ensure(
       a.summary.length <= 1500 &&
+        !containsSecret(a.summary) &&
         a.tags.length <= 20 &&
-        a.tags.every((t) => t.length <= 40) &&
+        a.tags.every((t) => t.length <= 40 && !containsSecret(t)) &&
         (a.correctedText === undefined ||
           (a.correctedText.trim().length > 0 &&
-            a.correctedText.length <= 100000)),
+            a.correctedText.length <= 60000 &&
+            !containsSecret(a.correctedText))),
       "INVALID_INPUT",
       "Too much text.",
     );
     const corrected =
       a.correctedText !== undefined && a.correctedText !== s.text;
     if (corrected) {
+      for (const stage of await ctx.db
+        .query("mediaStages")
+        .withIndex("by_source", (q) => q.eq("sourceId", s._id))
+        .collect())
+        await ctx.db.delete(stage._id);
       ensure(
         !["queued", "processing"].includes(s.state),
         "SOURCE_BUSY",
@@ -795,6 +839,7 @@ export const editSource = mutation({
         ? {
             text: a.correctedText,
             originalText: s.originalText ?? s.text,
+            originalMediaEvidence: s.originalMediaEvidence ?? s.mediaEvidence,
             correctionAuthor: actor.actor._id,
             kind: "text",
             state: "saved",
@@ -928,6 +973,11 @@ export async function redactSource(ctx: MutationCtx, id: Id<"sources">) {
     .withIndex("by_source", (q) => q.eq("sourceId", id))
     .collect();
   for (const p of proposals) await ctx.db.delete(p._id);
+  for (const stage of await ctx.db
+    .query("mediaStages")
+    .withIndex("by_source", (q) => q.eq("sourceId", id))
+    .collect())
+    await ctx.db.delete(stage._id);
   const runs = await ctx.db
     .query("runs")
     .withIndex("by_org", (q) => q.eq("organizationId", s.organizationId))
@@ -956,7 +1006,9 @@ export async function redactSource(ctx: MutationCtx, id: Id<"sources">) {
     mediaEvidence: undefined,
     mediaCoverage: undefined,
     originalText: undefined,
+    originalMediaEvidence: undefined,
     correctionAuthor: undefined,
+    originalSavedAt: undefined,
     url: undefined,
     tags: [],
     generation: s.generation + 1,
@@ -1288,6 +1340,9 @@ export const stageMedia = internalMutation({
     generation: v.number(),
     transcript: v.string(),
     coverage: v.string(),
+    cache: v.optional(
+      v.object({ pipelineVersion: v.string(), payload: v.any() }),
+    ),
     evidence: v.array(
       v.object({
         kind: v.string(),
@@ -1343,6 +1398,118 @@ export const stageMedia = internalMutation({
       mediaEvidence: a.evidence,
       updatedAt: Date.now(),
     });
+    if (a.cache) {
+      const payload = mediaStagePayload.parse(a.cache.payload);
+      ensure(
+        payload.transcript.map((s) => s.text).join(" ") === a.transcript &&
+          payload.evidence.length === a.evidence.length &&
+          payload.evidence.every((e, index) => {
+            const expected = a.evidence[index];
+            return (
+              e.kind === expected.kind &&
+              e.id === expected.id &&
+              e.startMs === expected.startMs &&
+              e.endMs === expected.endMs
+            );
+          }) &&
+          payload.transcript.every((segment) =>
+            payload.evidence.some(
+              (e) =>
+                e.kind === "transcript" &&
+                e.id === segment.id &&
+                e.startMs === segment.startMs &&
+                e.endMs === segment.endMs,
+            ),
+          ) &&
+          payload.observations.every((frame) =>
+            payload.evidence.some(
+              (e) =>
+                e.kind === "frame" &&
+                e.id === frame.id &&
+                e.startMs === frame.timestampMs &&
+                e.endMs === frame.timestampMs,
+            ),
+          ) &&
+          !containsSecret(JSON.stringify(payload)),
+        "INVALID_EVIDENCE",
+        "Media stage does not match its verified evidence.",
+      );
+      const objectKey = source.objectKey;
+      ensure(objectKey, "INVALID_EVIDENCE", "Missing source object identity.");
+      const asset = await ctx.db
+        .query("assets")
+        .withIndex("by_key", (q) => q.eq("key", objectKey))
+        .unique();
+      ensure(
+        asset?.etag &&
+          asset.sourceId === source._id &&
+          asset.organizationId === source.organizationId,
+        "INVALID_EVIDENCE",
+        "Source fingerprint unavailable.",
+      );
+      const old = await ctx.db
+        .query("mediaStages")
+        .withIndex("by_source", (q) => q.eq("sourceId", source._id))
+        .unique();
+      const data = {
+        organizationId: source.organizationId,
+        sourceId: source._id,
+        objectKey,
+        etag: asset.etag,
+        generation: a.generation,
+        pipelineVersion: a.cache.pipelineVersion,
+        artifactHash: await digest(JSON.stringify(payload)),
+        payload,
+        updatedAt: Date.now(),
+      };
+      if (old) await ctx.db.patch(old._id, data);
+      else
+        await ctx.db.insert("mediaStages", { ...data, createdAt: Date.now() });
+    }
     return true;
+  },
+});
+export const cachedMediaStage = internalQuery({
+  args: { id: v.id("sources"), pipelineVersion: v.string() },
+  handler: async (ctx, a) => {
+    const source = await ctx.db.get(a.id);
+    if (
+      !source ||
+      source.state === "deleted" ||
+      source.kind !== "upload" ||
+      !source.objectKey
+    )
+      return null;
+    const stage = await ctx.db
+      .query("mediaStages")
+      .withIndex("by_source", (q) => q.eq("sourceId", a.id))
+      .unique();
+    if (
+      !stage ||
+      stage.organizationId !== source.organizationId ||
+      stage.objectKey !== source.objectKey ||
+      stage.pipelineVersion !== a.pipelineVersion ||
+      stage.generation > source.generation ||
+      stage.updatedAt < Date.now() - 7 * 86400000
+    )
+      return null;
+    if (
+      stage.artifactHash !==
+      (await digest(JSON.stringify(mediaStagePayload.parse(stage.payload))))
+    )
+      return null;
+    const asset = await ctx.db
+      .query("assets")
+      .withIndex("by_key", (q) => q.eq("key", stage.objectKey))
+      .unique();
+    if (asset?.etag !== stage.etag) return null;
+    for (const e of stage.payload.evidence)
+      if (e.kind === "frame") {
+        const id = ctx.db.normalizeId("assets", e.id),
+          frame = id ? await ctx.db.get(id) : null;
+        if (frame?.sourceId !== source._id || frame.state !== "complete")
+          return null;
+      }
+    return stage;
   },
 });

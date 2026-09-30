@@ -1,0 +1,27 @@
+{
+  "timestamp": "2026-09-30T04:37:46.238Z",
+  "environment": "dedicated staging",
+  "pullRequest": "https://github.com/StefanDG1/vibe-scroller/pull/3",
+  "deliveries": [
+    {
+      "statusCode": 200,
+      "event": "pull_request",
+      "action": "closed"
+    },
+    {
+      "statusCode": 200,
+      "event": "pull_request",
+      "action": "reopened"
+    },
+    {
+      "statusCode": 400,
+      "event": "pull_request",
+      "action": "closed"
+    }
+  ],
+  "automaticReopenProjectedDraft": true,
+  "automaticCloseProjectedClosedUnmerged": true,
+  "rootCause": "Backend signing value had an extra trailing character. Reset with direct process arguments.",
+  "manualRefreshUsed": false,
+  "mergeTested": false
+}

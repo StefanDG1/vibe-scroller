@@ -17,6 +17,19 @@ const sourceState = v.union(
   ].map((s) => v.literal(s)),
 );
 export const productTables = {
+  mediaStages: defineTable({
+    ...tenant,
+    sourceId: v.id("sources"),
+    generation: v.number(),
+    objectKey: v.string(),
+    etag: v.string(),
+    pipelineVersion: v.string(),
+    artifactHash: v.string(),
+    payload: v.any(),
+  })
+    .index("by_org", ["organizationId"])
+    .index("by_source", ["sourceId"])
+    .index("by_updated", ["updatedAt"]),
   sourceCounts: defineTable({
     organizationId: v.id("organizations"),
     active: v.number(),
@@ -85,6 +98,7 @@ export const productTables = {
     granted: v.number(),
     spent: v.number(),
     reserved: v.number(),
+    revoked: v.optional(v.number()),
     expiresAt: v.optional(v.number()),
   })
     .index("by_org", ["organizationId"])
@@ -154,6 +168,7 @@ export const productTables = {
     ),
     mediaCoverage: v.optional(v.string()),
     originalText: v.optional(v.string()),
+    originalMediaEvidence: v.optional(v.any()),
     correctionAuthor: v.optional(v.id("users")),
     tags: v.array(v.string()),
     error: v.optional(v.string()),
@@ -184,7 +199,8 @@ export const productTables = {
     status: v.string(),
   })
     .index("by_org", ["organizationId"])
-    .index("by_provider", ["organizationId", "providerId"]),
+    .index("by_provider", ["organizationId", "providerId"])
+    .index("by_github", ["installationId", "providerId"]),
   proposals: defineTable({
     ...tenant,
     sourceId: v.id("sources"),
@@ -240,7 +256,8 @@ export const productTables = {
     events: v.array(v.string()),
   })
     .index("by_org", ["organizationId"])
-    .index("by_state", ["state"]),
+    .index("by_state", ["state"])
+    .index("by_pr", ["repositoryId", "prNumber"]),
   wallets: defineTable({
     ...tenant,
     granted: v.number(),
@@ -364,8 +381,54 @@ export const productTables = {
     start: v.number(),
     end: v.number(),
     credits: v.number(),
+    allowanceCeiling: v.optional(v.number()),
     subscription: v.string(),
   })
     .index("by_org", ["organizationId"])
     .index("by_key", ["key"]),
+  billingChanges: defineTable({
+    ...tenant,
+    subscriptionId: v.string(),
+    itemId: v.string(),
+    oldPrice: v.string(),
+    newPrice: v.string(),
+    tier: v.union(v.literal("starter"), v.literal("pro")),
+    interval: v.union(
+      v.literal("weekly"),
+      v.literal("monthly"),
+      v.literal("annual"),
+    ),
+    prorationDate: v.number(),
+    periodStart: v.number(),
+    periodEnd: v.number(),
+    amount: v.number(),
+    currency: v.string(),
+    expiresAt: v.number(),
+    state: v.string(),
+    invoiceId: v.optional(v.string()),
+  })
+    .index("by_org", ["organizationId"])
+    .index("by_subscription", ["subscriptionId"]),
+  billingReversals: defineTable({
+    ...tenant,
+    key: v.string(),
+    paymentId: v.string(),
+    invoiceId: v.optional(v.string()),
+    refunded: v.number(),
+    total: v.number(),
+  })
+    .index("by_org", ["organizationId"])
+    .index("by_key", ["key"])
+    .index("by_invoice", ["invoiceId"]),
+  creditFunding: defineTable({
+    ...tenant,
+    poolId: v.id("creditPools"),
+    key: v.string(),
+    invoiceId: v.string(),
+    credits: v.number(),
+    revoked: v.number(),
+  })
+    .index("by_org", ["organizationId"])
+    .index("by_key", ["key"])
+    .index("by_invoice", ["invoiceId"]),
 };

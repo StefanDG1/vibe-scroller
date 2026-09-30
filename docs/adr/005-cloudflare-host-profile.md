@@ -1,6 +1,6 @@
 # Cloudflare host profile
 
-Status: proposed, unverified. Date: 2026-09-30.
+Status: staging deployed; production resource validation pending. Date: 2026-09-30.
 
 The available Vercel team has a Hobby plan. The owner authorized no new purchases. Evaluate Cloudflare Workers Free for the commercial staging application without changing Next.js, React, WorkOS or Convex.
 
@@ -10,4 +10,8 @@ The adapter, Wrangler 4.125.0 and its rclone.js 0.6.6 peer are pinned in the app
 
 Windows packaging failed first on directory symlink privileges, then on native Sharp bundling. A repository-bounded directory-junction preload addressed only the first failure. A separate Linux packaging workflow receives no provider secrets and produces a short-lived build artifact. Neither a successful Node build nor a packaged artifact establishes working Workers hosting.
 
-Deployment remains gated by actual runtime authentication tests, free-plan bundle/resource limits, a scoped deployment credential, production callback and origin configuration, private response caching checks, and a secret scan of the artifact. Do not change DNS, activate live checkout or upgrade a provider plan to make this profile pass.
+Linux packaging passed. Deploying the prebundled Wrangler dry-run output with `no_bundle` avoids Linux absolute WASM paths during Windows rebundling. Staging is available at `https://vibescroller-staging.danistefangheorghiu.workers.dev`. WorkOS SSO and the authenticated workspace passed on this host. The scoped deployment token has Workers Scripts Edit on only the operator account; runtime secrets were supplied separately after packaging. The R2 CORS allowlist includes this host and the loopback development origin.
+
+The bundle was 15,154 KiB, gzip 3,295 KiB with 27 ms startup. Current official Workers limits permit a 64 MiB free-plan bundle; runtime CPU and load still require measurement. Secret byte comparison found no configured provider secrets in the package. Gitleaks reported generated-manifest and bundled-code candidates, whose provenance remains under review.
+
+Production deployment remains gated by final callback and origin configuration, private response caching checks on the latest code, load measurements, artifact candidate review and the full acceptance record. Do not change DNS, activate live checkout or upgrade a provider plan to make this profile pass.

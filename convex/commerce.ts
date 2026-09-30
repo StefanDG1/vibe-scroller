@@ -8,6 +8,46 @@ import { v } from "convex/values";
 import { access } from "./lib";
 import { wallet } from "./product";
 import { pricing, ensure } from "../packages/policy";
+import type { MutationCtx } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
+async function fundInvoice(
+  ctx: MutationCtx,
+  organizationId: Id<"organizations">,
+  poolId: Id<"creditPools">,
+  invoiceId: string | undefined,
+  credits: number,
+) {
+  if (!invoiceId) return 0;
+  const key = `${poolId}:${invoiceId}`;
+  const old = await ctx.db
+    .query("creditFunding")
+    .withIndex("by_key", (q) => q.eq("key", key))
+    .unique();
+  if (old) return old.revoked;
+  const reversal = await ctx.db
+    .query("billingReversals")
+    .withIndex("by_invoice", (q) => q.eq("invoiceId", invoiceId))
+    .unique();
+  ensure(
+    !reversal || reversal.organizationId === organizationId,
+    "FORBIDDEN",
+    "Invoice belongs to another workspace.",
+  );
+  const revoked = reversal
+    ? Math.floor((credits * reversal.refunded) / reversal.total)
+    : 0;
+  await ctx.db.insert("creditFunding", {
+    organizationId,
+    poolId,
+    key,
+    invoiceId,
+    credits,
+    revoked,
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+  });
+  return revoked;
+}
 export const catalogue = query({
   args: {},
   handler: () => ({
@@ -37,6 +77,8 @@ export const grantPeriod = internalMutation({
     start: v.number(),
     end: v.number(),
     verifiedPayment: v.boolean(),
+    upgradeAt: v.optional(v.number()),
+    invoiceId: v.optional(v.string()),
   },
   handler: async (ctx, a) => {
     ensure(
@@ -60,8 +102,17 @@ export const grantPeriod = internalMutation({
         "STALE_BILLING",
         "Entitlement identity mismatch.",
       );
-      if (credits > existing.credits) {
-        const delta = credits - existing.credits;
+      const ceiling = existing.allowanceCeiling ?? existing.credits;
+      if (credits > ceiling) {
+        if (a.upgradeAt === undefined || !a.invoiceId) return;
+        ensure(
+          a.upgradeAt >= a.start && a.upgradeAt < a.end,
+          "STALE_BILLING",
+          "Upgrade outside its paid period.",
+        );
+        const delta = Math.floor(
+          ((credits - ceiling) * (a.end - a.upgradeAt)) / (a.end - a.start),
+        );
         const pool = await ctx.db
           .query("creditPools")
           .withIndex("by_key", (q) => q.eq("key", key))
@@ -71,14 +122,26 @@ export const grantPeriod = internalMutation({
           "LEDGER_INVALID",
           "Entitlement pool unavailable.",
         );
+        const revoked = await fundInvoice(
+          ctx,
+          a.organizationId,
+          pool._id,
+          a.invoiceId,
+          delta,
+        );
         await ctx.db.patch(pool._id, {
           granted: pool.granted + delta,
+          revoked: (pool.revoked ?? 0) + revoked,
           updatedAt: Date.now(),
         });
-        await ctx.db.patch(existing._id, { credits, updatedAt: Date.now() });
+        await ctx.db.patch(existing._id, {
+          credits: existing.credits + delta,
+          allowanceCeiling: credits,
+          updatedAt: Date.now(),
+        });
         await ctx.db.patch(w._id, {
           tier: a.tier,
-          granted: w.granted + delta,
+          granted: w.granted + delta - revoked,
           updatedAt: Date.now(),
         });
       }
@@ -97,10 +160,11 @@ export const grantPeriod = internalMutation({
       end: a.end,
       key,
       credits,
+      allowanceCeiling: credits,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
-    await ctx.db.insert("creditPools", {
+    const poolId = await ctx.db.insert("creditPools", {
       organizationId: a.organizationId,
       key,
       kind: "included",
@@ -111,10 +175,18 @@ export const grantPeriod = internalMutation({
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
+    const revoked = await fundInvoice(
+      ctx,
+      a.organizationId,
+      poolId,
+      a.invoiceId,
+      credits,
+    );
+    if (revoked) await ctx.db.patch(poolId, { revoked });
     await ctx.db.patch(w._id, {
       tier: a.tier,
       interval: a.interval,
-      granted: w.granted + credits,
+      granted: w.granted + credits - revoked,
       periodEnd: a.end,
       updatedAt: Date.now(),
     });
@@ -245,17 +317,124 @@ export const grantTopup = internalMutation({
     )
       return;
     const w = await wallet(ctx, a.organizationId);
+    const reversal = await ctx.db
+      .query("billingReversals")
+      .withIndex("by_key", (q) => q.eq("key", `refund:${a.paymentId}`))
+      .unique();
+    ensure(
+      !reversal || reversal.organizationId === a.organizationId,
+      "FORBIDDEN",
+      "Payment reversal belongs to another workspace.",
+    );
+    const revoked = reversal
+      ? Math.floor((a.credits * reversal.refunded) / reversal.total)
+      : 0;
     await ctx.db.insert("creditPools", {
       organizationId: a.organizationId,
       key,
       kind: "purchased",
+      revoked,
       granted: a.credits,
       spent: 0,
       reserved: 0,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
-    await ctx.db.patch(w._id, { purchased: w.purchased + a.credits });
+    await ctx.db.patch(w._id, { purchased: w.purchased + a.credits - revoked });
+  },
+});
+export const reversePayment = internalMutation({
+  args: {
+    organizationId: v.id("organizations"),
+    paymentId: v.string(),
+    refunded: v.number(),
+    total: v.number(),
+    invoiceId: v.optional(v.string()),
+  },
+  handler: async (ctx, a) => {
+    ensure(
+      Number.isSafeInteger(a.refunded) &&
+        Number.isSafeInteger(a.total) &&
+        a.total > 0 &&
+        a.refunded >= 0 &&
+        a.refunded <= a.total,
+      "REFUND_INVALID",
+      "Invalid cumulative provider refund.",
+    );
+    const key = `refund:${a.paymentId}`;
+    const old = await ctx.db
+      .query("billingReversals")
+      .withIndex("by_key", (q) => q.eq("key", key))
+      .unique();
+    ensure(
+      !old || old.organizationId === a.organizationId,
+      "FORBIDDEN",
+      "Payment belongs to another workspace.",
+    );
+    if (old && old.refunded >= a.refunded) return;
+    if (old)
+      await ctx.db.patch(old._id, {
+        refunded: a.refunded,
+        updatedAt: Date.now(),
+      });
+    else
+      await ctx.db.insert("billingReversals", {
+        ...a,
+        key,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+    if (a.invoiceId) {
+      const invoiceId = a.invoiceId;
+      const grants = await ctx.db
+        .query("creditFunding")
+        .withIndex("by_invoice", (q) => q.eq("invoiceId", invoiceId))
+        .collect();
+      const w = await wallet(ctx, a.organizationId);
+      let removed = 0;
+      for (const grant of grants) {
+        ensure(
+          grant.organizationId === a.organizationId,
+          "FORBIDDEN",
+          "Invoice grant belongs to another workspace.",
+        );
+        const revoked = Math.floor((grant.credits * a.refunded) / a.total),
+          delta = revoked - grant.revoked;
+        if (delta <= 0) continue;
+        const pool = await ctx.db.get(grant.poolId);
+        if (!pool) continue;
+        await ctx.db.patch(pool._id, {
+          revoked: (pool.revoked ?? 0) + delta,
+          updatedAt: Date.now(),
+        });
+        await ctx.db.patch(grant._id, { revoked, updatedAt: Date.now() });
+        removed += delta;
+      }
+      if (removed)
+        await ctx.db.patch(w._id, {
+          granted: Math.max(0, w.granted - removed),
+          updatedAt: Date.now(),
+        });
+    }
+    const pool = await ctx.db
+      .query("creditPools")
+      .withIndex("by_key", (q) => q.eq("key", `payment:${a.paymentId}`))
+      .unique();
+    if (!pool) return;
+    ensure(
+      pool.organizationId === a.organizationId && pool.kind === "purchased",
+      "FORBIDDEN",
+      "Top-up belongs to another workspace.",
+    );
+    const revoked = Math.floor((pool.granted * a.refunded) / a.total),
+      delta = revoked - (pool.revoked ?? 0);
+    if (delta <= 0) return;
+    await ctx.db.patch(pool._id, { revoked, updatedAt: Date.now() });
+    const w = await wallet(ctx, a.organizationId);
+    await ctx.db.patch(w._id, {
+      purchased: Math.max(0, w.purchased - delta),
+      updatedAt: Date.now(),
+    });
   },
 });
 export const budgetFixture = internalMutation({
@@ -305,6 +484,7 @@ export const stagingBillingEvidence = internalQuery({
         granted: p.granted,
         spent: p.spent,
         reserved: p.reserved,
+        revoked: p.revoked ?? 0,
         kind: p.kind,
         expiresAt: p.expiresAt,
       })),

@@ -1,16 +1,16 @@
 import { authkitProxy } from "@workos-inc/authkit-nextjs";
-import {
-  NextResponse,
-  type NextRequest,
-  type NextFetchEvent,
-} from "next/server";
+import { privateContentPolicy } from "./lib/security";
+import { NextResponse, NextRequest, type NextFetchEvent } from "next/server";
 const auth = authkitProxy({
   middlewareAuth: {
     enabled: true,
     unauthenticatedPaths: ["/sign-in", "/sign-up", "/callback"],
   },
 });
-export default function proxy(request: NextRequest, event: NextFetchEvent) {
+export default async function proxy(
+  request: NextRequest,
+  event: NextFetchEvent,
+) {
   if (
     !process.env.WORKOS_CLIENT_ID ||
     !process.env.WORKOS_API_KEY ||
@@ -18,7 +18,21 @@ export default function proxy(request: NextRequest, event: NextFetchEvent) {
   ) {
     return NextResponse.redirect(new URL("/setup", request.url));
   }
-  return auth(request, event);
+  const nonce = crypto.randomUUID().replaceAll("-", "");
+  const policy = privateContentPolicy(
+    nonce,
+    process.env.NODE_ENV === "development",
+  );
+  const headers = new Headers(request.headers);
+  // Always replace caller-supplied nonce and CSP values.
+  headers.set("x-nonce", nonce);
+  headers.set("Content-Security-Policy", policy);
+  const response =
+    (await auth(new NextRequest(request, { headers }), event)) ??
+    NextResponse.next({ request: { headers } });
+  response.headers.set("Content-Security-Policy", policy);
+  response.headers.set("Cache-Control", "private, no-store");
+  return response;
 }
 export const config = {
   matcher: [

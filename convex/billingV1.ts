@@ -17,6 +17,207 @@ const priceId = (tier: string, interval: string) =>
   process.env[
     `STRIPE_${tier.toUpperCase()}_${interval.toUpperCase()}_PRICE_ID`
   ];
+export const quoteChange = action({
+  args: {
+    organizationId: v.id("organizations"),
+    tier: v.union(v.literal("starter"), v.literal("pro")),
+  },
+  handler: async (ctx, a): Promise<string> => {
+    ensure(
+      process.env.STRIPE_MODE !== "live",
+      "RELEASE_GATE",
+      "Live plan changes remain disabled until production billing approval.",
+    );
+    const auth = await ctx.runQuery(api.billing.authorize, {
+      organizationId: a.organizationId,
+    });
+    ensure(
+      auth.billing?.subscriptionId,
+      "NOT_FOUND",
+      "No active subscription.",
+    );
+    const client = stripe(),
+      sub = await client.subscriptions.retrieve(auth.billing.subscriptionId);
+    ensure(
+      sub.status === "active" &&
+        sub.metadata.product === "vibescroller" &&
+        sub.items.data.length === 1 &&
+        !sub.pending_update &&
+        !sub.cancel_at_period_end,
+      "CHANGE_UNAVAILABLE",
+      "Resolve cancellation or payment issues before changing plan.",
+    );
+    const item = sub.items.data[0],
+      interval = item.price.metadata.interval as
+        "weekly" | "monthly" | "annual";
+    ensure(
+      ["weekly", "monthly", "annual"].includes(interval) &&
+        item.price.metadata.tier !== a.tier,
+      "QUOTE_INVALID",
+      "Choose a different tier for the current renewal interval.",
+    );
+    const price = priceId(a.tier, interval);
+    ensure(price, "CATALOGUE_MISMATCH", "Target price unavailable.");
+    const target = await client.prices.retrieve(price);
+    ensure(
+      target.active &&
+        target.currency === "eur" &&
+        target.tax_behavior === "inclusive" &&
+        target.metadata.product === "vibescroller" &&
+        target.unit_amount ===
+          Math.round(pricing.tiers[a.tier][`${interval}_price_eur`] * 100),
+      "CATALOGUE_MISMATCH",
+      "Target price mismatch.",
+    );
+    const at = Math.floor(Date.now() / 1000);
+    const upgrade = a.tier === "pro";
+    const preview = upgrade
+      ? await client.invoices.createPreview({
+          customer: auth.billing.customerId,
+          subscription: sub.id,
+          subscription_details: {
+            items: [{ id: item.id, price }],
+            proration_behavior: "always_invoice",
+            proration_date: at,
+          },
+        })
+      : null;
+    return ctx.runMutation(internal.billingChanges.create, {
+      organizationId: a.organizationId,
+      subscriptionId: sub.id,
+      itemId: item.id,
+      oldPrice: item.price.id,
+      newPrice: price,
+      tier: a.tier,
+      interval: interval as "weekly" | "monthly" | "annual",
+      prorationDate: at,
+      periodStart: item.current_period_start,
+      periodEnd: item.current_period_end,
+      amount: preview?.amount_due ?? 0,
+      currency: "eur",
+    });
+  },
+});
+export const applyChange = action({
+  args: { id: v.id("billingChanges") },
+  handler: async (ctx, a): Promise<{ message: string }> => {
+    ensure(
+      process.env.STRIPE_MODE !== "live",
+      "RELEASE_GATE",
+      "Live plan changes remain disabled until production billing approval.",
+    );
+    const q = await ctx.runMutation(internal.billingChanges.claim, a),
+      client = stripe();
+    try {
+      const sub = await client.subscriptions.retrieve(q.subscriptionId);
+      const item = sub.items.data.find((i) => i.id === q.itemId);
+      ensure(
+        item &&
+          sub.status === "active" &&
+          !sub.cancel_at_period_end &&
+          item.price.id === q.oldPrice &&
+          item.current_period_start === q.periodStart &&
+          item.current_period_end === q.periodEnd,
+        "QUOTE_CHANGED",
+        "The paid subscription changed. Request a fresh quote.",
+      );
+      if (q.tier === "starter") {
+        ensure(
+          !sub.schedule,
+          "CHANGE_UNAVAILABLE",
+          "A renewal change is already scheduled.",
+        );
+        const schedule = await client.subscriptionSchedules.create(
+          { from_subscription: sub.id },
+          { idempotencyKey: `vibe:schedule:${q._id}` },
+        );
+        await client.subscriptionSchedules.update(
+          schedule.id,
+          {
+            end_behavior: "release",
+            proration_behavior: "none",
+            phases: [
+              {
+                start_date: q.periodStart,
+                end_date: q.periodEnd,
+                items: [{ price: q.oldPrice, quantity: 1 }],
+                metadata: sub.metadata,
+                proration_behavior: "none",
+              },
+              {
+                start_date: q.periodEnd,
+                items: [{ price: q.newPrice, quantity: 1 }],
+                metadata: { ...sub.metadata, tier: q.tier },
+                proration_behavior: "none",
+              },
+            ],
+          },
+          { idempotencyKey: `vibe:downgrade:${q._id}` },
+        );
+        await ctx.runMutation(internal.billingChanges.finish, {
+          id: q._id,
+          state: "scheduled",
+        });
+        return {
+          message:
+            "Downgrade scheduled for renewal. Current paid allowance is preserved.",
+        };
+      }
+      const preview = await client.invoices.createPreview({
+        customer:
+          typeof sub.customer === "string" ? sub.customer : sub.customer.id,
+        subscription: sub.id,
+        subscription_details: {
+          items: [{ id: q.itemId, price: q.newPrice }],
+          proration_behavior: "always_invoice",
+          proration_date: q.prorationDate,
+        },
+      });
+      ensure(
+        preview.amount_due === q.amount && preview.currency === q.currency,
+        "QUOTE_CHANGED",
+        "The payable total changed. Request a fresh quote.",
+      );
+      const updated = await client.subscriptions.update(
+        sub.id,
+        {
+          items: [{ id: q.itemId, price: q.newPrice }],
+          proration_behavior: "always_invoice",
+          proration_date: q.prorationDate,
+          payment_behavior: "error_if_incomplete",
+          metadata: { ...sub.metadata, tier: q.tier },
+          expand: ["latest_invoice"],
+        },
+        { idempotencyKey: `vibe:upgrade:${q._id}` },
+      );
+      const invoice = updated.latest_invoice as Stripe.Invoice;
+      ensure(
+        invoice?.status === "paid",
+        "PAYMENT_REQUIRED",
+        "Payment must complete before the allowance changes.",
+      );
+      await ctx.runMutation(internal.billingChanges.finish, {
+        id: q._id,
+        state: "applied",
+        invoiceId: invoice.id,
+      });
+      await ctx.runAction(internal.reconciliation.customer, {
+        customerId:
+          typeof sub.customer === "string" ? sub.customer : sub.customer.id,
+      });
+      return {
+        message:
+          "Paid upgrade applied. Only the remaining period's incremental allowance is granted.",
+      };
+    } catch (error) {
+      await ctx.runMutation(internal.billingChanges.finish, {
+        id: q._id,
+        state: "needs_reconciliation",
+      });
+      throw error;
+    }
+  },
+});
 export const checkout = action({
   args: {
     organizationId: v.id("organizations"),
@@ -158,7 +359,17 @@ export const cancel = action({
       "NOT_FOUND",
       "No subscription to cancel.",
     );
-    await stripe().subscriptions.update(auth.billing.subscriptionId, {
+    const client = stripe();
+    const subscription = await client.subscriptions.retrieve(
+      auth.billing.subscriptionId,
+    );
+    if (subscription.schedule)
+      await client.subscriptionSchedules.release(
+        typeof subscription.schedule === "string"
+          ? subscription.schedule
+          : subscription.schedule.id,
+      );
+    await client.subscriptions.update(auth.billing.subscriptionId, {
       cancel_at_period_end: true,
     });
     await ctx.runAction(internal.reconciliation.customer, {

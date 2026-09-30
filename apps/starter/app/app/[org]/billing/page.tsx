@@ -9,6 +9,7 @@ import {
   requestV1Refund,
   billingPortal,
   refreshBilling,
+  quoteV1Change,
 } from "@/app/actions";
 export default async function Page({
   params,
@@ -146,6 +147,21 @@ export default async function Page({
           </ActionForm>
           <ActionForm action={refreshBilling} label="Reconcile provider status">
             <input type="hidden" name="organizationId" value={org} />
+          </ActionForm>
+          <ActionForm action={quoteV1Change} label="Review plan-change quote">
+            <input type="hidden" name="organizationId" value={org} />
+            <label>
+              Target tier
+              <select name="tier">
+                <option value="starter">Starter at next renewal</option>
+                <option value="pro">Pro with exact proration</option>
+              </select>
+            </label>
+            <p>
+              Your renewal interval stays the same. You approve the provider
+              total on the next screen. Resolve cancellation before changing
+              plan.
+            </p>
           </ActionForm>
           {catalogue.sandboxEnabled && (
             <ActionForm action={buyV1Credits} label="Open sandbox top-up">

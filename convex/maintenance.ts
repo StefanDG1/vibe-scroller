@@ -13,6 +13,9 @@ export const purgeOrganization = internalMutation({
     if (!org || org.status !== "deleting") return;
     for (const table of [
       "creditPools",
+      "sourceCounts",
+      "mediaStages",
+      "billingChanges",
       "githubBindings",
       "matchingJobs",
       "githubLinks",

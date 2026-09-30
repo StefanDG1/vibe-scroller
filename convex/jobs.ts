@@ -506,18 +506,31 @@ export const projectPR = internalMutation({
   },
 });
 export const prRuns = internalQuery({
-  args: {},
-  handler: async (ctx) => {
+  args: { cursor: v.optional(v.string()) },
+  handler: async (ctx, a) => {
     const rows = await ctx.db
       .query("runs")
       .withIndex("by_state", (q) => q.eq("state", "completed"))
-      .take(100);
+      .paginate({ cursor: a.cursor ?? null, numItems: 50 });
     const out = [];
-    for (const r of rows) {
+    for (const r of rows.page) {
       const repo = await ctx.db.get(r.repositoryId);
       if (repo && r.prNumber) out.push({ ...r, repo });
     }
-    return out;
+    return {
+      page: out,
+      isDone: rows.isDone,
+      continueCursor: rows.continueCursor,
+    };
+  },
+});
+export const prRun = internalQuery({
+  args: { id: v.id("runs") },
+  handler: async (ctx, a) => {
+    const run = await ctx.db.get(a.id);
+    if (!run?.prNumber) return null;
+    const repo = await ctx.db.get(run.repositoryId);
+    return repo ? { ...run, repo } : null;
   },
 });
 export const runFailure = internalMutation({
@@ -743,6 +756,50 @@ export const waiveStagingFailure = internalMutation({
         `Staging service charge waived: ${a.reason}. Operator cost reservation remains held.`,
       ],
       updatedAt: Date.now(),
+    });
+  },
+});
+
+export const enqueuePR = internalMutation({
+  args: {
+    delivery: v.string(),
+    installationId: v.number(),
+    repositoryId: v.number(),
+    prNumber: v.number(),
+  },
+  handler: async (ctx, a) => {
+    const seen = await ctx.db
+      .query("webhookReceipts")
+      .withIndex("by_key", (q) =>
+        q.eq("provider", "github").eq("key", a.delivery),
+      )
+      .unique();
+    if (seen) return;
+    const repos = await ctx.db
+      .query("repositories")
+      .withIndex("by_github", (q) =>
+        q
+          .eq("installationId", a.installationId)
+          .eq("providerId", a.repositoryId),
+      )
+      .collect();
+    for (const repo of repos) {
+      for (const run of await ctx.db
+        .query("runs")
+        .withIndex("by_pr", (q) =>
+          q.eq("repositoryId", repo._id).eq("prNumber", a.prNumber),
+        )
+        .collect()) {
+        await ctx.scheduler.runAfter(0, internal.integrations.reconcilePRRun, {
+          id: run._id,
+        });
+      }
+    }
+    await ctx.db.insert("webhookReceipts", {
+      provider: "github",
+      key: a.delivery,
+      at: Date.now(),
+      state: "queued",
     });
   },
 });
