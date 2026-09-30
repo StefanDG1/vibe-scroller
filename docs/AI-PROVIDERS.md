@@ -4,14 +4,14 @@ Mode: reference.
 
 ## Supported modes
 
-| Route                                 | V1 role                                                                    | Funding and limits                                                                                           |
-| ------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| Managed API                           | Hosted transcription, vision, reasoning, planning, and funded cloud coding | Included processing allowance or prepaid credits                                                             |
-| Customer API key                      | Supported reasoning and coding providers                                   | Provider charges the customer; platform compute still has a disclosed cost                                   |
-| Official local Codex session          | Approved coding on a paired computer                                       | User's eligible ChatGPT account or local API configuration                                                   |
-| Official local ChatGPT-plan protocol  | Optional Windows text-inference utility                                    | Separate account permission and eligible local deployment; real account test and browser dispatch incomplete |
-| Optional local inference              | Local ASR and compatible local models                                      | User hardware and electricity; quality and capability checks still apply                                     |
-| General hosted ChatGPT-plan inference | Disabled capability gate                                                   | Requires verified official commercial permission and working contract                                        |
+| Route                                 | V1 role                                                                    | Funding and limits                                                                                              |
+| ------------------------------------- | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Managed API                           | Hosted transcription, vision, reasoning, planning, and funded cloud coding | Included processing allowance or prepaid credits                                                                |
+| Customer API key                      | Supported reasoning and coding providers                                   | Provider charges the customer; platform compute still has a disclosed cost                                      |
+| Official local Codex session          | Approved coding on a paired computer                                       | User's eligible ChatGPT account or local API configuration                                                      |
+| Official local ChatGPT-plan protocol  | Optional Windows text-inference utility                                    | Real owner consent and text inference passed; browser dispatch remains incomplete; eligible deployment required |
+| Optional local inference              | Local ASR and compatible local models                                      | User hardware and electricity; quality and capability checks still apply                                        |
+| General hosted ChatGPT-plan inference | Disabled capability gate                                                   | Requires verified official commercial permission and working contract                                           |
 
 WorkOS identifies the application user. OpenAI authorization grants a separate capability. Disconnecting an AI account must not sign the user out of VibeScroller or cancel a platform subscription unexpectedly.
 
@@ -37,7 +37,7 @@ A local coding session can send repository context to OpenAI. Describe that data
 
 The September 2026 [official plan-usage overview](https://developers.openai.com/siwc/token-sharing-open-source) now documents public Responses access for eligible open-source/local apps. Earlier failed page verification is historical, not a current absence claim. WorkOS remains application identity; plan permission is a separate capability. Paid/remotely hosted access remains gated pending official commercial approval. See [ADR 009](adr/009-chatgpt-plan-protocol.md) and [local setup](operations/chatgpt-local.md).
 
-The local protocol adapter is independently authored. OpenAI's DevKit has a noncommercial license and is not included. Direct Responses preview does not support raw audio/video or transcription. The local utility exposes text summary only; browser-connected dispatcher and actual account inference tests are incomplete. A saved funding preference grants neither OAuth consent nor permission to change existing jobs.
+The local protocol adapter is independently authored. OpenAI's DevKit has a noncommercial license and is not included. Direct Responses preview does not support raw audio/video or transcription. Owner consent, model discovery and a completed local text request passed on September 30. The utility exposes text summary only; browser-connected dispatch remains incomplete. A saved funding preference grants neither OAuth consent nor permission to change existing jobs. See [personal Instagram testing](operations/personal-instagram-testing.md) for the owner's OpenAI-only test requirement and current limitations.
 
 A commercial subscription adapter can be activated only after recording permitted deployment type, allowed workload, endpoint, authorization method, token storage rules, model access, rate limits, revocation, and commercial approval if required. Tests must cover revoked and exhausted accounts.
 
