@@ -1,0 +1,15 @@
+{
+  "commit": "e711a4ee8d78db4993525e1c1361f700681afc95",
+  "checkedAt": "2026-09-30T16:43:17.902Z",
+  "files": 3972,
+  "configuredCredentialOccurrences": 0,
+  "candidates": 54,
+  "matchingPreviouslyReviewedRedactedPatterns": 54,
+  "generatedFrameworkValues": 4,
+  "publicAssetOccurrences": 0,
+  "priorReview": "infra/artifact-review-9a60946.json",
+  "limitations": [
+    "Pattern/provenance comparison is not a full security audit",
+    "Generated runtime keys remain confidential server data"
+  ]
+}

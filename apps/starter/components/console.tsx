@@ -1213,9 +1213,17 @@ export function Console({
                   still apply; transcription, storage and cloud execution have
                   separate costs.
                 </p>
-                <label>
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: ".65rem",
+                    minHeight: 44,
+                  }}
+                >
                   <input
                     type="checkbox"
+                    style={{ width: 18, height: 18, flexShrink: 0 }}
                     checked={data.aiPreference?.preferChatGPTPlan ?? false}
                     disabled={demo || busy}
                     onChange={async (event) => {
@@ -1237,7 +1245,7 @@ export function Console({
                   />
                   Prefer my ChatGPT plan when available
                 </label>
-                <p className="notice">
+                <p className="notice" style={{ textAlign: "left" }}>
                   Hosted connection is awaiting OpenAI commercial access. Saving
                   this preference does not connect an account, grant consent, or
                   change the funding route of a current task.
