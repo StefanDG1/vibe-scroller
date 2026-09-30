@@ -13,13 +13,13 @@ The private source is `StefanDG1/vibe-scroller`. The staging web application is 
 
 ## Complete external release gates
 
-Register the hosted callback on the dedicated selected-repository GitHub App after fresh human account confirmation. Confirm WorkOS branding and enabled Google/email-code providers. Test a new user linking GitHub, rather than relying on the operator's existing installation.
+The hosted staging callback is registered on the dedicated selected-repository GitHub App and the existing staging owner reconnected successfully. Register production separately and test a new user linking GitHub. Confirm WorkOS branding and enabled Google/email-code providers.
 
 Keep live checkout disabled until official company identity, VAT status and required registrations match the chosen production tax mode. The exemption-target mode is a configuration, not evidence that the company qualifies. Publish legal drafts only after their checklist is completed; no legal review has occurred. Validate invoice refund reconciliation, provider costs, margin and production billing before activation.
 
 Keep local execution disabled until reviewed Windows isolation evidence passes. Keep vision disabled until authorized model-license acceptance and a verified free-provider quote exist. Email delivery needs user opt-in and a hosted delivery test. Telegram is deferred and is not required for normal browser use.
 
-Before production, rehearse private backup restoration, retention and deletion against isolated restored data, load/resource limits, provider interruption and execution cancellation. Review generated-artifact secret-scanner candidates, tenant boundaries and private evidence access. Use `docs/implementation-status.md` and `docs/LAUNCH-CHECKLIST.md` for unresolved checks.
+Before production, follow [backup recovery](backup-recovery.md) and rehearse a fresh hosted import, retention and deletion against isolated restored data. The offline encrypted staging archive rehearsal does not satisfy hosted recovery acceptance. Verify load/resource limits, provider interruption and execution cancellation. Review generated-artifact secret-scanner candidates, tenant boundaries and private evidence access. Use `docs/implementation-status.md` and `docs/LAUNCH-CHECKLIST.md` for unresolved checks.
 
 ## Roll back
 

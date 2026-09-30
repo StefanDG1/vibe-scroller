@@ -62,7 +62,7 @@ export function excludedPath(p: string) {
   );
 }
 export function sensitivePath(p: string) {
-  return /(^|\/)(\.github|infra|auth|billing|payments|identity|schema|migrations|security)([./]|$)|(^|\/)(package\.json|.*lock.*)$/i.test(
+  return /(^|\/)(\.github|infra|auth|billing|payments|identity|schema|migrations|security|convex|middleware|proxy)([./]|$)|(^|\/)(app\/api|packages\/providers)(\/|$)|(^|\/)(package\.json|.*lock.*)$/i.test(
     p,
   );
 }

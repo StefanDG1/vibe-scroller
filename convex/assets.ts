@@ -154,7 +154,12 @@ export const evidence = query({
     await access(ctx, asset.organizationId);
     if (asset.sourceId) {
       const source = await ctx.db.get(asset.sourceId);
-      if (!source || source.state === "deleted") fail("Evidence unavailable.");
+      if (
+        !source ||
+        source.organizationId !== asset.organizationId ||
+        source.state === "deleted"
+      )
+        fail("Evidence unavailable.");
     }
     return { key: asset.key, type: asset.type };
   },

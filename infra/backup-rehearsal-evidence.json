@@ -1,0 +1,25 @@
+{
+  "observedAt": "2026-09-30T10:54:14.041Z",
+  "environment": "dedicated staging export and isolated offline ZIP restore",
+  "labeledStagingContentIncluded": true,
+  "operatorAccountMetadataIncluded": true,
+  "encryptedAtRest": true,
+  "plaintextTemporaryFilesRemoved": true,
+  "byteRoundTripPassed": true,
+  "authenticatedMetadataTamperingRejected": true,
+  "backupSha256": "229bc6949a446bac356dba71bd038838994feac881afa2c201e2d92fb0cf3dd8",
+  "archiveBytes": 130213,
+  "inspection": {
+    "tables": 87,
+    "records": 179,
+    "jsonDocumentsValid": true
+  },
+  "authoritativeMarkerCount": 0,
+  "providerDatabaseImportTested": false,
+  "limitations": [
+    "Actual Convex export, encryption and isolated offline archive restoration only",
+    "No production import, R2 object backup or provider retention validation",
+    "A new locked deployment must import data, reapply the latest separate markers, quarantine credentials and pass acceptance before serving traffic",
+    "Local sealed archives are not a scheduled independently stored production backup; retain at most 30 days"
+  ]
+}

@@ -12,6 +12,8 @@ const operations = {
   saveProfile: ["mutation", api.product.saveProfile],
   draftProfile: ["action", api.integrations.draftProfile],
   match: ["action", api.integrations.match],
+  suggestRepositories: ["action", api.integrations.suggestRepositories],
+  draftPlan: ["action", api.integrations.draftPlan],
   decide: ["mutation", api.product.decide],
   editPlan: ["mutation", api.product.editPlan],
   approve: ["mutation", api.jobs.approve],
@@ -71,6 +73,20 @@ export async function POST(req: NextRequest) {
     );
   } catch (error) {
     const messages: Record<string, string> = {
+      GITHUB_UNAVAILABLE:
+        "GitHub access is unavailable or expired. Reconnect the selected GitHub account before continuing.",
+      PROVIDER_ERROR:
+        "The selected provider failed or refused the request. Check its connection; no funding fallback was used.",
+      SETUP_REQUIRED:
+        "This provider or model needs verified setup before this action is available.",
+      CONTEXT_REQUIRED:
+        "This action needs a ready source, supported main point or refreshed repository evidence.",
+      SOURCE_BUSY:
+        "This operation is already pending. Review its state before retrying; uncertain usage needs reconciliation.",
+      QUOTE_CHANGED:
+        "The model, price or scope changed. Review its current quote before approving.",
+      COST_RECONCILIATION_REQUIRED:
+        "Provider usage is uncertain or exceeded its approved ceiling. No automatic retry was issued.",
       PROVIDER_LIMIT:
         "The verified free inference allowance is reserved or exhausted. Try after it resets; no paid provider was used.",
       INSUFFICIENT_CREDITS:

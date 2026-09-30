@@ -7,10 +7,16 @@ import {
 import { v } from "convex/values";
 import { workflow } from "./workflows";
 import { validateRepositoryEvidence } from "../packages/repositories/context";
+import { selectionCurrent } from "../packages/repositories/selection";
 import { access, fail, limit, audit, writeAccess } from "./lib";
 import { productLimits } from "./limitsV1";
 import { internal } from "./_generated/api";
-import { safeSourceUrl, ensure, containsSecret } from "../packages/policy";
+import {
+  safeSourceUrl,
+  ensure,
+  containsSecret,
+  validatePaths,
+} from "../packages/policy";
 import {
   insightOutput,
   proposalOutput,
@@ -397,7 +403,24 @@ export const detail = query({
       .query("proposals")
       .withIndex("by_source", (q) => q.eq("sourceId", id))
       .collect();
-    return { ...s, objectKey: undefined, proposals };
+    const repositories = await ctx.db
+      .query("repositories")
+      .withIndex("by_org", (q) => q.eq("organizationId", s.organizationId))
+      .collect();
+    return {
+      ...s,
+      objectKey: undefined,
+      selectionPendingKey: undefined,
+      selectionActor: undefined,
+      repositorySelection: selectionCurrent(
+        s.repositorySelection,
+        s,
+        repositories,
+      )
+        ? s.repositorySelection
+        : undefined,
+      proposals,
+    };
   },
 });
 export const overview = query({
@@ -1013,6 +1036,7 @@ export async function redactSource(ctx: MutationCtx, id: Id<"sources">) {
     originalText: undefined,
     originalMediaEvidence: undefined,
     correctionAuthor: undefined,
+    repositorySelection: undefined,
     originalSavedAt: undefined,
     url: undefined,
     tags: [],
@@ -1198,6 +1222,12 @@ export const editPlan = mutation({
       "Accept and review the current proposal.",
     );
     const plan = planInput.parse(a.plan);
+    // Planning can describe protected work, but cannot admit forbidden paths or grant execution.
+    validatePaths(
+      plan.files.map((file) => file.path),
+      plan.files.map((file) => file.path),
+      true,
+    );
     const repo = await ctx.db.get(p.repositoryId);
     if (!repo) fail("Repository unavailable.");
     for (const f of plan.files)
@@ -1212,6 +1242,22 @@ export const editPlan = mutation({
       version: p.version + 1,
       updatedAt: Date.now(),
     });
+    for (const run of await ctx.db
+      .query("runs")
+      .withIndex("by_proposal", (q) => q.eq("proposalId", p._id))
+      .collect())
+      if (
+        !["completed", "failed", "canceled", "publishing"].includes(run.state)
+      )
+        await ctx.db.patch(run._id, {
+          state: "canceled",
+          generation: run.generation + 1,
+          events: [
+            ...run.events,
+            "Plan edited; prior unpublished execution approval invalidated. Outstanding usage still requires reconciliation.",
+          ],
+          updatedAt: Date.now(),
+        });
   },
 });
 export const addProposal = internalMutation({

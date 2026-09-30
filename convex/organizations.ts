@@ -12,6 +12,7 @@ import {
   writeAccess,
 } from "./lib";
 import { internal } from "./_generated/api";
+import { rememberDeletion } from "./lib/deletionMarkers";
 export const create = mutation({
   args: { name: v.string() },
   handler: async (ctx, { name }) => {
@@ -266,6 +267,7 @@ export const remove = mutation({
       fail(
         "Cancel the subscription and refresh billing before deleting this organization.",
       );
+    await rememberDeletion(ctx, "workspace", organizationId);
     await ctx.db.patch(organizationId, { status: "deleting" });
     await ctx.scheduler.runAfter(0, internal.maintenance.purgeOrganization, {
       organizationId,

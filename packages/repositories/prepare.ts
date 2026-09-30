@@ -3,7 +3,7 @@ import ignore from "ignore";
 import { excludedPath, ensure } from "../policy";
 import type { RepositoryExcerpt } from "./context";
 
-export const EXTRACTION_VERSION = "repomix-1.18.1/excerpts-v2";
+export const EXTRACTION_VERSION = "repomix-1.18.1/excerpts-v3";
 export type IgnorePolicy = { directory: string; content: string };
 export function repositoryIgnores(patterns: (string | IgnorePolicy)[]) {
   ensure(

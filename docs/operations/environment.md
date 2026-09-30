@@ -34,6 +34,14 @@ The billing UI reads its mode from Convex. The backend rejects a Stripe key whos
 
 Only the starter server reads `LP_INTEGRATION_*` variables. The integration defaults off and needs no account or credentials for exports or builds. The complete placeholder inventory and connect/disconnect procedure are in [LaunchProof setup](launchproof.md). Never expose `LP_INTEGRATION_SUMMARY_TOKEN` through a public environment variable or company configuration. The two `CURRENT_*` identity fields identify the target backend exercised by checks, not automatically the frontend build.
 
+## VibeScroller recovery and customer credentials
+
+`RESTORE_LOCK=true` blocks private product access and new account synchronization during recovery. Internal recovery functions require the lock. See [backup recovery](backup-recovery.md).
+
+`BACKUP_ENCRYPTION_KEY` belongs to private operator backup storage and must remain separate from hosted runtime secrets. Runtime credential encryption uses `SECRET_KEY_VERSION` and the corresponding `SECRET_KEY_<version>`. Migrate ciphertext through the internal compare-and-swap rotation before retiring an old runtime key.
+
+`OPENAI_CUSTOMER_MODELS_JSON` is a reviewed, expiring model and price registry. It defaults empty. Setting a customer key does not enable inference until the verified account model list intersects this registry. See [customer API credentials](customer-api-keys.md). No operator OpenAI key is configured.
+
 ## Website configuration
 
 The optional `website.operator` object in company configuration supplies the legal name, registered address, CUI, Trade Register number, and EUID for the legal notice. CompanyNerve uses company-published facts from exponentialeducation.ro privacy/terms plus the reused Stripe profile postcode, without independent registry validation. Exports remove the object and replace the support email with `owner@example.com`. These are public facts, not provider credentials. A generated product must supply its own legal identity and policies before publishing.

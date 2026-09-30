@@ -1,0 +1,32 @@
+{
+  "observedAt": "2026-09-30T11:41:21.216Z",
+  "environment": "dedicated staging, administrator CLI test identity for the existing owner",
+  "browserJourneyTested": false,
+  "labeledOwnedSourceId": "mx79ca9f0c2cct8d7dhx4p0v198fcpfy",
+  "selectionPassed": true,
+  "profileDraftPassed": true,
+  "planDraftPassed": false,
+  "noExecutionOrPublication": true,
+  "previousAttempts": [
+    {
+      "observedAt": "2026-09-30T11:10:00.649Z",
+      "failureStage": "profile_draft",
+      "failureCategory": null,
+      "selectionPassed": true,
+      "profileDraftPassed": false,
+      "planDraftPassed": false
+    },
+    {
+      "observedAt": "2026-09-30T11:13:47.039Z",
+      "failureStage": "profile_draft",
+      "failureCategory": "GITHUB_UNAVAILABLE",
+      "selectionPassed": true,
+      "profileDraftPassed": false,
+      "planDraftPassed": false
+    }
+  ],
+  "selectionCount": 0,
+  "savedProfileConfirmationPreserved": true,
+  "failureStage": "matching",
+  "failureCategory": "PROVIDER_LIMIT"
+}

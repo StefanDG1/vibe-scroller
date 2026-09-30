@@ -143,6 +143,9 @@ export const productTables = {
     .index("by_expiry", ["expiresAt"]),
   sources: defineTable({
     ...tenant,
+    repositorySelection: v.optional(v.any()),
+    selectionPendingKey: v.optional(v.string()),
+    selectionActor: v.optional(v.id("users")),
     key: v.string(),
     canonical: v.string(),
     kind: v.string(),
@@ -211,6 +214,9 @@ export const productTables = {
     ),
     context: v.string(),
     contextTree: v.optional(v.string()),
+    snapshotSummary: v.optional(v.any()),
+    snapshotAt: v.optional(v.number()),
+    snapshotDelta: v.optional(v.any()),
     extractionVersion: v.optional(v.string()),
     contextFiles: v.optional(v.array(v.string())),
     contextExcerpts: v.optional(
@@ -249,6 +255,10 @@ export const productTables = {
     detail: v.any(),
     review: v.string(),
     plan: v.optional(v.any()),
+    planDraft: v.optional(v.any()),
+    planDraftVersion: v.optional(v.number()),
+    planDraftKey: v.optional(v.string()),
+    planDraftActor: v.optional(v.id("users")),
     planHash: v.optional(v.string()),
     version: v.number(),
   })
@@ -269,6 +279,7 @@ export const productTables = {
     maxProviderUsdCents: v.optional(v.number()),
     providerUsdCents: v.optional(v.number()),
     providerRequestState: v.optional(v.string()),
+    publicationGeneration: v.optional(v.number()),
     maxCredits: v.number(),
     allowedPaths: v.array(v.string()),
     highRisk: v.boolean(),
@@ -292,6 +303,7 @@ export const productTables = {
     .index("by_org", ["organizationId"])
     .index("by_state", ["state"])
     .index("by_pr", ["repositoryId", "prNumber"])
+    .index("by_proposal", ["proposalId"])
     .index("by_org_state", ["organizationId", "state"])
     .index("by_device_state", ["deviceId", "state"]),
   wallets: defineTable({
@@ -393,6 +405,14 @@ export const productTables = {
   })
     .index("by_org", ["organizationId"])
     .index("by_target", ["target"]),
+  deletionMarkers: defineTable({
+    kind: v.union(v.literal("account"), v.literal("workspace")),
+    target: v.string(),
+    subjectHash: v.optional(v.string()),
+    at: v.number(),
+  })
+    .index("by_target", ["kind", "target"])
+    .index("by_subject", ["subjectHash"]),
   webhookReceipts: defineTable({
     provider: v.string(),
     key: v.string(),

@@ -20,6 +20,7 @@ async function approvalActive(
   ctx: import("./_generated/server").QueryCtx,
   run: import("./_generated/dataModel").Doc<"runs">,
 ) {
+  if (process.env.RESTORE_LOCK === "true") return false;
   const organization = await ctx.db.get(run.organizationId);
   const actor = await ctx.db.get(run.approvedBy);
   const membership = await ctx.db
@@ -90,6 +91,8 @@ export const saveRepository = internalMutation({
     ),
     context: v.string(),
     contextTree: v.optional(v.string()),
+    snapshotSummary: v.optional(v.any()),
+    snapshotDelta: v.optional(v.any()),
     extractionVersion: v.optional(v.string()),
     contextFiles: v.optional(v.array(v.string())),
     contextExcerpts: v.optional(
@@ -112,7 +115,11 @@ export const saveRepository = internalMutation({
       )
       .unique();
     if (old) {
-      await ctx.db.patch(old._id, { ...a, updatedAt: Date.now() });
+      await ctx.db.patch(old._id, {
+        ...a,
+        snapshotAt: Date.now(),
+        updatedAt: Date.now(),
+      });
       return old._id;
     }
     const entitlement = await wallet(ctx, a.organizationId);
@@ -136,6 +143,7 @@ export const saveRepository = internalMutation({
       profileVersion: 1,
       confirmed: false,
       status: "connected",
+      snapshotAt: Date.now(),
     });
   },
 });
@@ -148,6 +156,26 @@ export const secret = internalQuery({
         q.eq("organizationId", a.organizationId).eq("provider", a.provider),
       )
       .unique(),
+});
+export const previousSnapshot = internalQuery({
+  args: { ...org, providerId: v.number() },
+  handler: async (ctx, a) => {
+    const repo = await ctx.db
+      .query("repositories")
+      .withIndex("by_provider", (q) =>
+        q.eq("organizationId", a.organizationId).eq("providerId", a.providerId),
+      )
+      .unique();
+    return repo?.enabled
+      ? {
+          updatedAt: repo.snapshotAt ?? repo.updatedAt,
+          extractionVersion: repo.extractionVersion,
+          profileVersion: repo.profileVersion,
+          contextExcerpts: repo.contextExcerpts,
+          manifestEntries: repo.manifestEntries,
+        }
+      : null;
+  },
 });
 export const rotationPage = internalQuery({
   args: { cursor: v.union(v.string(), v.null()) },
@@ -339,6 +367,8 @@ export const revoke = mutation({
           contextExcerpts: [],
           manifest: [],
           manifestEntries: [],
+          snapshotSummary: undefined,
+          snapshotDelta: undefined,
         });
     }
   },
@@ -516,6 +546,11 @@ export const approve = mutation({
     );
     validatePaths(a.allowedPaths, a.allowedPaths, a.highRisk);
     ensure(
+      !a.highRisk || ["owner", "admin"].includes(actor.membership.role),
+      "FORBIDDEN",
+      "Protected changes require explicit owner or administrator review.",
+    );
+    ensure(
       a.executor !== "local" || a.maxCredits === 0,
       "QUOTE_CHANGED",
       "Local subscription execution has no invented platform inference cost.",
@@ -550,6 +585,41 @@ export const approve = mutation({
         "INVALID_INPUT",
         "Provider fields require the customer-key route.",
       );
+    }
+    const priorRuns = await ctx.db
+      .query("runs")
+      .withIndex("by_proposal", (q) => q.eq("proposalId", p._id))
+      .collect();
+    const unresolved = priorRuns.find(
+      (run) => run.providerRequestState === "started",
+    );
+    ensure(
+      !unresolved,
+      "COST_RECONCILIATION_REQUIRED",
+      "A previous customer-provider request needs usage reconciliation before another execution approval.",
+    );
+    const previous = priorRuns.find(
+      (run) =>
+        !["failed", "canceled"].includes(run.state) &&
+        (run.state !== "completed" || run.planHash === a.planHash),
+    );
+    if (previous) {
+      ensure(
+        previous.planHash === a.planHash &&
+          previous.baseSha === a.baseSha &&
+          previous.version === a.version &&
+          previous.executor === a.executor &&
+          previous.fundingRoute === a.fundingRoute &&
+          previous.maxCredits === a.maxCredits &&
+          previous.highRisk === a.highRisk &&
+          JSON.stringify(previous.allowedPaths) ===
+            JSON.stringify(a.allowedPaths) &&
+          previous.customerModel?.id === a.modelId &&
+          previous.maxProviderUsdCents === a.maxProviderUsdCents,
+        "SOURCE_BUSY",
+        "An existing execution or publication must be reconciled before changing its scope or funding.",
+      );
+      return previous._id;
     }
     const runId = await ctx.db.insert("runs", {
       organizationId: p.organizationId,
@@ -691,6 +761,7 @@ export const authorizePublication = mutation({
       : r.report;
     await ctx.db.patch(r._id, {
       state: "publishing",
+      publicationGeneration: r.generation,
       report,
       updatedAt: Date.now(),
     });
@@ -716,13 +787,36 @@ export const recordPR = internalMutation({
   },
   handler: async (ctx, a) => {
     const r = await ctx.db.get(a.id);
-    if (!r || r.generation !== a.generation || r.state !== "publishing") return;
+    if (!r) return;
+    if (r.prNumber === a.number && r.prUrl === a.url) return;
+    if (!(
+      r.publicationGeneration === a.generation ||
+      (r.generation === a.generation && r.state === "publishing")
+    ))
+      return;
+    const repo = await ctx.db.get(r.repositoryId);
+    ensure(
+      repo &&
+        Number.isSafeInteger(a.number) &&
+        a.number > 0 &&
+        a.url === `https://github.com/${repo.fullName}/pull/${a.number}` &&
+        !r.prNumber,
+      "INVALID_EVIDENCE",
+      "Publication receipt does not match this authorized repository.",
+    );
     await ctx.db.patch(a.id, {
       state: "completed",
       prNumber: a.number,
       prUrl: a.url,
       prState: a.state,
       mergedAt: a.mergedAt,
+      events:
+        r.generation !== a.generation || r.state !== "publishing"
+          ? [
+              ...r.events,
+              "An already authorized publication completed after cancellation or access changed. Its PR receipt was retained; no new publication was started.",
+            ]
+          : r.events,
       observedAt: Date.now(),
       updatedAt: Date.now(),
     });

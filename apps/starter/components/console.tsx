@@ -639,6 +639,7 @@ export function Console({
           )}
           {view === "source" && selected && (
             <SourceDetail
+              key={id(selected)}
               source={selected}
               demo={demo}
               org={organizationId}
@@ -1012,6 +1013,40 @@ export function Console({
               </section>
               <section className="panel">
                 <h2>Review and edit the plan</h2>
+                <Button
+                  busy={busy}
+                  disabled={selected.review !== "accepted"}
+                  onClick={() =>
+                    call("draftPlan", {
+                      id: id(selected),
+                      version: selected.version,
+                      maxCredits: 10,
+                    })
+                  }
+                >
+                  Draft an editable plan, maximum 10 credits
+                </Button>
+                {selected.planDraft &&
+                  selected.planDraftVersion === selected.version && (
+                    <details>
+                      <summary>Unconfirmed AI plan draft</summary>
+                      <pre>{JSON.stringify(selected.planDraft, null, 2)}</pre>
+                      <Button
+                        busy={busy}
+                        onClick={() =>
+                          setPlanText(
+                            JSON.stringify(selected.planDraft, null, 2),
+                          )
+                        }
+                      >
+                        Copy draft into the editable plan
+                      </Button>
+                      <p>
+                        Review and save a new version before execution. This
+                        draft grants no coding permission.
+                      </p>
+                    </details>
+                  )}
                 <p>
                   Acceptance does not authorize execution. Files marked existing
                   must appear in the repository snapshot. Saving creates a new
@@ -1724,11 +1759,42 @@ function CaptureForm({
 }
 function SourceDetail({ source, demo, org, repos, call, onProposal }: any) {
   const [detail, setDetail] = useState(source);
+  const [selectedInsight, setSelectedInsight] = useState("");
+  const insightId = selectedInsight || detail.analysis?.insights?.[0]?.id;
+  const selection =
+    detail.repositorySelection?.insightId === insightId
+      ? detail.repositorySelection
+      : undefined;
   useEffect(() => {
-    if (!demo)
-      fetch(`/api/source/${id(source)}`, { cache: "no-store" })
-        .then((r) => r.json())
-        .then(setDetail);
+    if (demo) return;
+    const abort = new AbortController();
+    fetch(`/api/source/${id(source)}`, {
+      cache: "no-store",
+      signal: abort.signal,
+    })
+      .then(async (response) => {
+        if (
+          !response.ok ||
+          !response.headers.get("content-type")?.includes("application/json")
+        )
+          throw new Error("Source unavailable");
+        const next = await response.json();
+        if (!abort.signal.aborted) setDetail(next);
+      })
+      .catch(() => {
+        if (!abort.signal.aborted)
+          setDetail({
+            ...source,
+            analysis: undefined,
+            text: undefined,
+            originalText: undefined,
+            summary: undefined,
+            repositorySelection: undefined,
+            error:
+              "Source details are unavailable. Check access before continuing.",
+          });
+      });
+    return () => abort.abort();
   }, [source, demo]);
   return (
     <>
@@ -1895,6 +1961,72 @@ function SourceDetail({ source, demo, org, repos, call, onProposal }: any) {
       </details>
       <section className="panel">
         <h2>Applies to your projects</h2>
+        {detail.analysis?.insights?.length > 0 && (
+          <>
+            <label>
+              Main point for project selection
+              <select
+                value={insightId}
+                onChange={(event) => setSelectedInsight(event.target.value)}
+              >
+                {detail.analysis.insights.map((insight: any) => (
+                  <option key={insight.id} value={insight.id}>
+                    {insight.title}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button
+              className="secondary"
+              onClick={() =>
+                call("suggestRepositories", {
+                  id: id(source),
+                  insightId,
+                  maxCredits: 10,
+                })
+              }
+            >
+              Find up to five plausible projects, maximum 10 credits
+            </button>
+            <p className="fine">
+              This selection uses confirmed business profiles. It does not
+              establish implementation fit or approve coding. Evaluate a project
+              separately to inspect repository evidence.
+            </p>
+            {selection && (
+              <div>
+                <p>
+                  {selection.candidates.length
+                    ? "Possible project matches"
+                    : "No plausible project match"}
+                </p>
+                {selection.noFitReason && <p>{selection.noFitReason}</p>}
+                {selection.candidates.map((candidate: any) => (
+                  <article key={candidate.repositoryId}>
+                    <h3>
+                      {repos.find(
+                        (repo: any) => id(repo) === candidate.repositoryId,
+                      )?.fullName ?? "Selected project"}
+                    </h3>
+                    <p>{candidate.reason}</p>
+                    <button
+                      className="secondary"
+                      onClick={() =>
+                        call("match", {
+                          id: id(source),
+                          repositoryId: candidate.repositoryId,
+                          maxCredits: 10,
+                        })
+                      }
+                    >
+                      Evaluate inspected repository, maximum 10 credits
+                    </button>
+                  </article>
+                ))}
+              </div>
+            )}
+          </>
+        )}
         {detail.matches?.map((m: any) => (
           <article key={m.repositoryId}>
             <h3>{label(m.disposition)}</h3>
@@ -1965,7 +2097,8 @@ function SourceDetail({ source, demo, org, repos, call, onProposal }: any) {
 function ExecutionApproval({ proposal, call, routes }: any) {
   const [executor, setExecutor] = useState("local"),
     [ceiling, setCeiling] = useState(100),
-    [modelId, setModelId] = useState("");
+    [modelId, setModelId] = useState(""),
+    [highRisk, setHighRisk] = useState(false);
   const model = routes?.models.find((m: any) => m.id === modelId);
   const cloud = executor !== "local";
   return (
@@ -2032,6 +2165,15 @@ function ExecutionApproval({ proposal, call, routes }: any) {
         Maximum runtime: 20 minutes. Permitted files come from the reviewed
         plan. Publication requires final patch review.
       </p>
+      <label className="check">
+        <input
+          type="checkbox"
+          checked={highRisk}
+          onChange={(event) => setHighRisk(event.target.checked)}
+        />
+        I explicitly approve protected changes in this exact plan. Owner or
+        administrator permission and final patch review are required.
+      </label>
       <button
         className="primary"
         disabled={executor === "customer" && !model}
@@ -2056,7 +2198,7 @@ function ExecutionApproval({ proposal, call, routes }: any) {
               : {}),
             maxCredits: cloud ? ceiling : 0,
             allowedPaths: proposal.plan?.files.map((f: any) => f.path) ?? [],
-            highRisk: false,
+            highRisk,
           })
         }
       >

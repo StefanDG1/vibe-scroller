@@ -1,5 +1,10 @@
 import { expect, it } from "vitest";
 import {
+  reuseExcerpt,
+  manifestDelta,
+} from "../packages/repositories/snapshotCache";
+import { EXTRACTION_VERSION } from "../packages/repositories/prepare";
+import {
   repositoryIgnores,
   preparedTree,
   inspectedIgnorePolicy,
@@ -71,4 +76,59 @@ it("uses Repomix to prepare only the inspected bounded context tree", () => {
       },
     ]),
   ).toThrow("POLICY_BLOCKED");
+});
+it("reuses only recent unchanged inspected blobs and identifies eligible-manifest differences", () => {
+  const entry = {
+    path: "README.md",
+    blobSha: "a".repeat(40),
+    mode: "100644",
+    size: 9,
+  };
+  const previous = {
+    updatedAt: Date.now(),
+    extractionVersion: EXTRACTION_VERSION,
+    profileVersion: 1,
+    manifestEntries: [entry],
+    contextExcerpts: [
+      {
+        path: entry.path,
+        startLine: 1,
+        endLine: 1,
+        blobSha: entry.blobSha,
+        content: "synthetic",
+      },
+    ],
+  };
+  expect(reuseExcerpt(entry, previous, 8000)?.content).toBe("synthetic");
+  expect(
+    reuseExcerpt({ ...entry, blobSha: "b".repeat(40) }, previous, 8000),
+  ).toBeNull();
+  expect(
+    reuseExcerpt(
+      entry,
+      { ...previous, updatedAt: Date.now() - 86400001 },
+      8000,
+    ),
+  ).toBeNull();
+  expect(
+    reuseExcerpt(entry, { ...previous, extractionVersion: "old" }, 8000),
+  ).toBeNull();
+  expect(
+    reuseExcerpt(
+      { ...entry, size: 5000 },
+      { ...previous, manifestEntries: [{ ...entry, size: 5000 }] },
+      8000,
+    ),
+  ).toBeNull();
+  const next = [
+    { ...entry, blobSha: "b".repeat(40) },
+    { ...entry, path: "new.md" },
+  ];
+  expect(
+    manifestDelta(next, [entry, { ...entry, path: "removed.md" }]),
+  ).toEqual({
+    addedToManifest: ["new.md"],
+    changedBlobs: ["README.md"],
+    removedFromManifest: ["removed.md"],
+  });
 });

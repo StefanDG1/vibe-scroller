@@ -17,6 +17,8 @@ export async function recentAuthentication(ctx: QueryCtx, maxAgeSeconds = 300) {
     fail("Sign in again before changing a sensitive connection.");
 }
 export async function user(ctx: QueryCtx) {
+  if (process.env.RESTORE_LOCK === "true")
+    return fail("Recovery is in progress. Private access is paused.");
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) return fail("Sign in to continue.");
   const row = await ctx.db

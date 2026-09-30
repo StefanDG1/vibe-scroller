@@ -1,0 +1,144 @@
+import { mutation, internalMutation } from "./_generated/server";
+import { v } from "convex/values";
+import { writeAccess, fail } from "./lib";
+import {
+  ensure,
+  containsSecret,
+  safePath,
+  validatePaths,
+} from "../packages/policy";
+import { planInput } from "../packages/contracts";
+import { reserve, settle } from "./product";
+export const start = mutation({
+  args: {
+    id: v.id("proposals"),
+    version: v.number(),
+    maxCredits: v.number(),
+    key: v.string(),
+  },
+  handler: async (ctx, a) => {
+    const proposal = await ctx.db.get(a.id);
+    if (!proposal) fail("Proposal unavailable.");
+    const { actor } = await writeAccess(ctx, proposal.organizationId);
+    const repo = await ctx.db.get(proposal.repositoryId),
+      source = await ctx.db.get(proposal.sourceId);
+    ensure(
+      proposal.review === "accepted" &&
+        proposal.version === a.version &&
+        repo?.enabled &&
+        repo.confirmed &&
+        repo.sha === proposal.baseSha &&
+        repo.profileVersion === proposal.profileVersion &&
+        source &&
+        source.state !== "deleted",
+      "APPROVAL_STALE",
+      "Accept the current proposal and refresh its evidence before drafting a plan.",
+    );
+    ensure(
+      a.maxCredits === 10 && /^[a-zA-Z0-9_-]{12,80}$/.test(a.key),
+      "QUOTE_CHANGED",
+      "Review the 10-credit plan quote.",
+    );
+    if (proposal.planDraft && proposal.planDraftVersion === proposal.version)
+      return { cached: true, proposal, repo, key: "" };
+    ensure(
+      !proposal.planDraftKey,
+      "SOURCE_BUSY",
+      "A plan draft is already pending. Interrupted usage needs reconciliation.",
+    );
+    const key = `plan:${proposal._id}:${a.key}`;
+    await reserve(ctx, proposal.organizationId, key, 10);
+    await ctx.db.patch(proposal._id, {
+      planDraftKey: key,
+      planDraftActor: actor._id,
+    });
+    return { cached: false, proposal, repo, key };
+  },
+});
+export const finish = internalMutation({
+  args: {
+    id: v.id("proposals"),
+    organizationId: v.id("organizations"),
+    key: v.string(),
+    version: v.number(),
+    baseSha: v.string(),
+    plan: v.optional(v.any()),
+    credits: v.number(),
+  },
+  handler: async (ctx, a) => {
+    const proposal = await ctx.db.get(a.id);
+    // Source deletion removes the proposal. Settle known usage without reviving it.
+    if (!proposal) {
+      await settle(ctx, a.organizationId, a.key, a.credits);
+      return;
+    }
+    if (
+      proposal.organizationId !== a.organizationId ||
+      proposal.planDraftKey !== a.key
+    )
+      return;
+    ensure(
+      Number.isSafeInteger(a.credits) && a.credits >= 0 && a.credits <= 10,
+      "BUDGET_EXCEEDED",
+      "Plan usage exceeds its quote.",
+    );
+    const repo = await ctx.db.get(proposal.repositoryId),
+      source = await ctx.db.get(proposal.sourceId);
+    const actor =
+      proposal.planDraftActor && (await ctx.db.get(proposal.planDraftActor));
+    const membership =
+      actor &&
+      (await ctx.db
+        .query("memberships")
+        .withIndex("by_pair", (q) =>
+          q
+            .eq("organizationId", proposal.organizationId)
+            .eq("userId", actor._id),
+        )
+        .unique());
+    const organization = await ctx.db.get(proposal.organizationId);
+    const valid =
+      proposal.review === "accepted" &&
+      proposal.version === a.version &&
+      repo?.enabled &&
+      repo.confirmed &&
+      repo.sha === a.baseSha &&
+      repo.sha === proposal.baseSha &&
+      repo.profileVersion === proposal.profileVersion &&
+      source &&
+      source.state !== "deleted" &&
+      actor?.status === "active" &&
+      organization?.status === "active" &&
+      membership &&
+      ["owner", "admin", "member"].includes(membership.role);
+    let plan;
+    if (a.plan && valid) {
+      plan = planInput.parse(a.plan);
+      validatePaths(
+        plan.files.map((file) => file.path),
+        plan.files.map((file) => file.path),
+        true,
+      );
+      ensure(
+        !containsSecret(JSON.stringify(plan)) &&
+          plan.files.every(
+            (file) =>
+              safePath(file.path) &&
+              (file.isNew
+                ? !repo.manifest.includes(file.path)
+                : repo.contextExcerpts?.some(
+                    (excerpt) => excerpt.path === file.path,
+                  )),
+          ),
+        "INVALID_EVIDENCE",
+        "A generated plan must use inspected existing files or explicitly new safe paths.",
+      );
+    }
+    await settle(ctx, proposal.organizationId, a.key, a.credits);
+    await ctx.db.patch(proposal._id, {
+      planDraftKey: undefined,
+      planDraftActor: undefined,
+      ...(plan ? { planDraft: plan, planDraftVersion: proposal.version } : {}),
+    });
+  },
+});

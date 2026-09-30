@@ -2,6 +2,7 @@ import { internalMutation, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import { queueDeletion } from "./assets";
+import { rememberDeletion } from "./lib/deletionMarkers";
 export const deletionJob = internalQuery({
   args: { jobId: v.id("deletionJobs") },
   handler: (ctx, { jobId }) => ctx.db.get(jobId),
@@ -11,6 +12,7 @@ export const purgeOrganization = internalMutation({
   handler: async (ctx, { organizationId }) => {
     const org = await ctx.db.get(organizationId);
     if (!org || org.status !== "deleting") return;
+    await rememberDeletion(ctx, "workspace", organizationId);
     for (const table of [
       "creditPools",
       "sourceCounts",

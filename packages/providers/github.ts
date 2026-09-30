@@ -4,7 +4,12 @@ import {
   preparedTree,
   EXTRACTION_VERSION,
 } from "../repositories/prepare";
-import { createPrivateKey, sign } from "node:crypto";
+import { createPrivateKey, sign, createHash } from "node:crypto";
+import {
+  reuseExcerpt,
+  manifestDelta,
+  type PreviousSnapshot,
+} from "../repositories/snapshotCache";
 import { ensure, containsSecret, prState, validatePaths } from "../policy";
 export async function github(
   path: string,
@@ -55,6 +60,7 @@ export async function snapshot(
   installationId: number,
   providerId: number,
   fullName: string,
+  previous?: PreviousSnapshot | null,
 ) {
   ensure(
     /^[\w.-]+\/[\w.-]+$/.test(fullName),
@@ -117,6 +123,7 @@ export async function snapshot(
   let context = "";
   const contextFiles: string[] = [];
   const contextExcerpts: RepositoryExcerpt[] = [];
+  let reusedExcerpts = 0;
   let remaining = 40000;
   for (const f of files
     .filter((f: any) => /README|package\.json|\.(tsx?|py|md)$/.test(f.path))
@@ -131,9 +138,22 @@ export async function snapshot(
     })
     .slice(0, 40)) {
     if (remaining < 100) break;
+    const cached = reuseExcerpt(
+      { path: f.path, blobSha: f.sha, mode: f.mode, size: f.size },
+      previous,
+      remaining,
+    );
+    if (cached) {
+      reusedExcerpts++;
+      remaining -= cached.content.length + 1;
+      contextExcerpts.push(cached);
+      contextFiles.push(f.path);
+      context += `\nFile: ${f.path}, lines ${cached.startLine}-${cached.endLine}\n${cached.content}\n`;
+      continue;
+    }
     const b = await github(`/repos/${fullName}/git/blobs/${f.sha}`, token);
     const text = Buffer.from(b.content, "base64").toString("utf8");
-    if (!containsSecret(text)) {
+    if (!text.includes("\0") && !containsSecret(text)) {
       const selected = excerpt(f.path, text, f.sha, remaining);
       if (!selected) continue;
       remaining -= selected.content.length + 1;
@@ -142,6 +162,7 @@ export async function snapshot(
       context += `\nFile: ${f.path}, lines ${selected.startLine}-${selected.endLine}\n${selected.content}\n`;
     }
   }
+  const delta = manifestDelta(manifestEntries, previous?.manifestEntries);
   return {
     sha,
     branch: repo.default_branch,
@@ -152,6 +173,51 @@ export async function snapshot(
     contextExcerpts,
     contextTree: preparedTree(contextExcerpts),
     extractionVersion: EXTRACTION_VERSION,
+    snapshotDelta: {
+      addedCount: delta.addedToManifest.length,
+      changedCount: delta.changedBlobs.length,
+      removedCount: delta.removedFromManifest.length,
+      addedExamples: delta.addedToManifest.slice(0, 25),
+      changedExamples: delta.changedBlobs.slice(0, 25),
+      removedExamples: delta.removedFromManifest.slice(0, 25),
+      reusedExcerpts,
+    },
+    snapshotSummary: {
+      baseSha: sha,
+      profileVersion: previous?.profileVersion ?? 1,
+      extractionVersion: EXTRACTION_VERSION,
+      cacheKey: createHash("sha256")
+        .update(
+          JSON.stringify({
+            sha,
+            profileVersion: previous?.profileVersion ?? 1,
+            extractionVersion: EXTRACTION_VERSION,
+            manifestEntries,
+          }),
+        )
+        .digest("hex"),
+      eligibleFileCount: manifestEntries.length,
+      inspectedPaths: contextFiles,
+      languageFileCounts: manifestEntries.reduce(
+        (counts: Record<string, number>, entry: { path: string }) => {
+          const suffix = entry.path.includes(".")
+            ? entry.path.split(".").at(-1)!.toLowerCase()
+            : "no_extension";
+          const extension = /^[a-z0-9_]{1,15}$/.test(suffix) ? suffix : "other";
+          Object.defineProperty(counts, extension, {
+            value:
+              (Object.hasOwn(counts, extension) ? counts[extension] : 0) + 1,
+            enumerable: true,
+            writable: true,
+            configurable: true,
+          });
+          return counts;
+        },
+        {},
+      ),
+      limitation:
+        "Structural manifest and inspected-path summary only. Eligible files were not all read; no semantic implementation or business outcome is inferred.",
+    },
   };
 }
 export async function publish(input: {

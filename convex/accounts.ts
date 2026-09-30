@@ -2,9 +2,21 @@ import { query, mutation, internalMutation } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { user, fail, limit } from "./lib";
+import { subjectHash, rememberDeletion } from "./lib/deletionMarkers";
 export const syncUser = internalMutation({
   args: { subject: v.string(), email: v.string(), name: v.string() },
   handler: async (ctx, args) => {
+    if (process.env.RESTORE_LOCK === "true") fail("Recovery is in progress.");
+    const hash = await subjectHash(args.subject);
+    if (
+      await ctx.db
+        .query("deletionMarkers")
+        .withIndex("by_subject", (q) => q.eq("subjectHash", hash))
+        .first()
+    )
+      fail(
+        "This identity was deleted. Create a new provider account to return.",
+      );
     const existing = await ctx.db
       .query("users")
       .withIndex("by_subject", (q) => q.eq("subject", args.subject))
@@ -90,6 +102,12 @@ export const deleteAccount = mutation({
           fail("Transfer ownership or delete your organizations first.");
       }
     }
+    await rememberDeletion(
+      ctx,
+      "account",
+      actor._id,
+      await subjectHash(actor.subject),
+    );
     for (const m of memberships) await ctx.db.delete(m._id);
     await ctx.db.patch(actor._id, { status: "deleting" });
     const job = await ctx.db.insert("deletionJobs", {
