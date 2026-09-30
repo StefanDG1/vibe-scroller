@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "1.0.0",
+  "jobId": "run_demo_001",
+  "workspaceId": "ws_demo",
+  "deviceId": "device_demo",
+  "approvalId": "approval_demo",
+  "repositoryId": "repo_demo_planner",
+  "baseSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "planHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "planArtifactId": "artifact_demo_plan",
+  "leaseGeneration": 1,
+  "expiresAt": 1790812800000,
+  "maxRuntimeSeconds": 1200,
+  "maxCredits": 0,
+  "fundingRoute": "local_codex_subscription",
+  "executionPolicyId": "policy_repo_restricted_v1",
+  "networkPolicyId": "network_approved_registries_v1",
+  "allowedPaths": [
+    "src/components/example/**",
+    "tests/example/**"
+  ],
+  "publicationMode": "review_required"
+}

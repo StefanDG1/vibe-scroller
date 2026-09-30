@@ -57,6 +57,10 @@ async function refresh(ctx: ActionCtx, customerId: string, eventId?: string) {
 export const checkout = action({
   args: { organizationId: v.id("organizations") },
   handler: async (ctx, { organizationId }): Promise<string> => {
+    if (process.env.STRIPE_MODE === "live")
+      throw new Error(
+        "Live checkout is disabled until VibeScroller tax and release evidence is recorded.",
+      );
     const auth = await ctx.runQuery(api.billing.authorize, { organizationId });
     if (!auth.configured)
       throw new Error("Subscriptions are not available for this deployment.");

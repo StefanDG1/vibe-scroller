@@ -1,0 +1,2 @@
+import type {MetadataRoute} from "next";
+export default function manifest():MetadataRoute.Manifest{return {name:"VibeScroller",short_name:"VibeScroller",description:"Make scrolling productive",start_url:"/app",display:"standalone",background_color:"#F7FAFC",theme_color:"#0E7490",icons:[{src:"/icon.svg",sizes:"any",type:"image/svg+xml"}],share_target:{action:"/share",method:"GET",params:{title:"title",text:"text",url:"url"}}} as MetadataRoute.Manifest}

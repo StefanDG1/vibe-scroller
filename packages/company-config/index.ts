@@ -42,16 +42,16 @@ export const company = defineCompany({
   schemaVersion: 1,
   product: {
     slug: "vibe-scroller",
-    name: "vibe-scroller",
+    name: "VibeScroller",
     description:
-      "A shared workspace for your team and its projects.",
+      "Make scrolling productive. Turn saved ideas into changes worth building.",
   },
   brandRecipe: "cobalt",
   website: {
     kind: "product",
-    url: "https://example.com",
-    appUrl: "https://app.example.com",
-    supportEmail: "owner@example.com",
+    url: "https://scroll.companynerve.com",
+    appUrl: "https://scroll.companynerve.com",
+    supportEmail: "contact@exponentialeducation.ro",
   },
   roles: ["owner", "admin", "member"],
   plans: { free: { projects: 3 }, pro: { projects: 100 } },

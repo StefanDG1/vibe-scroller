@@ -1,0 +1,225 @@
+import { createPrivateKey, sign } from "node:crypto";
+import {
+  ensure,
+  excludedPath,
+  containsSecret,
+  prState,
+  validatePaths,
+} from "../policy";
+export async function github(
+  path: string,
+  token: string,
+  method = "GET",
+  body?: unknown,
+) {
+  ensure(path.startsWith("/"), "INVALID_INPUT", "Invalid GitHub path.");
+  const res = await fetch(`https://api.github.com${path}`, {
+    method,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28",
+      "Content-Type": "application/json",
+    },
+    body: body ? JSON.stringify(body) : undefined,
+    signal: AbortSignal.timeout(30000),
+  });
+  ensure(
+    res.ok,
+    "GITHUB_UNAVAILABLE",
+    res.status === 401 || res.status === 403 || res.status === 404
+      ? "Repository access unavailable. Reconnect GitHub."
+      : "GitHub request failed.",
+  );
+  return res.status === 204 ? null : res.json();
+}
+export async function installationToken(installationId: number) {
+  const id = process.env.GITHUB_APP_ID,
+    key = process.env.GITHUB_APP_PRIVATE_KEY;
+  ensure(id && key, "SETUP_REQUIRED", "Configure the VibeScroller GitHub App.");
+  const now = Math.floor(Date.now() / 1000),
+    enc = (s: unknown) => Buffer.from(JSON.stringify(s)).toString("base64url");
+  const p = `${enc({ alg: "RS256", typ: "JWT" })}.${enc({ iat: now - 30, exp: now + 540, iss: id })}`;
+  const jwt = `${p}.${sign("RSA-SHA256", Buffer.from(p), createPrivateKey(key.replaceAll("\\n", "\n"))).toString("base64url")}`;
+  const result = await github(
+    `/app/installations/${installationId}/access_tokens`,
+    jwt,
+    "POST",
+    {},
+  );
+  return result.token as string;
+}
+export async function snapshot(
+  installationId: number,
+  providerId: number,
+  fullName: string,
+) {
+  ensure(
+    /^[\w.-]+\/[\w.-]+$/.test(fullName),
+    "INVALID_INPUT",
+    "Invalid repository.",
+  );
+  const token = await installationToken(installationId);
+  const permitted = await github(
+    "/installation/repositories?per_page=100",
+    token,
+  );
+  ensure(
+    permitted.repositories.some(
+      (r: any) => r.id === providerId && r.full_name === fullName,
+    ),
+    "FORBIDDEN",
+    "Repository is not in this selected installation.",
+  );
+  const repo = await github(`/repos/${fullName}`, token);
+  const ref = await github(
+    `/repos/${fullName}/git/ref/heads/${encodeURIComponent(repo.default_branch)}`,
+    token,
+  );
+  const sha = ref.object.sha;
+  const tree = await github(
+    `/repos/${fullName}/git/trees/${sha}?recursive=1`,
+    token,
+  );
+  ensure(
+    !tree.truncated,
+    "REPO_TOO_LARGE",
+    "Repository requires a bounded snapshot selection.",
+  );
+  const files = tree.tree.filter(
+    (f: any) =>
+      f.type === "blob" &&
+      f.mode !== "120000" &&
+      !excludedPath(f.path) &&
+      f.size <= 100000,
+  );
+  const manifest = files.map((f: any) => f.path);
+  let context = "";
+  for (const f of files
+    .filter((f: any) => /README|package\.json|\.(tsx?|py|md)$/.test(f.path))
+    .slice(0, 40)) {
+    if (context.length > 90000) break;
+    const b = await github(`/repos/${fullName}/git/blobs/${f.sha}`, token);
+    const text = Buffer.from(b.content, "base64").toString("utf8");
+    if (!containsSecret(text))
+      context += `\nFile: ${f.path}\n${text.slice(0, 10000)}\n`;
+  }
+  return { sha, branch: repo.default_branch, manifest, context };
+}
+export async function publish(input: {
+  installationId: number;
+  fullName: string;
+  baseSha: string;
+  runId: string;
+  createdAt: number;
+  title: string;
+  files: { path: string; content: string | null }[];
+  allowedPaths: string[];
+  highRisk: boolean;
+  report: string;
+}) {
+  validatePaths(
+    input.files.map((f) => f.path),
+    input.allowedPaths,
+    input.highRisk,
+  );
+  ensure(
+    input.files.every(
+      (f) =>
+        f.content === null ||
+        (f.content.length < 200000 && !containsSecret(f.content)),
+    ),
+    "POLICY_BLOCKED",
+    "Patch contains a secret or oversized file.",
+  );
+  const token = await installationToken(input.installationId),
+    root = `/repos/${input.fullName}`,
+    branch = `vibescroller/run-${input.runId}`,
+    marker = `<!-- vibescroller-run:${input.runId} -->`;
+  const existing = await github(
+    `${root}/pulls?state=all&head=${encodeURIComponent(input.fullName.split("/")[0] + ":" + branch)}`,
+    token,
+  );
+  const found = existing.find((p: any) => p.body?.includes(marker));
+  if (found)
+    return {
+      number: found.number,
+      url: found.html_url,
+      state: prState(found),
+      mergedAt: found.merged_at ?? undefined,
+    };
+  const repo = await github(root, token);
+  const current = await github(
+    `${root}/git/ref/heads/${encodeURIComponent(repo.default_branch)}`,
+    token,
+  );
+  ensure(
+    current.object.sha === input.baseSha,
+    "BASE_CHANGED",
+    "The repository base changed. Refresh and approve the plan again.",
+  );
+  const commit = await github(`${root}/git/commits/${input.baseSha}`, token);
+  const entries = [];
+  for (const f of input.files) {
+    const blob =
+      f.content === null
+        ? null
+        : await github(`${root}/git/blobs`, token, "POST", {
+            content: f.content,
+            encoding: "utf-8",
+          });
+    entries.push({
+      path: f.path,
+      mode: "100644",
+      type: "blob",
+      sha: blob?.sha ?? null,
+    });
+  }
+  const tree = await github(`${root}/git/trees`, token, "POST", {
+    base_tree: commit.tree.sha,
+    tree: entries,
+  });
+  const next = await github(`${root}/git/commits`, token, "POST", {
+    message: `VibeScroller: ${input.title}`,
+    tree: tree.sha,
+    parents: [input.baseSha],
+    author: {
+      name: "VibeScroller",
+      email: "noreply@vibescroller.invalid",
+      date: new Date(input.createdAt).toISOString(),
+    },
+    committer: {
+      name: "VibeScroller",
+      email: "noreply@vibescroller.invalid",
+      date: new Date(input.createdAt).toISOString(),
+    },
+  });
+  let ref;
+  try {
+    ref = await github(`${root}/git/ref/heads/${branch}`, token);
+  } catch {}
+  if (ref)
+    ensure(
+      ref.object.sha === next.sha,
+      "PUBLICATION_CONFLICT",
+      "The run branch already contains a different patch.",
+    );
+  else
+    await github(`${root}/git/refs`, token, "POST", {
+      ref: `refs/heads/${branch}`,
+      sha: next.sha,
+    });
+  const pr = await github(`${root}/pulls`, token, "POST", {
+    title: input.title,
+    head: branch,
+    base: repo.default_branch,
+    draft: true,
+    body: `${marker}\n\nPrepared from an explicitly approved VibeScroller plan. Benefit remains unmeasured.\n\nPrivate source evidence stays in the authenticated application.\n\nChecks and limitations:\n${input.report.slice(0, 4000)}`,
+  });
+  return {
+    number: pr.number,
+    url: pr.html_url,
+    state: prState(pr),
+    mergedAt: pr.merged_at ?? undefined,
+  };
+}

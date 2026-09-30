@@ -1,0 +1,1613 @@
+"use client";
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Brand } from "./site";
+type Initial = {
+  sources: any[];
+  repositories: any[];
+  proposals: any[];
+  runs: any[];
+  notifications: any[];
+  usage: any;
+  devices?: any[];
+  measured?: number;
+  githubChoices?: { id: number; fullName: string; installationId: number }[];
+};
+const id = (o: any) => o._id ?? o.id;
+const label = (s: string) => s.replaceAll("_", " ");
+const blankPlan = {
+  scope: "",
+  nonGoals: [],
+  files: [{ path: "", isNew: true }],
+  steps: [""],
+  tests: [""],
+  risks: [],
+  rollout: "",
+  rollback: "",
+  unknowns: [],
+};
+export function Console({
+  demo = false,
+  initial,
+  organizationId,
+  initialView = "home",
+}: {
+  demo?: boolean;
+  initial: Initial;
+  organizationId: string;
+  initialView?: string;
+}) {
+  const router = useRouter(),
+    [data, setData] = useState(initial),
+    [view, setView] = useState(
+      initialView === "plans" ? "proposals" : initialView,
+    ),
+    [selected, setSelected] = useState<any>(null),
+    [search, setSearch] = useState(""),
+    [filter, setFilter] = useState(""),
+    [notice, setNotice] = useState(""),
+    [busy, setBusy] = useState(false),
+    [captureOpen, setCaptureOpen] = useState(false),
+    [planText, setPlanText] = useState(JSON.stringify(blankPlan, null, 2)),
+    [dark, setDark] = useState(false);
+  const seenNotifications = useRef(new Set(initial.notifications.map(id)));
+  const captureDialog = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (!captureOpen) return;
+    const previous = document.activeElement as HTMLElement | null;
+    const dialog = captureDialog.current;
+    const controls = () =>
+      [
+        ...(dialog?.querySelectorAll<HTMLElement>(
+          'button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),a[href],[tabindex="0"]',
+        ) ?? []),
+      ].filter((element) => element.getClientRects().length);
+    controls()[0]?.focus();
+    function keyboard(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setCaptureOpen(false);
+      }
+      if (event.key !== "Tab") return;
+      const items = controls(),
+        first = items[0],
+        last = items.at(-1);
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last?.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first?.focus();
+      }
+    }
+    document.addEventListener("keydown", keyboard);
+    return () => {
+      document.removeEventListener("keydown", keyboard);
+      previous?.focus();
+    };
+  }, [captureOpen]);
+  function applyData(next: Initial) {
+    setData(next);
+    setSelected((current: any) =>
+      current
+        ? (next.proposals.find((p) => id(p) === id(current)) ??
+          next.sources.find((s) => id(s) === id(current)) ??
+          null)
+        : null,
+    );
+    for (const notification of next.notifications) {
+      if (
+        !seenNotifications.current.has(id(notification)) &&
+        "Notification" in window &&
+        Notification.permission === "granted"
+      ) {
+        new Notification("VibeScroller has an update", {
+          body: "Open your private inbox to review it.",
+          tag: id(notification),
+        });
+      }
+      seenNotifications.current.add(id(notification));
+    }
+  }
+  useEffect(() => {
+    setData(initial);
+  }, [initial]);
+  async function refreshData() {
+    if (demo) return;
+    const response = await fetch(`/api/workspace/${organizationId}`, {
+      cache: "no-store",
+    });
+    if (
+      response.ok &&
+      !response.redirected &&
+      response.headers.get("content-type")?.includes("application/json")
+    )
+      applyData(await response.json());
+    else if (
+      response.redirected ||
+      response.status === 401 ||
+      response.status === 403 ||
+      response.status === 404
+    ) {
+      setSelected(null);
+      setData({
+        sources: [],
+        repositories: [],
+        proposals: [],
+        runs: [],
+        notifications: [],
+        usage: null,
+      });
+    }
+  }
+  useEffect(() => {
+    if (demo) return;
+    const timer = setInterval(() => {
+      refreshData().catch(() => {});
+    }, 15000);
+    return () => clearInterval(timer);
+  }, [demo, organizationId]);
+  useEffect(() => {
+    setPlanText(JSON.stringify(selected?.plan ?? blankPlan, null, 2));
+  }, [selected?._id, selected?.planHash]);
+  useEffect(() => {
+    const url = new URL(location.href);
+    setSearch(url.searchParams.get("q") ?? "");
+    setFilter(url.searchParams.get("state") ?? "");
+  }, []);
+  async function call(operation: string, args: any) {
+    setBusy(true);
+    setNotice("");
+    try {
+      if (demo) {
+        setNotice(
+          "Synthetic demo action only. No provider, payment, execution or GitHub write occurred.",
+        );
+        return "demo";
+      }
+      const res = await fetch("/api/product", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ operation, args }),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error);
+      await refreshData();
+      router.refresh();
+      setNotice("Saved. The server accepted this action.");
+      return body.result;
+    } catch (e) {
+      setNotice(e instanceof Error ? e.message : "The action failed.");
+    } finally {
+      setBusy(false);
+    }
+  }
+  const go = (v: string) => {
+    if (!demo && v === "billing") {
+      router.push(`/app/${organizationId}/billing`);
+      return;
+    }
+    setView(v);
+    setSelected(null);
+    if (!demo)
+      history.replaceState(
+        null,
+        "",
+        `/app/${organizationId}/${v === "home" ? "" : v}`,
+      );
+  };
+  const filtered = data.sources.filter(
+    (s) =>
+      (!search ||
+        [s.title, s.summary, ...(s.mainPoints ?? [])]
+          .join(" ")
+          .toLowerCase()
+          .includes(search.toLowerCase())) &&
+      (!filter ||
+        s.state === filter ||
+        s.matches?.some((m: any) => m.disposition === filter)),
+  );
+  function findSource(s: any) {
+    setSelected(s);
+    setView("source");
+  }
+  const nav = [
+    ["home", "Home", "⌂"],
+    ["library", "Library", "▤"],
+    ["projects", "Projects", "⑂"],
+    ["inbox", "Inbox", "▣"],
+    ["proposals", "Proposals", "◇"],
+    ["runs", "Runs & PRs", "▷"],
+    ["usage", "Usage", "◷"],
+    ["connections", "Connections", "↔"],
+    ["runners", "Computers", "▱"],
+    ["privacy", "Privacy", "⊙"],
+    ["billing", "Billing", "€"],
+  ];
+  const metrics = [
+    data.sources.filter((s) => s.state === "ready" || s.summary).length,
+    data.proposals.filter((p) => p.review === "accepted").length,
+    new Set(data.runs.filter((r) => r.mergedAt).map((r) => r.prUrl)).size,
+    data.measured ?? 0,
+  ];
+  const Button = ({
+    children,
+    onClick,
+    primary = false,
+    disabled = false,
+  }: {
+    children: React.ReactNode;
+    onClick: () => void;
+    primary?: boolean;
+    disabled?: boolean;
+  }) => (
+    <button
+      disabled={busy || disabled}
+      className={primary ? "primary" : "secondary"}
+      onClick={onClick}
+    >
+      {children}
+    </button>
+  );
+  return (
+    <div className={`product-shell ${dark ? "dark" : ""}`}>
+      <aside className="product-rail">
+        <Brand />
+        <p className="workspace-label">
+          {demo ? "Demo workspace" : "Your workspace"}
+        </p>
+        <nav aria-label="Application">
+          {nav.map(([key, title, icon]) => (
+            <button
+              key={key}
+              className={view === key ? "active" : ""}
+              onClick={() => go(key)}
+            >
+              <span aria-hidden="true">{icon}</span>
+              {title}
+            </button>
+          ))}
+        </nav>
+        <div className="rail-bottom">
+          <button onClick={() => setDark(!dark)}>
+            {dark ? "Light appearance" : "Dark appearance"}
+          </button>
+          <Link href={demo ? "/app" : "/account"}>
+            {demo ? "Open your own library" : "Account & sign out"}
+          </Link>
+          <Link href="/">Back to website</Link>
+        </div>
+      </aside>
+      <div className="product-body">
+        <header className="product-top">
+          <div>
+            <span className="status">
+              {demo ? "Synthetic demo" : "Private workspace"}
+            </span>
+            <p>Make scrolling productive.</p>
+          </div>
+          <Button primary onClick={() => setCaptureOpen(true)}>
+            ＋ Add source
+          </Button>
+        </header>
+        {demo && (
+          <p className="demo-banner">
+            Synthetic data only. No real videos, customer repositories, measured
+            benefits or live execution.
+          </p>
+        )}
+        <main id="main" className="product-main">
+          <div className="page-heading">
+            <div>
+              <p className="muted">
+                {demo
+                  ? "Explore the review workflow"
+                  : "Your next useful action"}
+              </p>
+              <h1>
+                {view === "source"
+                  ? selected?.title
+                  : view === "proposal"
+                    ? selected?.title
+                    : (nav.find((n) => n[0] === view)?.[1] ?? "Review plan")}
+              </h1>
+            </div>
+            {selected && (
+              <Button
+                onClick={() => go(view === "source" ? "library" : "proposals")}
+              >
+                Back to list
+              </Button>
+            )}
+          </div>
+          <p
+            role="status"
+            aria-live="polite"
+            className={notice ? "notice" : "sr-only"}
+          >
+            {notice}
+          </p>
+          {(view === "home" || view === "library") && (
+            <>
+              <div className="attention">
+                <div>
+                  <h2>
+                    {data.proposals.filter((p) => p.review === "unreviewed")
+                      .length
+                      ? `${data.proposals.filter((p) => p.review === "unreviewed").length} proposals to review`
+                      : "Make room for the next useful idea."}
+                  </h2>
+                  <p>
+                    Keep the evidence, review the fit, and choose what to build.
+                  </p>
+                </div>
+                <Button onClick={() => go("proposals")}>
+                  Review proposals
+                </Button>
+              </div>
+              {view === "home" && (
+                <div className="metric-strip">
+                  {[
+                    "Sources processed",
+                    "Plans accepted",
+                    "Unique PRs merged",
+                    "Outcomes measured",
+                  ].map((n, i) => (
+                    <div key={n}>
+                      <strong>{metrics[i]}</strong>
+                      <span>{n}</span>
+                      <small>
+                        {i === 3
+                          ? "Benefit needs your evidence"
+                          : "Current workspace"}
+                      </small>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="library-tools">
+                <label>
+                  Search your library
+                  <input
+                    value={search}
+                    placeholder="Title, summary or main point"
+                    onChange={(e) => {
+                      setSearch(e.target.value);
+                      const u = new URL(location.href);
+                      u.searchParams.set("q", e.target.value);
+                      history.replaceState(null, "", u);
+                    }}
+                  />
+                </label>
+                <label>
+                  Show
+                  <select
+                    value={filter}
+                    onChange={(e) => {
+                      setFilter(e.target.value);
+                      const u = new URL(location.href);
+                      u.searchParams.set("state", e.target.value);
+                      history.replaceState(null, "", u);
+                    }}
+                  >
+                    <option value="">All sources</option>
+                    {[
+                      "ready",
+                      "needs_upload",
+                      "no_fit",
+                      "already_implemented",
+                      "unsupported_claim",
+                      "needs_context",
+                    ].map((s) => (
+                      <option key={s} value={s}>
+                        {label(s)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <Button
+                  onClick={() => {
+                    setSearch("");
+                    setFilter("");
+                  }}
+                >
+                  Reset filters
+                </Button>
+              </div>
+              <div className="source-list">
+                {filtered.length ? (
+                  filtered.slice(0, 30).map((s, i) => (
+                    <article key={id(s)} className="source-card">
+                      <button
+                        className={`source-thumb art-${i % 4}`}
+                        onClick={() => findSource(s)}
+                        aria-label={`Open ${s.title}`}
+                      >
+                        <span>▶</span>
+                        <small>
+                          {s.kind === "text" ? "Supplied text" : "Saved source"}
+                        </small>
+                      </button>
+                      <div className="source-card-body">
+                        <div className="row spread">
+                          <span className="muted">
+                            {demo
+                              ? "Illustrative source"
+                              : label(s.state ?? "ready")}
+                          </span>
+                          <span className="coverage">{label(s.coverage)}</span>
+                        </div>
+                        <button
+                          className="title-button"
+                          onClick={() => findSource(s)}
+                        >
+                          <h2>{s.title}</h2>
+                        </button>
+                        <p>
+                          {s.summary ??
+                            "This source needs an upload. Metadata is not an analysis."}
+                        </p>
+                        <ul className="point-preview">
+                          {s.mainPoints?.slice(0, 3).map((p: string) => (
+                            <li key={p}>{p}</li>
+                          ))}
+                        </ul>
+                        <div className="row wrap">
+                          {s.matches?.map((m: any) => (
+                            <span className="status" key={m.repositoryId}>
+                              {label(m.disposition)}
+                            </span>
+                          ))}
+                          {s.tags?.map((t: string) => (
+                            <span className="tag" key={t}>
+                              {t}
+                            </span>
+                          ))}
+                          {s.pullRequests?.length > 0 && (
+                            <span className="tag">
+                              {
+                                s.pullRequests.filter((p: any) => p.mergedAt)
+                                  .length
+                              }{" "}
+                              merged PR ·{" "}
+                              {
+                                s.pullRequests.filter(
+                                  (p: any) => p.state === "open",
+                                ).length
+                              }{" "}
+                              open
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <Button onClick={() => findSource(s)}>
+                        Open details
+                      </Button>
+                    </article>
+                  ))
+                ) : (
+                  <div className="empty">
+                    <h2>
+                      {data.sources.length
+                        ? "No sources match these filters."
+                        : "Your library starts here."}
+                    </h2>
+                    <p>
+                      {data.sources.length
+                        ? "Reset the filters to see your saved sources."
+                        : "Add a supported link, upload permitted content, or supply a transcript."}
+                    </p>
+                    <Button primary onClick={() => setCaptureOpen(true)}>
+                      Add your first source
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+          {view === "source" && selected && (
+            <SourceDetail
+              source={selected}
+              demo={demo}
+              org={organizationId}
+              repos={data.repositories}
+              call={call}
+              onProposal={(p: any) => {
+                setSelected(p);
+                setView("proposal");
+              }}
+            />
+          )}
+          {view === "projects" && (
+            <>
+              <p>
+                Only explicitly selected GitHub App repositories are analyzed.
+                Confirm a profile before matching.
+              </p>
+              <form
+                className="panel form-grid"
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const f = new FormData(e.currentTarget);
+                  const choice = data.githubChoices?.find(
+                    (r) =>
+                      `${r.installationId}:${r.id}` === f.get("repository"),
+                  );
+                  if (!choice) return;
+                  await call("connectRepository", {
+                    organizationId,
+                    installationId: choice.installationId,
+                    providerId: choice.id,
+                    fullName: choice.fullName,
+                  });
+                }}
+              >
+                <h2>Select a repository</h2>
+                <p>
+                  Install the GitHub App on the repositories you choose, then
+                  link your GitHub account to this workspace.
+                </p>
+                <a
+                  href="https://github.com/apps/vibescroller-stefandg1-staging/installations/new"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Install the staging GitHub App
+                </a>
+                {!demo && (
+                  <a
+                    href={`/api/github/connect?organizationId=${organizationId}`}
+                  >
+                    Link GitHub account
+                  </a>
+                )}
+                <label>
+                  Authorized repository
+                  <select name="repository" required defaultValue="">
+                    <option value="" disabled>
+                      Choose a repository
+                    </option>
+                    {data.githubChoices?.map((r) => (
+                      <option
+                        key={`${r.installationId}:${r.id}`}
+                        value={`${r.installationId}:${r.id}`}
+                      >
+                        {r.fullName}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <button
+                  className="primary"
+                  disabled={busy || !data.githubChoices?.length}
+                >
+                  Verify and snapshot selected repository
+                </button>
+              </form>
+              {data.repositories.map((r) => (
+                <form
+                  className="panel"
+                  key={id(r)}
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const f = new FormData(e.currentTarget);
+                    call("saveProfile", {
+                      id: id(r),
+                      profile: f.get("profile"),
+                      confirmed: f.get("confirmed") === "on",
+                      enabled: f.get("enabled") === "on",
+                    });
+                  }}
+                >
+                  <h2>{r.fullName}</h2>
+                  <p className="code-label">Base {r.sha}</p>
+                  <label>
+                    Purpose, audience, goals, constraints and non-goals
+                    <textarea
+                      name="profile"
+                      defaultValue={r.profile}
+                      rows={7}
+                    />
+                  </label>
+                  <label className="check">
+                    <input
+                      type="checkbox"
+                      name="confirmed"
+                      defaultChecked={r.confirmed}
+                    />
+                    I confirm this business profile
+                  </label>
+                  <label className="check">
+                    <input
+                      type="checkbox"
+                      name="enabled"
+                      defaultChecked={r.enabled}
+                    />
+                    Enable matching for this repository
+                  </label>
+                  <button className="secondary" disabled={busy}>
+                    Save profile
+                  </button>
+                </form>
+              ))}
+              {demo && (
+                <div className="panel">
+                  <h2>Demo Planner</h2>
+                  <p>
+                    Purpose: help people organize a small project. Audience:
+                    first-time planners. Goal: a clear first useful result.
+                    Non-goal: changing account or payment logic.
+                  </p>
+                  <span className="status">Synthetic confirmed profile</span>
+                </div>
+              )}
+            </>
+          )}
+          {view === "proposals" && (
+            <>
+              {data.proposals.length ? (
+                data.proposals.map((p) => (
+                  <article className="panel" key={id(p)}>
+                    <span className="status">{label(p.disposition)}</span>
+                    <h2>{p.title}</h2>
+                    <p>{p.detail?.currentProblem}</p>
+                    <p>{label(p.review)}</p>
+                    <Button
+                      onClick={() => {
+                        setSelected(p);
+                        setView("proposal");
+                      }}
+                    >
+                      Review proposal
+                    </Button>
+                  </article>
+                ))
+              ) : (
+                <div className="empty">
+                  <h2>No proposals to review.</h2>
+                  <p>
+                    Analyze a source and match it to a confirmed repository. No
+                    useful match is a valid result.
+                  </p>
+                  {demo && (
+                    <Button
+                      onClick={() => {
+                        setSelected({
+                          id: "demo-proposal",
+                          title: "Preview a useful result before setup",
+                          disposition: "relevant",
+                          review: "unreviewed",
+                          version: 1,
+                          detail: {
+                            currentProblem:
+                              "Demo Planner opens with an empty view.",
+                            proposedChange:
+                              "Offer a reversible populated example.",
+                            benefitHypothesis:
+                              "A first-time visitor may understand the product sooner.",
+                            risks: [
+                              "Sample data could be mistaken for a saved project.",
+                            ],
+                            acceptanceCriteria: [
+                              "Sample remains labeled",
+                              "Start fresh removes the example",
+                            ],
+                          },
+                        });
+                        setView("proposal");
+                      }}
+                    >
+                      Open synthetic proposal
+                    </Button>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+          {view === "proposal" && selected && (
+            <>
+              <span className="status">{label(selected.disposition)}</span>
+              <section className="panel">
+                <h2>Why this project?</h2>
+                <p>{selected.detail?.currentProblem}</p>
+                <h3>Proposed change</h3>
+                <p>
+                  {selected.detail?.proposedChange ??
+                    "No code change recommended."}
+                </p>
+                <h3>Expected benefit, as a hypothesis</h3>
+                <p>
+                  {selected.detail?.benefitHypothesis ?? "No benefit claim."}
+                </p>
+                <h3>Risks and reasons to reject</h3>
+                <ul>
+                  {selected.detail?.risks?.map((s: string) => (
+                    <li key={s}>{s}</li>
+                  ))}
+                </ul>
+                <h3>Acceptance criteria</h3>
+                <ul>
+                  {selected.detail?.acceptanceCriteria?.map((s: string) => (
+                    <li key={s}>{s}</li>
+                  ))}
+                </ul>
+                <details>
+                  <summary>Source and repository evidence</summary>
+                  <pre>
+                    {JSON.stringify(
+                      {
+                        source: selected.detail?.sourceEvidence,
+                        repository: selected.detail?.repositoryEvidence,
+                      },
+                      null,
+                      2,
+                    )}
+                  </pre>
+                </details>
+                <div className="row wrap">
+                  {["rejected", "deferred", "accepted"].map((d) => (
+                    <Button
+                      key={d}
+                      primary={d === "accepted"}
+                      onClick={async () => {
+                        await call("decide", {
+                          id: id(selected),
+                          version: selected.version,
+                          decision: d,
+                          note: "",
+                        });
+                        if (demo) setSelected({ ...selected, review: d });
+                      }}
+                    >
+                      {d === "accepted"
+                        ? "Accept proposal"
+                        : d === "rejected"
+                          ? "Reject"
+                          : "Defer"}
+                    </Button>
+                  ))}
+                </div>
+              </section>
+              <section className="panel">
+                <h2>Review and edit the plan</h2>
+                <p>
+                  Acceptance does not authorize execution. Files marked existing
+                  must appear in the repository snapshot. Saving creates a new
+                  immutable plan hash.
+                </p>
+                <label>
+                  Structured plan
+                  <textarea
+                    className="plan-editor"
+                    rows={16}
+                    value={planText}
+                    onChange={(e) => setPlanText(e.target.value)}
+                  />
+                </label>
+                <Button
+                  onClick={async () => {
+                    try {
+                      await call("editPlan", {
+                        id: id(selected),
+                        version: selected.version,
+                        plan: JSON.parse(planText),
+                      });
+                    } catch {
+                      setNotice(
+                        "The plan must be valid JSON with all required sections.",
+                      );
+                    }
+                  }}
+                >
+                  Save new plan version
+                </Button>
+                <Button
+                  onClick={() => {
+                    const a = document.createElement("a");
+                    a.href = URL.createObjectURL(
+                      new Blob([planText], { type: "application/json" }),
+                    );
+                    a.download = "vibescroller-plan.json";
+                    a.click();
+                    URL.revokeObjectURL(a.href);
+                  }}
+                >
+                  Export plan
+                </Button>
+              </section>
+              <ExecutionApproval proposal={selected} call={call} demo={demo} />
+            </>
+          )}
+          {view === "runs" && (
+            <>
+              {data.runs.length ? (
+                data.runs.map((r) => (
+                  <RunCard key={id(r)} run={r} call={call} />
+                ))
+              ) : (
+                <div className="empty">
+                  <h2>No authorized runs yet.</h2>
+                  <p>
+                    Approve a reviewed plan with a specific executor and funding
+                    route. An offline laptop never triggers a cloud charge.
+                  </p>
+                </div>
+              )}
+            </>
+          )}
+          {view === "inbox" && (
+            <>
+              <p>
+                Notifications use safe previews. Telegram is planned for later.
+                Messages never approve execution.
+              </p>
+              {data.notifications.length ? (
+                data.notifications.map((n) => (
+                  <article className="panel" key={id(n)}>
+                    <p>{n.message}</p>
+                    <small>{new Date(n.createdAt).toLocaleString()}</small>
+                  </article>
+                ))
+              ) : (
+                <div className="empty">
+                  <h2>You're caught up.</h2>
+                  <p>Processing and review notifications will appear here.</p>
+                </div>
+              )}
+              <Button
+                onClick={async () => {
+                  if (!("Notification" in window)) {
+                    setNotice(
+                      "This browser does not support desktop notifications. Use the inbox.",
+                    );
+                    return;
+                  }
+                  const result = await Notification.requestPermission();
+                  setNotice(
+                    result === "granted"
+                      ? "Browser notifications allowed. Delivery still requires an open application or a configured push service."
+                      : "Browser notifications remain off. The inbox is available.",
+                  );
+                }}
+              >
+                Enable browser notification permission
+              </Button>
+              <Button
+                onClick={() =>
+                  call("preferences", {
+                    organizationId,
+                    email: true,
+                    telegram: false,
+                    analytics: false,
+                    legalVersion: "draft-v1",
+                  })
+                }
+              >
+                Request email notifications
+              </Button>
+              <p>
+                Email stays unavailable until a verified sender is connected.
+              </p>
+            </>
+          )}
+          {view === "usage" && (
+            <>
+              <div className="panel">
+                <h2>Your allowance</h2>
+                <p>
+                  Trial: 30 credits and up to 3 sources. No automatic paid
+                  conversion.
+                </p>
+                <pre>
+                  {JSON.stringify(
+                    data.usage ?? { granted: 30, reserved: 0, spent: 0 },
+                    null,
+                    2,
+                  )}
+                </pre>
+              </div>
+              <p>
+                Reservations reduce available credits before work starts. Unused
+                reservations release after reconciled settlement. API and cloud
+                costs need an explicit quote.
+              </p>
+            </>
+          )}
+          {view === "connections" && (
+            <>
+              <div className="panel">
+                <h2>GitHub</h2>
+                <p>
+                  Install the VibeScroller GitHub App on selected repositories.
+                  Administration and workflow write are not requested by
+                  default.
+                </p>
+                <Button onClick={() => go("projects")}>
+                  Manage selected repositories
+                </Button>
+                <Button
+                  onClick={() =>
+                    call("revoke", { organizationId, provider: "github" })
+                  }
+                >
+                  Disconnect GitHub
+                </Button>
+              </div>
+              <form
+                className="panel"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const f = new FormData(e.currentTarget);
+                  call("saveKey", { organizationId, secret: f.get("secret") });
+                  e.currentTarget.reset();
+                }}
+              >
+                <h2>Your OpenAI API credential</h2>
+                <p>
+                  Provider charges are separate. The server encrypts this
+                  credential; the browser does not retain it.
+                </p>
+                <label>
+                  API key
+                  <input
+                    name="secret"
+                    type="password"
+                    autoComplete="off"
+                    required
+                  />
+                </label>
+                <button className="primary" disabled={busy}>
+                  Encrypt and save credential
+                </button>
+                <Button
+                  onClick={() =>
+                    call("revoke", { organizationId, provider: "openai" })
+                  }
+                >
+                  Revoke credential
+                </Button>
+              </form>
+              <div className="panel">
+                <h2>Telegram</h2>
+                <p>
+                  Planned for later. Use the web inbox now. Setup needs a
+                  BotFather bot, secret webhook, numeric-user pairing and replay
+                  tests.
+                </p>
+              </div>
+            </>
+          )}
+          {view === "runners" && (
+            <>
+              <div className="panel">
+                <h2>Optional laptop execution</h2>
+                <p>
+                  Pair a named computer, confirm its fingerprint, map
+                  repositories, and verify Windows isolation. Official Codex
+                  app-server keeps authentication on the computer. No inbound
+                  port is required.
+                </p>
+                <p className="notice">
+                  Execution is blocked until its isolation tests pass. A
+                  worktree alone is not a sandbox.
+                </p>
+                <Link href="/docs">Read runner setup</Link>
+              </div>
+              {data.devices?.map((d) => (
+                <article className="panel" key={id(d)}>
+                  <h3>{d.name}</h3>
+                  <p>
+                    {d.state} · Fingerprint {d.fingerprint}
+                  </p>
+                  <Button onClick={() => call("revokeDevice", { id: id(d) })}>
+                    Revoke computer
+                  </Button>
+                </article>
+              ))}
+            </>
+          )}
+          {view === "privacy" && (
+            <>
+              <div className="panel">
+                <h2>Your content and preferences</h2>
+                <p>
+                  Sources, summaries and project context belong to your
+                  workspace. Original media expires within the configured
+                  retention window. Source deletion blocks access immediately
+                  and schedules cleanup.
+                </p>
+                <a
+                  className="secondary"
+                  href={`/app/${organizationId}/content-export`}
+                >
+                  Export workspace content
+                </a>
+                <Link
+                  className="secondary"
+                  href={`/app/${organizationId}/settings`}
+                >
+                  Delete workspace
+                </Link>
+                <Link className="secondary" href="/account">
+                  Account export & deletion
+                </Link>
+              </div>
+              <Button
+                onClick={() =>
+                  call("preferences", {
+                    organizationId,
+                    email: false,
+                    telegram: false,
+                    analytics: false,
+                    legalVersion: "draft-v1",
+                  })
+                }
+              >
+                Turn off optional notifications and analytics
+              </Button>
+              <p>
+                No private service-worker cache or cross-workspace content
+                reuse.
+              </p>
+            </>
+          )}
+          {view === "billing" && (
+            <>
+              <div className="panel">
+                <h2>Live checkout is disabled</h2>
+                <p>
+                  Tax mode: pending evidence. The intended exemption strategy is
+                  not a claim about the company's registration. Ordinary VAT,
+                  special registration and destination treatment need matching
+                  official records.
+                </p>
+                <Link className="secondary" href="/pricing">
+                  View six catalogue prices and allowances
+                </Link>
+                <Link
+                  className="secondary"
+                  href={`/app/${organizationId}/billing`}
+                >
+                  Billing portal and subscription status
+                </Link>
+              </div>
+              <p>
+                Cancellation, refunds and invoice compliance remain
+                server-authorized workflows. A checkout return does not grant
+                credits.
+              </p>
+            </>
+          )}
+        </main>
+        <nav className="mobile-nav" aria-label="Mobile navigation">
+          {nav.slice(0, 4).map(([key, title, icon]) => (
+            <button
+              className={view === key ? "active" : ""}
+              key={key}
+              onClick={() => go(key)}
+            >
+              <span aria-hidden="true">{icon}</span>
+              {title}
+            </button>
+          ))}
+          <button aria-expanded={view === "menu"} onClick={() => go("menu")}>
+            More
+          </button>
+        </nav>
+      </div>
+      {view === "menu" && (
+        <section className="capture-modal" aria-label="All application pages">
+          <h2>More pages</h2>
+          <nav aria-label="All mobile pages" className="form-grid">
+            {nav.slice(4).map(([key, title]) => (
+              <button key={key} onClick={() => go(key)}>
+                {title}
+              </button>
+            ))}
+          </nav>
+        </section>
+      )}
+      {captureOpen && (
+        <div className="modal-backdrop">
+          <section
+            ref={captureDialog}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="capture-title"
+            className="capture-modal"
+          >
+            <div className="row spread">
+              <h2 id="capture-title">Add to your library</h2>
+              <Button onClick={() => setCaptureOpen(false)}>Close</Button>
+            </div>
+            <CaptureForm
+              demo={demo}
+              organizationId={organizationId}
+              call={call}
+              onDone={() => setCaptureOpen(false)}
+            />
+          </section>
+        </div>
+      )}
+    </div>
+  );
+}
+function CaptureForm({
+  demo,
+  organizationId,
+  call,
+  onDone,
+  existingSourceId,
+}: any) {
+  const [kind, setKind] = useState(existingSourceId ? "upload" : "url");
+  return (
+    <form
+      className="form-grid"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        const f = new FormData(e.currentTarget);
+        if (demo) {
+          await call("capture", { synthetic: true });
+          onDone();
+          return;
+        }
+        if (kind === "upload") {
+          const file = f.get("file") as File;
+          if (file.size > 250000000)
+            throw new Error("The maximum upload is 250 MB.");
+          const g = await fetch("/api/uploads/grant", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              organizationId,
+              type: file.type,
+              size: file.size,
+            }),
+          }).then((r) => r.json());
+          if (g.error) {
+            alert(g.error);
+            return;
+          }
+          const uploaded = await fetch(g.url, {
+            method: "PUT",
+            headers: { "Content-Type": file.type },
+            body: file,
+          });
+          if (!uploaded.ok) {
+            alert("Upload failed. No source was attached.");
+            return;
+          }
+          const done = await fetch("/api/uploads/complete", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ organizationId, key: g.key }),
+          }).then((r) => r.json());
+          if (done.error) {
+            alert(done.error);
+            return;
+          }
+          if (existingSourceId)
+            await call("attachSource", {
+              id: existingSourceId,
+              objectKey: g.key,
+              rightsAttested: f.get("rights") === "on",
+            });
+          else
+            await call("capture", {
+              organizationId,
+              key: crypto.randomUUID(),
+              kind,
+              title: f.get("title"),
+              objectKey: g.key,
+              rightsAttested: true,
+            });
+        } else if (existingSourceId)
+          await call("attachSource", {
+            id: existingSourceId,
+            text: f.get("text"),
+            rightsAttested: f.get("rights") === "on",
+          });
+        else
+          await call("capture", {
+            organizationId,
+            key: crypto.randomUUID(),
+            kind,
+            title: f.get("title"),
+            ...(kind === "url"
+              ? { url: f.get("url") }
+              : { text: f.get("text") }),
+            rightsAttested: f.get("rights") === "on",
+          });
+        onDone();
+      }}
+    >
+      <label>
+        Source type
+        <select value={kind} onChange={(e) => setKind(e.target.value)}>
+          {!existingSourceId && <option value="url">Video URL</option>}
+          <option value="upload">Permitted media upload</option>
+          <option value="text">Supplied transcript</option>
+        </select>
+      </label>
+      {!existingSourceId && (
+        <label>
+          Title
+          <input name="title" required maxLength={160} />
+        </label>
+      )}
+      {kind === "url" ? (
+        <label>
+          Source URL
+          <input name="url" type="url" placeholder="https://..." required />
+        </label>
+      ) : kind === "text" ? (
+        <label>
+          Original supplied text
+          <textarea name="text" rows={7} required maxLength={60000} />
+        </label>
+      ) : (
+        <label>
+          Video or audio, up to 250 MB and 10 minutes
+          <input
+            name="file"
+            type="file"
+            accept="video/mp4,video/webm,audio/mpeg,audio/wav"
+            required
+          />
+        </label>
+      )}
+      <label className="check">
+        <input name="rights" type="checkbox" required />I may submit this
+        content for processing
+      </label>
+      <p className="fine">
+        Saving is separate from analysis. Review the quote before processing.
+        Supplied text has no implied audio or visual coverage.
+      </p>
+      <button className="primary">
+        {demo
+          ? "Save synthetic demo source"
+          : existingSourceId
+            ? "Attach permitted content"
+            : "Save source"}
+      </button>
+    </form>
+  );
+}
+function SourceDetail({ source, demo, org, repos, call, onProposal }: any) {
+  const [detail, setDetail] = useState(source);
+  useEffect(() => {
+    if (!demo)
+      fetch(`/api/source/${id(source)}`, { cache: "no-store" })
+        .then((r) => r.json())
+        .then(setDetail);
+  }, [source, demo]);
+  return (
+    <>
+      <div className="panel">
+        <span className="coverage">
+          {label(detail.coverage ?? "metadata_only")}
+        </span>
+        <h2>AI summary</h2>
+        <p>
+          {detail.summary ??
+            "No analysis available. Upload permitted content or supply a transcript."}
+        </p>
+        {detail.url && (
+          <a href={detail.url} target="_blank" rel="noopener noreferrer">
+            Original source
+          </a>
+        )}
+        <p className="fine">
+          Capture date is not the original save date. Sampled evidence is not
+          exhaustive analysis.
+        </p>
+      </div>
+      <section className="panel">
+        <h2>Main points</h2>
+        {(
+          detail.analysis?.insights ??
+          detail.mainPoints?.map((t: string) => ({
+            title: t,
+            claim: t,
+            evidence: [],
+          })) ??
+          []
+        ).map((i: any) => (
+          <article className="insight" key={i.id ?? i.title}>
+            <h3>{i.title}</h3>
+            <p>{i.claim}</p>
+            <p>{i.interpretation}</p>
+            <span className="status">
+              {i.confidence ?? "Synthetic evidence"}
+            </span>
+            <ul>
+              {i.evidence?.map((e: any) => (
+                <li key={e.id}>
+                  {e.kind} · {e.id} ·{" "}
+                  {e.startMs === null
+                    ? "Supplied text"
+                    : `${e.startMs / 1000}s`}
+                </li>
+              ))}
+            </ul>
+          </article>
+        ))}
+        <details>
+          <summary>Original transcript and corrections</summary>
+          <p style={{ whiteSpace: "pre-wrap" }}>
+            {detail.text ??
+              "Original transcript is unavailable for this synthetic card."}
+          </p>
+          {detail.analysis?.correctedText && (
+            <p>Confirmed correction: {detail.analysis.correctedText}</p>
+          )}
+        </details>
+      </section>
+      {detail.state === "needs_upload" && (
+        <section className="panel">
+          <h2>Supply permitted content</h2>
+          <p>
+            This saved URL has no verified audiovisual analysis. Attach a
+            permitted upload or supplied transcript to this saved source.
+          </p>
+          <CaptureForm
+            demo={demo}
+            organizationId={org}
+            call={call}
+            existingSourceId={id(source)}
+            onDone={() => {}}
+          />
+        </section>
+      )}
+      <details className="panel">
+        <summary>Edit summary, tags and transcript correction</summary>
+        <form
+          key={`${id(source)}:${detail.updatedAt}`}
+          className="form-grid"
+          onSubmit={async (e) => {
+            e.preventDefault();
+            const f = new FormData(e.currentTarget);
+            await call("editSource", {
+              id: id(source),
+              summary: f.get("summary"),
+              tags: String(f.get("tags") ?? "")
+                .split(",")
+                .map((t) => t.trim())
+                .filter(Boolean),
+              ...(f.get("correction")
+                ? { correctedText: f.get("correction") }
+                : {}),
+            });
+          }}
+        >
+          <label>
+            Summary
+            <textarea
+              name="summary"
+              maxLength={1500}
+              defaultValue={detail.summary ?? ""}
+            />
+          </label>
+          <label>
+            Tags, separated by commas
+            <input name="tags" defaultValue={detail.tags?.join(", ") ?? ""} />
+          </label>
+          <label>
+            Transcript correction, retained beside the original
+            <textarea
+              name="correction"
+              maxLength={120000}
+              defaultValue={detail.analysis?.correctedText ?? ""}
+            />
+          </label>
+          <button className="primary">Save source edits</button>
+        </form>
+      </details>
+      <section className="panel">
+        <h2>Applies to your projects</h2>
+        {detail.matches?.map((m: any) => (
+          <article key={m.repositoryId}>
+            <h3>{label(m.disposition)}</h3>
+            <p>{m.reason}</p>
+          </article>
+        ))}
+        {detail.proposals?.map((p: any) => (
+          <button
+            className="secondary"
+            key={id(p)}
+            onClick={() => onProposal(p)}
+          >
+            {p.title} · {label(p.disposition)}
+          </button>
+        ))}
+        {repos.map((r: any) => (
+          <button
+            className="secondary"
+            key={id(r)}
+            onClick={() =>
+              call("match", {
+                id: id(source),
+                repositoryId: id(r),
+                maxCredits: 10,
+              })
+            }
+          >
+            Match {r.fullName}, maximum 10 credits
+          </button>
+        ))}
+        {!repos.length && !detail.matches?.length && (
+          <p>
+            No selected repository yet. Your source can remain useful as a
+            reference.
+          </p>
+        )}
+      </section>
+      <div className="panel">
+        <h2>Processing and retention</h2>
+        {detail.error && <p role="alert">{detail.error}</p>}
+        <button
+          className="primary"
+          onClick={() => call("process", { id: id(source), maxCredits: 10 })}
+        >
+          Analyze, maximum 10 credits
+        </button>
+        <button
+          className="secondary"
+          onClick={() => {
+            if (
+              confirm(
+                "Delete this source and its private evidence? Existing GitHub PRs remain on GitHub.",
+              )
+            )
+              call("deleteSource", { id: id(source) });
+          }}
+        >
+          Delete source
+        </button>
+        <p>
+          Benefit remains unmeasured. A merged PR does not prove the idea
+          worked.
+        </p>
+      </div>
+    </>
+  );
+}
+function ExecutionApproval({ proposal, call, demo }: any) {
+  const [executor, setExecutor] = useState("local"),
+    [ceiling, setCeiling] = useState(100);
+  return (
+    <section className="panel">
+      <h2>Separate execution approval</h2>
+      <p>Repository: {proposal.repositoryId ?? "Demo Planner"}</p>
+      <p>
+        Base commit: <code>{proposal.baseSha ?? "Synthetic base"}</code>
+      </p>
+      <p>
+        Plan version: {proposal.version} · Hash:{" "}
+        <code>{proposal.planHash ?? "Save a validated plan first"}</code>
+      </p>
+      <label>
+        Executor
+        <select value={executor} onChange={(e) => setExecutor(e.target.value)}>
+          <option value="local">Paired laptop, own local Codex session</option>
+          <option value="cloud">Metered cloud, managed API</option>
+        </select>
+      </label>
+      {executor === "cloud" && (
+        <label>
+          Maximum platform credits
+          <input
+            type="number"
+            min={1}
+            max={10000}
+            value={ceiling}
+            onChange={(e) => setCeiling(Number(e.target.value))}
+          />
+        </label>
+      )}
+      <p>
+        Maximum runtime: 20 minutes. Permitted files come from the reviewed
+        plan. Publication requires final patch review.
+      </p>
+      <button
+        className="primary"
+        onClick={() =>
+          call("approve", {
+            id: id(proposal),
+            version: proposal.version,
+            planHash: proposal.planHash ?? "",
+            baseSha: proposal.baseSha ?? "",
+            executor,
+            fundingRoute:
+              executor === "local" ? "local_codex_subscription" : "managed_api",
+            maxCredits: executor === "local" ? 0 : ceiling,
+            allowedPaths: proposal.plan?.files.map((f: any) => f.path) ?? [],
+            highRisk: false,
+          })
+        }
+      >
+        Approve exact scope and funding route
+      </button>
+      <p className="fine">
+        Missing isolation blocks execution. No automatic paid fallback.
+      </p>
+    </section>
+  );
+}
+function RunCard({ run, call }: any) {
+  return (
+    <article className="panel">
+      <span className="status">{label(run.state)}</span>
+      <h2>Run {id(run)}</h2>
+      <p>
+        {run.executor} · {label(run.fundingRoute)} · Ceiling {run.maxCredits}{" "}
+        credits
+      </p>
+      <p>Benefit: not measured</p>
+      <ul>
+        {run.events?.map((e: string, i: number) => (
+          <li key={i}>{e}</li>
+        ))}
+      </ul>
+      {run.error && <p role="alert">{run.error}</p>}
+      {run.patch && (
+        <details>
+          <summary>Review patch and check report</summary>
+          <pre>{run.patch}</pre>
+          <p>{run.report}</p>
+          <button
+            className="primary"
+            onClick={async () => {
+              const hash = await crypto.subtle.digest(
+                "SHA-256",
+                new TextEncoder().encode(run.patch),
+              );
+              const patchDigest = Array.from(new Uint8Array(hash), (n) =>
+                n.toString(16).padStart(2, "0"),
+              ).join("");
+              call("publish", {
+                id: id(run),
+                generation: run.generation,
+                patchDigest,
+              });
+            }}
+          >
+            Approve this patch for a draft PR
+          </button>
+        </details>
+      )}
+      {run.prUrl && (
+        <>
+          <a
+            className="secondary"
+            href={run.prUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {label(run.prState ?? "status unavailable")} · Open GitHub PR
+          </a>
+          <button
+            className="secondary"
+            onClick={() => call("refreshPR", { id: id(run) })}
+          >
+            Refresh authoritative PR status
+          </button>
+          <p>
+            Last checked{" "}
+            {run.observedAt
+              ? new Date(run.observedAt).toLocaleString()
+              : "not checked"}
+          </p>
+        </>
+      )}
+      <button
+        className="secondary"
+        onClick={() => call("cancel", { id: id(run) })}
+      >
+        Cancel pending execution
+      </button>
+    </article>
+  );
+}

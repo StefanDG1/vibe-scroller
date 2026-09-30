@@ -12,4 +12,22 @@ crons.interval(
   internal.payments.reconcile,
   {},
 );
+crons.interval(
+  "Reconcile draft PRs",
+  { minutes: 15 },
+  internal.integrations.reconcilePRs,
+  {},
+);
+crons.interval(
+  "Reconcile VibeScroller entitlements",
+  { hours: 1 },
+  internal.reconciliation.allBilling,
+  {},
+);
+crons.interval(
+  "Expire objects and apply deletion tombstones",
+  { hours: 1 },
+  internal.privacy.sweep,
+  {},
+);
 export default crons;

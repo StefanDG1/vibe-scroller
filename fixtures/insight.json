@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "1.0.0",
+  "sourceId": "src_demo_001",
+  "processingRunId": "proc_demo_001",
+  "coverage": "full_sampled",
+  "summary": "A synthetic demonstration places a populated example before an empty onboarding form.",
+  "insights": [
+    {
+      "id": "ins_demo_001",
+      "title": "Show a useful example before setup",
+      "claim": "The demonstration lets a new user inspect an example before filling in setup fields.",
+      "interpretation": "A similar experiment might help a project whose first screen is empty. This does not establish a conversion gain.",
+      "categories": [
+        "product_design"
+      ],
+      "evidence": [
+        {
+          "kind": "transcript",
+          "id": "seg_demo_001",
+          "startMs": 12000,
+          "endMs": 19000
+        },
+        {
+          "kind": "frame",
+          "id": "frame_demo_15000",
+          "startMs": 15000,
+          "endMs": 15000
+        }
+      ],
+      "confidence": "supported",
+      "verificationNeeds": [
+        "Check the target project's existing onboarding behavior."
+      ]
+    }
+  ],
+  "warnings": [
+    "Synthetic fixture. No real creator or customer result."
+  ]
+}

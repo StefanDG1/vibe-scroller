@@ -1,0 +1,96 @@
+import { query, mutation } from "./_generated/server";
+import { v } from "convex/values";
+import { access, fail, limit } from "./lib";
+import { ensure } from "../packages/policy";
+import { digest } from "./product";
+export const list = query({
+  args: { organizationId: v.id("organizations") },
+  handler: async (ctx, a) => {
+    await access(ctx, a.organizationId);
+    const rows = await ctx.db
+      .query("devices")
+      .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
+      .collect();
+    return rows.map(({ codeHash, credentialHash, ...d }) => d);
+  },
+});
+export const start = mutation({
+  args: {
+    organizationId: v.id("organizations"),
+    name: v.string(),
+    fingerprint: v.string(),
+    codeHash: v.string(),
+  },
+  handler: async (ctx, a) => {
+    const u = await access(ctx, a.organizationId, ["owner", "admin"]);
+    await limit(ctx, `pair:${u.actor._id}`, 3);
+    ensure(
+      /^[a-f0-9]{64}$/.test(a.fingerprint) &&
+        /^[a-f0-9]{64}$/.test(a.codeHash) &&
+        a.name.length <= 80,
+      "INVALID_INPUT",
+      "Invalid device challenge.",
+    );
+    return ctx.db.insert("devices", {
+      ...a,
+      owner: u.actor._id,
+      credentialHash: "",
+      state: "pending",
+      expiresAt: Date.now() + 600000,
+      lastSeenAt: 0,
+      capabilities: [],
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+  },
+});
+export const approve = mutation({
+  args: {
+    id: v.id("devices"),
+    fingerprint: v.string(),
+    credentialHash: v.string(),
+  },
+  handler: async (ctx, a) => {
+    const d = await ctx.db.get(a.id);
+    if (!d) fail("Device unavailable.");
+    const u = await access(ctx, d.organizationId);
+    ensure(
+      d.owner === u.actor._id &&
+        d.fingerprint === a.fingerprint &&
+        d.state === "pending" &&
+        d.expiresAt > Date.now() &&
+        /^[a-f0-9]{64}$/.test(a.credentialHash),
+      "PAIRING_INVALID",
+      "The device challenge is invalid or expired.",
+    );
+    await ctx.db.patch(d._id, {
+      state: "paired",
+      credentialHash: a.credentialHash,
+      codeHash: "",
+      updatedAt: Date.now(),
+    });
+  },
+});
+export const revoke = mutation({
+  args: { id: v.id("devices") },
+  handler: async (ctx, a) => {
+    const d = await ctx.db.get(a.id);
+    if (!d) fail("Device unavailable.");
+    await access(ctx, d.organizationId, ["owner"]);
+    await ctx.db.patch(d._id, {
+      state: "revoked",
+      credentialHash: "",
+      capabilities: [],
+    });
+    const runs = await ctx.db
+      .query("runs")
+      .withIndex("by_org", (q) => q.eq("organizationId", d.organizationId))
+      .collect();
+    for (const r of runs)
+      if (r.deviceId === d._id && r.state !== "completed")
+        await ctx.db.patch(r._id, {
+          state: "canceled",
+          generation: r.generation + 1,
+        });
+  },
+});

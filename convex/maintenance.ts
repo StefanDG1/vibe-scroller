@@ -1,6 +1,7 @@
 import { internalMutation, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
+import { queueDeletion } from "./assets";
 export const deletionJob = internalQuery({
   args: { jobId: v.id("deletionJobs") },
   handler: (ctx, { jobId }) => ctx.db.get(jobId),
@@ -11,6 +12,22 @@ export const purgeOrganization = internalMutation({
     const org = await ctx.db.get(organizationId);
     if (!org || org.status !== "deleting") return;
     for (const table of [
+      "creditPools",
+      "githubBindings",
+      "githubLinks",
+      "assets",
+      "sources",
+      "repositories",
+      "proposals",
+      "runs",
+      "wallets",
+      "reservations",
+      "outbox",
+      "connections",
+      "devices",
+      "feedback",
+      "notifications",
+      "preferences",
       "projects",
       "memberships",
       "invitations",
@@ -21,7 +38,10 @@ export const purgeOrganization = internalMutation({
         .query(table)
         .withIndex("by_org", (q) => q.eq("organizationId", organizationId))
         .take(100);
-      for (const row of rows) await ctx.db.delete(row._id);
+      for (const row of rows) {
+        if (table === "assets") await queueDeletion(ctx, (row as any).key);
+        await ctx.db.delete(row._id);
+      }
       if (rows.length === 100) {
         await ctx.scheduler.runAfter(
           0,

@@ -3,13 +3,15 @@ import { cookies } from "next/headers";
 import { getRecipe } from "@companynerve/design-recipes";
 import { company } from "@companynerve/company-config";
 import "./globals.css";
+import "./product.css";
 export const metadata: Metadata = {
   title: {
     default: company.product.name,
     template: `%s | ${company.product.name}`,
   },
   description: company.product.description,
-  robots: { index: false, follow: false },
+  robots: { index: true, follow: true },
+  metadataBase: new URL("https://scroll.companynerve.com"),
 };
 export default async function Layout({
   children,

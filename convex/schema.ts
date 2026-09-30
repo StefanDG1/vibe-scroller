@@ -1,3 +1,4 @@
+import { productTables } from "./productSchema";
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 export const role = v.union(
@@ -6,6 +7,7 @@ export const role = v.union(
   v.literal("member"),
 );
 export default defineSchema({
+  ...productTables,
   users: defineTable({
     subject: v.string(),
     email: v.string(),

@@ -9,15 +9,34 @@
  */
 
 import type * as accounts from "../accounts.js";
+import type * as assets from "../assets.js";
 import type * as billing from "../billing.js";
+import type * as billingV1 from "../billingV1.js";
+import type * as cloud from "../cloud.js";
+import type * as commerce from "../commerce.js";
 import type * as crons from "../crons.js";
+import type * as devices from "../devices.js";
+import type * as email from "../email.js";
+import type * as gateway from "../gateway.js";
+import type * as githubEvents from "../githubEvents.js";
+import type * as githubLinks from "../githubLinks.js";
+import type * as githubOAuth from "../githubOAuth.js";
 import type * as http from "../http.js";
 import type * as identity from "../identity.js";
+import type * as inferenceBudget from "../inferenceBudget.js";
+import type * as integrations from "../integrations.js";
+import type * as jobs from "../jobs.js";
 import type * as lib from "../lib.js";
+import type * as lib_inference from "../lib/inference.js";
+import type * as limitsV1 from "../limitsV1.js";
 import type * as maintenance from "../maintenance.js";
 import type * as organizations from "../organizations.js";
 import type * as payments from "../payments.js";
+import type * as privacy from "../privacy.js";
+import type * as product from "../product.js";
+import type * as productSchema from "../productSchema.js";
 import type * as projects from "../projects.js";
+import type * as reconciliation from "../reconciliation.js";
 
 import type {
   ApiFromModules,
@@ -27,15 +46,34 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   accounts: typeof accounts;
+  assets: typeof assets;
   billing: typeof billing;
+  billingV1: typeof billingV1;
+  cloud: typeof cloud;
+  commerce: typeof commerce;
   crons: typeof crons;
+  devices: typeof devices;
+  email: typeof email;
+  gateway: typeof gateway;
+  githubEvents: typeof githubEvents;
+  githubLinks: typeof githubLinks;
+  githubOAuth: typeof githubOAuth;
   http: typeof http;
   identity: typeof identity;
+  inferenceBudget: typeof inferenceBudget;
+  integrations: typeof integrations;
+  jobs: typeof jobs;
   lib: typeof lib;
+  "lib/inference": typeof lib_inference;
+  limitsV1: typeof limitsV1;
   maintenance: typeof maintenance;
   organizations: typeof organizations;
   payments: typeof payments;
+  privacy: typeof privacy;
+  product: typeof product;
+  productSchema: typeof productSchema;
   projects: typeof projects;
+  reconciliation: typeof reconciliation;
 }>;
 
 /**
@@ -64,4 +102,7 @@ export declare const internal: FilterApi<
   FunctionReference<any, "internal">
 >;
 
-export declare const components: {};
+export declare const components: {
+  rateLimiter: import("@convex-dev/rate-limiter/_generated/component.js").ComponentApi<"rateLimiter">;
+  resend: import("@convex-dev/resend/_generated/component.js").ComponentApi<"resend">;
+};

@@ -1,20 +1,33 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["ES2022", "DOM"],
+    "lib": [
+      "ES2022",
+      "DOM"
+    ],
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "strict": true,
     "skipLibCheck": true,
     "noEmit": true,
     "allowImportingTsExtensions": true,
-    "types": ["node", "vite/client"]
+    "types": [
+      "node",
+      "vite/client"
+    ],
+    "resolveJsonModule": true
   },
   "include": [
     "convex/**/*.ts",
     "packages/company-config/**/*.ts",
     "tests/**/*.ts",
-    "vitest.config.ts"
+    "vitest.config.ts",
+    "packages/policy/**/*.ts",
+    "packages/contracts/**/*.ts",
+    "packages/providers/**/*.ts"
   ],
-  "exclude": ["node_modules", "convex/_generated"]
+  "exclude": [
+    "node_modules",
+    "convex/_generated"
+  ]
 }

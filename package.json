@@ -22,8 +22,12 @@
     "setup:local": "node scripts/setup-local.mjs"
   },
   "dependencies": {
+    "@convex-dev/rate-limiter": "0.4.0",
+    "@convex-dev/resend": "0.2.8",
     "@workos-inc/node": "10.13.0",
-    "convex": "1.45.0",
+    "convex": "1.46.0",
+    "convex-helpers": "0.1.124",
+    "e2b": "2.51.0",
     "stripe": "22.6.2",
     "zod": "4.6.1"
   },

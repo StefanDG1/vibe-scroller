@@ -11,7 +11,7 @@ export function Header() {
       </Link>
       <nav className="navlinks" aria-label="Main">
         <Link href="/app">Workspace</Link>
-        <Link href="/recipes">Designs</Link>
+        <Link href="/docs">Help</Link>
         <Link href="/account">Account</Link>
       </nav>
     </header>

@@ -28,5 +28,11 @@ export const config = {
     "/sign-in",
     "/sign-up",
     "/callback",
+    "/api/product",
+    "/api/source/:path*",
+    "/api/uploads/:path*",
+    "/api/evidence/:path*",
+    "/api/workspace/:path*",
+    "/api/github/:path*",
   ],
 };

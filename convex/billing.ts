@@ -26,6 +26,14 @@ export const throttle = internalMutation({
   handler: (ctx, { organizationId }) =>
     limit(ctx, `billing:${organizationId}`, 10),
 });
+export const byCustomer = internalQuery({
+  args: { customerId: v.string() },
+  handler: (ctx, a) =>
+    ctx.db
+      .query("billing")
+      .withIndex("by_customer", (q) => q.eq("customerId", a.customerId))
+      .unique(),
+});
 export const attach = internalMutation({
   args: { organizationId: v.id("organizations"), customerId: v.string() },
   handler: async (ctx, args) => {

@@ -1,92 +1,181 @@
+import Link from "next/link";
 import { backend, api } from "@/lib/backend";
 import type { Id } from "../../../../../../convex/_generated/dataModel";
 import { ActionForm } from "@/components/action-form";
-import { startCheckout, billingPortal, refreshBilling } from "@/app/actions";
-import { Card, Button, Badge } from "@companynerve/ui";
-import { isPaid, company } from "@companynerve/company-config";
+import {
+  startV1Checkout,
+  cancelV1Subscription,
+  buyV1Credits,
+  requestV1Refund,
+  billingPortal,
+  refreshBilling,
+} from "@/app/actions";
 export default async function Page({
   params,
 }: {
   params: Promise<{ org: string }>;
 }) {
-  const { org } = await params;
-  const data = await (
-    await backend()
-  ).query(api.billing.authorize, {
-    organizationId: org as Id<"organizations">,
-  });
-  const paid = isPaid(data.billing);
+  const { org } = await params,
+    c = await backend(),
+    organizationId = org as Id<"organizations">;
+  const [auth, catalogue, usage] = await Promise.all([
+    c.query(api.billing.authorize, { organizationId }),
+    c.query(api.commerce.catalogue, {}),
+    c.query(api.product.usage, { organizationId }),
+  ]);
   return (
-    <>
-      <h1>Billing</h1>
-      <p className="muted">
-        Manage this workspace's plan. Account and organization data exports stay
-        free.
+    <main id="main" className="doc">
+      <Link href={`/app/${org}`}>Back to workspace</Link>
+      <h1>Billing and allowances</h1>
+      <p>
+        Live checkout is disabled while official company and tax records are
+        pending. This deployment offers a capped preview without automatic paid
+        conversion.
       </p>
-      <div className="stack">
-        <Card>
-          <Badge>{paid ? "Pro" : "Free"}</Badge>
-          <h2 style={{ marginTop: 20 }}>
-            {paid ? "More room for your work." : "Start with the essentials."}
-          </h2>
+      <section className="panel">
+        <h2>Current allowance</h2>
+        <p>
+          {usage.wallet?.tier ?? "Trial not started"}. Provider status:{" "}
+          {auth.billing?.status ?? "No subscription"}.
+        </p>
+        <p>
+          Included credits expire at their entitlement period end. Purchased
+          credits are tracked separately and are not confiscated when renewal
+          stops. Credits are service units, not a cash balance.
+        </p>
+      </section>
+      <section className="panel">
+        <h2>Catalogue</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Plan</th>
+              <th>Weekly</th>
+              <th>Monthly</th>
+              <th>Annual</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>Starter</th>
+              <td>EUR 5.99 / 65 credits</td>
+              <td>EUR 19 / 250 credits</td>
+              <td>EUR 190 / 250 credits each month</td>
+            </tr>
+            <tr>
+              <th>Pro</th>
+              <td>EUR 11.99 / 150 credits</td>
+              <td>EUR 39 / 600 credits</td>
+              <td>EUR 390 / 600 credits each month</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+          Starter: three repositories, 1 GB retained library storage and 1,000
+          sources. Pro: fifteen repositories, 5 GB and 10,000 sources. Both
+          include proposal, plan and authorized PR workflows.
+        </p>
+        <p>
+          Consumer totals include applicable tax. An exemption is a separate tax
+          treatment and requires official evidence.
+        </p>
+        {catalogue.sandboxEnabled ? (
+          <ActionForm action={startV1Checkout} label="Open sandbox checkout">
+            <input type="hidden" name="organizationId" value={org} />
+            <label>
+              Plan
+              <select name="tier">
+                <option value="starter">Starter</option>
+                <option value="pro">Pro</option>
+              </select>
+            </label>
+            <label>
+              Renewal
+              <select name="interval">
+                <option value="weekly">Every seven days</option>
+                <option value="monthly">Monthly</option>
+                <option value="annual">Annual with monthly credits</option>
+              </select>
+            </label>
+            <label>
+              Billing country
+              <input
+                name="country"
+                minLength={2}
+                maxLength={2}
+                defaultValue="RO"
+                required
+              />
+            </label>
+            <label>
+              <input type="checkbox" name="terms" required />I accept the
+              displayed <Link href="/terms">terms</Link> and credit expiry
+              policy
+            </label>
+            <label>
+              <input type="checkbox" name="immediate" />I request immediate
+              service, with statutory rights and the refund policy explained
+            </label>
+            <p>
+              Sandbox only. Use Stripe test details. No real charge is
+              activated.
+            </p>
+          </ActionForm>
+        ) : (
           <p>
-            {paid ? company.plans.pro.projects : company.plans.free.projects}{" "}
-            projects per workspace.{" "}
-            {paid
-              ? "The project report is available."
-              : data.configured
-                ? "Upgrade to enable the project report and a higher project limit."
-                : "No paid subscription is offered on this deployment."}
+            Sandbox checkout is awaiting its dedicated Stripe configuration and
+            webhook verification.
           </p>
-          {data.configured && (
-            <>
-              <p className="muted">
-                {data.mode === "live"
-                  ? "Live billing is enabled for this product."
-                  : "Test billing. No real payment is required."}{" "}
-                Price and currency appear on the provider's checkout page.
-              </p>
-              <ActionForm
-                action={startCheckout}
-                label={paid ? "Manage subscription" : "Open checkout"}
-              >
-                <input type="hidden" name="organizationId" value={org} />
-              </ActionForm>
-            </>
+        )}
+      </section>
+      {auth.billing && (
+        <section className="panel">
+          <h2>Subscription controls</h2>
+          <p>
+            Cancellation preserves the paid period. Provider reconciliation
+            determines access, not the checkout return URL.
+          </p>
+          <ActionForm
+            action={cancelV1Subscription}
+            label="Cancel renewal at period end"
+          >
+            <input type="hidden" name="organizationId" value={org} />
+          </ActionForm>
+          <ActionForm action={billingPortal} label="Open billing portal">
+            <input type="hidden" name="organizationId" value={org} />
+          </ActionForm>
+          <ActionForm action={refreshBilling} label="Reconcile provider status">
+            <input type="hidden" name="organizationId" value={org} />
+          </ActionForm>
+          {catalogue.sandboxEnabled && (
+            <ActionForm action={buyV1Credits} label="Open sandbox top-up">
+              <input type="hidden" name="organizationId" value={org} />
+              <label>
+                One-time pack
+                <select name="pack">
+                  <option value="200">EUR 10 / 200 credits</option>
+                  <option value="550">EUR 25 / 550 credits</option>
+                </select>
+              </label>
+            </ActionForm>
           )}
-        </Card>
-        {data.configured && data.billing && (
-          <Card>
-            <h2>Manage and refresh</h2>
-            <p className="muted">
-              Current provider status: {data.billing.status}. Access changes
-              only after the backend verifies billing. After returning from
-              checkout or the portal, refresh here.
-            </p>
-            <div className="actions">
-              <ActionForm action={billingPortal} label="Open billing portal">
-                <input type="hidden" name="organizationId" value={org} />
-              </ActionForm>
-              <ActionForm action={refreshBilling} label="Refresh billing">
-                <input type="hidden" name="organizationId" value={org} />
-              </ActionForm>
-            </div>
-          </Card>
-        )}
-        {(data.configured || paid) && (
-          <Card>
-            <h2>Example Pro report</h2>
-            <p className="muted">
-              A server-protected project report demonstrates how to enforce a
-              paid feature. Basic account and organization data exports stay
-              free.
-            </p>
-            <Button variant="outline" asChild>
-              <a href={`/app/${org}/report`}>Download Pro report</a>
-            </Button>
-          </Card>
-        )}
-      </div>
-    </>
+          <ActionForm
+            action={requestV1Refund}
+            label="Request invoice-aware refund review"
+          >
+            <input type="hidden" name="organizationId" value={org} />
+            <label>
+              Your invoice ID
+              <input name="invoiceId" required placeholder="in_..." />
+            </label>
+          </ActionForm>
+        </section>
+      )}
+      <Link href="/refunds">Refund policy</Link>
+      <p>
+        Weekly renewals can qualify for review. The form does not waive
+        statutory consumer rights.
+      </p>
+    </main>
   );
 }

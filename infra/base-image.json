@@ -1,0 +1,7 @@
+{
+  "image": "node:24-bookworm-slim",
+  "digest": "sha256:5cbc7caba8c2c0f0bca675d1b61b9f2857e1cf1853c6164ee9dd409501a936e7",
+  "platform": "linux/amd64",
+  "source": "https://hub.docker.com/_/node",
+  "verifiedAt": "2026-09-30"
+}

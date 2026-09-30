@@ -11,6 +11,66 @@ import type { FormState } from "@/components/action-form";
 import { recipes } from "@companynerve/design-recipes";
 const val = (d: FormData, key: string) => String(d.get(key) ?? "");
 const org = (d: FormData) => val(d, "organizationId") as Id<"organizations">;
+export async function startV1Checkout(_: FormState, d: FormData) {
+  let url;
+  try {
+    url = await (
+      await backend()
+    ).action(api.billingV1.checkout, {
+      organizationId: org(d),
+      tier: val(d, "tier") as "starter" | "pro",
+      interval: val(d, "interval") as "weekly" | "monthly" | "annual",
+      country: val(d, "country"),
+      termsAccepted: d.get("terms") === "on",
+      immediateService: d.get("immediate") === "on",
+    });
+  } catch {
+    return {
+      error:
+        "Checkout unavailable. Verify the catalogue, environment, terms and tax configuration.",
+    };
+  }
+  redirect(url);
+}
+export async function cancelV1Subscription(_: FormState, d: FormData) {
+  return run(async () => {
+    await (
+      await backend()
+    ).action(api.billingV1.cancel, { organizationId: org(d) });
+    return {
+      message:
+        "Cancellation requested for the paid period end. Refresh provider status to verify.",
+    };
+  });
+}
+export async function buyV1Credits(_: FormState, d: FormData) {
+  let url;
+  try {
+    url = await (
+      await backend()
+    ).action(api.billingV1.topup, {
+      organizationId: org(d),
+      pack: val(d, "pack") as "200" | "550",
+    });
+  } catch {
+    return {
+      error:
+        "Top-up unavailable. Check the billing account and approved environment.",
+    };
+  }
+  redirect(url);
+}
+export async function requestV1Refund(_: FormState, d: FormData) {
+  return run(async () => {
+    const result = await (
+      await backend()
+    ).action(api.billingV1.requestRefund, {
+      organizationId: org(d),
+      invoiceId: val(d, "invoiceId"),
+    });
+    return { message: result.message };
+  });
+}
 const signOutUrl = () =>
   new URL(process.env.APP_URL || "http://localhost:3001").origin;
 async function run(

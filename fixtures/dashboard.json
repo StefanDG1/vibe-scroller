@@ -1,0 +1,93 @@
+{
+  "fixture": true,
+  "notice": "Synthetic data only. No real videos, customer repositories, or measured benefits.",
+  "workspaceId": "ws_demo",
+  "sources": [
+    {
+      "id": "src_demo_001",
+      "title": "Show a useful example before setup",
+      "coverage": "full_sampled",
+      "summary": "A synthetic onboarding demonstration starts with an example.",
+      "mainPoints": [
+        "Preview a useful result",
+        "Keep setup reversible"
+      ],
+      "matches": [
+        {
+          "repositoryId": "repo_demo_planner",
+          "disposition": "relevant",
+          "reason": "The synthetic first-run view is empty."
+        }
+      ],
+      "pullRequests": [
+        {
+          "providerId": "pr_demo_11",
+          "state": "closed",
+          "isDraft": false,
+          "mergedAt": "2026-09-25T12:00:00Z"
+        },
+        {
+          "providerId": "pr_demo_12",
+          "state": "open",
+          "isDraft": true,
+          "mergedAt": null
+        }
+      ],
+      "benefit": "not_measured"
+    },
+    {
+      "id": "src_demo_002",
+      "title": "Replace every database with a spreadsheet",
+      "coverage": "audio_only",
+      "summary": "A synthetic source makes an unsupported universal storage claim.",
+      "mainPoints": [
+        "The creator claims spreadsheet storage always suffices"
+      ],
+      "matches": [
+        {
+          "repositoryId": "repo_demo_workspace",
+          "disposition": "unsupported_claim",
+          "reason": "The claim ignores the project's isolation requirements."
+        }
+      ],
+      "pullRequests": [],
+      "benefit": "not_measured"
+    },
+    {
+      "id": "src_demo_003",
+      "title": "A faster image upload pattern",
+      "coverage": "full_sampled",
+      "summary": "A synthetic source demonstrates direct object uploads.",
+      "mainPoints": [
+        "Avoid routing large files through a small request handler"
+      ],
+      "matches": [
+        {
+          "repositoryId": "repo_demo_gallery",
+          "disposition": "already_implemented",
+          "reason": "The fixture already uses direct upload grants."
+        }
+      ],
+      "pullRequests": [
+        {
+          "providerId": "pr_demo_13",
+          "state": "closed",
+          "isDraft": false,
+          "mergedAt": null
+        }
+      ],
+      "benefit": "not_measured"
+    },
+    {
+      "id": "src_demo_004",
+      "title": "Unavailable private source",
+      "coverage": "metadata_only",
+      "summary": null,
+      "mainPoints": [],
+      "state": "needs_upload",
+      "matches": [],
+      "pullRequests": [],
+      "benefit": "not_measured"
+    }
+  ]
+}
