@@ -15,6 +15,7 @@
     "typecheck": "tsc --noEmit && pnpm -r --if-present typecheck",
     "test": "vitest run && vitest run --config apps/starter/vitest.auth.config.ts",
     "validate": "node scripts/validate.mjs",
+    "benchmark": "node scripts/evaluate-benchmark.ts",
     "check": "pnpm validate && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "convex:dev": "convex dev",
     "template:export": "node scripts/export-template.mjs",
