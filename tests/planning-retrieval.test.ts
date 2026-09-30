@@ -14,6 +14,68 @@ const syntheticPlan = {
   rollback: "Revert",
   unknowns: [],
 };
+it("denies foreign tenant read/write routes and rejects an asset linked across workspaces", async () => {
+  const { t, a, b, org, sourceId, proposalId, foreign } = await setup();
+  const workspace = { organizationId: org };
+  const calls = [
+    () => b.query(api.product.library, workspace),
+    () => b.query(api.product.overview, workspace),
+    () => b.query(api.product.repositories, workspace),
+    () => b.query(api.product.proposals, workspace),
+    () => b.query(api.product.usage, workspace),
+    () => b.query(api.product.detail, { id: sourceId }),
+    () => b.query(api.product.proposal, { id: proposalId }),
+    () => b.query(api.jobs.connections, workspace),
+    () => b.query(api.jobs.customerRoutes, workspace),
+    () => b.query(api.devices.list, workspace),
+    () => b.query(api.commerce.invoiceTasks, workspace),
+    () =>
+      b.query(api.jobs.exportPage, {
+        ...workspace,
+        section: "sources",
+        cursor: null,
+        asOf: Date.now(),
+      }),
+    () =>
+      b.mutation(api.product.editSource, {
+        id: sourceId,
+        summary: "Foreign edit",
+        tags: [],
+      }),
+    () => b.mutation(api.product.deleteSource, { id: sourceId }),
+    () =>
+      b.mutation(api.commerce.preferences, {
+        ...workspace,
+        email: true,
+        telegram: false,
+        analytics: false,
+        legalVersion: "synthetic",
+      }),
+  ];
+  for (const call of calls) {
+    await expect(call()).rejects.toThrow();
+  }
+  expect((await a.query(api.product.detail, { id: sourceId })).title).toBe(
+    "Synthetic main point",
+  );
+  const asset = await t.run(async (ctx) => {
+    const repo = (await ctx.db.get(foreign))!;
+    return ctx.db.insert("assets", {
+      organizationId: repo.organizationId,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      key: "synthetic-private-object",
+      sourceId,
+      size: 1,
+      type: "image/png",
+      state: "complete",
+    });
+  });
+  await expect(a.query(api.assets.evidence, { id: asset })).rejects.toThrow();
+  await expect(b.query(api.assets.evidence, { id: asset })).rejects.toThrow(
+    "Evidence unavailable",
+  );
+});
 async function setup() {
   const t = convexTest(schema, modules);
   const owner = await t.mutation(internal.accounts.syncUser, {

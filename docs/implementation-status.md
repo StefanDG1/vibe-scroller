@@ -19,15 +19,15 @@ Repository: https://github.com/StefanDG1/vibe-scroller
 | WP05    | in_progress      | Atomic reservations, stage commits and workflows; interruption/cost reconciliation pending                            |
 | WP06    | blocked_external | Real isolated decode and transcription; vision license and usage verification pending                                 |
 | WP07    | in_progress      | Search, pagination, export, retention and deletion implemented; full browser/deletion evidence pending                |
-| WP08    | in_progress      | Selected GitHub App, hashed excerpts and Repomix tree; AI profile draft implemented, staging confirmation pending     |
-| WP09    | in_progress      | Evidence-bound matching and plans; complete abstention and quality evaluation pending                                 |
-| WP10    | in_progress      | Real free managed route; encrypted keys stored, customer-key execution route incomplete                               |
+| WP08    | in_progress      | Selected GitHub App, nested exclusions, hash reuse and Repomix tree; real profile draft passed; quality benchmark pending     |
+| WP09    | in_progress      | Semantic selection returned honest no-fit; reviewed AI draft plan implemented; live matching limited by free allowance                                 |
+| WP10    | in_progress      | Real free managed route; revision-bound customer-key broker implemented; funded customer request not tested                               |
 | WP11    | blocked_external | Pairing/lease/result code and vault test; actual native isolation failed                                              |
 | WP12    | in_progress      | Real isolated metered cloud coding produced a reviewed patch; cost calibration and outage cases remain                |
 | WP13    | in_progress      | Real draft PR 3 and automatic reopen/closure; merge/revert/access-loss staging remains                                |
 | WP14    | in_progress      | Private inbox and generic email integration; hosted email opt-in test pending; Telegram deferred by user              |
-| WP15    | in_progress      | Real six-price sandbox renewals, top-up, refund and plan changes; multi-payment invoice refund reconciliation remains |
-| WP16    | in_progress      | Security/privacy boundaries and private evidence; isolated restore and complete tenant/rotation matrix remain         |
+| WP15    | in_progress      | Real six-price sandbox lifecycle and two-payment invoice refunds; ledger tests passed; complete app invoice reconciliation pending |
+| WP16    | in_progress      | Deletion markers, locked recovery, offline encrypted restore and runtime key rotation passed; hosted restore and tenant matrix remain         |
 | WP17    | in_progress      | 85 tests and both builds; benchmark, physical devices and final artifact review incomplete                            |
 | WP18    | blocked_external | Official company/tax evidence, legal publication and production verification remain                                   |
 
@@ -280,3 +280,9 @@ Three targeted planning/retrieval tests passed, including exact approval replay,
 Chrome permission returned and the second exposed Stripe sandbox key was rotated with immediate expiry. The old key returned HTTP 401, the replacement matched the dedicated staging account, and Convex/local runtime configuration was updated without printing it. Both exposed staging keys are now replaced. The search incident and earlier failure remain recorded in infra/credential-search-incident.json. This does not claim a production security review.
 
 The next full `pnpm check` passed 78 document checks and 12 skill snapshots, lint, all TypeScript checks, 93 root tests plus 10 authentication tests, and both production builds. Three staging tests were skipped by default. Output is `outputs/check-20260930-recovery-planning.log`. Dedicated Convex development deployment completed at 13:44 Berlin time. After hosted GitHub reconnection, the actual profile draft passed; subsequent matching stopped at PROVIDER_LIMIT. No paid fallback or fabricated relevant proposal was used.
+
+Commit `9a609467f10372db04bc10a13903c37440add430` passed GitHub CI `36710533262` and Linux packaging `36710533261`. The packaged frontend deployed to Worker version `9ad0b8d3-0c25-43ea-94fa-6a78eb0ff64c`, startup 18 ms. Comparing 3,959 artifact files found zero configured credential occurrences. The staged scanner initially flagged three synthetic request identifiers, which received exact-line test annotations; the final staged scan passed. Historical generated-artifact candidate review remains open.
+
+Authenticated hosted library and source detail loaded on this package. New main-point/project-selection controls were visible in the accessibility tree. The 390-pixel source detail had document width 390 and no resource-limit error. An authenticated route returned HTTP 200 with private, no-store and CSP. No additional inference request was issued during this browser check. This is focused responsive/header verification, not the full mobile or accessibility acceptance suite.
+
+A subsequent synthetic tenant matrix denied 15 foreign-workspace read/write operations and rejected a complete asset pointing across workspace boundaries for both workspace owners. The owned source remained unchanged. `pnpm exec vitest run tests/planning-retrieval.test.ts` passed four tests, including this new matrix, then `pnpm typecheck` and `pnpm lint` passed. This adds one test after the 103-test full checkpoint; a full all-endpoint/table matrix and HTTP evidence-route acceptance are still incomplete. Only tests and documentation changed after deployed commit 9a60946.
