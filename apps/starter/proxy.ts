@@ -33,6 +33,7 @@ export const config = {
     "/api/uploads/:path*",
     "/api/evidence/:path*",
     "/api/workspace/:path*",
+    "/api/library/:path*",
     "/api/github/:path*",
   ],
 };

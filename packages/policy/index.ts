@@ -5,7 +5,8 @@ export class PolicyError extends Error {
     public code: string,
     message: string,
   ) {
-    super(message);
+    super(`${code}: ${message}`);
+    this.name = "PolicyError";
   }
 }
 export function ensure(ok: unknown, code: string, message: string): asserts ok {
@@ -35,6 +36,7 @@ export function safeSourceUrl(raw: string) {
     "UNSUPPORTED_SOURCE",
     "This source requires a permitted upload or supplied transcript.",
   );
+  // oxlint-disable-next-line unicorn/no-useless-spread -- Copy before deleting from this mutable iterator.
   for (const k of [...u.searchParams.keys()])
     if (k !== "v" && k !== "t") u.searchParams.delete(k);
   u.hash = "";
@@ -47,6 +49,7 @@ export function safePath(p: string) {
     !p.startsWith("/") &&
     !p.includes(":") &&
     !p.split("/").some((s) => s === ".." || s === "." || !s) &&
+    // oxlint-disable-next-line no-control-regex -- Reject control characters in repository paths.
     !/[\x00-\x1f]/.test(p)
   );
 }

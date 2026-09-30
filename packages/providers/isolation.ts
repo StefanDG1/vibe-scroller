@@ -10,8 +10,7 @@ if command -v getcap >/dev/null; then
 fi
 nft add table inet vibe
 nft 'add chain inet vibe output { type filter hook output priority -150; policy accept; }'
-nft 'add rule inet vibe output meta skuid != 0 ip daddr != 127.0.0.0/8 reject'
-nft 'add rule inet vibe output meta skuid != 0 ip6 daddr != ::1 reject'
+nft 'add rule inet vibe output meta skuid != 0 reject'
 test -z "$(find /usr /bin /sbin -xdev -type f -perm /6000 2>/dev/null)"
 `;
 

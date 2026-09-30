@@ -27,6 +27,7 @@ import type * as inferenceBudget from "../inferenceBudget.js";
 import type * as integrations from "../integrations.js";
 import type * as jobs from "../jobs.js";
 import type * as lib from "../lib.js";
+import type * as lib_githubAuthorization from "../lib/githubAuthorization.js";
 import type * as lib_inference from "../lib/inference.js";
 import type * as limitsV1 from "../limitsV1.js";
 import type * as maintenance from "../maintenance.js";
@@ -64,6 +65,7 @@ declare const fullApi: ApiFromModules<{
   integrations: typeof integrations;
   jobs: typeof jobs;
   lib: typeof lib;
+  "lib/githubAuthorization": typeof lib_githubAuthorization;
   "lib/inference": typeof lib_inference;
   limitsV1: typeof limitsV1;
   maintenance: typeof maintenance;

@@ -1,8 +1,7 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { access, fail, limit } from "./lib";
+import { access, fail, limit, recentAuthentication } from "./lib";
 import { ensure } from "../packages/policy";
-import { digest } from "./product";
 export const list = query({
   args: { organizationId: v.id("organizations") },
   handler: async (ctx, a) => {
@@ -11,7 +10,9 @@ export const list = query({
       .query("devices")
       .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
       .collect();
-    return rows.map(({ codeHash, credentialHash, ...d }) => d);
+    return rows.map(
+      ({ codeHash: _codeHash, credentialHash: _credentialHash, ...d }) => d,
+    );
   },
 });
 export const start = mutation({
@@ -23,6 +24,7 @@ export const start = mutation({
   },
   handler: async (ctx, a) => {
     const u = await access(ctx, a.organizationId, ["owner", "admin"]);
+    await recentAuthentication(ctx);
     await limit(ctx, `pair:${u.actor._id}`, 3);
     ensure(
       /^[a-f0-9]{64}$/.test(a.fingerprint) &&
@@ -54,6 +56,7 @@ export const approve = mutation({
     const d = await ctx.db.get(a.id);
     if (!d) fail("Device unavailable.");
     const u = await access(ctx, d.organizationId);
+    await recentAuthentication(ctx);
     ensure(
       d.owner === u.actor._id &&
         d.fingerprint === a.fingerprint &&

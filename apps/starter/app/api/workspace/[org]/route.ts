@@ -27,6 +27,7 @@ export async function GET(
     return Response.json(
       {
         sources: library.items,
+        libraryNext: library.next,
         repositories,
         proposals,
         runs: overview.runs,

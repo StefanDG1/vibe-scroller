@@ -1,9 +1,41 @@
-import { Resend } from "@convex-dev/resend";
+import { Resend, type EmailId } from "@convex-dev/resend";
 import { components } from "./_generated/api";
-import { internalMutation } from "./_generated/server";
+import { internalMutation, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
 export const resend: Resend = new Resend(components.resend, {
   testMode: process.env.EMAIL_REAL_DELIVERY_ENABLED !== "true",
+});
+export const stagingDeliveryTest = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    if (
+      !process.env.RESEND_FROM ||
+      !process.env.RESEND_API_KEY ||
+      !process.env.RESEND_WEBHOOK_SECRET
+    )
+      throw new Error("Dedicated staging email configuration is required.");
+    const staging = new Resend(components.resend, { testMode: false });
+    return staging.sendEmail(ctx, {
+      from: process.env.RESEND_FROM,
+      to: "delivered@resend.dev",
+      subject: "VibeScroller synthetic component delivery test",
+      text: "Synthetic integration test through the delivery component. No private source or repository content is included.",
+      idempotencyKey: "vibescroller-component-staging-delivery-v1",
+    });
+  },
+});
+export const stagingDeliveryStatus = internalQuery({
+  args: { id: v.string() },
+  handler: async (ctx, a) => {
+    const status = await resend.status(ctx, a.id as EmailId);
+    return status
+      ? {
+          status: status.status,
+          bounced: status.bounced,
+          failed: status.failed,
+        }
+      : null;
+  },
 });
 export const notify = internalMutation({
   args: { organizationId: v.id("organizations"), key: v.string() },

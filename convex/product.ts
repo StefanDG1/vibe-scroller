@@ -8,12 +8,7 @@ import { v } from "convex/values";
 import { access, fail, limit, audit } from "./lib";
 import { productLimits } from "./limitsV1";
 import { internal } from "./_generated/api";
-import {
-  safeSourceUrl,
-  ensure,
-  containsSecret,
-  validatePaths,
-} from "../packages/policy";
+import { safeSourceUrl, ensure, containsSecret } from "../packages/policy";
 import {
   insightOutput,
   proposalOutput,
@@ -262,38 +257,114 @@ export const library = query({
     ...org,
     search: v.optional(v.string()),
     state: v.optional(v.string()),
-    cursor: v.optional(v.number()),
+    cursor: v.optional(v.string()),
   },
   handler: async (ctx, a) => {
     await access(ctx, a.organizationId);
-    const start = a.cursor ?? 0;
-    const rows = await ctx.db
-      .query("sources")
-      .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
-      .order("desc")
-      .take(1000);
-    const active = rows.filter((s) => s.state !== "deleted");
-    const filtered = active.filter(
-      (s) =>
-        (!a.state || s.state === a.state) &&
-        (!a.search ||
-          [s.title, s.summary, s.text, ...s.tags]
-            .join(" ")
-            .toLowerCase()
-            .includes(a.search.toLowerCase())),
+    ensure(
+      !a.search || a.search.length <= 200,
+      "INVALID_INPUT",
+      "Search is too long.",
     );
+    const sourceState = [
+      "saved",
+      "needs_upload",
+      "queued",
+      "processing",
+      "ready",
+      "failed",
+    ].includes(a.state ?? "")
+      ? a.state
+      : undefined;
+    const disposition = [
+      "no_fit",
+      "already_implemented",
+      "unsupported_claim",
+      "needs_context",
+    ].includes(a.state ?? "")
+      ? a.state
+      : undefined;
+    ensure(
+      !a.state || sourceState || disposition,
+      "INVALID_INPUT",
+      "Invalid source filter.",
+    );
+    const query = a.search?.trim()
+      ? ctx.db
+          .query("sources")
+          .withSearchIndex("source_search", (q) => {
+            const tenant = q
+              .search("searchable", a.search!.trim())
+              .eq("organizationId", a.organizationId);
+            return sourceState
+              ? tenant.eq("state", sourceState as any)
+              : tenant;
+          })
+          .filter((q) => q.neq(q.field("state"), "deleted"))
+      : ctx.db
+          .query("sources")
+          .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
+          .order("desc")
+          .filter((q) =>
+            sourceState
+              ? q.eq(q.field("state"), sourceState)
+              : q.neq(q.field("state"), "deleted"),
+          );
+    const result = await query.paginate({
+      numItems: 30,
+      cursor: a.cursor ?? null,
+    });
+    const page = [];
+    for (const source of result.page) {
+      if (
+        !disposition ||
+        (
+          await ctx.db
+            .query("proposals")
+            .withIndex("by_source", (q) => q.eq("sourceId", source._id))
+            .collect()
+        ).some((proposal) => proposal.detail.disposition === disposition)
+      )
+        page.push(source);
+    }
     return {
-      items: filtered
-        .slice(start, start + 30)
-        .map(({ text, analysis, objectKey, ...s }) => ({
-          ...s,
+      items: page.map(
+        ({
+          text: _text,
+          analysis,
+          objectKey: _objectKey,
+          searchable: _searchable,
+          ...source
+        }) => ({
+          ...source,
           mainPoints:
             analysis?.insights?.slice(0, 3).map((i: any) => i.title) ?? [],
-        })),
-      next: start + 30 < filtered.length ? start + 30 : null,
-      total: filtered.length,
-      libraryTotal: active.length,
+        }),
+      ),
+      next: result.isDone ? null : result.continueCursor,
+      total: result.isDone && !a.cursor ? page.length : null,
     };
+  },
+});
+export const backfillSearch = internalMutation({
+  args: { cursor: v.optional(v.string()) },
+  handler: async (ctx, a) => {
+    const result = await ctx.db
+      .query("sources")
+      .paginate({ numItems: 20, cursor: a.cursor ?? null });
+    for (const source of result.page)
+      await ctx.db.patch(source._id, {
+        searchable:
+          source.state === "deleted"
+            ? ""
+            : [source.title, source.summary, source.text, ...source.tags]
+                .filter(Boolean)
+                .join(" "),
+      });
+    if (!result.isDone)
+      await ctx.scheduler.runAfter(0, internal.product.backfillSearch, {
+        cursor: result.continueCursor,
+      });
   },
 });
 export const detail = query({
@@ -461,6 +532,7 @@ export const capture = mutation({
     const id = await ctx.db.insert("sources", {
       ...a,
       canonical,
+      searchable: [a.title, a.text].filter(Boolean).join(" "),
       state: a.kind === "url" ? "needs_upload" : "saved",
       coverage: a.kind === "text" ? "caption_only" : "metadata_only",
       tags: [],
@@ -578,6 +650,9 @@ export const commitAnalysis = internalMutation({
       state: analysis ? "ready" : "failed",
       analysis,
       summary: analysis?.summary,
+      searchable: [s.title, analysis?.summary, s.text, ...s.tags]
+        .filter(Boolean)
+        .join(" "),
       coverage: analysis?.coverage ?? s.coverage,
       error: a.error,
       updatedAt: Date.now(),
@@ -618,6 +693,9 @@ export const editSource = mutation({
     );
     await ctx.db.patch(s._id, {
       summary: a.summary,
+      searchable: [s.title, a.summary, a.correctedText ?? s.text, ...a.tags]
+        .filter(Boolean)
+        .join(" "),
       tags: a.tags,
       analysis: a.correctedText
         ? {
@@ -703,6 +781,7 @@ export const attachSource = mutation({
       coverage: a.text ? "caption_only" : "metadata_only",
       summary: undefined,
       analysis: undefined,
+      searchable: [s.title, a.text, ...s.tags].filter(Boolean).join(" "),
       error: undefined,
       generation: s.generation + 1,
       updatedAt: Date.now(),
@@ -758,6 +837,7 @@ export async function redactSource(ctx: MutationCtx, id: Id<"sources">) {
     canonical: `deleted:${id}`,
     key: `deleted:${id}`,
     title: "Deleted source",
+    searchable: "",
     summary: undefined,
     text: undefined,
     analysis: undefined,
@@ -901,10 +981,19 @@ export const addProposal = internalMutation({
     sourceId: v.id("sources"),
     repositoryId: v.id("repositories"),
     detail: v.any(),
+    matchKey: v.optional(v.string()),
+    sourceGeneration: v.optional(v.number()),
   },
   handler: async (ctx, a) => {
     const s = await ctx.db.get(a.sourceId),
       r = await ctx.db.get(a.repositoryId);
+    const matchingJob = a.matchKey
+      ? await ctx.db
+          .query("matchingJobs")
+          .withIndex("by_key", (q) => q.eq("key", a.matchKey!))
+          .unique()
+      : null;
+    if (matchingJob?.proposalId) return matchingJob.proposalId;
     if (
       !s ||
       s.state === "deleted" ||
@@ -913,6 +1002,11 @@ export const addProposal = internalMutation({
       !r.enabled
     )
       return;
+    ensure(
+      a.sourceGeneration === undefined || s.generation === a.sourceGeneration,
+      "APPROVAL_STALE",
+      "Source context changed during matching.",
+    );
     const d: any = proposalOutput.parse(a.detail);
     ensure(
       d.baseSha === r.sha &&
@@ -929,10 +1023,10 @@ export const addProposal = internalMutation({
       );
     const insights = s.analysis?.insights ?? [];
     const insightIds = new Set(insights.map((i: any) => i.id));
+    const evidenceKey = (e: any) =>
+      JSON.stringify([e.kind, e.id, e.startMs, e.endMs]);
     const evidence = new Set(
-      insights.flatMap((i: any) =>
-        i.evidence.map((e: any) => JSON.stringify(e)),
-      ),
+      insights.flatMap((i: any) => i.evidence.map(evidenceKey)),
     );
     ensure(
       d.insightIds.every((id: string) => insightIds.has(id)),
@@ -940,12 +1034,12 @@ export const addProposal = internalMutation({
       "Invented insight reference.",
     );
     ensure(
-      d.sourceEvidence.every((e: any) => evidence.has(JSON.stringify(e))),
+      d.sourceEvidence.every((e: any) => evidence.has(evidenceKey(e))),
       "INVALID_EVIDENCE",
       "Invented source evidence.",
     );
     const now = Date.now();
-    return ctx.db.insert("proposals", {
+    const proposalId = await ctx.db.insert("proposals", {
       organizationId: s.organizationId,
       createdAt: now,
       updatedAt: now,
@@ -959,6 +1053,13 @@ export const addProposal = internalMutation({
       review: "unreviewed",
       version: 1,
     });
+    if (matchingJob)
+      await ctx.db.patch(matchingJob._id, {
+        proposalId,
+        state: "completed",
+        updatedAt: Date.now(),
+      });
+    return proposalId;
   },
 });
 export const feedback = mutation({

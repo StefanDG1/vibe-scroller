@@ -4,7 +4,12 @@ import { Header } from "@/components/header";
 import { ActionForm } from "@/components/action-form";
 import { createOrganization } from "@/app/actions";
 import { Card, Input, Label, Badge } from "@companynerve/ui";
-export default async function Page() {
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ draft?: string }>;
+}) {
+  const draft = (await searchParams).draft?.slice(0, 2048);
   const data = await (await backend()).query(api.accounts.current, {});
   return (
     <div className="container">
@@ -17,7 +22,11 @@ export default async function Page() {
         <div className="project-grid">
           {data.organizations.map((o) => (
             <Link
-              href={"/app/" + o.id}
+              href={
+                "/app/" +
+                o.id +
+                (draft ? `?draft=${encodeURIComponent(draft)}` : "")
+              }
               className="card project-link"
               key={o.id}
             >

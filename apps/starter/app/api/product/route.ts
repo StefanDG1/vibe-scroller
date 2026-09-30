@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
       { result },
       { headers: { "Cache-Control": "no-store" } },
     );
-  } catch (e) {
+  } catch {
     return NextResponse.json(
       {
         error:

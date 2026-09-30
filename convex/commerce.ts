@@ -7,13 +7,7 @@ import {
 import { v } from "convex/values";
 import { access } from "./lib";
 import { wallet } from "./product";
-import {
-  pricing,
-  ensure,
-  monthlyAnchor,
-  taxTreatment,
-  invoiceDeadline,
-} from "../packages/policy";
+import { pricing, ensure } from "../packages/policy";
 export const catalogue = query({
   args: {},
   handler: () => ({
@@ -22,7 +16,7 @@ export const catalogue = query({
     liveEnabled: false,
     sandboxEnabled:
       process.env.STRIPE_MODE !== "live" &&
-      /^sk_test_/.test(process.env.STRIPE_SECRET_KEY ?? "") &&
+      (process.env.STRIPE_SECRET_KEY ?? "").startsWith("sk_test_") &&
       !!process.env.STRIPE_V1_WEBHOOK_SECRET &&
       [
         "STARTER_WEEKLY",

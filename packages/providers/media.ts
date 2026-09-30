@@ -2,8 +2,6 @@ import { Sandbox } from "e2b";
 import { hardenSandbox } from "./isolation";
 import { signedObject } from "./storage";
 import { ensure } from "../policy";
-import { structured, usageCredits } from "./openai";
-import insightSchema from "../../contracts/insight.schema.json";
 export async function prepareMedia(objectKey: string, decoder: string) {
   ensure(
     process.env.MEDIA_VERIFIED === "true" &&

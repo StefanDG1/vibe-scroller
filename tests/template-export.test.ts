@@ -17,6 +17,9 @@ it("exports credential placeholders without local identity configuration and ref
   const work = join(root, "work");
   mkdirSync(work, { recursive: true });
   const fixture = mkdtempSync(join(work, "auth-export-"));
+  // Only the uniquely created fixture below this repository's work directory.
+  if (!fixture.startsWith(work + "/") && !fixture.startsWith(work + "\\"))
+    throw new Error("Unexpected export fixture path");
   const source = join(fixture, "source");
   const output = join(fixture, "product");
   const put = (path: string, value: string) => {
@@ -135,9 +138,6 @@ it("exports credential placeholders without local identity configuration and ref
       "Product owner's existing work\n",
     );
   } finally {
-    // Only the uniquely created fixture below this repository's work directory.
-    if (!fixture.startsWith(work + "/") && !fixture.startsWith(work + "\\"))
-      throw new Error("Unexpected export fixture path");
     rmSync(fixture, { recursive: true, force: true });
   }
 });

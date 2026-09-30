@@ -14,7 +14,7 @@
   "createdAt": "2026-09-30T01:07:37.778Z",
   "verified": true,
   "isolationEvidence": {
-    "time": "2026-09-30T01:20:53.988Z",
+    "time": "2026-09-30T02:26:31.440Z",
     "target": "vibescroller-v1-node24-media:pinned-abb476c3-c9df-48b8-8576-2751c5c45d92",
     "checks": {
       "unprivileged": true,
@@ -23,6 +23,9 @@
       "no_provider_credentials": true,
       "external_network_denied": true,
       "metadata_network_denied": true,
+      "trusted_loopback_denied": true,
+      "control_service_denied": true,
+      "no_effective_capabilities": true,
       "sudo_escalation_denied": true
     },
     "crossSandboxDenied": true,

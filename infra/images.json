@@ -1,5 +1,20 @@
 {
-  "media": {"digest":null,"verified":false,"tools":["FFmpeg","ffprobe","Python","PySceneDetect","yt-dlp"],"network":"disabled during decode","maxRuntimeSeconds":300,"maxBytes":250000000},
-  "coding": {"digest":null,"verified":false,"vcpu":2,"memoryGiB":4,"maxRuntimeSeconds":1200,"network":"disabled","secrets":"none in sandbox"},
+  "media": {
+    "digest": null,
+    "verified": false,
+    "tools": ["FFmpeg", "ffprobe", "Python", "PySceneDetect", "yt-dlp"],
+    "network": "disabled during decode",
+    "maxRuntimeSeconds": 300,
+    "maxBytes": 250000000
+  },
+  "coding": {
+    "digest": null,
+    "verified": false,
+    "vcpu": 2,
+    "memoryGiB": 4,
+    "maxRuntimeSeconds": 1200,
+    "network": "disabled",
+    "secrets": "none in sandbox"
+  },
   "publication": "trusted backend only"
 }

@@ -1,9 +1,78 @@
 import Stripe from "stripe";
-import {readFile} from "node:fs/promises";
-const pricing=JSON.parse(await readFile(new URL("../contracts/pricing.json",import.meta.url)));
-const key=process.env.STRIPE_SECRET_KEY;
-if(!key?.startsWith("sk_test_"))throw new Error("Catalogue setup requires an explicitly supplied sandbox secret key. Live products are never created by this script.");
-const client=new Stripe(key);const all=await client.products.list({limit:100});
-const product=all.data.find(p=>p.metadata.product==="vibescroller"&&p.metadata.catalogue==="1.0.0")??await client.products.create({name:"VibeScroller",metadata:{product:"vibescroller",catalogue:"1.0.0"}},{idempotencyKey:"vibescroller:catalogue:1.0.0"});
-for(const [tier,p] of Object.entries(pricing.tiers))for(const interval of ["weekly","monthly","annual"]){const lookup=`vibescroller_1_0_0_${tier}_${interval}`,old=await client.prices.list({lookup_keys:[lookup],limit:1});const price=old.data[0]??await client.prices.create({product:product.id,currency:"eur",unit_amount:Math.round(p[`${interval}_price_eur`]*100),tax_behavior:"inclusive",recurring:interval==="weekly"?{interval:"week"}:interval==="monthly"?{interval:"month"}:{interval:"year"},lookup_key:lookup,metadata:{product:"vibescroller",tier,interval,catalogue:"1.0.0"}},{idempotencyKey:lookup});console.log(`STRIPE_${tier.toUpperCase()}_${interval.toUpperCase()}_PRICE_ID=${price.id}`);}
-for(const pack of pricing.topups){const lookup=`vibescroller_1_0_0_topup_${pack.credits}`,old=await client.prices.list({lookup_keys:[lookup],limit:1});const price=old.data[0]??await client.prices.create({product:product.id,currency:"eur",unit_amount:Math.round(pack.price_eur*100),tax_behavior:"inclusive",lookup_key:lookup,metadata:{product:"vibescroller",credits:String(pack.credits),catalogue:"1.0.0"}},{idempotencyKey:lookup});console.log(`STRIPE_TOPUP_${pack.credits}_PRICE_ID=${price.id}`);}
+import { readFile } from "node:fs/promises";
+const pricing = JSON.parse(
+  await readFile(new URL("../contracts/pricing.json", import.meta.url)),
+);
+const key = process.env.STRIPE_SECRET_KEY;
+if (!key?.startsWith("sk_test_"))
+  throw new Error(
+    "Catalogue setup requires an explicitly supplied sandbox secret key. Live products are never created by this script.",
+  );
+const client = new Stripe(key);
+const all = await client.products.list({ limit: 100 });
+const product =
+  all.data.find(
+    (p) =>
+      p.metadata.product === "vibescroller" && p.metadata.catalogue === "1.0.0",
+  ) ??
+  (await client.products.create(
+    {
+      name: "VibeScroller",
+      metadata: { product: "vibescroller", catalogue: "1.0.0" },
+    },
+    { idempotencyKey: "vibescroller:catalogue:1.0.0" },
+  ));
+for (const [tier, p] of Object.entries(pricing.tiers))
+  for (const interval of ["weekly", "monthly", "annual"]) {
+    const lookup = `vibescroller_1_0_0_${tier}_${interval}`,
+      old = await client.prices.list({ lookup_keys: [lookup], limit: 1 });
+    const price =
+      old.data[0] ??
+      (await client.prices.create(
+        {
+          product: product.id,
+          currency: "eur",
+          unit_amount: Math.round(p[`${interval}_price_eur`] * 100),
+          tax_behavior: "inclusive",
+          recurring:
+            interval === "weekly"
+              ? { interval: "week" }
+              : interval === "monthly"
+                ? { interval: "month" }
+                : { interval: "year" },
+          lookup_key: lookup,
+          metadata: {
+            product: "vibescroller",
+            tier,
+            interval,
+            catalogue: "1.0.0",
+          },
+        },
+        { idempotencyKey: lookup },
+      ));
+    console.log(
+      `STRIPE_${tier.toUpperCase()}_${interval.toUpperCase()}_PRICE_ID=${price.id}`,
+    );
+  }
+for (const pack of pricing.topups) {
+  const lookup = `vibescroller_1_0_0_topup_${pack.credits}`,
+    old = await client.prices.list({ lookup_keys: [lookup], limit: 1 });
+  const price =
+    old.data[0] ??
+    (await client.prices.create(
+      {
+        product: product.id,
+        currency: "eur",
+        unit_amount: Math.round(pack.price_eur * 100),
+        tax_behavior: "inclusive",
+        lookup_key: lookup,
+        metadata: {
+          product: "vibescroller",
+          credits: String(pack.credits),
+          catalogue: "1.0.0",
+        },
+      },
+      { idempotencyKey: lookup },
+    ));
+  console.log(`STRIPE_TOPUP_${pack.credits}_PRICE_ID=${price.id}`);
+}

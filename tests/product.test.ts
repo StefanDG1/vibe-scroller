@@ -434,3 +434,202 @@ describe("VibeScroller product boundaries", () => {
     });
   });
 });
+
+describe("V1 library and resource allowances", () => {
+  it("pages beyond the first thirty sources and searches only the authorized workspace", async () => {
+    const { t, a, org, other } = await setup();
+    await t.run(async (ctx) => {
+      for (let i = 0; i < 45; i++)
+        await ctx.db.insert("sources", {
+          organizationId: org,
+          key: `synthetic-page-${i}`,
+          canonical: `synthetic-page-${i}`,
+          kind: "text",
+          title: `Synthetic pagination ${i}`,
+          text: "test content",
+          searchable: `Synthetic pagination ${i}`,
+          state: "saved",
+          coverage: "caption_only",
+          tags: [],
+          rightsAttested: true,
+          generation: 0,
+          createdAt: i,
+          updatedAt: i,
+        });
+      await ctx.db.insert("sources", {
+        organizationId: other,
+        key: "foreign-synthetic",
+        canonical: "foreign-synthetic",
+        kind: "text",
+        title: "foreign marker",
+        searchable: "uniqueforeignmarker",
+        state: "saved",
+        coverage: "caption_only",
+        tags: [],
+        rightsAttested: true,
+        generation: 0,
+        createdAt: 1,
+        updatedAt: 1,
+      });
+    });
+    const first = await a.query(api.product.library, { organizationId: org });
+    expect(first.items).toHaveLength(30);
+    expect(first.next).toBeTruthy();
+    const second = await a.query(api.product.library, {
+      organizationId: org,
+      cursor: first.next!,
+    });
+    expect(second.items).toHaveLength(15);
+    expect(second.next).toBeNull();
+    expect(
+      new Set([...first.items, ...second.items].map((source) => source._id))
+        .size,
+    ).toBe(45);
+    expect(
+      (
+        await a.query(api.product.library, {
+          organizationId: org,
+          search: "uniqueforeignmarker",
+        })
+      ).items,
+    ).toHaveLength(0);
+    await expect(
+      a.query(api.product.library, { organizationId: org, state: "deleted" }),
+    ).rejects.toThrow();
+  });
+  it("reserves pending upload bytes within the retained storage allowance", async () => {
+    const { a, org } = await setup();
+    for (let i = 0; i < 4; i++)
+      await a.mutation(api.assets.grant, {
+        organizationId: org,
+        key: `${org}/synthetic-${i}`,
+        size: 250000000,
+        type: "video/mp4",
+      });
+    await expect(
+      a.mutation(api.assets.grant, {
+        organizationId: org,
+        key: `${org}/synthetic-over`,
+        size: 1,
+        type: "video/mp4",
+      }),
+    ).rejects.toThrow();
+  });
+  it("requires fresh authentication before pairing and consumes approval once", async () => {
+    const { t, org } = await setup();
+    const stale = t.withIdentity({
+      subject: "a",
+      auth_time: Math.floor(Date.now() / 1000) - 301,
+    });
+    const fresh = t.withIdentity({
+      subject: "a",
+      auth_time: Math.floor(Date.now() / 1000),
+    });
+    const args = {
+      organizationId: org,
+      name: "Synthetic isolated device",
+      fingerprint: "a".repeat(64),
+      codeHash: "b".repeat(64),
+    };
+    await expect(stale.mutation(api.devices.start, args)).rejects.toThrow();
+    const id = await fresh.mutation(api.devices.start, args);
+    const approve = {
+      id,
+      fingerprint: args.fingerprint,
+      credentialHash: "c".repeat(64),
+    };
+    await expect(
+      stale.mutation(api.devices.approve, approve),
+    ).rejects.toThrow();
+    await fresh.mutation(api.devices.approve, approve);
+    await expect(
+      fresh.mutation(api.devices.approve, approve),
+    ).rejects.toThrow();
+  });
+});
+
+describe("persisted matching jobs", () => {
+  it("rejects concurrent duplicates, permits a bounded failed retry and reuses the committed proposal", async () => {
+    const { t, a, org } = await setup();
+    const sourceId = await t.run((ctx) =>
+      ctx.db.insert("sources", {
+        organizationId: org,
+        key: "synthetic-match",
+        canonical: "synthetic-match",
+        kind: "text",
+        title: "Synthetic matching boundary",
+        text: "Synthetic permitted note",
+        state: "ready",
+        coverage: "caption_only",
+        tags: [],
+        rightsAttested: true,
+        generation: 1,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        analysis: insightOutput.parse(fixture),
+      }),
+    );
+    const repositoryId = await t.mutation(internal.jobs.saveRepository, {
+      organizationId: org,
+      installationId: 1,
+      providerId: 1,
+      fullName: "test/synthetic",
+      sha: "a".repeat(40),
+      branch: "main",
+      manifest: proposalFixture.repositoryEvidence.map((e) => e.path),
+      context: "Synthetic context only",
+    });
+    await a.mutation(api.product.saveProfile, {
+      id: repositoryId,
+      profile: "Synthetic test repository",
+      confirmed: true,
+      enabled: true,
+    });
+    const args = { id: sourceId, repositoryId, maxCredits: 10 };
+    const first = await a.mutation(api.jobs.reserveMatch, args);
+    await expect(a.mutation(api.jobs.reserveMatch, args)).rejects.toThrow();
+    await t.mutation(internal.jobs.finishMatch, {
+      organizationId: org,
+      key: first.key,
+      semanticKey: first.semanticKey,
+      credits: 0,
+    });
+    const retry = await a.mutation(api.jobs.reserveMatch, args);
+    expect(retry.key).not.toBe(first.key);
+    const detail = {
+      ...proposalFixture,
+      repositoryId,
+      baseSha: "a".repeat(40),
+      profileVersion: 2,
+      insightIds: fixture.insights.map((i) => i.id),
+      sourceEvidence: fixture.insights.flatMap((i) => i.evidence),
+    };
+    const proposalId = await t.mutation(internal.product.addProposal, {
+      sourceId,
+      repositoryId,
+      detail,
+      matchKey: retry.semanticKey,
+      sourceGeneration: 1,
+    });
+    expect(
+      await t.mutation(internal.product.addProposal, {
+        sourceId,
+        repositoryId,
+        detail,
+        matchKey: retry.semanticKey,
+        sourceGeneration: 1,
+      }),
+    ).toBe(proposalId);
+    await t.mutation(internal.jobs.finishMatch, {
+      organizationId: org,
+      key: retry.key,
+      semanticKey: retry.semanticKey,
+      credits: 0,
+      proposalId: proposalId!,
+    });
+    expect((await a.mutation(api.jobs.reserveMatch, args)).cached).toBe(true);
+    expect(
+      await t.run((ctx) => ctx.db.query("proposals").collect()),
+    ).toHaveLength(1);
+  });
+});

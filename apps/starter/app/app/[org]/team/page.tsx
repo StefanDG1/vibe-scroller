@@ -41,7 +41,7 @@ export default async function Page({
                       <Badge>{m.role}</Badge>
                     </td>
                     {info.role === "owner" && (
-                      <td>
+                      <td aria-label={`Manage ${m.name}`}>
                         <ActionForm action={changeMember} label="Update">
                           <input
                             type="hidden"

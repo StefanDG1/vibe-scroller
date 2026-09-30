@@ -6,14 +6,9 @@ import {
   internalMutation,
 } from "./_generated/server";
 import { v } from "convex/values";
-import { access, fail, limit } from "./lib";
-import {
-  ensure,
-  validatePaths,
-  containsSecret,
-  safePath,
-} from "../packages/policy";
-import { reserve, settle, digest } from "./product";
+import { access, fail } from "./lib";
+import { ensure, validatePaths, containsSecret } from "../packages/policy";
+import { reserve, settle, digest, wallet } from "./product";
 const org = { organizationId: v.id("organizations") };
 export const authorizeOwner = query({
   args: org,
@@ -29,6 +24,7 @@ export const saveRepository = internalMutation({
     branch: v.string(),
     manifest: v.array(v.string()),
     context: v.string(),
+    contextFiles: v.optional(v.array(v.string())),
   },
   handler: async (ctx, a) => {
     const old = await ctx.db
@@ -41,6 +37,17 @@ export const saveRepository = internalMutation({
       await ctx.db.patch(old._id, { ...a, updatedAt: Date.now() });
       return old._id;
     }
+    const entitlement = await wallet(ctx, a.organizationId);
+    const connected = await ctx.db
+      .query("repositories")
+      .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
+      .collect();
+    ensure(
+      connected.filter((repo) => repo.enabled).length <
+        (entitlement.tier === "pro" ? 15 : 3),
+      "REPOSITORY_LIMIT",
+      "Your repository allowance is full. Disconnect a repository before adding another.",
+    );
     return ctx.db.insert("repositories", {
       ...a,
       createdAt: Date.now(),
@@ -172,14 +179,77 @@ export const reserveMatch = mutation({
       "QUOTE_CHANGED",
       "Review the current 10-credit quote.",
     );
-    const key = `match:${source._id}:${repo._id}:${repo.sha}:${repo.profileVersion}`;
+    const semanticKey = `match:${source._id}:${source.generation}:${repo._id}:${repo.sha}:${repo.profileVersion}`;
+    const old = await ctx.db
+      .query("matchingJobs")
+      .withIndex("by_key", (q) => q.eq("key", semanticKey))
+      .unique();
+    if (old?.proposalId)
+      return {
+        source,
+        repo,
+        key: old.reservationKey,
+        semanticKey,
+        cached: true,
+      };
+    ensure(
+      old?.state !== "pending",
+      "SOURCE_BUSY",
+      "A matching job is already processing this context.",
+    );
+    const attempt = (old?.attempt ?? 0) + 1;
+    ensure(
+      attempt <= 3,
+      "RETRY_LIMIT",
+      "Matching reached its bounded retry limit. Review provider and repository context.",
+    );
+    const key = `${semanticKey}:attempt:${attempt}`;
     await reserve(ctx, source.organizationId, key, 10);
-    return { source, repo, key };
+    if (old)
+      await ctx.db.patch(old._id, {
+        state: "pending",
+        attempt,
+        reservationKey: key,
+        updatedAt: Date.now(),
+      });
+    else
+      await ctx.db.insert("matchingJobs", {
+        organizationId: source.organizationId,
+        key: semanticKey,
+        sourceId: source._id,
+        repositoryId: repo._id,
+        state: "pending",
+        attempt,
+        reservationKey: key,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+    return { source, repo, key, semanticKey, cached: false };
   },
 });
 export const finishMatch = internalMutation({
-  args: { ...org, key: v.string(), credits: v.number() },
-  handler: (ctx, a) => settle(ctx, a.organizationId, a.key, a.credits),
+  args: {
+    ...org,
+    key: v.string(),
+    credits: v.number(),
+    semanticKey: v.optional(v.string()),
+    proposalId: v.optional(v.id("proposals")),
+  },
+  handler: async (ctx, a) => {
+    await settle(ctx, a.organizationId, a.key, a.credits);
+    if (a.semanticKey) {
+      const job = await ctx.db
+        .query("matchingJobs")
+        .withIndex("by_key", (q) => q.eq("key", a.semanticKey!))
+        .unique();
+      if (job && job.reservationKey === a.key)
+        await ctx.db.patch(job._id, {
+          state: (a.proposalId ?? job.proposalId) ? "completed" : "failed",
+          proposalId: a.proposalId ?? job.proposalId,
+          updatedAt: Date.now(),
+        });
+    }
+  },
 });
 export const approve = mutation({
   args: {
@@ -451,7 +521,7 @@ export const exportData = query({
           .take(10000)
       )
         .filter((s) => s.state !== "deleted")
-        .map(({ objectKey, ...s }) => s),
+        .map(({ objectKey: _objectKey, ...s }) => s),
       proposals: await ctx.db
         .query("proposals")
         .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
@@ -488,13 +558,33 @@ export const claimCloud = internalMutation({
       "APPROVAL_STALE",
       "Execution context changed.",
     );
+    const organization = await ctx.db.get(r.organizationId);
+    const actor = await ctx.db.get(r.approvedBy);
+    const membership = await ctx.db
+      .query("memberships")
+      .withIndex("by_pair", (q) =>
+        q.eq("organizationId", r.organizationId).eq("userId", r.approvedBy),
+      )
+      .unique();
+    ensure(
+      organization?.status === "active" &&
+        actor?.status === "active" &&
+        membership,
+      "FORBIDDEN",
+      "The approving member no longer has access.",
+    );
     const computeReserve = Number(
       process.env.CLOUD_COMPUTE_RESERVE_CREDITS ?? "10000",
     );
+    const rate = Number(process.env.E2B_CREDITS_PER_SECOND ?? "1");
     ensure(
-      Number.isSafeInteger(computeReserve) && computeReserve < r.maxCredits,
+      Number.isFinite(rate) &&
+        rate > 0 &&
+        Number.isSafeInteger(computeReserve) &&
+        computeReserve >= Math.ceil(1200 * rate) &&
+        computeReserve < r.maxCredits,
       "INSUFFICIENT_CREDITS",
-      "Compute reservation exceeds the approved maximum.",
+      "Review a quote that covers the full bounded compute reservation.",
     );
     await ctx.db.patch(r._id, {
       state: "running",

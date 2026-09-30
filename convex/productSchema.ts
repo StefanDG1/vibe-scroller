@@ -17,6 +17,18 @@ const sourceState = v.union(
   ].map((s) => v.literal(s)),
 );
 export const productTables = {
+  matchingJobs: defineTable({
+    ...tenant,
+    key: v.string(),
+    sourceId: v.id("sources"),
+    repositoryId: v.id("repositories"),
+    state: v.string(),
+    attempt: v.number(),
+    reservationKey: v.string(),
+    proposalId: v.optional(v.id("proposals")),
+  })
+    .index("by_key", ["key"])
+    .index("by_org", ["organizationId"]),
   inferenceReservations: defineTable({
     key: v.string(),
     budgetKey: v.string(),
@@ -121,6 +133,7 @@ export const productTables = {
     state: sourceState,
     coverage: v.string(),
     summary: v.optional(v.string()),
+    searchable: v.optional(v.string()),
     analysis: v.optional(v.any()),
     tags: v.array(v.string()),
     error: v.optional(v.string()),
@@ -129,7 +142,11 @@ export const productTables = {
   })
     .index("by_org", ["organizationId"])
     .index("by_key", ["organizationId", "key"])
-    .index("by_canonical", ["organizationId", "canonical"]),
+    .index("by_canonical", ["organizationId", "canonical"])
+    .searchIndex("source_search", {
+      searchField: "searchable",
+      filterFields: ["organizationId", "state"],
+    }),
   repositories: defineTable({
     ...tenant,
     installationId: v.number(),
@@ -143,6 +160,7 @@ export const productTables = {
     confirmed: v.boolean(),
     manifest: v.array(v.string()),
     context: v.string(),
+    contextFiles: v.optional(v.array(v.string())),
     status: v.string(),
   })
     .index("by_org", ["organizationId"])

@@ -57,67 +57,12 @@ async function refresh(ctx: ActionCtx, customerId: string, eventId?: string) {
 export const checkout = action({
   args: { organizationId: v.id("organizations") },
   handler: async (ctx, { organizationId }): Promise<string> => {
-    if (process.env.STRIPE_MODE === "live")
-      throw new Error(
-        "Live checkout is disabled until VibeScroller tax and release evidence is recorded.",
-      );
     const auth = await ctx.runQuery(api.billing.authorize, { organizationId });
     if (!auth.configured)
       throw new Error("Subscriptions are not available for this deployment.");
-    await ctx.runMutation(internal.billing.throttle, { organizationId });
-    const client = stripe();
-    const price = process.env.STRIPE_PRO_PRICE_ID;
-    if (!price) throw new Error("Pro billing is not configured.");
-    let customerId = auth.billing?.customerId;
-    if (!customerId) {
-      const customer = await client.customers.create(
-        {
-          email: auth.email,
-          name: auth.name,
-          metadata: { companynerveOrganizationId: organizationId },
-        },
-        { idempotencyKey: `customer:${organizationId}` },
-      );
-      customerId = await ctx.runMutation(internal.billing.attach, {
-        organizationId,
-        customerId: customer.id,
-      });
-    }
-    const subscriptions = await client.subscriptions.list({
-      customer: customerId,
-      status: "all",
-      limit: 100,
-    });
-    if (
-      subscriptions.data.some(
-        (s) => !["canceled", "incomplete_expired"].includes(s.status),
-      )
-    )
-      return (
-        await client.billingPortal.sessions.create({
-          customer: customerId,
-          configuration: process.env.STRIPE_PORTAL_CONFIG_ID,
-          return_url: `${appUrl()}/app/${organizationId}/billing`,
-        })
-      ).url;
-    const reservation = await ctx.runMutation(
-      internal.billing.reserveCheckout,
-      { organizationId },
+    throw new Error(
+      "Use the VibeScroller allowance catalogue. Foundation checkout is disabled.",
     );
-    const session = await client.checkout.sessions.create(
-      {
-        customer: customerId,
-        mode: "subscription",
-        integration_identifier: "companynerve-qmvtzjka",
-        line_items: [{ price, quantity: 1 }],
-        expires_at: Math.floor(reservation.expires / 1000),
-        success_url: `${appUrl()}/app/${organizationId}/billing?checkout=complete`,
-        cancel_url: `${appUrl()}/app/${organizationId}/billing`,
-      },
-      { idempotencyKey: reservation.key },
-    );
-    if (!session.url) throw new Error("Checkout is unavailable.");
-    return session.url;
   },
 });
 export const portal = action({

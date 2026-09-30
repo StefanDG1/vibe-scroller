@@ -1,10 +1,11 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useEffectEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Brand } from "./site";
 type Initial = {
   sources: any[];
+  libraryNext?: string | null;
   repositories: any[];
   proposals: any[];
   runs: any[];
@@ -27,16 +28,44 @@ const blankPlan = {
   rollback: "",
   unknowns: [],
 };
+const Button = ({
+  children,
+  onClick,
+  primary = false,
+  disabled = false,
+  busy = false,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+  primary?: boolean;
+  disabled?: boolean;
+  busy?: boolean;
+}) => (
+  <button
+    disabled={busy || disabled}
+    className={primary ? "primary" : "secondary"}
+    onClick={onClick}
+  >
+    {children}
+  </button>
+);
+
 export function Console({
   demo = false,
   initial,
   organizationId,
   initialView = "home",
+  initialSharedDraft = "",
+  initialSearch = "",
+  initialFilter = "",
 }: {
   demo?: boolean;
   initial: Initial;
   organizationId: string;
   initialView?: string;
+  initialSharedDraft?: string;
+  initialSearch?: string;
+  initialFilter?: string;
 }) {
   const router = useRouter(),
     [data, setData] = useState(initial),
@@ -44,19 +73,69 @@ export function Console({
       initialView === "plans" ? "proposals" : initialView,
     ),
     [selected, setSelected] = useState<any>(null),
-    [search, setSearch] = useState(""),
-    [filter, setFilter] = useState(""),
+    [search, setSearch] = useState(initialSearch),
+    [filter, setFilter] = useState(initialFilter),
     [notice, setNotice] = useState(""),
     [busy, setBusy] = useState(false),
-    [captureOpen, setCaptureOpen] = useState(false),
+    [captureOpen, setCaptureOpen] = useState(Boolean(initialSharedDraft)),
     [planText, setPlanText] = useState(JSON.stringify(blankPlan, null, 2)),
     [dark, setDark] = useState(false);
   const seenNotifications = useRef(new Set(initial.notifications.map(id)));
-  const captureDialog = useRef<HTMLElement>(null);
+  const captureDialog = useRef<HTMLDialogElement>(null);
+  const [sharedDraft, setSharedDraft] = useState(initialSharedDraft);
+  const libraryRequest = useRef(0);
+  async function loadLibrary(append = false) {
+    if (demo) return;
+    const generation = ++libraryRequest.current;
+    const q = new URLSearchParams({ q: search, state: filter });
+    if (append && data.libraryNext) q.set("cursor", data.libraryNext);
+    const response = await fetch(`/api/library/${organizationId}?${q}`, {
+      cache: "no-store",
+    });
+    if (!response.ok || response.redirected) return;
+    const result = await response.json();
+    if (generation !== libraryRequest.current) return;
+    setData((current) => ({
+      ...current,
+      sources: append
+        ? [
+            ...current.sources,
+            ...result.items.filter(
+              (item: any) =>
+                !current.sources.some((old) => id(old) === id(item)),
+            ),
+          ]
+        : result.items,
+      libraryNext: result.next,
+    }));
+  }
+  const loadLibraryFromEffect = useEffectEvent(() => loadLibrary());
+  useEffect(() => {
+    if (demo || view !== "library") return;
+    const timeout = setTimeout(() => {
+      loadLibraryFromEffect().catch(() =>
+        setNotice("Library search is unavailable. Try again."),
+      );
+    }, 250);
+    return () => {
+      clearTimeout(timeout);
+      // oxlint-disable-next-line react-hooks/exhaustive-deps -- Invalidate this asynchronous request generation on cleanup.
+      libraryRequest.current++;
+    };
+  }, [demo, organizationId, view, search, filter]);
+  useEffect(() => {
+    const draft = new URL(window.location.href).searchParams.get("draft");
+    if (!demo && draft) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("draft");
+      window.history.replaceState(null, "", url);
+    }
+  }, [demo]);
   useEffect(() => {
     if (!captureOpen) return;
     const previous = document.activeElement as HTMLElement | null;
     const dialog = captureDialog.current;
+    dialog?.showModal();
     const controls = () =>
       [
         ...(dialog?.querySelectorAll<HTMLElement>(
@@ -84,6 +163,7 @@ export function Console({
     document.addEventListener("keydown", keyboard);
     return () => {
       document.removeEventListener("keydown", keyboard);
+      dialog?.close();
       previous?.focus();
     };
   }, [captureOpen]);
@@ -110,9 +190,7 @@ export function Console({
       seenNotifications.current.add(id(notification));
     }
   }
-  useEffect(() => {
-    setData(initial);
-  }, [initial]);
+
   async function refreshData() {
     if (demo) return;
     const response = await fetch(`/api/workspace/${organizationId}`, {
@@ -141,21 +219,22 @@ export function Console({
       });
     }
   }
+  const refreshFromEffect = useEffectEvent(() => refreshData());
   useEffect(() => {
-    if (demo) return;
+    if (demo || view === "library") return;
     const timer = setInterval(() => {
-      refreshData().catch(() => {});
+      refreshFromEffect().catch(() => {});
     }, 15000);
     return () => clearInterval(timer);
-  }, [demo, organizationId]);
-  useEffect(() => {
+  }, [demo, organizationId, view]);
+  const planIdentity = selected
+    ? `${id(selected)}:${selected.planHash ?? ""}`
+    : "";
+  const [editedPlanIdentity, setEditedPlanIdentity] = useState("");
+  if (editedPlanIdentity !== planIdentity) {
+    setEditedPlanIdentity(planIdentity);
     setPlanText(JSON.stringify(selected?.plan ?? blankPlan, null, 2));
-  }, [selected?._id, selected?.planHash]);
-  useEffect(() => {
-    const url = new URL(location.href);
-    setSearch(url.searchParams.get("q") ?? "");
-    setFilter(url.searchParams.get("state") ?? "");
-  }, []);
+  }
   async function call(operation: string, args: any) {
     setBusy(true);
     setNotice("");
@@ -190,6 +269,7 @@ export function Console({
     }
     setView(v);
     setSelected(null);
+    if (v === "menu") return;
     if (!demo)
       history.replaceState(
         null,
@@ -199,12 +279,14 @@ export function Console({
   };
   const filtered = data.sources.filter(
     (s) =>
-      (!search ||
+      (!demo ||
+        !search ||
         [s.title, s.summary, ...(s.mainPoints ?? [])]
           .join(" ")
           .toLowerCase()
           .includes(search.toLowerCase())) &&
-      (!filter ||
+      (!demo ||
+        !filter ||
         s.state === filter ||
         s.matches?.some((m: any) => m.disposition === filter)),
   );
@@ -231,25 +313,6 @@ export function Console({
     new Set(data.runs.filter((r) => r.mergedAt).map((r) => r.prUrl)).size,
     data.measured ?? 0,
   ];
-  const Button = ({
-    children,
-    onClick,
-    primary = false,
-    disabled = false,
-  }: {
-    children: React.ReactNode;
-    onClick: () => void;
-    primary?: boolean;
-    disabled?: boolean;
-  }) => (
-    <button
-      disabled={busy || disabled}
-      className={primary ? "primary" : "secondary"}
-      onClick={onClick}
-    >
-      {children}
-    </button>
-  );
   return (
     <div className={`product-shell ${dark ? "dark" : ""}`}>
       <aside className="product-rail">
@@ -287,7 +350,7 @@ export function Console({
             </span>
             <p>Make scrolling productive.</p>
           </div>
-          <Button primary onClick={() => setCaptureOpen(true)}>
+          <Button busy={busy} primary onClick={() => setCaptureOpen(true)}>
             ＋ Add source
           </Button>
         </header>
@@ -315,19 +378,16 @@ export function Console({
             </div>
             {selected && (
               <Button
+                busy={busy}
                 onClick={() => go(view === "source" ? "library" : "proposals")}
               >
                 Back to list
               </Button>
             )}
           </div>
-          <p
-            role="status"
-            aria-live="polite"
-            className={notice ? "notice" : "sr-only"}
-          >
+          <output aria-live="polite" className={notice ? "notice" : "sr-only"}>
             {notice}
-          </p>
+          </output>
           {(view === "home" || view === "library") && (
             <>
               <div className="attention">
@@ -342,7 +402,7 @@ export function Console({
                     Keep the evidence, review the fit, and choose what to build.
                   </p>
                 </div>
-                <Button onClick={() => go("proposals")}>
+                <Button busy={busy} onClick={() => go("proposals")}>
                   Review proposals
                 </Button>
               </div>
@@ -407,6 +467,7 @@ export function Console({
                   </select>
                 </label>
                 <Button
+                  busy={busy}
                   onClick={() => {
                     setSearch("");
                     setFilter("");
@@ -417,7 +478,7 @@ export function Console({
               </div>
               <div className="source-list">
                 {filtered.length ? (
-                  filtered.slice(0, 30).map((s, i) => (
+                  filtered.map((s, i) => (
                     <article key={id(s)} className="source-card">
                       <button
                         className={`source-thumb art-${i % 4}`}
@@ -481,7 +542,7 @@ export function Console({
                           )}
                         </div>
                       </div>
-                      <Button onClick={() => findSource(s)}>
+                      <Button busy={busy} onClick={() => findSource(s)}>
                         Open details
                       </Button>
                     </article>
@@ -498,12 +559,28 @@ export function Console({
                         ? "Reset the filters to see your saved sources."
                         : "Add a supported link, upload permitted content, or supply a transcript."}
                     </p>
-                    <Button primary onClick={() => setCaptureOpen(true)}>
+                    <Button
+                      busy={busy}
+                      primary
+                      onClick={() => setCaptureOpen(true)}
+                    >
                       Add your first source
                     </Button>
                   </div>
                 )}
               </div>
+              {!demo && data.libraryNext && (
+                <Button
+                  busy={busy}
+                  onClick={() =>
+                    loadLibrary(true).catch(() =>
+                      setNotice("Could not load the next page."),
+                    )
+                  }
+                >
+                  Load more sources
+                </Button>
+              )}
             </>
           )}
           {view === "source" && selected && (
@@ -654,6 +731,7 @@ export function Console({
                     <p>{p.detail?.currentProblem}</p>
                     <p>{label(p.review)}</p>
                     <Button
+                      busy={busy}
                       onClick={() => {
                         setSelected(p);
                         setView("proposal");
@@ -672,6 +750,7 @@ export function Console({
                   </p>
                   {demo && (
                     <Button
+                      busy={busy}
                       onClick={() => {
                         setSelected({
                           id: "demo-proposal",
@@ -748,6 +827,7 @@ export function Console({
                 <div className="row wrap">
                   {["rejected", "deferred", "accepted"].map((d) => (
                     <Button
+                      busy={busy}
                       key={d}
                       primary={d === "accepted"}
                       onClick={async () => {
@@ -786,6 +866,7 @@ export function Console({
                   />
                 </label>
                 <Button
+                  busy={busy}
                   onClick={async () => {
                     try {
                       await call("editPlan", {
@@ -803,6 +884,7 @@ export function Console({
                   Save new plan version
                 </Button>
                 <Button
+                  busy={busy}
                   onClick={() => {
                     const a = document.createElement("a");
                     a.href = URL.createObjectURL(
@@ -856,6 +938,7 @@ export function Console({
                 </div>
               )}
               <Button
+                busy={busy}
                 onClick={async () => {
                   if (!("Notification" in window)) {
                     setNotice(
@@ -874,6 +957,7 @@ export function Console({
                 Enable browser notification permission
               </Button>
               <Button
+                busy={busy}
                 onClick={() =>
                   call("preferences", {
                     organizationId,
@@ -923,10 +1007,11 @@ export function Console({
                   Administration and workflow write are not requested by
                   default.
                 </p>
-                <Button onClick={() => go("projects")}>
+                <Button busy={busy} onClick={() => go("projects")}>
                   Manage selected repositories
                 </Button>
                 <Button
+                  busy={busy}
                   onClick={() =>
                     call("revoke", { organizationId, provider: "github" })
                   }
@@ -961,6 +1046,7 @@ export function Console({
                   Encrypt and save credential
                 </button>
                 <Button
+                  busy={busy}
                   onClick={() =>
                     call("revoke", { organizationId, provider: "openai" })
                   }
@@ -1000,7 +1086,10 @@ export function Console({
                   <p>
                     {d.state} · Fingerprint {d.fingerprint}
                   </p>
-                  <Button onClick={() => call("revokeDevice", { id: id(d) })}>
+                  <Button
+                    busy={busy}
+                    onClick={() => call("revokeDevice", { id: id(d) })}
+                  >
                     Revoke computer
                   </Button>
                 </article>
@@ -1034,6 +1123,7 @@ export function Console({
                 </Link>
               </div>
               <Button
+                busy={busy}
                 onClick={() =>
                   call("preferences", {
                     organizationId,
@@ -1110,24 +1200,28 @@ export function Console({
       )}
       {captureOpen && (
         <div className="modal-backdrop">
-          <section
+          <dialog
             ref={captureDialog}
-            role="dialog"
-            aria-modal="true"
             aria-labelledby="capture-title"
             className="capture-modal"
           >
             <div className="row spread">
               <h2 id="capture-title">Add to your library</h2>
-              <Button onClick={() => setCaptureOpen(false)}>Close</Button>
+              <Button busy={busy} onClick={() => setCaptureOpen(false)}>
+                Close
+              </Button>
             </div>
             <CaptureForm
+              sharedDraft={sharedDraft}
               demo={demo}
               organizationId={organizationId}
               call={call}
-              onDone={() => setCaptureOpen(false)}
+              onDone={() => {
+                setCaptureOpen(false);
+                setSharedDraft("");
+              }}
             />
-          </section>
+          </dialog>
         </div>
       )}
     </div>
@@ -1139,6 +1233,7 @@ function CaptureForm({
   call,
   onDone,
   existingSourceId,
+  sharedDraft,
 }: any) {
   const [kind, setKind] = useState(existingSourceId ? "upload" : "url");
   return (
@@ -1239,7 +1334,13 @@ function CaptureForm({
       {kind === "url" ? (
         <label>
           Source URL
-          <input name="url" type="url" placeholder="https://..." required />
+          <input
+            name="url"
+            type="url"
+            defaultValue={sharedDraft ?? ""}
+            placeholder="https://..."
+            required
+          />
         </label>
       ) : kind === "text" ? (
         <label>
@@ -1474,7 +1575,7 @@ function SourceDetail({ source, demo, org, repos, call, onProposal }: any) {
     </>
   );
 }
-function ExecutionApproval({ proposal, call, demo }: any) {
+function ExecutionApproval({ proposal, call }: any) {
   const [executor, setExecutor] = useState("local"),
     [ceiling, setCeiling] = useState(100);
   return (

@@ -1,6 +1,6 @@
 "use node";
 import Stripe from "stripe";
-import { action, internalAction } from "./_generated/server";
+import { action } from "./_generated/server";
 import { api, internal } from "./_generated/api";
 import { v } from "convex/values";
 import { pricing, ensure, taxTreatment } from "../packages/policy";

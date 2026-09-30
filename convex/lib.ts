@@ -5,6 +5,17 @@ import { isPaid } from "../packages/company-config";
 export function fail(message: string): never {
   throw new ConvexError(message);
 }
+export async function recentAuthentication(ctx: QueryCtx, maxAgeSeconds = 300) {
+  const identity = await ctx.auth.getUserIdentity();
+  const authenticatedAt = identity?.auth_time;
+  if (
+    typeof authenticatedAt !== "number" ||
+    !Number.isFinite(authenticatedAt) ||
+    authenticatedAt > Date.now() / 1000 ||
+    Date.now() / 1000 - authenticatedAt > maxAgeSeconds
+  )
+    fail("Sign in again before changing a sensitive connection.");
+}
 export async function user(ctx: QueryCtx) {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) return fail("Sign in to continue.");

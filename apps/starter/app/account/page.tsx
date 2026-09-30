@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { backend, api } from "@/lib/backend";
 import { Header, RecipePicker } from "@/components/header";
 import { ActionForm } from "@/components/action-form";
@@ -28,7 +29,9 @@ export default async function Page() {
               Download your profile and organization memberships.
             </p>
             <Button variant="outline" asChild>
-              <a href="/account/export">Download account data</a>
+              <Link href="/account/export" prefetch={false}>
+                Download account data
+              </Link>
             </Button>
           </Card>
           <Card>

@@ -1,7 +1,7 @@
 import { internalMutation } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
-import { invoiceDeadline, ensure } from "../packages/policy";
+import { invoiceDeadline } from "../packages/policy";
 import { redactSource } from "./product";
 import { queueDeletion } from "./assets";
 export const receipt = internalMutation({

@@ -51,30 +51,49 @@ export async function codeChanges(input: {
   );
   const items = tree.tree.filter(
     (f: any) =>
-      f.type === "blob" && f.mode !== "120000" && !excludedPath(f.path),
+      f.type === "blob" &&
+      f.mode !== "120000" &&
+      !excludedPath(f.path) &&
+      !/\.(png|jpe?g|gif|webp|ico|pdf|zip|xlsx?|woff2?|ttf|mp[34]|wav)$/i.test(
+        f.path,
+      ),
   );
   ensure(
-    items.length <= 100 &&
-      items.every((f: any) => f.size <= 100000) &&
-      items.reduce((n: number, f: any) => n + f.size, 0) <= 2000000,
+    items.length <= 2048 &&
+      items.every((f: any) => f.size <= 500000) &&
+      items.reduce((n: number, f: any) => n + f.size, 0) <= 20000000,
     "REPO_TOO_LARGE",
-    "The initial cloud worker supports at most 100 safe files and 2 MB. Approve a larger worker profile before retrying.",
+    "The cloud worker supports at most 2,048 safe text files and 20 MB. Binary files and symlinks require another reviewed profile.",
   );
   const base: { path: string; content: string }[] = [];
-  for (const f of items) {
-    const b = await github(`${root}/git/blobs/${f.sha}`, token);
-    const content = Buffer.from(b.content, "base64").toString("utf8");
-    ensure(
-      !content.includes("\0") && !containsSecret(content),
-      "POLICY_BLOCKED",
-      "The snapshot contains a binary or credential.",
+  // Bound trusted GitHub reads without passing credentials into the sandbox.
+  for (let offset = 0; offset < items.length; offset += 8) {
+    const batch = await Promise.all(
+      items.slice(offset, offset + 8).map(async (f: any) => {
+        const b = await github(`${root}/git/blobs/${f.sha}`, token);
+        const content = Buffer.from(b.content, "base64").toString("utf8");
+        ensure(
+          !content.includes("\0") && !containsSecret(content),
+          "POLICY_BLOCKED",
+          "The snapshot contains a binary or credential.",
+        );
+        return { path: f.path, content };
+      }),
     );
-    base.push({ path: f.path, content });
+    base.push(...batch);
   }
   const result = await input.generate(
     changesSchema,
     "Implement only the exact approved plan. Return complete UTF-8 contents for changed files, or null for approved deletion. Preserve all existing unrelated behavior. Never add tool permissions or modify other paths.",
-    { plan: input.plan, base, allowedPaths: input.allowedPaths },
+    {
+      plan: input.plan,
+      base: base.filter(
+        (file) =>
+          input.allowedPaths.includes(file.path) ||
+          ["README.md", "package.json"].includes(file.path),
+      ),
+      allowedPaths: input.allowedPaths,
+    },
     4000,
   );
   validatePaths(
@@ -124,10 +143,13 @@ export async function checkPatch(
     "mkdir -p /home/user/job && git -C /home/user/job init -q && git -C /home/user/job config user.name VibeScroller && git -C /home/user/job config user.email noreply@vibescroller.invalid",
     { user: "user", timeoutMs: 30000 },
   );
-  for (const f of base)
-    await sandbox.files.write(`/home/user/job/${f.path}`, f.content, {
-      user: "user",
-    });
+  for (let offset = 0; offset < base.length; offset += 100)
+    await sandbox.files.write(
+      base
+        .slice(offset, offset + 100)
+        .map((f) => ({ path: `/home/user/job/${f.path}`, data: f.content })),
+      { user: "user" },
+    );
   await sandbox.commands.run(
     "git -C /home/user/job -c core.hooksPath=/dev/null add . && git -C /home/user/job -c core.hooksPath=/dev/null commit -qm baseline",
     { user: "user", timeoutMs: 30000 },

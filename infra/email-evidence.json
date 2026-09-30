@@ -1,0 +1,16 @@
+{
+  "time": "2026-09-30T01:42:05.406Z",
+  "emailId": "01a0eff9-e0ee-7191-983f-8e0092533e26",
+  "requestAccepted": true,
+  "recipient": "official Resend simulation address",
+  "deliveryConfirmed": false,
+  "reference": "https://resend.dev/",
+  "componentDelivery": {
+    "id": "j976hc6h1ewjh9gejqqb7p47c98fd9g9",
+    "status": "delivered",
+    "bounced": false,
+    "failed": false,
+    "synthetic": true,
+    "method": "email:stagingDeliveryStatus internal query, provider signed webhook reconciliation"
+  }
+}

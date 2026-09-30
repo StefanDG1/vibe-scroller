@@ -23,7 +23,7 @@ export function ActionForm({
         </p>
       )}
       {state.message && (
-        <p className="success" role="status">
+        <output className="success">
           {state.message}
           {state.link && (
             <>
@@ -31,7 +31,7 @@ export function ActionForm({
               <a href={state.link}>{state.link}</a>
             </>
           )}
-        </p>
+        </output>
       )}
       <div>
         <Button

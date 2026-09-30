@@ -2,6 +2,7 @@
 import { internalAction } from "./_generated/server";
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
+import { authorizeRepository } from "./lib/githubAuthorization";
 import { infer } from "./lib/inference";
 import {
   createCodingSandbox,
@@ -16,7 +17,10 @@ export const execute = internalAction({
     if (!run) return;
     let sandbox;
     let credits = 0;
+    let computeStarted = 0;
     try {
+      await authorizeRepository(ctx, run.repo);
+      computeStarted = Date.now();
       sandbox = await createCodingSandbox();
       await ctx.runMutation(internal.jobs.sandboxStarted, {
         id: run._id,
@@ -50,20 +54,21 @@ export const execute = internalAction({
         status.state === "canceled"
       )
         throw new Error("Run canceled.");
+      await authorizeRepository(ctx, run.repo);
       const checked = await checkPatch(
         sandbox,
         generated.base,
         generated.changes,
         run.plan.tests,
       );
-      const seconds = Math.ceil((Date.now() - run.updatedAt) / 1000),
+      await sandbox.kill();
+      sandbox = undefined;
+      const seconds = Math.ceil((Date.now() - computeStarted) / 1000),
         cost =
           credits +
           Math.ceil(
             seconds * Number(process.env.E2B_CREDITS_PER_SECOND ?? "1"),
           );
-      await sandbox.kill();
-      sandbox = undefined;
       await ctx.runMutation(internal.jobs.completeCloud, {
         id: run._id,
         generation: run.generation,

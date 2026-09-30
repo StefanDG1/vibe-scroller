@@ -4,6 +4,7 @@ import { access, limit, fail } from "./lib";
 import { ensure } from "../packages/policy";
 import { internal } from "./_generated/api";
 import type { MutationCtx } from "./_generated/server";
+import { wallet } from "./product";
 export async function queueDeletion(ctx: MutationCtx, key: string) {
   const old = await ctx.db
     .query("objectDeletions")
@@ -30,6 +31,23 @@ export const grant = mutation({
   handler: async (ctx, a) => {
     const u = await access(ctx, a.organizationId);
     await limit(ctx, `upload:${u.actor._id}`, 10);
+    const entitlement = await wallet(ctx, a.organizationId);
+    const retained = await ctx.db
+      .query("assets")
+      .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
+      .collect();
+    const retainedBytes = retained
+      .filter(
+        (asset) => asset.state !== "deleted" && asset.expiresAt > Date.now(),
+      )
+      .reduce((sum, asset) => sum + asset.size, 0);
+    ensure(
+      Number.isSafeInteger(a.size) &&
+        retainedBytes + a.size <=
+          (entitlement.tier === "pro" ? 5 : 1) * 1000000000,
+      "STORAGE_LIMIT",
+      "Your retained storage allowance is full. Delete sources or wait for temporary uploads to expire.",
+    );
     ensure(
       a.size > 0 &&
         a.size <= 250000000 &&

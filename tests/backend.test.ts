@@ -109,7 +109,7 @@ describe("actual backend authorization and lifecycle", () => {
     ).toBe("Private");
   });
   it("binds invitations to a verified profile, consumes them once, and enforces member/revocation boundaries", async () => {
-    const { t, alice, bob, a } = await fixture();
+    const { alice, bob, a } = await fixture();
     const tokenHash = "a".repeat(64);
     await alice.mutation(api.organizations.invite, {
       organizationId: a,

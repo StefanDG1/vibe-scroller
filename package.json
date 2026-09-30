@@ -15,11 +15,12 @@
     "typecheck": "tsc --noEmit && pnpm -r --if-present typecheck",
     "test": "vitest run && vitest run --config apps/starter/vitest.auth.config.ts",
     "validate": "node scripts/validate.mjs",
-    "check": "pnpm validate && pnpm typecheck && pnpm test && pnpm build",
+    "check": "pnpm validate && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "convex:dev": "convex dev",
     "template:export": "node scripts/export-template.mjs",
     "format": "prettier --write .",
-    "setup:local": "node scripts/setup-local.mjs"
+    "setup:local": "node scripts/setup-local.mjs",
+    "lint": "oxlint apps/starter convex packages tests scripts --react-plugin --jsx-a11y-plugin --nextjs-plugin --ignore-pattern 'packages/runner/protocol/**' --ignore-pattern 'convex/_generated/**' --ignore-pattern '**/node_modules/**' --max-warnings 0"
   },
   "dependencies": {
     "@convex-dev/rate-limiter": "0.4.0",
@@ -35,6 +36,7 @@
     "@edge-runtime/vm": "5.0.0",
     "@types/node": "24.13.4",
     "convex-test": "0.0.57",
+    "oxlint": "1.86.0",
     "prettier": "3.9.6",
     "typescript": "7.0.2",
     "vite": "8.2.2",

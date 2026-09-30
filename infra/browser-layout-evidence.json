@@ -1,0 +1,27 @@
+{
+  "synthetic": true,
+  "route": "/demo",
+  "measurements": [
+    {
+      "width": 320,
+      "documentWidth": 320,
+      "overflow": false,
+      "fixtureLabel": true,
+      "mobileNavigationVisible": true
+    },
+    {
+      "width": 390,
+      "documentWidth": 390,
+      "overflow": false,
+      "fixtureLabel": true,
+      "mobileNavigationVisible": true
+    },
+    {
+      "width": 1440,
+      "documentWidth": 1425,
+      "overflow": false,
+      "fixtureLabel": true,
+      "mobileNavigationVisible": false
+    }
+  ]
+}

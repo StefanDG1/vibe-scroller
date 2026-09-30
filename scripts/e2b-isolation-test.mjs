@@ -49,8 +49,12 @@ try {
     user: "root",
     timeoutMs: 5000,
   });
+  await s.commands.run(
+    "nohup python3 -m http.server 48765 --bind 127.0.0.1 >/tmp/vibe-test-server.log 2>&1 &",
+    { user: "root", timeoutMs: 5000 },
+  );
   const isolation = await s.commands.run(
-    "python3 - <<'PY'\nimport os, pathlib, socket, subprocess, json\nchecks={}\nchecks['unprivileged']=os.getuid()!=0\nchecks['root_secret_denied']=not os.access('/root/vibe-canary',os.R_OK)\nchecks['host_mount_absent']=not pathlib.Path('/mnt/host').exists()\nchecks['no_provider_credentials']=not any(k in os.environ for k in ['E2B_API_KEY','OPENAI_API_KEY','GITHUB_APP_PRIVATE_KEY','CLOUDFLARE_AI_TOKEN','WORKOS_API_KEY'])\ntry: socket.create_connection(('1.1.1.1',443),timeout=3); checks['external_network_denied']=False\nexcept OSError: checks['external_network_denied']=True\ntry: socket.create_connection(('169.254.169.254',80),timeout=3); checks['metadata_network_denied']=False\nexcept OSError: checks['metadata_network_denied']=True\nchecks['sudo_escalation_denied']=subprocess.run(['sh','-c','command -v sudo >/dev/null && sudo -n id -u'],capture_output=True).returncode!=0\nprint(json.dumps(checks))\nassert all(checks.values())\nPY",
+    "python3 - <<'PY'\nimport os, pathlib, socket, subprocess, json\nchecks={}\nchecks['unprivileged']=os.getuid()!=0\nchecks['root_secret_denied']=not os.access('/root/vibe-canary',os.R_OK)\nchecks['host_mount_absent']=not pathlib.Path('/mnt/host').exists()\nchecks['no_provider_credentials']=not any(k in os.environ for k in ['E2B_API_KEY','OPENAI_API_KEY','GITHUB_APP_PRIVATE_KEY','CLOUDFLARE_AI_TOKEN','WORKOS_API_KEY'])\ntry: socket.create_connection(('1.1.1.1',443),timeout=3); checks['external_network_denied']=False\nexcept OSError: checks['external_network_denied']=True\ntry: socket.create_connection(('169.254.169.254',80),timeout=3); checks['metadata_network_denied']=False\nexcept OSError: checks['metadata_network_denied']=True\ntry: socket.create_connection(('127.0.0.1',48765),timeout=3); checks['trusted_loopback_denied']=False\nexcept OSError: checks['trusted_loopback_denied']=True\ntry: socket.create_connection(('127.0.0.1',49983),timeout=3); checks['control_service_denied']=False\nexcept OSError: checks['control_service_denied']=True\nstatus=pathlib.Path('/proc/self/status').read_text()\nchecks['no_effective_capabilities']=int(next(x.split(':')[1].strip() for x in status.splitlines() if x.startswith('CapEff:')),16)==0\nchecks['sudo_escalation_denied']=subprocess.run(['sh','-c','command -v sudo >/dev/null && sudo -n id -u'],capture_output=True).returncode!=0\nprint(json.dumps(checks))\nassert all(checks.values())\nPY",
     { user: "user", timeoutMs: 15000 },
   );
   const second = await other.commands.run(
@@ -72,6 +76,11 @@ try {
   await writeFile(file, JSON.stringify(build, null, 2) + "\n");
   console.log(JSON.stringify(build.isolationEvidence));
 } finally {
-  await Promise.allSettled(sandboxes.map((s) => s.kill()));
-  console.log("Synthetic test sandbox cleanup requested.");
+  const cleanup = await Promise.allSettled(sandboxes.map((s) => s.kill()));
+  console.log(
+    JSON.stringify({
+      cleanupAcknowledged: cleanup.every((r) => r.status === "fulfilled"),
+      sandboxes: sandboxes.length,
+    }),
+  );
 }

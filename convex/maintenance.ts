@@ -14,6 +14,7 @@ export const purgeOrganization = internalMutation({
     for (const table of [
       "creditPools",
       "githubBindings",
+      "matchingJobs",
       "githubLinks",
       "assets",
       "sources",

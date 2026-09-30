@@ -21,7 +21,9 @@ export async function github(
       "X-GitHub-Api-Version": "2022-11-28",
       "Content-Type": "application/json",
     },
-    body: body ? JSON.stringify(body) : undefined,
+    ...(body !== undefined && method !== "GET"
+      ? { body: JSON.stringify(body) }
+      : {}),
     signal: AbortSignal.timeout(30000),
   });
   ensure(
@@ -95,16 +97,28 @@ export async function snapshot(
   );
   const manifest = files.map((f: any) => f.path);
   let context = "";
+  const contextFiles: string[] = [];
   for (const f of files
     .filter((f: any) => /README|package\.json|\.(tsx?|py|md)$/.test(f.path))
+    .sort((a: any, b: any) => {
+      const score = (path: string) =>
+        /^(README\.md|package\.json)$/.test(path)
+          ? 0
+          : /^(convex\/|apps\/starter\/components\/)/.test(path)
+            ? 1
+            : 2;
+      return score(a.path) - score(b.path) || a.path.localeCompare(b.path);
+    })
     .slice(0, 40)) {
     if (context.length > 90000) break;
     const b = await github(`/repos/${fullName}/git/blobs/${f.sha}`, token);
     const text = Buffer.from(b.content, "base64").toString("utf8");
-    if (!containsSecret(text))
+    if (!containsSecret(text)) {
+      contextFiles.push(f.path);
       context += `\nFile: ${f.path}\n${text.slice(0, 10000)}\n`;
+    }
   }
-  return { sha, branch: repo.default_branch, manifest, context };
+  return { sha, branch: repo.default_branch, manifest, context, contextFiles };
 }
 export async function publish(input: {
   installationId: number;

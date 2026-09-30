@@ -1,4 +1,4 @@
-import { Template, Sandbox } from "e2b";
+import { Template } from "e2b";
 import { readFile, writeFile } from "node:fs/promises";
 const base = JSON.parse(
   await readFile(new URL("../infra/base-image.json", import.meta.url), "utf8"),
