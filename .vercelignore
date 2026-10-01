@@ -1,0 +1,25 @@
+# Only deploy application source. Operator records and local data stay private.
+private/
+outputs/
+work/
+.env*
+**/.env*
+!.env.example
+!**/.env.example
+node_modules/
+**/node_modules/
+.next/
+**/.next/
+.open-next/
+**/.open-next/
+.wrangler/
+**/.wrangler/
+.dev.vars*
+**/.dev.vars*
+coverage/
+test-results/
+playwright-report/
+__pycache__/
+**/__pycache__/
+*.log
+**/*.log

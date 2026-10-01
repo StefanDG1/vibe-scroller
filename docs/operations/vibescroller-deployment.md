@@ -1,5 +1,7 @@
 # Deploy VibeScroller
 
+Latest hosting update, 1 October 2026: Netlify has paused new production builds after its credit limit. The owner selected Vercel next, without a purchase. The dedicated project and Production-only configuration are prepared; its Hobby plan cannot host this commercial product under current provider rules. Follow [the Vercel migration procedure](vercel-migration.md). The live domain still serves Netlify commit `23375b9`; `96e2fb8` is released on GitHub but was not deployed there.
+
 The public source is `StefanDG1/vibe-scroller`. The staging web application is `https://vibescroller-staging.danistefangheorghiu.workers.dev`. Its backend is the dedicated Convex staging deployment `resolute-ladybug-999`. Earlier CompanyNerve deployment instructions describe upstream history and must not be used to deploy this product with upstream credentials.
 
 ## Build and stage

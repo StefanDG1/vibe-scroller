@@ -1,0 +1,52 @@
+name: Verify Vercel adapter
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+      - run: npm install --global pnpm@12.3.4
+      - run: pnpm install --frozen-lockfile
+      - name: Prepare offline adapter settings
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import { mkdirSync, writeFileSync } from 'node:fs';
+          mkdirSync('.vercel', { recursive: true });
+          writeFileSync('.vercel/project.json', JSON.stringify({
+            projectId: 'offline-compatibility-check',
+            orgId: 'offline-compatibility-check',
+            projectName: 'vibe-scroller',
+            settings: {
+              createdAt: 1790876336065,
+              framework: 'nextjs',
+              rootDirectory: 'apps/starter',
+              nodeVersion: '24.x',
+              buildCommand: 'pnpm --filter @companynerve/starter... run build',
+              installCommand: 'pnpm install --frozen-lockfile',
+              outputDirectory: null
+            }
+          }));
+          writeFileSync('.vercel/.env.production.local',
+            'APP_URL=https://scroll.companynerve.com\nSEO_PUBLIC_INDEXING=false\nNEXT_TELEMETRY_DISABLED=1\nENABLE_EXPERIMENTAL_COREPACK=1\n');
+          NODE
+      - name: Package Next.js functions on Linux without deploying
+        run: pnpm dlx vercel@61.1.0 build --prod --yes
+        env:
+          CI: "1"
+          NEXT_TELEMETRY_DISABLED: "1"
+      - name: Verify adapter output
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync, readdirSync } from 'node:fs';
+          const config = JSON.parse(readFileSync('.vercel/output/config.json', 'utf8'));
+          if (config.version !== 3) throw new Error('Unexpected output format');
+          if (!readdirSync('.vercel/output/functions').length) throw new Error('Missing functions');
+          console.log('Linux adapter output verified; no deployment or production secrets used.');
+          NODE

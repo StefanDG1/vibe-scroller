@@ -1,5 +1,7 @@
 # Configure the production domain and search visibility
 
+Latest hosting update, 1 October 2026: the scroll CNAME still targets Netlify. New Netlify production deployments are credit-blocked. A dedicated Vercel project is prepared, but the inspected Hobby team requires Pro before commercial deployment. No DNS cutover or nameserver migration occurred. Follow [the exact migration steps](vercel-migration.md) after the owner upgrades.
+
 Mode: how-to. Selected domain: `scroll.companynerve.com`. Domain configuration is authorized by the owner; parent-domain migration and new purchases are not authorized.
 
 ## Current evidence
