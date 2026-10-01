@@ -6,11 +6,11 @@ Status: review draft, not yet legally reviewed. Version: 1.1.0-alpha. Updated 1 
 
 VibeScroller uses these first-party items on scroll.companynerve.com. The browser lifetime can be longer than the server session validity; an expired or revoked server session cannot grant access.
 
-| Name                | Provider and purpose                                                             | Duration                                                                             | Scope                                         |
-| ------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | --------------------------------------------- |
-| __Host-wos-session  | WorkOS AuthKit, encrypted sign-in session                                        | Up to 400 days in the browser, cleared by sign-out; server session limits also apply | This host, secure, HttpOnly, SameSite Lax     |
-| wos-auth-verifier-* | WorkOS AuthKit, verifies an individual PKCE sign-in request                      | 10 minutes maximum, removed after callback                                           | This host, secure in production, HttpOnly     |
-| vs_consent          | CookieConsent, remembers your categories, consent revision and choice timestamps | 180 days                                                                             | This host, SameSite Lax, secure in production |
+| Name                           | Provider and purpose                                                             | Duration                                                                             | Scope                                         |
+| ------------------------------ | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | --------------------------------------------- |
+| __Host-vibescroller-production | WorkOS AuthKit, encrypted sign-in session                                        | Up to 400 days in the browser, cleared by sign-out; server session limits also apply | This host, secure, HttpOnly, SameSite Lax     |
+| wos-auth-verifier-*            | WorkOS AuthKit, verifies an individual PKCE sign-in request                      | 10 minutes maximum, removed after callback                                           | This host, secure in production, HttpOnly     |
+| vs_consent                     | CookieConsent, remembers your categories, consent revision and choice timestamps | 180 days                                                                             | This host, SameSite Lax, secure in production |
 
 Provider sign-in pages such as Google and WorkOS may have their own cookies on their own domains. Their policies apply when you visit those pages. They are not analytics permission for VibeScroller.
 

@@ -117,7 +117,7 @@ export function ConsentProvider() {
                           expiry: "180 days",
                         },
                         {
-                          name: "__Host-wos-session",
+                          name: "__Host-vibescroller-production",
                           purpose: "Secure WorkOS sign-in",
                           expiry:
                             "Browser expiry up to 400 days; server session limits also apply",

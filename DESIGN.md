@@ -105,6 +105,10 @@ components:
     textColor: "{colors.ink}"
     rounded: "{rounded.panel}"
     padding: "6px"
+  source-notes:
+    textColor: "{colors.ink}"
+    padding: "12px 0"
+    height: "44px"
 ---
 
 # Design System: VibeScroller
@@ -203,7 +207,13 @@ Library items are rows with thin bottom separators, a quiet media icon and a rea
 
 ### Processing and private evidence
 
-The implemented personal-video UI shows prepare, transcribe and analyze stages, an explicit automatic-analysis permission choice, private frame access and original transcript inspection. Current and completed steps brighten their labels; pending work uses a spinner. This records present components, while end-to-end video integration is still being tested. It does not establish production readiness or audiovisual completeness.
+The implemented personal-video UI shows prepare, transcribe and analyze stages, an explicit automatic-analysis permission choice, private frame access and original transcript inspection. Current and completed steps brighten their labels; pending work uses a spinner. Recorded verification now includes a real production upload whose generation-one personal-alpha analysis completed automatic Whisper transcription and sampled-frame ChatGPT analysis using gpt-5.6-sol at medium reasoning. This observed completion does not establish global production readiness, legal approval or audiovisual completeness.
+
+### Source overview and analysis notes
+
+Source detail leads with an exact-text overview drawn from the retained summary, followed by the coverage caution and a native disclosure, then Main points. Long summaries shorten at a sentence boundary within 280 characters where possible, otherwise at a word boundary with an ellipsis. The original complete summary remains available in the disclosure when shortened; all analysis warnings, the original source link and capture metadata remain there. The disclosure summary has a 44px minimum target, vertical padding (12px), visible keyboard focus and a small open-state gap (8px).
+
+**The Visible Limits Rule.** Keep the sampling and automatic-transcription caution visible for sampled audiovisual coverage while placing the retained full summary and detailed analysis notes in the disclosure.
 
 ### Consent
 

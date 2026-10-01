@@ -4,9 +4,9 @@ Mode: how-to. Last checked October 1, 2026. This guide distinguishes working che
 
 ## Start here
 
-The real address is https://scroll.companynerve.com/app. HTTPS and production Google sign-in work. The owner account has a verified Google identity and an active production OAuth session. Google remains restricted to the configured test user. Sign-in now creates a default personal workspace when needed and opens its dashboard directly. This production redirect and render passed on October 1. Existing active workspaces are reused; switching is available from Account. The complete laptop-assisted video journey is still being built.
+The real address is https://scroll.companynerve.com/app on your laptop or phone. HTTPS, clean production Google sign-in and automatic default workspace entry work. Google remains restricted to the configured test user. Existing active workspaces are reused; switching is available from Account. The dark interface and automatic laptop-assisted audio/visual analysis passed production verification on October 1. Reload an old tab to load the latest interface.
 
-The current development address is https://vibescroller-staging.danistefangheorghiu.workers.dev/app. Its earlier capacity failures remain documented. The newest ZIP importer has passed local browser testing but is not yet deployed there. The local production build with that importer runs at http://localhost:3002/app on the laptop.
+Use the real domain for the personal test. Earlier Cloudflare staging capacity failures remain documented; staging and local builds do not define the current production result.
 
 Use your existing VibeScroller Google identity. Signing into VibeScroller, Instagram and ChatGPT are separate actions. Never paste passwords, cookies or OAuth tokens into the app.
 
@@ -18,17 +18,21 @@ Use your existing VibeScroller Google identity. Signing into VibeScroller, Insta
 4. Review the counts and the listed links. Confirm that you may submit the content, then choose **Import reviewed links**. For a larger export, submit subsequent batches when the button permits it.
 5. Read the import manifest. A waiting record means a link was saved but needs permitted media or a transcript before analysis. A quota refusal does not mean the source was saved.
 
-Your supplied August archive produced four distinct links, three Reels and one post of unverified media type. That is what its Saved metadata contains, not a claim about all your current saves. The import saved all four in the development workspace and charged zero analysis credits. It sent 1,103 bytes of normalized metadata, without the ZIP, messages or contacts.
+Your supplied August archive produced four distinct links, three Reels and one post of unverified media type. That is what its Saved metadata contains, not a claim about all your current saves. The import saved all four in production and charged zero analysis credits, without uploading the ZIP, messages or contacts.
 
 For a fresh export, use Instagram's Accounts Center information-export controls, select your profile, Saved where offered, all time and JSON. An export usually supplies links and metadata; it does not grant access to other creators' video files. Upload content you may process if a link is private, removed or inaccessible. Do not provide Instagram session cookies.
 
 ## Use your ChatGPT plan
 
-Keep the paired laptop awake and connected for the planned personal route. Local Whisper now transcribes bounded normalized audio in a separate desktop utility. Its synthetic speech test matched the expected sentence and produced two timed segments. The browser-connected route will combine this with your eligible ChatGPT model to review text and sampled frames. Whisper uses the laptop's resources rather than your ChatGPT allowance. The browser-connected transcription and analysis journey is still implementation work. Raw customer video must first pass the isolated decoder; the local ASR utility refuses arbitrary media and non-normalized audio.
+Keep the paired laptop awake and connected. From Home choose **Upload or import**, then **Permitted media upload**. Select a video you may process, leave automatic analysis selected, choose the online computer/model, and review both source permission and plan/compute authorization. Choose **Upload and analyze**. No transcript is needed. If the app requests **Sign in again**, follow its link before selecting the file again. The authorization requires a fresh website sign-in.
+
+Production automatic upload passed at its first processing generation. The isolated worker prepared audio and sampled frames, offline Whisper supplied the English transcript, and your ChatGPT plan saved three cited insights. The explicitly owned synthetic video included visual-only size/spacing markers, correctly read by the model. Watch preparation, transcription and analysis, then review Main points, **Full summary and analysis notes**, the original transcript and private timestamped video evidence.
+
+MP4/WebM input is bounded to 250 MB and ten minutes. Local transcription currently supports English. Whisper uses laptop resources rather than your ChatGPT allowance; isolated media preparation separately reserves up to ten app compute credits. Raw video passes the isolated decoder before normalized audio reaches the local utility.
 
 Your existing local ChatGPT consent passed. A real text request and a real synthetic-image request succeeded without an API key or alternate funding. The image test used GPT-5.6 Sol with medium reasoning and reported 47 tokens. The account catalogue does not currently expose GPT-6.1 Sol through this route. The app must offer the models the account actually supports.
 
-Do not approve the existing managed-analysis route as a substitute for this OpenAI-only test. The saved preference alone does not connect browser jobs to the laptop. A gated browser-to-laptop supplied-text bridge is implemented and has local boundary tests, but its real integration test has not passed. See [personal runner setup](personal-analysis-runner.md) and [local ChatGPT setup](chatgpt-local.md). Gemini is a later optional route and must never become an automatic fallback.
+The automatic personal route uses the account's advertised GPT-5.6-Sol with medium reasoning during verification. There is no paid inference or alternate-model fallback. See [the complete video guide](../PERSONAL-VIDEO-GUIDE.md), [personal runner setup](personal-analysis-runner.md) and [local ChatGPT setup](chatgpt-local.md). Gemini is a later optional route. Automatic Instagram Saved media retrieval is not implemented: attach a video you may process to an imported link.
 
 ## Review and apply a useful idea
 
@@ -40,7 +44,7 @@ The isolated cloud draft-PR route has staging evidence. The Windows local coding
 
 ## Storage and evidence
 
-The ZIP is processed locally and is not retained by the app. Save only necessary source metadata and derived analysis. Useful screenshots or crops may be retained as private evidence with source/timestamp links and disclosed limits. The intended cloud split is R2 for images and Convex for metadata. Retained evidence must disappear when its source is deleted. This retention extension still needs integration and deletion checks.
+The ZIP is processed locally and is not retained by the app. Private EU R2 stores selected evidence with Convex metadata. Authenticated frame requests returned private/no-store; unauthenticated requests returned no image bytes. Source deletion fences delayed results and queues associated objects for removal. Successfully processed raw media expires after 24 hours, normalized temporary audio after one hour. Selected evidence follows the documented retention policy. Android hardware testing remains deferred; phone-sized Chrome layouts and interactions passed.
 
 Search, tags and state filters already exist. More categories and ranking should help retrieve relevant analyses, references and repository matches. A general conversational library assistant is not currently verified.
 

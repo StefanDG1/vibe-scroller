@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-01T02:54:52.3231157Z",
+  "generatedAt": "2026-10-01T04:05:17.8929000Z",
   "title": "Design System: VibeScroller",
   "extensions": {
     "colorMeta": {
@@ -370,29 +370,42 @@
       "description": "Floating secondary destinations with accessible focus styling.",
       "html": "<div class=\"ds-menu\"><button class=\"ds-menu-item\">Usage</button><button class=\"ds-menu-item\">Privacy</button><button class=\"ds-menu-item\">Cookie preferences</button></div>",
       "css": ".ds-menu{min-width:220px;padding:6px;border-radius:14px;background:#252525;color:var(--ink,#f4f4f4);box-shadow:0 12px 32px #0006;animation:ds-menu-enter 120ms ease-out}.ds-menu-item{display:flex;align-items:center;width:100%;min-height:44px;padding:10px 12px;border:0;border-radius:8px;background:none;color:inherit;font:14px/1.6 Inter,system-ui,sans-serif;text-align:left;cursor:pointer}.ds-menu-item:hover,.ds-menu-item:focus-visible{background:#383838;outline:none}@keyframes ds-menu-enter{from{clip-path:inset(0 0 8% 0);opacity:.8}to{clip-path:inset(0);opacity:1}}@media(prefers-reduced-motion:reduce){.ds-menu{animation:none}}"
+    },
+    {
+      "kind": "custom",
+      "name": "Source overview and analysis notes",
+      "css": ".ds-source-detail{padding:24px;border:1px solid #303030;border-radius:14px;background:var(--panel,#191919);color:var(--ink,#f4f4f4);font:16px/1.6 Inter,system-ui,sans-serif}.ds-source-heading{margin:0 0 12px;font-size:18px;line-height:1.35;font-weight:550;letter-spacing:-.025em}.ds-source-copy{margin:0 0 16px;color:var(--muted,#a8a8a8);max-width:72ch}.ds-source-fine{margin:0 0 16px;color:var(--muted,#a8a8a8);font-size:.8rem;max-width:72ch}.ds-source-notes>summary{min-height:44px;padding:12px 0;cursor:pointer;color:var(--console-ink,#f4f4f4)}.ds-source-notes>summary:focus-visible{outline:2px solid #d4d4d4;outline-offset:3px}.ds-source-notes[open]>summary{margin-bottom:8px}.ds-source-subheading{margin:0 0 12px;font-size:1.05rem;font-weight:550}@media(max-width:720px){.ds-source-detail{padding:18px}}",
+      "refersTo": "source-notes",
+      "description": "Native disclosure keeps detailed notes available while the sampled-coverage caution stays visible.",
+      "html": "<section class=\"ds-source-detail\"><h2 class=\"ds-source-heading\">AI summary</h2><p class=\"ds-source-copy\">Sampled evidence is not exhaustive analysis.</p><p class=\"ds-source-fine\">Frames are sampled. Automatic transcripts can contain errors.</p><details class=\"ds-source-notes\"><summary>Full summary and analysis notes</summary><section aria-label=\"Analysis limitations\"><h3 class=\"ds-source-subheading\">Limitations and uncertainty</h3><p class=\"ds-source-copy\">Sampled evidence is not exhaustive analysis.</p></section></details></section>"
     }
   ],
   "narrative": {
     "rules": [
       {
+        "body": "Use white for the main action and selected reading hierarchy; reserve color for an actual error.",
         "name": "The Neutral Action Rule",
-        "section": "colors",
-        "body": "Use white for the main action and selected reading hierarchy; reserve color for an actual error."
+        "section": "colors"
       },
       {
+        "body": "Keep title, explanation and metadata distinct through scale, weight and neutral contrast; use concise sentence case labels instead of ornamental eyebrows.",
         "name": "The Reading Hierarchy Rule",
-        "section": "typography",
-        "body": "Keep title, explanation and metadata distinct through scale, weight and neutral contrast; use concise sentence case labels instead of ornamental eyebrows."
+        "section": "typography"
       },
       {
+        "body": "Interactive controls keep at least a 44px target; small type and icons do not justify a smaller hit area. Informational chips are not controls.",
         "name": "The Touch Target Rule",
-        "section": "layout",
-        "body": "Interactive controls keep at least a 44px target; small type and icons do not justify a smaller hit area. Informational chips are not controls."
+        "section": "layout"
       },
       {
+        "body": "Keep routine content flat; use floating depth for a menu or modal that temporarily interrupts the underlying task.",
         "name": "The Flat Surface Rule",
-        "section": "elevation",
-        "body": "Keep routine content flat; use floating depth for a menu or modal that temporarily interrupts the underlying task."
+        "section": "elevation"
+      },
+      {
+        "body": "Keep the sampling and automatic-transcription caution visible for sampled audiovisual coverage while placing the retained full summary and detailed analysis notes in the disclosure.",
+        "name": "The Visible Limits Rule",
+        "section": "components"
       }
     ],
     "donts": [
