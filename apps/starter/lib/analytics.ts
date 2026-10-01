@@ -74,6 +74,7 @@ export async function setAnalyticsConsent(consented: boolean) {
             ...safe.properties,
             distinct_id: distinct,
             $process_person_profile: false,
+            $geoip_disable: true,
             token: key,
           },
         };

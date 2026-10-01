@@ -62,6 +62,7 @@ it("never initializes or captures before consent and drops SDK defaults after co
     coverage: "caption_only",
     distinct_id: "random",
     $process_person_profile: false,
+    $geoip_disable: true,
     token: "phc_SyntheticPublicTest",
   });
   expect(result.$set).toBeUndefined();
