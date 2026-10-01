@@ -4,6 +4,7 @@ import { signedObject } from "./storage";
 import { ensure } from "../policy";
 import { decoderManifest } from "../media/manifest";
 import { createHash } from "node:crypto";
+import { exactArrayBuffer } from "./binary";
 export async function prepareMedia(
   objectKey: string,
   decoder: string,
@@ -120,7 +121,7 @@ export async function transcribe(audio: Uint8Array, key: string) {
   const form = new FormData();
   form.append(
     "file",
-    new Blob([audio.slice().buffer as ArrayBuffer], { type: "audio/mpeg" }),
+    new Blob([exactArrayBuffer(audio)], { type: "audio/mpeg" }),
     "audio.mp3",
   );
   form.append(

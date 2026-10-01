@@ -7,6 +7,7 @@ import { personalDecoder } from "../packages/media/decoder-personal";
 import { signedObject, objectMetadata } from "../packages/providers/storage";
 import { createHash, randomUUID } from "node:crypto";
 import { ensure } from "../packages/policy";
+import { exactArrayBuffer } from "../packages/providers/binary";
 
 export const prepare = internalAction({
   args: { id: v.id("sources"), generation: v.number() },
@@ -14,6 +15,7 @@ export const prepare = internalAction({
     const source = await ctx.runMutation(internal.personalMediaState.begin, a);
     if (!source) return;
     let computeCredits: number | undefined;
+    let stage = "decode";
     const staged: string[] = [];
     try {
       const rate = Number(process.env.E2B_CREDITS_PER_SECOND);
@@ -42,16 +44,31 @@ export const prepare = internalAction({
         frames: [],
       };
       const put = async (bytes: Uint8Array, type: string) => {
+        stage = "storage_write";
         const key = `${source.organizationId}/personal-${randomUUID()}`;
         staged.push(key);
         const res = await fetch(signedObject(key, "PUT", 120), {
           method: "PUT",
           headers: { "Content-Type": type },
-          body: bytes.slice().buffer as ArrayBuffer,
+          body: exactArrayBuffer(bytes),
           signal: AbortSignal.timeout(30000),
         });
         ensure(res.ok, "STORAGE_UNAVAILABLE", "Private media write failed.");
+        stage = "storage_verify";
         const metadata = await objectMetadata(key);
+        if (metadata.size !== bytes.byteLength || metadata.type !== type)
+          console.error("personal_media_metadata_mismatch", {
+            expectedSize: bytes.byteLength,
+            receivedSize: metadata.size,
+            expectedType: type,
+            receivedType: [
+              "audio/wav",
+              "image/jpeg",
+              "application/octet-stream",
+            ].includes(metadata.type ?? "")
+              ? metadata.type
+              : "other",
+          });
         ensure(
           metadata.size === bytes.byteLength && metadata.type === type,
           "INVALID_EVIDENCE",
@@ -66,6 +83,7 @@ export const prepare = internalAction({
       };
       if (prepared.audio) {
         const blob = await put(prepared.audio, "audio/wav");
+        stage = "audio_register";
         const assetId = await ctx.runMutation(
           internal.assets.registerNormalized,
           {
@@ -83,6 +101,7 @@ export const prepare = internalAction({
         if (!(await ctx.runQuery(internal.personalMediaState.pending, a)))
           throw new Error("CANCELED");
         const blob = await put(Buffer.from(f.data, "base64"), "image/jpeg");
+        stage = "frame_register";
         const assetId = await ctx.runMutation(
           internal.assets.registerEvidence,
           {
@@ -101,12 +120,29 @@ export const prepare = internalAction({
           selectionReason: f.selectionReason,
         });
       }
+      stage = "queue";
       const accepted = await ctx.runMutation(
         internal.personalMediaState.finish,
         { ...a, organizationId: source.organizationId, computeCredits, media },
       );
       if (accepted) return;
-    } catch {
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "";
+      const category =
+        [
+          "APPROVAL_STALE",
+          "INVALID_EVIDENCE",
+          "STORAGE_UNAVAILABLE",
+          "UPLOAD_INCOMPLETE",
+          "QUOTE_CHANGED",
+          "BUDGET_EXCEEDED",
+          "CANCELED",
+        ].find((code) => message.includes(code)) ?? "UNCLASSIFIED";
+      console.error("personal_media_failed", {
+        stage,
+        category,
+        computeKnown: computeCredits !== undefined,
+      });
       await ctx.runMutation(internal.personalMediaState.finish, {
         ...a,
         organizationId: source.organizationId,
