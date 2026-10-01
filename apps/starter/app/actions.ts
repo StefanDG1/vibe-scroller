@@ -56,9 +56,26 @@ export async function startV1Checkout(_: FormState, d: FormData) {
       termsAccepted: d.get("terms") === "on",
       immediateService: d.get("immediate") === "on",
     });
-  } catch {
+  } catch (error) {
+    const data = error instanceof ConvexError ? error.data : null;
+    const messages: Record<string, string> = {
+      CHECKOUT_OPEN:
+        "A different checkout is already open. Return to the previous selection or wait 31 minutes before changing it.",
+      COUNTRY_DISABLED:
+        "Checkout is unavailable in this country. Choose an enabled billing country.",
+      SUBSCRIPTION_EXISTS:
+        "You already have a subscription. Use the billing portal to manage it.",
+      TERMS_REQUIRED: "Accept the service terms before opening checkout.",
+    };
+    const code =
+      typeof data === "string"
+        ? data.split(":", 1)[0]
+        : data && typeof data === "object" && "code" in data
+          ? String(data.code)
+          : "";
     return {
       error:
+        messages[code] ??
         "Checkout unavailable. Verify the catalogue, environment, terms and tax configuration.",
     };
   }

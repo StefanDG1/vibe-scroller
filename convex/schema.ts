@@ -61,6 +61,7 @@ export default defineSchema({
     revision: v.number(),
     appliedRevision: v.optional(v.number()),
     checkoutKey: v.optional(v.string()),
+    checkoutIntent: v.optional(v.string()),
     checkoutExpires: v.optional(v.number()),
   })
     .index("by_org", ["organizationId"])

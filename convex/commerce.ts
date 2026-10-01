@@ -97,23 +97,27 @@ async function fundInvoice(
 }
 export const catalogue = query({
   args: {},
-  handler: () => ({
-    pricing,
-    taxMode: "pending_evidence",
-    liveEnabled: false,
-    sandboxEnabled:
-      process.env.STRIPE_MODE !== "live" &&
-      /^[sr]k_test_/.test(process.env.STRIPE_SECRET_KEY ?? "") &&
-      !!process.env.STRIPE_V1_WEBHOOK_SECRET &&
-      [
-        "STARTER_WEEKLY",
-        "STARTER_MONTHLY",
-        "STARTER_ANNUAL",
-        "PRO_WEEKLY",
-        "PRO_MONTHLY",
-        "PRO_ANNUAL",
-      ].every((k) => !!process.env[`STRIPE_${k}_PRICE_ID`]),
-  }),
+  handler: async (ctx) => {
+    const tax = await ctx.db.query("taxConfigurations").first();
+    return {
+      pricing,
+      taxMode: tax?.domestic ?? "pending_evidence",
+      countries: tax?.countries ?? ["RO"],
+      liveEnabled: false,
+      sandboxEnabled:
+        process.env.STRIPE_MODE !== "live" &&
+        /^[sr]k_test_/.test(process.env.STRIPE_SECRET_KEY ?? "") &&
+        !!process.env.STRIPE_V1_WEBHOOK_SECRET &&
+        [
+          "STARTER_WEEKLY",
+          "STARTER_MONTHLY",
+          "STARTER_ANNUAL",
+          "PRO_WEEKLY",
+          "PRO_MONTHLY",
+          "PRO_ANNUAL",
+        ].every((k) => !!process.env[`STRIPE_${k}_PRICE_ID`]),
+    };
+  },
 });
 export const grantPeriod = internalMutation({
   args: {

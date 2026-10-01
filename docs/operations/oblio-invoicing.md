@@ -1,6 +1,6 @@
 # Use the accountant's Oblio workflow
 
-Mode: how-to. Checked September 30, 2026. Only the accountant has Oblio access. No API credentials, document creation, SPV authorization or purchase has occurred.
+Mode: how-to. Checked October 1, 2026. Only the accountant has Oblio access. No API credentials, document creation, SPV authorization or purchase has occurred.
 
 ## Keep one accounting workflow
 
@@ -18,6 +18,8 @@ The implemented private queue is `/account/invoices`. Configure verified WorkOS 
 4. Confirm cancellation, partial/full refund and credit-note handling. Retain the original Stripe invoice/payment IDs and Oblio series/number mapping; refunds must not delete audit history.
 
 Manual accountant operation is the initial adapter described in [billing](../BILLING-AND-TAX.md). Secure exported billing records separately from media. Do not collect unnecessary personal identifiers merely because the provider accepts them.
+
+Each queue entry now offers **Download accountant record**. This private JSON handover contains the verified seller identity, Stripe invoice and customer identifiers, available buyer name/address/tax identifiers, issue date, currency, subtotal, provider tax amount, total, paid/remaining amounts and provider invoice links. Monetary amounts are integer minor units; EUR 1210 means EUR 12.10. The operator must reconcile these source amounts with the applicable invoice treatment rather than assume every transaction is exempt. Access requires the explicit active invoice-operator identity and matching invoice customer/workspace/environment. Responses are private and not cached. It is a payment-provider source record, not a newly issued Oblio invoice or proof of ANAF acceptance. Send it through the accountant's agreed secure channel; do not upload it to GitHub.
 
 ## Optional automation
 

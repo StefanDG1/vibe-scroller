@@ -52,6 +52,13 @@ export const company = defineCompany({
     url: "https://scroll.companynerve.com",
     appUrl: "https://scroll.companynerve.com",
     supportEmail: "contact@exponentialeducation.ro",
+    operator: {
+      name: "EXPONENTIAL EDUCATION S.R.L.",
+      address: "Strada N. Istrati, No. 6, Iași, Iași County, 700460, Romania",
+      taxId: "54790758",
+      tradeRegister: "J2026035424002",
+      euid: "ROONRC.J2026035424002",
+    },
   },
   roles: ["owner", "admin", "member"],
   plans: { free: { projects: 3 }, pro: { projects: 100 } },

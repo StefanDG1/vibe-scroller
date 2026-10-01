@@ -1,0 +1,11 @@
+# Bind checkout retries and provide private accountant records
+
+Status: implemented. Date: 2026-10-01.
+
+A Stripe idempotency key cannot safely be reused after changing its request parameters. The existing 31-minute workspace reservation now binds the selected price, billing country, tax treatment, immediate-service choice and terms version. Identical retries preserve the existing session; a different selection receives a clear conflict until expiry. The restriction prevents multiple parallel subscription checkouts and parameter-mismatch errors. It currently requires returning to the original selection or waiting for expiry; automatic replacement is not implemented. Existing reservations without an intent remain compatible with the inherited checkout path and cannot silently become a different V1 checkout.
+
+The initial accountant-managed Oblio workflow needs actual provider records rather than a second invoice generator. Explicit active invoice operators can download a private JSON record for a queued invoice. The server verifies invoice customer ownership and test/live mode, limits request frequency, and returns source amounts and available buyer fields with verified seller identity. It grants no access to customer sources, repository content or credentials. The download is not an issued Oblio document or an ANAF acceptance receipt. The existing recent-authentication receipt workflow is preserved.
+
+The owner's official ANAF query dated October 1 confirms no ordinary Article 316 VAT registration on that date. It does not replace confirmation of Article 310 eligibility, special Article 317, customer-country treatment or applicable OSS/EX records. Live checkout remains disabled. Selecting an enabled country in the form is not an independent verification of the address collected by Stripe; full production market/tax acceptance remains an external release requirement.
+
+Validation covers identical retries, changed intents, expired reservations, unauthorized customer export, matching provider totals, different-customer rejection and mode mismatch. A dedicated synthetic sandbox checkout additionally verifies the real Stripe session, retry behavior, test-card payment and webhook-projected active subscription. Public paid launch still requires the complete production customer sign-in/payment/return and applicable tax/invoicing workflow.

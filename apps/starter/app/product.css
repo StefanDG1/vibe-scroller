@@ -1593,6 +1593,125 @@ dialog.capture-modal::backdrop {
 }
 .source-card {
   animation: source-enter 180ms ease-out both;
+  position: relative;
+}
+.source-hitarea {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  z-index: 1;
+  cursor: pointer;
+}
+.source-hitarea:focus-visible {
+  outline-offset: -2px;
+}
+.source-card:focus-within {
+  background: #202020;
+}
+.source-thumb,
+.source-open {
+  pointer-events: none;
+}
+.source-card-body p {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.page-heading.source-heading {
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.page-heading.source-heading > div {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+.page-heading.source-heading h1 {
+  font-size: clamp(20px, 2vw, 27px);
+  max-width: 65ch;
+}
+.insight-index,
+.evidence-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0;
+  list-style: none;
+}
+.insight-index a,
+.evidence-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid #3d3d3d;
+  border-radius: 9px;
+  color: var(--ink);
+  font-size: 13px;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.insight-index a {
+  flex: 1 1 230px;
+}
+.insight,
+#source-transcript {
+  scroll-margin-top: 85px;
+}
+.insight-evidence {
+  margin-top: 8px;
+}
+.product-main details > summary,
+.doc details > summary {
+  min-height: 44px;
+  padding-block: 10px;
+  cursor: pointer;
+}
+.insight h3 {
+  font-size: 16px;
+  line-height: 1.5;
+}
+.insight p {
+  max-width: 70ch;
+}
+.site-header nav a,
+.site-footer nav a,
+.doc > a,
+.panel > a,
+.source-notes > a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding-block: 8px;
+}
+.billing-plans {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
+  gap: 16px;
+}
+.billing-plans dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px 16px;
+}
+.billing-plans dd {
+  margin: 0;
+  text-align: right;
+}
+.checkbox-label {
+  min-height: 44px;
+  padding-block: 8px;
+}
+@media (max-width: 600px) {
+  .doc {
+    padding-inline: 16px;
+  }
+  .form-grid > div > button {
+    width: 100%;
+  }
 }
 .source-thumb {
   transition:

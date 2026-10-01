@@ -32,6 +32,9 @@ typography:
     fontWeight: 550
     lineHeight: 1.5
     letterSpacing: "-0.025em"
+  source-headline:
+    fontSize: "clamp(20px, 2vw, 27px)"
+    lineHeight: 1.3
   body:
     fontFamily: 'Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
     fontSize: "14px"
@@ -63,6 +66,10 @@ spacing:
   section: "20px"
   panel: "24px"
 components:
+  source-row:
+    description: One named button covers the complete source row; title, thumbnail and arrow share its action. Summaries show at most three lines in the library.
+  insight-evidence:
+    description: Main-point anchors and private evidence links have a 44px minimum height. Transcript references open and focus the transcript disclosure. Frame references open private evidence.
   button-primary:
     backgroundColor: "{colors.ink}"
     textColor: "{colors.primary-text}"

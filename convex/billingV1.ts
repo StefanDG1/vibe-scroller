@@ -312,6 +312,13 @@ export const checkout = action({
     });
     const reserved = await ctx.runMutation(internal.billing.reserveCheckout, {
       organizationId: a.organizationId,
+      intent: JSON.stringify([
+        price,
+        a.country,
+        treatment,
+        a.immediateService,
+        "v1-draft",
+      ]),
     });
     const origin = new URL(process.env.APP_URL!).origin;
     const session = await client.checkout.sessions.create(

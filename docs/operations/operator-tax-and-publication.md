@@ -1,6 +1,6 @@
 # Confirm tax treatment and publish the policies
 
-Mode: how-to. Checked 30 September 2026. Owner-supplied ONRC records establish the intended operator's identity and listed software activities. The official ANAF Article 316 registry matched that company and reported ordinary VAT registration false and inactive status false for September 30. This does not establish Article 317, OSS/EX status, turnover eligibility or invoice treatment for every market. Live checkout remains disabled pending those applicable checks.
+Mode: how-to. Checked 1 October 2026. Owner-supplied ONRC records establish the intended operator's identity and listed software activities. The September 30 ANAF check reported ordinary VAT registration false and inactive status false. The owner supplied an official October 1 query reporting absence from both the Article 316 registration and cancelled-registration registers. This does not establish Article 317, OSS/EX status, turnover eligibility or invoice treatment for every market. Live checkout remains disabled pending those applicable checks.
 
 VAT is not one yes/no setting. Domestic treatment, business purchases, customer location and customer business status can produce different obligations at the same time. This is an implementation checklist for discussion with the company's accountant, not a determination of its status.
 

@@ -29,9 +29,9 @@ export default async function Page({
       <Link href={`/app/${org}`}>Back to workspace</Link>
       <h1>Billing and allowances</h1>
       <p>
-        Live checkout is disabled while official company and tax records are
-        pending. This deployment offers a capped preview without automatic paid
-        conversion.
+        Live checkout is disabled while the applicable sales tax treatment and
+        publication checks are completed. Preview access does not convert to a
+        paid plan automatically.
       </p>
       <section className="panel">
         <h2>Current allowance</h2>
@@ -47,30 +47,30 @@ export default async function Page({
       </section>
       <section className="panel">
         <h2>Catalogue</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Plan</th>
-              <th>Weekly</th>
-              <th>Monthly</th>
-              <th>Annual</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <th>Starter</th>
-              <td>EUR 5.99 / 65 credits</td>
-              <td>EUR 19 / 250 credits</td>
-              <td>EUR 190 / 250 credits each month</td>
-            </tr>
-            <tr>
-              <th>Pro</th>
-              <td>EUR 11.99 / 150 credits</td>
-              <td>EUR 39 / 600 credits</td>
-              <td>EUR 390 / 600 credits each month</td>
-            </tr>
-          </tbody>
-        </table>
+        <div className="billing-plans">
+          <section aria-label="Starter pricing">
+            <h3>Starter</h3>
+            <dl>
+              <dt>Weekly</dt>
+              <dd>EUR 5.99 · 65 credits</dd>
+              <dt>Monthly</dt>
+              <dd>EUR 19 · 250 credits</dd>
+              <dt>Annual</dt>
+              <dd>EUR 190 · 250 credits each month</dd>
+            </dl>
+          </section>
+          <section aria-label="Pro pricing">
+            <h3>Pro</h3>
+            <dl>
+              <dt>Weekly</dt>
+              <dd>EUR 11.99 · 150 credits</dd>
+              <dt>Monthly</dt>
+              <dd>EUR 39 · 600 credits</dd>
+              <dt>Annual</dt>
+              <dd>EUR 390 · 600 credits each month</dd>
+            </dl>
+          </section>
+        </div>
         <p>
           Starter: three repositories, 1 GB retained library storage and 1,000
           sources. Pro: fifteen repositories, 5 GB and 10,000 sources. Both
@@ -100,20 +100,20 @@ export default async function Page({
             </label>
             <label>
               Billing country
-              <input
-                name="country"
-                minLength={2}
-                maxLength={2}
-                defaultValue="RO"
-                required
-              />
+              <select name="country" defaultValue="RO" required>
+                {catalogue.countries.map((country) => (
+                  <option key={country} value={country}>
+                    {country === "RO" ? "Romania" : country}
+                  </option>
+                ))}
+              </select>
             </label>
-            <label>
+            <label className="checkbox-label">
               <input type="checkbox" name="terms" required />I accept the
               displayed <Link href="/terms">terms</Link> and credit expiry
               policy
             </label>
-            <label>
+            <label className="checkbox-label">
               <input type="checkbox" name="immediate" />I request immediate
               service, with statutory rights and the refund policy explained
             </label>
@@ -129,7 +129,7 @@ export default async function Page({
           </p>
         )}
       </section>
-      {auth.billing && (
+      {auth.billing?.subscriptionId && (
         <section className="panel">
           <h2>Subscription controls</h2>
           <p>

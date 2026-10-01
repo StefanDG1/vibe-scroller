@@ -1,6 +1,7 @@
 import { query, internalQuery, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import { access, billingFor, fail, limit } from "./lib";
+import { ensure } from "../packages/policy";
 export const authorize = query({
   args: { organizationId: v.id("organizations") },
   handler: async (ctx, { organizationId }) => {
@@ -52,19 +53,32 @@ export const attach = internalMutation({
   },
 });
 export const reserveCheckout = internalMutation({
-  args: { organizationId: v.id("organizations") },
-  handler: async (ctx, { organizationId }) => {
+  args: {
+    organizationId: v.id("organizations"),
+    intent: v.optional(v.string()),
+  },
+  handler: async (ctx, { organizationId, intent }) => {
     const row = await billingFor(ctx, organizationId);
     if (!row) fail("Billing account unavailable.");
     if (
       row.checkoutKey &&
       row.checkoutExpires &&
       row.checkoutExpires > Date.now()
-    )
+    ) {
+      ensure(
+        row.checkoutIntent === intent,
+        "CHECKOUT_OPEN",
+        "A different checkout is already open. Return to the previous selection or wait 31 minutes before changing it.",
+      );
       return { key: row.checkoutKey, expires: row.checkoutExpires };
+    }
     const expires = Date.now() + 31 * 60000;
     const key = `checkout:${organizationId}:${Date.now()}`;
-    await ctx.db.patch(row._id, { checkoutKey: key, checkoutExpires: expires });
+    await ctx.db.patch(row._id, {
+      checkoutKey: key,
+      checkoutExpires: expires,
+      checkoutIntent: intent,
+    });
     return { key, expires };
   },
 });

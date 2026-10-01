@@ -15,7 +15,7 @@ export function ActionForm({
 }) {
   const [state, submit, pending] = useActionState(action, {});
   return (
-    <form action={submit} className="form-grid">
+    <form action={submit} className="form-grid" aria-busy={pending}>
       {children}
       {state.error && (
         <p className="error" role="alert">
@@ -23,7 +23,7 @@ export function ActionForm({
         </p>
       )}
       {state.message && (
-        <output className="success">
+        <output className="success" aria-live="polite">
           {state.message}
           {state.link && (
             <>
@@ -38,6 +38,7 @@ export function ActionForm({
           type="submit"
           variant={danger ? "destructive" : "default"}
           disabled={pending}
+          aria-busy={pending}
         >
           {pending ? "Working…" : label}
         </Button>

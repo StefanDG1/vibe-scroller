@@ -34,7 +34,7 @@ The active [provider register](SUBPROCESSORS.md) identifies the services used fo
 
 Storage configured in an EU jurisdiction does not mean every AI or authentication operation occurs only in the EU. Before enabling a provider, we verify its applicable agreement, processing locations, and lawful transfer safeguards where required. The published register states the actual configured route. We do not claim that this draft proves those agreements are in place.
 
-When you provide your own API key or use local Codex, that provider's own account and data terms also apply. Telegram capture uses its bot infrastructure. It is not an end-to-end encrypted vault for confidential repository content.
+When you provide your own API key or use local Codex, that provider's own account and data terms also apply. In the enabled personal video route, a paired laptop transcribes audio locally and sends the transcript and sampled frames through your own supported ChatGPT-plan connection. Local subscription credentials remain on that laptop. The computer must stay connected while processing. Telegram capture is deferred and is not active in this deployment.
 
 ## Retention
 
@@ -45,6 +45,8 @@ Intermediate caches expire within seven days. Raw repository snapshots normally 
 When you delete content, we remove normal access immediately and target deletion from active product systems within seven days. Backups normally expire within 30 days. We use deletion records to prevent deleted content from reappearing during restoration. Lawful holds can require limited exceptions.
 
 Accounting records follow the applicable statutory schedule. The initial Romanian accounting policy uses the period required by the current accounting rules, distinct from any additional OSS or dispute requirement. We retain only the data needed for that duty. Deleting your source library does not delete a legally required invoice.
+
+Explicitly authorized company invoice operators can download buyer details and payment-provider invoice records for the accountant's manual invoicing workflow. Customer workspace ownership alone does not grant that permission. Source media, transcripts and repository content are excluded from these accounting downloads.
 
 The live notice must state any materially different provider retention that applies to the enabled service. No provider is assumed to follow our own cache timing automatically.
 

@@ -29,6 +29,7 @@ import type * as identity from "../identity.js";
 import type * as imports from "../imports.js";
 import type * as inferenceBudget from "../inferenceBudget.js";
 import type * as integrations from "../integrations.js";
+import type * as invoiceAccounting from "../invoiceAccounting.js";
 import type * as invoiceOperations from "../invoiceOperations.js";
 import type * as jobs from "../jobs.js";
 import type * as lib from "../lib.js";
@@ -86,6 +87,7 @@ declare const fullApi: ApiFromModules<{
   imports: typeof imports;
   inferenceBudget: typeof inferenceBudget;
   integrations: typeof integrations;
+  invoiceAccounting: typeof invoiceAccounting;
   invoiceOperations: typeof invoiceOperations;
   jobs: typeof jobs;
   lib: typeof lib;

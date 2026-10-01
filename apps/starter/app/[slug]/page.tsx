@@ -36,7 +36,7 @@ const pages: Record<string, { title: string; body: string[] }> = {
   docs: {
     title: "Get started with your library",
     body: [
-      "Sign in with an email code or Google. Create a workspace. Use the library before connecting GitHub.",
+      "Sign in with an email code or Google. Your default workspace opens automatically. Use the library before connecting GitHub.",
       "Paste a source URL, upload permitted content, or provide a transcript. Text input does not imply audio or video analysis.",
       "Connect the VibeScroller GitHub App to selected repositories and confirm purpose, audience, goals, constraints and non-goals.",
       "Review processing quotes before spending credits. Local Codex and API-funded cloud execution have separate authorization and funding.",

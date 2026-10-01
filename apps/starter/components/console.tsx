@@ -147,12 +147,17 @@ export function Console({
   const captureDialog = useRef<HTMLDialogElement>(null);
   const [sharedDraft, setSharedDraft] = useState(initialSharedDraft);
   const libraryRequest = useRef(0);
+  const libraryAbort = useRef<AbortController | null>(null);
+  const refreshFlight = useRef<Promise<void> | null>(null);
   async function loadLibrary(append = false) {
     if (demo) {
       setLibraryError("");
       return;
     }
     const generation = ++libraryRequest.current;
+    libraryAbort.current?.abort();
+    const abort = new AbortController();
+    libraryAbort.current = abort;
     setLibraryLoading(true);
     setLibraryError("");
     try {
@@ -160,6 +165,7 @@ export function Console({
       if (append && data.libraryNext) q.set("cursor", data.libraryNext);
       const response = await fetch(`/api/library/${organizationId}?${q}`, {
         cache: "no-store",
+        signal: abort.signal,
       });
       if (!response.ok || response.redirected)
         throw new Error("Your library could not be loaded. Try again.");
@@ -179,7 +185,7 @@ export function Console({
         libraryNext: result.next,
       }));
     } catch (error) {
-      if (generation === libraryRequest.current)
+      if (!abort.signal.aborted && generation === libraryRequest.current)
         setLibraryError(
           error instanceof Error
             ? error.message
@@ -199,6 +205,7 @@ export function Console({
     }, 250);
     return () => {
       clearTimeout(timeout);
+      libraryAbort.current?.abort();
       // oxlint-disable-next-line react-hooks/exhaustive-deps -- Invalidate this asynchronous request generation on cleanup.
       libraryRequest.current++;
     };
@@ -285,6 +292,16 @@ export function Console({
 
   async function refreshData() {
     if (demo) return;
+    if (refreshFlight.current) return refreshFlight.current;
+    const request = refreshWorkspace();
+    refreshFlight.current = request;
+    try {
+      await request;
+    } finally {
+      refreshFlight.current = null;
+    }
+  }
+  async function refreshWorkspace() {
     const response = await fetch(`/api/workspace/${organizationId}`, {
       cache: "no-store",
     });
@@ -312,13 +329,26 @@ export function Console({
     }
   }
   const refreshFromEffect = useEffectEvent(() => refreshData());
+  const processing =
+    data.sources.some((s) => ["queued", "processing"].includes(s.state)) ||
+    data.runs.some((r) =>
+      ["queued", "running", "publishing"].includes(r.state),
+    );
   useEffect(() => {
     if (demo) return;
-    const timer = setInterval(() => {
+    const refreshVisible = () => {
+      if (document.visibilityState !== "visible" || !navigator.onLine) return;
       refreshFromEffect().catch(() => {});
-    }, 15000);
-    return () => clearInterval(timer);
-  }, [demo, organizationId, view]);
+    };
+    const timer = setInterval(refreshVisible, processing ? 15000 : 60000);
+    document.addEventListener("visibilitychange", refreshVisible);
+    window.addEventListener("online", refreshVisible);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", refreshVisible);
+      window.removeEventListener("online", refreshVisible);
+    };
+  }, [demo, organizationId, processing]);
   const planIdentity = selected
     ? `${id(selected)}:${selected.planHash ?? ""}`
     : "";
@@ -539,7 +569,9 @@ export function Console({
           </p>
         )}
         <main id="main" className="product-main">
-          <div className="page-heading">
+          <div
+            className={`page-heading ${view === "source" ? "source-heading" : ""}`}
+          >
             <div>
               <h1>
                 {view === "source"
@@ -704,10 +736,12 @@ export function Console({
                   filtered.map((s) => (
                     <article key={id(s)} className="source-card">
                       <button
-                        className="source-thumb"
+                        type="button"
+                        className="source-hitarea"
                         onClick={() => findSource(s)}
                         aria-label={`Open ${s.title}`}
-                      >
+                      />
+                      <span className="source-thumb" aria-hidden="true">
                         {s.kind === "text" ? (
                           <FileText size={24} strokeWidth={1.5} />
                         ) : s.kind === "upload" ? (
@@ -715,14 +749,9 @@ export function Console({
                         ) : (
                           <Link2 size={24} strokeWidth={1.5} />
                         )}
-                      </button>
+                      </span>
                       <div className="source-card-body">
-                        <button
-                          className="title-button"
-                          onClick={() => findSource(s)}
-                        >
-                          <h2>{s.title}</h2>
-                        </button>
+                        <h2>{s.title}</h2>
                         <div className="row spread">
                           <span className="coverage">{label(s.coverage)}</span>
                         </div>
@@ -774,14 +803,12 @@ export function Console({
                           )}
                         </div>
                       </div>
-                      <button
-                        type="button"
+                      <span
                         className="icon-button source-open"
-                        aria-label={`View details for ${s.title}`}
-                        onClick={() => findSource(s)}
+                        aria-hidden="true"
                       >
                         <ArrowRight size={18} />
-                      </button>
+                      </span>
                     </article>
                   ))
                 ) : (
@@ -2323,6 +2350,10 @@ function SourceDetail({
   const [detailLoading, setDetailLoading] = useState(!demo);
   const [selectedInsight, setSelectedInsight] = useState("");
   const [allFrames, setAllFrames] = useState(false);
+  const [transcriptOpen, setTranscriptOpen] = useState(false);
+  const transcript = useRef<HTMLDetailsElement>(null);
+  const sourceId = id(source);
+  const sourceRevision = `${source.generation}:${source.updatedAt}:${source.personalAnalysis?.state}`;
   const savedFrames = (
     detail.originalMediaEvidence ??
     detail.mediaEvidence ??
@@ -2336,7 +2367,7 @@ function SourceDetail({
   useEffect(() => {
     if (demo) return;
     const abort = new AbortController();
-    fetch(`/api/source/${id(source)}`, {
+    fetch(`/api/source/${sourceId}`, {
       cache: "no-store",
       signal: abort.signal,
     })
@@ -2371,7 +2402,20 @@ function SourceDetail({
         }
       });
     return () => abort.abort();
-  }, [source, demo]);
+    // The workspace projection is a new object after every poll. Reload private
+    // evidence only when this source's actual revision changes.
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
+  }, [sourceId, sourceRevision, demo]);
+  const insights =
+    detail.analysis?.insights ??
+    (demo
+      ? detail.mainPoints?.map((title: string) => ({
+          title,
+          claim: title,
+          evidence: [],
+        }))
+      : []) ??
+    [];
   const summary =
     detail.summary ??
     "No analysis available. Upload permitted content or supply a transcript.";
@@ -2430,6 +2474,15 @@ function SourceDetail({
       </div>
       <section className="panel">
         <h2>Main points</h2>
+        {!detailLoading && insights.length > 1 && (
+          <nav className="insight-index" aria-label="Main points">
+            {insights.map((insight: any, index: number) => (
+              <a key={insight.id ?? index} href={`#insight-${index}`}>
+                {insight.title}
+              </a>
+            ))}
+          </nav>
+        )}
         {detailLoading && (
           <output aria-live="polite">
             <Loader2 className="spinner" size={16} aria-hidden="true" /> Loading
@@ -2437,18 +2490,13 @@ function SourceDetail({
           </output>
         )}
         {!detailLoading &&
-          (
-            detail.analysis?.insights ??
-            (demo
-              ? detail.mainPoints?.map((t: string) => ({
-                  title: t,
-                  claim: t,
-                  evidence: [],
-                }))
-              : []) ??
-            []
-          ).map((i: any) => (
-            <article className="insight" key={i.id ?? i.title}>
+          insights.map((i: any, index: number) => (
+            <article
+              className="insight"
+              id={`insight-${index}`}
+              key={i.id ?? i.title}
+              tabIndex={-1}
+            >
               <h3>{i.title}</h3>
               <p>{i.claim}</p>
               <p>{i.interpretation}</p>
@@ -2457,28 +2505,72 @@ function SourceDetail({
                   {i.confidence ?? "Synthetic evidence"}
                 </span>
               )}
-              <ul>
-                {i.evidence?.map((e: any) => (
-                  <li key={e.id}>
-                    {label(e.kind)} ·{" "}
-                    {e.startMs === null
-                      ? "Supplied text"
-                      : `${e.startMs / 1000}s`}
-                    {e.kind === "frame" && !demo && (
-                      <a
-                        href={`/api/evidence/${encodeURIComponent(e.id)}?view=true`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        View private frame
-                      </a>
-                    )}
-                  </li>
-                ))}
-              </ul>
+              {!!i.evidence?.length && (
+                <details className="insight-evidence">
+                  <summary>
+                    Evidence · {i.evidence.length}{" "}
+                    {i.evidence.length === 1 ? "reference" : "references"}
+                  </summary>
+                  <ul className="evidence-links">
+                    {i.evidence?.map((e: any) => (
+                      <li key={e.id}>
+                        {e.kind === "frame" && !demo && (
+                          <a
+                            href={`/api/evidence/${encodeURIComponent(e.id)}?view=true`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            Frame · {(e.startMs / 1000).toFixed(1)}s
+                          </a>
+                        )}
+                        {e.kind === "transcript" && (
+                          <a
+                            href="#source-transcript"
+                            onClick={(event) => {
+                              event.preventDefault();
+                              setTranscriptOpen(true);
+                              requestAnimationFrame(() => {
+                                transcript.current?.scrollIntoView({
+                                  block: "start",
+                                });
+                                transcript.current?.focus({
+                                  preventScroll: true,
+                                });
+                              });
+                            }}
+                          >
+                            Transcript ·{" "}
+                            {e.startMs === null
+                              ? "supplied text"
+                              : `${(e.startMs / 1000).toFixed(1)}s`}
+                          </a>
+                        )}
+                        {e.kind !== "transcript" &&
+                          (e.kind !== "frame" || demo) && (
+                            <span>
+                              {label(e.kind)} ·{" "}
+                              {e.startMs === null
+                                ? "Supplied text"
+                                : `${(e.startMs / 1000).toFixed(1)}s`}
+                            </span>
+                          )}
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              )}
             </article>
           ))}
-        <details>
+        {!detailLoading && !insights.length && !detail.error && (
+          <p>No main points yet. Add permitted media to start analysis.</p>
+        )}
+        <details
+          id="source-transcript"
+          ref={transcript}
+          tabIndex={-1}
+          open={transcriptOpen}
+          onToggle={(event) => setTranscriptOpen(event.currentTarget.open)}
+        >
           <summary>Original transcript and corrections</summary>
           <p style={{ whiteSpace: "pre-wrap" }}>
             {detail.originalText ??
@@ -2516,6 +2608,8 @@ function SourceDetail({
                     width={960}
                     height={540}
                     unoptimized
+                    loading="lazy"
+                    decoding="async"
                   />
                 </a>
                 <figcaption>{(frame.startMs / 1000).toFixed(1)}s</figcaption>

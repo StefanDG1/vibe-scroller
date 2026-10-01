@@ -47,6 +47,9 @@ export default async function Page({
         <section key={task._id} className="panel stack">
           <h2>Invoice {task.invoiceId}</h2>
           <p>Workspace: {task.organizationId}</p>
+          <a href={`/api/accounting/${task._id}`} download>
+            Download accountant record
+          </a>
           <p>
             Reporting deadline: {new Date(task.dueAt).toISOString()} UTC ·{" "}
             {task.state === "submitted"
