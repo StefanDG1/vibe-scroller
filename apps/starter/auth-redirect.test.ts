@@ -36,6 +36,23 @@ afterAll(() => vi.unstubAllEnvs());
 const event = {} as NextFetchEvent;
 
 describe("private-page authentication redirects", () => {
+  it("preserves POST bodies for host adapters that reuse the middleware request", async () => {
+    const body = JSON.stringify({
+      operation: "importLinks",
+      args: { text: "Synthetic Saved metadata" },
+    });
+    const request = new NextRequest("https://auth-test.invalid/api/product", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        origin: "https://auth-test.invalid",
+      },
+      body,
+    });
+    await proxy(request, event);
+    expect(request.bodyUsed).toBe(false);
+    expect(await request.text()).toBe(body);
+  });
   it.each(["/app", "/account", "/app/workspace/orders", "/join/invite"])(
     "starts PKCE in the proxy for an anonymous %s request",
     async (path) => {

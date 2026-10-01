@@ -28,7 +28,9 @@ export default async function proxy(
   headers.set("x-nonce", nonce);
   headers.set("Content-Security-Policy", policy);
   const response =
-    (await auth(new NextRequest(request, { headers }), event)) ??
+    // Request construction transfers a POST body. Some hosting adapters reuse
+    // this request for the route handler, so transfer a clone instead.
+    (await auth(new NextRequest(request.clone(), { headers }), event)) ??
     NextResponse.next({ request: { headers } });
   response.headers.set("Content-Security-Policy", policy);
   response.headers.set("Cache-Control", "private, no-store");
