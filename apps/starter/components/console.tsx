@@ -122,6 +122,7 @@ export function Console({
     [search, setSearch] = useState(initialSearch),
     [filter, setFilter] = useState(initialFilter),
     [notice, setNotice] = useState(""),
+    [reauthNeeded, setReauthNeeded] = useState(false),
     [busy, setBusy] = useState(false),
     [libraryLoading, setLibraryLoading] = useState(
       demo && demoState === "loading",
@@ -335,6 +336,7 @@ export function Console({
     }
     setBusy(true);
     setNotice("");
+    setReauthNeeded(false);
     try {
       if (demo) {
         setNotice(
@@ -369,6 +371,7 @@ export function Console({
         );
       const body = await res.json();
       if (!res.ok) {
+        setReauthNeeded(body.code === "REAUTH_REQUIRED");
         if (!demo)
           track("operation_failed", {
             operation,
@@ -376,6 +379,7 @@ export function Console({
           });
         throw new Error(body.error);
       }
+      if (operation === "checkPersonalSession") return body.result;
       const event = productAnalyticsEvent(operation, args, body.result);
       if (!demo && event) track(event.event, event.properties);
       await refreshData();
@@ -557,6 +561,16 @@ export function Console({
           </div>
           <output aria-live="polite" className={notice ? "notice" : "sr-only"}>
             {notice}
+            {reauthNeeded && (
+              <>
+                {" "}
+                <a
+                  href={`/sign-in?reauth=true&returnTo=${encodeURIComponent(`/app/${organizationId}/library`)}`}
+                >
+                  Sign in again
+                </a>
+              </>
+            )}
           </output>
           {(view === "home" || view === "library") && (
             <>
@@ -1910,6 +1924,15 @@ function CaptureForm({
               throw new Error(
                 "Choose your online computer and approve using your ChatGPT plan.",
               );
+            if (personalEnabled && autoAnalyze) {
+              const fresh = await call("checkPersonalSession", {
+                organizationId,
+              });
+              if (fresh !== true) {
+                onDone();
+                return;
+              }
+            }
             const grantResponse = await fetch("/api/uploads/grant", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -1966,9 +1989,8 @@ function CaptureForm({
                 maxComputeCredits: 10,
               });
               if (approved === undefined) {
-                setImportError(
-                  "Your upload was saved, but analysis did not start. Open the source to review the connection and approve again.",
-                );
+                // Open the saved source instead of offering a duplicate upload.
+                onDone(sourceId);
                 return;
               }
             }
@@ -2709,17 +2731,22 @@ function PersonalSourceAnalysis({ source, devices, call }: any) {
           aria-label="Analysis progress"
           aria-live="polite"
         >
-          {(source.kind === "upload" ? [
-            "Preparing media",
-            "Transcribing audio",
-            "Analyzing frames and saving insights",
-          ] : ["Analyzing text and saving insights"]).map((step, index) => {
+          {(source.kind === "upload"
+            ? [
+                "Preparing media",
+                "Transcribing audio",
+                "Analyzing frames and saving insights",
+              ]
+            : ["Analyzing text and saving insights"]
+          ).map((step, index) => {
             const active =
-              source.kind !== "upload" ? 0 : source.personalAnalysis.state === "preparing"
+              source.kind !== "upload"
                 ? 0
-                : source.personalAnalysis.stage === "transcribing"
-                  ? 1
-                  : 2;
+                : source.personalAnalysis.state === "preparing"
+                  ? 0
+                  : source.personalAnalysis.stage === "transcribing"
+                    ? 1
+                    : 2;
             return (
               <li
                 key={step}

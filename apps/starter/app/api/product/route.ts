@@ -31,6 +31,7 @@ const operations = {
   startDevice: ["mutation", api.devices.start],
   approveDevice: ["mutation", api.devices.approve],
   approvePersonalAnalysis: ["mutation", api.personalAnalysis.approve],
+  checkPersonalSession: ["query", api.personalAnalysis.checkSession],
   cancelPersonalAnalysis: ["mutation", api.personalAnalysis.cancel],
 } as const;
 export async function POST(req: NextRequest) {
@@ -77,7 +78,9 @@ export async function POST(req: NextRequest) {
     const result =
       entry[0] === "action"
         ? await c.action(entry[1] as any, args)
-        : await c.mutation(entry[1] as any, args);
+        : entry[0] === "query"
+          ? await c.query(entry[1] as any, args)
+          : await c.mutation(entry[1] as any, args);
     return NextResponse.json(
       { result: result ?? null },
       { headers: { "Cache-Control": "no-store" } },
@@ -157,6 +160,7 @@ export async function POST(req: NextRequest) {
         error: category
           ? messages[category]
           : "The operation could not be completed. Check the current source, plan, allowance, and connection status before retrying.",
+        code: category ?? "UNCLASSIFIED",
       },
       { status: 400, headers: { "Cache-Control": "no-store" } },
     );

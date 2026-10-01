@@ -8,6 +8,14 @@ export function rejectAnalytics() {
   void setAnalyticsConsent(false);
 }
 export function openCookiePreferences() {
+  // Another tab can change the cookie while this modal still has old switches.
+  const cookie = Consent.getCookie();
+  if (
+    Consent.validConsent() &&
+    cookie?.revision === 1 &&
+    Array.isArray(cookie.categories)
+  )
+    Consent.acceptCategory(cookie.categories);
   Consent.showPreferences();
 }
 export function CookieSettings({ className = "" }: { className?: string }) {

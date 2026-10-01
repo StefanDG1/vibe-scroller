@@ -16,6 +16,10 @@ afterEach(() => {
 });
 it("never initializes or captures before consent and drops SDK defaults after consent", async () => {
   vi.stubGlobal("navigator", { doNotTrack: "0" });
+  const document = {
+    cookie: `vs_consent=${encodeURIComponent(JSON.stringify({ revision: 1, categories: ["necessary", "analytics"] }))}`,
+  };
+  vi.stubGlobal("document", document);
   vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "phc_SyntheticPublicTest");
   let config: any;
   mock.init.mockImplementation((_key, opts) => {
@@ -69,6 +73,15 @@ it("never initializes or captures before consent and drops SDK defaults after co
   ).toBeNull();
   analytics.track("source_viewed", { kind: "text", title: "private" });
   expect(mock.capture).toHaveBeenCalledTimes(1);
+  // A withdrawal in another tab must stop events before the polling callback.
+  document.cookie = `vs_consent=${encodeURIComponent(JSON.stringify({ revision: 1, categories: ["necessary"] }))}`;
+  expect(analytics.track("source_viewed", { kind: "text" })).toBe(false);
+  expect(
+    config.before_send({
+      event: "source_viewed",
+      properties: { distinct_id: "random" },
+    }),
+  ).toBeNull();
   await analytics.setAnalyticsConsent(false);
   expect(mock.reset).toHaveBeenCalledTimes(1);
   analytics.track("source_viewed", { kind: "text" });

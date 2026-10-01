@@ -1,9 +1,19 @@
 "use client";
 import { safeAnalyticsEvent } from "./analytics-events";
+import { cookieAllowsAnalytics } from "./analytics-consent";
 import type { PostHog } from "posthog-js";
 let sdk: PostHog | undefined;
 let allowed = false;
 let generation = 0;
+function consentStillAllowed() {
+  return (
+    allowed &&
+    cookieAllowsAnalytics(document.cookie) &&
+    navigator.doNotTrack !== "1" &&
+    !(navigator as Navigator & { globalPrivacyControl?: boolean })
+      .globalPrivacyControl
+  );
+}
 export async function setAnalyticsConsent(consented: boolean) {
   const next =
     consented &&
@@ -51,7 +61,7 @@ export async function setAnalyticsConsent(consented: boolean) {
       disable_conversations: true,
       cross_subdomain_cookie: false,
       before_send: (event) => {
-        if (!allowed || !event) return null;
+        if (!consentStillAllowed() || !event) return null;
         const safe = safeAnalyticsEvent(event.event, event.properties);
         if (!safe) return null;
         const distinct = event.properties.distinct_id;
@@ -72,7 +82,7 @@ export async function setAnalyticsConsent(consented: boolean) {
   }
 }
 export function track(name: string, properties: Record<string, unknown> = {}) {
-  if (!allowed || !sdk) return false;
+  if (!consentStillAllowed() || !sdk) return false;
   const safe = safeAnalyticsEvent(name, properties);
   if (safe) {
     sdk.capture(safe.event, safe.properties);

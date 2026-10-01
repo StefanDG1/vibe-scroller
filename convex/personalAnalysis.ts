@@ -1,8 +1,13 @@
-import { mutation, internalMutation, internalQuery } from "./_generated/server";
+import {
+  query,
+  mutation,
+  internalMutation,
+  internalQuery,
+} from "./_generated/server";
 import { internal } from "./_generated/api";
 import type { QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
-import { writeAccess, recentAuthentication, limit, audit } from "./lib";
+import { access, writeAccess, recentAuthentication, limit, audit } from "./lib";
 import { ensure, containsSecret } from "../packages/policy";
 import { insightOutput } from "../packages/contracts";
 import { reserve, settle } from "./product";
@@ -50,6 +55,25 @@ async function authorizedDevice(ctx: QueryCtx, hash: string) {
   );
   return device;
 }
+// Check the sensitive authorization before uploading bytes. Approval still
+// repeats this check, because a long upload can outlast the fresh session.
+export const checkSession = query({
+  args: { organizationId: v.id("organizations") },
+  handler: async (ctx, a) => {
+    const { actor } = await access(ctx, a.organizationId, [
+      "owner",
+      "admin",
+      "member",
+    ]);
+    await recentAuthentication(ctx);
+    ensure(
+      personalAllowed(actor.subject),
+      "FORBIDDEN",
+      "Personal analysis is unavailable for this account.",
+    );
+    return true;
+  },
+});
 export const approve = mutation({
   args: {
     id: v.id("sources"),
@@ -344,7 +368,13 @@ export const dispatch = internalMutation({
           deadline = now + (source.kind === "upload" ? 900000 : 180000);
         await ctx.db.patch(source._id, {
           state: "processing",
-          personalAnalysis: { ...job, state: "running", stage:source.kind === "upload" ? "transcribing" : "analyzing", leaseUntil, deadline },
+          personalAnalysis: {
+            ...job,
+            state: "running",
+            stage: source.kind === "upload" ? "transcribing" : "analyzing",
+            leaseUntil,
+            deadline,
+          },
           updatedAt: now,
         });
         await ctx.db.patch(device._id, { activePersonalSource: source._id });
@@ -530,7 +560,12 @@ export const dispatch = internalMutation({
         : {}),
       summary: output.summary,
       coverage: output.coverage,
-      tags: [...new Set([...source.tags, ...output.insights.flatMap((i:any)=>i.categories)])].slice(0,20),
+      tags: [
+        ...new Set([
+          ...source.tags,
+          ...output.insights.flatMap((i: any) => i.categories),
+        ]),
+      ].slice(0, 20),
       searchable: [
         source.title,
         source.text,

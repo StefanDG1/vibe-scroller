@@ -90,6 +90,31 @@ const outputFor = (job: any) => ({
     },
   ],
 });
+it("checks fresh personal access before upload without reserving usage and rejects stale or other-tenant sessions", async () => {
+  const s = await setup();
+  expect(
+    await s.a.query(api.personalAnalysis.checkSession, {
+      organizationId: s.org,
+    }),
+  ).toBe(true);
+  expect(
+    await s.t.run((ctx) => ctx.db.query("reservations").collect()),
+  ).toHaveLength(0);
+  await expect(
+    s.b.query(api.personalAnalysis.checkSession, { organizationId: s.org }),
+  ).rejects.toThrow("Organization unavailable");
+  const stale = s.t.withIdentity({
+    subject: "a",
+    auth_time: Math.floor(Date.now() / 1000) - 301,
+  });
+  await expect(
+    stale.query(api.personalAnalysis.checkSession, { organizationId: s.org }),
+  ).rejects.toThrow("Sign in again");
+  vi.stubEnv("PERSONAL_ALPHA_SUBJECTS_JSON", "[]");
+  await expect(
+    s.a.query(api.personalAnalysis.checkSession, { organizationId: s.org }),
+  ).rejects.toThrow("FORBIDDEN");
+});
 it("allows the verified operator's personal library without granting a paid tier or changing the ordinary trial limit", async () => {
   const s = await setup();
   vi.stubEnv("PERSONAL_ALPHA_SUBJECTS_JSON", "[]");
@@ -422,8 +447,18 @@ it("reserves media compute separately, binds prepared assets and rejects invente
     useOwnPlan: true,
     maxComputeCredits: 10,
   });
-  expect(await s.t.mutation(internal.personalMediaState.begin, { id: source, generation: 1 })).not.toBeNull();
-  expect(await s.t.mutation(internal.personalMediaState.begin, { id: source, generation: 1 })).toBeNull();
+  expect(
+    await s.t.mutation(internal.personalMediaState.begin, {
+      id: source,
+      generation: 1,
+    }),
+  ).not.toBeNull();
+  expect(
+    await s.t.mutation(internal.personalMediaState.begin, {
+      id: source,
+      generation: 1,
+    }),
+  ).toBeNull();
   const frameId = await s.t.mutation(internal.assets.registerEvidence, {
     sourceId: source,
     generation: 1,
@@ -514,27 +549,74 @@ it("releases canceled media before dispatch but keeps dispatched compute reserve
     const s = await setup();
     vi.stubEnv("MEDIA_VERIFIED", "true");
     const key = `${s.org}/synthetic-cancel-video`;
-    await s.t.run((ctx) => ctx.db.insert("assets", {
-      organizationId: s.org, key, size: 100, type: "video/mp4", state: "complete",
-      etag: "synthetic", expiresAt: Date.now() + 86400000, createdAt: Date.now(), updatedAt: Date.now(),
-    }));
+    await s.t.run((ctx) =>
+      ctx.db.insert("assets", {
+        organizationId: s.org,
+        key,
+        size: 100,
+        type: "video/mp4",
+        state: "complete",
+        etag: "synthetic",
+        expiresAt: Date.now() + 86400000,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      }),
+    );
     const source = await s.a.mutation(api.product.capture, {
-      organizationId: s.org, key: "cancel-owned-upload", kind: "upload", title: "Synthetic video",
-      objectKey: key, rightsAttested: true,
+      organizationId: s.org,
+      key: "cancel-owned-upload",
+      kind: "upload",
+      title: "Synthetic video",
+      objectKey: key,
+      rightsAttested: true,
     });
     await s.a.mutation(api.personalAnalysis.approve, {
-      id: source, generation: 0, deviceId: s.device, model: "synthetic-model",
-      effort: "medium", useOwnPlan: true, maxComputeCredits: 10,
+      id: source,
+      generation: 0,
+      deviceId: s.device,
+      model: "synthetic-model",
+      effort: "medium",
+      useOwnPlan: true,
+      maxComputeCredits: 10,
     });
-    if (dispatched) expect(await s.t.mutation(internal.personalMediaState.begin, { id: source, generation: 1 })).not.toBeNull();
+    if (dispatched)
+      expect(
+        await s.t.mutation(internal.personalMediaState.begin, {
+          id: source,
+          generation: 1,
+        }),
+      ).not.toBeNull();
     await s.a.mutation(api.personalAnalysis.cancel, { id: source });
-    expect(await s.t.mutation(internal.personalMediaState.begin, { id: source, generation: 1 })).toBeNull();
-    const reservations = await s.t.run((ctx) => ctx.db.query("reservations").collect());
-    expect(reservations.find((r) => r.key.startsWith("personal-media:"))).toMatchObject({ state: dispatched ? "active" : "settled", ...(dispatched ? {} : { settled: 0 }) });
+    expect(
+      await s.t.mutation(internal.personalMediaState.begin, {
+        id: source,
+        generation: 1,
+      }),
+    ).toBeNull();
+    const reservations = await s.t.run((ctx) =>
+      ctx.db.query("reservations").collect(),
+    );
+    expect(
+      reservations.find((r) => r.key.startsWith("personal-media:")),
+    ).toMatchObject({
+      state: dispatched ? "active" : "settled",
+      ...(dispatched ? {} : { settled: 0 }),
+    });
     if (dispatched) {
-      await s.t.mutation(internal.personalMediaState.finish, { id: source, generation: 1, organizationId: s.org, computeCredits: 2 });
-      expect((await s.t.run((ctx) => ctx.db.query("reservations").collect())).find((r) => r.key.startsWith("personal-media:"))).toMatchObject({ state: "settled", settled: 2 });
+      await s.t.mutation(internal.personalMediaState.finish, {
+        id: source,
+        generation: 1,
+        organizationId: s.org,
+        computeCredits: 2,
+      });
+      expect(
+        (await s.t.run((ctx) => ctx.db.query("reservations").collect())).find(
+          (r) => r.key.startsWith("personal-media:"),
+        ),
+      ).toMatchObject({ state: "settled", settled: 2 });
     }
-    expect((await s.t.run((ctx) => ctx.db.get(source)))?.personalAnalysis?.state).toBe("canceled");
+    expect(
+      (await s.t.run((ctx) => ctx.db.get(source)))?.personalAnalysis?.state,
+    ).toBe("canceled");
   }
 });
