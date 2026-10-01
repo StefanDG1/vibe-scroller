@@ -391,7 +391,7 @@
       },
       {
         "name": "The Flat Surface Rule",
-        "section": "elevation & depth",
+        "section": "elevation",
         "body": "Keep routine content flat; use floating depth for a menu or modal that temporarily interrupts the underlying task."
       }
     ],
