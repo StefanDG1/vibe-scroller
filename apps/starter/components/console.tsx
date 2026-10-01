@@ -2362,6 +2362,14 @@ function SourceDetail({
       });
     return () => abort.abort();
   }, [source, demo]);
+  const summary =
+    detail.summary ??
+    "No analysis available. Upload permitted content or supply a transcript.";
+  const overview =
+    summary.length > 280
+      ? (summary.match(/^.{1,280}[.!?](?:\s|$)/)?.[0]?.trim() ??
+        `${summary.slice(0, 280).replace(/\s+\S*$/, "")}…`)
+      : summary;
   return (
     <>
       <div className="panel">
@@ -2369,41 +2377,46 @@ function SourceDetail({
           {label(detail.coverage ?? "metadata_only")}
         </span>
         <h2>AI summary</h2>
-        <p>
-          {detail.summary ??
-            "No analysis available. Upload permitted content or supply a transcript."}
-        </p>
+        <p>{overview}</p>
         {detail.error && (
           <p className="error" role="alert">
             {detail.error}
           </p>
         )}
-        {!!detail.analysis?.warnings?.length && (
-          <section aria-label="Analysis limitations">
-            <h3>Limitations and uncertainty</h3>
-            <ul>
-              {detail.analysis.warnings.map(
-                (warning: string, index: number) => (
-                  <li key={index}>{warning}</li>
-                ),
-              )}
-            </ul>
-          </section>
-        )}
-        {detail.url && (
-          <a href={detail.url} target="_blank" rel="noopener noreferrer">
-            Original source
-          </a>
-        )}
         <p className="fine">
-          {detail.createdAt
-            ? `Captured ${new Date(detail.createdAt).toLocaleString()}.`
-            : "Synthetic example; no real capture date."}
-          {detail.originalSavedAt
-            ? ` Original save date supplied by the import: ${new Date(detail.originalSavedAt).toLocaleString()}.`
-            : " Original save date unknown."}{" "}
-          Sampled evidence is not exhaustive analysis.
+          {detail.coverage === "full_sampled"
+            ? "Frames are sampled. Automatic transcripts can contain errors."
+            : "Review the evidence coverage and analysis notes."}
         </p>
+        <details className="source-notes">
+          <summary>Full summary and analysis notes</summary>
+          {overview !== summary && <p>{summary}</p>}
+          {!!detail.analysis?.warnings?.length && (
+            <section aria-label="Analysis limitations">
+              <h3>Limitations and uncertainty</h3>
+              <ul>
+                {detail.analysis.warnings.map(
+                  (warning: string, index: number) => (
+                    <li key={index}>{warning}</li>
+                  ),
+                )}
+              </ul>
+            </section>
+          )}
+          {detail.url && (
+            <a href={detail.url} target="_blank" rel="noopener noreferrer">
+              Original source
+            </a>
+          )}
+          <p className="fine">
+            {detail.createdAt
+              ? `Captured ${new Date(detail.createdAt).toLocaleString()}.`
+              : "Synthetic example; no real capture date."}
+            {detail.originalSavedAt
+              ? ` Original save date supplied by the import: ${new Date(detail.originalSavedAt).toLocaleString()}.`
+              : " Original save date unknown."}{" "}
+          </p>
+        </details>
       </div>
       <section className="panel">
         <h2>Main points</h2>

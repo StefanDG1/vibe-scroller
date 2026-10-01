@@ -1638,6 +1638,15 @@ dialog.capture-modal::backdrop {
   grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
   gap: 14px;
 }
+.source-notes > summary {
+  min-height: 44px;
+  padding: 12px 0;
+  cursor: pointer;
+  color: var(--console-ink, #f4f4f4);
+}
+.source-notes[open] > summary {
+  margin-bottom: 8px;
+}
 .evidence-grid figure {
   margin: 0;
   min-width: 0;
