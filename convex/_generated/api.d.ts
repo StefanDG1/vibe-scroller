@@ -44,6 +44,8 @@ import type * as media from "../media.js";
 import type * as organizations from "../organizations.js";
 import type * as payments from "../payments.js";
 import type * as personalAnalysis from "../personalAnalysis.js";
+import type * as personalMedia from "../personalMedia.js";
+import type * as personalMediaState from "../personalMediaState.js";
 import type * as planning from "../planning.js";
 import type * as privacy from "../privacy.js";
 import type * as product from "../product.js";
@@ -99,6 +101,8 @@ declare const fullApi: ApiFromModules<{
   organizations: typeof organizations;
   payments: typeof payments;
   personalAnalysis: typeof personalAnalysis;
+  personalMedia: typeof personalMedia;
+  personalMediaState: typeof personalMediaState;
   planning: typeof planning;
   privacy: typeof privacy;
   product: typeof product;

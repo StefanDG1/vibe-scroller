@@ -216,6 +216,64 @@ export const registerEvidence = internalMutation({
     });
   },
 });
+export const registerNormalized = internalMutation({
+  args: {
+    sourceId: v.id("sources"),
+    generation: v.number(),
+    key: v.string(),
+    size: v.number(),
+    etag: v.string(),
+  },
+  handler: async (ctx, a) => {
+    const source = await ctx.db.get(a.sourceId);
+    if (
+      !source ||
+      source.state === "deleted" ||
+      source.generation !== a.generation
+    ) {
+      await queueDeletion(ctx, a.key);
+      return null;
+    }
+    ensure(
+      a.key.startsWith(`${source.organizationId}/`) &&
+        a.key.split("/").length === 2 &&
+        a.size >= 44 &&
+        a.size <= 19500000,
+      "INVALID_EVIDENCE",
+      "Invalid normalized audio.",
+    );
+    const entitlement = await wallet(ctx, source.organizationId);
+    const retained = await ctx.db
+      .query("assets")
+      .withIndex("by_org", (q) => q.eq("organizationId", source.organizationId))
+      .collect();
+    if (
+      retained
+        .filter((b) => b.state !== "deleted")
+        .reduce((n, b) => n + b.size, 0) +
+        a.size >
+      (entitlement.tier === "pro" ? 5 : 1) * 1000000000
+    ) {
+      await queueDeletion(ctx, a.key);
+      return null;
+    }
+    const id = await ctx.db.insert("assets", {
+      organizationId: source.organizationId,
+      sourceId: source._id,
+      key: a.key,
+      size: a.size,
+      etag: a.etag,
+      type: "audio/wav",
+      kind: "normalized_audio",
+      state: "complete",
+      expiresAt: Date.now() + 3600000,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+    await ctx.scheduler.runAfter(3600000, internal.assets.expireAsset, { id });
+    return id;
+  },
+});
 export const queueEvidenceDeletion = internalMutation({
   args: { key: v.string() },
   handler: (ctx, a) => queueDeletion(ctx, a.key),

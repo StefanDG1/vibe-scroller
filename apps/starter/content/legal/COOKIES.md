@@ -1,23 +1,33 @@
 # Cookies and similar storage
 
-Status: review draft, not yet effective. Version: 1.0.0.
+Status: review draft, not yet legally reviewed. Version: 1.1.0-alpha. Updated 1 October 2026.
 
-## Necessary storage
+## Essential storage
 
-VibeScroller uses necessary session and security storage to sign you in, protect requests, remember essential privacy choices, and operate the selected workspace. These functions are required for the requested service and are not used as an excuse to enable unrelated advertising tracking.
+VibeScroller uses these first-party items on scroll.companynerve.com. The browser lifetime can be longer than the server session validity; an expired or revoked server session cannot grant access.
 
-The implementation must generate an exact inventory from the deployed application, including cookie or storage name, provider, purpose, duration, and first-party or third-party scope. Do not publish invented cookie names or claim that this general draft is an inventory.
+| Name                | Provider and purpose                                                             | Duration                                                                             | Scope                                         |
+| ------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | --------------------------------------------- |
+| __Host-wos-session  | WorkOS AuthKit, encrypted sign-in session                                        | Up to 400 days in the browser, cleared by sign-out; server session limits also apply | This host, secure, HttpOnly, SameSite Lax     |
+| wos-auth-verifier-* | WorkOS AuthKit, verifies an individual PKCE sign-in request                      | 10 minutes maximum, removed after callback                                           | This host, secure in production, HttpOnly     |
+| vs_consent          | CookieConsent, remembers your categories, consent revision and choice timestamps | 180 days                                                                             | This host, SameSite Lax, secure in production |
 
-## Optional storage
+Provider sign-in pages such as Google and WorkOS may have their own cookies on their own domains. Their policies apply when you visit those pages. They are not analytics permission for VibeScroller.
 
-Optional analytics, marketing identifiers, and session replay are off by default. Session replay is not part of the initial product. Where consent is required, do not load optional scripts before consent.
+## Optional product analytics
 
-The consent interface provides equally accessible Accept optional, Reject optional, and Manage choices controls. Necessary storage is described separately. Withdrawing consent must stop future optional processing and remove local identifiers where appropriate.
+PostHog EU Cloud receives optional, explicitly named product events only after you allow analytics. They describe workflow steps, coarse states and capped counts, such as an import completing or a proposal being rejected. We do not send your saved source text, caption, source URL, repository name or file content, email, workspace ID or page URL. Session replay, automatic click capture, surveys, advertising identifiers and AI prompt capture are disabled.
 
-No consent banner is required solely as decoration when only necessary storage exists. The cookie information and settings remain available. Add the consent interface before enabling nonessential tracking.
+The random analytics identifier stays in memory for the current page session. The configured SDK does not persist an analytics identity in cookies or local storage. The consent choice cookie is essential preference storage. PostHog still receives network metadata such as your IP address; these events should not be called anonymous merely because we omit names.
+
+Reject analytics is as accessible as Allow analytics. Preferences lets you choose again. Use Cookie preferences in the app's account menu, privacy screen or website footer to withdraw permission. Future event capture stops and the in-memory identity resets. A request already sent cannot be recalled. Existing events follow the applicable privacy policy and the provider's configured retention. Do Not Track and Global Privacy Control also prevent analytics capture.
 
 ## Browser and PWA data
 
-The PWA caches public application assets. It does not cache private transcripts or repository data in a shared service-worker cache. An optional offline capture draft is labeled as unsent and cleared when its account context changes.
+The PWA caches public application assets. It does not cache private transcripts or repository data in a shared service-worker cache. Instagram ZIP previews read the file on your device and send only the selected normalized Saved metadata when you confirm an import. The full archive is not uploaded by this workflow.
 
-You can remove site data in your browser. Doing so can sign you out or remove unsent drafts, but it does not itself delete records stored in your online account. Account deletion is available through the privacy settings.
+You can remove this site's data in your browser. Doing so can sign you out and remove unsent drafts. It does not delete records in your online account. Use app privacy settings for export and deletion.
+
+## Publication checks
+
+This implementation inventory is a review draft. Confirm the production names, domains, lifetimes, processing agreement, retention and contact details in the publication checklist before a paid public launch. No legal review is claimed.

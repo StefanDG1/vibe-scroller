@@ -202,6 +202,12 @@ http.route({
         credentialHash,
         operation: body.operation,
       });
+      if (result.job?.media)
+        result.job.media = await ctx.runAction(internal.personalMedia.lease, {
+          credentialHash,
+          id: result.job.id,
+          generation: result.job.generation,
+        });
       return reply(result);
     } catch {
       return reply(

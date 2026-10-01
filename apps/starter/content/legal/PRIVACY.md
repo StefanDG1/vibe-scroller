@@ -26,6 +26,8 @@ Optional marketing, nonessential tracking, and any separately proposed use requi
 
 We do not use private source content or repository material to train models across customers by default. We do not sell your private library or use it as a public SEO archive.
 
+Optional product analytics uses PostHog EU Cloud only after analytics consent. We send approved event names and coarse properties such as processing state, route and capped counts. We exclude source URLs, captions, transcripts, evidence, repository names and files, account emails and model prompts. The provider still receives network metadata needed to receive a request. We disable replay and automatic capture. Rejecting analytics leaves the application usable. The cookie preferences control lets you withdraw permission for future events; it cannot retract events already sent. See [the cookie policy](COOKIES.md).
+
 ## Providers and international processing
 
 The active [provider register](SUBPROCESSORS.md) identifies the services used for authentication, hosting, databases, storage, AI, payments, execution, and communication. Only providers needed for your selected route receive the relevant data.

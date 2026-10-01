@@ -6,6 +6,16 @@ const source = await readFile(
 await writeFile(
   new URL("../packages/media/decoder.ts", import.meta.url),
   "// Generated from decode.py for the Convex Node bundle. Regenerate with scripts/sync-decoder.mjs.\nexport const decoder = " +
-    JSON.stringify(source) +
+    JSON.stringify(source.replaceAll("\r\n", "\n")) +
+    ";\n",
+);
+const personal = await readFile(
+  new URL("../packages/media/decode-personal.py", import.meta.url),
+  "utf8",
+);
+await writeFile(
+  new URL("../packages/media/decoder-personal.ts", import.meta.url),
+  "// Generated from decode-personal.py. Regenerate with scripts/sync-decoder.mjs.\nexport const personalDecoder = " +
+    JSON.stringify(personal.replaceAll("\r\n", "\n")) +
     ";\n",
 );

@@ -106,11 +106,19 @@ try {
           client,
           request,
           signal: shutdown.signal,
+          asr: config.localAsr,
         });
         console.log(
           "Personal source analysis completed. Review it in the browser.",
         );
-      } catch {
+      } catch (error) {
+        if (
+          error instanceof Error &&
+          /^Personal analysis failed at (lease|profile|media|inference|output_validation|completion): ((PERSONAL|CHATGPT)_[A-Z_]+|VALIDATION_OR_TRANSPORT)$/.test(
+            error.message,
+          )
+        )
+          console.error(error.message);
         try {
           await request("fail", {
             id: response.job.id,

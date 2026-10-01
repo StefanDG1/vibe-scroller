@@ -2,7 +2,13 @@ import { Sandbox } from "e2b";
 import { hardenSandbox } from "./isolation";
 import { signedObject } from "./storage";
 import { ensure } from "../policy";
-export async function prepareMedia(objectKey: string, decoder: string) {
+import { decoderManifest } from "../media/manifest";
+import { createHash } from "node:crypto";
+export async function prepareMedia(
+  objectKey: string,
+  decoder: string,
+  normalizedPcm = false,
+) {
   ensure(
     process.env.MEDIA_VERIFIED === "true" &&
       process.env.E2B_API_KEY &&
@@ -57,20 +63,46 @@ export async function prepareMedia(objectKey: string, decoder: string) {
       user: "user",
       timeoutMs: 240000,
     });
-    const manifest = JSON.parse(
-      await sandbox.files.read("/home/user/media/manifest.json"),
+    const rawManifest = await sandbox.files.read(
+      "/home/user/media/manifest.json",
     );
+    ensure(
+      rawManifest.length <= 20000,
+      "INVALID_MEDIA_MANIFEST",
+      "Media manifest exceeded its limit.",
+    );
+    const manifest = decoderManifest(JSON.parse(rawManifest), normalizedPcm);
     const audio = manifest.audio
       ? await sandbox.files.read(`/home/user/media/${manifest.audio}`, {
           format: "bytes",
         })
       : undefined;
+    ensure(
+      !audio || audio.byteLength <= 19500000,
+      "INVALID_MEDIA_MANIFEST",
+      "Normalized audio exceeded its limit.",
+    );
     const frames = [];
+    let frameBytes = 0;
     for (const f of manifest.frames) {
       const data = await sandbox.files.read(`/home/user/media/${f.id}`, {
         format: "bytes",
       });
-      frames.push({ ...f, data: Buffer.from(data).toString("base64") });
+      frameBytes += data.byteLength;
+      ensure(
+        data.byteLength <= 1000000 &&
+          frameBytes <= 12000000 &&
+          data[0] === 255 &&
+          data[1] === 216 &&
+          data[2] === 255,
+        "INVALID_MEDIA_MANIFEST",
+        "Frame data exceeded its safe bounds.",
+      );
+      frames.push({
+        ...f,
+        sha256: createHash("sha256").update(data).digest("hex"),
+        data: Buffer.from(data).toString("base64"),
+      });
     }
     await sandbox.kill();
     killed = true;

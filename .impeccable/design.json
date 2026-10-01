@@ -1,0 +1,420 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-01T02:54:52.3231157Z",
+  "title": "Design System: VibeScroller",
+  "extensions": {
+    "colorMeta": {
+      "ink": {
+        "role": "primary",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(26% 0 0)",
+          "oklch(37% 0 0)",
+          "oklch(49% 0 0)",
+          "oklch(60% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(83% 0 0)",
+          "oklch(95% 0 0)"
+        ],
+        "displayName": "ink"
+      },
+      "canvas": {
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(26% 0 0)",
+          "oklch(37% 0 0)",
+          "oklch(49% 0 0)",
+          "oklch(60% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(83% 0 0)",
+          "oklch(95% 0 0)"
+        ],
+        "displayName": "canvas"
+      },
+      "panel": {
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(26% 0 0)",
+          "oklch(37% 0 0)",
+          "oklch(49% 0 0)",
+          "oklch(60% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(83% 0 0)",
+          "oklch(95% 0 0)"
+        ],
+        "displayName": "panel"
+      },
+      "line": {
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(26% 0 0)",
+          "oklch(37% 0 0)",
+          "oklch(49% 0 0)",
+          "oklch(60% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(83% 0 0)",
+          "oklch(95% 0 0)"
+        ],
+        "displayName": "line"
+      },
+      "muted": {
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(26% 0 0)",
+          "oklch(37% 0 0)",
+          "oklch(49% 0 0)",
+          "oklch(60% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(83% 0 0)",
+          "oklch(95% 0 0)"
+        ],
+        "displayName": "muted"
+      },
+      "soft": {
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(26% 0 0)",
+          "oklch(37% 0 0)",
+          "oklch(49% 0 0)",
+          "oklch(60% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(83% 0 0)",
+          "oklch(95% 0 0)"
+        ],
+        "displayName": "soft"
+      },
+      "rail": {
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(26% 0 0)",
+          "oklch(37% 0 0)",
+          "oklch(49% 0 0)",
+          "oklch(60% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(83% 0 0)",
+          "oklch(95% 0 0)"
+        ],
+        "displayName": "rail"
+      },
+      "control": {
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(26% 0 0)",
+          "oklch(37% 0 0)",
+          "oklch(49% 0 0)",
+          "oklch(60% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(83% 0 0)",
+          "oklch(95% 0 0)"
+        ],
+        "displayName": "control"
+      },
+      "control-line": {
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(26% 0 0)",
+          "oklch(37% 0 0)",
+          "oklch(49% 0 0)",
+          "oklch(60% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(83% 0 0)",
+          "oklch(95% 0 0)"
+        ],
+        "displayName": "control line"
+      },
+      "composer": {
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(26% 0 0)",
+          "oklch(37% 0 0)",
+          "oklch(49% 0 0)",
+          "oklch(60% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(83% 0 0)",
+          "oklch(95% 0 0)"
+        ],
+        "displayName": "composer"
+      },
+      "menu": {
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(26% 0 0)",
+          "oklch(37% 0 0)",
+          "oklch(49% 0 0)",
+          "oklch(60% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(83% 0 0)",
+          "oklch(95% 0 0)"
+        ],
+        "displayName": "menu"
+      },
+      "selected": {
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(26% 0 0)",
+          "oklch(37% 0 0)",
+          "oklch(49% 0 0)",
+          "oklch(60% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(83% 0 0)",
+          "oklch(95% 0 0)"
+        ],
+        "displayName": "selected"
+      },
+      "primary-hover": {
+        "role": "primary",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(26% 0 0)",
+          "oklch(37% 0 0)",
+          "oklch(49% 0 0)",
+          "oklch(60% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(83% 0 0)",
+          "oklch(95% 0 0)"
+        ],
+        "displayName": "primary hover"
+      },
+      "primary-text": {
+        "role": "primary",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(26% 0 0)",
+          "oklch(37% 0 0)",
+          "oklch(49% 0 0)",
+          "oklch(60% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(83% 0 0)",
+          "oklch(95% 0 0)"
+        ],
+        "displayName": "primary text"
+      },
+      "chip-text": {
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(26% 0 0)",
+          "oklch(37% 0 0)",
+          "oklch(49% 0 0)",
+          "oklch(60% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(83% 0 0)",
+          "oklch(95% 0 0)"
+        ],
+        "displayName": "chip text"
+      },
+      "error": {
+        "role": "semantic",
+        "tonalRamp": [
+          "oklch(15% 0.08 25)",
+          "oklch(26% 0.08 25)",
+          "oklch(37% 0.08 25)",
+          "oklch(49% 0.08 25)",
+          "oklch(60% 0.08 25)",
+          "oklch(72% 0.08 25)",
+          "oklch(83% 0.08 25)",
+          "oklch(95% 0.08 25)"
+        ],
+        "displayName": "error"
+      },
+      "focus": {
+        "role": "neutral",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(26% 0 0)",
+          "oklch(37% 0 0)",
+          "oklch(49% 0 0)",
+          "oklch(60% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(83% 0 0)",
+          "oklch(95% 0 0)"
+        ],
+        "displayName": "focus"
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Page heading",
+        "purpose": "Console page identity; 25px on mobile."
+      },
+      "title": {
+        "displayName": "Source title",
+        "purpose": "Readable source names; 14px on mobile."
+      },
+      "body": {
+        "displayName": "UI body",
+        "purpose": "Forms, navigation and compact explanation."
+      },
+      "source-body": {
+        "displayName": "Source description",
+        "purpose": "Supporting content with a 70ch limit."
+      },
+      "label": {
+        "displayName": "Field label",
+        "purpose": "Concise field and permission labels."
+      },
+      "metadata": {
+        "displayName": "Metadata",
+        "purpose": "Secondary details and frame captions."
+      }
+    },
+    "shadows": [
+      {
+        "name": "floating-menu",
+        "value": "0 12px 32px #0006",
+        "purpose": "Account menu depth."
+      }
+    ],
+    "motion": [
+      {
+        "name": "control-response",
+        "value": "140ms ease-out",
+        "purpose": "Background, border and text responses."
+      },
+      {
+        "name": "menu-reveal",
+        "value": "120ms ease-out",
+        "purpose": "Clip and opacity reveal."
+      },
+      {
+        "name": "source-enter",
+        "value": "180ms ease-out",
+        "purpose": "Opacity 0 to 1; translateY 4px to 0."
+      },
+      {
+        "name": "pending-spinner",
+        "value": "800ms linear infinite",
+        "purpose": "Ongoing work indication."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "prefers-reduced-motion: reduce",
+        "purpose": "Disable animation and transition; remove thumbnail movement."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "compact-desktop",
+        "value": "1050px"
+      },
+      {
+        "name": "mobile",
+        "value": "720px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Main permitted action.",
+      "html": "<button class=\"ds-primary\">Add source</button>",
+      "css": ".ds-primary{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 17px;border:1px solid var(--ink,#f4f4f4);border-radius:10px;background:var(--ink,#f4f4f4);color:#141414;font:550 .87rem/1.6 Inter,system-ui,sans-serif;cursor:pointer;transition:background-color 140ms ease-out,border-color 140ms ease-out}.ds-primary:hover:not(:disabled){background:#d8d8d8;border-color:#d8d8d8}.ds-primary:focus-visible{outline:2px solid #d4d4d4;outline-offset:3px}.ds-primary:disabled{opacity:.45;cursor:not-allowed}@media(prefers-reduced-motion:reduce){.ds-primary{transition:none}}"
+    },
+    {
+      "name": "Secondary button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Supporting action with a quiet outline.",
+      "html": "<button class=\"ds-secondary\">Cancel</button>",
+      "css": ".ds-secondary{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 17px;border:1px solid var(--line,#333333);border-radius:10px;background:transparent;color:var(--ink,#f4f4f4);font:550 .87rem/1.6 Inter,system-ui,sans-serif;cursor:pointer;transition:background-color 140ms ease-out,border-color 140ms ease-out}.ds-secondary:hover:not(:disabled){background:var(--soft,#262626);border-color:#4a4a4a}.ds-secondary:focus-visible{outline:2px solid #d4d4d4;outline-offset:3px}.ds-secondary:disabled{opacity:.45;cursor:not-allowed}@media(prefers-reduced-motion:reduce){.ds-secondary{transition:none}}"
+    },
+    {
+      "name": "Text field",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "Compact editable field with visible keyboard focus.",
+      "html": "<label class=\"ds-label\">Source title<input class=\"ds-field\" placeholder=\"Source title\"></label>",
+      "css": ".ds-label{display:grid;gap:6px;color:var(--ink,#f4f4f4);font:13px/1.6 Inter,system-ui,sans-serif}.ds-field{min-width:0;min-height:44px;padding:10px 12px;border:1px solid #3d3d3d;border-radius:9px;background:#202020;color:var(--ink,#f4f4f4);font:14px/1.6 Inter,system-ui,sans-serif;transition:border-color 140ms ease-out}.ds-field::placeholder{color:#989898;opacity:1}.ds-field:focus-visible{outline:2px solid #d4d4d4;outline-offset:3px}@media(prefers-reduced-motion:reduce){.ds-field{transition:none}}"
+    },
+    {
+      "name": "Navigation item",
+      "kind": "nav",
+      "refersTo": "navigation-item",
+      "description": "Compact desktop destination with a selected neutral fill.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Workspace\"><button class=\"ds-nav-item\" aria-current=\"page\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z\"/><path d=\"M9 21v-8h6v8\"/></svg>Home</button></nav>",
+      "css": ".ds-nav{padding:12px;background:#171717}.ds-nav-item{display:flex;align-items:center;gap:12px;width:100%;min-height:44px;padding:10px 12px;border:0;border-radius:9px;text-align:left;background:none;color:#b5b5b5;font:14px/1.6 Inter,system-ui,sans-serif;cursor:pointer;transition:background-color 140ms ease-out,color 140ms ease-out}.ds-nav-item:hover{background:#222;color:#f4f4f4}.ds-nav-item[aria-current=page]{background:#2a2a2a;color:#fff;font-weight:550}.ds-nav-item:focus-visible{outline:2px solid #d4d4d4;outline-offset:3px}@media(prefers-reduced-motion:reduce){.ds-nav-item{transition:none}}"
+    },
+    {
+      "name": "State chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Informational source state; not an interactive control.",
+      "html": "<span class=\"ds-chip\">Ready</span>",
+      "css": ".ds-chip{display:inline-flex;align-items:center;min-height:28px;padding:4px 9px;border:0;border-radius:5px;background:#252525;color:#bdbdbd;font:600 11px/1.6 Inter,system-ui,sans-serif}"
+    },
+    {
+      "name": "Panel",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "Contained settings or evidence, without a decorative shadow.",
+      "html": "<section class=\"ds-panel\"><h2 class=\"ds-panel-title\">Evidence</h2><p class=\"ds-panel-copy\">Sampled evidence is not exhaustive analysis.</p></section>",
+      "css": ".ds-panel{padding:24px;border:1px solid #303030;border-radius:14px;background:var(--panel,#191919);color:var(--ink,#f4f4f4);font:14px/1.6 Inter,system-ui,sans-serif}.ds-panel-title{margin:0 0 12px;font-size:18px;line-height:1.35;font-weight:550;letter-spacing:-.025em}.ds-panel-copy{margin:0;color:var(--muted,#a8a8a8);max-width:72ch}@media(max-width:720px){.ds-panel{padding:18px}}"
+    },
+    {
+      "name": "Account menu",
+      "kind": "custom",
+      "refersTo": "menu",
+      "description": "Floating secondary destinations with accessible focus styling.",
+      "html": "<div class=\"ds-menu\"><button class=\"ds-menu-item\">Usage</button><button class=\"ds-menu-item\">Privacy</button><button class=\"ds-menu-item\">Cookie preferences</button></div>",
+      "css": ".ds-menu{min-width:220px;padding:6px;border-radius:14px;background:#252525;color:var(--ink,#f4f4f4);box-shadow:0 12px 32px #0006;animation:ds-menu-enter 120ms ease-out}.ds-menu-item{display:flex;align-items:center;width:100%;min-height:44px;padding:10px 12px;border:0;border-radius:8px;background:none;color:inherit;font:14px/1.6 Inter,system-ui,sans-serif;text-align:left;cursor:pointer}.ds-menu-item:hover,.ds-menu-item:focus-visible{background:#383838;outline:none}@keyframes ds-menu-enter{from{clip-path:inset(0 0 8% 0);opacity:.8}to{clip-path:inset(0);opacity:1}}@media(prefers-reduced-motion:reduce){.ds-menu{animation:none}}"
+    }
+  ],
+  "narrative": {
+    "rules": [
+      {
+        "name": "The Neutral Action Rule",
+        "section": "colors",
+        "body": "Use white for the main action and selected reading hierarchy; reserve color for an actual error."
+      },
+      {
+        "name": "The Reading Hierarchy Rule",
+        "section": "typography",
+        "body": "Keep title, explanation and metadata distinct through scale, weight and neutral contrast; use concise sentence case labels instead of ornamental eyebrows."
+      },
+      {
+        "name": "The Touch Target Rule",
+        "section": "layout",
+        "body": "Interactive controls keep at least a 44px target; small type and icons do not justify a smaller hit area. Informational chips are not controls."
+      },
+      {
+        "name": "The Flat Surface Rule",
+        "section": "elevation & depth",
+        "body": "Keep routine content flat; use floating depth for a menu or modal that temporarily interrupts the underlying task."
+      }
+    ],
+    "donts": [
+      "**Don't** add a light-mode switch, decorative gradients or fabricated thumbnails.",
+      "**Don't** add ornamental eyebrows, zero-count hero metrics or a recurring explanatory motto.",
+      "**Don't** convert a supplied-text result into a claim of complete audiovisual analysis.",
+      "**Don't** publish private reference screenshots or promote an unverified outcome into success."
+    ],
+    "dos": [
+      "**Do** use the dark neutral palette and concise sentence case interface copy.",
+      "**Do** keep loading, empty, ready, success and error feedback tied to actual state.",
+      "**Do** preserve visible keyboard focus, 44px controls and reduced-motion behavior.",
+      "**Do** keep permissions and private evidence access explicit."
+    ],
+    "keyCharacteristics": [
+      "Dark-only neutral surfaces.",
+      "Compact text hierarchy and quiet borders.",
+      "Readable source rows rather than nested decorative cards.",
+      "Accessible menus, visible focus and generous touch targets.",
+      "Short motion tied to state changes and evidence arrival."
+    ],
+    "northStar": "The Quiet Console",
+    "overview": "VibeScroller uses a neutral charcoal world, compact navigation and restrained white controls. Its visual character follows the owner's settled modern ChatGPT/Codex and ElevenLabs references: calm density, readable source content, small line icons and direct interactions. The system describes the implemented app shell; the surface composition remains in [the console brief](docs/design/console-brief.md).\n\nContent, actual state and permitted actions establish hierarchy. Source icons identify media without inventing thumbnails. Panels remain subdued so titles, evidence and the next action carry attention. [PRODUCT.md](PRODUCT.md) records the product constraints; the four foundational documents remain the copy brief. This document does not change copy, establish benefit, or approve legal publication."
+  }
+}

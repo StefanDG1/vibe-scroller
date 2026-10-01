@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { getRecipe } from "@companynerve/design-recipes";
 import { company } from "@companynerve/company-config";
-import { RecipeTheme } from "@/components/recipe-theme";
+import { ConsentProvider } from "@/components/consent";
+import "vanilla-cookieconsent/dist/cookieconsent.css";
 import "./globals.css";
 import "./product.css";
 export const metadata: Metadata = {
@@ -41,11 +41,10 @@ export default async function Layout({
 }) {
   // Public pages can be prerendered; private routes still perform their own auth.
   // The selected product recipe is stable across visitors.
-  const recipe = getRecipe(company.brandRecipe);
   return (
-    <html lang="en" data-recipe={recipe.id}>
+    <html lang="en" className="dark" style={{ colorScheme: "dark" }}>
       <body>
-        <RecipeTheme />
+        <ConsentProvider />
         <a className="skip" href="#main">
           Skip to content
         </a>

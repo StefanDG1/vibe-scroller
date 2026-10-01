@@ -3,6 +3,7 @@ packages:
   - packages/*
 
 allowBuilds:
+  core-js: false
   esbuild: true
   rclone.js: false
   sharp: true
@@ -10,3 +11,4 @@ allowBuilds:
 
 minimumReleaseAgeExclude:
   - '@opennextjs/cloudflare@1.20.7'
+  - posthog-js@1.435.5

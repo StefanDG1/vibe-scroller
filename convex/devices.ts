@@ -1,3 +1,4 @@
+import { releaseUnstarted } from "./personalMediaState";
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { access, fail, limit, recentAuthentication, writeAccess } from "./lib";
@@ -109,7 +110,7 @@ export const revoke = mutation({
       personalSeenAt: undefined,
       personalProfileBinding: undefined,
     });
-    for (const state of ["queued", "running"]) {
+    for (const state of ["preparing", "queued", "running"]) {
       const sources = await ctx.db
         .query("sources")
         .withIndex("by_personal_device_state", (q) =>
@@ -120,6 +121,12 @@ export const revoke = mutation({
         .collect();
       for (const source of sources) {
         const job = source.personalAnalysis!;
+        await releaseUnstarted(
+          ctx,
+          source.organizationId,
+          source._id,
+          job.generation,
+        );
         await settle(
           ctx,
           source.organizationId,

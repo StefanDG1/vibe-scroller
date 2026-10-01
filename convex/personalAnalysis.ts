@@ -1,4 +1,5 @@
-import { mutation, internalMutation } from "./_generated/server";
+import { mutation, internalMutation, internalQuery } from "./_generated/server";
+import { internal } from "./_generated/api";
 import type { QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
 import { writeAccess, recentAuthentication, limit, audit } from "./lib";
@@ -6,6 +7,7 @@ import { ensure, containsSecret } from "../packages/policy";
 import { insightOutput } from "../packages/contracts";
 import { reserve, settle } from "./product";
 import { personalAllowed } from "./lib/personalAccess";
+import { releaseUnstarted } from "./personalMediaState";
 
 // A personal alpha is explicitly bound to verified WorkOS subjects. Email or
 // a saved preference cannot activate subscription permission for hosted users.
@@ -56,6 +58,7 @@ export const approve = mutation({
     model: v.string(),
     effort: v.union(v.literal("low"), v.literal("medium"), v.literal("high")),
     useOwnPlan: v.boolean(),
+    maxComputeCredits: v.optional(v.number()),
   },
   handler: async (ctx, a) => {
     const source = await ctx.db.get(a.id);
@@ -84,9 +87,11 @@ export const approve = mutation({
       "Review the current source state before approving.",
     );
     ensure(
-      source.kind === "text" && source.text && source.rightsAttested,
+      ((source.kind === "text" && source.text) ||
+        (source.kind === "upload" && source.objectKey)) &&
+        source.rightsAttested,
       "UPLOAD_REQUIRED",
-      "This route currently accepts supplied text. Video processing needs its separate media integration.",
+      "Attach permitted media before analyzing this link.",
     );
     ensure(
       (device.personalSeenAt ?? 0) > Date.now() - 60000 &&
@@ -96,6 +101,47 @@ export const approve = mutation({
       "Start the personal analysis runner and choose an available account model.",
     );
     const generation = source.generation + 1;
+    const media = source.kind === "upload";
+    if (media) {
+      const unresolved = await ctx.db
+        .query("reservations")
+        .withIndex("by_org", (q) =>
+          q.eq("organizationId", source.organizationId),
+        )
+        .collect();
+      ensure(
+        !unresolved.some(
+          (r) =>
+            r.key.startsWith(`personal-media:${source._id}:`) &&
+            r.state === "active",
+        ),
+        "COST_RECONCILIATION_REQUIRED",
+        "Reconcile the earlier media compute reservation before retrying.",
+      );
+      ensure(
+        a.maxComputeCredits === 10 && process.env.MEDIA_VERIFIED === "true",
+        "SETUP_REQUIRED",
+        "Approve the verified media worker's maximum 10 compute credits.",
+      );
+      const asset = await ctx.db
+        .query("assets")
+        .withIndex("by_key", (q) => q.eq("key", source.objectKey!))
+        .unique();
+      ensure(
+        asset?.state === "complete" &&
+          asset.sourceId === source._id &&
+          asset.organizationId === source.organizationId &&
+          (asset.expiresAt === undefined || asset.expiresAt > Date.now()),
+        "UPLOAD_INVALID",
+        "The original media is unavailable.",
+      );
+      await reserve(
+        ctx,
+        source.organizationId,
+        `personal-media:${source._id}:${generation}`,
+        10,
+      );
+    }
     await reserve(
       ctx,
       source.organizationId,
@@ -104,7 +150,8 @@ export const approve = mutation({
     );
     await ctx.db.patch(source._id, {
       generation,
-      state: "queued",
+      state: media ? "processing" : "queued",
+      personalMedia: undefined,
       error: undefined,
       personalAnalysis: {
         deviceId: device._id,
@@ -113,14 +160,20 @@ export const approve = mutation({
         model: a.model,
         profileBinding: device.personalProfileBinding!,
         effort: a.effort,
-        state: "queued",
+        state: media ? "preparing" : "queued",
         approvedAt: Date.now(),
         expiresAt: Date.now() + 900000,
         leaseUntil: 0,
         deadline: 0,
+        stage: media ? "preparing" : "analyzing",
       },
       updatedAt: Date.now(),
     });
+    if (media)
+      await ctx.scheduler.runAfter(0, internal.personalMedia.prepare, {
+        id: source._id,
+        generation,
+      });
     await audit(
       ctx,
       source.organizationId,
@@ -145,7 +198,18 @@ export const cancel = mutation({
       "FORBIDDEN",
       "Only the approving account may cancel its plan request.",
     );
-    if (!["queued", "running"].includes(source.personalAnalysis.state)) return;
+    if (
+      !["preparing", "queued", "running"].includes(
+        source.personalAnalysis.state,
+      )
+    )
+      return;
+    await releaseUnstarted(
+      ctx,
+      source.organizationId,
+      source._id,
+      source.personalAnalysis.generation,
+    );
     await settle(
       ctx,
       source.organizationId,
@@ -179,6 +243,10 @@ export const dispatch = internalMutation({
     id: v.optional(v.id("sources")),
     generation: v.optional(v.number()),
     output: v.optional(v.any()),
+    transcript: v.optional(v.any()),
+    stage: v.optional(
+      v.union(v.literal("transcribing"), v.literal("analyzing")),
+    ),
     usage: v.optional(
       v.object({ inputTokens: v.number(), outputTokens: v.number() }),
     ),
@@ -273,10 +341,10 @@ export const dispatch = internalMutation({
           continue;
         }
         const leaseUntil = now + 40000,
-          deadline = now + 180000;
+          deadline = now + (source.kind === "upload" ? 900000 : 180000);
         await ctx.db.patch(source._id, {
           state: "processing",
-          personalAnalysis: { ...job, state: "running", leaseUntil, deadline },
+          personalAnalysis: { ...job, state: "running", stage:source.kind === "upload" ? "transcribing" : "analyzing", leaseUntil, deadline },
           updatedAt: now,
         });
         await ctx.db.patch(device._id, { activePersonalSource: source._id });
@@ -288,7 +356,13 @@ export const dispatch = internalMutation({
             effort: job.effort,
             profileBinding: job.profileBinding,
             text: source.text,
-            coverage: "caption_only",
+            coverage:
+              source.kind === "upload"
+                ? source.personalMedia?.coverage
+                : "caption_only",
+            ...(source.kind === "upload"
+              ? { media: source.personalMedia }
+              : {}),
             leaseUntil,
             deadline,
           },
@@ -332,7 +406,7 @@ export const dispatch = internalMutation({
     ensure(
       source &&
         source.organizationId === device.organizationId &&
-        source.kind === "text" &&
+        ["text", "upload"].includes(source.kind) &&
         source.state === "processing" &&
         job?.deviceId === device._id &&
         job.actor === device.owner &&
@@ -349,28 +423,83 @@ export const dispatch = internalMutation({
       await ctx.db.patch(source._id, {
         personalAnalysis: {
           ...job,
+          ...(a.stage ? { stage: a.stage } : {}),
           leaseUntil: Math.min(now + 40000, job.deadline),
         },
       });
       return { valid: true, deadline: job.deadline };
     }
     const output: any = insightOutput.parse(a.output);
+    if (source.kind === "upload")
+      output.warnings = [
+        ...new Set([
+          "Video frames are sampled; short scenes can be missed. Automatic transcription can contain errors.",
+          ...output.warnings,
+        ]),
+      ].slice(0, 20);
     ensure(
       JSON.stringify(output).length <= 120000 &&
         !containsSecret(JSON.stringify(output)) &&
         output.sourceId === source._id &&
         output.processingRunId === `${source._id}:${job.generation}` &&
-        output.coverage === "caption_only",
+        output.coverage ===
+          (source.kind === "upload"
+            ? source.personalMedia?.coverage
+            : "caption_only"),
       "INVALID_EVIDENCE",
       "Invalid personal source output.",
     );
+    const transcript =
+      source.kind === "upload"
+        ? validateTranscript(a.transcript, source.personalMedia)
+        : [];
+    const evidenceList =
+      source.kind === "upload"
+        ? [
+            ...transcript.map((s: any) => ({
+              kind: "transcript",
+              id: s.id,
+              startMs: s.startMs,
+              endMs: s.endMs,
+            })),
+            ...source.personalMedia.frames.map((f: any) => ({
+              kind: "frame",
+              id: f.assetId,
+              startMs: f.timestampMs,
+              endMs: f.timestampMs,
+            })),
+          ]
+        : [
+            {
+              kind: "user_note",
+              id: "supplied_text",
+              startMs: null,
+              endMs: null,
+            },
+          ];
+    if (source.kind === "upload")
+      for (const frame of source.personalMedia.frames) {
+        const assetId = ctx.db.normalizeId("assets", frame.assetId);
+        const asset = assetId ? await ctx.db.get(assetId) : null;
+        ensure(
+          asset?.sourceId === source._id &&
+            asset.organizationId === source.organizationId &&
+            asset.state === "complete" &&
+            asset.kind === "evidence",
+          "INVALID_EVIDENCE",
+          "Frame evidence is unavailable.",
+        );
+      }
     for (const insight of output.insights)
       for (const evidence of insight.evidence)
         ensure(
-          evidence.kind === "user_note" &&
-            evidence.id === "supplied_text" &&
-            evidence.startMs === null &&
-            evidence.endMs === null,
+          evidenceList.some(
+            (e: any) =>
+              e.kind === evidence.kind &&
+              e.id === evidence.id &&
+              e.startMs === evidence.startMs &&
+              e.endMs === evidence.endMs,
+          ),
           "INVALID_EVIDENCE",
           "Unverified evidence reference.",
         );
@@ -391,11 +520,21 @@ export const dispatch = internalMutation({
     await ctx.db.patch(source._id, {
       state: "ready",
       analysis: output,
+      ...(source.kind === "upload"
+        ? {
+            text: transcript.map((s: any) => s.text).join(" "),
+            mediaCoverage: output.coverage,
+            mediaEvidence: evidenceList,
+            originalMediaEvidence: evidenceList,
+          }
+        : {}),
       summary: output.summary,
       coverage: output.coverage,
+      tags: [...new Set([...source.tags, ...output.insights.flatMap((i:any)=>i.categories)])].slice(0,20),
       searchable: [
         source.title,
         source.text,
+        ...transcript.map((s: any) => s.text),
         output.summary,
         ...source.tags,
         ...output.insights.flatMap((i: any) => i.categories),
@@ -405,6 +544,11 @@ export const dispatch = internalMutation({
       updatedAt: now,
     });
     await ctx.db.patch(device._id, { activePersonalSource: undefined });
+    if (source.kind === "upload")
+      await ctx.scheduler.runAfter(0, internal.assets.expireOriginal, {
+        sourceId: source._id,
+        generation: source.generation,
+      });
     await ctx.db.insert("notifications", {
       organizationId: device.organizationId,
       key: `source:${source._id}:${job.generation}`,
@@ -414,5 +558,91 @@ export const dispatch = internalMutation({
       updatedAt: now,
     });
     return { accepted: true };
+  },
+});
+
+export function validateTranscript(value: unknown, media: any): any[] {
+  ensure(
+    Array.isArray(value) &&
+      value.length <= 200 &&
+      (media.audio || value.length === 0),
+    "INVALID_EVIDENCE",
+    "Invalid automatic transcript.",
+  );
+  let chars = 0;
+  for (let i = 0; i < value.length; i++) {
+    const s = value[i];
+    ensure(
+      s &&
+        Object.keys(s).every((k) =>
+          ["id", "text", "startMs", "endMs"].includes(k),
+        ) &&
+        s.id === `segment-${i}` &&
+        typeof s.text === "string" &&
+        s.text.length <= 4000 &&
+        Number.isSafeInteger(s.startMs) &&
+        Number.isSafeInteger(s.endMs) &&
+        s.startMs >= 0 &&
+        s.endMs >= s.startMs &&
+        s.endMs <= media.durationMs,
+      "INVALID_EVIDENCE",
+      "Invalid transcript timing or identity.",
+    );
+    chars += s.text.length;
+  }
+  ensure(
+    chars <= 60000 && !containsSecret(JSON.stringify(value)),
+    "INVALID_EVIDENCE",
+    "Transcript exceeded its safe bound.",
+  );
+  return value;
+}
+
+export const mediaLease = internalQuery({
+  args: {
+    credentialHash: v.string(),
+    id: v.id("sources"),
+    generation: v.number(),
+  },
+  handler: async (ctx, a) => {
+    const device = await authorizedDevice(ctx, a.credentialHash);
+    const source = await ctx.db.get(a.id),
+      job = source?.personalAnalysis;
+    ensure(
+      device.activePersonalSource === a.id &&
+        source?.organizationId === device.organizationId &&
+        source.generation === a.generation &&
+        source.state === "processing" &&
+        job?.deviceId === device._id &&
+        job.profileBinding === device.personalProfileBinding &&
+        job.state === "running" &&
+        job.leaseUntil > Date.now() &&
+        job.deadline > Date.now(),
+      "APPROVAL_STALE",
+      "Media lease is unavailable.",
+    );
+    ensure(
+      source.personalMedia,
+      "INVALID_EVIDENCE",
+      "Prepared media is missing.",
+    );
+    for (const b of [
+      ...source.personalMedia.frames,
+      ...(source.personalMedia.audio ? [source.personalMedia.audio] : []),
+    ]) {
+      const assetId = ctx.db.normalizeId("assets", b.assetId),
+        asset = assetId ? await ctx.db.get(assetId) : null;
+      ensure(
+        asset?.sourceId === source._id &&
+          asset.organizationId === source.organizationId &&
+          asset.key === b.key &&
+          asset.size === b.size &&
+          asset.state === "complete" &&
+          (asset.expiresAt === undefined || asset.expiresAt > Date.now()),
+        "INVALID_EVIDENCE",
+        "Private media expired or changed.",
+      );
+    }
+    return source.personalMedia;
   },
 });

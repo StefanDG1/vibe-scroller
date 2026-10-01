@@ -9,6 +9,7 @@ export function privateContentPolicy(nonce: string, development: boolean) {
     if (name === "NEXT_PUBLIC_CONVEX_URL")
       connect.add(url.origin.replace("https:", "wss:"));
   }
+  if (process.env.NEXT_PUBLIC_POSTHOG_KEY) connect.add("https://eu.i.posthog.com");
   if (development) connect.add("ws://localhost:3001");
   return [
     "default-src 'self'",

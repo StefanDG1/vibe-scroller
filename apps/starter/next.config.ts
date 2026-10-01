@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { buildVersion } from "../../scripts/version.mjs";
 const config: NextConfig = {
   transpilePackages: [
     "@companynerve/ui",
@@ -6,6 +7,10 @@ const config: NextConfig = {
     "@companynerve/design-recipes",
   ],
   poweredByHeader: false,
+  env: {
+    NEXT_PUBLIC_APP_VERSION: buildVersion().version,
+    NEXT_PUBLIC_APP_COMMIT: buildVersion().commit,
+  },
   async headers() {
     return [
       {

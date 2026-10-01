@@ -345,3 +345,196 @@ it("runs the browser-approved text envelope without tools or a funding fallback 
   ).rejects.toThrow();
   expect(modelCalled).toBe(false);
 });
+
+it("accepts bounded server clock skew but rejects a fabricated long deadline before inference", async () => {
+  const job = {
+    id: "clock-test",
+    generation: 1,
+    text: "Owned test",
+    coverage: "caption_only",
+    model: "synthetic-model",
+    effort: "medium",
+    deadline: Date.now() + 180800,
+    profileBinding: createHash("sha256")
+      .update("synthetic-profile")
+      .digest("hex"),
+  };
+  const request = async (operation: string) =>
+    operation === "heartbeat"
+      ? { valid: true, deadline: job.deadline }
+      : { accepted: true };
+  const client = {
+    status: async () => ({ activeProfileId: "synthetic-profile" }),
+    respond: async () => ({ text: JSON.stringify(outputFor(job)) }),
+  };
+  await expect(processPersonalJob(job, { request, client })).resolves.toEqual({
+    completed: true,
+  });
+  await expect(
+    processPersonalJob(
+      { ...job, deadline: Date.now() + 190000 },
+      { request, client },
+    ),
+  ).rejects.toThrow("PERSONAL_JOB_INVALID");
+});
+
+it("reserves media compute separately, binds prepared assets and rejects invented transcript/frame evidence", async () => {
+  const s = await setup();
+  vi.stubEnv("MEDIA_VERIFIED", "true");
+  const key = `${s.org}/synthetic-upload`;
+  await s.t.run((ctx) =>
+    ctx.db.insert("assets", {
+      organizationId: s.org,
+      key,
+      size: 100,
+      type: "video/mp4",
+      state: "complete",
+      etag: "synthetic",
+      expiresAt: Date.now() + 86400000,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    }),
+  );
+  const source = await s.a.mutation(api.product.capture, {
+    organizationId: s.org,
+    key: "owned-upload-test",
+    kind: "upload",
+    title: "Synthetic video",
+    objectKey: key,
+    rightsAttested: true,
+  });
+  await expect(
+    s.a.mutation(api.personalAnalysis.approve, {
+      id: source,
+      generation: 0,
+      deviceId: s.device,
+      model: "synthetic-model",
+      effort: "medium",
+      useOwnPlan: true,
+    }),
+  ).rejects.toThrow("SETUP_REQUIRED");
+  await s.a.mutation(api.personalAnalysis.approve, {
+    id: source,
+    generation: 0,
+    deviceId: s.device,
+    model: "synthetic-model",
+    effort: "medium",
+    useOwnPlan: true,
+    maxComputeCredits: 10,
+  });
+  expect(await s.t.mutation(internal.personalMediaState.begin, { id: source, generation: 1 })).not.toBeNull();
+  expect(await s.t.mutation(internal.personalMediaState.begin, { id: source, generation: 1 })).toBeNull();
+  const frameId = await s.t.mutation(internal.assets.registerEvidence, {
+    sourceId: source,
+    generation: 1,
+    key: `${s.org}/synthetic-frame`,
+    size: 100,
+    etag: "fixture",
+  });
+  const media = {
+    durationMs: 8000,
+    coverage: "visual_only",
+    frames: [
+      {
+        assetId: frameId,
+        key: `${s.org}/synthetic-frame`,
+        size: 100,
+        sha256: "a".repeat(64),
+        timestampMs: 1000,
+        selectionReason: "periodic sample",
+        etag: "fixture",
+      },
+    ],
+  };
+  await s.t.mutation(internal.personalMediaState.finish, {
+    id: source,
+    generation: 1,
+    organizationId: s.org,
+    computeCredits: 2,
+    media,
+  });
+  const { job }: any = await s.dispatch({ operation: "poll" });
+  expect(job.media.coverage).toBe("visual_only");
+  const output: any = outputFor(job);
+  output.coverage = "visual_only";
+  output.insights[0].evidence = [
+    { kind: "frame", id: frameId, startMs: 1000, endMs: 1000 },
+  ];
+  await expect(
+    s.dispatch({
+      operation: "complete",
+      id: source,
+      generation: 1,
+      output,
+      transcript: [
+        { id: "segment-0", text: "Invented audio", startMs: 0, endMs: 1 },
+      ],
+    }),
+  ).rejects.toThrow("INVALID_EVIDENCE");
+  output.insights[0].evidence[0].startMs = 999;
+  await expect(
+    s.dispatch({
+      operation: "complete",
+      id: source,
+      generation: 1,
+      output,
+      transcript: [],
+    }),
+  ).rejects.toThrow("INVALID_EVIDENCE");
+  output.insights[0].evidence[0].startMs = 1000;
+  await s.dispatch({
+    operation: "complete",
+    id: source,
+    generation: 1,
+    output,
+    transcript: [],
+  });
+  const row = await s.a.query(api.product.detail, { id: source });
+  expect(row.state).toBe("ready");
+  expect(row.mediaEvidence?.[0].id).toBe(frameId);
+  const reservations = await s.t.run((ctx) =>
+    ctx.db.query("reservations").collect(),
+  );
+  expect(
+    reservations.find((r) => r.key.startsWith("personal-media:")),
+  ).toMatchObject({ max: 10, settled: 2, state: "settled" });
+  expect(reservations.find((r) => r.key.startsWith("source:"))).toMatchObject({
+    max: 0,
+    settled: 0,
+    state: "settled",
+  });
+  await s.a.mutation(api.product.deleteSource, { id: source });
+  expect(
+    (await s.t.run((ctx) => ctx.db.get(source)))?.personalMedia,
+  ).toBeUndefined();
+});
+
+it("releases canceled media before dispatch but keeps dispatched compute reserved until reconciliation", async () => {
+  for (const dispatched of [false, true]) {
+    const s = await setup();
+    vi.stubEnv("MEDIA_VERIFIED", "true");
+    const key = `${s.org}/synthetic-cancel-video`;
+    await s.t.run((ctx) => ctx.db.insert("assets", {
+      organizationId: s.org, key, size: 100, type: "video/mp4", state: "complete",
+      etag: "synthetic", expiresAt: Date.now() + 86400000, createdAt: Date.now(), updatedAt: Date.now(),
+    }));
+    const source = await s.a.mutation(api.product.capture, {
+      organizationId: s.org, key: "cancel-owned-upload", kind: "upload", title: "Synthetic video",
+      objectKey: key, rightsAttested: true,
+    });
+    await s.a.mutation(api.personalAnalysis.approve, {
+      id: source, generation: 0, deviceId: s.device, model: "synthetic-model",
+      effort: "medium", useOwnPlan: true, maxComputeCredits: 10,
+    });
+    if (dispatched) expect(await s.t.mutation(internal.personalMediaState.begin, { id: source, generation: 1 })).not.toBeNull();
+    await s.a.mutation(api.personalAnalysis.cancel, { id: source });
+    expect(await s.t.mutation(internal.personalMediaState.begin, { id: source, generation: 1 })).toBeNull();
+    const reservations = await s.t.run((ctx) => ctx.db.query("reservations").collect());
+    expect(reservations.find((r) => r.key.startsWith("personal-media:"))).toMatchObject({ state: dispatched ? "active" : "settled", ...(dispatched ? {} : { settled: 0 }) });
+    if (dispatched) {
+      await s.t.mutation(internal.personalMediaState.finish, { id: source, generation: 1, organizationId: s.org, computeCredits: 2 });
+      expect((await s.t.run((ctx) => ctx.db.query("reservations").collect())).find((r) => r.key.startsWith("personal-media:"))).toMatchObject({ state: "settled", settled: 2 });
+    }
+    expect((await s.t.run((ctx) => ctx.db.get(source)))?.personalAnalysis?.state).toBe("canceled");
+  }
+});

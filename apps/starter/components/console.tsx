@@ -2,7 +2,35 @@
 import { useState, useEffect, useRef, useEffectEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Brand } from "./site";
+import {
+  Home,
+  Library,
+  GitBranch,
+  Inbox,
+  FileCheck2,
+  GitPullRequest,
+  Gauge,
+  Plug,
+  Laptop,
+  ShieldCheck,
+  CreditCard,
+  Plus,
+  FileText,
+  Link2,
+  Video,
+  Loader2,
+  PanelLeftClose,
+  PanelLeftOpen,
+  ArrowRight,
+  MoreHorizontal,
+  Check,
+} from "lucide-react";
+import { AccountMenu } from "./account-menu";
+import { CookieSettings, rejectAnalytics } from "./consent";
+import { track } from "@/lib/analytics";
+import { productAnalyticsEvent } from "@/lib/analytics-events";
 import type { ImportPreview } from "../../../packages/instagram-import";
 type Initial = {
   aiPreference?: {
@@ -55,9 +83,11 @@ const Button = ({
   <button
     type="button"
     disabled={busy || disabled}
+    aria-busy={busy || undefined}
     className={primary ? "primary" : "secondary"}
     onClick={onClick}
   >
+    {busy && <Loader2 className="spinner" size={16} aria-hidden="true" />}
     {children}
   </button>
 );
@@ -71,6 +101,7 @@ export function Console({
   initialSharedDraft = "",
   initialSearch = "",
   initialFilter = "",
+  demoState = "ready",
 }: {
   demo?: boolean;
   readOnly?: boolean;
@@ -80,6 +111,7 @@ export function Console({
   initialSharedDraft?: string;
   initialSearch?: string;
   initialFilter?: string;
+  demoState?: "ready" | "loading" | "error" | "empty";
 }) {
   const router = useRouter(),
     [data, setData] = useState(initial),
@@ -91,11 +123,19 @@ export function Console({
     [filter, setFilter] = useState(initialFilter),
     [notice, setNotice] = useState(""),
     [busy, setBusy] = useState(false),
+    [libraryLoading, setLibraryLoading] = useState(
+      demo && demoState === "loading",
+    ),
+    [libraryError, setLibraryError] = useState(
+      demo && demoState === "error"
+        ? "Synthetic request failure. Your library could not be loaded."
+        : "",
+    ),
     [captureOpen, setCaptureOpen] = useState(
       !readOnly && Boolean(initialSharedDraft),
     ),
     [planText, setPlanText] = useState(JSON.stringify(blankPlan, null, 2)),
-    [dark, setDark] = useState(false),
+    [railCollapsed, setRailCollapsed] = useState(false),
     [pairing, setPairing] = useState<{
       id: string;
       fingerprint: string;
@@ -107,33 +147,50 @@ export function Console({
   const [sharedDraft, setSharedDraft] = useState(initialSharedDraft);
   const libraryRequest = useRef(0);
   async function loadLibrary(append = false) {
-    if (demo) return;
+    if (demo) {
+      setLibraryError("");
+      return;
+    }
     const generation = ++libraryRequest.current;
-    const q = new URLSearchParams({ q: search, state: filter });
-    if (append && data.libraryNext) q.set("cursor", data.libraryNext);
-    const response = await fetch(`/api/library/${organizationId}?${q}`, {
-      cache: "no-store",
-    });
-    if (!response.ok || response.redirected) return;
-    const result = await response.json();
-    if (generation !== libraryRequest.current) return;
-    setData((current) => ({
-      ...current,
-      sources: append
-        ? [
-            ...current.sources,
-            ...result.items.filter(
-              (item: any) =>
-                !current.sources.some((old) => id(old) === id(item)),
-            ),
-          ]
-        : result.items,
-      libraryNext: result.next,
-    }));
+    setLibraryLoading(true);
+    setLibraryError("");
+    try {
+      const q = new URLSearchParams({ q: search, state: filter });
+      if (append && data.libraryNext) q.set("cursor", data.libraryNext);
+      const response = await fetch(`/api/library/${organizationId}?${q}`, {
+        cache: "no-store",
+      });
+      if (!response.ok || response.redirected)
+        throw new Error("Your library could not be loaded. Try again.");
+      const result = await response.json();
+      if (generation !== libraryRequest.current) return;
+      setData((current) => ({
+        ...current,
+        sources: append
+          ? [
+              ...current.sources,
+              ...result.items.filter(
+                (item: any) =>
+                  !current.sources.some((old) => id(old) === id(item)),
+              ),
+            ]
+          : result.items,
+        libraryNext: result.next,
+      }));
+    } catch (error) {
+      if (generation === libraryRequest.current)
+        setLibraryError(
+          error instanceof Error
+            ? error.message
+            : "Your library could not be loaded.",
+        );
+    } finally {
+      if (generation === libraryRequest.current) setLibraryLoading(false);
+    }
   }
   const loadLibraryFromEffect = useEffectEvent(() => loadLibrary());
   useEffect(() => {
-    if (demo || view !== "library") return;
+    if (demo || !["library", "home"].includes(view)) return;
     const timeout = setTimeout(() => {
       loadLibraryFromEffect().catch(() =>
         setNotice("Library search is unavailable. Try again."),
@@ -190,6 +247,18 @@ export function Console({
     };
   }, [captureOpen]);
   function applyData(next: Initial) {
+    if (!demo)
+      for (const source of next.sources) {
+        const old = data.sources.find((s) => id(s) === id(source));
+        if (source.state === "ready" && old && old.state !== "ready")
+          track("analysis_completed", {
+            route:
+              source.personalAnalysis?.state === "completed"
+                ? "personal_chatgpt"
+                : "included",
+            coverage: source.coverage,
+          });
+      }
     setData(next);
     setSelected((current: any) =>
       current
@@ -243,7 +312,7 @@ export function Console({
   }
   const refreshFromEffect = useEffectEvent(() => refreshData());
   useEffect(() => {
-    if (demo || view === "library") return;
+    if (demo) return;
     const timer = setInterval(() => {
       refreshFromEffect().catch(() => {});
     }, 15000);
@@ -273,6 +342,8 @@ export function Console({
         );
         return "demo";
       }
+      if (operation === "preferences" && args.analytics === false)
+        rejectAnalytics();
       const res = await fetch("/api/product", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -297,7 +368,16 @@ export function Console({
           "The application host is temporarily unavailable. No success was confirmed. Check the inbox before retrying this action.",
         );
       const body = await res.json();
-      if (!res.ok) throw new Error(body.error);
+      if (!res.ok) {
+        if (!demo)
+          track("operation_failed", {
+            operation,
+            code: body.code ?? "UNKNOWN",
+          });
+        throw new Error(body.error);
+      }
+      const event = productAnalyticsEvent(operation, args, body.result);
+      if (!demo && event) track(event.event, event.properties);
       await refreshData();
       setNotice("Saved. The server accepted this action.");
       return body.result;
@@ -314,6 +394,7 @@ export function Console({
     }
     setView(v);
     setSelected(null);
+    if (!demo) track("workspace_viewed", { view: v });
     if (v === "menu") return;
     if (!demo)
       history.replaceState(
@@ -324,85 +405,121 @@ export function Console({
   };
   const filtered = data.sources.filter(
     (s) =>
-      (!demo ||
-        !search ||
-        [s.title, s.summary, ...(s.mainPoints ?? [])]
+      (!search ||
+        [s.title, s.summary, s.text, ...(s.tags ?? []), ...(s.mainPoints ?? [])]
           .join(" ")
           .toLowerCase()
           .includes(search.toLowerCase())) &&
-      (!demo ||
-        !filter ||
+      (!filter ||
         s.state === filter ||
         s.matches?.some((m: any) => m.disposition === filter)),
   );
   function findSource(s: any) {
+    if (!demo)
+      track("source_viewed", {
+        kind: s.kind,
+        state: s.state,
+        coverage: s.coverage,
+      });
     setSelected(s);
     setView("source");
   }
   const nav = [
-    ["home", "Home", "⌂"],
-    ["library", "Library", "▤"],
-    ["projects", "Projects", "⑂"],
-    ["inbox", "Inbox", "▣"],
-    ["proposals", "Proposals", "◇"],
-    ["runs", "Runs & PRs", "▷"],
-    ["usage", "Usage", "◷"],
-    ["connections", "Connections", "↔"],
-    ["runners", "Computers", "▱"],
-    ["privacy", "Privacy", "⊙"],
-    ["billing", "Billing", "€"],
-  ];
-  const metrics = [
-    data.sources.filter((s) => s.state === "ready" || s.summary).length,
-    data.proposals.filter((p) => p.review === "accepted").length,
-    new Set(data.runs.filter((r) => r.mergedAt).map((r) => r.prUrl)).size,
-    data.measured ?? 0,
-  ];
+    ["home", "Home", Home],
+    ["library", "Library", Library],
+    ["projects", "Projects", GitBranch],
+    ["inbox", "Inbox", Inbox],
+    ["proposals", "Proposals", FileCheck2],
+    ["runs", "Runs & PRs", GitPullRequest],
+    ["usage", "Usage", Gauge],
+    ["connections", "Connections", Plug],
+    ["runners", "Computers", Laptop],
+    ["privacy", "Privacy", ShieldCheck],
+    ["billing", "Billing", CreditCard],
+  ] as const;
+  const pendingProposals = data.proposals.filter(
+    (p) => p.review === "unreviewed",
+  ).length;
   return (
-    <div className={`product-shell ${dark ? "dark" : ""}`}>
+    <div
+      className={`product-shell dark ${railCollapsed ? "rail-collapsed" : ""}`}
+    >
       <aside className="product-rail">
-        <Brand />
-        <p className="workspace-label">
-          {demo ? "Demo workspace" : "Your workspace"}
-        </p>
+        <div className="rail-brand">
+          <Brand />
+          <button
+            type="button"
+            className="icon-button"
+            aria-label="Collapse sidebar"
+            onClick={() => setRailCollapsed(true)}
+          >
+            <PanelLeftClose size={19} />
+          </button>
+        </div>
+        {demo && <p className="workspace-label">Demo workspace</p>}
         <nav aria-label="Application">
-          {nav.map(([key, title, icon]) => (
+          {nav.slice(0, 6).map(([key, title, Icon]) => (
             <button
+              type="button"
               key={key}
+              aria-current={view === key ? "page" : undefined}
               className={view === key ? "active" : ""}
               onClick={() => go(key)}
             >
-              <span aria-hidden="true">{icon}</span>
+              <Icon size={19} strokeWidth={1.7} aria-hidden="true" />
               {title}
+              {key === "inbox" && data.notifications.some((n) => !n.read) && (
+                <span className="nav-count">
+                  {data.notifications.filter((n) => !n.read).length}
+                </span>
+              )}
             </button>
           ))}
         </nav>
         <div className="rail-bottom">
-          <button onClick={() => setDark(!dark)}>
-            {dark ? "Light appearance" : "Dark appearance"}
+          <button type="button" onClick={() => go("connections")}>
+            <Plug size={18} />
+            Connections
           </button>
-          <Link href={demo ? "/app" : "/account"}>
-            {demo ? "Open your own library" : "Account & sign out"}
-          </Link>
-          <Link href="/">Back to website</Link>
+          <AccountMenu go={go} demo={demo} />
         </div>
       </aside>
       <div className="product-body">
         <header className="product-top">
-          <div>
-            <span className="status">
-              {demo ? "Synthetic demo" : "Private workspace"}
+          <div className="row">
+            <button
+              type="button"
+              className="icon-button rail-open"
+              aria-label="Expand sidebar"
+              onClick={() => setRailCollapsed(false)}
+            >
+              <PanelLeftOpen size={19} />
+            </button>
+            <span className="top-view">
+              {view === "source"
+                ? "Library"
+                : view === "proposal"
+                  ? "Proposals"
+                  : view === "menu"
+                    ? "More"
+                    : (nav.find((n) => n[0] === view)?.[1] ?? "Review plan")}
             </span>
-            <p>Make scrolling productive.</p>
+            {demo && <span className="status">Synthetic demo</span>}
           </div>
-          <Button
-            busy={busy}
-            disabled={readOnly}
-            primary
-            onClick={() => setCaptureOpen(true)}
-          >
-            ＋ Add source
-          </Button>
+          <div className="row">
+            <Button
+              busy={busy}
+              disabled={readOnly}
+              primary
+              onClick={() => setCaptureOpen(true)}
+            >
+              <Plus size={17} />
+              Add source
+            </Button>
+            <div className="mobile-account">
+              <AccountMenu go={go} demo={demo} />
+            </div>
+          </div>
         </header>
         {readOnly && (
           <p className="demo-banner">
@@ -419,17 +536,14 @@ export function Console({
         <main id="main" className="product-main">
           <div className="page-heading">
             <div>
-              <p className="muted">
-                {demo
-                  ? "Explore the review workflow"
-                  : "Your next useful action"}
-              </p>
               <h1>
                 {view === "source"
                   ? selected?.title
                   : view === "proposal"
                     ? selected?.title
-                    : (nav.find((n) => n[0] === view)?.[1] ?? "Review plan")}
+                    : view === "menu"
+                      ? "More"
+                      : (nav.find((n) => n[0] === view)?.[1] ?? "Review plan")}
               </h1>
             </div>
             {selected && (
@@ -446,48 +560,71 @@ export function Console({
           </output>
           {(view === "home" || view === "library") && (
             <>
-              <div className="attention">
-                <div>
-                  <h2>
-                    {data.proposals.filter((p) => p.review === "unreviewed")
-                      .length
-                      ? `${data.proposals.filter((p) => p.review === "unreviewed").length} proposals to review`
-                      : "Make room for the next useful idea."}
-                  </h2>
-                  <p>
-                    Keep the evidence, review the fit, and choose what to build.
-                  </p>
-                </div>
-                <Button busy={busy} onClick={() => go("proposals")}>
-                  Review proposals
-                </Button>
-              </div>
               {view === "home" && (
-                <div className="metric-strip">
-                  {[
-                    "Sources processed",
-                    "Plans accepted",
-                    "Unique PRs merged",
-                    "Outcomes measured",
-                  ].map((n, i) => (
-                    <div key={n}>
-                      <strong>{metrics[i]}</strong>
-                      <span>{n}</span>
-                      <small>
-                        {i === 3
-                          ? "Benefit needs your evidence"
-                          : "Current workspace"}
-                      </small>
-                    </div>
-                  ))}
+                <section className="home-capture" aria-label="Capture a source">
+                  <h2>What did you save?</h2>
+                  <form
+                    className="capture-composer"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      setCaptureOpen(true);
+                    }}
+                  >
+                    <Link2 size={21} aria-hidden="true" />
+                    <input
+                      aria-label="Video URL"
+                      value={sharedDraft}
+                      onChange={(e) => setSharedDraft(e.target.value)}
+                      placeholder="Paste a video link"
+                      type="url"
+                      disabled={readOnly}
+                    />
+                    <button
+                      type="submit"
+                      className="composer-send"
+                      disabled={readOnly}
+                      aria-label="Add video link"
+                    >
+                      <ArrowRight size={20} />
+                    </button>
+                  </form>
+                  <div className="capture-shortcuts">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSharedDraft("");
+                        setCaptureOpen(true);
+                      }}
+                      disabled={readOnly}
+                    >
+                      <Plus size={16} />
+                      Upload or import
+                    </button>
+                    <button type="button" onClick={() => go("connections")}>
+                      <Plug size={16} />
+                      Connect AI
+                    </button>
+                  </div>
+                </section>
+              )}
+              {pendingProposals > 0 && (
+                <div className="attention">
+                  <h2>
+                    {pendingProposals}{" "}
+                    {pendingProposals === 1 ? "proposal" : "proposals"} to
+                    review
+                  </h2>
+                  <Button busy={busy} onClick={() => go("proposals")}>
+                    Review <ArrowRight size={16} />
+                  </Button>
                 </div>
               )}
               <div className="library-tools">
                 <label>
-                  Search your library
+                  <span className="sr-only">Search your library</span>
                   <input
                     value={search}
-                    placeholder="Title, summary or main point"
+                    placeholder="Search your library"
                     onChange={(e) => {
                       setSearch(e.target.value);
                       const u = new URL(location.href);
@@ -497,7 +634,7 @@ export function Console({
                   />
                 </label>
                 <label>
-                  Show
+                  <span className="sr-only">Filter sources</span>
                   <select
                     value={filter}
                     onChange={(e) => {
@@ -522,52 +659,72 @@ export function Console({
                     ))}
                   </select>
                 </label>
-                <Button
-                  busy={busy}
-                  onClick={() => {
-                    setSearch("");
-                    setFilter("");
-                  }}
-                >
-                  Reset filters
-                </Button>
+                {(search || filter) && (
+                  <Button
+                    busy={busy}
+                    onClick={() => {
+                      setSearch("");
+                      setFilter("");
+                    }}
+                  >
+                    Clear filters
+                  </Button>
+                )}
               </div>
-              <div className="source-list">
-                {filtered.length ? (
-                  filtered.map((s, i) => (
+              {libraryError && (
+                <div className="panel error" role="alert">
+                  {libraryError}
+                  <Button busy={libraryLoading} onClick={() => loadLibrary()}>
+                    Retry
+                  </Button>
+                </div>
+              )}
+              <div className="source-list" aria-busy={libraryLoading}>
+                {libraryLoading && !filtered.length ? (
+                  <output className="empty">
+                    <Loader2 className="spinner" size={24} />
+                    <p>Loading your library...</p>
+                  </output>
+                ) : filtered.length ? (
+                  filtered.map((s) => (
                     <article key={id(s)} className="source-card">
                       <button
-                        className={`source-thumb art-${i % 4}`}
+                        className="source-thumb"
                         onClick={() => findSource(s)}
                         aria-label={`Open ${s.title}`}
                       >
-                        <span>▶</span>
-                        <small>
-                          {s.kind === "text" ? "Supplied text" : "Saved source"}
-                        </small>
+                        {s.kind === "text" ? (
+                          <FileText size={24} strokeWidth={1.5} />
+                        ) : s.kind === "upload" ? (
+                          <Video size={24} strokeWidth={1.5} />
+                        ) : (
+                          <Link2 size={24} strokeWidth={1.5} />
+                        )}
                       </button>
                       <div className="source-card-body">
-                        <div className="row spread">
-                          <span className="muted">
-                            {demo
-                              ? "Illustrative source"
-                              : label(s.state ?? "ready")}
-                          </span>
-                          <span className="coverage">{label(s.coverage)}</span>
-                        </div>
                         <button
                           className="title-button"
                           onClick={() => findSource(s)}
                         >
                           <h2>{s.title}</h2>
                         </button>
+                        <div className="row spread">
+                          <span className="coverage">{label(s.coverage)}</span>
+                        </div>
+                        {!demo && (
+                          <span className="muted source-state">
+                            {label(s.state ?? "ready")}
+                          </span>
+                        )}
                         <p>
                           {s.summary ??
                             (s.state === "needs_upload"
-                              ? "This source needs permitted content. Metadata is not an analysis."
-                              : s.state === "failed"
-                                ? "Analysis needs attention. Open the source for its next step."
-                                : "Source saved. Review and approve analysis to get its summary.")}
+                              ? "Add the video or transcript to analyze it."
+                              : ["processing", "queued"].includes(s.state)
+                                ? "Transcribing and analyzing your source..."
+                                : s.state === "failed"
+                                  ? "Analysis stopped. Open for details."
+                                  : "Ready for analysis.")}
                         </p>
                         <ul className="point-preview">
                           {s.mainPoints?.slice(0, 3).map((p: string) => (
@@ -582,7 +739,7 @@ export function Console({
                           ))}
                           {s.tags?.map((t: string) => (
                             <span className="tag" key={t}>
-                              {t}
+                              {label(t)}
                             </span>
                           ))}
                           {s.pullRequests?.length > 0 && (
@@ -602,29 +759,38 @@ export function Console({
                           )}
                         </div>
                       </div>
-                      <Button busy={busy} onClick={() => findSource(s)}>
-                        Open details
-                      </Button>
+                      <button
+                        type="button"
+                        className="icon-button source-open"
+                        aria-label={`View details for ${s.title}`}
+                        onClick={() => findSource(s)}
+                      >
+                        <ArrowRight size={18} />
+                      </button>
                     </article>
                   ))
                 ) : (
                   <div className="empty">
                     <h2>
-                      {data.sources.length
+                      {search || filter
                         ? "No sources match these filters."
                         : "Your library starts here."}
                     </h2>
                     <p>
-                      {data.sources.length
+                      {search || filter
                         ? "Reset the filters to see your saved sources."
                         : "Add a supported link, upload permitted content, or supply a transcript."}
                     </p>
                     <Button
                       busy={busy}
                       primary
-                      onClick={() => setCaptureOpen(true)}
+                      onClick={() =>
+                        search || filter
+                          ? (setSearch(""), setFilter(""))
+                          : setCaptureOpen(true)
+                      }
                     >
-                      Add your first source
+                      {search || filter ? "Clear filters" : "Add source"}
                     </Button>
                   </div>
                 )}
@@ -1166,6 +1332,7 @@ export function Console({
               >
                 Enable browser notification permission
               </Button>
+              <CookieSettings className="secondary" />
               <Button
                 busy={busy}
                 onClick={() =>
@@ -1515,6 +1682,7 @@ export function Console({
                   Account export & deletion
                 </Link>
               </div>
+              <CookieSettings className="secondary" />
               <Button
                 busy={busy}
                 onClick={() =>
@@ -1562,35 +1730,37 @@ export function Console({
               </p>
             </>
           )}
+          {view === "menu" && (
+            <section className="panel" aria-label="All application pages">
+              <h2>More pages</h2>
+              <nav aria-label="All mobile pages" className="form-grid">
+                {nav.slice(4).map(([key, title]) => (
+                  <button key={key} onClick={() => go(key)}>
+                    {title}
+                  </button>
+                ))}
+              </nav>
+            </section>
+          )}
         </main>
         <nav className="mobile-nav" aria-label="Mobile navigation">
-          {nav.slice(0, 4).map(([key, title, icon]) => (
+          {nav.slice(0, 4).map(([key, title, Icon]) => (
             <button
               className={view === key ? "active" : ""}
+              aria-current={view === key ? "page" : undefined}
               key={key}
               onClick={() => go(key)}
             >
-              <span aria-hidden="true">{icon}</span>
+              <Icon size={20} strokeWidth={1.7} aria-hidden="true" />
               {title}
             </button>
           ))}
           <button aria-expanded={view === "menu"} onClick={() => go("menu")}>
+            <MoreHorizontal size={20} aria-hidden="true" />
             More
           </button>
         </nav>
       </div>
-      {view === "menu" && (
-        <section className="capture-modal" aria-label="All application pages">
-          <h2>More pages</h2>
-          <nav aria-label="All mobile pages" className="form-grid">
-            {nav.slice(4).map(([key, title]) => (
-              <button key={key} onClick={() => go(key)}>
-                {title}
-              </button>
-            ))}
-          </nav>
-        </section>
-      )}
       {captureOpen && (
         <div className="modal-backdrop">
           <dialog
@@ -1605,13 +1775,22 @@ export function Console({
               </Button>
             </div>
             <CaptureForm
+              devices={data.devices ?? []}
+              personalEnabled={data.aiPreference?.personalAlphaEnabled}
               sharedDraft={sharedDraft}
               demo={demo}
               organizationId={organizationId}
               call={call}
-              onDone={() => {
+              onDone={(sourceId?: string) => {
                 setCaptureOpen(false);
                 setSharedDraft("");
+                if (sourceId)
+                  findSource({
+                    _id: sourceId,
+                    title: "New upload",
+                    state: "processing",
+                    coverage: "metadata_only",
+                  });
               }}
             />
           </dialog>
@@ -1626,9 +1805,33 @@ function CaptureForm({
   call,
   onDone,
   existingSourceId,
+  existingGeneration,
+  devices = [],
+  personalEnabled = false,
   sharedDraft,
 }: any) {
   const [kind, setKind] = useState(existingSourceId ? "upload" : "url");
+  const [saving, setSaving] = useState(false);
+  const [autoAnalyze, setAutoAnalyze] = useState(true);
+  const eligible = devices.filter(
+    (d: any) =>
+      d.personalOwned &&
+      d.state === "paired" &&
+      d.personalOnline &&
+      d.personalModels?.length,
+  );
+  const [chosenDevice, setChosenDevice] = useState(
+    eligible.length === 1 ? id(eligible[0]) : "",
+  );
+  const computer = eligible.find((d: any) => id(d) === chosenDevice);
+  const [chosenModel, setChosenModel] = useState("");
+  const effectiveModel =
+    chosenModel ||
+    computer?.personalModels.find(
+      (m: any) => m.slug === "gpt-6.1-sol" || m.slug === "gpt-5.6-sol",
+    )?.slug ||
+    computer?.personalModels[0]?.slug ||
+    "";
   const [manifest, setManifest] = useState<any>(null);
   const [importError, setImportError] = useState("");
   const [preview, setPreview] = useState<ImportPreview | null>(null);
@@ -1692,55 +1895,94 @@ function CaptureForm({
           return;
         }
         if (kind === "upload") {
-          const file = f.get("file") as File;
-          if (file.size > 250000000)
-            throw new Error("The maximum upload is 250 MB.");
-          const g = await fetch("/api/uploads/grant", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              organizationId,
-              type: file.type,
-              size: file.size,
-            }),
-          }).then((r) => r.json());
-          if (g.error) {
-            alert(g.error);
-            return;
-          }
-          const uploaded = await fetch(g.url, {
-            method: "PUT",
-            headers: { "Content-Type": file.type },
-            body: file,
-          });
-          if (!uploaded.ok) {
-            alert("Upload failed. No source was attached.");
-            return;
-          }
-          const done = await fetch("/api/uploads/complete", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ organizationId, key: g.key }),
-          }).then((r) => r.json());
-          if (done.error) {
-            alert(done.error);
-            return;
-          }
-          if (existingSourceId)
-            await call("attachSource", {
-              id: existingSourceId,
-              objectKey: g.key,
-              rightsAttested: f.get("rights") === "on",
+          if (saving) return;
+          setSaving(true);
+          setImportError("");
+          try {
+            const file = f.get("file") as File;
+            if (!file?.size || file.size > 250000000)
+              throw new Error("Choose a video or audio file up to 250 MB.");
+            if (
+              personalEnabled &&
+              autoAnalyze &&
+              (!computer || !effectiveModel || f.get("ownPlan") !== "on")
+            )
+              throw new Error(
+                "Choose your online computer and approve using your ChatGPT plan.",
+              );
+            const grantResponse = await fetch("/api/uploads/grant", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                organizationId,
+                type: file.type,
+                size: file.size,
+              }),
             });
-          else
-            await call("capture", {
-              organizationId,
-              key: crypto.randomUUID(),
-              kind,
-              title: f.get("title"),
-              objectKey: g.key,
-              rightsAttested: true,
+            const g = await grantResponse.json();
+            if (!grantResponse.ok || g.error)
+              throw new Error(g.error || "Upload permission failed.");
+            const uploaded = await fetch(g.url, {
+              method: "PUT",
+              headers: { "Content-Type": file.type },
+              body: file,
             });
+            if (!uploaded.ok)
+              throw new Error("Upload failed. No source was attached.");
+            const doneResponse = await fetch("/api/uploads/complete", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ organizationId, key: g.key }),
+            });
+            const done = await doneResponse.json();
+            if (!doneResponse.ok || done.error)
+              throw new Error(done.error || "Upload verification failed.");
+            let sourceId = existingSourceId;
+            if (existingSourceId) {
+              const attached = await call("attachSource", {
+                id: existingSourceId,
+                objectKey: g.key,
+                rightsAttested: f.get("rights") === "on",
+              });
+              if (attached === undefined) return;
+            } else
+              sourceId = await call("capture", {
+                organizationId,
+                key: crypto.randomUUID(),
+                kind,
+                title: String(f.get("title") || file.name).slice(0, 160),
+                objectKey: g.key,
+                rightsAttested: f.get("rights") === "on",
+              });
+            if (!sourceId) return;
+            if (personalEnabled && autoAnalyze) {
+              const approved = await call("approvePersonalAnalysis", {
+                id: sourceId,
+                generation: existingSourceId ? existingGeneration + 1 : 0,
+                deviceId: chosenDevice,
+                model: effectiveModel,
+                effort: "medium",
+                useOwnPlan: true,
+                maxComputeCredits: 10,
+              });
+              if (approved === undefined) {
+                setImportError(
+                  "Your upload was saved, but analysis did not start. Open the source to review the connection and approve again.",
+                );
+                return;
+              }
+            }
+            onDone(sourceId);
+          } catch (error) {
+            setImportError(
+              error instanceof Error
+                ? error.message
+                : "Upload failed. Try again.",
+            );
+          } finally {
+            setSaving(false);
+          }
+          return;
         } else if (existingSourceId)
           await call("attachSource", {
             id: existingSourceId,
@@ -1779,7 +2021,14 @@ function CaptureForm({
       {!existingSourceId && kind !== "import" && (
         <label>
           Title
-          <input name="title" required maxLength={160} />
+          <input
+            name="title"
+            required={kind !== "upload"}
+            maxLength={160}
+            placeholder={
+              kind === "upload" ? "Uses the filename if empty" : undefined
+            }
+          />
         </label>
       )}
       {kind === "import" ? (
@@ -1826,7 +2075,14 @@ function CaptureForm({
                       file.name,
                     );
                   }
-                  if (!controller.signal.aborted) setPreview(next);
+                  if (!controller.signal.aborted) {
+                    setPreview(next);
+                    if (!demo)
+                      track("import_previewed", {
+                        format: next.format,
+                        count: next.links.length,
+                      });
+                  }
                 } catch (error) {
                   if (!controller.signal.aborted)
                     setImportError(
@@ -1914,18 +2170,82 @@ function CaptureForm({
         <input name="rights" type="checkbox" required />I may submit this
         content for processing
       </label>
+      {kind === "upload" && personalEnabled && (
+        <section
+          className="upload-analysis form-grid"
+          aria-label="Automatic analysis"
+        >
+          <label className="check">
+            <input
+              type="checkbox"
+              checked={autoAnalyze}
+              onChange={(e) => setAutoAnalyze(e.target.checked)}
+            />
+            Transcribe and analyze after upload
+          </label>
+          {autoAnalyze && (
+            <>
+              <label>
+                Computer
+                <select
+                  value={chosenDevice}
+                  onChange={(e) => {
+                    setChosenDevice(e.target.value);
+                    setChosenModel("");
+                  }}
+                >
+                  <option value="">Choose an online computer</option>
+                  {eligible.map((d: any) => (
+                    <option key={id(d)} value={id(d)}>
+                      {d.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                ChatGPT model
+                <select
+                  value={effectiveModel}
+                  onChange={(e) => setChosenModel(e.target.value)}
+                >
+                  {!computer && (
+                    <option value="">Connect your computer first</option>
+                  )}
+                  {computer?.personalModels.map((m: any) => (
+                    <option key={m.slug} value={m.slug}>
+                      {m.displayName}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="check">
+                <input name="ownPlan" type="checkbox" required />
+                Use my ChatGPT plan for this video with medium reasoning.
+                Reserve up to 10 credits for isolated media preparation.
+              </label>
+              <p className="fine">
+                Audio is transcribed locally on your laptop. Sampled frames and
+                the transcript go to your connected OpenAI account. No paid AI
+                fallback.
+              </p>
+            </>
+          )}
+        </section>
+      )}
       <p className="fine">
-        Saving is separate from analysis. Review the quote before processing.
-        Supplied text has no implied audio or visual coverage.
+        {kind === "upload" && personalEnabled && autoAnalyze
+          ? "Keep your paired laptop on until analysis finishes."
+          : "Saving does not start analysis. Supplied text has no implied audio or visual coverage."}
       </p>
       <button
         className="primary"
         disabled={
-          kind === "import" &&
-          (previewBusy ||
-            importBusy ||
-            !preview?.links.length ||
-            importOffset >= preview.links.length)
+          saving ||
+          (kind === "import" &&
+            (previewBusy ||
+              importBusy ||
+              !preview?.links.length ||
+              importOffset >= preview.links.length))
         }
       >
         {demo
@@ -1936,9 +2256,13 @@ function CaptureForm({
               : importOffset
                 ? "Import next batch"
                 : "Import reviewed links"
-            : existingSourceId
-              ? "Attach permitted content"
-              : "Save source"}
+            : saving
+              ? "Uploading..."
+              : kind === "upload" && personalEnabled && autoAnalyze
+                ? "Upload and analyze"
+                : existingSourceId
+                  ? "Attach permitted content"
+                  : "Save source"}
       </button>
       {importError && <p role="alert">{importError}</p>}
       {manifest && (
@@ -1974,6 +2298,12 @@ function SourceDetail({
 }: any) {
   const [detail, setDetail] = useState(source);
   const [selectedInsight, setSelectedInsight] = useState("");
+  const [allFrames, setAllFrames] = useState(false);
+  const savedFrames = (
+    detail.originalMediaEvidence ??
+    detail.mediaEvidence ??
+    []
+  ).filter((e: any) => e.kind === "frame");
   const insightId = selectedInsight || detail.analysis?.insights?.[0]?.id;
   const selection =
     detail.repositorySelection?.insightId === insightId
@@ -2074,7 +2404,7 @@ function SourceDetail({
             <ul>
               {i.evidence?.map((e: any) => (
                 <li key={e.id}>
-                  {e.kind} · {e.id} ·{" "}
+                  {label(e.kind)} ·{" "}
                   {e.startMs === null
                     ? "Supplied text"
                     : `${e.startMs / 1000}s`}
@@ -2113,6 +2443,42 @@ function SourceDetail({
           )}
         </details>
       </section>
+      {!demo && savedFrames.length > 0 && (
+        <section className="panel" aria-label="Video evidence">
+          <h2>Video evidence</h2>
+          <div className="evidence-grid">
+            {savedFrames.slice(0, allFrames ? 24 : 4).map((frame: any) => (
+              <figure key={frame.id}>
+                <a
+                  href={`/api/evidence/${encodeURIComponent(frame.id)}?view=true`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Image
+                    src={`/api/evidence/${encodeURIComponent(frame.id)}?inline=true`}
+                    alt={`Private sampled video frame at ${(frame.startMs / 1000).toFixed(1)} seconds`}
+                    width={960}
+                    height={540}
+                    unoptimized
+                  />
+                </a>
+                <figcaption>{(frame.startMs / 1000).toFixed(1)}s</figcaption>
+              </figure>
+            ))}
+          </div>
+          {savedFrames.length > 4 && (
+            <Button onClick={() => setAllFrames(!allFrames)}>
+              {allFrames
+                ? "Show fewer frames"
+                : `View all ${savedFrames.length} frames`}
+            </Button>
+          )}
+          <p className="fine">
+            Selected frames support the analysis. Sampling can miss short
+            scenes.
+          </p>
+        </section>
+      )}
       {detail.state === "needs_upload" && (
         <section className="panel">
           <h2>Supply permitted content</h2>
@@ -2125,6 +2491,9 @@ function SourceDetail({
             organizationId={org}
             call={call}
             existingSourceId={id(source)}
+            existingGeneration={detail.generation}
+            devices={devices}
+            personalEnabled={personalEnabled}
             onDone={() => {}}
           />
         </section>
@@ -2328,12 +2697,53 @@ function PersonalSourceAnalysis({ source, devices, call }: any) {
       d.personalModels?.length,
   );
   const device = eligible.find((d: any) => id(d) === deviceId);
-  const running = ["queued", "running"].includes(
+  const running = ["preparing", "queued", "running"].includes(
     source.personalAnalysis?.state,
   );
   return (
     <section aria-label="Personal ChatGPT analysis" className="panel">
       <h3>Use your ChatGPT plan</h3>
+      {running && (
+        <ol
+          className="processing-steps"
+          aria-label="Analysis progress"
+          aria-live="polite"
+        >
+          {(source.kind === "upload" ? [
+            "Preparing media",
+            "Transcribing audio",
+            "Analyzing frames and saving insights",
+          ] : ["Analyzing text and saving insights"]).map((step, index) => {
+            const active =
+              source.kind !== "upload" ? 0 : source.personalAnalysis.state === "preparing"
+                ? 0
+                : source.personalAnalysis.stage === "transcribing"
+                  ? 1
+                  : 2;
+            return (
+              <li
+                key={step}
+                className={
+                  index === active
+                    ? "current"
+                    : index < active
+                      ? "complete"
+                      : ""
+                }
+              >
+                {index < active ? (
+                  <Check size={16} aria-hidden="true" />
+                ) : index === active ? (
+                  <Loader2 size={16} className="spinner" aria-hidden="true" />
+                ) : (
+                  <span className="step-dot" />
+                )}
+                {step}
+              </li>
+            );
+          })}
+        </ol>
+      )}
       {source.personalAnalysis && (
         <p>
           Personal analysis: {label(source.personalAnalysis.state)} ·{" "}
@@ -2358,19 +2768,20 @@ function PersonalSourceAnalysis({ source, devices, call }: any) {
         >
           Cancel personal analysis
         </Button>
-      ) : source.kind !== "text" ? (
+      ) : !["text", "upload"].includes(source.kind) ? (
         <p>
-          Supply permitted transcript or post text for this route. Connecting
-          video decoding and local transcription is still in progress.
+          Upload the permitted video to start automatic transcription and frame
+          analysis.
         </p>
       ) : (
         source.state !== "ready" && (
           <>
             <p>
-              Your paired laptop sends this supplied text to OpenAI using its
-              connected account. This request uses no VibeScroller inference
-              credits. Your ChatGPT limits still apply. It does not authorize
-              coding.
+              {source.kind === "upload"
+                ? "Your laptop transcribes audio locally, then sends sampled frames and the transcript to your ChatGPT account. Media preparation reserves up to 10 compute credits."
+                : "Your laptop sends this text to your ChatGPT account."}{" "}
+              No VibeScroller inference credits or paid AI fallback. Your
+              ChatGPT limits apply.
             </p>
             {!eligible.length ? (
               <p>
@@ -2442,6 +2853,9 @@ function PersonalSourceAnalysis({ source, devices, call }: any) {
                         model,
                         effort: "medium",
                         useOwnPlan: true,
+                        ...(source.kind === "upload"
+                          ? { maxComputeCredits: 10 }
+                          : {}),
                       });
                       setConsent(false);
                     } finally {
@@ -2449,7 +2863,9 @@ function PersonalSourceAnalysis({ source, devices, call }: any) {
                     }
                   }}
                 >
-                  Approve personal text analysis
+                  {source.kind === "upload"
+                    ? "Transcribe and analyze video"
+                    : "Analyze with my plan"}
                 </Button>
                 <p className="fine">
                   Approval expires after 15 minutes if unclaimed.

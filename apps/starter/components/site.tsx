@@ -1,9 +1,11 @@
 import Link from "next/link";
+import { Waypoints } from "lucide-react";
+import { CookieSettings } from "./consent";
 export function Brand() {
   return (
     <Link href="/" className="brand">
       <span className="brand-icon" aria-hidden="true">
-        ↝
+        <Waypoints size={21} strokeWidth={1.8} />
       </span>
       VibeScroller
     </Link>
@@ -49,6 +51,7 @@ export function SiteFooter() {
           </Link>
         ))}
         <a href="https://github.com/StefanDG1/vibe-scroller">MIT source</a>
+        <CookieSettings />
       </nav>
       <small>
         EXPONENTIAL EDUCATION S.R.L. · Development preview. Live checkout is

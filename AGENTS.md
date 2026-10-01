@@ -47,3 +47,7 @@ Keep these documents living. When new research, owner ideas, verified outcomes o
 Use the product's exact terms. Keep one primary documentation mode per file. Use sentence-case headings, plain verbs, and explicit subjects. Keep implementation facts separate from plans. Avoid filler, em dashes, invented customer statistics, and unsupported productivity claims.
 
 The owner expects the complete package to work without further product-design questions. Use the specified defaults. External legal or provider evidence remains a release gate, not permission to fabricate a value.
+
+## Version every main update
+
+Follow [the versioning policy](docs/VERSIONING.md). Main updates receive deterministic immutable alpha tags bound to the exact commit. Publish a GitHub prerelease only after required CI passes for that commit. Preserve the build version in the account menu. A tag or successful build does not close external release gates.

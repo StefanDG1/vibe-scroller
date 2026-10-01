@@ -143,6 +143,7 @@ export const productTables = {
     .index("by_expiry", ["expiresAt"]),
   sources: defineTable({
     ...tenant,
+    personalMedia: v.optional(v.any()),
     personalAnalysis: v.optional(
       v.object({
         deviceId: v.id("devices"),
@@ -160,6 +161,7 @@ export const productTables = {
         expiresAt: v.number(),
         leaseUntil: v.number(),
         deadline: v.number(),
+        stage: v.optional(v.string()),
         inputTokens: v.optional(v.number()),
         outputTokens: v.optional(v.number()),
       }),
@@ -343,6 +345,7 @@ export const productTables = {
   }).index("by_org", ["organizationId"]),
   reservations: defineTable({
     ...tenant,
+    dispatchedAt: v.optional(v.number()),
     key: v.string(),
     max: v.number(),
     settled: v.number(),
