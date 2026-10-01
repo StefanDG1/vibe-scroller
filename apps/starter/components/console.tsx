@@ -57,6 +57,14 @@ type Initial = {
 };
 const id = (o: any) => o._id ?? o.id;
 const label = (s: string) => s.replaceAll("_", " ");
+const coverageLabel = (s: string) =>
+  ({
+    full_sampled: "Audio + sampled frames",
+    audio_only: "Audio",
+    visual_only: "Images",
+    caption_only: "Text",
+    metadata_only: "Link",
+  })[s] ?? label(s);
 const blankPlan = {
   scope: "",
   nonGoals: [],
@@ -92,6 +100,43 @@ const Button = ({
     {children}
   </button>
 );
+
+function SourceThumbnail({ source, demo }: { source: any; demo: boolean }) {
+  const frame = (
+    source.originalMediaEvidence ??
+    source.mediaEvidence ??
+    []
+  ).find((e: any) => e.kind === "frame");
+  const [failedId, setFailedId] = useState<string>(),
+    [loadedId, setLoadedId] = useState<string>();
+  const failed = Boolean(frame && failedId === frame.id),
+    loaded = Boolean(frame && loadedId === frame.id);
+  return (
+    <span className="source-thumb" aria-hidden="true">
+      {!demo && frame && !failed && (
+        <Image
+          className={loaded ? "source-preview ready" : "source-preview"}
+          src={`/api/evidence/${encodeURIComponent(frame.id)}?inline=true`}
+          width={60}
+          height={76}
+          alt=""
+          unoptimized
+          loading="lazy"
+          onLoad={() => setLoadedId(frame.id)}
+          onError={() => setFailedId(frame.id)}
+        />
+      )}
+      {(!loaded || failed) &&
+        (source.kind === "text" ? (
+          <FileText size={24} strokeWidth={1.5} />
+        ) : source.kind === "upload" ? (
+          <Video size={24} strokeWidth={1.5} />
+        ) : (
+          <Link2 size={24} strokeWidth={1.5} />
+        ))}
+    </span>
+  );
+}
 
 export function Console({
   demo = false,
@@ -820,21 +865,15 @@ export function Console({
                         onClick={() => findSource(s)}
                         aria-label={`Open ${s.title}`}
                       />
-                      <span className="source-thumb" aria-hidden="true">
-                        {s.kind === "text" ? (
-                          <FileText size={24} strokeWidth={1.5} />
-                        ) : s.kind === "upload" ? (
-                          <Video size={24} strokeWidth={1.5} />
-                        ) : (
-                          <Link2 size={24} strokeWidth={1.5} />
-                        )}
-                      </span>
+                      <SourceThumbnail source={s} demo={demo} />
                       <div className="source-card-body">
                         <h2>{s.title}</h2>
                         <div className="row spread">
-                          <span className="coverage">{label(s.coverage)}</span>
+                          <span className="coverage">
+                            {coverageLabel(s.coverage)}
+                          </span>
                         </div>
-                        {!demo && (
+                        {!demo && s.state !== "ready" && (
                           <span className="muted source-state">
                             {label(s.state ?? "ready")}
                           </span>
@@ -2525,7 +2564,7 @@ function SourceDetail({
     <>
       <div className="panel">
         <span className="coverage">
-          {label(detail.coverage ?? "metadata_only")}
+          {coverageLabel(detail.coverage ?? "metadata_only")}
         </span>
         <h2>AI summary</h2>
         <p>{overview}</p>

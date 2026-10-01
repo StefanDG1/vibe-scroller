@@ -251,3 +251,5 @@ Documentation evidence: the effective cascade in `apps/starter/app/product.css`,
 ## Library categories and sorting
 
 Keep search and filters in the existing dark control style. Use accessible names for unlabeled selectors, 44 px controls and wrapping layouts on narrow screens. Search uses relevance and disables date/title sorting until cleared. A source row displays its insight count, a short point preview and up to four category names; the full row opens actual details. Category editing lives in a native disclosure within those details, with saving, error, empty and success behavior using the existing operation state. Shared suggestions are a separate owner/admin choice with a concise privacy explanation.
+
+Source thumbnails use the first retained private frame when available, load lazily and fade in over 160 ms. Failed or unavailable evidence retains the media-type icon. Reduced motion disables the fade. The image goes through the tenant-checked no-store endpoint and bypasses public image optimization. Completed sources show their insight count without a redundant ready label. Phone filters each keep a usable full-width touch target.
