@@ -383,7 +383,8 @@ export function Console({
       const event = productAnalyticsEvent(operation, args, body.result);
       if (!demo && event) track(event.event, event.properties);
       await refreshData();
-      setNotice("Saved. The server accepted this action.");
+      if (operation === "deleteSource") go("library");
+      setNotice(operation === "deleteSource" ? "Source deleted." : "Saved.");
       return body.result;
     } catch (e) {
       setNotice(e instanceof Error ? e.message : "The action failed.");
