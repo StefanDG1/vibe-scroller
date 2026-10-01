@@ -1,6 +1,6 @@
 # Implementation status
 
-Release label: Development. No production or legal approval is claimed.
+Release label: Owner personal alpha deployed at https://scroll.companynerve.com. Specific production checks below do not certify paid/public V1, legal approval or complete security acceptance.
 
 Foundation: CompanyNerve commit `74642451d605dcad43546ddf651097960615810e`, exported with its official `scripts/export-template.mjs`. The upstream working-tree status addition was read and left unchanged.
 
@@ -10,26 +10,26 @@ Repository: https://github.com/StefanDG1/vibe-scroller
 
 ## Work packages
 
-| Package | State            | Evidence                                                                                                                              |
-| ------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| WP01    | verified_staging | Export preserved; frozen install, CI, builds and secret scanning passed                                                               |
-| WP02    | in_progress      | 60 hosted responsive view checks passed; full accessibility acceptance remains                                                        |
-| WP03    | in_progress      | Real hosted WorkOS login; tenant tests; recovery/logout acceptance incomplete                                                         |
-| WP04    | in_progress      | Real owned uploads and import manifest; physical Android share test pending                                                           |
-| WP05    | in_progress      | Atomic reservations, stage commits and workflows; interruption/cost reconciliation pending                                            |
-| WP06    | blocked_external | Real isolated decode and transcription; vision license and usage verification pending                                                 |
-| WP07    | in_progress      | Search, pagination, export, retention and deletion implemented; full browser/deletion evidence pending                                |
-| WP08    | in_progress      | Selected GitHub App, nested exclusions, hash reuse and Repomix tree; real profile draft passed; quality benchmark pending             |
-| WP09    | in_progress      | Semantic selection returned honest no-fit; reviewed AI draft plan implemented; live matching limited by free allowance                |
-| WP10    | in_progress      | Real free managed route; revision-bound customer-key broker implemented; funded customer request not tested                           |
-| WP11    | blocked_external | Pairing/lease/result code and vault test; actual native isolation failed                                                              |
-| WP12    | in_progress      | Real isolated metered cloud coding produced a reviewed patch; cost calibration and outage cases remain                                |
-| WP13    | in_progress      | Real draft PR 3 and automatic reopen/closure; merge/revert/access-loss staging remains                                                |
-| WP14    | in_progress      | Private inbox and generic email integration; hosted email opt-in test pending; Telegram deferred by user                              |
-| WP15    | in_progress      | Real six-price sandbox lifecycle and two-payment invoice refunds; ledger tests passed; complete app invoice reconciliation pending    |
-| WP16    | in_progress      | Deletion markers, locked recovery, offline encrypted restore and runtime key rotation passed; hosted restore and tenant matrix remain |
-| WP17    | in_progress      | 85 tests and both builds; benchmark, physical devices and final artifact review incomplete                                            |
-| WP18    | blocked_external | Official company/tax evidence, legal publication and production verification remain                                                   |
+| Package | State            | Evidence                                                                                                                               |
+| ------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| WP01    | verified_staging | Export preserved; frozen install, CI, builds and secret scanning passed                                                                |
+| WP02    | in_progress      | Dark console and production desktop/mobile source checks passed; full accessibility acceptance remains                                 |
+| WP03    | in_progress      | Production Google login/default workspace and canonical reauthentication passed; broader recovery/logout acceptance remains            |
+| WP04    | in_progress      | Actual supplied ZIP imported four links; their media was attached and analyzed in production; physical Android deferred                |
+| WP05    | in_progress      | Atomic reservations, stage commits and workflows; interruption/cost reconciliation pending                                             |
+| WP06    | in_progress      | Production local Whisper and personal ChatGPT audio/vision passed on three real Reels and one carousel; hosted commercial access gated |
+| WP07    | in_progress      | Search, pagination, export, retention and deletion implemented; full browser/deletion evidence pending                                 |
+| WP08    | in_progress      | Selected GitHub App, nested exclusions, hash reuse and Repomix tree; real profile draft passed; quality benchmark pending              |
+| WP09    | in_progress      | Semantic selection returned honest no-fit; reviewed AI draft plan implemented; live matching limited by free allowance                 |
+| WP10    | in_progress      | Real free managed route; revision-bound customer-key broker implemented; funded customer request not tested                            |
+| WP11    | blocked_external | Pairing/lease/result code and vault test; actual native isolation failed                                                               |
+| WP12    | in_progress      | Real isolated metered cloud coding produced a reviewed patch; cost calibration and outage cases remain                                 |
+| WP13    | in_progress      | Real draft PR 3 and automatic reopen/closure; merge/revert/access-loss staging remains                                                 |
+| WP14    | in_progress      | Private inbox and generic email integration; hosted email opt-in test pending; Telegram deferred by user                               |
+| WP15    | in_progress      | Real six-price sandbox lifecycle and two-payment invoice refunds; ledger tests passed; complete app invoice reconciliation pending     |
+| WP16    | in_progress      | Deletion markers, locked recovery, offline encrypted restore and runtime key rotation passed; hosted restore and tenant matrix remain  |
+| WP17    | in_progress      | 154 app, 11 auth and six PCM tests plus both builds passed; broad benchmark/device/security acceptance remains                         |
+| WP18    | blocked_external | Personal production alpha verified; applicable tax/invoicing, legal publication and paid/public release acceptance remain              |
 
 ## Evidence
 
@@ -449,7 +449,6 @@ Netlify's rebuild blocked on a secret-value scan of the R2 bucket identifier alr
 
 Production main b98ca94 published successfully. A real upload returned storage grant200, signed PUT200 and completion200. R2 CORS originally allowed only local/staging origins; the existing signed-in Cloudflare dashboard added the exact production origin while keeping public bucket access disabled. Wrangler's existing deployment token lacked bucket-CORS permissions; no expanded token or purchase was created. The second fresh browser upload automatically created its source and explicitly approved personal media preparation. Three preparation attempts failed at private frame metadata verification: JPEG expected19399bytes, actualuploaded65536bytes, same MIME. Buffer.slice retained a larger backing allocation. Exact byte copies now replace both media preparation PUT and managed transcription Blob construction, with a regression asserting that Buffer/subarray payloads exclude surrounding memory and resist later mutation. Safe diagnostics record only stage/category/size/allowlisted MIME. Staged failed private objects are scheduled for deletion; no frame was sent to ChatGPT on those failed preparations. Focused13tests passed; lint/types and production Convex deployment passed. The real transcription/visual result is still pending the corrected retry.
 
-
 ## 1 October 2026: real production audio and visual result
 
 Main 1a57cf46bfe7 passed required GitHub CI 36810979676 and published immutable prerelease v0.1.0-alpha.20261001033222.g1a57cf46bfe7. CI ran `pnpm check`: document validation, zero-warning lint, types, 151 application tests and 11 authentication tests passed, plus four Python PCM tests and both Next production builds. Three credential-gated staging tests were skipped.
@@ -466,11 +465,9 @@ Final session/consent candidate `pnpm check` passed: 152 application tests, 11 a
 
 Provider property inspection found that the initial three consented test page events had default GeoIP enrichment, despite SDK ip:false. The safe property projection had removed the provider suppression marker. The projection now explicitly sets $geoip_disable:true; focused consent tests, lint and types passed. The official provider implementation documents this per-event marker (https://github.com/PostHog/posthog/issues/41602). Earlier test events remain historical evidence; they must not be described as having GeoIP disabled. Production receipt without GeoIP is pending the corrected build. No source text, URL or account email was present in the inspected page event.
 
-
 Fresh production upload on main c5dcfd9 completed automatically at generation1 without a supplied transcript or retry. The isolated worker prepared media, the active Windows runner transcribed English audio locally, and gpt-5.6-sol medium completed three saved cited insights with full_sampled coverage. Usage was 5,182 input and 1,376 output tokens. The first full engine proof produced four insights; the independent automatic regression produced three. These counts describe actual outputs, not a fixed expected number. Private production-automatic-upload-proof.json records the source/generation/result.
 
 Repeated clean reauthentication revealed a separate callback defect: WorkOS completed and the fresh-session query returned true, but callback307 redirected to the immutable Netlify deploy hostname; canonical domain routing then revisited consumed callback parameters and returned500. Network evidence contains paths/statuses only. The AuthKit callback now uses its supported baseURL option with the configured APP_URL, preserving PKCE/state verification. A regression, lint and types passed; production clean callback verification remains pending.
-
 
 ## 1 October 2026: final production checks and source disclosure
 
@@ -482,7 +479,6 @@ The actual source gallery expanded from four to all six selected evidence frames
 
 The fresh scoped source-detail review returned fix for expanded notes hiding the insights. The new overview preserves exact summary text, puts every full summary/warning/capture field into a labeled native disclosure, and retains a brief sampling/transcription caution outside it. Main points follow promptly; the disclosure has a 44px target. Lint, types and the starter production build passed. Confirmation captures and reviewer scoring are pending publication of this narrow fix.
 
-
 Final scoped reviewer disposition is ship for the source-detail hierarchy finding: desktop and 390x844 production captures show overview, visible caution and Main points in the first viewport (mobile Main points y577px). Native disclosure opened and preserved the full summary and all five analysis warnings; actual source has three insights. The documenter updated DESIGN.md and schema-v2 sidecar after the correction. Confirmation captures: outputs/video-acceptance/production-desktop-disclosure.png and production-mobile-disclosure.png. No wider design/production/legal approval is inferred from this scoped verdict.
 
 Actual automatic source reservations reconciled to source inference max0/settled0 and isolated media max10/settled1, both settled. The two-stage permission did not authorize coding. The failed fresh-session synthetic upload test was deleted through its real source UI confirmation; subsequent source GET returned404. This confirms retired-source access, not independent physical-object purge evidence. Owner Instagram links and successful labeled evidence sources were not removed.
@@ -493,7 +489,20 @@ Personal alpha readiness is narrower than paid/public V1 completion. Remaining e
 
 The final deletion check exposed a navigation defect: selected data was retired but the console stayed in source view with no selection, leaving only its notice. Successful deletion now navigates to Library and reports Source deleted. This is a functional recovery fix, not a reopened aesthetic review. The retired failed test source still returns404; the remaining owned failed upload will verify corrected navigation after deployment.
 
-
 Production c05aae1 published with its verified alpha version. The remaining failed owned synthetic video upload was deleted through its native confirmation; source GET returned404, the console returned to the populated Library with Source deleted, and the successful automatic analysis remained ready. Current Instagram source links remained present; no Instagram source was deleted. Account displayed the exact deployed immutable version. This closes the deletion-navigation regression. Lint, types and the starter build passed before push; required CI passed for c05aae1 with the same153 application/11 auth/four Python tests and three staging skips.
 
 The owner's Windows personal runner remains active. The real-domain personal upload test needs no further provider provisioning: sign in, keep the paired laptop on, select permitted media, review automatic-analysis permissions and upload. The owner guide and deployment procedure distinguish this tested personal alpha from the remaining paid/public V1 gates. Final publication of this evidence record changes documentation only.
+
+## 1 October 2026: all four actual imported Instagram posts analyzed
+
+Production backend and host were main e9d974e. Between approximately 12:50 and 13:20 CEST, the owner's existing signed-in Instagram browser session opened the exact four links extracted from the supplied archive. Three were playable Reels; the fourth was a 14-image carousel. The permitted media was retrieved into ignored private/instagram, uploaded to private workspace storage and attached to the original imported records. No archive, unrelated Instagram data, session cookies or OAuth credentials were committed or transferred to VibeScroller. This is operator-assisted ingestion; automatic Instagram Saved retrieval remains unimplemented.
+
+All four original records returned state ready and personalAnalysis.state completed through the authenticated production API. Reel A saved six insights, Reel B five and Reel C three, all with automatically generated English transcripts and full_sampled visual coverage. The carousel saved seven insights with visual_only coverage and no invented transcript. Its corrected capture covers all twelve advertised prompt topics. The final results total 21 insights. Each used the owner's advertised gpt-5.6-sol account model and medium reasoning through the official local connection. Final successful model usage totals 160,825 input and 9,631 output tokens; these totals exclude the superseded first carousel analysis. No alternate inference provider or paid API fallback was used. All twelve source/compute reservations, including failed or superseded attempts, were settled; compute total was six app credits, and inference reservations settled at zero app credits. Plan allowance is consumed separately.
+
+Reel C first stopped during local transcription before model inference. Its final speech segment started at 33,000ms but Whisper reported an end at 36,280ms for 34,461ms of normalized audio. The previous one-second tolerance rejected it. The local adapter now accepts only terminal overruns bounded to five seconds with a start strictly inside the actual audio, clips evidence to the actual EOF, and reports the clipping. Negative, reversed, outside-audio and excessive timings remain rejected. Real normalized-audio reprocessing passed with 19 segments; the production retry completed and its saved warnings disclose the timing correction. The previous failure remains recorded. The first carousel render missed a prompt slide because unchanged canvas content did not provide a full-duration recording; a periodic redraw corrected capture, and the second analysis includes that topic. No natural video is claimed to have exhaustive frame coverage.
+
+Private evidence includes the four *-production-final.json files, four-source-production-proof.json, workspace-final.json and desktop/mobile captures under private/instagram/2026-08-export. The real source detail screens were opened from the production library. Desktop and 390px carousel captures had no horizontal overflow. Early screenshots revealed title-only placeholders labeled Synthetic evidence during detail fetch. The UI correction now shows a loading output and renders real claims/citations only after details arrive; the synthetic fallback is restricted to demo mode. Source-detail fetch failure clears stale main points and media evidence. Production confirmation of that UI correction remains pending publication.
+
+Sensitive reauthentication with a deep workspace return path completed identity but landed with reserved code/state parameters, causing Invalid source filter. Reauthentication through the existing canonical /app?workspace= entry instead reached the selected default dashboard without those parameters; the UI reauthentication link now uses that verified entry. No PKCE/state verification or freshness check was weakened. Production confirmation of the new link remains pending publication.
+
+Working-tree validation: pnpm check passed 154 application tests, 11 authentication tests, six Python PCM tests, document validation, zero-warning lint, type checks and both Next builds; three credential-gated staging tests skipped. Log outputs/check-real-instagram-20261001.log. After the detail-loading correction, type checks, zero-warning lint and the starter build passed; an initial lint warning requiring semantic output instead of role=status was fixed. pnpm audit --prod --audit-level high reported no known vulnerabilities. The source media and diagnostic transcripts are ignored by Git. Required exact-commit CI/publication and the final live loading-state check remain pending.

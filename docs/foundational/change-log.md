@@ -10,3 +10,5 @@ Mode: reference. Preserve evidence and reasoning behind changes to the four-docu
 | 2026-09-30 | Operator evidence | Updated Research/Offer for supplied identity and current ordinary VAT registry evidence | Originals/identifiers remain private; applicable tax, invoice and legal publication checks remain open            |
 
 | 2026-10-01 | F003 | Recorded private screenshots/crops, category/ranking and retrieval scope | Owner instruction; complete evidence retention and conversational retrieval remain unverified |
+
+| 2026-10-01 | Personal production evidence | Updated Research/Offer with real three-Reel and carousel audio/vision results | Operator-assisted retrieval, private evidence and 21 cited insights; no automatic Instagram sync, commercial hosted eligibility or measured customer benefit. Avatar and Beliefs remain consistent with review and permission boundaries |

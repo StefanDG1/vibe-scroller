@@ -13,6 +13,16 @@ spec.loader.exec_module(module)
 
 
 class PCMTests(unittest.TestCase):
+    def test_terminal_timestamp_overrun_is_clipped_to_real_audio(self):
+        self.assertEqual(module.bounded_segment_timing(33000, 36280, 34461), (33000, 34461, True))
+        self.assertEqual(module.bounded_segment_timing(100, 200, 34461), (100, 200, False))
+
+    def test_outside_audio_reversed_and_excessive_times_are_rejected(self):
+        for start, end in [(-1, 200), (300, 200), (34461, 35000), (35000, 36000), (33000, 39462)]:
+            with self.subTest(start=start, end=end):
+                with self.assertRaisesRegex(ValueError, "TIMING_INVALID"):
+                    module.bounded_segment_timing(start, end, 34461)
+
     def test_normalized_audio_and_digest(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "audio.wav"

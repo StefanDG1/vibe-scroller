@@ -129,3 +129,16 @@ it("rejects remote fetch abuse, redirects, changed bytes, duplicate evidence, ex
     preparePersonalInput(media, { fetchImpl, transcribe }),
   ).rejects.toThrow("PERSONAL_ASR_SETUP_REQUIRED");
 });
+it("keeps the bounded terminal timing correction visible and excludes arbitrary subprocess warnings", async () => {
+  const warning =
+    "The final transcript segment timing was clipped to the actual audio duration.";
+  const input = await preparePersonalInput(media, {
+    fetchImpl,
+    asr: {},
+    transcribe: async () => ({
+      ...(await transcribe()),
+      warnings: [warning, "Untrusted diagnostic text"],
+    }),
+  });
+  expect(input.transcriptionWarnings).toEqual([warning]);
+});

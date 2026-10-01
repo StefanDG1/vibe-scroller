@@ -120,6 +120,7 @@ export async function preparePersonalInput(
     });
   }
   let transcript = [];
+  const transcriptionWarnings = [];
   if (audio) {
     if (!asr) throw new Error("PERSONAL_ASR_SETUP_REQUIRED");
     await onStage?.("transcribing");
@@ -132,6 +133,14 @@ export async function preparePersonalInput(
     )
       throw new Error("PERSONAL_TRANSCRIPT_INVALID");
     let chars = 0;
+    if (
+      result.warnings?.includes(
+        "The final transcript segment timing was clipped to the actual audio duration.",
+      )
+    )
+      transcriptionWarnings.push(
+        "The final transcript segment timing was clipped to the actual audio duration.",
+      );
     transcript = result.segments.map((s, index) => {
       if (
         typeof s.text !== "string" ||
@@ -153,5 +162,5 @@ export async function preparePersonalInput(
       };
     });
   }
-  return { transcript, frames, frameEvidence };
+  return { transcript, frames, frameEvidence, transcriptionWarnings };
 }

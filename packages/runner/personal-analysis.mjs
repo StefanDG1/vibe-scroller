@@ -112,6 +112,7 @@ export async function processPersonalJob(
           ? {
               durationMs: job.media.durationMs,
               automaticTranscript: mediaInput.transcript,
+              transcriptionWarnings: mediaInput.transcriptionWarnings ?? [],
               sampledFrames: mediaInput.frameEvidence,
               evidence,
             }
@@ -170,7 +171,7 @@ export async function processPersonalJob(
   } catch (error) {
     const code =
       error instanceof Error &&
-      /^(PERSONAL|CHATGPT)_[A-Z_]+$/.test(error.message)
+      /^(PERSONAL|CHATGPT|LOCAL_ASR)_[A-Z_]+$/.test(error.message)
         ? error.message
         : "VALIDATION_OR_TRANSPORT";
     throw new Error(`Personal analysis failed at ${stage}: ${code}`);

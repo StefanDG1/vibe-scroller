@@ -7,4 +7,9 @@ export function preparePersonalInput(
     fetchImpl?: any;
     transcribe?: any;
   },
-): Promise<{ transcript: any[]; frames: any[]; frameEvidence: any[] }>;
+): Promise<{
+  transcript: any[];
+  frames: any[];
+  frameEvidence: any[];
+  transcriptionWarnings: string[];
+}>;

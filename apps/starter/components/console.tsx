@@ -566,7 +566,7 @@ export function Console({
               <>
                 {" "}
                 <a
-                  href={`/sign-in?reauth=true&returnTo=${encodeURIComponent(`/app/${organizationId}/library`)}`}
+                  href={`/sign-in?reauth=true&returnTo=${encodeURIComponent(`/app?workspace=${organizationId}`)}`}
                 >
                   Sign in again
                 </a>
@@ -2320,6 +2320,7 @@ function SourceDetail({
   onProposal,
 }: any) {
   const [detail, setDetail] = useState(source);
+  const [detailLoading, setDetailLoading] = useState(!demo);
   const [selectedInsight, setSelectedInsight] = useState("");
   const [allFrames, setAllFrames] = useState(false);
   const savedFrames = (
@@ -2346,20 +2347,28 @@ function SourceDetail({
         )
           throw new Error("Source unavailable");
         const next = await response.json();
-        if (!abort.signal.aborted) setDetail(next);
+        if (!abort.signal.aborted) {
+          setDetail(next);
+          setDetailLoading(false);
+        }
       })
       .catch(() => {
-        if (!abort.signal.aborted)
+        if (!abort.signal.aborted) {
           setDetail({
             ...source,
             analysis: undefined,
             text: undefined,
             originalText: undefined,
             summary: undefined,
+            mainPoints: undefined,
+            mediaEvidence: undefined,
+            originalMediaEvidence: undefined,
             repositorySelection: undefined,
             error:
               "Source details are unavailable. Check access before continuing.",
           });
+          setDetailLoading(false);
+        }
       });
     return () => abort.abort();
   }, [source, demo]);
@@ -2421,43 +2430,54 @@ function SourceDetail({
       </div>
       <section className="panel">
         <h2>Main points</h2>
-        {(
-          detail.analysis?.insights ??
-          detail.mainPoints?.map((t: string) => ({
-            title: t,
-            claim: t,
-            evidence: [],
-          })) ??
-          []
-        ).map((i: any) => (
-          <article className="insight" key={i.id ?? i.title}>
-            <h3>{i.title}</h3>
-            <p>{i.claim}</p>
-            <p>{i.interpretation}</p>
-            <span className="status">
-              {i.confidence ?? "Synthetic evidence"}
-            </span>
-            <ul>
-              {i.evidence?.map((e: any) => (
-                <li key={e.id}>
-                  {label(e.kind)} ·{" "}
-                  {e.startMs === null
-                    ? "Supplied text"
-                    : `${e.startMs / 1000}s`}
-                  {e.kind === "frame" && !demo && (
-                    <a
-                      href={`/api/evidence/${encodeURIComponent(e.id)}?view=true`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      View private frame
-                    </a>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </article>
-        ))}
+        {detailLoading && (
+          <output aria-live="polite">
+            <Loader2 className="spinner" size={16} aria-hidden="true" /> Loading
+            source details…
+          </output>
+        )}
+        {!detailLoading &&
+          (
+            detail.analysis?.insights ??
+            (demo
+              ? detail.mainPoints?.map((t: string) => ({
+                  title: t,
+                  claim: t,
+                  evidence: [],
+                }))
+              : []) ??
+            []
+          ).map((i: any) => (
+            <article className="insight" key={i.id ?? i.title}>
+              <h3>{i.title}</h3>
+              <p>{i.claim}</p>
+              <p>{i.interpretation}</p>
+              {(i.confidence || demo) && (
+                <span className="status">
+                  {i.confidence ?? "Synthetic evidence"}
+                </span>
+              )}
+              <ul>
+                {i.evidence?.map((e: any) => (
+                  <li key={e.id}>
+                    {label(e.kind)} ·{" "}
+                    {e.startMs === null
+                      ? "Supplied text"
+                      : `${e.startMs / 1000}s`}
+                    {e.kind === "frame" && !demo && (
+                      <a
+                        href={`/api/evidence/${encodeURIComponent(e.id)}?view=true`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        View private frame
+                      </a>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </article>
+          ))}
         <details>
           <summary>Original transcript and corrections</summary>
           <p style={{ whiteSpace: "pre-wrap" }}>

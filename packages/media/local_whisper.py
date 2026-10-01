@@ -57,6 +57,14 @@ def normalized_pcm(path):
     return pcm, frames / 16000, hashlib.sha256(data).hexdigest()
 
 
+def bounded_segment_timing(start, end, duration_ms):
+    # Whisper can place the final spoken segment slightly past the real EOF.
+    # Accept only a bounded terminal overrun, never extend evidence past audio.
+    if not 0 <= start <= end or start >= duration_ms or end > duration_ms + 5000:
+        raise ValueError("LOCAL_ASR_TIMING_INVALID")
+    return start, min(end, duration_ms), end > duration_ms
+
+
 def transcribe(path, model_path):
     pcm, duration, digest = normalized_pcm(path)
     revision = verify_model(model_path)
@@ -65,6 +73,7 @@ def transcribe(path, model_path):
 
     samples = np.frombuffer(pcm, dtype="<i2").astype(np.float32) / 32768
     segments = []
+    clipped = False
     # Silence is not a transcript. Do not introduce a second VAD model.
     if np.max(np.abs(samples)) >= .0004 and np.sqrt(np.mean(samples * samples)) >= .0001:
         model = WhisperModel(str(model_path), device="cpu", compute_type="int8", cpu_threads=4, local_files_only=True)
@@ -75,14 +84,14 @@ def transcribe(path, model_path):
         for item in output:
             text = item.text.strip()
             start, end = round(item.start * 1000), round(item.end * 1000)
-            if not 0 <= start <= end <= round(duration * 1000) + 1000:
-                raise ValueError("LOCAL_ASR_TIMING_INVALID")
+            start, end, was_clipped = bounded_segment_timing(start, end, round(duration * 1000))
+            clipped = clipped or was_clipped
             total += len(text)
             if len(segments) >= 200 or len(text) > 4000 or total > 60000:
                 raise ValueError("LOCAL_ASR_OUTPUT_LIMIT")
             if text:
                 segments.append({"index": len(segments), "startMs": start,
-                                 "endMs": min(end, round(duration * 1000)), "text": text})
+                                 "endMs": end, "text": text})
     return {"schemaVersion": 1, "model": "openai/whisper-small.en",
             "weightDistribution": "Systran/faster-whisper-small.en",
             "weightRevision": revision,
@@ -90,7 +99,8 @@ def transcribe(path, model_path):
             "device": "cpu", "computeType": "int8", "language": "en",
             "durationMs": round(duration * 1000), "audioSha256": digest,
             "segments": segments, "coverage": "audio_only",
-            "warnings": ["Automatic transcription can contain errors; review the original audio."]}
+            "warnings": ["Automatic transcription can contain errors; review the original audio."] +
+                        (["The final transcript segment timing was clipped to the actual audio duration."] if clipped else [])}
 
 
 def main():
