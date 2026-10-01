@@ -2529,14 +2529,12 @@ function SourceDetail({
                             onClick={(event) => {
                               event.preventDefault();
                               setTranscriptOpen(true);
-                              requestAnimationFrame(() => {
-                                transcript.current?.scrollIntoView({
-                                  block: "start",
-                                });
-                                transcript.current?.focus({
-                                  preventScroll: true,
-                                });
-                              });
+                              const target = transcript.current;
+                              if (target) {
+                                target.open = true;
+                                target.scrollIntoView({ block: "start" });
+                                target.focus({ preventScroll: true });
+                              }
                             }}
                           >
                             Transcript ·{" "}
