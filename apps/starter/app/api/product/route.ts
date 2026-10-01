@@ -53,13 +53,17 @@ export async function POST(req: NextRequest) {
   if (Number(req.headers.get("content-length") ?? 0) > 150000)
     return NextResponse.json({ error: "Request too large." }, { status: 413 });
   let operationName = "unvalidated";
+  let stage = "read_body";
+  let bodyBytes: number | undefined;
   try {
     const raw = await req.text();
+    bodyBytes = new TextEncoder().encode(raw).length;
     if (new TextEncoder().encode(raw).length > 150000)
       return NextResponse.json(
         { error: "Request too large." },
         { status: 413 },
       );
+    stage = "parse_body";
     const { operation, args } = JSON.parse(raw);
     const entry = operations[operation as keyof typeof operations];
     if (!entry)
@@ -68,6 +72,7 @@ export async function POST(req: NextRequest) {
         { status: 400 },
       );
     operationName = operation;
+    stage = "backend";
     const c = await backend(auth);
     const result =
       entry[0] === "action"
@@ -132,6 +137,14 @@ export async function POST(req: NextRequest) {
     console.error("product_operation_failed", {
       operation: operationName,
       category: category ?? "UNCLASSIFIED",
+      stage,
+      bodyBytes,
+      errorType:
+        error instanceof SyntaxError
+          ? "SyntaxError"
+          : error instanceof TypeError
+            ? "TypeError"
+            : "Error",
     });
     return NextResponse.json(
       {

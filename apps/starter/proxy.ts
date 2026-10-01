@@ -27,11 +27,11 @@ export default async function proxy(
   // Always replace caller-supplied nonce and CSP values.
   headers.set("x-nonce", nonce);
   headers.set("Content-Security-Policy", policy);
+  // Preserve the host adapter's original request and its body metadata.
+  request.headers.set("x-nonce", nonce);
+  request.headers.set("Content-Security-Policy", policy);
   const response =
-    // Request construction transfers a POST body. Some hosting adapters reuse
-    // this request for the route handler, so transfer a clone instead.
-    (await auth(new NextRequest(request.clone(), { headers }), event)) ??
-    NextResponse.next({ request: { headers } });
+    (await auth(request, event)) ?? NextResponse.next({ request: { headers } });
   response.headers.set("Content-Security-Policy", policy);
   response.headers.set("Cache-Control", "private, no-store");
   return response;
