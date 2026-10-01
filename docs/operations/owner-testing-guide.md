@@ -6,7 +6,7 @@ Mode: how-to. Last checked October 1, 2026. This guide distinguishes working che
 
 The real address is https://scroll.companynerve.com/app on your laptop or phone. HTTPS, clean production Google sign-in and automatic default workspace entry work. Google remains restricted to the configured test user. Existing active workspaces are reused; switching is available from Account. The dark interface and automatic laptop-assisted audio/visual analysis passed production verification on October 1. Reload an old tab to load the latest interface.
 
-Production hosting now uses the owner�s Vercel Pro team. Reload the page after the host change; your same-domain login remains usable.
+Production hosting now uses the owner's Vercel Pro team. Reload the page after the host change; your same-domain login remains usable.
 
 Use the real domain for the personal test. Earlier Cloudflare staging capacity failures remain documented; staging and local builds do not define the current production result.
 

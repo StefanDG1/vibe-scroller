@@ -821,7 +821,7 @@ export function Console({
                     <option value="oldest">Oldest imported</option>
                     <option value="saved">Recently saved</option>
                     <option value="updated">Recently updated</option>
-                    <option value="title">Title A�Z</option>
+                    <option value="title">Title A-Z</option>
                   </select>
                 </label>
                 {(search || filter || category || sort !== "newest") && (
@@ -2435,9 +2435,11 @@ function CaptureForm({
           : kind === "import"
             ? importBusy
               ? "Importing links..."
-              : importOffset
-                ? "Import next batch"
-                : "Import reviewed links"
+              : preview?.links.length && importOffset >= preview.links.length
+                ? "Import complete"
+                : importOffset
+                  ? "Import next batch"
+                  : "Import reviewed links"
             : saving
               ? "Uploading..."
               : kind === "upload" && personalEnabled && autoAnalyze
@@ -2618,7 +2620,7 @@ function SourceDetail({
         <summary>
           Categories
           {detail.categoryNames?.length
-            ? ` � ${detail.categoryNames.join(", ")}`
+            ? ` - ${detail.categoryNames.join(", ")}`
             : ""}
         </summary>
         {!readOnly && (
