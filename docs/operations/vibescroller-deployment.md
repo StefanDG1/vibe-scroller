@@ -1,6 +1,6 @@
 # Deploy VibeScroller
 
-The private source is `StefanDG1/vibe-scroller`. The staging web application is `https://vibescroller-staging.danistefangheorghiu.workers.dev`. Its backend is the dedicated Convex staging deployment `resolute-ladybug-999`. Earlier CompanyNerve deployment instructions describe upstream history and must not be used to deploy this product with upstream credentials.
+The public source is `StefanDG1/vibe-scroller`. The staging web application is `https://vibescroller-staging.danistefangheorghiu.workers.dev`. Its backend is the dedicated Convex staging deployment `resolute-ladybug-999`. Earlier CompanyNerve deployment instructions describe upstream history and must not be used to deploy this product with upstream credentials.
 
 ## Build and stage
 
@@ -28,3 +28,13 @@ Configure `INVOICE_OPERATOR_SUBJECTS_JSON` only in the intended backend, using e
 ## Roll back
 
 Redeploy the previous reviewed Worker package and retain the dedicated backend's compatible schema. Web rollback does not undo schema migrations, reservations, provider charges, PRs or webhook events. Reconcile uncertain usage before releasing cost holds. Never automatically retry a coding task that may still be running.
+
+## Netlify production alpha
+
+The owner created the Stefan Free team and approved Netlify/GitHub account access. The dedicated site is `vibescroller-alpha`, with `apps/starter` as package directory, repository root as base, `pnpm --filter @companynerve/starter... run build` as command and `apps/starter/.next` as publish directory. The committed package-level `netlify.toml` selects Node 24, pnpm 12.3.4, no indexing and Next.js skew protection. Netlify manages its Next.js adapter. No plan purchase or automatic paid top-up was made.
+
+The separate Convex production deployment is `bold-lemur-667`. It has production WorkOS configuration and code, without copied staging users or fixtures. WorkOS production is `environment_01M3T5CFGPWW9DZRW9E1V8AGEJ`. Its application callback is https://scroll.companynerve.com/callback. Production web configuration uses a fresh cookie secret and `__Host-vibescroller-production` name. The API key and cookie secret are masked Netlify secret values; all configuration is restricted to Production, without preview access. Keep production previews private and do not expose production credentials to untrusted branch builds.
+
+Namecheap retains the parent domain's existing DNS. A new ownership TXT record and `scroll CNAME vibescroller-alpha.netlify.app` were added; no parent nameserver migration occurred. HTTPS homepage returned 200 with noindex and CSP. Unauthenticated app/private-query requests reach WorkOS sign-in with private/no-store responses. This is authentication entry verification, not a completed signed-in product test. Production Google OAuth is configured; official WorkOS APIs verified the approved owner Google identity and active OAuth session. The Google project remains in Testing with the owner test user. Operator permissions use that production subject. Workspace creation currently returns HTTP 500 and remains an unresolved product test. Email-code login is enabled but its delivery journey still needs verification.
+
+The temporary and custom production addresses share the production frontend. Netlify production visibility is public; previews stay private. Do not treat this as paid launch. Checkout, isolated processing, evidence storage, GitHub callbacks, webhooks, administrator binding, provider contracts and recovery/security acceptance still need their production-specific configuration and tests. The app must show unavailable routes honestly. Keep a tested commit available for rollback and check the current Free credit allowance before issuing additional rebuilds. See [Netlify's current limits/pricing](https://www.netlify.com/pricing/) and [the owner testing guide](owner-testing-guide.md).

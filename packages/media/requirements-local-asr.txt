@@ -1,0 +1,2 @@
+# Python 3.13, Windows CPU baseline. The lock records resolved package versions.
+faster-whisper==1.2.1

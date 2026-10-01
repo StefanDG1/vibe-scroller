@@ -25,6 +25,8 @@ export class LocalChatGPT {
     instructions?: string;
     frames?: { dataUrl: string; timestampMs: number }[];
     reasoningEffort?: "low" | "medium" | "high";
+    signal?: AbortSignal;
+    expectedProfileId?: string;
   }): Promise<{ text: string; responseId?: string; usage?: unknown }>;
   disconnect(): Promise<{ remoteRevoked: boolean; manageUsage?: string }>;
 }

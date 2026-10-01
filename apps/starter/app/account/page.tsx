@@ -17,6 +17,10 @@ export default async function Page() {
       <main id="main" className="doc">
         <h1>Your account</h1>
         <div className="stack">
+          <Card>
+            <h2 style={{ marginTop: 0 }}>Workspaces</h2>
+            <Link href="/app/workspaces">Switch or manage your workspaces</Link>
+          </Card>
           {invoiceAccess.allowed && (
             <Card>
               <h2 style={{ marginTop: 0 }}>Invoice operations</h2>

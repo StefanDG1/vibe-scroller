@@ -143,6 +143,27 @@ export const productTables = {
     .index("by_expiry", ["expiresAt"]),
   sources: defineTable({
     ...tenant,
+    personalAnalysis: v.optional(
+      v.object({
+        deviceId: v.id("devices"),
+        actor: v.id("users"),
+        generation: v.number(),
+        model: v.string(),
+        profileBinding: v.string(),
+        effort: v.union(
+          v.literal("low"),
+          v.literal("medium"),
+          v.literal("high"),
+        ),
+        state: v.string(),
+        approvedAt: v.number(),
+        expiresAt: v.number(),
+        leaseUntil: v.number(),
+        deadline: v.number(),
+        inputTokens: v.optional(v.number()),
+        outputTokens: v.optional(v.number()),
+      }),
+    ),
     repositorySelection: v.optional(v.any()),
     selectionPendingKey: v.optional(v.string()),
     selectionActor: v.optional(v.id("users")),
@@ -179,6 +200,10 @@ export const productTables = {
     generation: v.number(),
   })
     .index("by_org", ["organizationId"])
+    .index("by_personal_device_state", [
+      "personalAnalysis.deviceId",
+      "personalAnalysis.state",
+    ])
     .index("by_key", ["organizationId", "key"])
     .index("by_canonical", ["organizationId", "canonical"])
     .searchIndex("source_search", {
@@ -380,6 +405,12 @@ export const productTables = {
     capabilities: v.array(v.string()),
     isolationEvidenceHash: v.optional(v.string()),
     activeRunId: v.optional(v.id("runs")),
+    personalModels: v.optional(
+      v.array(v.object({ slug: v.string(), displayName: v.string() })),
+    ),
+    personalSeenAt: v.optional(v.number()),
+    personalProfileBinding: v.optional(v.string()),
+    activePersonalSource: v.optional(v.id("sources")),
   })
     .index("by_org", ["organizationId"])
     .index("by_code", ["codeHash"])

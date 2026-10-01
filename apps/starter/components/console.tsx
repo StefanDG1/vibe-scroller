@@ -9,6 +9,7 @@ type Initial = {
     preferChatGPTPlan: boolean;
     hostedStatus: string;
     active: boolean;
+    personalAlphaEnabled?: boolean;
   };
   sources: any[];
   libraryNext?: string | null;
@@ -298,7 +299,6 @@ export function Console({
       const body = await res.json();
       if (!res.ok) throw new Error(body.error);
       await refreshData();
-      router.refresh();
       setNotice("Saved. The server accepted this action.");
       return body.result;
     } catch (e) {
@@ -650,6 +650,10 @@ export function Console({
               demo={demo}
               org={organizationId}
               repos={data.repositories}
+              devices={data.devices ?? []}
+              personalEnabled={
+                !demo && data.aiPreference?.personalAlphaEnabled === true
+              }
               call={call}
               onProposal={(p: any) => {
                 setSelected(p);
@@ -1237,6 +1241,7 @@ export function Console({
                         setData((current) => ({
                           ...current,
                           aiPreference: {
+                            ...current.aiPreference,
                             preferChatGPTPlan,
                             hostedStatus: "awaiting_commercial_access",
                             active: false,
@@ -1252,10 +1257,11 @@ export function Console({
                   change the funding route of a current task.
                 </p>
                 <p>
-                  The optional local text adapter is in the source repository.
-                  It requires an eligible deployment, official account consent
-                  and a completed inference test. Coding still requires verified
-                  isolation and separate approval.
+                  Personal alpha accounts can pair a laptop and approve
+                  supplied-text analysis from the source screen. ChatGPT consent
+                  stays on that laptop. Video processing needs its separate
+                  media integration. Coding requires verified isolation and
+                  separate approval.
                 </p>
                 <a
                   href="https://chatgpt.com/settings/usage"
@@ -1396,12 +1402,21 @@ export function Console({
                           )
                         )
                           throw new Error("Invalid public pairing request.");
-                        const deviceId = await call("startDevice", {
-                          organizationId,
-                          name: value.name,
-                          fingerprint: value.fingerprint,
-                          codeHash: value.codeHash,
-                        });
+                        const existing = data.devices?.find(
+                          (d) =>
+                            d.personalOwned &&
+                            d.pairingActive &&
+                            d.fingerprint === value.fingerprint &&
+                            d.name === value.name,
+                        );
+                        const deviceId = existing
+                          ? id(existing)
+                          : await call("startDevice", {
+                              organizationId,
+                              name: value.name,
+                              fingerprint: value.fingerprint,
+                              codeHash: value.codeHash,
+                            });
                         if (deviceId)
                           setPairing({
                             id: deviceId,
@@ -1947,7 +1962,16 @@ function CaptureForm({
     </form>
   );
 }
-function SourceDetail({ source, demo, org, repos, call, onProposal }: any) {
+function SourceDetail({
+  source,
+  demo,
+  org,
+  repos,
+  devices,
+  personalEnabled,
+  call,
+  onProposal,
+}: any) {
   const [detail, setDetail] = useState(source);
   const [selectedInsight, setSelectedInsight] = useState("");
   const insightId = selectedInsight || detail.analysis?.insights?.[0]?.id;
@@ -2256,6 +2280,13 @@ function SourceDetail({ source, demo, org, repos, call, onProposal }: any) {
       </section>
       <div className="panel">
         <h2>Processing and retention</h2>
+        {personalEnabled && (
+          <PersonalSourceAnalysis
+            source={detail}
+            devices={devices}
+            call={call}
+          />
+        )}
         {detail.error && <p role="alert">{detail.error}</p>}
         <button
           className="primary"
@@ -2282,6 +2313,155 @@ function SourceDetail({ source, demo, org, repos, call, onProposal }: any) {
         </p>
       </div>
     </>
+  );
+}
+function PersonalSourceAnalysis({ source, devices, call }: any) {
+  const [deviceId, setDeviceId] = useState(""),
+    [model, setModel] = useState(""),
+    [consent, setConsent] = useState(false),
+    [busy, setBusy] = useState(false);
+  const eligible = devices.filter(
+    (d: any) =>
+      d.personalOwned &&
+      d.state === "paired" &&
+      d.personalOnline &&
+      d.personalModels?.length,
+  );
+  const device = eligible.find((d: any) => id(d) === deviceId);
+  const running = ["queued", "running"].includes(
+    source.personalAnalysis?.state,
+  );
+  return (
+    <section aria-label="Personal ChatGPT analysis" className="panel">
+      <h3>Use your ChatGPT plan</h3>
+      {source.personalAnalysis && (
+        <p>
+          Personal analysis: {label(source.personalAnalysis.state)} ·{" "}
+          {source.personalAnalysis.model} · {source.personalAnalysis.effort}{" "}
+          reasoning.{" "}
+          {source.personalAnalysis.inputTokens === undefined
+            ? "Plan usage is not yet reported."
+            : `${source.personalAnalysis.inputTokens} input and ${source.personalAnalysis.outputTokens} output tokens reported.`}
+        </p>
+      )}
+      {running ? (
+        <Button
+          busy={busy}
+          onClick={async () => {
+            setBusy(true);
+            try {
+              await call("cancelPersonalAnalysis", { id: id(source) });
+            } finally {
+              setBusy(false);
+            }
+          }}
+        >
+          Cancel personal analysis
+        </Button>
+      ) : source.kind !== "text" ? (
+        <p>
+          Supply permitted transcript or post text for this route. Connecting
+          video decoding and local transcription is still in progress.
+        </p>
+      ) : (
+        source.state !== "ready" && (
+          <>
+            <p>
+              Your paired laptop sends this supplied text to OpenAI using its
+              connected account. This request uses no VibeScroller inference
+              credits. Your ChatGPT limits still apply. It does not authorize
+              coding.
+            </p>
+            {!eligible.length ? (
+              <p>
+                Start the personal runner on your paired laptop to see its
+                available models.
+              </p>
+            ) : (
+              <>
+                <label>
+                  Computer
+                  <select
+                    value={deviceId}
+                    onChange={(e) => {
+                      setDeviceId(e.target.value);
+                      setModel("");
+                      setConsent(false);
+                    }}
+                  >
+                    <option value="">Choose your computer</option>
+                    {eligible.map((d: any) => (
+                      <option key={id(d)} value={id(d)}>
+                        {d.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Account model
+                  <select
+                    value={model}
+                    onChange={(e) => {
+                      setModel(e.target.value);
+                      setConsent(false);
+                    }}
+                  >
+                    <option value="">Choose an available model</option>
+                    {device?.personalModels.map((m: any) => (
+                      <option key={m.slug} value={m.slug}>
+                        {m.displayName}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="check-label">
+                  <input
+                    type="checkbox"
+                    checked={consent}
+                    onChange={(e) => setConsent(e.target.checked)}
+                  />
+                  Use my connected ChatGPT plan for this source with medium
+                  reasoning.
+                </label>
+                <Button
+                  primary
+                  busy={busy}
+                  disabled={
+                    !consent ||
+                    !device ||
+                    !model ||
+                    ["queued", "processing"].includes(source.state)
+                  }
+                  onClick={async () => {
+                    setBusy(true);
+                    try {
+                      await call("approvePersonalAnalysis", {
+                        id: id(source),
+                        generation: source.generation,
+                        deviceId,
+                        model,
+                        effort: "medium",
+                        useOwnPlan: true,
+                      });
+                      setConsent(false);
+                    } finally {
+                      setBusy(false);
+                    }
+                  }}
+                >
+                  Approve personal text analysis
+                </Button>
+                <p className="fine">
+                  Approval expires after 15 minutes if unclaimed.
+                  Reauthentication may be required. There is no automatic model
+                  or paid-provider fallback.
+                </p>
+              </>
+            )}
+          </>
+        )
+      )}
+    </section>
   );
 }
 function ExecutionApproval({ proposal, call, routes }: any) {

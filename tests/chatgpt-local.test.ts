@@ -79,6 +79,45 @@ const profile = () => ({
   clientId: "oaiapp_synthetic",
   ...tokenRecord(token, identity, undefined, undefined),
 });
+it("propagates cancellation before and during provider inference without a fallback", async () => {
+  const controller = new AbortController();
+  let inferenceStarted = false;
+  const client = new LocalChatGPT({
+    store: memoryStore(profile()),
+    fetchImpl: async (url: string, init: RequestInit) => {
+      if (url.endsWith("/models"))
+        return Response.json({
+          models: [{ slug: "observed-model", visibility: "list" }],
+        });
+      inferenceStarted = true;
+      return new Promise((_resolve, reject) => {
+        init.signal!.addEventListener(
+          "abort",
+          () => reject(init.signal!.reason),
+          { once: true },
+        );
+        controller.abort(new Error("test cancellation"));
+      });
+    },
+  });
+  await expect(
+    client.respond({
+      model: "observed-model",
+      input: "text",
+      signal: controller.signal,
+    }),
+  ).rejects.toThrow("test cancellation");
+  expect(inferenceStarted).toBe(true);
+  inferenceStarted = false;
+  await expect(
+    client.respond({
+      model: "observed-model",
+      input: "text",
+      signal: controller.signal,
+    }),
+  ).rejects.toThrow("test cancellation");
+  expect(inferenceStarted).toBe(false);
+});
 function stream(items: any[], fragment = false) {
   const data = items
     .map((item) => `data: ${JSON.stringify(item)}\r\n\r\n`)
@@ -227,6 +266,24 @@ it("exposes safe account metadata while keeping local tokens private", async () 
   expect(result).toContain("sharing");
   for (const value of [token.access_token, token.refresh_token, token.id_token])
     expect(result).not.toContain(value);
+});
+it("refuses an account switch after a source approved another local registration", async () => {
+  let called = false;
+  const client = new LocalChatGPT({
+    store: memoryStore(profile()),
+    fetchImpl: async () => {
+      called = true;
+      throw Error("must not call provider");
+    },
+  });
+  await expect(
+    client.respond({
+      model: "observed-model",
+      input: "text",
+      expectedProfileId: "other-profile",
+    }),
+  ).rejects.toThrow("CHATGPT_PROFILE_CHANGED");
+  expect(called).toBe(false);
 });
 it("requires granted plan scope and current account-specific model access", async () => {
   const restricted = profile();

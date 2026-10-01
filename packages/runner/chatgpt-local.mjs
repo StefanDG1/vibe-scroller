@@ -41,7 +41,9 @@ export class LocalChatGPT {
     const response = await this.fetch(url, {
       ...init,
       redirect: "error",
-      signal: AbortSignal.timeout(60000),
+      signal: init.signal
+        ? AbortSignal.any([init.signal, AbortSignal.timeout(60000)])
+        : AbortSignal.timeout(60000),
     });
     if (!response.ok)
       throw new Error(
@@ -184,12 +186,14 @@ export class LocalChatGPT {
       await this.store.write(state);
     });
   }
-  async authenticated(operation) {
+  async authenticated(operation, expectedProfileId) {
     return this.store.lock(async () => {
       const state = await this.store.read();
       let profile = state.profiles.find(
         (entry) => entry.id === state.activeProfileId,
       );
+      if (expectedProfileId && profile?.id !== expectedProfileId)
+        throw new Error("CHATGPT_PROFILE_CHANGED");
       if (!profile?.accessToken || profile.pendingRefresh)
         throw new Error("CHATGPT_RECONNECT_REQUIRED");
       if (!profile.scopes?.includes(planScope))
@@ -244,7 +248,16 @@ export class LocalChatGPT {
         }));
     });
   }
-  async respond({ model, input, instructions, frames, reasoningEffort }) {
+  async respond({
+    model,
+    input,
+    instructions,
+    frames,
+    reasoningEffort,
+    signal,
+    expectedProfileId,
+  }) {
+    signal?.throwIfAborted();
     const body = inferenceRequest(
       model,
       input,
@@ -253,7 +266,9 @@ export class LocalChatGPT {
       reasoningEffort,
     );
     return this.authenticated(async (profile) => {
+      signal?.throwIfAborted();
       const catalogue = await this.json(`${resource}/models`, {
+        signal,
         headers: { Authorization: `Bearer ${profile.accessToken}` },
       });
       if (
@@ -265,15 +280,19 @@ export class LocalChatGPT {
       const response = await this.fetch(`${resource}/responses`, {
         method: "POST",
         redirect: "error",
-        signal: AbortSignal.timeout(120000),
+        signal: signal
+          ? AbortSignal.any([signal, AbortSignal.timeout(120000)])
+          : AbortSignal.timeout(120000),
         headers: {
           Authorization: `Bearer ${profile.accessToken}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(body),
       });
-      return completedResponse(response);
-    });
+      const result = await completedResponse(response);
+      signal?.throwIfAborted();
+      return result;
+    }, expectedProfileId);
   }
   async disconnect() {
     return this.store.lock(async () => {

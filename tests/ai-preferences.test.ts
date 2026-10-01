@@ -23,6 +23,7 @@ it("keeps plan preference personal, off by default and independent of hosted aut
     preferChatGPTPlan: false,
     hostedStatus: "awaiting_commercial_access",
     active: false,
+    personalAlphaEnabled: false,
   });
   await expect(
     bob.mutation(api.aiPreferences.save, {

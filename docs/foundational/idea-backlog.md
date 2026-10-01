@@ -2,10 +2,11 @@
 
 Mode: reference. Review ideas through [the process](COPY-AND-IDEAS.md). An entry does not authorize activation or unsupported claims.
 
-| ID   | Date       | Idea                                                            | Status                                                      |
-| ---- | ---------- | --------------------------------------------------------------- | ----------------------------------------------------------- |
-| F001 | 2026-09-30 | Prefer the user's eligible ChatGPT plan for supported inference | Accepted direction; local proof only; hosted offering gated |
-| F002 | 2026-09-30 | Capture/review ideas from a ChatGPT app/plugin                  | Investigated; optional interface unbuilt                    |
+| ID   | Date       | Idea                                                            | Status                                                       |
+| ---- | ---------- | --------------------------------------------------------------- | ------------------------------------------------------------ |
+| F001 | 2026-09-30 | Prefer the user's eligible ChatGPT plan for supported inference | Accepted direction; local proof only; hosted offering gated  |
+| F002 | 2026-09-30 | Capture/review ideas from a ChatGPT app/plugin                  | Investigated; optional interface unbuilt                     |
+| F003 | 2026-10-01 | Retain useful private visual evidence and rank/retrieve sources | Accepted scope; connected retention and retrieval unverified |
 
 ## F001: User-selected ChatGPT plan funding
 
@@ -29,6 +30,16 @@ Source: owner's September 30 request. Proposal: capture permitted sources and in
 Official MCP/plugin support does not establish marketplace acceptance or plan-funded backend inference. Audience fit is plausible but untested. Offer scope remains web V1; funding, approval and execution stay explicit. Invisible autonomous actions would conflict with the control beliefs.
 
 Decision: defer publication while web release gates remain. See [the investigation](../operations/chatgpt-plugin-investigation.md). Validate a scoped authenticated MCP connection and positive/negative review cases before advertising it. No submission or customer use is recorded.
+
+## F003: Private visual references and source retrieval
+
+Source: owner's October 1 request to keep useful screenshots or crops alongside text, categorize and rank posts, and retrieve the right reference for a project. The intended audience remains people reviewing saved practical content; this is not evidence of market demand.
+
+Research and Avatar support investigating retrieval friction. Offer scope can include source-linked private evidence and transparent category/rank filters once enabled. Beliefs require inspectable evidence and user control; invisible retention or fabricated timestamps would conflict. No copy may promise comprehensive video coverage or a working conversational library assistant before integration passes.
+
+Store only necessary metadata and selected derived evidence. Keep raw ZIPs on the selecting device. R2 objects and Convex metadata need tenant checks, bounded retention, private short-lived links, source/hash/timestamp provenance and source-deletion tests. Screenshots that contain captions supplement rather than replace original audio and source descriptions. A crop must retain its relation to the full frame.
+
+Validation: use a rights-cleared design clip, retain a useful timestamped frame, retrieve it through a category/project filter, deny foreign-tenant access, delete the source and confirm both metadata and object disappear. Compare rank explanations with the actual source and project evidence. General chat retrieval remains a later connected test; ordinary search and filters must remain usable.
 
 ## New idea template
 

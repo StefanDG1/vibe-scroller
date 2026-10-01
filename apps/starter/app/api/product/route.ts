@@ -29,6 +29,8 @@ const operations = {
   revokeDevice: ["mutation", api.devices.revoke],
   startDevice: ["mutation", api.devices.start],
   approveDevice: ["mutation", api.devices.approve],
+  approvePersonalAnalysis: ["mutation", api.personalAnalysis.approve],
+  cancelPersonalAnalysis: ["mutation", api.personalAnalysis.cancel],
 } as const;
 export async function POST(req: NextRequest) {
   if (req.headers.get("origin") !== new URL(req.url).origin)
@@ -69,7 +71,7 @@ export async function POST(req: NextRequest) {
         ? await c.action(entry[1] as any, args)
         : await c.mutation(entry[1] as any, args);
     return NextResponse.json(
-      { result },
+      { result: result ?? null },
       { headers: { "Cache-Control": "no-store" } },
     );
   } catch (error) {

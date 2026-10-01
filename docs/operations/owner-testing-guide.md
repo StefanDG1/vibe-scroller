@@ -4,7 +4,7 @@ Mode: how-to. Last checked October 1, 2026. This guide distinguishes working che
 
 ## Start here
 
-The intended address is https://scroll.companynerve.com/app. Domain, production sign-in and the complete laptop-assisted video journey are still being configured. Do not treat this address as ready until the deployment record confirms it.
+The real address is https://scroll.companynerve.com/app. HTTPS and production Google sign-in work. The owner account has a verified Google identity and an active production OAuth session. Google remains restricted to the configured test user. Creating the first production workspace currently returns HTTP 500; this is being investigated. The complete laptop-assisted video journey is still being built.
 
 The current development address is https://vibescroller-staging.danistefangheorghiu.workers.dev/app. Its earlier capacity failures remain documented. The newest ZIP importer has passed local browser testing but is not yet deployed there. The local production build with that importer runs at http://localhost:3002/app on the laptop.
 
@@ -24,11 +24,11 @@ For a fresh export, use Instagram's Accounts Center information-export controls,
 
 ## Use your ChatGPT plan
 
-Keep the paired laptop awake and connected for the planned personal route. Local Whisper will transcribe audio; your eligible ChatGPT model will review text and sampled frames. Whisper uses the laptop's resources rather than your ChatGPT allowance. The browser-connected transcription and analysis journey is still implementation work.
+Keep the paired laptop awake and connected for the planned personal route. Local Whisper now transcribes bounded normalized audio in a separate desktop utility. Its synthetic speech test matched the expected sentence and produced two timed segments. The browser-connected route will combine this with your eligible ChatGPT model to review text and sampled frames. Whisper uses the laptop's resources rather than your ChatGPT allowance. The browser-connected transcription and analysis journey is still implementation work. Raw customer video must first pass the isolated decoder; the local ASR utility refuses arbitrary media and non-normalized audio.
 
 Your existing local ChatGPT consent passed. A real text request and a real synthetic-image request succeeded without an API key or alternate funding. The image test used GPT-5.6 Sol with medium reasoning and reported 47 tokens. The account catalogue does not currently expose GPT-6.1 Sol through this route. The app must offer the models the account actually supports.
 
-Do not approve the existing managed-analysis route as a substitute for this OpenAI-only test. The saved preference alone does not connect browser jobs to the laptop. The desktop text utility is usable separately; see [local ChatGPT setup](chatgpt-local.md). Gemini is a later optional route and must never become an automatic fallback.
+Do not approve the existing managed-analysis route as a substitute for this OpenAI-only test. The saved preference alone does not connect browser jobs to the laptop. A gated browser-to-laptop supplied-text bridge is implemented and has local boundary tests, but its real integration test has not passed. See [personal runner setup](personal-analysis-runner.md) and [local ChatGPT setup](chatgpt-local.md). Gemini is a later optional route and must never become an automatic fallback.
 
 ## Review and apply a useful idea
 

@@ -26,6 +26,7 @@ import type { MutationCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 import { queueDeletion } from "./assets";
 import { mediaStagePayload } from "../packages/media/stages";
+import { personalAllowed } from "./lib/personalAccess";
 const org = { organizationId: v.id("organizations") };
 export async function wallet(ctx: MutationCtx, id: Id<"organizations">) {
   let w = await ctx.db
@@ -592,10 +593,21 @@ export async function captureOne(
     });
     counts = (await ctx.db.get(countId))!;
   }
+  const personalLibrary =
+    personalAllowed(actor.actor.subject) &&
+    actor.organization.createdBy === actor.actor._id;
   ensure(
     (w.tier !== "trial" || w.granted > 0) &&
-      (w.tier === "trial" ? counts.lifetime : counts.active) <
-        (w.tier === "trial" ? 3 : w.tier === "pro" ? 10000 : 1000),
+      (w.tier === "trial" && !personalLibrary
+        ? counts.lifetime
+        : counts.active) <
+        (personalLibrary
+          ? 1000
+          : w.tier === "trial"
+            ? 3
+            : w.tier === "pro"
+              ? 10000
+              : 1000),
     "QUOTA_EXCEEDED",
     "Source allowance reached.",
   );
@@ -1036,6 +1048,7 @@ export async function redactSource(ctx: MutationCtx, id: Id<"sources">) {
     originalText: undefined,
     originalMediaEvidence: undefined,
     correctionAuthor: undefined,
+    personalAnalysis: undefined,
     repositorySelection: undefined,
     originalSavedAt: undefined,
     url: undefined,

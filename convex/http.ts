@@ -139,4 +139,81 @@ http.route({
     }
   }),
 });
+http.route({
+  path: "/runner/personal/v1",
+  method: "POST",
+  handler: httpAction(async (ctx, req) => {
+    const reply = (body: unknown, status = 200) =>
+      new Response(JSON.stringify(body), {
+        status,
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store",
+        },
+      });
+    const token = req.headers
+      .get("authorization")
+      ?.match(/^Bearer ([A-Za-z0-9_-]{43})$/)?.[1];
+    if (!token) return reply({ error: "Invalid device credential." }, 401);
+    const reader = req.body?.getReader();
+    if (!reader) return reply({ error: "Missing body." }, 400);
+    try {
+      let size = 0;
+      const chunks: Uint8Array[] = [];
+      for (;;) {
+        const item = await reader.read();
+        if (item.done) break;
+        size += item.value.byteLength;
+        if (size > 150000) {
+          await reader.cancel();
+          return reply({ error: "Payload too large." }, 413);
+        }
+        chunks.push(item.value);
+      }
+      const bytes = new Uint8Array(size);
+      let offset = 0;
+      for (const chunk of chunks) {
+        bytes.set(chunk, offset);
+        offset += chunk.byteLength;
+      }
+      const body = JSON.parse(
+        new TextDecoder("utf-8", { fatal: true }).decode(bytes),
+      );
+      if (
+        body.protocolVersion !== "1.0.0" ||
+        typeof body.operation !== "string" ||
+        !body.args ||
+        typeof body.args !== "object" ||
+        Array.isArray(body.args) ||
+        Object.keys(body).some(
+          (k) => !["protocolVersion", "operation", "args"].includes(k),
+        )
+      )
+        return reply({ error: "Unsupported protocol." }, 400);
+      const hash = await crypto.subtle.digest(
+        "SHA-256",
+        new TextEncoder().encode(token),
+      );
+      const credentialHash = Array.from(new Uint8Array(hash), (b) =>
+        b.toString(16).padStart(2, "0"),
+      ).join("");
+      const result = await ctx.runMutation(internal.personalAnalysis.dispatch, {
+        ...body.args,
+        credentialHash,
+        operation: body.operation,
+      });
+      return reply(result);
+    } catch {
+      return reply(
+        {
+          error:
+            "Personal device request rejected. Stop the current request before reconciling.",
+        },
+        403,
+      );
+    } finally {
+      reader.releaseLock();
+    }
+  }),
+});
 export default http;

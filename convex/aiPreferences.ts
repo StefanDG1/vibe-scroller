@@ -1,6 +1,7 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { access } from "./lib";
+import { personalAllowed } from "./lib/personalAccess";
 export const read = query({
   args: { organizationId: v.id("organizations") },
   handler: async (ctx, args) => {
@@ -9,6 +10,7 @@ export const read = query({
       preferChatGPTPlan: actor.preferChatGPTPlan ?? false,
       hostedStatus: "awaiting_commercial_access" as const,
       active: false as const,
+      personalAlphaEnabled: personalAllowed(actor.subject),
     };
   },
 });

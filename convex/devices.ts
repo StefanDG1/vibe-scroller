@@ -2,16 +2,26 @@ import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { access, fail, limit, recentAuthentication, writeAccess } from "./lib";
 import { ensure } from "../packages/policy";
+import { settle } from "./product";
 export const list = query({
   args: { organizationId: v.id("organizations") },
   handler: async (ctx, a) => {
-    await access(ctx, a.organizationId);
+    const { actor } = await access(ctx, a.organizationId);
     const rows = await ctx.db
       .query("devices")
       .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
       .collect();
     return rows.map(
-      ({ codeHash: _codeHash, credentialHash: _credentialHash, ...d }) => d,
+      ({ codeHash: _codeHash, credentialHash: _credentialHash, ...d }) => ({
+        ...d,
+        personalOwned: d.owner === actor._id,
+        pairingActive: d.state === "pending" && d.expiresAt > Date.now(),
+        personalOnline:
+          d.owner === actor._id &&
+          d.state === "paired" &&
+          (d.personalSeenAt ?? 0) > Date.now() - 60000,
+        personalModels: d.owner === actor._id ? d.personalModels : undefined,
+      }),
     );
   },
 });
@@ -95,7 +105,37 @@ export const revoke = mutation({
       state: "revoked",
       credentialHash: "",
       capabilities: [],
+      personalModels: undefined,
+      personalSeenAt: undefined,
+      personalProfileBinding: undefined,
     });
+    for (const state of ["queued", "running"]) {
+      const sources = await ctx.db
+        .query("sources")
+        .withIndex("by_personal_device_state", (q) =>
+          q
+            .eq("personalAnalysis.deviceId", d._id)
+            .eq("personalAnalysis.state", state),
+        )
+        .collect();
+      for (const source of sources) {
+        const job = source.personalAnalysis!;
+        await settle(
+          ctx,
+          source.organizationId,
+          `source:${source._id}:${job.generation}`,
+          0,
+        );
+        await ctx.db.patch(source._id, {
+          state: "failed",
+          generation: source.generation + 1,
+          personalAnalysis: { ...job, state: "canceled" },
+          error:
+            "The paired computer was revoked. Plan usage already started may still count.",
+          updatedAt: Date.now(),
+        });
+      }
+    }
     const runs = await ctx.db
       .query("runs")
       .withIndex("by_org", (q) => q.eq("organizationId", d.organizationId))

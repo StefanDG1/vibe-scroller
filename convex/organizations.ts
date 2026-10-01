@@ -13,6 +13,61 @@ import {
 } from "./lib";
 import { internal } from "./_generated/api";
 import { rememberDeletion } from "./lib/deletionMarkers";
+export const ensureDefault = mutation({
+  args: { preferredId: v.optional(v.id("organizations")) },
+  handler: async (ctx, { preferredId }) => {
+    const actor = await user(ctx);
+    if (preferredId) {
+      await access(ctx, preferredId);
+      await ctx.db.patch(actor._id, { defaultWorkspaceId: preferredId });
+      return preferredId;
+    }
+    const memberships = await ctx.db
+      .query("memberships")
+      .withIndex("by_user", (q) => q.eq("userId", actor._id))
+      .collect();
+    const active = (
+      await Promise.all(
+        memberships.map(async (m) => {
+          const workspace = await ctx.db.get(m.organizationId);
+          return workspace?.status === "active"
+            ? { workspace, membership: m }
+            : null;
+        }),
+      )
+    ).filter((row) => row !== null);
+    const selected =
+      active.find((row) => row.workspace._id === actor.defaultWorkspaceId) ??
+      active.find((row) => row.membership.role === "owner") ??
+      active[0];
+    if (selected) {
+      if (actor.defaultWorkspaceId !== selected.workspace._id)
+        await ctx.db.patch(actor._id, {
+          defaultWorkspaceId: selected.workspace._id,
+        });
+      return selected.workspace._id;
+    }
+    if (memberships.length >= 10)
+      fail(
+        "Your existing workspaces are unavailable. Contact support before creating another.",
+      );
+    await limit(ctx, `org:${actor._id}`, 5);
+    const id = await ctx.db.insert("organizations", {
+      name: "Personal workspace",
+      status: "active",
+      createdBy: actor._id,
+      createdAt: Date.now(),
+    });
+    await ctx.db.insert("memberships", {
+      organizationId: id,
+      userId: actor._id,
+      role: "owner",
+    });
+    await ctx.db.patch(actor._id, { defaultWorkspaceId: id });
+    await audit(ctx, id, actor._id, "organization.created", id);
+    return id;
+  },
+});
 export const create = mutation({
   args: { name: v.string() },
   handler: async (ctx, { name }) => {
