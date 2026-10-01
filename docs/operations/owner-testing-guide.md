@@ -4,7 +4,7 @@ Mode: how-to. Last checked October 1, 2026. This guide distinguishes working che
 
 ## Start here
 
-The real address is https://scroll.companynerve.com/app. HTTPS and production Google sign-in work. The owner account has a verified Google identity and an active production OAuth session. Google remains restricted to the configured test user. Creating the first production workspace currently returns HTTP 500; this is being investigated. The complete laptop-assisted video journey is still being built.
+The real address is https://scroll.companynerve.com/app. HTTPS and production Google sign-in work. The owner account has a verified Google identity and an active production OAuth session. Google remains restricted to the configured test user. Sign-in now creates a default personal workspace when needed and opens its dashboard directly. This production redirect and render passed on October 1. Existing active workspaces are reused; switching is available from Account. The complete laptop-assisted video journey is still being built.
 
 The current development address is https://vibescroller-staging.danistefangheorghiu.workers.dev/app. Its earlier capacity failures remain documented. The newest ZIP importer has passed local browser testing but is not yet deployed there. The local production build with that importer runs at http://localhost:3002/app on the laptop.
 

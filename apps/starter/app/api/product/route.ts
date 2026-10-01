@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { backend, api, configured } from "@/lib/backend";
 import { withAuth } from "@workos-inc/authkit-nextjs";
+import { allowedRequestOrigin } from "@/lib/request-origin";
 const operations = {
   capture: ["mutation", api.product.capture],
   importLinks: ["mutation", api.imports.links],
@@ -33,9 +34,9 @@ const operations = {
   cancelPersonalAnalysis: ["mutation", api.personalAnalysis.cancel],
 } as const;
 export async function POST(req: NextRequest) {
-  if (req.headers.get("origin") !== new URL(req.url).origin)
+  if (!allowedRequestOrigin(req))
     return NextResponse.json(
-      { error: "Request origin is not allowed." },
+      { error: "Request origin is not allowed.", code: "ORIGIN_DENIED" },
       { status: 403 },
     );
   if (!configured())
@@ -51,6 +52,7 @@ export async function POST(req: NextRequest) {
     );
   if (Number(req.headers.get("content-length") ?? 0) > 150000)
     return NextResponse.json({ error: "Request too large." }, { status: 413 });
+  let operationName = "unvalidated";
   try {
     const raw = await req.text();
     if (new TextEncoder().encode(raw).length > 150000)
@@ -65,6 +67,7 @@ export async function POST(req: NextRequest) {
         { error: "Unknown operation." },
         { status: 400 },
       );
+    operationName = operation;
     const c = await backend(auth);
     const result =
       entry[0] === "action"
@@ -108,13 +111,28 @@ export async function POST(req: NextRequest) {
         "The selected executor has not passed the required isolation checks.",
       FORBIDDEN:
         "This action is unavailable with your current workspace or repository access.",
+      RIGHTS_REQUIRED:
+        "Confirm that you may save and process this content before continuing.",
+      INVALID_INPUT:
+        "Some submitted fields are invalid. Review the source and try again.",
+      REAUTH_REQUIRED:
+        "Sign in again before changing a sensitive connection. Your library has been kept.",
     };
     const category =
       error instanceof Error
-        ? Object.keys(messages).find((code) =>
-            error.message.includes(`${code}:`),
+        ? error.message.includes(
+            "Sign in again before changing a sensitive connection.",
           )
+          ? "REAUTH_REQUIRED"
+          : Object.keys(messages).find((code) =>
+              error.message.includes(`${code}:`),
+            )
         : undefined;
+    // Do not log payloads, source text, credentials, tokens or upstream errors.
+    console.error("product_operation_failed", {
+      operation: operationName,
+      category: category ?? "UNCLASSIFIED",
+    });
     return NextResponse.json(
       {
         error: category

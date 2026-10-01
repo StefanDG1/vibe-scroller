@@ -23,6 +23,32 @@ const record = (v: unknown): Record<string, unknown> | undefined =>
     ? (v as Record<string, unknown>)
     : undefined;
 
+// Some Meta exports encode UTF-8 bytes as Latin-1 code points inside JSON.
+// Repair only a complete, valid UTF-8 round trip with a mojibake marker.
+function savedTitle(title: string) {
+  if (
+    /[Â-ô][-¿]/.test(title) &&
+    [...title].every((c) => c.codePointAt(0)! <= 255)
+  ) {
+    try {
+      const bytes = Uint8Array.from([...title], (c) => c.charCodeAt(0));
+      const decoded = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+      const encoded = new TextEncoder().encode(decoded);
+      if (
+        encoded.length === bytes.length &&
+        encoded.every((b, i) => b === bytes[i])
+      )
+        title = decoded;
+    } catch {
+      /* Ordinary Unicode must remain unchanged. */
+    }
+  }
+  return title
+    .trim()
+    .slice(0, 160)
+    .replace(/[\uD800-\uDBFF]$/, "");
+}
+
 export function isSavedFile(path: string) {
   return (
     !path.includes("\\") &&
@@ -79,7 +105,7 @@ function nativeRow(value: unknown): unknown {
   return {
     url,
     ...(typeof title === "string" && title.trim()
-      ? { title: title.trim().slice(0, 160) }
+      ? { title: savedTitle(title) }
       : {}),
     ...(timestamp === undefined
       ? {}

@@ -278,7 +278,7 @@ export function Console({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ operation, args }),
       });
-      if (res.redirected || res.status === 401 || res.status === 403) {
+      if (res.redirected || res.status === 401) {
         setSelected(null);
         setData({
           sources: [],

@@ -31,6 +31,27 @@ const modern = [
   },
 ];
 describe("Instagram Saved metadata", () => {
+  it("repairs Meta's Latin-1 UTF-8 captions while preserving valid Unicode and avoiding split emoji", () => {
+    const title = "Business 📈📖🔥";
+    const broken = String.fromCharCode(...new TextEncoder().encode(title));
+    const preview = (caption: string) =>
+      previewLinkFile(
+        JSON.stringify([
+          {
+            ...modern[0],
+            label_values: [
+              modern[0].label_values[0],
+              { label: "Caption", value: caption },
+            ],
+          },
+        ]),
+        "saved_posts.json",
+      ).links[0].title;
+    expect(preview(broken)).toBe(title);
+    expect(preview("Café 中文 📈")).toBe("Café 中文 📈");
+    expect(preview("Ã not damaged")).toBe("Ã not damaged");
+    expect(preview("A".repeat(159) + "📈")).toBe("A".repeat(159));
+  });
   it("maps the observed label-values layout, discards unrelated fields and preserves export timestamps", () => {
     const p = previewLinkFile(JSON.stringify(modern), "saved_posts.json");
     expect(p.links).toEqual([

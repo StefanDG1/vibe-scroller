@@ -1,7 +1,8 @@
 import { backend, api } from "@/lib/backend";
+import { allowedRequestOrigin } from "@/lib/request-origin";
 import type { Id } from "../../../../../../convex/_generated/dataModel";
 export async function POST(req: Request) {
-  if (req.headers.get("origin") !== new URL(req.url).origin)
+  if (!allowedRequestOrigin(req))
     return Response.json({ error: "Origin denied." }, { status: 403 });
   try {
     const { organizationId, key } = await req.json();

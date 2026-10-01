@@ -1,9 +1,10 @@
 import { randomUUID } from "node:crypto";
 import { backend, api } from "@/lib/backend";
+import { allowedRequestOrigin } from "@/lib/request-origin";
 import { signedObject } from "../../../../../../packages/providers/storage";
 import type { Id } from "../../../../../../convex/_generated/dataModel";
 export async function POST(req: Request) {
-  if (req.headers.get("origin") !== new URL(req.url).origin)
+  if (!allowedRequestOrigin(req))
     return Response.json({ error: "Origin denied." }, { status: 403 });
   try {
     const { organizationId, size, type } = await req.json();
