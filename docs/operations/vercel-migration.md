@@ -4,6 +4,8 @@ Mode: how-to. Prepared on 1 October 2026. Production cutover is pending.
 
 The dedicated [VibeScroller project](https://vercel.com/stefandg1s-projects/vibe-scroller) is created in the owner's existing team. It uses Next.js, Node 24, `apps/starter` as root, repository workspace files outside that root, and Frankfurt (`fra1`) functions. The application package pins pnpm 12.3.4 and Node 24; production enables Corepack to preserve the exported lockfile. No plan purchase occurred.
 
+The selected domain is already attached to this project and ownership is verified. Its DNS remains at Netlify, so Vercel correctly reports an invalid hosting configuration and no deployment. The provider's current preferred CNAME target is `a987f11417c888aa.vercel-dns-017.com.`. Recheck the project's recommendation immediately before cutover; this preparation is not a certificate or routing verification. Linux adapter run [36902253093](https://github.com/StefanDG1/vibe-scroller/actions/runs/36902253093) passed for `209606d` without deployment credentials or production secrets.
+
 ## Before deployment
 
 Upgrade `stefandg1s-projects` to Pro. Its inspected plan is Hobby. Vercel's [fair-use rules](https://vercel.com/docs/limits/fair-use-guidelines#commercial-usage) require Pro or Enterprise for commercial deployments, including sites advertising subscriptions. A protected preview does not establish an exception. The project has no Git connection or deployment yet, so future main pushes cannot accidentally deploy it before this gate is resolved.
@@ -24,7 +26,7 @@ The Windows adapter check compiled Next.js and types but failed final packaging 
 
 ## Switch only the subdomain
 
-1. Add `scroll.companynerve.com` to the existing Vercel project and obtain its actual prescribed DNS target and any ownership TXT record. Do not guess a target or change parent nameservers.
+1. Recheck the already attached `scroll.companynerve.com` domain and obtain its current prescribed DNS target and any new verification requirement. Ownership was verified during preparation. Do not guess a target or change parent nameservers.
 2. Record the current Namecheap `scroll` CNAME, which targets `vibescroller-alpha.netlify.app`. Preserve unrelated root/app/launch/www/mail records. Configure only Vercel's prescribed scroll records after its deployment is ready.
 3. Verify DNS, certificate, HTTPS, canonical links, noindex, secure cookie, Google sign-in, default workspace, library import, upload grant/completion, private evidence, transcript navigation and the laptop runner on the final domain. Retain the canonical WorkOS/GitHub callbacks, Convex links and R2 CORS for that same domain.
 4. Confirm the account menu's build version matches the verified commit. Test billing in the separate sandbox; hosting migration does not activate live prices or close tax/legal gates.
