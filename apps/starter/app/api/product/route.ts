@@ -9,6 +9,8 @@ const operations = {
   editSource: ["mutation", api.product.editSource],
   attachSource: ["mutation", api.product.attachSource],
   deleteSource: ["mutation", api.product.deleteSource],
+  assignCategories: ["mutation", api.categories.assign],
+  suggestCategory: ["mutation", api.categories.suggest],
   connectRepository: ["action", api.integrations.connectRepository],
   saveProfile: ["mutation", api.product.saveProfile],
   draftProfile: ["action", api.integrations.draftProfile],

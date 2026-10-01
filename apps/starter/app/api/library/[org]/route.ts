@@ -12,6 +12,8 @@ export async function GET(
       organizationId: (await params).org as Id<"organizations">,
       search: q.get("q") || undefined,
       state: q.get("state") || undefined,
+      category: q.get("category") || undefined,
+      sort: q.get("sort") || undefined,
       cursor: q.get("cursor") || undefined,
     });
     return Response.json(result, {

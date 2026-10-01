@@ -7,12 +7,16 @@ export async function ProductPage({
   draft = "",
   search = "",
   filter = "",
+  category = "",
+  sort = "newest",
 }: {
   org: string;
   view: string;
   draft?: string;
   search?: string;
   filter?: string;
+  category?: string;
+  sort?: string;
 }) {
   const c = await backend(),
     organizationId = org as Id<"organizations">;
@@ -27,11 +31,14 @@ export async function ProductPage({
     organization,
     customerRoutes,
     aiPreference,
+    categories,
   ] = await Promise.all([
     c.query(api.product.library, {
       organizationId,
       search: search || undefined,
       state: filter || undefined,
+      category: category || undefined,
+      sort,
     }),
     c.query(api.product.repositories, { organizationId }),
     c.query(api.product.proposals, { organizationId }),
@@ -42,6 +49,7 @@ export async function ProductPage({
     c.query(api.organizations.details, { organizationId }),
     c.query(api.jobs.customerRoutes, { organizationId }),
     c.query(api.aiPreferences.read, { organizationId }),
+    c.query(api.categories.list, { organizationId }),
   ]);
   return (
     <Console
@@ -49,11 +57,15 @@ export async function ProductPage({
       initialSharedDraft={draft.slice(0, 2048)}
       initialSearch={search}
       initialFilter={filter}
+      initialCategory={category}
+      initialSort={sort}
       organizationId={org}
       initialView={view}
       readOnly={organization.role === "viewer"}
+      canSuggestCategories={["owner", "admin"].includes(organization.role)}
       initial={{
         sources: library.items,
+        categories,
         libraryNext: library.next,
         repositories,
         proposals,

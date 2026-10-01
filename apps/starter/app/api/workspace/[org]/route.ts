@@ -1,12 +1,13 @@
 import { backend, api } from "@/lib/backend";
 import type { Id } from "../../../../../../convex/_generated/dataModel";
 export async function GET(
-  _: Request,
+  request: Request,
   { params }: { params: Promise<{ org: string }> },
 ) {
   try {
     const organizationId = (await params).org as Id<"organizations">,
       c = await backend();
+    const q = new URL(request.url).searchParams;
     const [
       library,
       repositories,
@@ -17,8 +18,15 @@ export async function GET(
       githubChoices,
       customerRoutes,
       aiPreference,
+      categories,
     ] = await Promise.all([
-      c.query(api.product.library, { organizationId }),
+      c.query(api.product.library, {
+        organizationId,
+        search: q.get("q") || undefined,
+        state: q.get("state") || undefined,
+        category: q.get("category") || undefined,
+        sort: q.get("sort") || undefined,
+      }),
       c.query(api.product.repositories, { organizationId }),
       c.query(api.product.proposals, { organizationId }),
       c.query(api.product.overview, { organizationId }),
@@ -27,6 +35,7 @@ export async function GET(
       c.query(api.githubLinks.choices, { organizationId }),
       c.query(api.jobs.customerRoutes, { organizationId }),
       c.query(api.aiPreferences.read, { organizationId }),
+      c.query(api.categories.list, { organizationId }),
     ]);
     return Response.json(
       {
@@ -41,6 +50,7 @@ export async function GET(
         githubChoices,
         customerRoutes,
         aiPreference,
+        categories,
         measured: overview.measured,
       },
       {

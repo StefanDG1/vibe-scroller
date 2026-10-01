@@ -6,6 +6,8 @@ Mode: how-to. Last checked October 1, 2026. This guide distinguishes working che
 
 The real address is https://scroll.companynerve.com/app on your laptop or phone. HTTPS, clean production Google sign-in and automatic default workspace entry work. Google remains restricted to the configured test user. Existing active workspaces are reused; switching is available from Account. The dark interface and automatic laptop-assisted audio/visual analysis passed production verification on October 1. Reload an old tab to load the latest interface.
 
+Production hosting now uses the owner�s Vercel Pro team. Reload the page after the host change; your same-domain login remains usable.
+
 Use the real domain for the personal test. Earlier Cloudflare staging capacity failures remain documented; staging and local builds do not define the current production result.
 
 Use your existing VibeScroller Google identity. Signing into VibeScroller, Instagram and ChatGPT are separate actions. Never paste passwords, cookies or OAuth tokens into the app.
@@ -53,3 +55,9 @@ Search, tags and state filters already exist. More categories and ranking should
 Record the page, approximate time, device and action that failed. Include the visible error and whether the source was saved. Avoid repeated submissions after an unclear write result. Do not send private tokens or full archives in GitHub issues. Screenshots should omit personal or sensitive content.
 
 The [implementation record](../implementation-status.md) lists exact test evidence. [Deployment instructions](vibescroller-deployment.md) describe environment setup. [The publication checklist](../../legal/POLICY-IMPLEMENTATION.md) and [accountant handover](operator-tax-and-publication.md) remain required for paid release. No professional legal review has been claimed.
+
+## Find the insights and categories
+
+Open Library. Choose Music, Reading or another category, then sort by import date, save date, update date or title. Search finds matching stored sources by relevance. Open a whole source row to read all insights and expand its private evidence. The count on the row shows the full number of insights, even when only three point titles are previewed.
+
+Open Categories inside a source to edit its names. A new valid topic can be created by future analysis. Your manual choices survive reprocessing. The shared suggestion control is optional, publishes no source content and requires operator review before a name joins the app-wide vocabulary.

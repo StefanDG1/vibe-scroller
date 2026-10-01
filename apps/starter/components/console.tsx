@@ -40,6 +40,7 @@ type Initial = {
     personalAlphaEnabled?: boolean;
   };
   sources: any[];
+  categories?: { key: string; name: string; count: number }[];
   libraryNext?: string | null;
   repositories: any[];
   proposals: any[];
@@ -95,22 +96,28 @@ const Button = ({
 export function Console({
   demo = false,
   readOnly = false,
+  canSuggestCategories = false,
   initial,
   organizationId,
   initialView = "home",
   initialSharedDraft = "",
   initialSearch = "",
   initialFilter = "",
+  initialCategory = "",
+  initialSort = "newest",
   demoState = "ready",
 }: {
   demo?: boolean;
   readOnly?: boolean;
+  canSuggestCategories?: boolean;
   initial: Initial;
   organizationId: string;
   initialView?: string;
   initialSharedDraft?: string;
   initialSearch?: string;
   initialFilter?: string;
+  initialCategory?: string;
+  initialSort?: string;
   demoState?: "ready" | "loading" | "error" | "empty";
 }) {
   const router = useRouter(),
@@ -121,6 +128,8 @@ export function Console({
     [selected, setSelected] = useState<any>(null),
     [search, setSearch] = useState(initialSearch),
     [filter, setFilter] = useState(initialFilter),
+    [category, setCategory] = useState(initialCategory),
+    [sort, setSort] = useState(initialSort),
     [notice, setNotice] = useState(""),
     [reauthNeeded, setReauthNeeded] = useState(false),
     [busy, setBusy] = useState(false),
@@ -161,7 +170,12 @@ export function Console({
     setLibraryLoading(true);
     setLibraryError("");
     try {
-      const q = new URLSearchParams({ q: search, state: filter });
+      const q = new URLSearchParams({
+        q: search,
+        state: filter,
+        category,
+        sort,
+      });
       if (append && data.libraryNext) q.set("cursor", data.libraryNext);
       const response = await fetch(`/api/library/${organizationId}?${q}`, {
         cache: "no-store",
@@ -209,7 +223,7 @@ export function Console({
       // oxlint-disable-next-line react-hooks/exhaustive-deps -- Invalidate this asynchronous request generation on cleanup.
       libraryRequest.current++;
     };
-  }, [demo, organizationId, view, search, filter]);
+  }, [demo, organizationId, view, search, filter, category, sort]);
   useEffect(() => {
     const draft = new URL(window.location.href).searchParams.get("draft");
     if (!demo && draft) {
@@ -302,9 +316,12 @@ export function Console({
     }
   }
   async function refreshWorkspace() {
-    const response = await fetch(`/api/workspace/${organizationId}`, {
-      cache: "no-store",
-    });
+    const response = await fetch(
+      `/api/workspace/${organizationId}?${new URLSearchParams({ q: search, state: filter, category, sort })}`,
+      {
+        cache: "no-store",
+      },
+    );
     if (
       response.ok &&
       !response.redirected &&
@@ -414,7 +431,13 @@ export function Console({
       if (!demo && event) track(event.event, event.properties);
       await refreshData();
       if (operation === "deleteSource") go("library");
-      setNotice(operation === "deleteSource" ? "Source deleted." : "Saved.");
+      setNotice(
+        operation === "deleteSource"
+          ? "Source deleted."
+          : operation === "suggestCategory"
+            ? "Category name submitted for review."
+            : "Saved.",
+      );
       return body.result;
     } catch (e) {
       setNotice(e instanceof Error ? e.message : "The action failed.");
@@ -438,17 +461,26 @@ export function Console({
         `/app/${organizationId}/${v === "home" ? "" : v}`,
       );
   };
-  const filtered = data.sources.filter(
-    (s) =>
-      (!search ||
-        [s.title, s.summary, s.text, ...(s.tags ?? []), ...(s.mainPoints ?? [])]
-          .join(" ")
-          .toLowerCase()
-          .includes(search.toLowerCase())) &&
-      (!filter ||
-        s.state === filter ||
-        s.matches?.some((m: any) => m.disposition === filter)),
-  );
+  const filtered = !demo
+    ? data.sources
+    : data.sources.filter(
+        (s) =>
+          (!search ||
+            [
+              s.title,
+              s.summary,
+              s.text,
+              ...(s.tags ?? []),
+              ...(s.mainPoints ?? []),
+            ]
+              .join(" ")
+              .toLowerCase()
+              .includes(search.toLowerCase())) &&
+          (!category || s.categoryKeys?.includes(category)) &&
+          (!filter ||
+            s.state === filter ||
+            s.matches?.some((m: any) => m.disposition === filter)),
+      );
   function findSource(s: any) {
     if (!demo)
       track("source_viewed", {
@@ -706,12 +738,59 @@ export function Console({
                     ))}
                   </select>
                 </label>
-                {(search || filter) && (
+                <label>
+                  <span className="sr-only">Category</span>
+                  <select
+                    value={category}
+                    onChange={(e) => {
+                      setCategory(e.target.value);
+                      const u = new URL(location.href);
+                      u.searchParams.set("category", e.target.value);
+                      history.replaceState(null, "", u);
+                    }}
+                  >
+                    <option value="">All categories</option>
+                    {(data.categories ?? [])
+                      .filter((c) => c.count > 0)
+                      .map((c) => (
+                        <option key={c.key} value={c.key}>
+                          {c.name} ({c.count})
+                        </option>
+                      ))}
+                  </select>
+                </label>
+                <label>
+                  <span className="sr-only">Sort sources</span>
+                  <select
+                    value={search ? "relevance" : sort}
+                    disabled={Boolean(search)}
+                    onChange={(e) => {
+                      setSort(e.target.value);
+                      const u = new URL(location.href);
+                      u.searchParams.set("sort", e.target.value);
+                      history.replaceState(null, "", u);
+                    }}
+                  >
+                    {search && <option value="relevance">Most relevant</option>}
+                    <option value="newest">Newest imported</option>
+                    <option value="oldest">Oldest imported</option>
+                    <option value="saved">Recently saved</option>
+                    <option value="updated">Recently updated</option>
+                    <option value="title">Title A�Z</option>
+                  </select>
+                </label>
+                {(search || filter || category || sort !== "newest") && (
                   <Button
                     busy={busy}
                     onClick={() => {
                       setSearch("");
                       setFilter("");
+                      setCategory("");
+                      setSort("newest");
+                      const u = new URL(location.href);
+                      for (const key of ["q", "state", "category", "sort"])
+                        u.searchParams.delete(key);
+                      history.replaceState(null, "", u);
                     }}
                   >
                     Clear filters
@@ -776,16 +855,23 @@ export function Console({
                           ))}
                         </ul>
                         <div className="row wrap">
+                          {s.insightCount > 0 && (
+                            <span className="tag">
+                              {s.insightCount} insights
+                            </span>
+                          )}
                           {s.matches?.map((m: any) => (
                             <span className="status" key={m.repositoryId}>
                               {label(m.disposition)}
                             </span>
                           ))}
-                          {s.tags?.map((t: string) => (
-                            <span className="tag" key={t}>
-                              {label(t)}
-                            </span>
-                          ))}
+                          {(s.categoryNames ?? s.tags)
+                            ?.slice(0, 4)
+                            .map((t: string) => (
+                              <span className="tag" key={t}>
+                                {label(t)}
+                              </span>
+                            ))}
                           {s.pullRequests?.length > 0 && (
                             <span className="tag">
                               {
@@ -814,25 +900,29 @@ export function Console({
                 ) : (
                   <div className="empty">
                     <h2>
-                      {search || filter
-                        ? "No sources match these filters."
+                      {search || filter || category
+                        ? "No matches on this page"
                         : "Your library starts here."}
                     </h2>
                     <p>
-                      {search || filter
-                        ? "Reset the filters to see your saved sources."
+                      {search || filter || category
+                        ? data.libraryNext
+                          ? "Continue loading to check more sources, or clear the filters."
+                          : "Clear the filters to see your saved sources."
                         : "Add a supported link, upload permitted content, or supply a transcript."}
                     </p>
                     <Button
                       busy={busy}
                       primary
                       onClick={() =>
-                        search || filter
-                          ? (setSearch(""), setFilter(""))
+                        search || filter || category
+                          ? (setSearch(""), setFilter(""), setCategory(""))
                           : setCaptureOpen(true)
                       }
                     >
-                      {search || filter ? "Clear filters" : "Add source"}
+                      {search || filter || category
+                        ? "Clear filters"
+                        : "Add source"}
                     </Button>
                   </div>
                 )}
@@ -855,6 +945,9 @@ export function Console({
             <SourceDetail
               key={id(selected)}
               source={selected}
+              readOnly={readOnly}
+              busy={busy}
+              canSuggestCategories={canSuggestCategories}
               demo={demo}
               org={organizationId}
               repos={data.repositories}
@@ -2338,6 +2431,9 @@ function CaptureForm({
 }
 function SourceDetail({
   source,
+  readOnly,
+  busy,
+  canSuggestCategories,
   demo,
   org,
   repos,
@@ -2350,6 +2446,7 @@ function SourceDetail({
   const [detailLoading, setDetailLoading] = useState(!demo);
   const [selectedInsight, setSelectedInsight] = useState("");
   const [allFrames, setAllFrames] = useState(false);
+  const [categoryDraft, setCategoryDraft] = useState("");
   const [transcriptOpen, setTranscriptOpen] = useState(false);
   const transcript = useRef<HTMLDetailsElement>(null);
   const sourceId = id(source);
@@ -2472,6 +2569,79 @@ function SourceDetail({
           </p>
         </details>
       </div>
+      <details
+        className="panel source-notes"
+        onToggle={(e) => {
+          if (e.currentTarget.open)
+            setCategoryDraft((detail.categoryNames ?? []).join(", "));
+        }}
+      >
+        <summary>
+          Categories
+          {detail.categoryNames?.length
+            ? ` � ${detail.categoryNames.join(", ")}`
+            : ""}
+        </summary>
+        {!readOnly && (
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const names = categoryDraft
+                .split(",")
+                .map((s) => s.trim())
+                .filter(Boolean);
+              const result = await call("assignCategories", {
+                id: sourceId,
+                names,
+              });
+              if (result?.saved)
+                setDetail({
+                  ...detail,
+                  categoryNames: result.names,
+                  categoryKeys: result.keys,
+                });
+            }}
+          >
+            <label>
+              Separate categories with commas
+              <input
+                value={categoryDraft}
+                maxLength={400}
+                onChange={(e) => setCategoryDraft(e.target.value)}
+                placeholder="Music, Reading, Product design"
+              />
+            </label>
+            <button
+              type="submit"
+              className="secondary"
+              disabled={busy}
+              aria-busy={busy || undefined}
+            >
+              {busy ? "Saving…" : "Save categories"}
+            </button>
+          </form>
+        )}
+        {!demo && canSuggestCategories && !!detail.categoryKeys?.length && (
+          <details>
+            <summary>Suggest a shared category</summary>
+            <p className="fine">
+              Only this category name is submitted for review. Your videos and
+              insights stay private. Workspace owners and admins can submit.
+            </p>
+            {detail.categoryKeys.map((key: string, index: number) => (
+              <Button
+                key={key}
+                busy={busy}
+                onClick={() =>
+                  call("suggestCategory", { organizationId: org, key })
+                }
+              >
+                Suggest {detail.categoryNames[index]}
+              </Button>
+            ))}
+          </details>
+        )}
+      </details>
       <section className="panel">
         <h2>Main points</h2>
         {!detailLoading && insights.length > 1 && (

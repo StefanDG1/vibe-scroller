@@ -17,6 +17,58 @@ const sourceState = v.union(
   ].map((s) => v.literal(s)),
 );
 export const productTables = {
+  categoryVocabulary: defineTable({
+    key: v.string(),
+    name: v.string(),
+    aliases: v.array(v.string()),
+    updatedAt: v.number(),
+  }).index("by_key", ["key"]),
+  workspaceCategories: defineTable({
+    ...tenant,
+    key: v.string(),
+    name: v.string(),
+    aliases: v.array(v.string()),
+    count: v.number(),
+  })
+    .index("by_org", ["organizationId"])
+    .index("by_org_key", ["organizationId", "key"]),
+  categorySuggestions: defineTable({
+    ...tenant,
+    key: v.string(),
+    name: v.string(),
+    state: v.string(),
+  })
+    .index("by_state", ["state"])
+    .index("by_org", ["organizationId"])
+    .index("by_org_key", ["organizationId", "key"]),
+  sourceCategories: defineTable({
+    searchable: v.optional(v.string()),
+    ...tenant,
+    sourceId: v.id("sources"),
+    categoryKey: v.string(),
+    title: v.string(),
+    sourceCreatedAt: v.number(),
+    sourceUpdatedAt: v.number(),
+    savedAt: v.number(),
+  })
+    .index("by_org", ["organizationId"])
+    .index("by_source", ["sourceId"])
+    .index("by_category_created", [
+      "organizationId",
+      "categoryKey",
+      "sourceCreatedAt",
+    ])
+    .index("by_category_title", ["organizationId", "categoryKey", "title"])
+    .index("by_category_updated", [
+      "organizationId",
+      "categoryKey",
+      "sourceUpdatedAt",
+    ])
+    .index("by_category_saved", ["organizationId", "categoryKey", "savedAt"])
+    .searchIndex("category_search", {
+      searchField: "searchable",
+      filterFields: ["organizationId", "categoryKey"],
+    }),
   mediaStages: defineTable({
     ...tenant,
     sourceId: v.id("sources"),
@@ -173,6 +225,9 @@ export const productTables = {
     canonical: v.string(),
     kind: v.string(),
     title: v.string(),
+    categoryKeys: v.optional(v.array(v.string())),
+    categoryNames: v.optional(v.array(v.string())),
+    categoryOverride: v.optional(v.array(v.string())),
     url: v.optional(v.string()),
     originalSavedAt: v.optional(v.number()),
     text: v.optional(v.string()),
@@ -202,6 +257,9 @@ export const productTables = {
     generation: v.number(),
   })
     .index("by_org", ["organizationId"])
+    .index("by_org_title", ["organizationId", "title"])
+    .index("by_org_updated", ["organizationId", "updatedAt"])
+    .index("by_org_saved", ["organizationId", "originalSavedAt"])
     .index("by_personal_device_state", [
       "personalAnalysis.deviceId",
       "personalAnalysis.state",

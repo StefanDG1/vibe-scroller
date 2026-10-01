@@ -13,6 +13,7 @@ import { insightOutput } from "../packages/contracts";
 import { reserve, settle } from "./product";
 import { personalAllowed } from "./lib/personalAccess";
 import { releaseUnstarted } from "./personalMediaState";
+import { syncCategories, vocabulary } from "./categories";
 
 // A personal alpha is explicitly bound to verified WorkOS subjects. Email or
 // a saved preference cannot activate subscription permission for hosted users.
@@ -386,6 +387,9 @@ export const dispatch = internalMutation({
             effort: job.effort,
             profileBinding: job.profileBinding,
             text: source.text,
+            categoryVocabulary: (
+              await vocabulary(ctx, source.organizationId)
+            ).map((c) => c.name),
             coverage:
               source.kind === "upload"
                 ? source.personalMedia?.coverage
@@ -578,6 +582,7 @@ export const dispatch = internalMutation({
       error: undefined,
       updatedAt: now,
     });
+    await syncCategories(ctx, (await ctx.db.get(source._id))!, output);
     await ctx.db.patch(device._id, { activePersonalSource: undefined });
     if (source.kind === "upload")
       await ctx.scheduler.runAfter(0, internal.assets.expireOriginal, {

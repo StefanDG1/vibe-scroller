@@ -1802,3 +1802,22 @@ dialog.capture-modal::backdrop {
     transform: none;
   }
 }
+
+/* Library filters wrap without forcing horizontal scrolling on small screens. */
+.library-tools {
+  flex-wrap: wrap;
+}
+.library-tools label {
+  min-width: 150px;
+  flex: 1 1 150px;
+}
+.library-tools label:first-child {
+  flex: 2 1 240px;
+}
+@media (max-width: 600px) {
+  .library-tools label {
+    min-width: 0;
+    width: 100%;
+    flex-basis: 100%;
+  }
+}

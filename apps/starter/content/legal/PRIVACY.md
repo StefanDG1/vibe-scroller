@@ -24,6 +24,8 @@ We use necessary account and service data to perform our contract with you. We p
 
 Optional marketing, nonessential tracking, and any separately proposed use requiring consent depend on the relevant choice. Refusing optional consent does not prevent use of the paid core service. You can withdraw consent as easily as you give it.
 
+Workspace category names and source assignments are private. If a workspace owner or admin explicitly suggests a shared category, we receive that name for review. An approved name and its aliases may be used in the app-wide vocabulary. We do not share the linked videos, transcripts, frames, insights or repository material through that process. Do not submit confidential or personal information in a shared name.
+
 We do not use private source content or repository material to train models across customers by default. We do not sell your private library or use it as a public SEO archive.
 
 Optional product analytics uses PostHog EU Cloud only after analytics consent. We send approved event names and coarse properties such as processing state, route and capped counts. We exclude source URLs, captions, transcripts, evidence, repository names and files, account emails and model prompts. The provider still receives network metadata needed to receive a request. We disable replay and automatic capture. Rejecting analytics leaves the application usable. The cookie preferences control lets you withdraw permission for future events; it cannot retract events already sent. See [the cookie policy](COOKIES.md).

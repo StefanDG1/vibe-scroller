@@ -1,6 +1,6 @@
 # Configure the production domain and search visibility
 
-Latest hosting update, 1 October 2026: the scroll CNAME still targets Netlify. New Netlify production deployments are credit-blocked. A dedicated Vercel project is prepared, but the inspected Hobby team requires Pro before commercial deployment. No DNS cutover or nameserver migration occurred. Follow [the exact migration steps](vercel-migration.md) after the owner upgrades.
+Latest hosting update, 1 October 2026: the owner upgraded the existing Vercel team to Pro. VibeScroller is deployed there from the selected GitHub repository. Namecheap's scroll CNAME points to `a987f11417c888aa.vercel-dns-017.com.`; the HTTPS health route and owner library work on the real domain. Parent DNS and mail records were preserved. Follow [the Vercel deployment and rollback procedure](vercel-migration.md). Historical Netlify and Worker instructions below describe previous hosts. Billing, legal and execution gates remain separate.
 
 Mode: how-to. Selected domain: `scroll.companynerve.com`. Domain configuration is authorized by the owner; parent-domain migration and new purchases are not authorized.
 

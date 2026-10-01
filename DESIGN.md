@@ -247,3 +247,7 @@ Color and border responses run briefly (140ms ease-out). Account menus reveal wi
 - **Don't** publish private reference screenshots or promote an unverified outcome into success.
 
 Documentation evidence: the effective cascade in `apps/starter/app/product.css`, the console, account-menu and consent components, and the root layout. Review captures include `outputs/design-review/ready-390.png`, `error-390.png`, `loading-390.png`, `empty-390.png`, `more-320.png` and the earlier desktop capture. These capture paths are review evidence, not runtime assets. The one attempted detector returned no reliable verdict; this record makes no detector-pass claim.
+
+## Library categories and sorting
+
+Keep search and filters in the existing dark control style. Use accessible names for unlabeled selectors, 44 px controls and wrapping layouts on narrow screens. Search uses relevance and disables date/title sorting until cleared. A source row displays its insight count, a short point preview and up to four category names; the full row opens actual details. Category editing lives in a native disclosure within those details, with saving, error, empty and success behavior using the existing operation state. Shared suggestions are a separate owner/admin choice with a concise privacy explanation.

@@ -4,7 +4,13 @@ export default async function Page({
   searchParams,
 }: {
   params: Promise<{ org: string }>;
-  searchParams: Promise<{ draft?: string; q?: string; state?: string }>;
+  searchParams: Promise<{
+    draft?: string;
+    q?: string;
+    state?: string;
+    category?: string;
+    sort?: string;
+  }>;
 }) {
   const query = await searchParams;
   return (
@@ -14,6 +20,8 @@ export default async function Page({
       draft={query.draft}
       search={query.q}
       filter={query.state}
+      category={query.category}
+      sort={query.sort}
     />
   );
 }

@@ -27,6 +27,7 @@ import type { Id } from "./_generated/dataModel";
 import { queueDeletion } from "./assets";
 import { mediaStagePayload } from "../packages/media/stages";
 import { personalAllowed } from "./lib/personalAccess";
+import { syncCategories } from "./categories";
 const org = { organizationId: v.id("organizations") };
 export async function wallet(ctx: MutationCtx, id: Id<"organizations">) {
   let w = await ctx.db
@@ -284,6 +285,8 @@ export const library = query({
     ...org,
     search: v.optional(v.string()),
     state: v.optional(v.string()),
+    category: v.optional(v.string()),
+    sort: v.optional(v.string()),
     cursor: v.optional(v.string()),
   },
   handler: async (ctx, a) => {
@@ -316,33 +319,104 @@ export const library = query({
       "INVALID_INPUT",
       "Invalid source filter.",
     );
-    const query = a.search?.trim()
-      ? ctx.db
-          .query("sources")
-          .withSearchIndex("source_search", (q) => {
-            const tenant = q
-              .search("searchable", a.search!.trim())
-              .eq("organizationId", a.organizationId);
-            return sourceState
-              ? tenant.eq("state", sourceState as any)
-              : tenant;
-          })
-          .filter((q) => q.neq(q.field("state"), "deleted"))
-      : ctx.db
-          .query("sources")
-          .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
-          .order("desc")
-          .filter((q) =>
-            sourceState
-              ? q.eq(q.field("state"), sourceState)
-              : q.neq(q.field("state"), "deleted"),
-          );
-    const result = await query.paginate({
-      numItems: 30,
-      cursor: a.cursor ?? null,
-    });
+    const sort = a.sort ?? "newest";
+    ensure(
+      ["newest", "oldest", "title", "updated", "saved"].includes(sort),
+      "INVALID_INPUT",
+      "Invalid sort order.",
+    );
+    ensure(
+      !a.category || a.category.length <= 64,
+      "INVALID_INPUT",
+      "Invalid category.",
+    );
+    const direction = sort === "title" || sort === "oldest" ? "asc" : "desc";
+    let result;
+    if (a.search?.trim() && a.category) {
+      const links = await ctx.db
+        .query("sourceCategories")
+        .withSearchIndex("category_search", (q) =>
+          q
+            .search("searchable", a.search!.trim())
+            .eq("organizationId", a.organizationId)
+            .eq("categoryKey", a.category!),
+        )
+        .paginate({ numItems: 30, cursor: a.cursor ?? null });
+      const sources = await Promise.all(
+        links.page.map((link) => ctx.db.get(link.sourceId)),
+      );
+      result = {
+        ...links,
+        page: sources.filter(
+          (s) =>
+            s && s.organizationId === a.organizationId && s.state !== "deleted",
+        ),
+      };
+    } else if (a.search?.trim()) {
+      result = await ctx.db
+        .query("sources")
+        .withSearchIndex("source_search", (q) =>
+          q
+            .search("searchable", a.search!.trim())
+            .eq("organizationId", a.organizationId),
+        )
+        .filter((q) =>
+          sourceState
+            ? q.eq(q.field("state"), sourceState)
+            : q.neq(q.field("state"), "deleted"),
+        )
+        .paginate({ numItems: 30, cursor: a.cursor ?? null });
+    } else if (a.category) {
+      const index =
+        sort === "title"
+          ? "by_category_title"
+          : sort === "updated"
+            ? "by_category_updated"
+            : sort === "saved"
+              ? "by_category_saved"
+              : "by_category_created";
+      const links = await ctx.db
+        .query("sourceCategories")
+        .withIndex(index, (q) =>
+          q
+            .eq("organizationId", a.organizationId)
+            .eq("categoryKey", a.category!),
+        )
+        .order(direction)
+        .paginate({ numItems: 30, cursor: a.cursor ?? null });
+      const sources = await Promise.all(
+        links.page.map((link) => ctx.db.get(link.sourceId)),
+      );
+      result = {
+        ...links,
+        page: sources.filter(
+          (s) =>
+            s && s.organizationId === a.organizationId && s.state !== "deleted",
+        ),
+      };
+    } else {
+      const index =
+        sort === "title"
+          ? "by_org_title"
+          : sort === "updated"
+            ? "by_org_updated"
+            : sort === "saved"
+              ? "by_org_saved"
+              : "by_org";
+      result = await ctx.db
+        .query("sources")
+        .withIndex(index, (q) => q.eq("organizationId", a.organizationId))
+        .order(direction)
+        .filter((q) =>
+          sourceState
+            ? q.eq(q.field("state"), sourceState)
+            : q.neq(q.field("state"), "deleted"),
+        )
+        .paginate({ numItems: 30, cursor: a.cursor ?? null });
+    }
     const page = [];
     for (const source of result.page) {
+      if (!source || (sourceState && source.state !== sourceState)) continue;
       if (
         !disposition ||
         (
@@ -364,6 +438,7 @@ export const library = query({
           ...source
         }) => ({
           ...source,
+          insightCount: analysis?.insights?.length ?? 0,
           mainPoints:
             analysis?.insights?.slice(0, 3).map((i: any) => i.title) ?? [],
         }),
@@ -792,6 +867,8 @@ export const commitAnalysis = internalMutation({
       error: a.error,
       updatedAt: Date.now(),
     });
+    if (analysis)
+      await syncCategories(ctx, (await ctx.db.get(s._id))!, analysis);
     await ctx.db.insert("notifications", {
       organizationId: s.organizationId,
       createdAt: Date.now(),
@@ -1062,6 +1139,8 @@ export async function redactSource(ctx: MutationCtx, id: Id<"sources">) {
     generation: s.generation + 1,
     updatedAt: Date.now(),
   });
+  await syncCategories(ctx, (await ctx.db.get(id))!);
+  await ctx.db.patch(id, { categoryOverride: undefined });
   for (const asset of await ctx.db
     .query("assets")
     .withIndex("by_org", (q) => q.eq("organizationId", s.organizationId))

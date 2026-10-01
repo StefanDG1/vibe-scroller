@@ -95,54 +95,43 @@
               ]
             }
           },
+          "topics": {
+            "type": "array",
+            "maxItems": 4,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 48
+            }
+          },
           "evidence": {
             "type": "array",
             "maxItems": 30,
             "items": {
               "type": "object",
               "additionalProperties": false,
-              "required": [
-                "kind",
-                "id",
-                "startMs",
-                "endMs"
-              ],
+              "required": ["kind", "id", "startMs", "endMs"],
               "properties": {
                 "kind": {
-                  "enum": [
-                    "transcript",
-                    "frame",
-                    "caption",
-                    "user_note"
-                  ]
+                  "enum": ["transcript", "frame", "caption", "user_note"]
                 },
                 "id": {
                   "type": "string",
                   "minLength": 1
                 },
                 "startMs": {
-                  "type": [
-                    "integer",
-                    "null"
-                  ],
+                  "type": ["integer", "null"],
                   "minimum": 0
                 },
                 "endMs": {
-                  "type": [
-                    "integer",
-                    "null"
-                  ],
+                  "type": ["integer", "null"],
                   "minimum": 0
                 }
               }
             }
           },
           "confidence": {
-            "enum": [
-              "supported",
-              "uncertain",
-              "unsupported"
-            ]
+            "enum": ["supported", "uncertain", "unsupported"]
           },
           "verificationNeeds": {
             "type": "array",

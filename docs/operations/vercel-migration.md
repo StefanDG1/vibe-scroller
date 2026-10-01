@@ -1,18 +1,18 @@
 # Move VibeScroller to Vercel
 
-Mode: how-to. Prepared on 1 October 2026. Production cutover is pending.
+Mode: how-to. Production cutover completed on 1 October 2026.
 
 The dedicated [VibeScroller project](https://vercel.com/stefandg1s-projects/vibe-scroller) is created in the owner's existing team. It uses Next.js, Node 24, `apps/starter` as root, repository workspace files outside that root, and Frankfurt (`fra1`) functions. The application package pins pnpm 12.3.4 and Node 24; production enables Corepack to preserve the exported lockfile. No plan purchase occurred.
 
-The selected domain is already attached to this project and ownership is verified. Its DNS remains at Netlify, so Vercel correctly reports an invalid hosting configuration and no deployment. The provider's current preferred CNAME target is `a987f11417c888aa.vercel-dns-017.com.`. Recheck the project's recommendation immediately before cutover; this preparation is not a certificate or routing verification. Linux adapter run [36902253093](https://github.com/StefanDG1/vibe-scroller/actions/runs/36902253093) passed for `209606d` without deployment credentials or production secrets.
+The selected domain is attached, ownership is verified, and its Namecheap scroll CNAME now routes to Vercel. The API reports a valid hosting configuration. HTTPS health and the authenticated owner library were verified on the final domain. The provider's current preferred CNAME target is `a987f11417c888aa.vercel-dns-017.com.`. Recheck the project's recommendation immediately before cutover; this preparation is not a certificate or routing verification. Linux adapter run [36902253093](https://github.com/StefanDG1/vibe-scroller/actions/runs/36902253093) passed for `209606d` without deployment credentials or production secrets.
 
 ## Before deployment
 
-Upgrade `stefandg1s-projects` to Pro. Its inspected plan is Hobby. Vercel's [fair-use rules](https://vercel.com/docs/limits/fair-use-guidelines#commercial-usage) require Pro or Enterprise for commercial deployments, including sites advertising subscriptions. A protected preview does not establish an exception. The project has no Git connection or deployment yet, so future main pushes cannot accidentally deploy it before this gate is resolved.
+The owner upgraded `stefandg1s-projects` to Pro. The authenticated provider API confirmed the plan. Git is connected only to `StefanDG1/vibe-scroller`; main is the production branch. First production deployment `dpl_8u2f1T2WbzrMNXkqEm4sZDK4Afob` built `0c7af5750d761df76f44a3885086ee34d8648144` on Vercel Linux and reached READY. No agent purchase occurred.
 
 Production environment values are already configured only for Production: dedicated WorkOS identity/callback/cookie, Convex `bold-lemur-667`, canonical `APP_URL`, consent-gated PostHog, dedicated private R2 and the selected-repository GitHub App client ID. Server values are encrypted. Preview and Development have no copied production credentials. The existing R2 bucket has a legacy staging name but belongs to VibeScroller; bucket public access must remain disabled. Local ChatGPT OAuth credentials are never uploaded to Vercel.
 
-All deployments currently require Vercel authentication. Preserve that protection during verification. After the operator approves the verified public production cutover, use standard preview protection while allowing the final production domain. WorkOS app authentication, private CSP and tenant checks remain enforced separately.
+Standard protection now requires Vercel authentication for generated production deployment URLs and all previews. The canonical production domain serves publicly, with private app routes requiring WorkOS authentication. WorkOS app authentication, private CSP and tenant checks remain enforced separately.
 
 ## Build and connect
 
@@ -27,11 +27,11 @@ The Windows adapter check compiled Next.js and types but failed final packaging 
 ## Switch only the subdomain
 
 1. Recheck the already attached `scroll.companynerve.com` domain and obtain its current prescribed DNS target and any new verification requirement. Ownership was verified during preparation. Do not guess a target or change parent nameservers.
-2. Record the current Namecheap `scroll` CNAME, which targets `vibescroller-alpha.netlify.app`. Preserve unrelated root/app/launch/www/mail records. Configure only Vercel's prescribed scroll records after its deployment is ready.
+2. Preserve the rollback Namecheap `scroll` CNAME target `vibescroller-alpha.netlify.app`. Preserve unrelated root/app/launch/www/mail records. Configure only Vercel's prescribed scroll records after its deployment is ready.
 3. Verify DNS, certificate, HTTPS, canonical links, noindex, secure cookie, Google sign-in, default workspace, library import, upload grant/completion, private evidence, transcript navigation and the laptop runner on the final domain. Retain the canonical WorkOS/GitHub callbacks, Convex links and R2 CORS for that same domain.
 4. Confirm the account menu's build version matches the verified commit. Test billing in the separate sandbox; hosting migration does not activate live prices or close tax/legal gates.
 5. Keep the Netlify site available during verification. If migration fails, restore the recorded scroll CNAME. A frontend rollback does not reverse backend schema changes, jobs, PRs or provider charges.
 
 ## Current hosting limitation
 
-Netlify published `23375b9`, then skipped `96e2fb8` because this cycle's 300 credits were exhausted by 20 production deployments. Operational credits keep the current site online but do not permit another production build. The latest GitHub version and the live build therefore differ. No Netlify upgrade, Vercel upgrade, DNS cutover or live charge has been made. See [implementation evidence](../implementation-status.md).
+Netlify published `23375b9`, then skipped `96e2fb8` because this cycle's 300 credits were exhausted by 20 production deployments. Operational credits keep the current site online but do not permit another production build. This Netlify limit caused the migration. The owner purchased Vercel Pro, and the scroll CNAME has been switched successfully. No Netlify upgrade or live customer charge was made. See [implementation evidence](../implementation-status.md).

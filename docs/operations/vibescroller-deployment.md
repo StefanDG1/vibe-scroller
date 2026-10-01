@@ -1,6 +1,6 @@
 # Deploy VibeScroller
 
-Latest hosting update, 1 October 2026: Netlify has paused new production builds after its credit limit. The owner selected Vercel next, without a purchase. The dedicated project and Production-only configuration are prepared; its Hobby plan cannot host this commercial product under current provider rules. Follow [the Vercel migration procedure](vercel-migration.md). The live domain still serves Netlify commit `23375b9`; `96e2fb8` is released on GitHub but was not deployed there.
+Latest hosting update, 1 October 2026: the owner upgraded the existing Vercel team to Pro. VibeScroller is deployed there from the selected GitHub repository. Namecheap's scroll CNAME points to `a987f11417c888aa.vercel-dns-017.com.`; the HTTPS health route and owner library work on the real domain. Parent DNS and mail records were preserved. Follow [the Vercel deployment and rollback procedure](vercel-migration.md). Historical Netlify and Worker instructions below describe previous hosts. Billing, legal and execution gates remain separate.
 
 The public source is `StefanDG1/vibe-scroller`. The staging web application is `https://vibescroller-staging.danistefangheorghiu.workers.dev`. Its backend is the dedicated Convex staging deployment `resolute-ladybug-999`. Earlier CompanyNerve deployment instructions describe upstream history and must not be used to deploy this product with upstream credentials.
 
