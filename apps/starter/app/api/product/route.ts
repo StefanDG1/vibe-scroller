@@ -123,15 +123,21 @@ export async function POST(req: NextRequest) {
       REAUTH_REQUIRED:
         "Sign in again before changing a sensitive connection. Your library has been kept.",
     };
+    const data =
+      error &&
+      typeof error === "object" &&
+      "data" in error &&
+      typeof error.data === "string"
+        ? error.data
+        : "";
+    const message = data || (error instanceof Error ? error.message : "");
     const category =
       error instanceof Error
-        ? error.message.includes(
+        ? message.includes(
             "Sign in again before changing a sensitive connection.",
           )
           ? "REAUTH_REQUIRED"
-          : Object.keys(messages).find((code) =>
-              error.message.includes(`${code}:`),
-            )
+          : Object.keys(messages).find((code) => message.includes(`${code}:`))
         : undefined;
     // Do not log payloads, source text, credentials, tokens or upstream errors.
     console.error("product_operation_failed", {

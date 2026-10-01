@@ -1,11 +1,13 @@
 import pricing from "../../contracts/pricing.json";
+import { ConvexError } from "convex/values";
 export { pricing };
-export class PolicyError extends Error {
+export class PolicyError extends ConvexError<string> {
   constructor(
     public code: string,
     message: string,
   ) {
     super(`${code}: ${message}`);
+    this.message = `${code}: ${message}`;
     this.name = "PolicyError";
   }
 }
