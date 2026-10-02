@@ -1,3 +1,5 @@
+import { managedMarketVerified } from "./managed-markets";
+
 type Environment = Record<string, string | undefined>;
 const tiers = ["STARTER", "PRO"],
   intervals = ["WEEKLY", "MONTHLY", "ANNUAL"];
@@ -20,10 +22,16 @@ export function billingReadiness(env: Environment) {
     env.LIVE_CHECKOUT_ENABLED === "true" &&
     env.BILLING_RELEASE_APPROVED === "true" &&
     (env.STRIPE_BILLING_ROUTE !== "managed_payments" ||
-      env.STRIPE_MANAGED_PAYMENTS_VERIFIED === "true");
+      (env.STRIPE_MANAGED_PAYMENTS_VERIFIED === "true" &&
+        managedMarketVerified(env)));
   return {
     catalogueConfigured,
     liveEnabled,
-    sandboxEnabled: catalogueConfigured && mode === "test",
+    sandboxEnabled:
+      catalogueConfigured &&
+      mode === "test" &&
+      (env.STRIPE_BILLING_ROUTE !== "managed_payments" ||
+        env.STRIPE_MANAGED_MARKET !== "tax_covered" ||
+        managedMarketVerified(env)),
   };
 }

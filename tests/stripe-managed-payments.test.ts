@@ -42,12 +42,13 @@ it("preserves the launch country allowlist in both test and live MoR routes", ()
       }),
     ).toThrow("unavailable in this country");
 });
-it("uses provider-collected eligibility for the explicitly approved consumer markets", () => {
-  for (const country of [undefined, "", "US", "CN", "invented"]) {
+it("uses verified tax coverage and provider-collected billing location", () => {
+  for (const country of [undefined, "RO", "DE", "US"]) {
     const result = checkoutPaymentRoute({
       ...base,
       country,
-      managedMarket: "provider_supported",
+      managedMarket: "tax_covered",
+      managedMarketVerified: true,
       managedVerified: true,
       live: true,
     });
@@ -57,10 +58,41 @@ it("uses provider-collected eligibility for the explicitly approved consumer mar
   expect(() =>
     checkoutPaymentRoute({
       ...base,
-      managedMarket: "provider_supported",
+      managedMarket: "tax_covered",
+      managedMarketVerified: true,
       live: true,
     }),
   ).toThrow("eligibility");
+  for (const live of [false, true]) {
+    expect(() =>
+      checkoutPaymentRoute({
+        ...base,
+        live,
+        managedVerified: true,
+        managedMarket: "tax_covered",
+      }),
+    ).toThrow("country enforcement");
+    for (const country of ["CN", "RS", "", "invented"]) {
+      expect(() =>
+        checkoutPaymentRoute({
+          ...base,
+          live,
+          country,
+          managedVerified: true,
+          managedMarket: "tax_covered",
+          managedMarketVerified: true,
+        }),
+      ).toThrow("unavailable in this country");
+    }
+  }
+  expect(() =>
+    checkoutPaymentRoute({
+      ...base,
+      live: true,
+      managedVerified: true,
+      managedMarket: "provider_supported",
+    }),
+  ).toThrow("tax-covered");
 });
 it("rejects an unknown managed market and does not broaden direct checkout", () => {
   expect(() => checkoutPaymentRoute({ ...base, managedMarket: "all" })).toThrow(

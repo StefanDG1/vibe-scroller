@@ -1,0 +1,23 @@
+{
+  "checkedDate": "2026-10-03",
+  "policy": "stripe-tax-covered-2026-10-03-v1",
+  "coveredCountryCount": 81,
+  "source": "https://docs.stripe.com/payments/managed-payments/tax-compliance",
+  "conditionalCountryExcluded": "RS: seller registration condition not evidenced",
+  "nativeLiveRuleEnabledAt100Percent": true,
+  "nativeSandboxRuleEnabledAt100Percent": true,
+  "enabledAllowRuleBypassAbsent": true,
+  "syntheticSandboxPaymentCases": {
+    "RO": "authorized",
+    "DE": "authorized",
+    "US": "authorized",
+    "CN": "blocked by matching country rule",
+    "missingBillingCountry": "blocked by matching country rule"
+  },
+  "realMoneyTest": false,
+  "limitations": [
+    "Native rule configuration and sandbox card outcomes do not constitute a live payment test.",
+    "Managed Payments Checkout and renewal acceptance after this rule change are recorded separately.",
+    "Country enforcement does not establish provider agreements, published policy approval or completion of the paid product."
+  ]
+}

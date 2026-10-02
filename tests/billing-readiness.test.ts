@@ -1,5 +1,9 @@
 import { expect, it } from "vitest";
 import { billingReadiness } from "../packages/providers/billing-readiness";
+import {
+  managedMarketPolicy,
+  managedRadarCondition,
+} from "../packages/providers/managed-markets";
 const env: Record<string, string> = {
   STRIPE_MODE: "live",
   STRIPE_SECRET_KEY: "rk_live_synthetic",
@@ -10,6 +14,18 @@ const env: Record<string, string> = {
   BILLING_RELEASE_APPROVED: "true",
   STRIPE_BILLING_ROUTE: "managed_payments",
   STRIPE_MANAGED_PAYMENTS_VERIFIED: "true",
+  STRIPE_MANAGED_MARKET: "tax_covered",
+  STRIPE_MANAGED_COUNTRY_RULE_PROOF: JSON.stringify({
+    accountId: "acct_synthetic",
+    mode: "live",
+    policy: managedMarketPolicy,
+    condition: managedRadarCondition,
+    enabled: true,
+    trafficPercent: 100,
+    allowRulesDisabled: true,
+    sandboxAcceptancePassed: true,
+    verifiedAt: new Date().toISOString(),
+  }),
 };
 for (const tier of ["STARTER", "PRO"])
   for (const interval of ["WEEKLY", "MONTHLY", "ANNUAL"])
@@ -28,6 +44,8 @@ it("requires the complete V1 catalogue, matching key mode and all live release s
     "LIVE_CHECKOUT_ENABLED",
     "BILLING_RELEASE_APPROVED",
     "STRIPE_MANAGED_PAYMENTS_VERIFIED",
+    "STRIPE_MANAGED_MARKET",
+    "STRIPE_MANAGED_COUNTRY_RULE_PROOF",
   ])
     expect(billingReadiness({ ...env, [key]: undefined }).liveEnabled).toBe(
       false,
@@ -47,6 +65,10 @@ it("exposes sandbox checkout independently of live activation and never treats l
       STRIPE_MODE: "test",
       STRIPE_SECRET_KEY: "rk_test_synthetic",
       BILLING_RELEASE_APPROVED: undefined,
+      STRIPE_MANAGED_COUNTRY_RULE_PROOF: JSON.stringify({
+        ...JSON.parse(env.STRIPE_MANAGED_COUNTRY_RULE_PROOF),
+        mode: "test",
+      }),
     }),
   ).toEqual({
     catalogueConfigured: true,

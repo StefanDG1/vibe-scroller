@@ -6,6 +6,7 @@ import { v } from "convex/values";
 import { pricing, ensure } from "../packages/policy";
 import { billingReadiness } from "../packages/providers/billing-readiness";
 import { checkoutPaymentRoute } from "../packages/providers/stripe-checkout";
+import { managedMarketVerified } from "../packages/providers/managed-markets";
 function stripe() {
   const key = process.env.STRIPE_SECRET_KEY;
   ensure(
@@ -269,6 +270,7 @@ export const checkout = action({
       route: process.env.STRIPE_BILLING_ROUTE,
       managedVerified: process.env.STRIPE_MANAGED_PAYMENTS_VERIFIED === "true",
       managedMarket: process.env.STRIPE_MANAGED_MARKET,
+      managedMarketVerified: managedMarketVerified(process.env),
     });
     const treatment = route.treatment;
     const price = priceId(a.tier, a.interval);
@@ -343,6 +345,7 @@ export const checkout = action({
         price,
         route.billingCountry,
         treatment,
+        route.marketPolicy,
         a.immediateService,
         "v1-draft",
       ]),
@@ -364,6 +367,7 @@ export const checkout = action({
           interval: a.interval,
           termsVersion: "v1-draft",
           taxTreatment: treatment,
+          marketPolicy: route.marketPolicy,
         },
         subscription_data: {
           metadata: {
@@ -449,6 +453,7 @@ export const topup = action({
       route: process.env.STRIPE_BILLING_ROUTE,
       managedVerified: process.env.STRIPE_MANAGED_PAYMENTS_VERIFIED === "true",
       managedMarket: process.env.STRIPE_MANAGED_MARKET,
+      managedMarketVerified: managedMarketVerified(process.env),
     });
     const price = process.env[`STRIPE_TOPUP_${a.pack}_PRICE_ID`];
     ensure(price, "BILLING_UNAVAILABLE", "Top-up price unavailable.");
@@ -478,6 +483,7 @@ export const topup = action({
         price,
         route.billingCountry,
         route.treatment,
+        route.marketPolicy,
         a.immediateService,
         "v1-draft",
       ]),
@@ -498,6 +504,7 @@ export const topup = action({
           checkoutKey: reserved.key,
           termsVersion: "v1-draft",
           taxTreatment: route.treatment,
+          marketPolicy: route.marketPolicy,
           organizationId: a.organizationId,
         },
         success_url: `${origin}/app/${a.organizationId}/usage`,

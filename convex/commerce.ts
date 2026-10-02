@@ -106,7 +106,9 @@ export const catalogue = query({
       countries: tax?.countries ?? ["RO"],
       billingCountryRequired:
         process.env.STRIPE_BILLING_ROUTE !== "managed_payments" ||
-        process.env.STRIPE_MANAGED_MARKET !== "provider_supported",
+        !["provider_supported", "tax_covered"].includes(
+          process.env.STRIPE_MANAGED_MARKET ?? "",
+        ),
       ...billingReadiness(process.env),
     };
   },

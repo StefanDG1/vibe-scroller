@@ -2,6 +2,8 @@
 
 Status: owner approved; implementation and production acceptance in progress. Date: October 2, 2026.
 
+October 3 update: [ADR 035](035-managed-tax-covered-markets.md) supersedes the live market configuration below. Payment acceptance and indirect-tax coverage are distinct. `provider_supported` cannot enable live checkout; use verified `tax_covered` enforcement.
+
 The owner explicitly approved checkout wherever Stripe Managed Payments supports the customer, replacing the earlier EU VAT-territory-only launch scope. The offer remains for private consumers. This decision does not authorize business purchases, direct billing outside its reviewed countries, new purchases, a real-money test, or a change to Exponential Education's tax registrations.
 
 Stripe's [current eligibility documentation](https://docs.stripe.com/payments/managed-payments/eligibility), retrieved with Stripe CLI 1.53.0 on October 2, states that customer purchases are supported in more than 195 countries and territories, subject to its restricted territories and account/product eligibility. Stripe remains authoritative for the actual billing location and transaction. Do not market this as unrestricted worldwide availability or maintain a second unofficial sanctions list in the app.
