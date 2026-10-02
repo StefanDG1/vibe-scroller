@@ -3804,7 +3804,9 @@ function RunCard({ run, title, call, busy, readOnly }: any) {
             )}
         </>
       )}
-      {!["completed", "canceled", "publishing"].includes(run.state) && (
+      {!["completed", "canceled", "failed", "publishing"].includes(
+        run.state,
+      ) && (
         <button
           className="secondary"
           disabled={busy || readOnly}

@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-02T14:58:05.094Z",
+  "commit": "28de29c6a52d9f4687ddd10d49a81863ffd5dac2",
+  "environment": "production",
+  "synthetic": true,
+  "approval": "operator authenticated CLI",
+  "approvedBaseSha": "d781b87f353bd2c2ada192870e91beea5dada9fc",
+  "actualGitHubBaseSha": "28de29c6a52d9f4687ddd10d49a81863ffd5dac2",
+  "state": "failed as expected",
+  "baseChangeRecognized": true,
+  "sandboxStarted": false,
+  "modelRequestIssued": false,
+  "patchProduced": false,
+  "prCreated": false,
+  "spentCreditsUnchanged": true,
+  "reservedBalance": 0,
+  "newApprovalRequired": true,
+  "paidV1Established": false
+}

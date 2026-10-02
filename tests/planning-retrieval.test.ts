@@ -181,6 +181,8 @@ it("keeps cancellation fenced and reserved until matching teardown evidence, the
     return id;
   });
   await a.mutation(api.jobs.cancel, { id });
+  await a.mutation(api.jobs.cancel, { id });
+  expect((await t.run((ctx) => ctx.db.get(id)))!.generation).toBe(2);
   await t.mutation(internal.jobs.failCloud, {
     id,
     generation: 1,

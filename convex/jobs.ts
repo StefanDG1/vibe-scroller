@@ -714,6 +714,7 @@ export const cancel = mutation({
     const r = await ctx.db.get(a.id);
     if (!r) fail("Run unavailable.");
     await writeAccess(ctx, r.organizationId);
+    if (r.state === "canceled") return;
     ensure(
       !["publishing", "completed"].includes(r.state),
       "PUBLICATION_IN_PROGRESS",
