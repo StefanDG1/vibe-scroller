@@ -149,16 +149,27 @@ export async function preparePersonalInput(
         !Number.isSafeInteger(s.endMs) ||
         s.startMs < 0 ||
         s.endMs < s.startMs ||
-        s.endMs > media.durationMs
+        s.endMs > result.durationMs ||
+        s.startMs >= media.durationMs ||
+        s.endMs > media.durationMs + 1000
       )
         throw new Error("PERSONAL_TRANSCRIPT_INVALID");
       chars += s.text.length;
       if (chars > 60000) throw new Error("PERSONAL_TRANSCRIPT_INVALID");
+      if (
+        s.endMs > media.durationMs &&
+        !transcriptionWarnings.includes(
+          "The final transcript segment timing was clipped to the actual audio duration.",
+        )
+      )
+        transcriptionWarnings.push(
+          "The final transcript segment timing was clipped to the actual audio duration.",
+        );
       return {
         id: `segment-${index}`,
         text: s.text,
         startMs: s.startMs,
-        endMs: s.endMs,
+        endMs: Math.min(s.endMs, media.durationMs),
       };
     });
   }

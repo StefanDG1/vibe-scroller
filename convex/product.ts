@@ -492,7 +492,24 @@ export const detail = query({
       (organizationId !== undefined && organizationId !== s.organizationId)
     )
       fail("Source unavailable.");
-    await access(ctx, s.organizationId);
+    const reader = await access(ctx, s.organizationId);
+    const analysisHash = s.analysis
+      ? await digest(JSON.stringify(s.analysis))
+      : undefined;
+    const currentReview = analysisHash
+      ? await ctx.db
+          .query("feedback")
+          .withIndex("by_target_actor", (q) =>
+            q
+              .eq("organizationId", s.organizationId)
+              .eq("target", s._id)
+              .eq("actor", reader.actor._id)
+              .eq("sourceGeneration", s.generation)
+              .eq("analysisHash", analysisHash),
+          )
+          .order("desc")
+          .first()
+      : null;
     const proposals = await ctx.db
       .query("proposals")
       .withIndex("by_source", (q) => q.eq("sourceId", id))
@@ -503,6 +520,15 @@ export const detail = query({
       .collect();
     return {
       ...s,
+      analysisHash,
+      analysisReview: currentReview?.qualityVerdict
+        ? {
+            verdict: currentReview.qualityVerdict,
+            note: currentReview.note,
+            reviewedAt: currentReview.createdAt,
+            generation: currentReview.sourceGeneration,
+          }
+        : undefined,
       objectKey: undefined,
       selectionPendingKey: undefined,
       selectionActor: undefined,
@@ -715,6 +741,9 @@ export async function captureOne(
     generation: 0,
     createdAt: now,
     updatedAt: now,
+    ...(a.kind === "url" && process.env.LINK_PREVIEWS_ENABLED === "true"
+      ? { linkPreview: { state: "queued" as const, updatedAt: now } }
+      : {}),
   });
   await ctx.db.patch(counts._id, {
     active: counts.active + 1,
@@ -728,8 +757,76 @@ export async function captureOne(
     if (asset) await ctx.db.patch(asset._id, { sourceId: id, updatedAt: now });
   }
   await audit(ctx, a.organizationId, actor.actor._id, "source.captured", id);
+  if (a.kind === "url" && process.env.LINK_PREVIEWS_ENABLED === "true")
+    await workflow.start(
+      ctx,
+      internal.workflows.linkPreview,
+      { id },
+      {
+        startAsync: true,
+        onComplete: internal.workflows.completed,
+        context: null,
+      },
+    );
   return id;
 }
+export async function queueLinkPreview(ctx: MutationCtx, id: Id<"sources">) {
+  if (process.env.LINK_PREVIEWS_ENABLED !== "true") return false;
+  const source = await ctx.db.get(id);
+  if (
+    !source ||
+    source.state === "deleted" ||
+    source.kind !== "url" ||
+    !source.url ||
+    !source.rightsAttested ||
+    ["queued", "loading", "ready"].includes(source.linkPreview?.state || "") ||
+    (source.linkPreview && source.linkPreview.updatedAt > Date.now() - 86400000)
+  )
+    return false;
+  await ctx.db.patch(id, {
+    linkPreview: { state: "queued", updatedAt: Date.now() },
+  });
+  await workflow.start(
+    ctx,
+    internal.workflows.linkPreview,
+    { id },
+    {
+      startAsync: true,
+      onComplete: internal.workflows.completed,
+      context: null,
+    },
+  );
+  return true;
+}
+export const queueOwnerPreviews = internalMutation({
+  args: { ...org, ids: v.array(v.id("sources")) },
+  handler: async (ctx, a) => {
+    const organization = await ctx.db.get(a.organizationId);
+    const owner = organization
+      ? await ctx.db.get(organization.createdBy)
+      : null;
+    ensure(
+      organization?.status === "active" &&
+        owner?.status === "active" &&
+        personalAllowed(owner.subject) &&
+        a.ids.length <= 50 &&
+        new Set(a.ids).size === a.ids.length,
+      "FORBIDDEN",
+      "Bounded owner preview backfill required.",
+    );
+    let queued = 0;
+    for (const id of a.ids) {
+      const source = await ctx.db.get(id);
+      ensure(
+        source?.organizationId === a.organizationId,
+        "FORBIDDEN",
+        "Preview source scope changed.",
+      );
+      if (await queueLinkPreview(ctx, id)) queued++;
+    }
+    return { queued };
+  },
+});
 
 export async function digest(text: string) {
   const b = await crypto.subtle.digest(
@@ -1231,6 +1328,13 @@ export async function redactSource(ctx: MutationCtx, id: Id<"sources">) {
     .withIndex("by_source", (q) => q.eq("sourceId", id))
     .collect();
   for (const p of proposals) await ctx.db.delete(p._id);
+  for (const review of await ctx.db
+    .query("feedback")
+    .withIndex("by_target_actor", (q) =>
+      q.eq("organizationId", s.organizationId).eq("target", id),
+    )
+    .collect())
+    await ctx.db.delete(review._id);
   for (const stage of await ctx.db
     .query("mediaStages")
     .withIndex("by_source", (q) => q.eq("sourceId", id))
@@ -1270,6 +1374,7 @@ export async function redactSource(ctx: MutationCtx, id: Id<"sources">) {
     personalMedia: undefined,
     acquisition: undefined,
     repositorySelection: undefined,
+    linkPreview: undefined,
     originalSavedAt: undefined,
     url: undefined,
     tags: [],
@@ -1584,6 +1689,86 @@ export const addProposal = internalMutation({
         updatedAt: Date.now(),
       });
     return proposalId;
+  },
+});
+export const reviewAnalysis = mutation({
+  args: {
+    id: v.id("sources"),
+    generation: v.number(),
+    analysisHash: v.string(),
+    verdict: v.union(
+      v.literal("accurate"),
+      v.literal("missing_details"),
+      v.literal("incorrect"),
+      v.literal("unsure"),
+    ),
+    note: v.string(),
+  },
+  handler: async (ctx, a) => {
+    const source = await ctx.db.get(a.id);
+    if (!source || source.state === "deleted") fail("Source unavailable.");
+    const { actor } = await writeAccess(ctx, source.organizationId);
+    ensure(
+      source.state === "ready" &&
+        source.analysis &&
+        source.generation === a.generation &&
+        (await digest(JSON.stringify(source.analysis))) === a.analysisHash,
+      "APPROVAL_STALE",
+      "The analysis changed. Reload it before reviewing.",
+    );
+    ensure(
+      a.note.length <= 2000 && !containsSecret(a.note),
+      "INVALID_INPUT",
+      "Keep review notes under 2,000 characters and omit credentials.",
+    );
+    const note = a.note.trim();
+    const previous = await ctx.db
+      .query("feedback")
+      .withIndex("by_target_actor", (q) =>
+        q
+          .eq("organizationId", source.organizationId)
+          .eq("target", source._id)
+          .eq("actor", actor._id)
+          .eq("sourceGeneration", a.generation)
+          .eq("analysisHash", a.analysisHash),
+      )
+      .order("desc")
+      .first();
+    if (previous?.qualityVerdict === a.verdict && previous.note === note)
+      return {
+        verdict: a.verdict,
+        note,
+        generation: a.generation,
+        reviewedAt: previous.createdAt,
+      };
+    await limit(ctx, `analysis-review:${actor._id}`, 20);
+    const now = Date.now();
+    await ctx.db.insert("feedback", {
+      organizationId: source.organizationId,
+      actor: actor._id,
+      target: source._id,
+      action: "analysis_quality_review",
+      qualityVerdict: a.verdict,
+      note,
+      sourceGeneration: a.generation,
+      analysisHash: a.analysisHash,
+      benefit: "not_measured",
+      createdAt: now,
+      updatedAt: now,
+    });
+    await audit(
+      ctx,
+      source.organizationId,
+      actor._id,
+      "analysis.reviewed",
+      source._id,
+    );
+    return {
+      verdict: a.verdict,
+      note,
+      generation: a.generation,
+      reviewedAt: now,
+    };
   },
 });
 export const feedback = mutation({

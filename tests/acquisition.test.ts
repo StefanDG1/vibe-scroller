@@ -8,7 +8,17 @@ import release from "../infra/downloader.json";
 import { acquirer } from "../packages/media/acquirer";
 import { hardenAcquisition } from "../packages/providers/acquisition-isolation";
 import type { JobSandbox } from "../packages/providers/sandbox";
+import { execFileSync } from "node:child_process";
 describe("permitted source acquisition", () => {
+  it("exercises metadata, separate-stream transport and existing Linux subprocess boundaries without a real provider", () => {
+    expect(() =>
+      execFileSync(
+        process.env.PYTHON_BIN || "python",
+        ["tests/acquisition_worker_test.py"],
+        { cwd: process.cwd(), stdio: "pipe", timeout: 10000 },
+      ),
+    ).not.toThrow();
+  });
   it("restricts retrieval to single supported source identifiers and strips tracking", () => {
     expect(
       acquisitionPolicy(

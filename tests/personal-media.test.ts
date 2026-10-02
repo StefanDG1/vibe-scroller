@@ -142,3 +142,16 @@ it("keeps the bounded terminal timing correction visible and excludes arbitrary 
   });
   expect(input.transcriptionWarnings).toEqual([warning]);
 });
+it("clips PCM rounding past video EOF only within the independently validated audio duration", async () => {
+  const input = await preparePersonalInput(media, {
+    fetchImpl,
+    asr: {},
+    transcribe: async () => ({
+      ...(await transcribe()),
+      durationMs: 8003,
+      segments: [{ text: "Final speech", startMs: 7000, endMs: 8003 }],
+    }),
+  });
+  expect(input.transcript[0].endMs).toBe(8000);
+  expect(input.transcriptionWarnings).toHaveLength(1);
+});

@@ -8,6 +8,16 @@ source = root / 'input'
 assert source.is_file() and not source.is_symlink() and source.stat().st_size <= 250_000_000
 def run(args, timeout=60):
     return subprocess.run(args, check=True, capture_output=True, timeout=timeout, cwd=root)
+extra_audio = root / 'audio-input'
+if extra_audio.exists():
+    assert extra_audio.is_file() and not extra_audio.is_symlink()
+    assert source.stat().st_size + extra_audio.stat().st_size <= 250_000_000
+    combined = root / 'combined-input'
+    run(['ffmpeg','-nostdin','-threads','2','-protocol_whitelist','file','-i',str(source),
+         '-protocol_whitelist','file','-i',str(extra_audio),'-map','0:v:0','-map','1:a:0',
+         '-c','copy','-t','601','-f','matroska',str(combined)],45)
+    assert combined.is_file() and combined.stat().st_size <= 250_000_000
+    source = combined
 probe = json.loads(run(['ffprobe','-v','error','-show_streams','-show_format','-of','json',str(source)],15).stdout)
 duration = float(probe['format'].get('duration', 0))
 assert 0 < duration <= 600

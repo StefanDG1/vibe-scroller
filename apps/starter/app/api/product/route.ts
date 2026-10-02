@@ -28,6 +28,7 @@ const operations = {
   testKey: ["action", api.integrations.testKey],
   revoke: ["mutation", api.jobs.revoke],
   feedback: ["mutation", api.product.feedback],
+  reviewAnalysis: ["mutation", api.product.reviewAnalysis],
   preferences: ["mutation", api.commerce.preferences],
   aiPreference: ["mutation", api.aiPreferences.save],
   revokeDevice: ["mutation", api.devices.revoke],

@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { AccountMenu } from "./account-menu";
 import { PlanEditor } from "./plan-editor";
+import { AnalysisReview } from "./analysis-review";
 import { reviewedPlan } from "../../../packages/plans/editor";
 import { CookieSettings, rejectAnalytics } from "./consent";
 import { track } from "@/lib/analytics";
@@ -110,6 +111,9 @@ const Button = ({
 
 function SourceThumbnail({ source, demo }: { source: any; demo: boolean }) {
   const frame =
+    (source.linkPreview?.assetId
+      ? { id: source.linkPreview.assetId, kind: "frame" }
+      : undefined) ??
     (source.originalMediaEvidence ?? source.mediaEvidence ?? []).find(
       (e: any) => e.kind === "frame",
     ) ??
@@ -2890,6 +2894,26 @@ function SourceDetail({
       </div>
       <section className="panel">
         <h2>Main points</h2>
+        {!demo &&
+          !detailLoading &&
+          detail.state === "ready" &&
+          detail.analysisHash && (
+            <AnalysisReview
+              key={`${sourceId}:${detail.generation}:${detail.analysisHash}`}
+              sourceId={sourceId}
+              generation={detail.generation}
+              analysisHash={detail.analysisHash}
+              initial={detail.analysisReview}
+              disabled={readOnly || busy}
+              call={call}
+              onSaved={(review) =>
+                setDetail((current: any) => ({
+                  ...current,
+                  analysisReview: review,
+                }))
+              }
+            />
+          )}
         {!detailLoading && insights.length > 1 && (
           <nav className="insight-index" aria-label="Main points">
             {insights.map((insight: any, index: number) => (

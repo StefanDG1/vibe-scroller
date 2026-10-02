@@ -46,6 +46,7 @@ import type * as limitsV1 from "../limitsV1.js";
 import type * as localResults from "../localResults.js";
 import type * as maintenance from "../maintenance.js";
 import type * as media from "../media.js";
+import type * as operatorAcceptance from "../operatorAcceptance.js";
 import type * as organizations from "../organizations.js";
 import type * as payments from "../payments.js";
 import type * as personalAnalysis from "../personalAnalysis.js";
@@ -65,6 +66,8 @@ import type * as runnerProtocol from "../runnerProtocol.js";
 import type * as sandboxBroker from "../sandboxBroker.js";
 import type * as sandboxSnapshots from "../sandboxSnapshots.js";
 import type * as settlementAccounting from "../settlementAccounting.js";
+import type * as sourcePreview from "../sourcePreview.js";
+import type * as sourcePreviewState from "../sourcePreviewState.js";
 import type * as toolMaintenance from "../toolMaintenance.js";
 import type * as workflows from "../workflows.js";
 
@@ -113,6 +116,7 @@ declare const fullApi: ApiFromModules<{
   localResults: typeof localResults;
   maintenance: typeof maintenance;
   media: typeof media;
+  operatorAcceptance: typeof operatorAcceptance;
   organizations: typeof organizations;
   payments: typeof payments;
   personalAnalysis: typeof personalAnalysis;
@@ -132,6 +136,8 @@ declare const fullApi: ApiFromModules<{
   sandboxBroker: typeof sandboxBroker;
   sandboxSnapshots: typeof sandboxSnapshots;
   settlementAccounting: typeof settlementAccounting;
+  sourcePreview: typeof sourcePreview;
+  sourcePreviewState: typeof sourcePreviewState;
   toolMaintenance: typeof toolMaintenance;
   workflows: typeof workflows;
 }>;

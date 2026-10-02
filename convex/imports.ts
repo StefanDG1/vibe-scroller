@@ -3,7 +3,7 @@ import { v } from "convex/values";
 import { limit, audit, writeAccess } from "./lib";
 import { ensure } from "../packages/policy";
 import { parseLinkImport } from "../packages/imports";
-import { captureOne } from "./product";
+import { captureOne, queueLinkPreview } from "./product";
 
 export const links = mutation({
   args: {
@@ -45,6 +45,7 @@ export const links = mutation({
         )
         .unique();
       if (old && old.state !== "deleted") {
+        await queueLinkPreview(ctx, old._id);
         entries.push({ row: row.row, status: "duplicate", sourceId: old._id });
         continue;
       }

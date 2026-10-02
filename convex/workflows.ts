@@ -8,6 +8,15 @@ import { v } from "convex/values";
 export const workflow = new WorkflowManager(components.workflow, {
   workpoolOptions: { maxParallelism: 2, retryActionsByDefault: false },
 });
+export const linkPreview = workflow
+  .define({ args: { id: v.id("sources") }, returns: v.null() })
+  .handler(async (step, a): Promise<null> => {
+    await step.runAction(internal.sourcePreview.retrieve, a, {
+      retry: false,
+      name: "bounded-private-link-preview-v1",
+    });
+    return null;
+  });
 export const sourceAnalysis = workflow
   .define({
     args: { id: v.id("sources"), generation: v.number(), media: v.boolean() },

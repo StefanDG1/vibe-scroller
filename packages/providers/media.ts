@@ -69,7 +69,7 @@ export async function prepareMedia(
       });
       await sandbox.commands.run("python3 /home/user/media/acquire.py", {
         user: "user",
-        timeoutMs: 100000,
+        timeoutMs: 120000,
       });
       const raw = await sandbox.files.read("/home/user/media/acquisition.json");
       ensure(
@@ -79,7 +79,8 @@ export async function prepareMedia(
       );
       acquisition = acquisitionManifest.parse(JSON.parse(raw));
       ensure(
-        acquisition.status === "acquired",
+        acquisition.status === "acquired" ||
+          acquisition.status === "downloaded",
         "SOURCE_UNAVAILABLE",
         acquisitionMessage(acquisition.status),
       );
@@ -134,6 +135,12 @@ export async function prepareMedia(
       "Media manifest exceeded its limit.",
     );
     const manifest = decoderManifest(JSON.parse(rawManifest), normalizedPcm);
+    if (acquisition)
+      acquisition = acquisitionManifest.parse({
+        ...acquisition,
+        status: "acquired",
+        durationSeconds: manifest.durationSeconds,
+      });
     const audio = manifest.audio
       ? await sandbox.files.read(`/home/user/media/${manifest.audio}`, {
           format: "bytes",

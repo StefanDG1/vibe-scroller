@@ -1,0 +1,17 @@
+{
+  "preparedAt": "2026-10-02T18:41:40.669Z",
+  "codeCommit": "5964d55c2223336d4b4c1363fc7c6c02ad5b5765",
+  "environment": "production",
+  "examples": 5,
+  "realOwnerPosts": 4,
+  "syntheticControlClips": 1,
+  "actualReadySources": 5,
+  "totalSavedInsights": 25,
+  "sourceSnapshotsBoundToGenerationAndAnalysisHash": true,
+  "humanReviewed": 0,
+  "inferenceRerun": false,
+  "sourceContentPublished": false,
+  "split": "development",
+  "completeBenchmark": false,
+  "privateReviewPackTracked": false
+}

@@ -86,6 +86,7 @@ export const acquisitionManifest = z
     schemaVersion: z.literal("1.0.0"),
     status: z.enum([
       "acquired",
+      "downloaded",
       "needs_auth",
       "rate_limited",
       "unavailable",
@@ -115,6 +116,11 @@ export const acquisitionManifest = z
         code: "custom",
         message: "Acquired media needs verified bounds.",
       });
+    if (value.status === "downloaded" && !value.byteLength)
+      ctx.addIssue({
+        code: "custom",
+        message: "Downloaded media needs a bounded byte count.",
+      });
   });
 
 export function acquisitionMessage(status: string) {
@@ -131,6 +137,8 @@ export function acquisitionMessage(status: string) {
       over_limit: "This post exceeds the 250 MB or 10-minute processing limit.",
       failed:
         "Link retrieval did not finish. Review its status before retrying; no alternate AI provider was used.",
+      downloaded:
+        "The video was retrieved, but media preparation did not finish. Review its status before retrying.",
     }[status] ?? "Link retrieval did not complete."
   );
 }

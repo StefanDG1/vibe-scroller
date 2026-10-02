@@ -101,38 +101,53 @@ def acquire(raw):
     common = [BINARY, '--ignore-config', '--no-plugin-dirs', '--no-cache-dir',
               '--no-playlist', '--no-warnings', '--no-progress', '--socket-timeout', '10',
               '--retries', '0', '--fragment-retries', '0', '--extractor-retries', '0',
-              '--max-downloads', '1', '--max-filesize', str(MAX_BYTES),
-              '--format', 'best[height<=1080][vcodec!=none][acodec!=none]/best[height<=1080]/bestaudio',
+              '--max-filesize', str(MAX_BYTES), '--fixup', 'never',
               '--', raw]
     proxy = os.environ.get('VIBE_DOWNLOAD_PROXY')
     if proxy:
         assert proxy == 'http://127.0.0.1:47891'
         common = common[:-2] + ['--proxy', proxy] + common[-2:]
     code, stdout, stderr = bounded_run(common[:-2] + ['--skip-download', '--dump-single-json'] + common[-2:], 25)
-    if code not in (0, 101) or not stdout.strip():
+    if code != 0 or not stdout.strip():
         return {**base, 'status': failure_status(stderr)}
     info = json.loads(stdout)
     if info.get('_type') in ('playlist', 'multi_video') or info.get('entries') is not None or info.get('is_live'):
         return {**base, 'status': 'unsupported'}
     duration = info.get('duration')
-    if not isinstance(duration, (int, float)) or not math.isfinite(duration) or duration <= 0:
+    if duration is not None and (not isinstance(duration, (int, float)) or not math.isfinite(duration) or duration <= 0):
         return {**base, 'status': 'unsupported'}
-    if duration > 600 or (info.get('filesize') or 0) > MAX_BYTES:
+    if (duration is not None and duration > 600) or (info.get('filesize') or 0) > MAX_BYTES:
         return {**base, 'status': 'over_limit'}
     base.update(title=str(info.get('title') or '')[:160],
                 description=str(info.get('description') or '')[:6000],
-                extractor=str(info.get('extractor_key') or '')[:80],
-                durationSeconds=duration)
-    code, _, stderr = bounded_run(common[:-2] + ['--output', str(ROOT / 'input'),
-                                               '--no-part', '--no-overwrites'] + common[-2:], 60, 64_000)
-    path = ROOT / 'input'
-    # yt-dlp may return 101 when its one-download bound was reached successfully.
-    if code not in (0, 101) or not path.is_file() or path.is_symlink():
-        return {**base, 'status': failure_status(stderr)}
-    size = path.stat().st_size
+                extractor=str(info.get('extractor_key') or '')[:80])
+    if duration is not None:
+        base['durationSeconds'] = duration
+    formats = info.get('formats') or []
+    video = any(f.get('vcodec') not in (None, 'none') for f in formats)
+    audio = any(f.get('acodec') not in (None, 'none') for f in formats)
+    if not video and not audio:
+        return {**base, 'status': 'unsupported'}
+    # Instagram can publish video and audio as separate representations. Fetch
+    # each directly, then let the network-disabled decoder combine them. Never
+    # invoke a postprocessor while the source-network broker is reachable.
+    downloads = [('input', 'bestvideo[height<=?1920][width<=?1920]/best[height<=?1920][width<=?1920][vcodec!=none]' if video else 'bestaudio')]
+    if video and audio:
+        downloads.append(('audio-input', 'bestaudio/best[acodec!=none]'))
+    size = 0
+    for name, selection in downloads:
+        code, _, stderr = bounded_run(common[:-2] + ['--format', selection, '--output', str(ROOT / name),
+                                                     '--max-downloads', '1', '--no-part', '--no-overwrites'] + common[-2:], 40, 64_000)
+        path = ROOT / name
+        # 101 is only accepted after the exact bounded file exists.
+        if code not in (0, 101) or not path.is_file() or path.is_symlink():
+            return {**base, 'status': failure_status(stderr)}
+        size += path.stat().st_size
     if not 0 < size <= MAX_BYTES:
         return {**base, 'status': 'over_limit'}
-    return {**base, 'status': 'acquired', 'byteLength': size}
+    # This is transport evidence only. The caller disables all source networking
+    # before measuring duration and decoding; absent platform duration is normal.
+    return {**base, 'status': 'downloaded', 'byteLength': size}
 
 
 if __name__ == '__main__':

@@ -1,0 +1,20 @@
+{
+  "checkedAt": "2026-10-02T19:05:27.016Z",
+  "environment": "production-provider integration",
+  "source": "another real owner saved Instagram link",
+  "downloaderVersion": "2026.08.19",
+  "credentialsProvided": false,
+  "uploadedMediaProvided": false,
+  "transcriptProvided": false,
+  "browserCaptureUsed": false,
+  "measuredDurationSeconds": 34.804,
+  "pcmBytes": 1114636,
+  "visualFrames": 22,
+  "coverage": "full_sampled",
+  "computeSeconds": 79,
+  "workerTerminated": true,
+  "privateSourceContentTracked": false,
+  "summaryVerified": false,
+  "allPlatformLinksVerified": false,
+  "completeBenchmark": false
+}

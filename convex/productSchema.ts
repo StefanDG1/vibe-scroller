@@ -214,6 +214,18 @@ export const productTables = {
     .index("by_expiry", ["expiresAt"]),
   sources: defineTable({
     ...tenant,
+    linkPreview: v.optional(
+      v.object({
+        state: v.union(
+          v.literal("queued"),
+          v.literal("loading"),
+          v.literal("ready"),
+          v.literal("unavailable"),
+        ),
+        assetId: v.optional(v.id("assets")),
+        updatedAt: v.number(),
+      }),
+    ),
     acquisition: v.optional(
       v.object({
         basis: v.literal("permitted_public_fetch"),
@@ -522,7 +534,25 @@ export const productTables = {
     action: v.string(),
     note: v.string(),
     benefit: v.string(),
-  }).index("by_org", ["organizationId"]),
+    sourceGeneration: v.optional(v.number()),
+    analysisHash: v.optional(v.string()),
+    qualityVerdict: v.optional(
+      v.union(
+        v.literal("accurate"),
+        v.literal("missing_details"),
+        v.literal("incorrect"),
+        v.literal("unsure"),
+      ),
+    ),
+  })
+    .index("by_org", ["organizationId"])
+    .index("by_target_actor", [
+      "organizationId",
+      "target",
+      "actor",
+      "sourceGeneration",
+      "analysisHash",
+    ]),
   notifications: defineTable({
     ...tenant,
     key: v.string(),
