@@ -25,7 +25,7 @@ export const execute = internalAction({
     let terminatedSandboxId: string | undefined;
     let stage = "authorization";
     try {
-      await authorizeRepository(ctx, run.repo);
+      await authorizeRepository(ctx, run.repo, run.baseSha);
       stage = "sandbox";
       computeStarted = Date.now();
       sandbox = await createCodingSandbox(run.maxSeconds);
@@ -105,7 +105,7 @@ export const execute = internalAction({
         status.state === "canceled"
       )
         throw new Error("Run canceled.");
-      await authorizeRepository(ctx, run.repo);
+      await authorizeRepository(ctx, run.repo, run.baseSha);
       stage = "isolated_checks";
       await ctx.runMutation(internal.jobs.isolatedChecksStarted, {
         id: run._id,
@@ -144,6 +144,8 @@ export const execute = internalAction({
               "PROVIDER_ERROR",
               "FORBIDDEN",
               "SETUP_REQUIRED",
+              "BASE_CHANGED",
+              "APPROVAL_STALE",
             ].find((code) => error.message.includes(code)) ?? error.name)
           : "UnknownError";
       console.error(JSON.stringify({ stage, category }));
@@ -153,7 +155,10 @@ export const execute = internalAction({
         credits,
         beforeSandboxCreation:
           stage === "authorization" && computeStarted === 0,
-        error: `Cloud task failed or stopped at ${stage} (${category}). Review provider and usage; no draft PR was published.`,
+        error:
+          category === "BASE_CHANGED"
+            ? "Repository base changed. Refresh the project snapshot and review a new plan approval. No draft PR was published."
+            : `Cloud task failed or stopped at ${stage} (${category}). Review provider and usage; no draft PR was published.`,
       });
     } finally {
       if (sandbox) {

@@ -4,6 +4,7 @@ import { internal } from "../_generated/api";
 import { decrypt, encrypt } from "../../packages/providers/secrets";
 import { github } from "../../packages/providers/github";
 import { ensure } from "../../packages/policy";
+import { verifyExecutionBase } from "../../packages/repositories/executionBase";
 import {
   decodeGitHubCredential,
   githubRefreshRequired,
@@ -17,7 +18,9 @@ export async function authorizeRepository(
     installationId: number;
     providerId: number;
     fullName: string;
+    branch?: string;
   },
+  executionBaseSha?: string,
 ) {
   const link = await ctx.runQuery(internal.githubLinks.binding, {
     organizationId: repo.organizationId,
@@ -86,4 +89,6 @@ export async function authorizeRepository(
     "FORBIDDEN",
     "Repository access changed. Reconnect GitHub.",
   );
+  if (executionBaseSha)
+    await verifyExecutionBase(repo, current, executionBaseSha, token);
 }

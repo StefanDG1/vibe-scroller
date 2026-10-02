@@ -33,3 +33,5 @@ Worker verification and public commercial approval are separate. Set CLOUD_PUBLI
 ## Reconcile failures before work begins
 
 A trusted authorization failure before sandbox creation or model use releases the unused service-credit reservation at zero. Its receipt requires no sandbox-start marker, no issued customer-provider request and the matching generation. Cancellation stays canceled; accepted output and publication receipts cannot be overwritten by late failures. Unknown creation, model usage or teardown still retains its hold for reconciliation. This is not a generic zero-cost exception.
+
+The worker also compares GitHub's actual default branch/head with the exact approved base before creation and before checks. A stored snapshot match cannot substitute for this provider check. Refresh the project snapshot and review a new approval after BASE_CHANGED; do not silently rebase. See [ADR 026](../adr/026-current-github-base-before-execution.md).
