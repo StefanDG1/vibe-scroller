@@ -34,6 +34,20 @@ export const stripeEvent = internalAction({
     const own = await client.accounts.retrieve(null);
     if (own.id !== account) return { status: 400 };
     const object = event.data.object as any;
+    if (
+      [
+        "checkout.session.completed",
+        "checkout.session.async_payment_succeeded",
+      ].includes(event.type) &&
+      object.payment_status === "paid" &&
+      object.metadata?.product === "vibescroller" &&
+      typeof object.metadata.checkoutKey === "string" &&
+      typeof object.customer === "string"
+    )
+      await ctx.runMutation(internal.billing.checkoutCompleted, {
+        customerId: object.customer,
+        key: object.metadata.checkoutKey,
+      });
     if (event.type === "charge.refunded") {
       const charge = await client.charges.retrieve(object.id);
       const linked = await ctx.runQuery(internal.billing.byCustomer, {

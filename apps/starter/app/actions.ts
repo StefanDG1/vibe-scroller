@@ -100,6 +100,9 @@ export async function buyV1Credits(_: FormState, d: FormData) {
     ).action(api.billingV1.topup, {
       organizationId: org(d),
       pack: val(d, "pack") as "200" | "550",
+      country: val(d, "country"),
+      termsAccepted: d.get("terms") === "on",
+      immediateService: d.get("immediate") === "on",
     });
   } catch {
     return {

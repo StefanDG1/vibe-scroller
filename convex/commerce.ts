@@ -9,6 +9,7 @@ import { access, writeAccess, audit, recentAuthentication, limit } from "./lib";
 import { requireInvoiceOperator } from "./lib/invoiceOperator";
 import { wallet } from "./product";
 import { pricing, ensure } from "../packages/policy";
+import { billingReadiness } from "../packages/providers/billing-readiness";
 import type { MutationCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 async function invoiceRefundFraction(
@@ -103,19 +104,7 @@ export const catalogue = query({
       pricing,
       taxMode: tax?.domestic ?? "pending_evidence",
       countries: tax?.countries ?? ["RO"],
-      liveEnabled: false,
-      sandboxEnabled:
-        process.env.STRIPE_MODE !== "live" &&
-        /^[sr]k_test_/.test(process.env.STRIPE_SECRET_KEY ?? "") &&
-        !!process.env.STRIPE_V1_WEBHOOK_SECRET &&
-        [
-          "STARTER_WEEKLY",
-          "STARTER_MONTHLY",
-          "STARTER_ANNUAL",
-          "PRO_WEEKLY",
-          "PRO_MONTHLY",
-          "PRO_ANNUAL",
-        ].every((k) => !!process.env[`STRIPE_${k}_PRICE_ID`]),
+      ...billingReadiness(process.env),
     };
   },
 });

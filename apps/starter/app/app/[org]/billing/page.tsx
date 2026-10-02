@@ -29,9 +29,9 @@ export default async function Page({
       <Link href={`/app/${org}`}>Back to workspace</Link>
       <h1>Billing and allowances</h1>
       <p>
-        Live checkout is disabled while the applicable sales tax treatment and
-        publication checks are completed. Preview access does not convert to a
-        paid plan automatically.
+        {catalogue.liveEnabled
+          ? "Manage your subscription and processing allowance. Preview access never converts automatically."
+          : "Live checkout is disabled while the applicable billing and publication checks are completed. Preview access never converts automatically."}
       </p>
       <section className="panel">
         <h2>Current allowance</h2>
@@ -52,22 +52,22 @@ export default async function Page({
             <h3>Starter</h3>
             <dl>
               <dt>Weekly</dt>
-              <dd>EUR 5.99 · 65 credits</dd>
+              <dd>EUR 5.99 Â· 65 credits</dd>
               <dt>Monthly</dt>
-              <dd>EUR 19 · 250 credits</dd>
+              <dd>EUR 19 Â· 250 credits</dd>
               <dt>Annual</dt>
-              <dd>EUR 190 · 250 credits each month</dd>
+              <dd>EUR 190 Â· 250 credits each month</dd>
             </dl>
           </section>
           <section aria-label="Pro pricing">
             <h3>Pro</h3>
             <dl>
               <dt>Weekly</dt>
-              <dd>EUR 11.99 · 150 credits</dd>
+              <dd>EUR 11.99 Â· 150 credits</dd>
               <dt>Monthly</dt>
-              <dd>EUR 39 · 600 credits</dd>
+              <dd>EUR 39 Â· 600 credits</dd>
               <dt>Annual</dt>
-              <dd>EUR 390 · 600 credits each month</dd>
+              <dd>EUR 390 Â· 600 credits each month</dd>
             </dl>
           </section>
         </div>
@@ -80,8 +80,15 @@ export default async function Page({
           Consumer totals include applicable tax. An exemption is a separate tax
           treatment and requires official evidence.
         </p>
-        {catalogue.sandboxEnabled ? (
-          <ActionForm action={startV1Checkout} label="Open sandbox checkout">
+        {catalogue.sandboxEnabled || catalogue.liveEnabled ? (
+          <ActionForm
+            action={startV1Checkout}
+            label={
+              catalogue.liveEnabled
+                ? "Continue to checkout"
+                : "Open sandbox checkout"
+            }
+          >
             <input type="hidden" name="organizationId" value={org} />
             <label>
               Plan
@@ -118,14 +125,15 @@ export default async function Page({
               service, with statutory rights and the refund policy explained
             </label>
             <p>
-              Sandbox only. Use Stripe test details. No real charge is
-              activated.
+              {catalogue.liveEnabled
+                ? "The provider confirms your total, currency and applicable taxes before payment."
+                : "Sandbox only. Use Stripe test details. No real charge is activated."}
             </p>
           </ActionForm>
         ) : (
           <p>
-            Sandbox checkout is awaiting its dedicated Stripe configuration and
-            webhook verification.
+            Checkout is awaiting verified provider configuration and release
+            approval.
           </p>
         )}
       </section>
@@ -163,8 +171,15 @@ export default async function Page({
               plan.
             </p>
           </ActionForm>
-          {catalogue.sandboxEnabled && (
-            <ActionForm action={buyV1Credits} label="Open sandbox top-up">
+          {(catalogue.sandboxEnabled || catalogue.liveEnabled) && (
+            <ActionForm
+              action={buyV1Credits}
+              label={
+                catalogue.liveEnabled
+                  ? "Buy processing credits"
+                  : "Open sandbox top-up"
+              }
+            >
               <input type="hidden" name="organizationId" value={org} />
               <label>
                 One-time pack
@@ -172,6 +187,25 @@ export default async function Page({
                   <option value="200">EUR 10 / 200 credits</option>
                   <option value="550">EUR 25 / 550 credits</option>
                 </select>
+              </label>
+              <label>
+                Billing country
+                <select name="country" defaultValue="RO" required>
+                  {catalogue.countries.map((country) => (
+                    <option key={country} value={country}>
+                      {country === "RO" ? "Romania" : country}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="checkbox-label">
+                <input name="terms" type="checkbox" required />I accept the
+                displayed <Link href="/terms">terms</Link> and processing-credit
+                policy.
+              </label>
+              <label className="checkbox-label">
+                <input name="immediate" type="checkbox" />I request immediate
+                service, with statutory rights and the refund policy explained.
               </label>
             </ActionForm>
           )}

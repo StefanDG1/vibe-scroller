@@ -4,6 +4,7 @@ import { action } from "./_generated/server";
 import { api, internal } from "./_generated/api";
 import { v } from "convex/values";
 import { pricing, ensure } from "../packages/policy";
+import { billingReadiness } from "../packages/providers/billing-readiness";
 import { checkoutPaymentRoute } from "../packages/providers/stripe-checkout";
 function stripe() {
   const key = process.env.STRIPE_SECRET_KEY;
@@ -13,6 +14,17 @@ function stripe() {
     "Stripe environment and key must match.",
   );
   return new Stripe(key);
+}
+async function verifiedStripe() {
+  const client = stripe();
+  ensure(
+    process.env.STRIPE_ACCOUNT_ID &&
+      (await client.accounts.retrieve(null)).id ===
+        process.env.STRIPE_ACCOUNT_ID,
+    "BILLING_UNAVAILABLE",
+    "The provider account does not match VibeScroller billing configuration.",
+  );
+  return client;
 }
 const priceId = (tier: string, interval: string) =>
   process.env[
@@ -25,7 +37,8 @@ export const quoteChange = action({
   },
   handler: async (ctx, a): Promise<string> => {
     ensure(
-      process.env.STRIPE_MODE !== "live",
+      process.env.STRIPE_MODE !== "live" ||
+        billingReadiness(process.env).liveEnabled,
       "RELEASE_GATE",
       "Live plan changes remain disabled until production billing approval.",
     );
@@ -37,7 +50,7 @@ export const quoteChange = action({
       "NOT_FOUND",
       "No active subscription.",
     );
-    const client = stripe(),
+    const client = await verifiedStripe(),
       sub = await client.subscriptions.retrieve(auth.billing.subscriptionId);
     ensure(
       sub.status === "active" &&
@@ -103,12 +116,13 @@ export const applyChange = action({
   args: { id: v.id("billingChanges") },
   handler: async (ctx, a): Promise<{ message: string }> => {
     ensure(
-      process.env.STRIPE_MODE !== "live",
+      process.env.STRIPE_MODE !== "live" ||
+        billingReadiness(process.env).liveEnabled,
       "RELEASE_GATE",
       "Live plan changes remain disabled until production billing approval.",
     );
-    const q = await ctx.runMutation(internal.billingChanges.claim, a),
-      client = stripe();
+    const client = await verifiedStripe();
+    const q = await ctx.runMutation(internal.billingChanges.claim, a);
     try {
       const sub = await client.subscriptions.retrieve(q.subscriptionId);
       const item = sub.items.data.find((i) => i.id === q.itemId);
@@ -244,7 +258,7 @@ export const checkout = action({
     const live = process.env.STRIPE_MODE === "live";
     const tax = await ctx.runQuery(internal.commerce.taxConfig, {});
     ensure(
-      !live || process.env.LIVE_CHECKOUT_ENABLED === "true",
+      !live || billingReadiness(process.env).liveEnabled,
       "RELEASE_GATE",
       "Live checkout is disabled.",
     );
@@ -262,7 +276,7 @@ export const checkout = action({
       "BILLING_UNAVAILABLE",
       "This product price is not configured.",
     );
-    const client = stripe();
+    const client = await verifiedStripe();
     const actualPrice = await client.prices.retrieve(price);
     const expected = Math.round(
       pricing.tiers[a.tier][`${a.interval}_price_eur`] * 100,
@@ -344,6 +358,7 @@ export const checkout = action({
         consent_collection: { terms_of_service: "required" },
         metadata: {
           product: "vibescroller",
+          checkoutKey: reserved.key,
           tier: a.tier,
           interval: a.interval,
           termsVersion: "v1-draft",
@@ -377,7 +392,7 @@ export const cancel = action({
       "NOT_FOUND",
       "No subscription to cancel.",
     );
-    const client = stripe();
+    const client = await verifiedStripe();
     const subscription = await client.subscriptions.retrieve(
       auth.billing.subscriptionId,
     );
@@ -400,10 +415,14 @@ export const topup = action({
   args: {
     organizationId: v.id("organizations"),
     pack: v.union(v.literal("200"), v.literal("550")),
+    country: v.string(),
+    termsAccepted: v.boolean(),
+    immediateService: v.boolean(),
   },
   handler: async (ctx, a): Promise<string> => {
     ensure(
-      process.env.STRIPE_MODE !== "live",
+      process.env.STRIPE_MODE !== "live" ||
+        billingReadiness(process.env).liveEnabled,
       "RELEASE_GATE",
       "Live top-ups remain disabled until the matching release approval.",
     );
@@ -415,12 +434,29 @@ export const topup = action({
       "BILLING_REQUIRED",
       "Create a billing account first.",
     );
+    ensure(
+      a.termsAccepted,
+      "TERMS_REQUIRED",
+      "Accept the displayed terms before purchasing credits.",
+    );
+    const live = process.env.STRIPE_MODE === "live";
+    const tax = await ctx.runQuery(internal.commerce.taxConfig, {});
+    const route = checkoutPaymentRoute({
+      tax,
+      country: a.country,
+      live,
+      route: process.env.STRIPE_BILLING_ROUTE,
+      managedVerified: process.env.STRIPE_MANAGED_PAYMENTS_VERIFIED === "true",
+    });
     const price = process.env[`STRIPE_TOPUP_${a.pack}_PRICE_ID`];
     ensure(price, "BILLING_UNAVAILABLE", "Top-up price unavailable.");
-    const p = await stripe().prices.retrieve(price),
+    const client = await verifiedStripe();
+    const p = await client.prices.retrieve(price),
       expected = a.pack === "200" ? 1000 : 2500;
     ensure(
-      p.unit_amount === expected &&
+      p.active &&
+        !p.recurring &&
+        p.unit_amount === expected &&
         p.currency === "eur" &&
         p.metadata.product === "vibescroller" &&
         p.tax_behavior === "inclusive",
@@ -428,18 +464,45 @@ export const topup = action({
       "Top-up catalogue mismatch.",
     );
     const origin = new URL(process.env.APP_URL!).origin;
-    const session = await stripe().checkout.sessions.create({
-      customer: auth.billing.customerId,
-      mode: "payment",
-      line_items: [{ price, quantity: 1 }],
-      metadata: {
-        product: "vibescroller",
-        credits: a.pack,
-        organizationId: a.organizationId,
-      },
-      success_url: `${origin}/app/${a.organizationId}/usage`,
-      cancel_url: `${origin}/app/${a.organizationId}/usage`,
+    await ctx.runMutation(internal.commerce.recordAcceptance, {
+      organizationId: a.organizationId,
+      termsVersion: "v1-draft",
+      immediateService: a.immediateService,
     });
+    const reserved = await ctx.runMutation(internal.billing.reserveCheckout, {
+      organizationId: a.organizationId,
+      intent: JSON.stringify([
+        "topup",
+        price,
+        a.country,
+        route.treatment,
+        a.immediateService,
+        "v1-draft",
+      ]),
+    });
+    const session = await client.checkout.sessions.create(
+      {
+        customer: auth.billing.customerId,
+        integration_identifier: "vibescroller_topup_vksnqjrt",
+        billing_address_collection: "required",
+        ...route.options,
+        consent_collection: { terms_of_service: "required" },
+        expires_at: Math.floor(reserved.expires / 1000),
+        mode: "payment",
+        line_items: [{ price, quantity: 1 }],
+        metadata: {
+          product: "vibescroller",
+          credits: a.pack,
+          checkoutKey: reserved.key,
+          termsVersion: "v1-draft",
+          taxTreatment: route.treatment,
+          organizationId: a.organizationId,
+        },
+        success_url: `${origin}/app/${a.organizationId}/usage`,
+        cancel_url: `${origin}/app/${a.organizationId}/usage`,
+      },
+      { idempotencyKey: reserved.key },
+    );
     return session.url!;
   },
 });
@@ -449,7 +512,9 @@ export const requestRefund = action({
     const auth = await ctx.runQuery(api.billing.authorize, {
       organizationId: a.organizationId,
     });
-    const invoice = await stripe().invoices.retrieve(a.invoiceId);
+    const invoice = await (
+      await verifiedStripe()
+    ).invoices.retrieve(a.invoiceId);
     ensure(
       invoice.customer === auth.billing?.customerId,
       "FORBIDDEN",

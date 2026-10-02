@@ -33,6 +33,22 @@ Repository: https://github.com/StefanDG1/vibe-scroller
 
 ## Evidence
 
+### October 2: exact cloud publication, owned production video and Managed top-ups
+
+Main 0410a18479b04fe1af8c191fb9bf3ad501f6faa8 passed Verify template 36955401772, Version main update 36955401794 and Publish verified alpha 36955478276. GitHub reported its Vercel deployment successful. The production Convex deployment was bold-lemur-667.
+
+Native Chrome on the production domain uploaded the clearly labeled, owned 15-second synthetic design video, approved the connected owner’s personal route and completed automatic local Whisper transcription plus ChatGPT reasoning. The connected account advertised gpt-5.6-sol; gpt-6.1-sol was not returned and was not substituted or claimed. The result contained 209 transcript characters, three insights and six private frame references with full_sampled coverage. The analysis cited the frame-only “MINIMUM TARGET: 44 PX” instruction. At 390 CSS pixels the page had no horizontal overflow and the first four private evidence images loaded. No paid API fallback was used. Full private evidence remains ignored in private/production-owned-video-20261002-proof.json and its mobile screenshot.
+
+Actual commands node --env-file=private/stripe-vibescroller-test-configured.env private/stripe-managed-topup.mjs 200 and 550, with native sandbox-card checkout, verified Managed Payments and exact 200/550 purchased-credit grants. All six subscription combinations, immediate paid upgrade and renewal-scheduled downgrade were already verified in the same dedicated sandbox. Renewals, failed payments and full live Link controls remain separate checks; no real purchase was made.
+
+The follow-up prepares a complete-catalogue readiness response, release-gated live routes, account verification on V1 mutations, signed-key checkout completion and consented Managed top-ups. Production activation remains false. It also places main points before category editing and repairs corrupted punctuation in the console. The existing computed UI font was verified as Segoe UI; no font replacement was necessary.
+
+Windows follow-up `pnpm check` passed 190 application tests (three credential-gated suites skipped), eleven authentication tests, six PCM tests, lint, types, document checks and both production builds. `pnpm audit --prod --audit-level high`, `git diff --check` and staged Gitleaks scanning passed. Later staging and deployment results are recorded separately.
+
+A fresh signed-in official Stripe documentation page unexpectedly hydrated its sample with the current default sandbox secret. That full-access sandbox key was expired immediately; the UI confirmed “API key expired”. No new broad key was created, and the separately scoped integration credential was untouched. This was a repeated credential-output mistake, not a live-key exposure. Future documentation reads must use unauthenticated content or redact before returning text.
+
+The actual Cloudflare account page showed Workers Free as its current plan and 10,000 Workers AI neurons/day. Its backend verification timestamp was refreshed for development and production without a purchase. The account-subscription API denied the existing narrowly scoped token; automated plan verification is not claimed. The real planning test initially failed CONTEXT_REQUIRED at profile drafting because its selected staging repository lacked current inspected excerpts; snapshot refresh and a new plan test remain in progress.
+
 ### October 2: browser background acquisition and completed Managed Payments sandbox
 
 Main 75e0254052c03f069eab20f096702866acd3545e passed Verify template 36953623117, Version main update 36953623130 and Publish verified alpha 36953700787. Its Vercel Git deployment succeeded, and native Chrome on the real domain showed Add and analyze at 390 CSS pixels without horizontal overflow. The production Convex deployment bold-lemur-667 and pinned acquisition image flags were verified. The personal runner was restarted from its existing local vault configuration; no OAuth token was copied to the backend.

@@ -50,6 +50,14 @@ Create the six subscription prices and optional top-up products in sandbox first
 
 Test payments, retries, proration, renewal, cancellation, refunds, failed cards, and wrong-mode events. Record the actual tax status and required invoice workflow before enabling live checkout. The owner reports live readiness, but a VibeScroller-specific live journey remains a separate test.
 
+## Approve production billing
+
+The app exposes the complete catalogue only when all six V1 price IDs, the matching account/key mode, signed V1 webhook and portal configuration exist. Sandbox availability is independent of live activation. Live checkout, top-ups and plan changes additionally require LIVE_CHECKOUT_ENABLED=true and BILLING_RELEASE_APPROVED=true; Managed Payments also requires STRIPE_MANAGED_PAYMENTS_VERIFIED=true. Leave all three false until the corresponding provider, consumer-scope, publication and workflow acceptance is recorded. These switches are backend configuration, never customer-controlled form values.
+
+Every V1 provider mutation verifies the credential’s own account. Checkout reservations are shared by the subscription and top-up routes. Only a signed paid event with the current reservation key clears that reservation early; a late event cannot clear a newer checkout. Provider identity or release failures do not authorize a direct-payment fallback.
+
+Signed-in Stripe documentation can hydrate example snippets with actual API credentials. Use unauthenticated official documentation or redact credential patterns before returning any browser text, accessibility names or screenshots. Do not print complete signed-in documentation pages. Never create a replacement broad sandbox key merely to view documentation.
+
 ## Configure notifications
 
 Create the Telegram bot, secret webhook, and pairing flow. Test numeric-user binding, duplicate updates, unlinking, safe previews, and a malicious URL. Configure transactional email with a verified sender. Keep optional marketing separate.

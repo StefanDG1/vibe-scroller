@@ -921,7 +921,7 @@ export function Console({
                                 s.pullRequests.filter((p: any) => p.mergedAt)
                                   .length
                               }{" "}
-                              merged PR Ã‚·{" "}
+                              merged PR ·{" "}
                               {
                                 s.pullRequests.filter(
                                   (p: any) => p.state === "open",
@@ -999,6 +999,7 @@ export function Console({
                 !demo && data.aiPreference?.personalAlphaEnabled === true
               }
               linkAnalysisEnabled={data.aiPreference?.linkAnalysisEnabled}
+              cloudEnabled={data.aiPreference?.cloudAnalysisEnabled}
               call={call}
               onProposal={(p: any) => {
                 setSelected(p);
@@ -1096,7 +1097,7 @@ export function Console({
                       call("draftProfile", { id: id(r), maxCredits: 10 })
                     }
                   >
-                    Draft a business profile Ã‚· reserve up to 10 credits
+                    Draft a business profile · reserve up to 10 credits
                   </Button>
                   {r.profileDraft &&
                     r.profileDraftSha === r.sha &&
@@ -1823,7 +1824,7 @@ export function Console({
                 <article className="panel" key={id(d)}>
                   <h3>{d.name}</h3>
                   <p>
-                    {d.state} Ã‚· Fingerprint {d.fingerprint}
+                    {d.state} · Fingerprint {d.fingerprint}
                   </p>
                   <Button
                     busy={busy}
@@ -2631,6 +2632,7 @@ function SourceDetail({
   devices,
   personalEnabled,
   linkAnalysisEnabled,
+  cloudEnabled,
   call,
   onProposal,
 }: any) {
@@ -2711,7 +2713,7 @@ function SourceDetail({
   const overview =
     summary.length > 280
       ? (summary.match(/^.{1,280}[.!?](?:\s|$)/)?.[0]?.trim() ??
-        `${summary.slice(0, 280).replace(/\s+\S*$/, "")}Ã¢â‚¬Â¦`)
+        `${summary.slice(0, 280).replace(/\s+\S*$/, "")}…`)
       : summary;
   return (
     <>
@@ -2761,79 +2763,6 @@ function SourceDetail({
           </p>
         </details>
       </div>
-      <details
-        className="panel source-notes"
-        onToggle={(e) => {
-          if (e.currentTarget.open)
-            setCategoryDraft((detail.categoryNames ?? []).join(", "));
-        }}
-      >
-        <summary>
-          Categories
-          {detail.categoryNames?.length
-            ? ` - ${detail.categoryNames.join(", ")}`
-            : ""}
-        </summary>
-        {!readOnly && (
-          <form
-            onSubmit={async (e) => {
-              e.preventDefault();
-              const names = categoryDraft
-                .split(",")
-                .map((s) => s.trim())
-                .filter(Boolean);
-              const result = await call("assignCategories", {
-                id: sourceId,
-                names,
-              });
-              if (result?.saved)
-                setDetail({
-                  ...detail,
-                  categoryNames: result.names,
-                  categoryKeys: result.keys,
-                });
-            }}
-          >
-            <label>
-              Separate categories with commas
-              <input
-                value={categoryDraft}
-                maxLength={400}
-                onChange={(e) => setCategoryDraft(e.target.value)}
-                placeholder="Music, Reading, Product design"
-              />
-            </label>
-            <button
-              type="submit"
-              className="secondary"
-              disabled={busy}
-              aria-busy={busy || undefined}
-            >
-              {busy ? "SavingÃ¢â‚¬Â¦" : "Save categories"}
-            </button>
-          </form>
-        )}
-        {!demo && canSuggestCategories && !!detail.categoryKeys?.length && (
-          <details>
-            <summary>Suggest a shared category</summary>
-            <p className="fine">
-              Only this category name is submitted for review. Your videos and
-              insights stay private. Workspace owners and admins can submit.
-            </p>
-            {detail.categoryKeys.map((key: string, index: number) => (
-              <Button
-                key={key}
-                busy={busy}
-                onClick={() =>
-                  call("suggestCategory", { organizationId: org, key })
-                }
-              >
-                Suggest {detail.categoryNames[index]}
-              </Button>
-            ))}
-          </details>
-        )}
-      </details>
       <section className="panel">
         <h2>Main points</h2>
         {!detailLoading && insights.length > 1 && (
@@ -2848,7 +2777,7 @@ function SourceDetail({
         {detailLoading && (
           <output aria-live="polite">
             <Loader2 className="spinner" size={16} aria-hidden="true" /> Loading
-            source detailsÃ¢â‚¬Â¦
+            source details…
           </output>
         )}
         {!detailLoading &&
@@ -2870,7 +2799,7 @@ function SourceDetail({
               {!!i.evidence?.length && (
                 <details className="insight-evidence">
                   <summary>
-                    Evidence Ã‚· {i.evidence.length}{" "}
+                    Evidence · {i.evidence.length}{" "}
                     {i.evidence.length === 1 ? "reference" : "references"}
                   </summary>
                   <ul className="evidence-links">
@@ -2882,7 +2811,7 @@ function SourceDetail({
                             target="_blank"
                             rel="noopener noreferrer"
                           >
-                            Frame Ã‚· {(e.startMs / 1000).toFixed(1)}s
+                            Frame · {(e.startMs / 1000).toFixed(1)}s
                           </a>
                         )}
                         {e.kind === "transcript" && (
@@ -2899,7 +2828,7 @@ function SourceDetail({
                               }
                             }}
                           >
-                            Transcript Ã‚·{" "}
+                            Transcript ·{" "}
                             {e.startMs === null
                               ? "supplied text"
                               : `${(e.startMs / 1000).toFixed(1)}s`}
@@ -2926,7 +2855,7 @@ function SourceDetail({
                           e.kind !== "transcript" &&
                           (e.kind !== "frame" || demo) && (
                             <span>
-                              {label(e.kind)} Ã‚·{" "}
+                              {label(e.kind)} ·{" "}
                               {e.startMs === null
                                 ? "Supplied text"
                                 : `${(e.startMs / 1000).toFixed(1)}s`}
@@ -2964,8 +2893,7 @@ function SourceDetail({
             ?.filter((e: any) => e.kind === "transcript")
             .map((e: any) => (
               <p key={e.id} className="fine">
-                Original transcript segment: {(e.startMs / 1000).toFixed(1)}
-                Ã¢â‚¬â€œ
+                Original transcript segment: {(e.startMs / 1000).toFixed(1)}–
                 {(e.endMs / 1000).toFixed(1)} seconds.
               </p>
             ))}
@@ -3020,6 +2948,79 @@ function SourceDetail({
           </p>
         </section>
       )}
+      <details
+        className="panel source-notes"
+        onToggle={(e) => {
+          if (e.currentTarget.open)
+            setCategoryDraft((detail.categoryNames ?? []).join(", "));
+        }}
+      >
+        <summary>
+          Categories
+          {detail.categoryNames?.length
+            ? ` (${detail.categoryNames.length})`
+            : ""}
+        </summary>
+        {!readOnly && (
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const names = categoryDraft
+                .split(",")
+                .map((s) => s.trim())
+                .filter(Boolean);
+              const result = await call("assignCategories", {
+                id: sourceId,
+                names,
+              });
+              if (result?.saved)
+                setDetail({
+                  ...detail,
+                  categoryNames: result.names,
+                  categoryKeys: result.keys,
+                });
+            }}
+          >
+            <label>
+              Separate categories with commas
+              <input
+                value={categoryDraft}
+                maxLength={400}
+                onChange={(e) => setCategoryDraft(e.target.value)}
+                placeholder="Music, Reading, Product design"
+              />
+            </label>
+            <button
+              type="submit"
+              className="secondary"
+              disabled={busy}
+              aria-busy={busy || undefined}
+            >
+              {busy ? "Saving…" : "Save categories"}
+            </button>
+          </form>
+        )}
+        {!demo && canSuggestCategories && !!detail.categoryKeys?.length && (
+          <details>
+            <summary>Suggest a shared category</summary>
+            <p className="fine">
+              Only this category name is submitted for review. Your videos and
+              insights stay private. Workspace owners and admins can submit.
+            </p>
+            {detail.categoryKeys.map((key: string, index: number) => (
+              <Button
+                key={key}
+                busy={busy}
+                onClick={() =>
+                  call("suggestCategory", { organizationId: org, key })
+                }
+              >
+                Suggest {detail.categoryNames[index]}
+              </Button>
+            ))}
+          </details>
+        )}
+      </details>
       {detail.state === "needs_upload" && (
         <section className="panel">
           <h2>Supply permitted content</h2>
@@ -3164,13 +3165,16 @@ function SourceDetail({
             key={id(p)}
             onClick={() => onProposal(p)}
           >
-            {p.title} Ã‚· {label(p.disposition)}
+            {p.title} · {label(p.disposition)}
           </button>
         ))}
         {repos.map((r: any) => (
           <button
             className="secondary"
             key={id(r)}
+            disabled={
+              busy || detail.state !== "ready" || !r.enabled || !r.confirmed
+            }
             onClick={() =>
               call("match", {
                 id: id(source),
@@ -3200,12 +3204,15 @@ function SourceDetail({
           />
         )}
         {detail.error && <p role="alert">{detail.error}</p>}
-        <button
-          className="primary"
-          onClick={() => call("process", { id: id(source), maxCredits: 10 })}
-        >
-          Analyze, maximum 10 credits
-        </button>
+        {cloudEnabled && detail.state !== "ready" && (
+          <button
+            className="primary"
+            disabled={busy || ["queued", "processing"].includes(detail.state)}
+            onClick={() => call("process", { id: id(source), maxCredits: 10 })}
+          >
+            Analyze in cloud, up to 10 credits
+          </button>
+        )}
         <button
           className="secondary"
           onClick={() => {
@@ -3299,8 +3306,8 @@ function PersonalSourceAnalysis({
       )}
       {source.personalAnalysis && (
         <p>
-          Personal analysis: {label(source.personalAnalysis.state)} Ã‚·{" "}
-          {source.personalAnalysis.model} Ã‚· {source.personalAnalysis.effort}{" "}
+          Personal analysis: {label(source.personalAnalysis.state)} ·{" "}
+          {source.personalAnalysis.model} · {source.personalAnalysis.effort}{" "}
           reasoning.{" "}
           {source.personalAnalysis.inputTokens === undefined
             ? "Plan usage is not yet reported."
@@ -3452,7 +3459,7 @@ function ExecutionApproval({ proposal, call, routes }: any) {
         Base commit: <code>{proposal.baseSha ?? "Synthetic base"}</code>
       </p>
       <p>
-        Plan version: {proposal.version} Ã‚· Hash:{" "}
+        Plan version: {proposal.version} · Hash:{" "}
         <code>{proposal.planHash ?? "Save a validated plan first"}</code>
       </p>
       <label>
@@ -3476,7 +3483,7 @@ function ExecutionApproval({ proposal, call, routes }: any) {
               <option value="">Choose a verified model</option>
               {routes?.models.map((m: any) => (
                 <option key={m.id} value={m.id}>
-                  {m.id} Ã‚· {m.version}
+                  {m.id} · {m.version}
                 </option>
               ))}
             </select>
@@ -3559,8 +3566,8 @@ function RunCard({ run, call }: any) {
       <span className="status">{label(run.state)}</span>
       <h2>Run {id(run)}</h2>
       <p>
-        {run.executor} Ã‚· {label(run.fundingRoute)} Ã‚· Ceiling{" "}
-        {run.maxCredits} credits
+        {run.executor} · {label(run.fundingRoute)} · Ceiling {run.maxCredits}{" "}
+        credits
       </p>
       {run.fundingRoute === "customer_api_key" && (
         <p>
@@ -3612,7 +3619,7 @@ function RunCard({ run, call }: any) {
             target="_blank"
             rel="noopener noreferrer"
           >
-            {label(run.prState ?? "status unavailable")} Ã‚· Open GitHub PR
+            {label(run.prState ?? "status unavailable")} · Open GitHub PR
           </a>
           <button
             className="secondary"

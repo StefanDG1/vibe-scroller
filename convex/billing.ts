@@ -1,6 +1,7 @@
 import { query, internalQuery, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import { access, billingFor, fail, limit } from "./lib";
+import { billingReadiness } from "../packages/providers/billing-readiness";
 import { ensure } from "../packages/policy";
 export const authorize = query({
   args: { organizationId: v.id("organizations") },
@@ -11,12 +12,14 @@ export const authorize = query({
       email: a.actor.email,
       mode: process.env.STRIPE_MODE === "live" ? "live" : "test",
       configured: Boolean(
-        process.env.STRIPE_PRO_PRICE_ID &&
-        process.env.STRIPE_WEBHOOK_SECRET &&
-        new RegExp(`^[sr]k_${process.env.STRIPE_MODE ?? "test"}_`).test(
-          process.env.STRIPE_SECRET_KEY ?? "",
-        ) &&
-        ["test", "live"].includes(process.env.STRIPE_MODE ?? "test"),
+        billingReadiness(process.env).catalogueConfigured ||
+        (!process.env.STRIPE_V1_WEBHOOK_SECRET &&
+          process.env.STRIPE_PRO_PRICE_ID &&
+          process.env.STRIPE_WEBHOOK_SECRET &&
+          new RegExp(`^[sr]k_${process.env.STRIPE_MODE ?? "test"}_`).test(
+            process.env.STRIPE_SECRET_KEY ?? "",
+          ) &&
+          ["test", "live"].includes(process.env.STRIPE_MODE ?? "test")),
       ),
       billing: await billingFor(ctx, organizationId),
     };
@@ -89,13 +92,28 @@ export const reserveCheckout = internalMutation({
       return { key: row.checkoutKey, expires: row.checkoutExpires };
     }
     const expires = Date.now() + 31 * 60000;
-    const key = `checkout:${organizationId}:${Date.now()}`;
+    const key = `checkout:${organizationId}:${crypto.randomUUID()}`;
     await ctx.db.patch(row._id, {
       checkoutKey: key,
       checkoutExpires: expires,
       checkoutIntent: intent,
     });
     return { key, expires };
+  },
+});
+export const checkoutCompleted = internalMutation({
+  args: { customerId: v.string(), key: v.string() },
+  handler: async (ctx, a) => {
+    const row = await ctx.db
+      .query("billing")
+      .withIndex("by_customer", (q) => q.eq("customerId", a.customerId))
+      .unique();
+    if (!row || row.checkoutKey !== a.key) return;
+    await ctx.db.patch(row._id, {
+      checkoutKey: undefined,
+      checkoutIntent: undefined,
+      checkoutExpires: undefined,
+    });
   },
 });
 export const reserveRefresh = internalMutation({
