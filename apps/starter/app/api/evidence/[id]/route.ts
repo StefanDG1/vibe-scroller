@@ -1,6 +1,13 @@
 import { backend, api } from "@/lib/backend";
 import { signedObject } from "../../../../../../packages/providers/storage";
 import type { Id } from "../../../../../../convex/_generated/dataModel";
+const privateHeaders = {
+  "Cache-Control": "private, no-store",
+  "Referrer-Policy": "no-referrer",
+  "X-Content-Type-Options": "nosniff",
+  "X-Robots-Tag": "noindex",
+  Vary: "Cookie",
+};
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ id: string }> },
@@ -43,11 +50,7 @@ export async function GET(
       return new Response(bytes, {
         headers: {
           "Content-Type": "image/jpeg",
-          "Cache-Control": "private, no-store",
-          "Referrer-Policy": "no-referrer",
-          "X-Content-Type-Options": "nosniff",
-          "X-Robots-Tag": "noindex",
-          Vary: "Cookie",
+          ...privateHeaders,
         },
       });
     }
@@ -56,20 +59,21 @@ export async function GET(
         status: 302,
         headers: {
           Location: url,
-          "Cache-Control": "no-store",
-          "Referrer-Policy": "no-referrer",
+          ...privateHeaders,
         },
       });
     return Response.json(
       { url },
       {
         headers: {
-          "Cache-Control": "no-store",
-          "Referrer-Policy": "no-referrer",
+          ...privateHeaders,
         },
       },
     );
   } catch {
-    return Response.json({ error: "Evidence unavailable." }, { status: 404 });
+    return Response.json(
+      { error: "Evidence unavailable." },
+      { status: 404, headers: privateHeaders },
+    );
   }
 }

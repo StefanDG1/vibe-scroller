@@ -1,0 +1,30 @@
+{
+  "observedAt": "2026-10-02T04:03:33.150Z",
+  "synthetic": true,
+  "environment": "Dedicated Stripe sandbox and resolute-ladybug-999",
+  "realMoneyCharged": false,
+  "weekly": {
+    "initialPaid": true,
+    "paidRenewal": true,
+    "renewalCredits": 65,
+    "reconciliationIdempotent": true,
+    "nativePortalPaymentMethodUpdated": true,
+    "failedRenewalStatus": "past_due",
+    "failedRenewalGrantedCredits": false,
+    "failedRenewalBlocksNewFundedWork": true,
+    "libraryRemainsAccessible": true
+  },
+  "monthly": {
+    "paidRenewal": true,
+    "renewalCredits": 600
+  },
+  "annual": {
+    "paidRenewal": true,
+    "firstMonthlyGrantAfterAnnualRenewal": 250
+  },
+  "limitations": [
+    "Stripe test clocks advance provider time, not the Convex wall clock. These checks do not certify future-dated spending or all twelve annual monthly grants.",
+    "Initial attempts to update a Managed Payments subscription payment method through the standard API were rejected; the verified change used its native customer portal.",
+    "No live payment, live Link account deletion or consumer-market restriction is certified by these sandbox checks."
+  ]
+}

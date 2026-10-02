@@ -10,28 +10,50 @@ Repository: https://github.com/StefanDG1/vibe-scroller
 
 ## Work packages
 
-| Package | State            | Evidence                                                                                                                               |
-| ------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| WP01    | verified_staging | Export preserved; frozen install, CI, builds and secret scanning passed                                                                |
-| WP02    | in_progress      | Dark console and production desktop/mobile source checks passed; full accessibility acceptance remains                                 |
-| WP03    | in_progress      | Production Google login/default workspace and canonical reauthentication passed; broader recovery/logout acceptance remains            |
-| WP04    | in_progress      | Actual supplied ZIP imported four links; their media was attached and analyzed in production; physical Android deferred                |
-| WP05    | in_progress      | Atomic reservations, stage commits and workflows; interruption/cost reconciliation pending                                             |
-| WP06    | in_progress      | Production local Whisper and personal ChatGPT audio/vision passed on three real Reels and one carousel; hosted commercial access gated |
-| WP07    | in_progress      | Search, pagination, export, retention and deletion implemented; full browser/deletion evidence pending                                 |
-| WP08    | in_progress      | Selected GitHub App, nested exclusions, hash reuse and Repomix tree; real profile draft passed; quality benchmark pending              |
-| WP09    | in_progress      | Semantic selection returned honest no-fit; reviewed AI draft plan implemented; live matching limited by free allowance                 |
-| WP10    | in_progress      | Real free managed route; revision-bound customer-key broker implemented; funded customer request not tested                            |
-| WP11    | blocked_external | Pairing/lease/result code and vault test; actual native isolation failed                                                               |
-| WP12    | in_progress      | Real isolated metered cloud coding produced a reviewed patch; cost calibration and outage cases remain                                 |
-| WP13    | in_progress      | Real draft PR 3 and automatic reopen/closure; merge/revert/access-loss staging remains                                                 |
-| WP14    | in_progress      | Private inbox and generic email integration; hosted email opt-in test pending; Telegram deferred by user                               |
-| WP15    | in_progress      | Real six-price sandbox lifecycle and two-payment invoice refunds; ledger tests passed; complete app invoice reconciliation pending     |
-| WP16    | in_progress      | Deletion markers, locked recovery, offline encrypted restore and runtime key rotation passed; hosted restore and tenant matrix remain  |
-| WP17    | in_progress      | 154 app, 11 auth and six PCM tests plus both builds passed; broad benchmark/device/security acceptance remains                         |
-| WP18    | blocked_external | Personal production alpha verified; applicable tax/invoicing, legal publication and paid/public release acceptance remain              |
+| Package | State            | Evidence                                                                                                                                    |
+| ------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| WP01    | verified_staging | Export preserved; frozen install, CI, builds and secret scanning passed                                                                     |
+| WP02    | in_progress      | Dark console and production desktop/mobile source checks passed; full accessibility acceptance remains                                      |
+| WP03    | in_progress      | Production Google login/default workspace and canonical reauthentication passed; broader recovery/logout acceptance remains                 |
+| WP04    | in_progress      | Actual supplied ZIP imported four links; their media was attached and analyzed in production; physical Android deferred                     |
+| WP05    | in_progress      | Atomic reservations, stage commits and workflows; interruption/cost reconciliation pending                                                  |
+| WP06    | in_progress      | Production local Whisper and personal ChatGPT audio/vision passed on three real Reels and one carousel; hosted commercial access gated      |
+| WP07    | in_progress      | Search/categories/sort and private evidence browser checks passed; late-object retirement and private evidence checks passed in production  |
+| WP08    | in_progress      | Selected GitHub App, nested exclusions, hash reuse and Repomix tree; real profile draft passed; quality benchmark pending                   |
+| WP09    | in_progress      | Semantic selection returned honest no-fit; reviewed AI draft plan implemented; live matching limited by free allowance                      |
+| WP10    | in_progress      | Real free managed route; revision-bound customer-key broker implemented; funded customer request not tested                                 |
+| WP11    | blocked_external | Pairing/lease/result code and vault test; actual native isolation failed                                                                    |
+| WP12    | in_progress      | Real isolated metered cloud coding produced a reviewed patch; cost calibration and outage cases remain                                      |
+| WP13    | in_progress      | Real draft PR 3 and automatic reopen/closure; merge/revert/access-loss staging remains                                                      |
+| WP14    | in_progress      | Normal generic hosted email delivered to official test recipient; opt-out passed; Telegram deferred by user                                 |
+| WP15    | in_progress      | Six prices/top-ups, real renewals/failure/portal/refund checks passed; operator settlement export verified; live release gated              |
+| WP16    | in_progress      | Locked hosted restore/tombstone/quarantine passed; physical deletion race fixed; independent backups/object recovery and full matrix remain |
+| WP17    | in_progress      | 200 app, 11 auth and six PCM tests plus both builds passed; broad benchmark/device/security acceptance remains                              |
+| WP18    | blocked_external | Personal production alpha verified; applicable tax/invoicing, legal publication and paid/public release acceptance remain                   |
 
 ## Evidence
+
+### October 2: recurring billing, hosted recovery and object retirement
+
+Working-tree base f9b43a0087966b28d4ea701cb652d4e6d001dcc8 passed exact-commit CI 36958810960, versioning 36958810861, publication 36958881425 and Vercel success. The production backend renewal deployment completed separately. Production GitHub linking returned Invalid Redirect URI because its callback was absent from the existing GitHub App; owner MFA is pending before correcting settings. No production plan/PR success is claimed.
+
+Actual isolated hosted restoration into locked rare-echidna-358 imported an encrypted pre-deletion database snapshot, applied the later marker, redacted the restored canary, denied private access and quarantined thirteen connection/device/repository records. Runtime provider secrets were not copied, temporary plaintext was removed and the destination expires after one day. [Evidence](../infra/hosted-recovery-evidence.json) limits this to database recovery; independent scheduled backups and R2 object recovery remain.
+
+The normal email.notify path delivered a generic notification to Resend's official delivered simulator. Email opt-out blocked both earlier and later sends; the real-delivery development flag was restored false. Internal delivery identifiers permit verification without exposing them to customer queries. [Evidence](../infra/hosted-email-notification-evidence.json) is not a customer marketing send.
+
+Three real dedicated Managed Payments sandbox subscriptions completed native checkout, then test clocks produced paid weekly, monthly and annual renewal invoices. The corresponding renewal grants were 65, 600 and the first monthly 250 respectively. Reconciliation did not duplicate credits. The standard API correctly refused a payment-method change for Managed Payments; its native portal subscription edit successfully selected the declining sandbox card. The next weekly invoice remained unpaid/past_due, issued no credit grant, blocked new funded source work and retained library access. [Renewal evidence](../infra/managed-renewal-evidence.json) preserves the limitation that provider clocks do not advance the application's wall clock. No real-money purchase was made.
+
+The new monthly settlement action requires an active allowlisted invoice operator, five-minute reauthentication and rate limits before provider access. It verifies Stripe account/mode, bounds pagination without partial success, exports fee/currency/payout data without buyer/source content and labels incomplete months. Four boundary tests passed. The real sandbox export read sixteen balance entries and zero payouts. Its first read failed for missing Balance Read; narrowly scoped Balance and Payout Read permissions were added. [Evidence](../infra/settlement-export-evidence.json) is a provider handover, not an invoice, tax filing or accountant approval.
+
+A browser accessibility inspection accidentally exposed the dedicated restricted sandbox key. It was immediately rotated with expiration set to Now, captured only privately and updated in local files and the dedicated development deployment. Clipboard content was cleared. The live key was not exposed and the old Education account was untouched. Every later credential-page inspection redacts token labels before printing. This incident must not be described as no secret exposure.
+
+The production owned privacy canary returned an authenticated 200 JPEG with private/no-store, denied a foreign tenant and unsigned storage, then its native source UI deletion returned opaque 404 and removed the original object and asset metadata. A simulated late PUT with a still-valid pre-deletion timestamp was rejected by evidence registration but survived the earlier completed object-deletion receipt. The private failing proof records lateObjectDeleted:false; the owned canary bytes were explicitly purged after that check. Object retirement now reopens completed deletions, prohibits key reuse, rejects retired frame/audio registration and schedules bounded 20-minute/24-hour rechecks. Two regressions cover reopening and immutable key boundaries. The repaired production backend deployed to bold-lemur-667. A fresh owned canary then passed authenticated viewing, foreign-tenant and unsigned-object denial, native source deletion, metadata removal, initial physical deletion and physical deletion after a simulated late PUT and rejected stale evidence callback. The test removed only its owned canary; original Instagram sources were preserved. See infra/private-evidence-deletion-evidence.json. The frontend header changes require their separate publication check.
+
+The source response route now applies private/no-store, no-referrer, nosniff, noindex and Cookie variation to successful, redirect and unavailable responses. The desktop brand hit area is 44px high; corrupted billing punctuation and the misleading staging GitHub label were corrected. Owner/deployment/accountant guides now describe current Vercel and bounded link acquisition behavior. [V1 readiness](V1-READINESS.md) consolidates remaining required gates.
+
+Windows `pnpm check` in outputs/check-20261002-final-retirement.log passed 116 document validations, twelve skill snapshots, zero-warning lint, workspace types, 200 application tests, eleven auth tests, six PCM tests and both Next production builds. Three credential-gated suites skipped. `pnpm audit --prod --audit-level high` found no known vulnerabilities. Initial typecheck needed generated API bindings; the first full check found impure Date() rendering and was corrected to use the server-observed time. The first retirement test lacked the rate-limiter component registration and was corrected before passing. No failed check is counted as a pass.
+
+Read-only verification of the dedicated live Stripe account reported chargesEnabled:true, payoutsEnabled:true, detailsSubmitted:true, no currently/past-due requirements and no disabled reason. This confirms account readiness, not Managed Payments terms, market enforcement, legal publication or full V1 release. Live checkout flags remain false.
 
 ### October 2: durable GitHub authorization and responsive production checks
 

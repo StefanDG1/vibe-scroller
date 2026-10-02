@@ -52,22 +52,22 @@ export default async function Page({
             <h3>Starter</h3>
             <dl>
               <dt>Weekly</dt>
-              <dd>EUR 5.99 Â· 65 credits</dd>
+              <dd>EUR 5.99 · 65 credits</dd>
               <dt>Monthly</dt>
-              <dd>EUR 19 Â· 250 credits</dd>
+              <dd>EUR 19 · 250 credits</dd>
               <dt>Annual</dt>
-              <dd>EUR 190 Â· 250 credits each month</dd>
+              <dd>EUR 190 · 250 credits each month</dd>
             </dl>
           </section>
           <section aria-label="Pro pricing">
             <h3>Pro</h3>
             <dl>
               <dt>Weekly</dt>
-              <dd>EUR 11.99 Â· 150 credits</dd>
+              <dd>EUR 11.99 · 150 credits</dd>
               <dt>Monthly</dt>
-              <dd>EUR 39 Â· 600 credits</dd>
+              <dd>EUR 39 · 600 credits</dd>
               <dt>Annual</dt>
-              <dd>EUR 390 Â· 600 credits each month</dd>
+              <dd>EUR 390 · 600 credits each month</dd>
             </dl>
           </section>
         </div>

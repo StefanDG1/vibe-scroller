@@ -1,0 +1,24 @@
+{
+  "observedAt": "2026-10-02T03:06:58.522Z",
+  "target": "rare-echidna-358",
+  "syntheticTestData": true,
+  "servingProductionUntouched": true,
+  "locked": true,
+  "imported": true,
+  "markersApplied": true,
+  "credentialsQuarantined": true,
+  "privateAccessDenied": true,
+  "plaintextRemoved": true,
+  "archiveSha256": "fbe1c806197ebc6d4a7fb5e4d8b83305362a51738ed793209e712a83300da249",
+  "preDeletionCanaryRestored": true,
+  "markerCount": 1,
+  "deletedCanaryRedacted": true,
+  "quarantinedRows": 13,
+  "quarantineComplete": true,
+  "completedAt": "2026-10-02T03:07:43.485Z",
+  "limitations": [
+    "Database recovery and deletion canary only; R2 object recovery and independently scheduled backup remain separate",
+    "Destination remains locked, without runtime provider credentials, and expires after one day",
+    "Developer administrator identities were used; this is not a browser recovery journey"
+  ]
+}

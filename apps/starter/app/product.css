@@ -1020,6 +1020,9 @@ button:disabled {
   flex-shrink: 0;
   border-right: 1px solid #282828;
 }
+.rail-brand .brand {
+  min-height: 44px;
+}
 .rail-brand {
   display: flex;
   justify-content: space-between;

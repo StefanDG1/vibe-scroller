@@ -120,6 +120,7 @@ export const productTables = {
   }).index("by_identity", ["identityHash"]),
   objectDeletions: defineTable({
     key: v.string(),
+    rechecksScheduledAt: v.optional(v.number()),
     state: v.string(),
     attempts: v.number(),
     createdAt: v.number(),

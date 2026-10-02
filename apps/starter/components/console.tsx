@@ -1041,7 +1041,7 @@ export function Console({
                   target="_blank"
                   rel="noreferrer"
                 >
-                  Install the staging GitHub App
+                  Install the GitHub App
                 </a>
                 {!demo && (
                   <a

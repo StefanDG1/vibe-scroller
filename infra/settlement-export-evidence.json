@@ -1,0 +1,14 @@
+{
+  "synthetic": true,
+  "environment": "resolute-ladybug-999",
+  "provider": "Dedicated Stripe sandbox",
+  "recordType": "provider_settlement_handover",
+  "observedAt": "2026-10-02T03:38:56.564Z",
+  "month": "2026-10",
+  "partialMonth": true,
+  "entryCount": 16,
+  "payoutCount": 0,
+  "providerReadPassed": true,
+  "customerDataExcluded": true,
+  "liveInvoiceIssued": false
+}

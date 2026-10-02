@@ -1,6 +1,6 @@
 # Your VibeScroller testing guide
 
-Mode: how-to. Last checked October 1, 2026. This guide distinguishes working checks from work still underway. It is not a production-ready announcement.
+Mode: how-to. Last checked October 2, 2026. This guide distinguishes working checks from work still underway. It is not a production-ready announcement.
 
 ## Start here
 
@@ -18,7 +18,7 @@ Use your existing VibeScroller Google identity. Signing into VibeScroller, Insta
 2. Choose **Instagram export or link import**.
 3. Select your ZIP export, or the extracted `saved_posts.json`. JSON is preferred; a Saved HTML file also works. The archive stays on the selecting device.
 4. Review the counts and the listed links. Confirm that you may submit the content, then choose **Import reviewed links**. For a larger export, submit subsequent batches when the button permits it.
-5. Read the import manifest. A waiting record means a link was saved but needs permitted media or a transcript before analysis. A quota refusal does not mean the source was saved.
+5. Read the import manifest. Select automatic personal analysis with your online computer and account model to process imported links in the background. A saved record without that permission waits for an explicit analysis approval. A platform access failure shows the permitted-media fallback; a quota refusal does not mean the source was saved.
 
 Your supplied August archive produced four distinct links, three Reels and one post of unverified media type. That is what its Saved metadata contains, not a claim about all your current saves. The import saved all four in production and charged zero analysis credits, without uploading the ZIP, messages or contacts.
 
@@ -26,7 +26,7 @@ For a fresh export, use Instagram's Accounts Center information-export controls,
 
 ## Use your ChatGPT plan
 
-Keep the paired laptop awake and connected. From Home choose **Upload or import**, then **Permitted media upload**. Select a video you may process, leave automatic analysis selected, choose the online computer/model, and review both source permission and plan/compute authorization. Choose **Upload and analyze**. No transcript is needed. If the app requests **Sign in again**, follow its link before selecting the file again. The authorization requires a fresh website sign-in.
+Keep the paired laptop awake and connected. Choose **Add source** to paste a supported public video link or import your Saved export. Select automatic personal analysis, choose the online computer/model, and review both source permission and plan/compute authorization. The bounded worker attempts retrieval and prepares audio and frames; the paired laptop transcribes and reasons. If the platform blocks retrieval, choose **Permitted media upload** and **Upload and analyze** for content you may process. No transcript is needed. If the app requests **Sign in again**, follow its link before selecting the file again. The authorization requires a fresh website sign-in.
 
 Production automatic upload passed at its first processing generation. The isolated worker prepared audio and sampled frames, offline Whisper supplied the English transcript, and your ChatGPT plan saved three cited insights. The explicitly owned synthetic video included visual-only size/spacing markers, correctly read by the model. Watch preparation, transcription and analysis, then review Main points, **Full summary and analysis notes**, the original transcript and private timestamped video evidence.
 
@@ -34,7 +34,7 @@ MP4/WebM input is bounded to 250 MB and ten minutes. Local transcription current
 
 Your existing local ChatGPT consent passed. A real text request and a real synthetic-image request succeeded without an API key or alternate funding. The image test used GPT-5.6 Sol with medium reasoning and reported 47 tokens. The account catalogue does not currently expose GPT-6.1 Sol through this route. The app must offer the models the account actually supports.
 
-The automatic personal route uses the account's advertised GPT-5.6-Sol with medium reasoning during verification. There is no paid inference or alternate-model fallback. See [the complete video guide](../PERSONAL-VIDEO-GUIDE.md), [personal runner setup](personal-analysis-runner.md) and [local ChatGPT setup](chatgpt-local.md). Gemini is a later optional route. Automatic Instagram Saved media retrieval is not implemented: attach a video you may process to an imported link.
+The automatic personal route uses the account's advertised GPT-5.6-Sol with medium reasoning during verification. There is no paid inference or alternate-model fallback. See [the complete video guide](../PERSONAL-VIDEO-GUIDE.md), [personal runner setup](personal-analysis-runner.md) and [local ChatGPT setup](chatgpt-local.md). Gemini is a later optional route. Automatic bounded retrieval is implemented for supported public links. The actual first Instagram Reel returned a platform rate limit, and its carousel is unsupported by the video downloader; those cases require permitted media. There is no promise that every Instagram saved post is retrievable.
 
 ## Review and apply a useful idea
 
@@ -42,7 +42,7 @@ After an actual analysis completes, review its summary, main points, source evid
 
 Connect GitHub and select only the repositories you want reviewed. Inspect the proposed change against its recorded repository commit. Accepting a proposal creates a plan; review and edit it before separately approving coding. That approval binds the plan, repository, executor, funding route and maximum cost. Review the draft PR in GitHub. V1 does not merge or deploy automatically.
 
-The isolated cloud draft-PR route has staging evidence. The Windows local coding route remains blocked by its failed isolation check. ChatGPT consent does not remove that block. Unattended work still requires the specific approved task and budget.
+The isolated cloud draft-PR route has staging evidence. Production GitHub account linking still needs its callback configuration corrected and a fresh real repository/plan/PR test. The Windows local coding route remains blocked by its failed isolation check. ChatGPT consent does not remove that block. Unattended work still requires the specific approved task and budget.
 
 ## Storage and evidence
 

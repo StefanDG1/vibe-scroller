@@ -1,0 +1,26 @@
+{
+  "observedAt": "2026-10-02T04:17:43.998Z",
+  "synthetic": true,
+  "environment": "production",
+  "authenticatedBrowser": {
+    "status": 200,
+    "cacheControl": "private, no-store",
+    "type": "image/jpeg",
+    "bytes": 19399,
+    "jpeg": true
+  },
+  "foreignTenantDenied": true,
+  "unsignedObjectDenied": true,
+  "nativeSourceDeletion": true,
+  "privateBrowserDeniedAfterDeletion": true,
+  "initialPhysicalDelete": true,
+  "sourceRedacted": true,
+  "metadataRemoved": true,
+  "lateWriteAfterPriorReceipt": true,
+  "lateEvidenceRejected": true,
+  "lateObjectDeleted": true,
+  "limitations": [
+    "Administrator CLI identities checked backend tenancy; this does not substitute for the full browser identity matrix.",
+    "Only a labeled owned canary was removed. Customer and original Instagram sources were not deleted."
+  ]
+}

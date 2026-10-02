@@ -57,18 +57,20 @@ export const notify = internalMutation({
       .query("memberships")
       .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
       .collect();
+    const deliveryIds: string[] = [];
     for (const member of members.filter((m) => m.role === "owner")) {
       const user = await ctx.db.get(member.userId);
       if (!user || user.status !== "active") continue;
       // Generic notification only. Evidence, titles, code, and transcripts stay behind authenticated access.
-      await resend.sendEmail(ctx, {
+      const id = await resend.sendEmail(ctx, {
         from: process.env.RESEND_FROM,
         to: user.email,
         subject: "VibeScroller has an update",
         text: `A source or coding task needs your attention. Sign in to review it: ${process.env.APP_URL}/app/${a.organizationId}/inbox`,
         idempotencyKey: `${a.key}:${user._id}`,
       });
+      deliveryIds.push(id);
     }
-    return { queued: true };
+    return { queued: deliveryIds.length > 0, deliveryIds };
   },
 });

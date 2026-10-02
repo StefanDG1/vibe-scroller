@@ -4,6 +4,14 @@ Mode: how-to. Checked 1 October 2026. Owner-supplied ONRC records establish the 
 
 VAT is not one yes/no setting. Domestic treatment, business purchases, customer location and customer business status can produce different obligations at the same time. This is an implementation checklist for discussion with the company's accountant, not a determination of its status.
 
+## Use the selected merchant route
+
+The owner selected Stripe Managed Payments if eligible. Its transaction merchant handles its applicable customer sales tax and consumer invoice obligations under the verified provider contract. Exponential Education remains responsible for its own company accounting, provider-fee documents, settlements and applicable tax/reporting obligations. Do not issue a duplicate Exponential consumer invoice for a merchant-of-record transaction merely to populate the direct-billing queue. Direct billing remains an alternative gated configuration.
+
+The private operator page `/account/invoices` now offers a monthly provider settlement download with recent authentication. It exports provider balance movements, fee types and payout references, without customer content or invented VAT classification. The dedicated sandbox read succeeded on October 2. This JSON handover is not an invoice, tax return, proof of exemption or accountant approval. Reconcile it with Stripe fee documents, Managed Payments tax reports and the company bank records. An in-progress month is explicitly marked incomplete. Live restricted-key read permissions must be configured separately.
+
+Before paid activation, verify Managed Payments eligibility and accepted terms, the intended customer market, the current legal/provider publication checklist, and the accountant's treatment of actual company/provider transactions. The owner's zero-revenue attestation and ANAF/VIES results are retained evidence, not a blanket registration determination.
+
 ## Choose the domestic treatment from evidence
 
 | Situation                                                    | Consequence for VibeScroller                                                                                                                                                                                                                                                                                                |

@@ -10,17 +10,41 @@ export async function queueDeletion(ctx: MutationCtx, key: string) {
     .query("objectDeletions")
     .withIndex("by_key", (q) => q.eq("key", key))
     .unique();
-  if (old?.state === "deleted") return;
-  if (!old)
+  const scheduleRechecks = old?.rechecksScheduledAt === undefined;
+  if (old)
+    await ctx.db.patch(old._id, {
+      state: "pending",
+      updatedAt: Date.now(),
+      ...(scheduleRechecks ? { rechecksScheduledAt: Date.now() } : {}),
+    });
+  else
     await ctx.db.insert("objectDeletions", {
       key,
       state: "pending",
       attempts: 0,
       createdAt: Date.now(),
       updatedAt: Date.now(),
+      rechecksScheduledAt: Date.now(),
     });
+  // A previously issued PUT can finish after an immediate deletion. Retired
+  // keys cannot be reused, and delayed checks close that bounded upload race.
+  if (scheduleRechecks)
+    for (const delay of [20 * 60000, 86400000])
+      await ctx.scheduler.runAfter(delay, internal.assets.recheckDeletion, {
+        key,
+      });
   await ctx.scheduler.runAfter(0, internal.integrations.deleteObject, { key });
 }
+export const recheckDeletion = internalMutation({
+  args: { key: v.string() },
+  handler: async (ctx, { key }) => {
+    const retired = await ctx.db
+      .query("objectDeletions")
+      .withIndex("by_key", (q) => q.eq("key", key))
+      .unique();
+    if (retired) await queueDeletion(ctx, key);
+  },
+});
 export const grant = mutation({
   args: {
     organizationId: v.id("organizations"),
@@ -61,6 +85,14 @@ export const grant = mutation({
       a.key.startsWith(`${a.organizationId}/`) && a.key.split("/").length === 2,
       "INVALID_INPUT",
       "Invalid object key.",
+    );
+    ensure(
+      !(await ctx.db
+        .query("objectDeletions")
+        .withIndex("by_key", (q) => q.eq("key", a.key))
+        .unique()),
+      "UPLOAD_INVALID",
+      "Retired upload keys cannot be reused.",
     );
     ensure(
       !(await ctx.db
@@ -190,6 +222,15 @@ export const registerEvidence = internalMutation({
       "INVALID_EVIDENCE",
       "Invalid bounded frame object.",
     );
+    if (
+      await ctx.db
+        .query("objectDeletions")
+        .withIndex("by_key", (q) => q.eq("key", a.key))
+        .unique()
+    ) {
+      await queueDeletion(ctx, a.key);
+      return null;
+    }
     const entitlement = await wallet(ctx, source.organizationId);
     const retained = await ctx.db
       .query("assets")
@@ -242,6 +283,15 @@ export const registerNormalized = internalMutation({
       "INVALID_EVIDENCE",
       "Invalid normalized audio.",
     );
+    if (
+      await ctx.db
+        .query("objectDeletions")
+        .withIndex("by_key", (q) => q.eq("key", a.key))
+        .unique()
+    ) {
+      await queueDeletion(ctx, a.key);
+      return null;
+    }
     const entitlement = await wallet(ctx, source.organizationId);
     const retained = await ctx.db
       .query("assets")

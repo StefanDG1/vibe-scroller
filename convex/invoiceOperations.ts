@@ -1,7 +1,7 @@
 import { paginationOptsValidator } from "convex/server";
-import { query } from "./_generated/server";
+import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { fail } from "./lib";
+import { fail, recentAuthentication, limit } from "./lib";
 import { invoiceOperator, requireInvoiceOperator } from "./lib/invoiceOperator";
 export const status = query({
   args: {},
@@ -29,5 +29,15 @@ export const queue = query({
       observedAt: Date.now(),
       mode: process.env.STRIPE_MODE === "live" ? "live" : "test",
     };
+  },
+});
+
+export const authorizeSettlementExport = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const actor = await requireInvoiceOperator(ctx);
+    await recentAuthentication(ctx);
+    await limit(ctx, `settlement-export:${actor._id}`, 5);
+    return { authorized: true };
   },
 });

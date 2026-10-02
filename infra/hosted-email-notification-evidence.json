@@ -1,0 +1,15 @@
+{
+  "time": "2026-10-02T03:14:48.748Z",
+  "environment": "resolute-ladybug-999",
+  "recipient": "official Resend delivered simulator",
+  "customerEmailSent": false,
+  "optOutBlocked": true,
+  "queued": true,
+  "laterOptOutBlocked": true,
+  "deliveryStatus": {
+    "bounced": false,
+    "failed": false,
+    "status": "delivered"
+  },
+  "observedStatusAt": "2026-10-02T03:18:58.100Z"
+}

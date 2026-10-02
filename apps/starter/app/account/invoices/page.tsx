@@ -40,6 +40,35 @@ export default async function Page({
         to ANAF or verify acceptance. Reconcile corrections with the accountant
         while retaining the original record.
       </p>
+      <section className="panel">
+        <h2>Provider settlements</h2>
+        <p>
+          Download balance movements, provider fee breakdowns and payout
+          references for your accountant. Managed Payments customer invoices
+          come from the transaction merchant.
+        </p>
+        <form action="/api/accounting/settlements" method="get">
+          <label>
+            Accounting month
+            <input
+              type="month"
+              name="month"
+              required
+              defaultValue={new Date(queue.observedAt)
+                .toISOString()
+                .slice(0, 7)}
+              max={new Date(queue.observedAt).toISOString().slice(0, 7)}
+            />
+          </label>
+          <button type="submit" className="secondary">
+            Download settlement record
+          </button>
+        </form>
+        <p className="fine">
+          A recent sign-in is required. This is a private provider record, not a
+          tax filing or invoice issuance.
+        </p>
+      </section>
       {queue.page.length === 0 && (
         <p>No invoice reporting tasks on this page.</p>
       )}

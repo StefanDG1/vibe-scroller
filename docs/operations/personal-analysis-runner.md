@@ -1,6 +1,6 @@
 # Use the personal analysis runner
 
-This route is a restricted personal alpha. It currently analyzes supplied transcript or post text with your own ChatGPT plan. It does not decode an Instagram video, claim coding approval or use a paid fallback.
+This route is a restricted personal alpha. It analyzes permitted videos, selected frames and supplied text through your own connected ChatGPT plan. Local Whisper automatically transcribes audio after isolated decoding. Supported public links use the bounded acquisition worker; private, blocked and unsupported posts can require a permitted-media fallback. No paid inference fallback is used. Coding requires separate approval and verified isolation. See [the video guide](../PERSONAL-VIDEO-GUIDE.md) for the current automatic route.
 
 ## Prepare the laptop
 
@@ -16,10 +16,10 @@ Run `pnpm runner:personal C:\absolute\private\config.json`. Keep the computer aw
 
 ## Approve from your phone or laptop
 
-1. Sign in to the app and capture a permitted transcript or post text, or attach it to an imported saved link.
+1. Sign in and use Add source to submit a supported public link, import a reviewed Saved export, or choose the permitted-media fallback. Select automatic personal analysis and review its rights and own-plan consent.
 2. Open the source. Under Use your ChatGPT plan, select your online computer and an available account model.
-3. Check the own-plan permission and approve personal text analysis. The interface selects medium reasoning. Reauthenticate if requested.
-4. Wait for the source summary. Review its main points, supplied-text evidence and coverage. A text result does not establish what happened in the video.
+3. Check the own-plan permission and approve the personal analysis. The interface selects medium reasoning. Reauthenticate if requested.
+4. Wait for the source summary. Review the main points, transcript, private frames and coverage. Frames are sampled; supplied post text alone does not establish audio or visual coverage.
 5. Cancel from the source screen or revoke the computer if needed. Started work may still count against OpenAI's allowance. Check the official plan usage screen before retrying an uncertain request.
 
 Approval expires after 15 minutes if unclaimed. The runner never switches to another model, API key or another user's account. Platform storage and future cloud decoding have their own allowances. This personal route does not replace the normal hosted product's metered cloud option.
