@@ -1,4 +1,4 @@
-import { Sandbox } from "e2b";
+import { createJobSandbox, stopJobSandbox, type JobSandbox } from "./sandbox";
 import { hardenSandbox } from "./isolation";
 import { ensure, containsSecret, validatePaths } from "../policy";
 import { github, installationToken, repositoryArchive } from "./github";
@@ -130,7 +130,7 @@ export async function codeChanges(input: {
 }
 export async function createCodingSandbox(maxSeconds = 1200) {
   ensure(
-    process.env.E2B_API_KEY && process.env.E2B_CODING_TEMPLATE,
+    process.env.CLOUD_VERIFIED === "true",
     "SETUP_REQUIRED",
     "Configure the pinned coding image and sandbox account.",
   );
@@ -139,18 +139,12 @@ export async function createCodingSandbox(maxSeconds = 1200) {
     "QUOTE_CHANGED",
     "Review the bounded execution time.",
   );
-  const sandbox = await Sandbox.create(process.env.E2B_CODING_TEMPLATE, {
-    apiKey: process.env.E2B_API_KEY,
-    timeoutMs: maxSeconds * 1000,
-    secure: true,
-    allowInternetAccess: false,
-    metadata: { product: "vibescroller", class: "coding" },
-  });
+  const sandbox = await createJobSandbox("coding", maxSeconds);
   await hardenSandbox(sandbox);
   return sandbox;
 }
 export async function checkPatch(
-  sandbox: Sandbox,
+  sandbox: JobSandbox,
   base: { path: string; content: string; mode?: string }[],
   changes: { path: string; content: string | null }[],
   tests: string[],
@@ -242,5 +236,5 @@ export async function checkPatch(
   return { patch, report: report.join("\n\n") };
 }
 export async function killSandbox(sandboxId: string) {
-  return Sandbox.kill(sandboxId, { apiKey: process.env.E2B_API_KEY });
+  return stopJobSandbox(sandboxId);
 }

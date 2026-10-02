@@ -32,6 +32,10 @@ Mode: reference. These decisions supersede earlier alternatives in the discussio
 | D26 | Preserve the exact V2 mode label `full retard mode` internally, with finite permissions and spending                                                       | Owner's requested wording                           |
 | D27 | Mark Builds Brands permission is owner-attested; no unsupported affiliation or licence identification                                                      | Owner's permission statement                        |
 
+## Current hosting and execution
+
+On October 2, 2026, the owner selected Vercel Pro, withdrew Netlify use and asked to avoid E2B. Vercel Sandbox replaces E2B behind the execution adapter. No new hosting purchase is authorized. Shared included credits do not mean unlimited free execution. [ADR 023](adr/023-vercel-isolated-execution.md) records implementation and verification boundaries.
+
 ## Known operator context
 
 The founder uses an Android OnePlus 13 and a Lenovo Yoga Pro 9i 2024 with 32 GB RAM and an RTX 4070 laptop GPU. Typical personal input is one to five English videos daily. These are sizing assumptions, not limits on other customers' devices.

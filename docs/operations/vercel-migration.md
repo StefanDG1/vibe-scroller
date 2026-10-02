@@ -27,11 +27,15 @@ The Windows adapter check compiled Next.js and types but failed final packaging 
 ## Switch only the subdomain
 
 1. Recheck the already attached `scroll.companynerve.com` domain and obtain its current prescribed DNS target and any new verification requirement. Ownership was verified during preparation. Do not guess a target or change parent nameservers.
-2. Preserve the rollback Namecheap `scroll` CNAME target `vibescroller-alpha.netlify.app`. Preserve unrelated root/app/launch/www/mail records. Configure only Vercel's prescribed scroll records after its deployment is ready.
+2. Preserve unrelated root/app/launch/www/mail records. Configure only Vercel's prescribed scroll records after its deployment is ready. The former Netlify target is historical evidence and is no longer an authorized rollback target.
 3. Verify DNS, certificate, HTTPS, canonical links, noindex, secure cookie, Google sign-in, default workspace, library import, upload grant/completion, private evidence, transcript navigation and the laptop runner on the final domain. Retain the canonical WorkOS/GitHub callbacks, Convex links and R2 CORS for that same domain.
 4. Confirm the account menu's build version matches the verified commit. Test billing in the separate sandbox; hosting migration does not activate live prices or close tax/legal gates.
-5. Keep the Netlify site available during verification. If migration fails, restore the recorded scroll CNAME. A frontend rollback does not reverse backend schema changes, jobs, PRs or provider charges.
+5. Roll back to an exact previously verified Vercel production deployment when needed. Do not restore Netlify. A frontend rollback does not reverse backend schema changes, jobs, PRs or provider charges.
 
 ## Current hosting limitation
 
 Netlify published `23375b9`, then skipped `96e2fb8` because this cycle's 300 credits were exhausted by 20 production deployments. Operational credits keep the current site online but do not permit another production build. This Netlify limit caused the migration. The owner purchased Vercel Pro, and the scroll CNAME has been switched successfully. No Netlify upgrade or live customer charge was made. See [implementation evidence](../implementation-status.md).
+
+## Netlify retirement
+
+The owner withdrew Netlify use on October 2. Native settings now show stopped builds and locked automatic publishing for only vibescroller-alpha. The repository build configuration is removed. Historical deployments and evidence remain retained; they are not a serving or rollback dependency. The canonical subdomain remains on Vercel. The old site has not yet been verified unpublished.

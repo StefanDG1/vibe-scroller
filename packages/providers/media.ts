@@ -1,4 +1,4 @@
-import { Sandbox } from "e2b";
+import { createJobSandbox } from "./sandbox";
 import { hardenSandbox } from "./isolation";
 import { signedObject } from "./storage";
 import { ensure } from "../policy";
@@ -34,39 +34,23 @@ export async function prepareMedia(
   const link =
     typeof input === "string" ? undefined : acquisitionPolicy(input.url);
   ensure(
-    process.env.MEDIA_VERIFIED === "true" &&
-      process.env.E2B_API_KEY &&
-      process.env.E2B_MEDIA_TEMPLATE,
+    process.env.MEDIA_VERIFIED === "true",
     "MEDIA_UNAVAILABLE",
     "Verify the pinned isolated media image before processing.",
   );
   if (link)
     ensure(
-      process.env.ACQUISITION_VERIFIED === "true" &&
-        process.env.E2B_ACQUISITION_TEMPLATE,
+      process.env.ACQUISITION_VERIFIED === "true",
       "MEDIA_UNAVAILABLE",
       "The isolated link downloader has not been verified.",
     );
   const started = Date.now();
   let killed = false;
   let acquisition: Acquisition | undefined;
-  const sandbox = await Sandbox.create(
-    link
-      ? process.env.E2B_ACQUISITION_TEMPLATE!
-      : process.env.E2B_MEDIA_TEMPLATE,
-    {
-      apiKey: process.env.E2B_API_KEY,
-      allowInternetAccess: Boolean(link),
-      ...(link
-        ? { network: { allowOut: link.domains, denyOut: ["0.0.0.0/0"] } }
-        : {}),
-      secure: true,
-      timeoutMs: 300000,
-      metadata: {
-        product: "vibescroller",
-        class: link ? "public-acquisition" : "media",
-      },
-    },
+  const sandbox = await createJobSandbox(
+    link ? "acquisition" : "media",
+    300,
+    link?.domains,
   );
   try {
     if (link) {
@@ -100,7 +84,7 @@ export async function prepareMedia(
         acquisitionMessage(acquisition.status),
       );
       // No source-network access is needed by FFmpeg or any subsequent decoder.
-      await sandbox.updateNetwork({ denyOut: ["0.0.0.0/0"], allowOut: [] });
+      await sandbox.lockdown();
     }
     await hardenSandbox(sandbox);
     if (!link) {

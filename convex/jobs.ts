@@ -1081,7 +1081,7 @@ export const claimCloud = internalMutation({
       Number(process.env.CLOUD_COMPUTE_RESERVE_CREDITS ?? "10000"),
       Math.floor(r.maxCredits - 1),
     );
-    const rate = Number(process.env.E2B_CREDITS_PER_SECOND ?? "1");
+    const rate = Number(process.env.SANDBOX_CREDITS_PER_SECOND ?? "1");
     if (r.fundingRoute === "customer_api_key") {
       const key = await ctx.db
         .query("connections")

@@ -2,6 +2,7 @@ import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { resolve, dirname, relative, join } from "node:path";
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
+import { publicProxy, publicBridge } from "../packages/media/public-proxy.ts";
 import { publicPolicyDocuments } from "../packages/policy/public-documents.ts";
 const root = resolve(import.meta.dirname, "..");
 const errors = [];
@@ -14,6 +15,15 @@ for (const name of Object.values(publicPolicyDocuments)) {
   )
     errors.push(
       `Public policy draft is stale: ${name}. Run node scripts/sync-legal.mjs.`,
+    );
+}
+for (const [content, file] of [
+  [publicProxy, "public_proxy.py"],
+  [publicBridge, "public_bridge.py"],
+]) {
+  if (content !== readFileSync(join(root, "packages/media", file), "utf8"))
+    errors.push(
+      "Public-download worker bundle is stale. Run node scripts/sync-public-proxy.mjs.",
     );
 }
 if (existsSync(join(root, ".git"))) {

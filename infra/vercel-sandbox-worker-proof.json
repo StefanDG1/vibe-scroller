@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordedAt": "2026-10-02T12:02:00.488944+00:00",
+  "provider": "Vercel Sandbox 3.5.1",
+  "region": "fra1",
+  "synthetic": true,
+  "mediaEvidence": {
+    "time": "2026-10-02T11:34:58.875Z",
+    "synthetic": true,
+    "coverage": "full_sampled",
+    "durationSeconds": 15,
+    "frames": 6,
+    "pcmBytes": 480082,
+    "customerDataPresent": false
+  },
+  "acquisitionIsolation": {
+    "time": "2026-10-02T11:51:13.378Z",
+    "synthetic": true,
+    "checks": {
+      "unprivileged": true,
+      "sudo_denied": true,
+      "broker_home_denied": true,
+      "metadata": true,
+      "private": true,
+      "loopback": true,
+      "ipv6_private": true,
+      "allowed_public_https": true,
+      "ip_literal": true,
+      "unapproved_host": true,
+      "control_host": true
+    },
+    "noRealPostRetrieved": true
+  },
+  "codingEvidence": {
+    "time": "2026-10-02T11:52:19.906Z",
+    "synthetic": true,
+    "provider": "vercel",
+    "patchChecked": true,
+    "unprivilegedCheckPassed": true,
+    "symlinkDenied": true,
+    "hardlinkDenied": true,
+    "customerDataUsed": false,
+    "prPublished": false,
+    "pinnedPnpm": "12.3.4",
+    "externalCancellation": true,
+    "repeatedCancellation": true
+  },
+  "wholeProductionPrJourneyVerified": false,
+  "cloudCodingActivation": false,
+  "sourceHashes": {
+    "packages/providers/sandbox.ts": "103c1e6ff5e282a627c5fbbd79465d5833968b3ad2ea2ba774782c55e3d16f34",
+    "packages/media/public_proxy.py": "d512a248b2b6258e9c0f1b99fb407618fded2f567d23939588cbe46c8759caef",
+    "packages/media/public_bridge.py": "1b4f20482fbfbcfcc07da1fc90cf043df30449268665ac4621e3f000e24a9257",
+    "packages/providers/isolation.ts": "f4035cfa04cc713cfee93195adca5ea996eca615cbb725e03fca3dcdeeb0a04f",
+    "packages/providers/acquisition-isolation.ts": "ca196f55854d93980ded0c4e6cf75dedabf5cf4ec0ae92459529c495173e379c"
+  }
+}

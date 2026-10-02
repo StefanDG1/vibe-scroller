@@ -1,26 +1,20 @@
-import type { Sandbox } from "e2b";
+import type { JobSandbox } from "./sandbox";
 
-// Run as the trusted broker before exposing any untrusted files or commands.
-// E2B's egress proxy accepts TCP before filtering and does not cover MMDS.
-export const hardenSandboxCommand = `set -eu
-test "$(id -u)" = 0
-find / -xdev -type f -perm /6000 -exec chmod a-s {} + 2>/dev/null
-if command -v getcap >/dev/null; then
-  getcap -r /usr /bin /sbin 2>/dev/null | cut -d ' ' -f 1 | while read -r file; do setcap -r "$file"; done
-fi
-nft add table inet vibe
-nft 'add chain inet vibe output { type filter hook output priority -150; policy accept; }'
-nft 'add rule inet vibe output meta skuid != 0 reject'
-test -z "$(find /usr /bin /sbin -xdev -type f -perm /6000 2>/dev/null)"
-`;
-
-export async function hardenSandbox(sandbox: Sandbox) {
+export async function hardenSandbox(sandbox: JobSandbox) {
   try {
-    await sandbox.commands.run(hardenSandboxCommand, {
-      user: "root",
-      timeoutMs: 30000,
-      requestTimeoutMs: 30000,
-    });
+    await sandbox.lockdown();
+    const result = await sandbox.commands.run(
+      `python3 - <<'PY'
+import os,pathlib
+assert os.getuid()==1001
+status=pathlib.Path('/proc/self/status').read_text()
+assert 'NoNewPrivs:\\t1' in status
+assert int(next(x.split(':')[1].strip() for x in status.splitlines() if x.startswith('CapEff:')),16)==0
+assert not os.access('/root',os.R_OK) and not os.access('/home/ubuntu',os.R_OK)
+PY`,
+      { user: "user", timeoutMs: 10000 },
+    );
+    if (result.exitCode !== 0) throw Error();
   } catch {
     await sandbox.kill();
     throw new Error(

@@ -21,7 +21,7 @@ export const prepare = internalAction({
     let stage = "decode";
     const staged: string[] = [];
     try {
-      const rate = Number(process.env.E2B_CREDITS_PER_SECOND);
+      const rate = Number(process.env.SANDBOX_CREDITS_PER_SECOND);
       // Bound total sandbox lifetime, not just the expected clip time.
       ensure(
         Number.isFinite(rate) && rate > 0 && Math.ceil(300 * rate) <= 10,
@@ -143,7 +143,7 @@ export const prepare = internalAction({
         error.computeSeconds !== undefined
       )
         computeCredits = Math.ceil(
-          error.computeSeconds * Number(process.env.E2B_CREDITS_PER_SECOND),
+          error.computeSeconds * Number(process.env.SANDBOX_CREDITS_PER_SECOND),
         );
       const message = error instanceof Error ? error.message : "";
       const category =

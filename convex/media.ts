@@ -91,7 +91,7 @@ export const analyze = internalAction({
           source.kind === "url" ? { url: source.url! } : source.objectKey!,
           decoder,
         );
-        const rate = Number(process.env.E2B_CREDITS_PER_SECOND);
+        const rate = Number(process.env.SANDBOX_CREDITS_PER_SECOND);
         ensure(
           Number.isFinite(rate) && rate > 0,
           "QUOTE_CHANGED",
@@ -351,7 +351,7 @@ export const analyze = internalAction({
             ...args,
             manifest: error.acquisition,
           });
-        const rate = Number(process.env.E2B_CREDITS_PER_SECOND);
+        const rate = Number(process.env.SANDBOX_CREDITS_PER_SECOND);
         if (
           error.computeSeconds !== undefined &&
           Number.isFinite(rate) &&

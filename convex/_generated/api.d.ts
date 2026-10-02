@@ -58,6 +58,7 @@ import type * as reconciliation from "../reconciliation.js";
 import type * as recovery from "../recovery.js";
 import type * as retrieval from "../retrieval.js";
 import type * as runnerProtocol from "../runnerProtocol.js";
+import type * as sandboxBroker from "../sandboxBroker.js";
 import type * as settlementAccounting from "../settlementAccounting.js";
 import type * as workflows from "../workflows.js";
 
@@ -118,6 +119,7 @@ declare const fullApi: ApiFromModules<{
   recovery: typeof recovery;
   retrieval: typeof retrieval;
   runnerProtocol: typeof runnerProtocol;
+  sandboxBroker: typeof sandboxBroker;
   settlementAccounting: typeof settlementAccounting;
   workflows: typeof workflows;
 }>;

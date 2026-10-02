@@ -4,7 +4,7 @@ import { createHash } from "node:crypto";
 import { archiveSnapshot } from "../packages/repositories/archive";
 import { repositoryArchive } from "../packages/providers/github";
 import { checkPatch } from "../packages/providers/cloud";
-import type { Sandbox } from "e2b";
+import type { JobSandbox } from "../packages/providers/sandbox";
 
 const text = "Owned synthetic repository documentation.";
 const entry = {
@@ -141,7 +141,7 @@ it("preserves executable file modes without shell expansion and never chmods a d
         return { exitCode: 0, stdout: "", stderr: "" };
       },
     },
-  } as unknown as Sandbox;
+  } as unknown as JobSandbox;
   await checkPatch(
     sandbox,
     [

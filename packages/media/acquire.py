@@ -104,6 +104,10 @@ def acquire(raw):
               '--max-downloads', '1', '--max-filesize', str(MAX_BYTES),
               '--format', 'best[height<=1080][vcodec!=none][acodec!=none]/best[height<=1080]/bestaudio',
               '--', raw]
+    proxy = os.environ.get('VIBE_DOWNLOAD_PROXY')
+    if proxy:
+        assert proxy == 'http://127.0.0.1:47891'
+        common = common[:-2] + ['--proxy', proxy] + common[-2:]
     code, stdout, stderr = bounded_run(common[:-2] + ['--skip-download', '--dump-single-json'] + common[-2:], 25)
     if code not in (0, 101) or not stdout.strip():
         return {**base, 'status': failure_status(stderr)}

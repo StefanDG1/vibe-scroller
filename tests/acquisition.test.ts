@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   acquisitionManifest,
   acquisitionMessage,
@@ -6,7 +6,8 @@ import {
 } from "../packages/media/acquisition";
 import release from "../infra/downloader.json";
 import { acquirer } from "../packages/media/acquirer";
-import { acquisitionIsolationCommand } from "../packages/providers/acquisition-isolation";
+import { hardenAcquisition } from "../packages/providers/acquisition-isolation";
+import type { JobSandbox } from "../packages/providers/sandbox";
 describe("permitted source acquisition", () => {
   it("restricts retrieval to single supported source identifiers and strips tracking", () => {
     expect(
@@ -64,7 +65,25 @@ describe("permitted source acquisition", () => {
     expect(acquirer).toContain("start_new_session=True");
     expect(acquirer).toContain("--ignore-config");
     expect(acquirer).not.toContain("--cookies");
-    expect(acquisitionIsolationCommand).toContain("169.254.0.0/16");
-    expect(acquisitionIsolationCommand).toContain("::ffff:0:0/96");
+    expect(acquirer).toContain("VIBE_DOWNLOAD_PROXY");
+  });
+  it("blocks retrieval and destroys the VM when the independent isolation probe fails", async () => {
+    const kill = vi.fn(async () => {});
+    const configurePublicDownload = vi.fn(async () => {});
+    const run = vi.fn(async () => ({ exitCode: 1 }));
+    const sandbox = {
+      kill,
+      configurePublicDownload,
+      commands: { run },
+    } as unknown as JobSandbox;
+    await expect(hardenAcquisition(sandbox)).rejects.toThrow(
+      "Execution blocked",
+    );
+    expect(configurePublicDownload).toHaveBeenCalledOnce();
+    expect(kill).toHaveBeenCalledOnce();
+    expect(run).toHaveBeenCalledWith(
+      expect.stringContaining("169.254.169.254"),
+      expect.objectContaining({ user: "user" }),
+    );
   });
 });

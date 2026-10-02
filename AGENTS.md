@@ -51,3 +51,7 @@ The owner expects the complete package to work without further product-design qu
 ## Version every main update
 
 Follow [the versioning policy](docs/VERSIONING.md). Main updates receive deterministic immutable alpha tags bound to the exact commit. Publish a GitHub prerelease only after required CI passes for that commit. Preserve the build version in the account menu. A tag or successful build does not close external release gates.
+
+## Use the current hosting and execution decision
+
+The owner selected Vercel Pro and Vercel Sandbox on October 2, 2026. Netlify builds/publishing are stopped and E2B runtime integration is retired. Do not restore either as an automatic fallback. Use [ADR 023](docs/adr/023-vercel-isolated-execution.md) and [the sandbox runbook](docs/operations/vercel-sandbox.md). Historical provider evidence cannot verify the replacement. Customer code and media stay in ephemeral microVMs; Vercel persistence must be explicitly disabled. Keep commercial cloud execution gated until its whole approved job and draft-PR journey passes.

@@ -6,7 +6,7 @@ Mode: reference.
 
 Cloud execution makes the complete product usable from a browser without a paired computer. It is an explicit paid choice. It is never a silent fallback for an offline laptop or an exhausted ChatGPT plan.
 
-Use an ephemeral CPU sandbox provider through an adapter. E2B is the initial candidate because its published usage-based option has no recurring base fee. Do not rely on introductory credits in long-term pricing. Sources S20 and S21 describe the candidate, not a tested VibeScroller integration.
+Use the Vercel Sandbox adapter on the existing Pro team, as selected by the owner on October 2. E2B is retired. Explicitly set persistent=false, no exposed ports, two CPUs, Frankfurt and no region failover. Separate pinned coding and media snapshots contain tools only. Shared Pro credit can be exhausted and overage remains metered; it is not a free unlimited allowance. See [ADR 023](adr/023-vercel-isolated-execution.md) and [the runbook](operations/vercel-sandbox.md).
 
 ## Job classes
 

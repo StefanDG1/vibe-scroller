@@ -115,7 +115,7 @@ export const execute = internalAction({
         cost =
           credits +
           Math.ceil(
-            seconds * Number(process.env.E2B_CREDITS_PER_SECOND ?? "1"),
+            seconds * Number(process.env.SANDBOX_CREDITS_PER_SECOND ?? "1"),
           );
       await ctx.runMutation(internal.jobs.completeCloud, {
         id: run._id,
@@ -181,7 +181,7 @@ export const waiveStagingFailure = internalAction({
       e.startsWith("Isolated sandbox started: "),
     );
     const sandboxId = event?.slice("Isolated sandbox started: ".length);
-    if (!sandboxId || !/^[a-z0-9-]{1,128}$/.test(sandboxId))
+    if (!sandboxId || !/^vercel:[A-Za-z0-9_-]{1,128}$/.test(sandboxId))
       throw new Error("Recorded sandbox termination evidence required.");
     await killSandbox(sandboxId);
     await ctx.runMutation(internal.jobs.waiveStagingFailure, a);
