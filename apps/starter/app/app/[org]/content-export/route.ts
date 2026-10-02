@@ -1,5 +1,6 @@
 import { backend, api } from "@/lib/backend";
 import type { Id } from "../../../../../../convex/_generated/dataModel";
+import { contentExportSections } from "../../../../../../packages/privacy/export";
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ org: string }> },
@@ -8,23 +9,34 @@ export async function GET(
   const organizationId = (await params).org as Id<"organizations">;
   // Check permission before returning download headers. Every subsequent page checks again.
   const asOf = Date.now();
-  const firstPage = await client.query(api.jobs.exportPage, {
-    organizationId,
-    section: "sources",
-    cursor: null,
-    asOf,
-  });
+  const firstPage = await client
+    .query(api.jobs.exportPage, {
+      organizationId,
+      section: "sources",
+      cursor: null,
+      asOf,
+    })
+    .catch(() => null);
+  if (!firstPage)
+    return new Response("Access denied or export unavailable.", {
+      status: 403,
+      headers: {
+        "Cache-Control": "private, no-store",
+        "X-Content-Type-Options": "nosniff",
+      },
+    });
+  const authorizedFirstPage = firstPage;
   async function* chunks() {
-    yield `{"schemaVersion":"1.1.0","exportedAt":${asOf},"consistency":"Live records as read; new records after export start excluded"`;
-    for (const section of ["sources", "proposals", "feedback"] as const) {
+    yield `{"schemaVersion":"1.2.0","exportedAt":${asOf},"consistency":"Live records as read; new records after export start excluded"`;
+    for (const section of contentExportSections) {
       yield `,"${section}":[`;
       let cursor: string | null = null;
       let first = true;
       do {
         if (request.signal.aborted) return;
-        const result: typeof firstPage =
+        const result: typeof authorizedFirstPage =
           section === "sources" && cursor === null
-            ? firstPage
+            ? authorizedFirstPage
             : await client.query(api.jobs.exportPage, {
                 organizationId,
                 section,

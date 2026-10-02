@@ -63,3 +63,7 @@ The [implementation record](../implementation-status.md) lists exact test eviden
 Open Library. Choose Music, Reading or another category, then sort by import date, save date, update date or title. Search finds matching stored sources by relevance. Open a whole source row to read all insights and expand its private evidence. The count on the row shows the full number of insights, even when only three point titles are previewed.
 
 Open Categories inside a source to edit its names. A new valid topic can be created by future analysis. Your manual choices survive reprocessing. The shared suggestion control is optional, publishes no source content and requires operator review before a name joins the app-wide vocabulary.
+
+## Download your work
+
+As workspace owner, open Privacy and choose Export workspace content. The JSON download includes saved sources and insights, proposals and plans, feedback, repository profiles and commit manifests, coding/PR history and workspace categories. It excludes deleted sources, private storage links, credential bindings and temporary raw repository context. This is a live paginated export, not an atomic database snapshot; records created after it starts are excluded, and losing owner access interrupts the download. Account profile/membership data has its separate account export.

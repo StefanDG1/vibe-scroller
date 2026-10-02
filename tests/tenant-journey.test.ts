@@ -3,6 +3,7 @@ import { convexTest } from "convex-test";
 import rateLimiterTest from "@convex-dev/rate-limiter/test";
 import schema from "../convex/schema";
 import { api, internal } from "../convex/_generated/api";
+import { contentExportSections } from "../packages/privacy/export";
 const modules = import.meta.glob("../convex/**/*.ts");
 afterEach(() => vi.unstubAllEnvs());
 
@@ -294,4 +295,69 @@ it("refuses cross-workspace joins in corrupted restored proposal/run references 
       highRisk: false,
     }),
   ).rejects.toThrow("FORBIDDEN");
+});
+
+it("guards every content-export section, admin view and billing record after membership or owner-role loss", async () => {
+  const { t, owner, foreign, viewer, org, userId } = await setup();
+  const quoteId = await t.run((ctx) => {
+    const now = Date.now();
+    return ctx.db.insert("billingChanges", {
+      organizationId: org,
+      subscriptionId: "synthetic-subscription",
+      itemId: "synthetic-item",
+      oldPrice: "synthetic-old-price",
+      newPrice: "synthetic-new-price",
+      tier: "starter",
+      interval: "monthly",
+      prorationDate: now,
+      periodStart: now,
+      periodEnd: now + 60000,
+      amount: 1900,
+      currency: "eur",
+      state: "quoted",
+      expiresAt: now + 60000,
+      createdAt: now,
+      updatedAt: now,
+    });
+  });
+  const reads = [
+    ...contentExportSections.map(
+      (section) => (client: typeof owner) =>
+        client.query(api.jobs.exportPage, {
+          organizationId: org,
+          section,
+          cursor: null,
+          asOf: Date.now(),
+        }),
+    ),
+    (client: typeof owner) =>
+      client.query(api.organizations.exportData, { organizationId: org }),
+    (client: typeof owner) =>
+      client.query(api.organizations.members, { organizationId: org }),
+    (client: typeof owner) =>
+      client.query(api.organizations.invitations, { organizationId: org }),
+    (client: typeof owner) =>
+      client.query(api.organizations.auditLog, { organizationId: org }),
+    (client: typeof owner) =>
+      client.query(api.commerce.invoiceTasks, { organizationId: org }),
+    (client: typeof owner) =>
+      client.query(api.billing.authorize, { organizationId: org }),
+    (client: typeof owner) =>
+      client.query(api.billingChanges.quote, { id: quoteId }),
+  ];
+  for (const read of reads) {
+    expect(await read(owner)).toBeDefined();
+    for (const client of [foreign, viewer, t])
+      await expect(read(client)).rejects.toThrow();
+  }
+  await t.run(async (ctx) => {
+    const member = await ctx.db
+      .query("memberships")
+      .withIndex("by_pair", (q) =>
+        q.eq("organizationId", org).eq("userId", userId),
+      )
+      .unique();
+    await ctx.db.patch(member!._id, { role: "member" });
+  });
+  for (const read of reads) await expect(read(owner)).rejects.toThrow();
 });

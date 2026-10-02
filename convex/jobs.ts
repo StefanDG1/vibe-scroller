@@ -1,4 +1,5 @@
 import { RETRIEVAL_VERSION } from "../packages/repositories/retrieval";
+import { exportRecord } from "../packages/privacy/export";
 import { internal } from "./_generated/api";
 import { workflow } from "./workflows";
 import {
@@ -917,6 +918,9 @@ export const exportPage = query({
       v.literal("sources"),
       v.literal("proposals"),
       v.literal("feedback"),
+      v.literal("repositories"),
+      v.literal("runs"),
+      v.literal("workspaceCategories"),
     ),
     cursor: v.union(v.string(), v.null()),
     asOf: v.number(),
@@ -932,20 +936,6 @@ export const exportPage = query({
       .query(a.section)
       .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
       .paginate({ cursor: a.cursor, numItems: 5 });
-    // Preserve useful evidence metadata without exposing storage bearer capabilities.
-    const redact = (value: unknown): unknown => {
-      if (Array.isArray(value)) return value.map(redact);
-      if (value && typeof value === "object")
-        return Object.fromEntries(
-          Object.entries(value)
-            .filter(
-              ([key]) =>
-                !["objectKey", "ciphertext", "signedUrl"].includes(key),
-            )
-            .map(([key, item]) => [key, redact(item)]),
-        );
-      return value;
-    };
     return {
       page: rows.page
         .filter(
@@ -953,7 +943,7 @@ export const exportPage = query({
             Math.floor(row._creationTime) <= a.asOf &&
             !("state" in row && row.state === "deleted"),
         )
-        .map(redact),
+        .map((row) => exportRecord(a.section, row)),
       isDone: rows.isDone,
       continueCursor: rows.continueCursor,
     };
