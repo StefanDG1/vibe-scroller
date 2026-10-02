@@ -12,7 +12,7 @@ The public site uses the motto "Make scrolling productive." It does not promise 
 
 ## Users and boundaries
 
-The first customers are adult individual developers and founders in the EU. English is the initial interface and default source language. Users can create multiple business profiles and select the repositories each profile owns. Business customers can enquire about a pilot. The application must not advertise unbuilt enterprise features.
+The first audience is adult individual developers and founders. English is the initial interface and default source language. The owner approved consumer checkout in Stripe Managed Payments' supported markets on October 2, 2026; direct billing retains its separately reviewed country policy. Users can create multiple business profiles and select the repositories each profile owns. Business customers can enquire about a pilot. The application must not advertise unbuilt enterprise features.
 
 The founder's one-to-five daily English videos provide a starting workload. The service must use quotas and durable jobs rather than assuming every customer has that workload. The founder's laptop is a benchmark device, not a hosting dependency for paying customers.
 
@@ -32,44 +32,44 @@ The user can record whether the implemented change helped. Merge and business be
 
 ## V1 requirements
 
-| ID | Requirement | Required behavior |
-| --- | --- | --- |
-| R01 | Responsive web app | Core journeys work at 320 CSS pixels through desktop. No native installation is required. |
-| R02 | Public website | Home, pricing, how it works, docs, FAQ, contact, legal, and account entry routes are complete. |
-| R03 | Authentication | WorkOS email code and Google sign-in, secure sessions, sign-out, account recovery, and verified identity. |
-| R04 | Workspace authorization | Every private object belongs to a workspace. Membership and role checks occur on the server. |
-| R05 | Capture | Paste URL, share target where supported, upload, CSV/JSON link import, and linked Telegram inbox. |
-| R06 | Source access | Unsupported, private, removed, or blocked sources have explicit statuses and a safe upload fallback. |
-| R07 | Media processing | Extract audio and timestamped visual evidence. Use bounded, restartable jobs. |
-| R08 | Transcription | Preserve original output, corrections, source language, model version, and uncertainty. |
-| R09 | Visual understanding | Identify relevant demonstrations, visible code, diagrams, and UI changes without claiming every frame was reviewed. |
-| R10 | Evidence-backed insights | Distinct main points link to transcript or frame evidence. Claims and system interpretations remain separate. |
-| R11 | Library | Browse, search, filter, tag, edit, export, and delete saved content and its derived records. |
-| R12 | Private reuse | Deduplicate within a workspace. A second identical import does not repeat completed processing or billing. |
-| R13 | Repository selection | Users choose GitHub installations and repos. No automatic access to all account repositories. |
-| R14 | Business profile | Store purpose, audience, stage, goals, business model, constraints, and non-goals for each project. |
-| R15 | Repository snapshots | Analyze selected content at a recorded commit. Respect exclusions and scan for secrets. |
-| R16 | Selective matching | Evaluate plausible matches. Return no fit, already implemented, unsupported, or deferred when appropriate. |
-| R17 | Proposal review | Show source evidence, repository evidence, concrete change, expected benefit, risks, effort, and alternatives. |
-| R18 | Plan generation | Generate a versioned, editable, exportable implementation plan with acceptance tests and rollback. |
-| R19 | Execution approval | Separate planning acceptance from permission to execute. Bind approval to a specific plan and budget. |
-| R20 | Local coding | Optional paired runner uses official Codex app-server with the user's supported authentication. |
-| R21 | Cloud coding | Offer an explicitly funded, bounded isolated execution route without requiring a laptop. |
-| R22 | Draft PR publishing | Validate the patch, run checks, and publish to an authorized branch. Never merge or deploy automatically. |
-| R23 | PR lifecycle | Track open, draft, ready, merged, and closed-unmerged states from GitHub, with reconciliation. |
-| R24 | Dashboard | Show summaries, main points, project applicability, next actions, PR state, and benefit evidence. |
-| R25 | Feedback | Record rejection reason, acceptance, implementation, merge, reversion, and outcome independently. |
-| R26 | AI funding | Support included API allowance, customer API keys, and supported local subscription execution. |
-| R27 | Billing | Weekly, monthly, annual individual plans, subscription portal, cancellation, refunds, and webhook-driven entitlements. |
-| R28 | Budget enforcement | Reserve estimated costs atomically. Cap retries, tokens, runtime, storage, and paid fallbacks. |
-| R29 | Privacy | Private evidence by default, short raw-media retention, export, deletion, and auditable retention exceptions. |
-| R30 | Notifications | In-app inbox, optional email, and optional Telegram. No sensitive source text in lock-screen messages by default. |
-| R31 | Operations | Health checks, error monitoring, backup restoration, incident response, and provider failure handling. |
-| R32 | Legal launch | Publish product-specific policies and enforce consent, tax, consumer, and data-processing requirements. |
-| R33 | Accessibility | Keyboard access, readable contrast, text alternatives, visible focus, and reduced motion. |
-| R34 | Evidence of completion | Test and release records distinguish local, staging, and production verification. |
-| R35 | Source traceability | Every claim, proposal, and implementation retains provenance and processing versions. |
-| R36 | Account disconnection | Disconnecting a provider revokes its capabilities without unexpectedly deleting the user's app account. |
+| ID  | Requirement              | Required behavior                                                                                                      |
+| --- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| R01 | Responsive web app       | Core journeys work at 320 CSS pixels through desktop. No native installation is required.                              |
+| R02 | Public website           | Home, pricing, how it works, docs, FAQ, contact, legal, and account entry routes are complete.                         |
+| R03 | Authentication           | WorkOS email code and Google sign-in, secure sessions, sign-out, account recovery, and verified identity.              |
+| R04 | Workspace authorization  | Every private object belongs to a workspace. Membership and role checks occur on the server.                           |
+| R05 | Capture                  | Paste URL, share target where supported, upload, CSV/JSON link import, and linked Telegram inbox.                      |
+| R06 | Source access            | Unsupported, private, removed, or blocked sources have explicit statuses and a safe upload fallback.                   |
+| R07 | Media processing         | Extract audio and timestamped visual evidence. Use bounded, restartable jobs.                                          |
+| R08 | Transcription            | Preserve original output, corrections, source language, model version, and uncertainty.                                |
+| R09 | Visual understanding     | Identify relevant demonstrations, visible code, diagrams, and UI changes without claiming every frame was reviewed.    |
+| R10 | Evidence-backed insights | Distinct main points link to transcript or frame evidence. Claims and system interpretations remain separate.          |
+| R11 | Library                  | Browse, search, filter, tag, edit, export, and delete saved content and its derived records.                           |
+| R12 | Private reuse            | Deduplicate within a workspace. A second identical import does not repeat completed processing or billing.             |
+| R13 | Repository selection     | Users choose GitHub installations and repos. No automatic access to all account repositories.                          |
+| R14 | Business profile         | Store purpose, audience, stage, goals, business model, constraints, and non-goals for each project.                    |
+| R15 | Repository snapshots     | Analyze selected content at a recorded commit. Respect exclusions and scan for secrets.                                |
+| R16 | Selective matching       | Evaluate plausible matches. Return no fit, already implemented, unsupported, or deferred when appropriate.             |
+| R17 | Proposal review          | Show source evidence, repository evidence, concrete change, expected benefit, risks, effort, and alternatives.         |
+| R18 | Plan generation          | Generate a versioned, editable, exportable implementation plan with acceptance tests and rollback.                     |
+| R19 | Execution approval       | Separate planning acceptance from permission to execute. Bind approval to a specific plan and budget.                  |
+| R20 | Local coding             | Optional paired runner uses official Codex app-server with the user's supported authentication.                        |
+| R21 | Cloud coding             | Offer an explicitly funded, bounded isolated execution route without requiring a laptop.                               |
+| R22 | Draft PR publishing      | Validate the patch, run checks, and publish to an authorized branch. Never merge or deploy automatically.              |
+| R23 | PR lifecycle             | Track open, draft, ready, merged, and closed-unmerged states from GitHub, with reconciliation.                         |
+| R24 | Dashboard                | Show summaries, main points, project applicability, next actions, PR state, and benefit evidence.                      |
+| R25 | Feedback                 | Record rejection reason, acceptance, implementation, merge, reversion, and outcome independently.                      |
+| R26 | AI funding               | Support included API allowance, customer API keys, and supported local subscription execution.                         |
+| R27 | Billing                  | Weekly, monthly, annual individual plans, subscription portal, cancellation, refunds, and webhook-driven entitlements. |
+| R28 | Budget enforcement       | Reserve estimated costs atomically. Cap retries, tokens, runtime, storage, and paid fallbacks.                         |
+| R29 | Privacy                  | Private evidence by default, short raw-media retention, export, deletion, and auditable retention exceptions.          |
+| R30 | Notifications            | In-app inbox, optional email, and optional Telegram. No sensitive source text in lock-screen messages by default.      |
+| R31 | Operations               | Health checks, error monitoring, backup restoration, incident response, and provider failure handling.                 |
+| R32 | Legal launch             | Publish product-specific policies and enforce consent, tax, consumer, and data-processing requirements.                |
+| R33 | Accessibility            | Keyboard access, readable contrast, text alternatives, visible focus, and reduced motion.                              |
+| R34 | Evidence of completion   | Test and release records distinguish local, staging, and production verification.                                      |
+| R35 | Source traceability      | Every claim, proposal, and implementation retains provenance and processing versions.                                  |
+| R36 | Account disconnection    | Disconnecting a provider revokes its capabilities without unexpectedly deleting the user's app account.                |
 
 ## Release exclusions
 

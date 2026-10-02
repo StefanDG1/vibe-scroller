@@ -6,14 +6,14 @@ This completes the original Mark Builds Brands Avatar Sheet Template using the [
 
 ## Demographic and general information
 
-| Template field           | Completion                                                                                         | Basis                        |
-| ------------------------ | -------------------------------------------------------------------------------------------------- | ---------------------------- |
-| Age range                | Adults only; a narrower age range is unknown                                                       | Product                      |
-| Gender                   | No verified distribution; do not gender the copy                                                   | Unknown                      |
-| Location                 | EU first; English interface and initial content language                                           | Product, not measured demand |
-| Monthly revenue          | Not known; personal salary and project revenue must not be conflated                               | Unknown                      |
-| Professional backgrounds | Independent development and technical product founding are the intended focus                      | Product and hypothesis       |
-| Typical identities       | Person with permission to change a selected repository and responsibility for reviewing the change | Behavioral hypothesis        |
+| Template field           | Completion                                                                                          | Basis                                         |
+| ------------------------ | --------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| Age range                | Adults only; a narrower age range is unknown                                                        | Product                                       |
+| Gender                   | No verified distribution; do not gender the copy                                                    | Unknown                                       |
+| Location                 | English interface; consumer checkout in Managed Payments' supported markets once release gates pass | Owner decision October 2; not measured demand |
+| Monthly revenue          | Not known; personal salary and project revenue must not be conflated                                | Unknown                                       |
+| Professional backgrounds | Independent development and technical product founding are the intended focus                       | Product and hypothesis                        |
+| Typical identities       | Person with permission to change a selected repository and responsibility for reviewing the change  | Behavioral hypothesis                         |
 
 The first-person identity used for copy exploration is "I build a project and keep finding ideas I might use." This is drafted language, not a customer quote. Do not infer that the buyer runs a profitable SaaS, works full time, has a particular education, or is already subscribed to ChatGPT. Business enquiries are possible, but enterprise administration and team governance cannot be invented to broaden this avatar.
 

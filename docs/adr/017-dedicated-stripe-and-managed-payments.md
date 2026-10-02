@@ -2,6 +2,8 @@
 
 Status: integration preparation; provider activation and live tests pending. Date: 2026-10-02.
 
+Market-scope follow-up: the owner subsequently approved Stripe Managed Payments' supported consumer markets. [ADR 022](022-managed-consumer-markets.md) supersedes the configured-country launch restriction for that explicit managed route; direct billing retains its separate tax/country gates. Earlier preparation and test limitations below remain historical evidence.
+
 The owner authorized a dedicated VibeScroller Stripe account under the existing login and Exponential Education SRL legal entity. The new Romanian account is separate from the education platform's account. Existing education products, keys, webhooks and subscriptions are not migrated or modified. Stripe's legal-entity reuse flow was selected. Account creation and access to its live dashboard are observed; these do not establish charge/payout readiness or Managed Payments approval.
 
 The owner subsequently selected Stripe Managed Payments if eligible and accepted its additional 3.5% transaction fee. This becomes the preferred launch route. It does not authorize optional paid Radar tiers, climate contributions, a real-money test or unrelated purchases. Romania and automated SaaS are supported by the current official documentation, but the account and product still require provider eligibility and terms acceptance.

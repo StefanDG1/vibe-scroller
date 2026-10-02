@@ -104,6 +104,9 @@ export const catalogue = query({
       pricing,
       taxMode: tax?.domestic ?? "pending_evidence",
       countries: tax?.countries ?? ["RO"],
+      billingCountryRequired:
+        process.env.STRIPE_BILLING_ROUTE !== "managed_payments" ||
+        process.env.STRIPE_MANAGED_MARKET !== "provider_supported",
       ...billingReadiness(process.env),
     };
   },

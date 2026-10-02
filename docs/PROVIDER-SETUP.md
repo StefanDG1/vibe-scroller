@@ -46,6 +46,8 @@ Use the dedicated VibeScroller Stripe account under Exponential Education SRL, a
 
 The preferred launch route is Managed Payments, subject to its account/product eligibility and operator acceptance of the provider terms. Prepare it in a dedicated sandbox first. Stripe handles covered customer-sales VAT and transaction invoices through Link. Keep direct-sale tax modes as alternatives; never silently fall back from a refused Managed Payments checkout to direct processing.
 
+The owner approved Managed Payments' supported consumer markets on October 2. Set `STRIPE_MANAGED_MARKET=provider_supported` only for that selected route after deploying its reviewed adapter. Checkout collects the actual billing address; the app does not request a preliminary country selection. Direct billing and an unset managed-market setting retain the existing reviewed-country policy. See [ADR 022](adr/022-managed-consumer-markets.md).
+
 Provision the catalogue using the matching deployment-independent secret environment: STRIPE_SECRET_KEY, STRIPE_ACCOUNT_ID and STRIPE_MODE. Run node scripts/stripe-catalogue.mjs for test mode; live mode requires the separately authorized --live flag. The command checks the credential's own Romanian account before mutations. It prints only configuration IDs and readiness flags, never keys. Its output deliberately leaves LIVE_CHECKOUT_ENABLED=false. Configure the dedicated portal, signed webhook, country policy and provider approvals before activation.
 
 Create the six subscription prices and optional top-up products in sandbox first. Add stable metadata identifying VibeScroller and the catalogue version. Use separate environment IDs. Configure customer portal actions and the signature-protected webhook endpoint.

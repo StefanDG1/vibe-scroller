@@ -26,6 +26,8 @@ The chosen product name and motto are VibeScroller and "Make scrolling productiv
 
 ## Customer and demographic findings
 
+Market-scope update, October 2: the owner approved consumer purchases in Stripe Managed Payments' supported markets. The earlier EU-first research brief below describes the original targeting decision. Broader checkout eligibility does not establish broader demand or a demographic finding. Existing behavioral positioning and evidence requirements remain unchanged; see [ADR 022](../adr/022-managed-consumer-markets.md).
+
 The intended first audience is adult individual developers and founders in the EU, using English. This is a product decision, not a researched distribution of buyers. No narrower age band, gender mix, income, monthly business revenue, country concentration, or family status has been established. The founder's OnePlus phone, laptop, and one-to-five daily English videos are a starting workload, not a customer persona.
 
 A useful behavioral definition is more specific than an age range. The candidate saves technical demonstrations, engineering advice, product ideas, or founder lessons. They have a project they can change and enough judgment to review a proposed implementation. Their phone is where they encounter ideas; their repository is where those ideas would need to become concrete work. Each part of that description is a targeting hypothesis. It should be verified by observing their current workflow rather than by asking whether a new AI app sounds useful.

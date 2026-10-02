@@ -242,7 +242,7 @@ export const checkout = action({
       v.literal("monthly"),
       v.literal("annual"),
     ),
-    country: v.string(),
+    country: v.optional(v.string()),
     termsAccepted: v.boolean(),
     immediateService: v.boolean(),
   },
@@ -268,6 +268,7 @@ export const checkout = action({
       live,
       route: process.env.STRIPE_BILLING_ROUTE,
       managedVerified: process.env.STRIPE_MANAGED_PAYMENTS_VERIFIED === "true",
+      managedMarket: process.env.STRIPE_MANAGED_MARKET,
     });
     const treatment = route.treatment;
     const price = priceId(a.tier, a.interval);
@@ -340,7 +341,7 @@ export const checkout = action({
       organizationId: a.organizationId,
       intent: JSON.stringify([
         price,
-        a.country,
+        route.billingCountry,
         treatment,
         a.immediateService,
         "v1-draft",
@@ -415,7 +416,7 @@ export const topup = action({
   args: {
     organizationId: v.id("organizations"),
     pack: v.union(v.literal("200"), v.literal("550")),
-    country: v.string(),
+    country: v.optional(v.string()),
     termsAccepted: v.boolean(),
     immediateService: v.boolean(),
   },
@@ -447,6 +448,7 @@ export const topup = action({
       live,
       route: process.env.STRIPE_BILLING_ROUTE,
       managedVerified: process.env.STRIPE_MANAGED_PAYMENTS_VERIFIED === "true",
+      managedMarket: process.env.STRIPE_MANAGED_MARKET,
     });
     const price = process.env[`STRIPE_TOPUP_${a.pack}_PRICE_ID`];
     ensure(price, "BILLING_UNAVAILABLE", "Top-up price unavailable.");
@@ -474,7 +476,7 @@ export const topup = action({
       intent: JSON.stringify([
         "topup",
         price,
-        a.country,
+        route.billingCountry,
         route.treatment,
         a.immediateService,
         "v1-draft",

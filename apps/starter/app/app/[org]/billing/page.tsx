@@ -105,16 +105,18 @@ export default async function Page({
                 <option value="annual">Annual with monthly credits</option>
               </select>
             </label>
-            <label>
-              Billing country
-              <select name="country" defaultValue="RO" required>
-                {catalogue.countries.map((country) => (
-                  <option key={country} value={country}>
-                    {country === "RO" ? "Romania" : country}
-                  </option>
-                ))}
-              </select>
-            </label>
+            {catalogue.billingCountryRequired && (
+              <label>
+                Billing country
+                <select name="country" defaultValue="RO" required>
+                  {catalogue.countries.map((country) => (
+                    <option key={country} value={country}>
+                      {country === "RO" ? "Romania" : country}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
             <label className="checkbox-label">
               <input type="checkbox" name="terms" required />I accept the
               displayed <Link href="/terms">terms</Link> and credit expiry
@@ -188,16 +190,18 @@ export default async function Page({
                   <option value="550">EUR 25 / 550 credits</option>
                 </select>
               </label>
-              <label>
-                Billing country
-                <select name="country" defaultValue="RO" required>
-                  {catalogue.countries.map((country) => (
-                    <option key={country} value={country}>
-                      {country === "RO" ? "Romania" : country}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              {catalogue.billingCountryRequired && (
+                <label>
+                  Billing country
+                  <select name="country" defaultValue="RO" required>
+                    {catalogue.countries.map((country) => (
+                      <option key={country} value={country}>
+                        {country === "RO" ? "Romania" : country}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
               <label className="checkbox-label">
                 <input name="terms" type="checkbox" required />I accept the
                 displayed <Link href="/terms">terms</Link> and processing-credit

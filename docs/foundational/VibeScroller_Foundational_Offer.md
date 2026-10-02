@@ -84,6 +84,8 @@ The specified preview is at most three sources and 30 credits, with no automatic
 
 ### Funding and availability
 
+Market-scope update, October 2: the owner approved private-consumer checkout in Stripe Managed Payments' supported countries and territories. The provider determines eligibility from the actual checkout details. Business purchases remain unavailable; direct billing retains its separate reviewed country policy. This broadens purchase eligibility, not evidence of demand, legal publication approval or enabled paid V1. See [ADR 022](../adr/022-managed-consumer-markets.md).
+
 The preferred optional route is official user ChatGPT-plan funding when the application, user, and workload are eligible and the user consents. For a paid remotely hosted product, current official commercial access requires the interest or waitlist process. Access is not granted here. Do not offer an enabled SIWC button or imply that connecting identity unlocks all inference.
 
 Evidence update, September 30: the independently authored Windows local text utility completed owner-authorized OAuth, account-specific model discovery and a real nonempty response using the owner's plan. This verifies that narrow local route. It does not establish hosted commercial access, browser-connected dispatch, video transcription, coding isolation or customer savings. The [idea backlog](idea-backlog.md) records the proposed funding message and its limits.

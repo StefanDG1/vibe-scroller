@@ -42,6 +42,47 @@ it("preserves the launch country allowlist in both test and live MoR routes", ()
       }),
     ).toThrow("unavailable in this country");
 });
+it("uses provider-collected eligibility for the explicitly approved consumer markets", () => {
+  for (const country of [undefined, "", "US", "CN", "invented"]) {
+    const result = checkoutPaymentRoute({
+      ...base,
+      country,
+      managedMarket: "provider_supported",
+      managedVerified: true,
+      live: true,
+    });
+    expect(result.billingCountry).toBeNull();
+    expect(result.options).toEqual({ managed_payments: { enabled: true } });
+  }
+  expect(() =>
+    checkoutPaymentRoute({
+      ...base,
+      managedMarket: "provider_supported",
+      live: true,
+    }),
+  ).toThrow("eligibility");
+});
+it("rejects an unknown managed market and does not broaden direct checkout", () => {
+  expect(() => checkoutPaymentRoute({ ...base, managedMarket: "all" })).toThrow(
+    "market policy",
+  );
+  expect(() =>
+    checkoutPaymentRoute({
+      ...base,
+      managedMarket: "provider_supported",
+      route: "direct",
+      country: "US",
+    }),
+  ).toThrow("unavailable in this country");
+  expect(() =>
+    checkoutPaymentRoute({
+      ...base,
+      managedMarket: "provider_supported",
+      route: "direct",
+      country: undefined,
+    }),
+  ).toThrow("unavailable in this country");
+});
 it("keeps direct tax evidence requirements and explicitly opts out of dashboard MoR defaults", () => {
   expect(() =>
     checkoutPaymentRoute({ ...base, route: "direct", live: true }),

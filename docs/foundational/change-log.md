@@ -2,6 +2,8 @@
 
 Mode: reference. Preserve evidence and reasoning behind changes to the four-document brief.
 
+October 2, F004: the owner approved Managed Payments' supported consumer markets. Research preserves its historical EU-first brief with a dated scope update; Avatar and Offer now reflect purchase eligibility. Beliefs were reviewed and remain consistent with individual value, explicit permission, bounded costs and verified availability. This is an operator decision, not new customer research or paid-release evidence. See [ADR 022](../adr/022-managed-consumer-markets.md).
+
 | Date       | Idea              | Change                                                                                  | Evidence and limits                                                                                               |
 | ---------- | ----------------- | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | 2026-09-30 | Initial brief     | Completed Research, Avatar, Offer and six Beliefs through the seven-stage SOP           | Public sources, original templates, private prompt ledger; no dedicated Deep Research run or invented interviews  |

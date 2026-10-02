@@ -41,6 +41,10 @@ Store only necessary metadata and selected derived evidence. Keep raw ZIPs on th
 
 Validation: use a rights-cleared design clip, retain a useful timestamped frame, retrieve it through a category/project filter, deny foreign-tenant access, delete the source and confirm both metadata and object disappear. Compare rank explanations with the actual source and project evidence. General chat retrieval remains a later connected test; ordinary search and filters must remain usable.
 
+## F004: Provider-supported consumer checkout markets
+
+Source: owner's October 2 approval to allow checkout wherever Stripe Managed Payments supports it. Adopted as a purchase-scope decision, not proof of global demand. The Research and Avatar behavioral hypotheses remain unvalidated; the Offer's market wording changes; the six Beliefs retain their evidence, control and value requirements. Business purchases and direct-billing tax/country expansion are not approved. Verify provider-collected billing details, honest currency/tax disclosures and no direct fallback before paid activation. See [ADR 022](../adr/022-managed-consumer-markets.md).
+
 ## New idea template
 
 Assign the next ID and add a row above:

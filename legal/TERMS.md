@@ -58,7 +58,7 @@ The checkout identifies the merchant for each transaction. When it uses Stripe M
 
 Use the billing settings to manage renewal and request service support. The receipt also links to the applicable merchant’s order and payment support. Do not send card details to VibeScroller support. Where Link is merchant of record, we do not issue a second Exponential Education consumer invoice for the same purchase. Our accountant receives the company’s separate settlement and provider accounting records.
 
-The initial paid offer is for private consumers in supported EU VAT territories. Business and unsupported-territory purchases remain unavailable. The checkout’s actual billing location and customer type must meet that offer; selecting an eligible country in the app does not establish eligibility by itself. A change to the merchant route or sales scope requires an updated checkout disclosure and release review.
+The initial paid offer is for private consumers in the countries and territories supported by the displayed merchant. For Stripe Managed Payments purchases, Stripe Checkout collects the billing address and determines transaction eligibility, available currency options and applicable taxes. Restricted territories and business purchases remain unavailable. A change to direct billing requires a separately reviewed country and tax configuration; a refused Managed Payments transaction does not automatically switch to direct billing.
 
 ## Acceptable use and suspension
 
