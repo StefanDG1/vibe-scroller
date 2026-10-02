@@ -21,6 +21,20 @@ const sourceState = v.union(
   ].map((s) => v.literal(s)),
 );
 export const productTables = {
+  sandboxToolSnapshots: defineTable({
+    kind: v.union(v.literal("media"), v.literal("coding")),
+    snapshotId: v.string(),
+    parentSnapshotId: v.optional(v.string()),
+    projectId: v.string(),
+    teamId: v.string(),
+    expiresAt: v.number(),
+    updatedAt: v.number(),
+    lease: v.optional(v.string()),
+    leaseUntil: v.optional(v.number()),
+    retryAfter: v.optional(v.number()),
+    lastError: v.optional(v.string()),
+    computeSeconds: v.optional(v.number()),
+  }).index("by_kind", ["kind"]),
   categoryVocabulary: defineTable({
     key: v.string(),
     name: v.string(),

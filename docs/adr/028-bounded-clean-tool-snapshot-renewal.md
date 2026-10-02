@@ -1,0 +1,13 @@
+# ADR 028: bounded clean tool snapshot renewal
+
+Status: implementation accepted; production activation requires real renewal acceptance. Date: October 2, 2026.
+
+Seven-day tool snapshots need renewal before expiry. Clone only an already verified clean tool snapshot within the configured Vercel project. Initial seeds must match the explicitly configured media/coding snapshot IDs and require their existing worker verification. Never snapshot a customer workload or use a user-supplied image identifier.
+
+An internal six-hour maintenance action checks the provider expiry. Within 36 hours of expiry it atomically claims one kind-specific five-minute lease, with a six-hour retry backoff. A clean clone has no network, exposed ports, provider persistence, region failover or customer inputs, and a 120-second VM ceiling. Trusted probes verify bounded clean home contents, UID 1001, empty capabilities, no-new-privileges, inaccessible privileged homes, an empty network namespace and the pinned required tools. Media checks decode only a synthetic in-memory color frame; coding checks use pinned pnpm and existing Node/Git.
+
+Create a seven-day candidate only after probes pass. Promote its metadata after acknowledged stop/delete and bounded wall-clock exposure. The old verified image remains selected after failure, recovery lock, stale lease or missing teardown acknowledgement. Promotion receipts are idempotent. After a lost receipt, read the authoritative active image before cleanup; never delete a candidate that is active or whose activation is uncertain. Failed promotion deletes an abandoned candidate only after that check and where acknowledged. Unknown provider cleanup is not reported as verified deletion. Previous clean snapshots expire naturally, avoiding a deletion race with an in-flight worker creation.
+
+The HMAC-authenticated, nonce-fenced credential broker supplies project-scoped active snapshot metadata with its short-lived OIDC authorization. Job creation validates its actual expiry and ID; an expired selected snapshot cannot silently fall back to an unverified image. Cleanup can still acquire credentials when a tool image expires. Metadata has no customer content or credential fields. Foreign-project or duplicate configuration rows deny issuance.
+
+Renewal is operator infrastructure usage, independently metered by Vercel; it does not debit a customer's task reservation or invent a provider bill. This maintains the current pinned tools, not their security updates. Updating tool versions or the base image still requires a new build and the complete worker acceptance suite. Keep SANDBOX_SNAPSHOT_RENEWAL_ENABLED false until actual production renewal, teardown and replacement worker checks pass.

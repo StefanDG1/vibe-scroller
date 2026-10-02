@@ -1,0 +1,18 @@
+{
+  "at": "2026-10-02T15:18:30.550Z",
+  "codeCommit": "cdd019089cd48ab203919950f034bcd0971c4669",
+  "environment": "actual production GitHub adapter with operator authorization",
+  "synthetic": true,
+  "fullAppWorkflow": false,
+  "prUrl": "https://github.com/StefanDG1/vibe-scroller/pull/12",
+  "headSha": "c58327b1adff2f64611d3a2e6cc254af2a069115",
+  "baseSha": "cdd019089cd48ab203919950f034bcd0971c4669",
+  "draftCreated": true,
+  "privateOutputExcluded": true,
+  "reviewedFileBytesMatched": true,
+  "changedFiles": 1,
+  "closedUnmerged": true,
+  "testBranchRemoved": true,
+  "noModelOrSandboxRequest": true,
+  "paidV1Established": false
+}

@@ -51,16 +51,18 @@ export async function POST(request: Request) {
     )
       return denied();
     const client = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL);
-    if (
-      !(await client.mutation(api.sandboxBroker.consume, { body, signature }))
-    )
-      return denied();
+    const authorized = await client.mutation(api.sandboxBroker.consume, {
+      body,
+      signature,
+    });
+    if (!authorized) return denied();
     const token = await getVercelOidcToken();
     return Response.json(
       {
         token,
         teamId: process.env.SANDBOX_TEAM_ID,
         projectId: process.env.SANDBOX_PROJECT_ID,
+        ...(authorized !== true ? { snapshots: authorized.snapshots } : {}),
       },
       { headers },
     );

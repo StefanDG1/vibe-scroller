@@ -5,6 +5,7 @@ import { randomBytes, createHash } from "node:crypto";
 import { signSandboxRequest } from "../policy/sandbox-broker";
 import { publicProxy, publicBridge } from "../media/public-proxy";
 import { ensure } from "../policy";
+import { toolSnapshot, type ToolSnapshot } from "../policy/tool-snapshots";
 
 type Options = {
   user?: "user" | "root";
@@ -72,7 +73,12 @@ function pathInJob(path: string) {
   );
   return path;
 }
-export async function sandboxCredentials() {
+export async function sandboxCredentials(): Promise<{
+  token?: string;
+  teamId?: string;
+  projectId?: string;
+  snapshots?: Partial<Record<"media" | "coding", ToolSnapshot>>;
+}> {
   const token = process.env.VERCEL_SANDBOX_TOKEN;
   if (!token) {
     const endpoint = process.env.SANDBOX_BRIDGE_URL;
@@ -134,6 +140,7 @@ export async function sandboxCredentials() {
       token: credentials.token as string,
       teamId: credentials.teamId as string,
       projectId: credentials.projectId as string,
+      ...(credentials.snapshots ? { snapshots: credentials.snapshots } : {}),
     };
   }
   ensure(
@@ -522,10 +529,13 @@ export async function createJobSandbox(
     process.env[
       kind === "coding" ? "VERCEL_CODING_IMAGE" : "VERCEL_MEDIA_IMAGE"
     ];
-  const snapshotId =
-    process.env[
-      kind === "coding" ? "VERCEL_CODING_SNAPSHOT" : "VERCEL_MEDIA_SNAPSHOT"
-    ];
+  const { snapshots, ...credentials } = await sandboxCredentials();
+  const kindSnapshot = snapshots?.[kind === "coding" ? "coding" : "media"];
+  const snapshotId = kindSnapshot
+    ? toolSnapshot(kindSnapshot).snapshotId
+    : process.env[
+        kind === "coding" ? "VERCEL_CODING_SNAPSHOT" : "VERCEL_MEDIA_SNAPSHOT"
+      ];
   ensure(
     snapshotId
       ? /^snap_[A-Za-z0-9_-]{8,128}$/.test(snapshotId)
@@ -534,7 +544,7 @@ export async function createJobSandbox(
     "Configure the pinned and tested isolated tool image.",
   );
   const sdk = await Sandbox.create({
-    ...(await sandboxCredentials()),
+    ...credentials,
     ...sandboxPolicy(kind, seconds, domains),
     ...(snapshotId
       ? { source: { type: "snapshot" as const, snapshotId } }

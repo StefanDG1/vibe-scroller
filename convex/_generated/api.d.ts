@@ -62,7 +62,9 @@ import type * as recoveryStorage from "../recoveryStorage.js";
 import type * as retrieval from "../retrieval.js";
 import type * as runnerProtocol from "../runnerProtocol.js";
 import type * as sandboxBroker from "../sandboxBroker.js";
+import type * as sandboxSnapshots from "../sandboxSnapshots.js";
 import type * as settlementAccounting from "../settlementAccounting.js";
+import type * as toolMaintenance from "../toolMaintenance.js";
 import type * as workflows from "../workflows.js";
 
 import type {
@@ -126,7 +128,9 @@ declare const fullApi: ApiFromModules<{
   retrieval: typeof retrieval;
   runnerProtocol: typeof runnerProtocol;
   sandboxBroker: typeof sandboxBroker;
+  sandboxSnapshots: typeof sandboxSnapshots;
   settlementAccounting: typeof settlementAccounting;
+  toolMaintenance: typeof toolMaintenance;
   workflows: typeof workflows;
 }>;
 

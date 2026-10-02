@@ -33,7 +33,27 @@ export const consume = mutation({
       state: "consumed",
     });
     await ctx.scheduler.runAfter(60000, internal.sandboxBroker.expire, { id });
-    return true;
+    const rows = await ctx.db.query("sandboxToolSnapshots").take(3);
+    if (!rows.length) return true;
+    if (
+      rows.length > 2 ||
+      new Set(rows.map((row) => row.kind)).size !== rows.length
+    )
+      return false;
+    const snapshots: Record<string, { snapshotId: string; expiresAt: number }> =
+      {};
+    for (const row of rows) {
+      if (
+        row.projectId !== process.env.VERCEL_SANDBOX_PROJECT_ID ||
+        row.teamId !== process.env.VERCEL_SANDBOX_TEAM_ID
+      )
+        return false;
+      snapshots[row.kind] = {
+        snapshotId: row.snapshotId,
+        expiresAt: row.expiresAt,
+      };
+    }
+    return { snapshots };
   },
 });
 export const expire = internalMutation({
