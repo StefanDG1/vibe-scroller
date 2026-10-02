@@ -1,5 +1,11 @@
 # Implementation status
 
+## October 3, 2026: reduce Vercel build spending
+
+At parent commit ca19a637939c6d411fa244998d44c158e0e53db5, the owner requested Basic rather than Standard builds. Native Vercel settings saved an explicit Custom Machine/Basic selection; independent authenticated project API reads confirmed both vibe-scroller and vibe-scroller-workers-staging use buildMachineType basic, buildMachineSelection fixed and elasticConcurrencyEnabled false. Existing Fluid Compute and function regions were preserved. No other project or subscription was changed. Private whitelisted configuration receipts are in outputs/*-basic-build-proof.json.
+
+ADR 033 and the committed ignored-build script add conservative documentation-only skipping against the previous successful deployment. Missing/invalid/unavailable history builds normally, as do accumulated application changes, legal updates, unknown inputs and runtime deletion. Five actual Git repository acceptance tests passed with pnpm test:build-policy, including execution from apps/starter. pnpm check passed in outputs/basic-build-policy-check.log: 278 application tests, three explicit external skips, eleven authentication tests, six PCM and three proxy tests, five new build-policy tests, document validation, lint, types and both local production builds. pnpm audit --prod --audit-level high found no known vulnerabilities. No extra remote build was requested merely to inspect settings. Final commit/CI/deployment observation follows separately; this change is not paid V1 completion or measured billing savings.
+
 Release label: Owner personal alpha deployed at https://scroll.companynerve.com. Specific production checks below do not certify paid/public V1, legal approval or complete security acceptance.
 
 Foundation: CompanyNerve commit `74642451d605dcad43546ddf651097960615810e`, exported with its official `scripts/export-template.mjs`. The upstream working-tree status addition was read and left unchanged.
