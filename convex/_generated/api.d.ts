@@ -37,6 +37,7 @@ import type * as lib from "../lib.js";
 import type * as lib_cloudAccess from "../lib/cloudAccess.js";
 import type * as lib_deletionMarkers from "../lib/deletionMarkers.js";
 import type * as lib_githubAuthorization from "../lib/githubAuthorization.js";
+import type * as lib_hostedMediaAccess from "../lib/hostedMediaAccess.js";
 import type * as lib_inference from "../lib/inference.js";
 import type * as lib_invoiceOperator from "../lib/invoiceOperator.js";
 import type * as lib_personalAccess from "../lib/personalAccess.js";
@@ -103,6 +104,7 @@ declare const fullApi: ApiFromModules<{
   "lib/cloudAccess": typeof lib_cloudAccess;
   "lib/deletionMarkers": typeof lib_deletionMarkers;
   "lib/githubAuthorization": typeof lib_githubAuthorization;
+  "lib/hostedMediaAccess": typeof lib_hostedMediaAccess;
   "lib/inference": typeof lib_inference;
   "lib/invoiceOperator": typeof lib_invoiceOperator;
   "lib/personalAccess": typeof lib_personalAccess;

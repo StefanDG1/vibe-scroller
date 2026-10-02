@@ -231,6 +231,7 @@ export async function approvePersonal(ctx: MutationCtx, a: PersonalApproval) {
   await ctx.db.patch(source._id, {
     generation,
     state: media ? "processing" : "queued",
+    managedAnalysisActor: undefined,
     personalMedia: undefined,
     error: undefined,
     personalAnalysis: {

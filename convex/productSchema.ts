@@ -228,6 +228,7 @@ export const productTables = {
       }),
     ),
     personalMedia: v.optional(v.any()),
+    managedAnalysisActor: v.optional(v.id("users")),
     personalAnalysis: v.optional(
       v.object({
         deviceId: v.id("devices"),

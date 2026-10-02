@@ -45,12 +45,14 @@ export const analyze = internalAction({
     const stagedKeys: string[] = [];
     let stagesCommitted = false;
     let reusedMediaGeneration: number | undefined;
-    try {
+    const authorize = async () =>
       ensure(
-        process.env.HOSTED_MEDIA_ANALYSIS_VERIFIED === "true",
+        await ctx.runQuery(internal.product.authorizeHostedMedia, args),
         "SETUP_REQUIRED",
-        "Hosted audiovisual analysis is awaiting its licensed model and end-to-end verification.",
+        "Hosted media is unavailable for this account or source authorization.",
       );
+    try {
+      await authorize();
       ensure(
         ((source.kind === "upload" && source.objectKey) ||
           (source.kind === "url" && source.url && source.rightsAttested)) &&
@@ -128,6 +130,7 @@ export const analyze = internalAction({
             });
         }
         if (media.audio) {
+          await authorize();
           timeRemaining();
           inferenceStarted = true;
           const asr = await inferMedia(
@@ -197,6 +200,7 @@ export const analyze = internalAction({
           .slice(0, 4);
         for (const frame of frames) {
           try {
+            await authorize();
             const pixels = Buffer.from(frame.data, "base64");
             ensure(
               pixels.length <= 1000000,
@@ -316,6 +320,7 @@ export const analyze = internalAction({
         { oneOf: evidence.map((item) => ({ const: item })) },
       );
       timeRemaining();
+      await authorize();
       inferenceStarted = true;
       const result = await infer(
         ctx,

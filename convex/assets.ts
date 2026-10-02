@@ -5,6 +5,7 @@ import { ensure } from "../packages/policy";
 import { internal } from "./_generated/api";
 import type { MutationCtx } from "./_generated/server";
 import { wallet } from "./product";
+import { hostedSourceAllowed } from "./lib/hostedMediaAccess";
 export async function queueDeletion(ctx: MutationCtx, key: string) {
   const old = await ctx.db
     .query("objectDeletions")
@@ -210,7 +211,8 @@ export const registerEvidence = internalMutation({
     if (
       !source ||
       source.state === "deleted" ||
-      source.generation !== a.generation
+      source.generation !== a.generation ||
+      (source.managedAnalysisActor && !(await hostedSourceAllowed(ctx, source)))
     ) {
       await queueDeletion(ctx, a.key);
       return null;

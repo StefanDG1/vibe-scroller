@@ -1,6 +1,6 @@
 # ADR 029: reviewed Gemma 4 vision
 
-Status: adapter accepted; real audiovisual acceptance pending. Date: October 2, 2026.
+Status: real owned-image acceptance passed; complete audiovisual acceptance pending. Date: October 2, 2026.
 
 The existing optional Moondream route remains disabled without its named licence acceptance. The owner authorized a compatible free managed model and the browser route still needs actual audiovisual analysis. Current [Cloudflare documentation](https://developers.cloudflare.com/workers-ai/models/gemma-4-26b-a4b-it/) lists Gemma 4 vision with a 256K context. Its licence link redirects to Google's [Apache 2.0 licence](https://ai.google.dev/gemma/apache_2). This adapter calls the Cloudflare-hosted model; it does not distribute or modify model weights or claim Google processes the request. No Moondream acceptance or professional legal review is invented.
 
@@ -9,3 +9,7 @@ Use the documented chat content image_url with an inline, bounded JPEG, low deta
 [Current Cloudflare pricing](https://developers.cloudflare.com/workers-ai/platform/pricing/) states 9,091 neurons per million input tokens and 27,273 per million output tokens. Reserve 2,500 neurons for a single frame, covering the entire published input context plus the bounded completion with headroom. Do not assume image token counts from bytes. Actual provider usage settles only when available; otherwise retain the whole reservation. Existing verified Workers Free plan and daily operator ceilings remain mandatory. This is an explicitly selected route, never a fallback from a customer's ChatGPT session or failed provider request.
 
 GEMMA4_VISION_QUOTE_VERIFIED must be set only after the documented contract and quota are checked, including at the HTTP broker. HOSTED_MEDIA_ANALYSIS_VERIFIED stays disabled until a real owned clip passes automatic speech, visual-only information, private evidence, insight provenance and cleanup acceptance. A single controlled clip does not complete the required broader quality benchmark or authorize paid public release.
+
+The exact owned JPEG passed production inference on October 2: correctly observed text/button, stopped output and provider-reported 5.363636 neurons (332 prompt/86 completion tokens). The 2,500-neuron hold settled from actual reported usage. See infra/gemma-owned-image-production-proof.json. No token-derived usage estimate was needed. The temporary exact-image gate was disabled afterward.
+
+Hosted media additionally separates technical verification, operator acceptance and public release. Before public approval only the at-most-ten explicitly selected subjects may initiate a verified or acceptance-only route. Each new media job binds its actual actor. Worker stages, evidence registration and output commits recheck active account, workspace, current write membership and subject scope. Revoked work cannot save new output; confirmed cost/error settlement remains possible. Personal ChatGPT approvals clear that managed binding and never inherit hosted permission.

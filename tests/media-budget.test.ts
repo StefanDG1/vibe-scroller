@@ -22,6 +22,7 @@ it("refuses unknown compute rates and unverified hosted analysis before creating
   ];
   for (const { rate, verified, category } of cases) {
     vi.stubEnv("HOSTED_MEDIA_ANALYSIS_VERIFIED", verified);
+    vi.stubEnv("HOSTED_MEDIA_PUBLIC_RELEASE_APPROVED", "true");
     vi.stubEnv("SANDBOX_CREDITS_PER_SECOND", rate);
     const t = convexTest(schema, import.meta.glob("../convex/**/*.ts"));
     const id = await t.run(async (ctx) => {
@@ -39,7 +40,13 @@ it("refuses unknown compute rates and unverified hosted analysis before creating
         createdBy: user,
         createdAt: now,
       });
+      await ctx.db.insert("memberships", {
+        organizationId,
+        userId: user,
+        role: "owner",
+      });
       return ctx.db.insert("sources", {
+        managedAnalysisActor: user,
         organizationId,
         createdAt: now,
         updatedAt: now,

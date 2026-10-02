@@ -28,6 +28,7 @@ it("does not advertise hosted media after its verified free-plan boundary expire
       .cloudAnalysisEnabled,
   ).toBe(false);
   vi.stubEnv("HOSTED_MEDIA_ANALYSIS_VERIFIED", "true");
+  vi.stubEnv("HOSTED_MEDIA_PUBLIC_RELEASE_APPROVED", "true");
   expect(
     (await user.query(api.aiPreferences.read, { organizationId: org }))
       .cloudAnalysisEnabled,

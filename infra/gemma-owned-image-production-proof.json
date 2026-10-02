@@ -1,0 +1,22 @@
+{
+  "checkedAt": "2026-10-02T16:46:23.837Z",
+  "environment": "production",
+  "synthetic": true,
+  "imageSha256": "c4b3636d9eba5c66192e6493eac95833219101a65b38e4572ba1fc312ec2e36d",
+  "maxNeurons": 2500,
+  "model": "@cf/google/gemma-4-26b-a4b-it",
+  "observation": "A dark background contains white and teal text and a teal button.\n\nAt the top left, the white text reads \"OWNED SYNTHETIC VIDEO TEST\". Below this, a larger white heading reads \"Readable interfaces\". Underneath the heading, teal text reads \"Use clear contrast and one primary action\".\n\nIn the lower-left area, there is a rectangular teal button with rounded corners containing the black text \"Continue\".",
+  "usage": {
+    "completion_tokens": 86,
+    "neurons": 5.363636016845703,
+    "prompt_tokens": 332,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "total_tokens": 418
+  },
+  "usageVerified": true,
+  "codeCommit": "4674254d91407c86f19ffb7d64f96d40f9a0516e",
+  "scope": "Exact owned synthetic image; not customer quality acceptance or public release",
+  "probeGateDisabledAfterward": true
+}

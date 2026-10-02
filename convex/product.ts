@@ -29,6 +29,10 @@ import type { Id } from "./_generated/dataModel";
 import { queueDeletion } from "./assets";
 import { mediaStagePayload } from "../packages/media/stages";
 import { personalAllowed } from "./lib/personalAccess";
+import {
+  hostedMediaAllowed,
+  hostedSourceAllowed,
+} from "./lib/hostedMediaAccess";
 import { syncCategories } from "./categories";
 import {
   acquisitionManifest,
@@ -742,7 +746,11 @@ async function startSource(
 ) {
   const s = await ctx.db.get(a.id);
   if (!s || s.state === "deleted") fail("Source unavailable.");
-  await writeAccess(ctx, s.organizationId, ["owner", "admin", "member"]);
+  const { actor } = await writeAccess(ctx, s.organizationId, [
+    "owner",
+    "admin",
+    "member",
+  ]);
   ensure(
     a.maxCredits === 10,
     "QUOTE_CHANGED",
@@ -769,7 +777,7 @@ async function startSource(
   if (s.kind !== "text")
     ensure(
       process.env.MANAGED_INFERENCE_ROUTE === "cloudflare_free" &&
-        process.env.HOSTED_MEDIA_ANALYSIS_VERIFIED === "true",
+        hostedMediaAllowed(actor.subject),
       "SETUP_REQUIRED",
       "Select the configured cloud media route explicitly; no personal-plan fallback is used.",
     );
@@ -782,6 +790,7 @@ async function startSource(
   await ctx.db.patch(s._id, {
     state: "queued",
     generation: s.generation + 1,
+    managedAnalysisActor: s.kind !== "text" ? actor._id : undefined,
     error: undefined,
   });
   await workflow.start(
@@ -831,6 +840,11 @@ export const recordAcquisition = internalMutation({
       source.generation !== a.generation
     )
       return false;
+    if (
+      source.managedAnalysisActor &&
+      !(await hostedSourceAllowed(ctx, source))
+    )
+      return false;
     const { schemaVersion: _schemaVersion, ...metadata } =
       acquisitionManifest.parse(a.manifest);
     await ctx.db.patch(a.id, {
@@ -848,6 +862,17 @@ export const recordAcquisition = internalMutation({
 export const workerSource = internalQuery({
   args: { id: v.id("sources") },
   handler: (ctx, a) => ctx.db.get(a.id),
+});
+export const authorizeHostedMedia = internalQuery({
+  args: { id: v.id("sources"), generation: v.number() },
+  handler: async (ctx, a) => {
+    const source = await ctx.db.get(a.id);
+    return (
+      !!source &&
+      source.generation === a.generation &&
+      (await hostedSourceAllowed(ctx, source))
+    );
+  },
 });
 export const commitAnalysis = internalMutation({
   args: {
@@ -882,6 +907,11 @@ export const commitAnalysis = internalMutation({
       return;
     let analysis: any;
     if (a.output) {
+      ensure(
+        !s.managedAnalysisActor || (await hostedSourceAllowed(ctx, s)),
+        "FORBIDDEN",
+        "Media authorization changed before output commit.",
+      );
       analysis = insightOutput.parse(a.output);
       ensure(
         analysis.sourceId === s._id &&
@@ -1639,6 +1669,11 @@ export const stageMedia = internalMutation({
       !source ||
       source.state === "deleted" ||
       source.generation !== a.generation
+    )
+      return false;
+    if (
+      source.managedAnalysisActor &&
+      !(await hostedSourceAllowed(ctx, source))
     )
       return false;
     ensure(
