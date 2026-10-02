@@ -2648,7 +2648,19 @@ function CaptureForm({
                     ? "Add and analyze"
                     : "Save source"}
       </button>
-      {importError && <p role="alert">{importError}</p>}
+      {importError && (
+        <div role="alert" className="form-grid">
+          <p>{importError}</p>
+          {importError.startsWith("Sign in again") && (
+            <a
+              className="button"
+              href={`/sign-in?reauth=true&returnTo=${encodeURIComponent(`/app?workspace=${organizationId}`)}`}
+            >
+              Sign in again
+            </a>
+          )}
+        </div>
+      )}
       {manifest && (
         <section aria-label="Import manifest">
           <output>

@@ -6,7 +6,7 @@ Mode: how-to. Last checked October 2, 2026. This guide distinguishes working che
 
 The real address is https://scroll.companynerve.com/app on your laptop or phone. HTTPS, clean production Google sign-in and automatic default workspace entry work. The dedicated Google OAuth audience was published as In production on October 2, with the correct product homepage, privacy and terms links and operator support email. A fresh owner Google sign-in after actual logout returned to the existing workspace. This removes the Google test-user restriction; it does not approve hosted ChatGPT access or paid V1. Existing active workspaces are reused; switching is available from Account. The dark interface and automatic laptop-assisted audio/visual analysis passed production verification on October 1. Reload an old tab to load the latest interface.
 
-Production hosting now uses the owner's Vercel Pro team. Reload the page after the host change; your same-domain login remains usable.
+Production hosting and isolated preparation now use the owner's Vercel Pro team. E2B is retired; Netlify builds are stopped and its old site is private. Reload the page after the host change; your same-domain login remains usable.
 
 Use the real domain for the personal test. Earlier Cloudflare staging capacity failures remain documented; staging and local builds do not define the current production result.
 
@@ -44,7 +44,7 @@ Connect GitHub and select only the repositories you want reviewed. Inspect the p
 
 Open a proposal and accept only a relevant change you want. Choose the quoted draft action, then review scope, existing/new files, steps, checks, risks and rollback in the plan fields. JSON is available in its disclosure, and Export plan downloads your current edits. Save new plan version records the reviewed plan and invalidates older execution approvals. Saving does not start coding; choose a verified executor and funding route in the separate approval section.
 
-The isolated cloud draft-PR route has staging evidence. Production GitHub account linking still needs its callback configuration corrected and a fresh real repository/plan/PR test. The Windows local coding route remains blocked by its failed isolation check. ChatGPT consent does not remove that block. Unattended work still requires the specific approved task and budget.
+The isolated cloud draft-PR route has staging evidence. The production GitHub callback is corrected and linking is present; the complete fresh repository/plan/PR journey still needs acceptance. The Windows local coding route remains blocked by its failed isolation check. ChatGPT consent does not remove that block. Unattended work still requires the specific approved task and budget.
 
 ## Storage and evidence
 

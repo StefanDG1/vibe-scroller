@@ -87,15 +87,15 @@ export const analyze = internalAction({
         else credits = payload.computeCredits;
         stagesCommitted = true;
       } else {
+        const rate = Number(process.env.SANDBOX_CREDITS_PER_SECOND);
+        ensure(
+          Number.isFinite(rate) && rate > 0 && Math.ceil(300 * rate) <= 10,
+          "QUOTE_CHANGED",
+          "Configure the verified compute ceiling before processing.",
+        );
         const media = await prepareMedia(
           source.kind === "url" ? { url: source.url! } : source.objectKey!,
           decoder,
-        );
-        const rate = Number(process.env.SANDBOX_CREDITS_PER_SECOND);
-        ensure(
-          Number.isFinite(rate) && rate > 0,
-          "QUOTE_CHANGED",
-          "Configure the verified compute ceiling.",
         );
         credits = Math.ceil(media.computeSeconds * rate);
         ensure(
@@ -371,6 +371,7 @@ export const analyze = internalAction({
               "STORAGE_UNAVAILABLE",
               "CONTEXT_REQUIRED",
               "BUDGET_EXCEEDED",
+              "QUOTE_CHANGED",
             ].find((code) => error.message.includes(code)) ?? error.name)
           : "UnknownError";
       console.error(JSON.stringify({ stage: "media_analysis", category }));

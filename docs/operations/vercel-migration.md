@@ -38,4 +38,4 @@ Netlify published `23375b9`, then skipped `96e2fb8` because this cycle's 300 cre
 
 ## Netlify retirement
 
-The owner withdrew Netlify use on October 2. Native settings now show stopped builds and locked automatic publishing for only vibescroller-alpha. The repository build configuration is removed. Historical deployments and evidence remain retained; they are not a serving or rollback dependency. The canonical subdomain remains on Vercel. The old site has not yet been verified unpublished.
+The owner withdrew Netlify use on October 2. Native settings now show stopped builds and locked automatic publishing for only vibescroller-alpha. The repository build configuration is removed. Historical deployments and evidence remain retained; they are not a serving or rollback dependency. The canonical subdomain remains on Vercel. Native settings also verified Production and Deploy Preview visibility Private. Historical records remain retained; the old site is not a public fallback. Unpublishing/deleting its historical project is not claimed.

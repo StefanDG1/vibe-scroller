@@ -53,5 +53,28 @@
     "packages/media/public_bridge.py": "1b4f20482fbfbcfcc07da1fc90cf043df30449268665ac4621e3f000e24a9257",
     "packages/providers/isolation.ts": "f4035cfa04cc713cfee93195adca5ea996eca615cbb725e03fca3dcdeeb0a04f",
     "packages/providers/acquisition-isolation.ts": "ca196f55854d93980ded0c4e6cf75dedabf5cf4ec0ae92459529c495173e379c"
+  },
+  "productionAuthorization": {
+    "time": "2026-10-02T12:07:14.537Z",
+    "environment": "production",
+    "originDenied": true,
+    "forgedSignatureDenied": true,
+    "replayDenied": true,
+    "noStore": true,
+    "projectIdentity": true,
+    "credentialLogged": false
+  },
+  "productionWorkerSuite": {
+    "command": "pnpm exec vitest run --config private/vercel-production.config.ts",
+    "trackedWorkerTests": "integration/vercel-sandbox.live.test.ts",
+    "testsPassed": 4,
+    "usesLiveProductionBroker": true,
+    "usesAccountPat": false,
+    "mediaActivated": true,
+    "acquisitionActivated": true,
+    "cloudCodingActivated": false,
+    "environment": "bold-lemur-667",
+    "frontendCommit": "641bb50a7060989d20270d18f231fb71c42b8326",
+    "deploymentId": "dpl_H5FLSevf4LKeAFaFoyEX3AF6M9f5"
   }
 }
