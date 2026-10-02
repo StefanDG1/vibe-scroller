@@ -33,6 +33,16 @@ Repository: https://github.com/StefanDG1/vibe-scroller
 
 ## Evidence
 
+### October 2: independent encrypted backup setup
+
+Exact main dcf22bcc0b534f548695791cd2dca9235983e847 passed Verify template 36968003704, Version main update 36968003751 and Publish verified alpha 36968080722; its Vercel status is successful. The tenant/vision/recovery production backend deployed to bold-lemur-667. Native Chrome confirmed that Account no longer offers Appearance. Its remaining small header/card links were measured and enlarged in the next UI patch. The initial staged secret scan flagged a synthetic test key literal; commit 6d37649 was pushed before that false positive was fully cleared. Follow-up dcf22bc replaced the ambiguous literal and scanning the whole change against f2a4725 found no leaks. No actual credential was in that finding.
+
+Fresh official Windows permission-profile probes used only owned synthetic canaries. A root-deny/minimal-read/workspace-write profile still permitted both home and sibling-repository reads. Adding explicit directory denials failed with helper_sandbox_lock_failed before returning probe results. No customer credential was read and local execution remains disabled. Current [official permission guidance](https://learn.chatgpt.com/docs/permissions) does not override the actual failed boundary.
+
+The independent database exporter now verifies the actual production deployment before exporting, encrypts database ZIP and separately captured deletion markers with AES-256-GCM, authenticates commit/working-tree state, limits restoration to seven days and removes temporary plaintext. Its restricted ninety-day Convex key has only backup view/create/download and internal-query permissions. Actual production export encrypted 138,836 bytes and three deletion markers. Positive deployment identity, environment-read denial and internal-mutation denial passed with that key. Secrets were configured privately in the VibeScroller GitHub repository; no key was printed or committed. The main-only daily workflow and seven-day encrypted artifact storage still require their first real dispatch before being counted as independent scheduled storage. Bulk R2 object backup/recovery and provider/publication review remain separate gates.
+
+Windows pnpm check in outputs/check-20261002-scheduled-backup.log passed 117 documents, twelve skill snapshots, 210 application tests, eleven auth tests, six PCM tests, lint, types and both builds. Three credential-gated suites skipped. Two new archive tests cover purpose/destination/expiry/key/authenticated metadata boundaries. Subsequent account-link sizing and archive provenance metadata passed lint/types; final publication and actual workflow evidence are recorded separately.
+
 ### October 2: public Google audience and tenant relationship acceptance
 
 The dedicated Google OAuth project audience now shows In production. Branding retains workos.com and adds companynerve.com, the actual homepage/privacy/terms links and the operator's support email. No credentials, logo or added sensitive/restricted scopes were copied or accepted. Native production Chrome signed out to the public homepage, opened /app, selected the explicitly authorized owner Google account and returned to the same existing workspace. Email-code, expired-session and recovery journeys remain separate acceptance work.

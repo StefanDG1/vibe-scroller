@@ -16,6 +16,15 @@ const entry = v.object({
   at: v.number(),
 });
 // Only deployment administrators can call these internal endpoints. Never expose them in product routes.
+export const backupIdentity = internalQuery({
+  args: {},
+  handler: () => ({
+    deployment: new URL(process.env.CONVEX_CLOUD_URL!).hostname.replace(
+      /\.convex\.cloud$/,
+      "",
+    ),
+  }),
+});
 export const markerPage = internalQuery({
   args: {
     section: v.union(v.literal("tombstones"), v.literal("deletionMarkers")),

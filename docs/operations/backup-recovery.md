@@ -1,6 +1,6 @@
 # Recover a workspace backup
 
-Mode: how-to. Locked hosted staging database restoration passed on October 2. A bounded owned evidence-frame recovery also passed. Scheduled independent production backups and bulk recovery acceptance remain incomplete.
+Mode: how-to. Locked hosted staging database restoration passed on October 2. A bounded owned evidence-frame recovery also passed. The independent production database exporter and schedule are implemented; their first GitHub execution and bulk object recovery acceptance are recorded separately.
 
 The dedicated staging rehearsal encrypts a Convex export with AES-256-GCM, decrypts it offline, validates every document and rejects altered authenticated metadata. It exports the latest deletion markers separately after the snapshot. This verifies archive integrity, not a hosted database import or object-storage recovery.
 
@@ -25,3 +25,13 @@ The operator-side `packages/recovery/evidence-backup.mjs` seals a JPEG of at mos
 Before decrypting, supply current records from the locked recovery deployment after applying the latest independent deletion manifest. A deleted workspace/source, retired key, changed generation, foreign asset, expired record, absent deletion lists or unlocked destination is rejected. Never use the archive's old records as evidence that content still exists. Quarantine restored provider credentials before unlocking.
 
 The October 2 real rehearsal exported staging into the locked rare-echidna-358 deployment, encrypted an owned synthetic JPEG, removed its object, recovered it and checked its SHA-256. Private browser access remained denied under the restore lock. A newer source deletion was then applied; recovery refused the earlier frame and the temporary object was physically purged. [Object recovery evidence](../../infra/object-recovery-evidence.json) records the boundary. This does not certify a separate backup storage account, scheduled retention or recovery of all raw media. No serving production database or customer object was overwritten.
+
+## Schedule independent encrypted database backups
+
+The Encrypted production backup workflow runs only from this repository's main branch, never on pull requests or forks. Enable it with the repository variable VIBE_BACKUP_ENABLED=true after its credentials and first dispatch are verified. It runs daily at 02:23 UTC and can be dispatched manually. A restricted, ninety-day production key needs only backups:view, backups:create, backups:download and functions:runInternalQueries. It cannot deploy, view environment variables, act as a user, execute mutations/actions or import backups. Rotate it before expiry; a failed GitHub run needs operator attention.
+
+Store the key as VIBE_BACKUP_CONVEX_KEY and the independent AES-256 backup key as VIBE_BACKUP_ENCRYPTION_KEY in GitHub Actions secrets. Keep a recoverable copy of the encryption key under the owner's separate control. Runtime environment credentials are never included, but encrypted customer connection credentials and device metadata in database records remain sensitive and must be quarantined on restore. Only trusted main code can receive these secrets.
+
+scripts/production-backup.mjs checks the backend's actual deployment identity before exporting. It bounds exports to 200 MB, removes temporary plaintext, encrypts the database ZIP and the separately captured latest deletion manifest, and emits only coarse operational counts. GitHub stores the sealed JSON artifacts for seven days. This uses GitHub as a backup processing/storage provider; its applicable agreement, processing locations and publication register require review before paid launch. No EU-only processing claim is made.
+
+The database-backup utility authenticates archive purpose, source deployment, commit, content hash and seven-day expiry. Decryption requires a different named recovery destination under restore lock. It does not import or unlock any database. Obtain the newest independent deletion manifest after the snapshot, apply it before serving traffic, quarantine credentials and repeat the existing hosted/tenant/private-object checks. The daily snapshot is not permission to restore deleted content. R2 object bytes and bulk object disaster recovery remain separate acceptance work.

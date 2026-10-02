@@ -12,7 +12,7 @@ export default async function Page() {
     c.query(api.invoiceOperations.status, {}),
   ]);
   return (
-    <div className="container">
+    <div className="container account-page">
       <Header />
       <main id="main" className="doc">
         <h1>Your account</h1>

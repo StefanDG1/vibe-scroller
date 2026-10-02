@@ -15,7 +15,7 @@ export default async function Page({
     organizationId: org as Id<"organizations">,
   });
   return (
-    <>
+    <div className="workspace-settings">
       <h1>Workspace settings</h1>
       <div className="stack">
         <Card>
@@ -67,6 +67,6 @@ export default async function Page({
           </>
         )}
       </div>
-    </>
+    </div>
   );
 }
