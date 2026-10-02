@@ -10,26 +10,26 @@ Repository: https://github.com/StefanDG1/vibe-scroller
 
 ## Work packages
 
-| Package | State            | Evidence                                                                                                                                    |
-| ------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| WP01    | verified_staging | Export preserved; frozen install, CI, builds and secret scanning passed                                                                     |
-| WP02    | in_progress      | Dark console and production desktop/mobile source checks passed; full accessibility acceptance remains                                      |
-| WP03    | in_progress      | Production Google login/default workspace and canonical reauthentication passed; broader recovery/logout acceptance remains                 |
-| WP04    | in_progress      | Actual supplied ZIP imported four links; their media was attached and analyzed in production; physical Android deferred                     |
-| WP05    | in_progress      | Atomic reservations, stage commits and workflows; interruption/cost reconciliation pending                                                  |
-| WP06    | in_progress      | Production local Whisper and personal ChatGPT audio/vision passed on three real Reels and one carousel; hosted commercial access gated      |
-| WP07    | in_progress      | Search/categories/sort and private evidence browser checks passed; late-object retirement and private evidence checks passed in production  |
-| WP08    | in_progress      | Selected GitHub App, nested exclusions, hash reuse and Repomix tree; real profile draft passed; quality benchmark pending                   |
-| WP09    | in_progress      | Semantic selection returned honest no-fit; reviewed AI draft plan implemented; live matching limited by free allowance                      |
-| WP10    | in_progress      | Real free managed route; revision-bound customer-key broker implemented; funded customer request not tested                                 |
-| WP11    | blocked_external | Pairing/lease/result code and vault test; actual native isolation failed                                                                    |
-| WP12    | in_progress      | Real isolated metered cloud coding produced a reviewed patch; cost calibration and outage cases remain                                      |
-| WP13    | in_progress      | Real draft PR 3 and automatic reopen/closure; merge/revert/access-loss staging remains                                                      |
-| WP14    | in_progress      | Normal generic hosted email delivered to official test recipient; opt-out passed; Telegram deferred by user                                 |
-| WP15    | in_progress      | Six prices/top-ups, real renewals/failure/portal/refund checks passed; operator settlement export verified; live release gated              |
-| WP16    | in_progress      | Locked hosted restore/tombstone/quarantine passed; physical deletion race fixed; independent backups/object recovery and full matrix remain |
-| WP17    | in_progress      | 200 app, 11 auth and six PCM tests plus both builds passed; broad benchmark/device/security acceptance remains                              |
-| WP18    | blocked_external | Personal production alpha verified; applicable tax/invoicing, legal publication and paid/public release acceptance remain                   |
+| Package | State            | Evidence                                                                                                                                     |
+| ------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| WP01    | verified_staging | Export preserved; frozen install, CI, builds and secret scanning passed                                                                      |
+| WP02    | in_progress      | Dark console and production desktop/mobile source checks passed; full accessibility acceptance remains                                       |
+| WP03    | in_progress      | Production Google login/default workspace and canonical reauthentication passed; broader recovery/logout acceptance remains                  |
+| WP04    | in_progress      | Actual supplied ZIP imported four links; their media was attached and analyzed in production; physical Android deferred                      |
+| WP05    | in_progress      | Atomic reservations, stage commits and workflows; interruption/cost reconciliation pending                                                   |
+| WP06    | in_progress      | Production local Whisper and personal ChatGPT audio/vision passed on three real Reels and one carousel; hosted commercial access gated       |
+| WP07    | in_progress      | Search/categories/sort and private evidence browser checks passed; late-object retirement and private evidence checks passed in production   |
+| WP08    | in_progress      | Selected GitHub App, nested exclusions, hash reuse and Repomix tree; real profile draft passed; quality benchmark pending                    |
+| WP09    | in_progress      | Semantic selection returned honest no-fit; reviewed AI draft plan implemented; live matching limited by free allowance                       |
+| WP10    | in_progress      | Real free managed route; revision-bound customer-key broker implemented; funded customer request not tested                                  |
+| WP11    | blocked_external | Pairing/lease/result code and vault test; actual native isolation failed                                                                     |
+| WP12    | in_progress      | Real isolated metered cloud coding produced a reviewed patch; cost calibration and outage cases remain                                       |
+| WP13    | in_progress      | Real draft PR 3 and automatic reopen/closure; merge/revert/access-loss staging remains                                                       |
+| WP14    | in_progress      | Normal generic hosted email delivered to official test recipient; opt-out passed; Telegram deferred by user                                  |
+| WP15    | in_progress      | Six prices/top-ups, real renewals/failure/portal/refund checks passed; operator settlement export verified; live release gated               |
+| WP16    | in_progress      | Locked database and owned-frame restore passed; object retirement and joined tenant boundaries fixed; independent backups/full matrix remain |
+| WP17    | in_progress      | 208 app, 11 auth and six PCM tests plus both builds passed; broad benchmark/device/security acceptance remains                               |
+| WP18    | blocked_external | Personal production alpha verified; applicable tax/invoicing, legal publication and paid/public release acceptance remain                    |
 
 ## Evidence
 

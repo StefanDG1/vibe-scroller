@@ -277,7 +277,7 @@ it("refuses cross-workspace joins in corrupted restored proposal/run references 
     owner.mutation(api.planning.start, {
       id: ids.proposal,
       version: 1,
-      key: "synthetic-scope-123",
+      key: "test000000000000",
       maxCredits: 10,
     }),
   ).rejects.toThrow("FORBIDDEN");
