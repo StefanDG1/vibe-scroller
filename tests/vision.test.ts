@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   authorizeMoondream,
   MOONDREAM_MODEL,
+  GEMMA4_MODEL,
   visionRequest,
   visionText,
 } from "../packages/providers/vision";
@@ -9,6 +10,65 @@ import { cfRun } from "../packages/providers/cloudflare";
 afterEach(() => {
   vi.unstubAllEnvs();
   vi.unstubAllGlobals();
+});
+
+it("bounds reviewed Gemma 4 image calls and rejects missing setup, truncated output and tools", async () => {
+  const pixels = new Uint8Array([255, 216, 255]);
+  expect(() => visionRequest(pixels, { VISION_MODEL: GEMMA4_MODEL })).toThrow(
+    "SETUP_REQUIRED",
+  );
+  const request = visionRequest(pixels, {
+    VISION_MODEL: GEMMA4_MODEL,
+    GEMMA4_VISION_QUOTE_VERIFIED: "true",
+  });
+  expect(request.maxNeurons).toBeGreaterThanOrEqual(
+    Math.ceil((256000 * 9091 + 400 * 27273) / 1000000),
+  );
+  expect(request.input).toMatchObject({
+    max_completion_tokens: 400,
+    chat_template_kwargs: { enable_thinking: false },
+    tool_choice: "none",
+    store: false,
+    stream: false,
+    n: 1,
+  });
+  const body = JSON.stringify(request.input);
+  expect(body).toContain("data:image/jpeg;base64,");
+  expect(body).not.toContain("https://");
+  const valid = {
+    choices: [
+      {
+        finish_reason: "stop",
+        message: { content: "Owned visible reference" },
+      },
+    ],
+  };
+  expect(visionText(GEMMA4_MODEL, valid)).toBe("Owned visible reference");
+  for (const choice of [
+    { finish_reason: "length", message: { content: "Truncated" } },
+    { finish_reason: "stop", message: { refusal: "Refused" } },
+    { finish_reason: "stop", message: { content: "Tool", tool_calls: [{}] } },
+  ])
+    expect(() => visionText(GEMMA4_MODEL, { choices: [choice] })).toThrow(
+      "INVALID_EVIDENCE",
+    );
+  vi.stubEnv("CLOUDFLARE_FREE_PLAN_VERIFIED_AT", new Date().toISOString());
+  vi.stubEnv("CLOUDFLARE_AI_TOKEN", "synthetic-token");
+  vi.stubEnv("CLOUDFLARE_ACCOUNT_ID", "synthetic-account");
+  vi.stubEnv("GEMMA4_VISION_QUOTE_VERIFIED", "");
+  const fetcher = vi.fn(async () =>
+    Response.json({ success: true, result: valid }),
+  );
+  vi.stubGlobal("fetch", fetcher);
+  await expect(cfRun(GEMMA4_MODEL, request.input)).rejects.toThrow(
+    "SETUP_REQUIRED",
+  );
+  expect(fetcher).not.toHaveBeenCalled();
+  vi.stubEnv("GEMMA4_VISION_QUOTE_VERIFIED", "true");
+  expect(
+    visionText(GEMMA4_MODEL, await cfRun(request.model, request.input)),
+  ).toBe("Owned visible reference");
+  expect(fetcher).toHaveBeenCalledOnce();
 });
 describe("licensed vision route", () => {
   it("blocks a new licensed model before making any provider request", () => {

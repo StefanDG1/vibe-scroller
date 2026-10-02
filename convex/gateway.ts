@@ -2,6 +2,14 @@
 import { internalAction } from "./_generated/server";
 import { getServiceToken } from "convex/server";
 import { v } from "convex/values";
+import { createHash } from "node:crypto";
+import { inferMedia } from "./lib/inference";
+import {
+  GEMMA4_MODEL,
+  visionRequest,
+  visionText,
+} from "../packages/providers/vision";
+import { ensure, containsSecret } from "../packages/policy";
 // This checks access without generating tokens or returning a deployment credential.
 export const capability = internalAction({
   args: {},
@@ -108,6 +116,58 @@ export const syntheticProbe = internalAction({
       text: result.choices?.[0]?.message?.content,
       usage: result.usage,
       synthetic: true,
+    };
+  },
+});
+
+// Operator-only bounded acceptance, independently restricted to the exact
+// owned synthetic image hash. It cannot consume customer image capabilities.
+export const ownedVisionProbe = internalAction({
+  args: { jpeg: v.string() },
+  handler: async (ctx, a) => {
+    ensure(
+      process.env.VISION_ACCEPTANCE_PROBES_ENABLED === "true" &&
+        a.jpeg.length <= 140000,
+      "POLICY_BLOCKED",
+      "Owned image acceptance is disabled.",
+    );
+    const pixels = Buffer.from(a.jpeg, "base64");
+    ensure(
+      pixels.length > 0 &&
+        pixels.length <= 100000 &&
+        pixels[0] === 255 &&
+        pixels[1] === 216 &&
+        pixels[2] === 255 &&
+        createHash("sha256").update(pixels).digest("hex") ===
+          process.env.VISION_ACCEPTANCE_IMAGE_SHA256,
+      "POLICY_BLOCKED",
+      "Only the exact owned acceptance image is authorized.",
+    );
+    const request = visionRequest(pixels, {
+      ...process.env,
+      VISION_MODEL: GEMMA4_MODEL,
+    });
+    const response = await inferMedia(
+      ctx,
+      request.model,
+      request.input,
+      request.maxNeurons,
+    );
+    const observation = visionText(request.model, response.result);
+    ensure(
+      typeof observation === "string" &&
+        observation.length <= 4000 &&
+        !containsSecret(observation),
+      "INVALID_EVIDENCE",
+      "Owned visual observation failed validation.",
+    );
+    return {
+      synthetic: true,
+      model: request.model,
+      observation,
+      usageVerified: response.usageVerified,
+      usage: response.result.usage ?? null,
+      maxNeurons: request.maxNeurons,
     };
   },
 });

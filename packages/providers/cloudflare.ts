@@ -1,5 +1,10 @@
 import { ensure } from "../policy";
-import { authorizeMoondream, MOONDREAM_MODEL } from "./vision";
+import {
+  authorizeMoondream,
+  MOONDREAM_MODEL,
+  authorizeGemma4,
+  GEMMA4_MODEL,
+} from "./vision";
 import { freeWorkersConfigured } from "./workers-plan";
 export const cfTextModel = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
 export function freeCloudflare() {
@@ -23,10 +28,12 @@ export function cfQuote(
 export async function cfRun(model: string, input: unknown) {
   freeCloudflare();
   if (model === MOONDREAM_MODEL) authorizeMoondream();
+  if (model === GEMMA4_MODEL) authorizeGemma4();
   ensure(
     [
       cfTextModel,
       MOONDREAM_MODEL,
+      GEMMA4_MODEL,
       "@cf/openai/whisper-large-v3-turbo",
       "@cf/meta/llama-3.2-11b-vision-instruct",
     ].includes(model),
