@@ -708,6 +708,54 @@ textarea {
   font-family: ui-monospace, monospace;
   font-size: 0.8rem;
 }
+.plan-review,
+.plan-fields,
+.plan-files {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.plan-fields,
+.plan-files {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.plan-files legend {
+  margin-bottom: 12px;
+  font-size: 0.87rem;
+}
+.plan-file {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 150px 44px;
+  align-items: end;
+  gap: 12px;
+}
+.plan-remove {
+  min-width: 44px;
+  min-height: 44px;
+}
+.plan-hint {
+  margin: 0;
+  color: var(--subtle);
+  font-size: 0.8rem;
+}
+.plan-release {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+@media (max-width: 600px) {
+  .plan-file {
+    grid-template-columns: minmax(0, 1fr) 44px;
+  }
+  .plan-file > label:first-child {
+    grid-column: 1 / -1;
+  }
+  .plan-release {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
 .insight {
   border-bottom: 1px solid var(--line);
   padding: 15px 0;

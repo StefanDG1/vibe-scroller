@@ -253,3 +253,15 @@ Documentation evidence: the effective cascade in `apps/starter/app/product.css`,
 Keep search and filters in the existing dark control style. Use accessible names for unlabeled selectors, 44 px controls and wrapping layouts on narrow screens. Search uses relevance and disables date/title sorting until cleared. A source row displays its insight count, a short point preview and up to four category names; the full row opens actual details. Category editing lives in a native disclosure within those details, with saving, error, empty and success behavior using the existing operation state. Shared suggestions are a separate owner/admin choice with a concise privacy explanation.
 
 Source thumbnails use the first retained private frame when available, load lazily and fade in over 160 ms. Failed or unavailable evidence retains the media-type icon. Reduced motion disables the fade. The image goes through the tenant-checked no-store endpoint and bypasses public image optimization. Completed sources show their insight count without a redundant ready label. Phone filters each keep a usable full-width touch target.
+
+## Plan review
+
+Review scope, affected files, implementation steps, checks, rollout and rollback in editable fields. File rows distinguish existing and new files and retain 44 px removal controls. On phones the path fills a row, with the change selector and removal control below it. JSON stays in a native disclosure for import and advanced edits. Invalid JSON remains intact until corrected; it never becomes a silently accepted plan.
+
+| Before                                        | After                                           | Why                                                       |
+| --------------------------------------------- | ----------------------------------------------- | --------------------------------------------------------- |
+| JSON was the only editor                      | Labeled plan fields and optional JSON           | Review does not require editing serialized syntax         |
+| A new draft stayed behind a disclosure        | Current unconfirmed draft fills the editor      | The next review step is visible; saving remains explicit  |
+| Blank steps or checks met array length limits | Save rejects empty steps, checks and file paths | A plan must specify work and verification before approval |
+
+October 2 native Chrome checks covered 320, 360, 390, 412, 768 and 1440 CSS pixels without page overflow. Private captures include plan-editor-local-mobile.png and plan-editor-staging-saved-mobile.png. Saving the labeled staging plan created version 2 and a 64-character hash; it did not start coding. These checks do not certify the generated recommendation's usefulness or a full PR journey.

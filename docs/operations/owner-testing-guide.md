@@ -42,6 +42,8 @@ After an actual analysis completes, review its summary, main points, source evid
 
 Connect GitHub and select only the repositories you want reviewed. Inspect the proposed change against its recorded repository commit. Accepting a proposal creates a plan; review and edit it before separately approving coding. That approval binds the plan, repository, executor, funding route and maximum cost. Review the draft PR in GitHub. V1 does not merge or deploy automatically.
 
+Open a proposal and accept only a relevant change you want. Choose the quoted draft action, then review scope, existing/new files, steps, checks, risks and rollback in the plan fields. JSON is available in its disclosure, and Export plan downloads your current edits. Save new plan version records the reviewed plan and invalidates older execution approvals. Saving does not start coding; choose a verified executor and funding route in the separate approval section.
+
 The isolated cloud draft-PR route has staging evidence. Production GitHub account linking still needs its callback configuration corrected and a fresh real repository/plan/PR test. The Windows local coding route remains blocked by its failed isolation check. ChatGPT consent does not remove that block. Unattended work still requires the specific approved task and budget.
 
 ## Storage and evidence

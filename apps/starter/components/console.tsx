@@ -28,6 +28,8 @@ import {
   Check,
 } from "lucide-react";
 import { AccountMenu } from "./account-menu";
+import { PlanEditor } from "./plan-editor";
+import { reviewedPlan } from "../../../packages/plans/editor";
 import { CookieSettings, rejectAnalytics } from "./consent";
 import { track } from "@/lib/analytics";
 import { productAnalyticsEvent } from "@/lib/analytics-events";
@@ -417,12 +419,22 @@ export function Console({
     };
   }, [demo, organizationId, processing]);
   const planIdentity = selected
-    ? `${id(selected)}:${selected.planHash ?? ""}`
+    ? `${id(selected)}:${selected.planHash ?? (selected.planDraftVersion === selected.version ? (selected.planDraftKey ?? JSON.stringify(selected.planDraft ?? null)) : "")}`
     : "";
   const [editedPlanIdentity, setEditedPlanIdentity] = useState("");
   if (editedPlanIdentity !== planIdentity) {
     setEditedPlanIdentity(planIdentity);
-    setPlanText(JSON.stringify(selected?.plan ?? blankPlan, null, 2));
+    setPlanText(
+      JSON.stringify(
+        selected?.plan ??
+          (selected?.planDraftVersion === selected?.version
+            ? selected?.planDraft
+            : undefined) ??
+          blankPlan,
+        null,
+        2,
+      ),
+    );
   }
   async function call(operation: string, args: any) {
     if (readOnly) {
@@ -1409,15 +1421,11 @@ export function Console({
                   must appear in the repository snapshot. Saving creates a new
                   immutable plan hash.
                 </p>
-                <label>
-                  Structured plan
-                  <textarea
-                    className="plan-editor"
-                    rows={16}
-                    value={planText}
-                    onChange={(e) => setPlanText(e.target.value)}
-                  />
-                </label>
+                <PlanEditor
+                  value={planText}
+                  onChange={setPlanText}
+                  disabled={busy || readOnly}
+                />
                 <Button
                   busy={busy}
                   disabled={selected.review !== "accepted"}
@@ -1426,11 +1434,11 @@ export function Console({
                       await call("editPlan", {
                         id: id(selected),
                         version: selected.version,
-                        plan: JSON.parse(planText),
+                        plan: reviewedPlan(planText),
                       });
                     } catch {
                       setNotice(
-                        "The plan must be valid JSON with all required sections.",
+                        "Add a scope, at least one file, implementation step and check. Keep all required sections and valid JSON.",
                       );
                     }
                   }}
