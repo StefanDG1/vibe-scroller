@@ -1,0 +1,9 @@
+{
+  "checkedAt": "2026-10-02T16:57:55.280Z",
+  "productionWebhookConfiguredAndReloadVerified": true,
+  "realGitHubRedeliveryResponse": 200,
+  "productionReceiptPresent": true,
+  "receiptState": "queued",
+  "receiptAt": 1790960085292,
+  "scope": "Saved production URL plus real signed GitHub redelivery and independent production receipt; prior full PR lifecycle evidence is separate."
+}

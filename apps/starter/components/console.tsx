@@ -2085,6 +2085,9 @@ function CaptureForm({
   const [kind, setKind] = useState(existingSourceId ? "upload" : "url");
   const [saving, setSaving] = useState(false);
   const [autoAnalyze, setAutoAnalyze] = useState(true);
+  const [analysisRoute, setAnalysisRoute] = useState(
+    personalEnabled ? "personal" : "cloud",
+  );
   const eligible = devices.filter(
     (d: any) =>
       d.personalOwned &&
@@ -2106,11 +2109,12 @@ function CaptureForm({
     "";
   const personalAutomatic =
     personalEnabled &&
+    analysisRoute === "personal" &&
     autoAnalyze &&
     (kind === "upload" ||
       (linkAnalysisEnabled && ["url", "import"].includes(kind)));
   const cloudAutomatic =
-    !personalEnabled &&
+    analysisRoute === "cloud" &&
     cloudEnabled &&
     autoAnalyze &&
     (kind === "upload" ||
@@ -2235,14 +2239,13 @@ function CaptureForm({
             if (!file?.size || file.size > 250000000)
               throw new Error("Choose a video or audio file up to 250 MB.");
             if (
-              personalEnabled &&
-              autoAnalyze &&
+              personalAutomatic &&
               (!computer || !effectiveModel || f.get("ownPlan") !== "on")
             )
               throw new Error(
                 "Choose your online computer and approve using your ChatGPT plan.",
               );
-            if (personalEnabled && autoAnalyze) {
+            if (personalAutomatic) {
               const fresh = await call("checkPersonalSession", {
                 organizationId,
               });
@@ -2303,7 +2306,7 @@ function CaptureForm({
                 );
               await call("process", { id: sourceId, maxCredits: 10 });
             }
-            if (personalEnabled && autoAnalyze) {
+            if (personalAutomatic) {
               const approved = await call("approvePersonalAnalysis", {
                 id: sourceId,
                 generation: existingSourceId ? existingGeneration + 1 : 0,
@@ -2553,7 +2556,20 @@ function CaptureForm({
         <input name="rights" type="checkbox" required />I may submit this
         content for processing
       </label>
+      {personalEnabled && cloudEnabled && (
+        <label>
+          Analysis provider
+          <select
+            value={analysisRoute}
+            onChange={(e) => setAnalysisRoute(e.target.value)}
+          >
+            <option value="personal">My ChatGPT plan · paired laptop</option>
+            <option value="cloud">Cloud processing · app credits</option>
+          </select>
+        </label>
+      )}
       {personalEnabled &&
+        analysisRoute === "personal" &&
         (kind === "upload" ||
           (linkAnalysisEnabled && ["url", "import"].includes(kind))) && (
           <section
@@ -2618,7 +2634,7 @@ function CaptureForm({
             )}
           </section>
         )}
-      {!personalEnabled &&
+      {analysisRoute === "cloud" &&
         cloudEnabled &&
         (kind === "upload" ||
           kind === "text" ||
