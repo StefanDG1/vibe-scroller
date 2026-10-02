@@ -1,6 +1,7 @@
 import { Console } from "./console";
 import { backend, api } from "@/lib/backend";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { notFound } from "next/navigation";
 export async function ProductPage({
   org,
   view,
@@ -9,6 +10,7 @@ export async function ProductPage({
   filter = "",
   category = "",
   sort = "newest",
+  sourceId,
 }: {
   org: string;
   view: string;
@@ -17,6 +19,7 @@ export async function ProductPage({
   filter?: string;
   category?: string;
   sort?: string;
+  sourceId?: string;
 }) {
   const c = await backend(),
     organizationId = org as Id<"organizations">;
@@ -32,6 +35,7 @@ export async function ProductPage({
     customerRoutes,
     aiPreference,
     categories,
+    selectedSource,
   ] = await Promise.all([
     c.query(api.product.library, {
       organizationId,
@@ -50,10 +54,19 @@ export async function ProductPage({
     c.query(api.jobs.customerRoutes, { organizationId }),
     c.query(api.aiPreferences.read, { organizationId }),
     c.query(api.categories.list, { organizationId }),
+    sourceId
+      ? c
+          .query(api.product.detail, {
+            id: sourceId as Id<"sources">,
+            organizationId,
+          })
+          .catch(() => notFound())
+      : Promise.resolve(null),
   ]);
   return (
     <Console
-      key={org}
+      key={`${org}:${sourceId ?? "workspace"}`}
+      initialSource={selectedSource}
       initialSharedDraft={draft.slice(0, 2048)}
       initialSearch={search}
       initialFilter={filter}

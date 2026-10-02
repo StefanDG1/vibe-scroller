@@ -186,7 +186,17 @@ async function setup() {
       ["run", () => client.query(api.jobs.run, { id: ids.run })],
       ["evidence", () => client.query(api.assets.evidence, { id: ids.asset })],
     ] as const;
-  return { t, owner, foreign, viewer, org, ids, reads, userId: users[0] };
+  return {
+    t,
+    owner,
+    foreign,
+    viewer,
+    org,
+    other,
+    ids,
+    reads,
+    userId: users[0],
+  };
 }
 
 it("denies the library-to-PR private read matrix to foreign, unsigned and removed identities while preserving viewer reads", async () => {
@@ -360,4 +370,30 @@ it("guards every content-export section, admin view and billing record after mem
     await ctx.db.patch(member!._id, { role: "member" });
   });
   for (const read of reads) await expect(read(owner)).rejects.toThrow();
+});
+
+it("binds bookmarked source details to the requested workspace even for a member of both", async () => {
+  const { t, owner, org, other, ids, userId } = await setup();
+  await t.run((ctx) =>
+    ctx.db.insert("memberships", {
+      organizationId: other,
+      userId,
+      role: "member",
+    }),
+  );
+  expect(
+    (
+      await owner.query(api.product.detail, {
+        id: ids.source,
+        organizationId: org,
+      })
+    ).title,
+  ).toBe("Private source A");
+  await expect(
+    owner.query(api.product.detail, { id: ids.source, organizationId: other }),
+  ).rejects.toThrow("Source unavailable");
+  await owner.mutation(api.product.deleteSource, { id: ids.source });
+  await expect(
+    owner.query(api.product.detail, { id: ids.source, organizationId: org }),
+  ).rejects.toThrow("Source unavailable");
 });

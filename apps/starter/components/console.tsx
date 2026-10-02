@@ -44,6 +44,7 @@ type Initial = {
     cloudAnalysisEnabled?: boolean;
   };
   sources: any[];
+  selectedSource?: any;
   categories?: { key: string; name: string; count: number }[];
   libraryNext?: string | null;
   repositories: any[];
@@ -157,6 +158,7 @@ export function Console({
   initialFilter = "",
   initialCategory = "",
   initialSort = "newest",
+  initialSource = null,
   demoState = "ready",
 }: {
   demo?: boolean;
@@ -170,6 +172,7 @@ export function Console({
   initialFilter?: string;
   initialCategory?: string;
   initialSort?: string;
+  initialSource?: any;
   demoState?: "ready" | "loading" | "error" | "empty";
 }) {
   const router = useRouter(),
@@ -177,7 +180,7 @@ export function Console({
     [view, setView] = useState(
       initialView === "plans" ? "proposals" : initialView,
     ),
-    [selected, setSelected] = useState<any>(null),
+    [selected, setSelected] = useState<any>(initialSource),
     [search, setSearch] = useState(initialSearch),
     [filter, setFilter] = useState(initialFilter),
     [category, setCategory] = useState(initialCategory),
@@ -334,13 +337,21 @@ export function Console({
           });
       }
     setData(next);
-    setSelected((current: any) =>
-      current
-        ? (next.proposals.find((p) => id(p) === id(current)) ??
-          next.sources.find((s) => id(s) === id(current)) ??
-          null)
-        : null,
-    );
+    setSelected((current: any) => {
+      if (!current) return null;
+      // A request started for a different selection cannot overwrite a source
+      // or proposal opened while that request was in flight.
+      if (!selected || id(current) !== id(selected)) return current;
+      if (view === "source")
+        return next.selectedSource && id(next.selectedSource) === id(current)
+          ? next.selectedSource
+          : null;
+      return (
+        next.proposals.find((p) => id(p) === id(current)) ??
+        next.sources.find((s) => id(s) === id(current)) ??
+        null
+      );
+    });
     for (const notification of next.notifications) {
       if (
         !seenNotifications.current.has(id(notification)) &&
@@ -368,12 +379,16 @@ export function Console({
     }
   }
   async function refreshWorkspace() {
-    const response = await fetch(
-      `/api/workspace/${organizationId}?${new URLSearchParams({ q: search, state: filter, category, sort })}`,
-      {
-        cache: "no-store",
-      },
-    );
+    const query = new URLSearchParams({
+      q: search,
+      state: filter,
+      category,
+      sort,
+    });
+    if (view === "source" && selected) query.set("sourceId", id(selected));
+    const response = await fetch(`/api/workspace/${organizationId}?${query}`, {
+      cache: "no-store",
+    });
     if (
       response.ok &&
       !response.redirected &&
@@ -399,6 +414,9 @@ export function Console({
   }
   const refreshFromEffect = useEffectEvent(() => refreshData());
   const processing =
+    (view === "source" &&
+      selected &&
+      ["queued", "processing"].includes(selected.state)) ||
     data.sources.some((s) => ["queued", "processing"].includes(s.state)) ||
     data.runs.some((r) =>
       ["queued", "running", "publishing"].includes(r.state),
@@ -552,6 +570,20 @@ export function Console({
       });
     setSelected(s);
     setView("source");
+    if (!demo) {
+      const query = new URLSearchParams();
+      for (const [key, value] of Object.entries({
+        q: search,
+        state: filter,
+        category,
+        sort,
+      }))
+        if (value && (key !== "sort" || value !== "newest"))
+          query.set(key, value);
+      router.push(
+        `/app/${organizationId}/library/${encodeURIComponent(id(s))}${query.size ? `?${query}` : ""}`,
+      );
+    }
   }
   const nav = [
     ["home", "Home", Home],
@@ -669,7 +701,7 @@ export function Console({
             <div>
               <h1>
                 {view === "source"
-                  ? selected?.title
+                  ? (selected?.title ?? "Source unavailable")
                   : view === "proposal"
                     ? selected?.title
                     : view === "menu"
@@ -1019,6 +1051,12 @@ export function Console({
                 setView("proposal");
               }}
             />
+          )}
+          {view === "source" && !selected && (
+            <div className="panel empty-state">
+              <p>This source is no longer available in this workspace.</p>
+              <Button onClick={() => go("library")}>Open library</Button>
+            </div>
           )}
           {view === "projects" && (
             <>
@@ -2669,7 +2707,7 @@ function SourceDetail({
   useEffect(() => {
     if (demo) return;
     const abort = new AbortController();
-    fetch(`/api/source/${sourceId}`, {
+    fetch(`/api/source/${sourceId}?organizationId=${encodeURIComponent(org)}`, {
       cache: "no-store",
       signal: abort.signal,
     })
@@ -2707,7 +2745,7 @@ function SourceDetail({
     // The workspace projection is a new object after every poll. Reload private
     // evidence only when this source's actual revision changes.
     // oxlint-disable-next-line react-hooks/exhaustive-deps
-  }, [sourceId, sourceRevision, demo]);
+  }, [sourceId, sourceRevision, org, demo]);
   const insights =
     detail.analysis?.insights ??
     (demo

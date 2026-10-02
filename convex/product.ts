@@ -476,10 +476,18 @@ export const backfillSearch = internalMutation({
   },
 });
 export const detail = query({
-  args: { id: v.id("sources") },
-  handler: async (ctx, { id }) => {
+  args: {
+    id: v.id("sources"),
+    organizationId: v.optional(v.id("organizations")),
+  },
+  handler: async (ctx, { id, organizationId }) => {
     const s = await ctx.db.get(id);
-    if (!s || s.state === "deleted") fail("Source unavailable.");
+    if (
+      !s ||
+      s.state === "deleted" ||
+      (organizationId !== undefined && organizationId !== s.organizationId)
+    )
+      fail("Source unavailable.");
     await access(ctx, s.organizationId);
     const proposals = await ctx.db
       .query("proposals")

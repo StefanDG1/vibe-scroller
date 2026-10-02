@@ -19,6 +19,7 @@ export async function GET(
       customerRoutes,
       aiPreference,
       categories,
+      selectedSource,
     ] = await Promise.all([
       c.query(api.product.library, {
         organizationId,
@@ -36,6 +37,14 @@ export async function GET(
       c.query(api.jobs.customerRoutes, { organizationId }),
       c.query(api.aiPreferences.read, { organizationId }),
       c.query(api.categories.list, { organizationId }),
+      q.get("sourceId")
+        ? c
+            .query(api.product.detail, {
+              id: q.get("sourceId") as Id<"sources">,
+              organizationId,
+            })
+            .catch(() => null)
+        : Promise.resolve(null),
     ]);
     return Response.json(
       {
@@ -51,6 +60,7 @@ export async function GET(
         customerRoutes,
         aiPreference,
         categories,
+        selectedSource,
         measured: overview.measured,
       },
       {

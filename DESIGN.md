@@ -265,3 +265,11 @@ Review scope, affected files, implementation steps, checks, rollout and rollback
 | Blank steps or checks met array length limits | Save rejects empty steps, checks and file paths | A plan must specify work and verification before approval |
 
 October 2 native Chrome checks covered 320, 360, 390, 412, 768 and 1440 CSS pixels without page overflow. Private captures include plan-editor-local-mobile.png and plan-editor-staging-saved-mobile.png. Saving the labeled staging plan created version 2 and a 64-character hash; it did not start coding. These checks do not certify the generated recommendation's usefulness or a full PR journey.
+
+## Permanent source reading
+
+| Before                                                                                                                                       | After                                                                                                                                           |
+| -------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| A source detail existed only in client state; reload returned to the library. Refreshing a first page could remove an older selected source. | A tenant-scoped source URL restores the selected record, and background refresh reads that record independently of the paginated/filter result. |
+
+Retain the existing dark overview, main-point cards and 44 px controls. The actual local detail stayed readable at 320/360/390/412/768/1440 without page overflow. A filtered library with zero rows still returned its separately authorized selected source. Native clicking, reload and background refresh passed; an initial automation reloaded before asynchronous navigation finished and was corrected. Invalid/deleted source links reveal no private record. This verifies source navigation and its states, not a complete mobile execution/PR journey.

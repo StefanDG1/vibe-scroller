@@ -62,6 +62,8 @@ The [implementation record](../implementation-status.md) lists exact test eviden
 
 Open Library. Choose Music, Reading or another category, then sort by import date, save date, update date or title. Search finds matching stored sources by relevance. Open a whole source row to read all insights and expand its private evidence. The count on the row shows the full number of insights, even when only three point titles are previewed.
 
+Opening a source gives it a permanent private address under Library. Bookmark that address to return to the same video and insights after reload. Reading an older source stays open while the library refreshes or its current filters exclude that source. The link still requires access to its workspace; deleted and unavailable records cannot be reopened from a bookmark.
+
 Open Categories inside a source to edit its names. A new valid topic can be created by future analysis. Your manual choices survive reprocessing. The shared suggestion control is optional, publishes no source content and requires operator review before a name joins the app-wide vocabulary.
 
 ## Download your work
