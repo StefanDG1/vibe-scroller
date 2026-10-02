@@ -2023,3 +2023,36 @@ dialog.capture-modal::backdrop {
     transition: none;
   }
 }
+.source-origin {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: var(--ink);
+  text-decoration: none;
+}
+.source-origin:hover {
+  border-color: var(--ink);
+}
+.source-origin:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 4px;
+}
+.source-origin .source-thumb {
+  width: 96px;
+  height: 120px;
+  min-height: 120px;
+}
+.source-origin-copy {
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+  flex: 1;
+}
+.source-origin-copy > span {
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+.source-origin > svg {
+  flex-shrink: 0;
+}

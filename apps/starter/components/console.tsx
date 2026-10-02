@@ -2846,6 +2846,22 @@ function SourceDetail({
       : summary;
   return (
     <>
+      {detail.url && (
+        <a
+          className="panel source-origin"
+          href={detail.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`Open original source: ${detail.title}`}
+        >
+          <SourceThumbnail source={detail} demo={demo} />
+          <span className="source-origin-copy">
+            <strong>Original source</strong>
+            <span>{detail.url}</span>
+          </span>
+          <ArrowRight size={20} aria-hidden="true" />
+        </a>
+      )}
       <div className="panel">
         <span className="coverage">
           {coverageLabel(detail.coverage ?? "metadata_only")}
