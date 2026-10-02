@@ -39,7 +39,18 @@
     "arrowNavigation": true,
     "escapeDismissal": true,
     "sameSourceUrl": true,
-    "modalControlsMinimumPixels": 48
+    "modalControlsMinimumPixels": 48,
+    "originatingButtonFocusRestored": true,
+    "advancedExclusionSelectedPoints": 4,
+    "advancedRestoredSelectedPoints": 5,
+    "analyzedFilterRows": 18,
+    "notAnalyzedFilterPageRows": 30,
+    "publishedSortVerifiedDatesBeforeUnknown": true,
+    "viewportWidthsWithoutOverflow": [320, 360, 390, 412, 768, 1440],
+    "specificTopicsWithoutInferredOtherPrefix": true
   },
-  "pendingUiCorrection": "Explicit originating-button focus restoration and plain specific-topic names are awaiting frontend publication."
+  "frontendVerifiedCommit": "6f365e6c8b79094e741f0090b7e5611bb87f1c42",
+  "frontendDeployment": "dpl_6tX2ZUnmcr4n2ed3CMc5GqHD4SmN",
+  "requiredCi": 37073214297,
+  "requiredCiPassed": true
 }
