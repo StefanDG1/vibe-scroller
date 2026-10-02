@@ -278,7 +278,9 @@ export async function deleteOrganization(_: FormState, d: FormData) {
       organizationId: org(d),
       confirmation: val(d, "confirmation"),
     });
-    return { path: "/app" };
+    // /app provisions a default workspace. Stay in management after deletion
+    // so removing the last workspace does not create another one immediately.
+    return { path: "/app/workspaces" };
   });
 }
 export async function deleteAccount(_: FormState, d: FormData) {

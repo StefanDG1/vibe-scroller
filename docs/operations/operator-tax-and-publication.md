@@ -1,6 +1,8 @@
 # Confirm tax treatment and publish the policies
 
-Mode: how-to. Checked 1 October 2026. Owner-supplied ONRC records establish the intended operator's identity and listed software activities. The September 30 ANAF check reported ordinary VAT registration false and inactive status false. The owner supplied an official October 1 query reporting absence from both the Article 316 registration and cancelled-registration registers. This does not establish Article 317, OSS/EX status, turnover eligibility or invoice treatment for every market. Live checkout remains disabled pending those applicable checks.
+Mode: how-to. Updated October 3, 2026. Owner-supplied ONRC records establish the intended operator's identity and listed software activities. The September 30 ANAF check reported ordinary VAT registration false and inactive status false. The owner supplied an official October 1 query reporting absence from both the Article 316 registration and cancelled-registration registers. This does not establish Article 317, OSS/EX status, turnover eligibility or invoice treatment for every market. Live checkout remains disabled pending its applicable release checks.
+
+The owner reports that the accountant confirmed existing automatically generated Stripe artifacts are sufficient and handles the company's filing. Record this as owner-reported accountant confirmation, not independent professional review. For the selected Managed Payments route, provide the existing settlement/fee documents and bank records; do not request the same company records or create a duplicate consumer-invoice system. The remaining questions below apply only to an alternative direct-billing mode or a materially changed transaction scope.
 
 VAT is not one yes/no setting. Domestic treatment, business purchases, customer location and customer business status can produce different obligations at the same time. This is an implementation checklist for discussion with the company's accountant, not a determination of its status.
 
@@ -31,7 +33,7 @@ The cross-border SME scheme is a different route. A qualifying EU business may s
 
 For EU business customers, establish their business status and place of supply; validate VAT identifiers where appropriate. A reverse-charge invoice is a distinct treatment, not a blanket zero-tax setting for anyone selecting "business." Foreign cloud/AI/email invoices also need review: supplier country, invoice treatment and Article 317/payment obligations can matter even before the company has paying VibeScroller customers. Keep unsupported countries disabled until their treatment is reviewed.
 
-## Request one accountant confirmation
+## Alternative direct billing: confirm the applicable treatment
 
 Identity documents are now supplied; do not request them again. Originals, extracted fields and the dated registry response stay in ignored `private/company-records`, outside GitHub. The fiscal annex is an incorporation request dated May 20, with ordinary VAT options unchecked on visual inspection; it is not a current complete tax determination. No independent digital-signature verification or later-change certificate is claimed.
 

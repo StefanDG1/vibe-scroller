@@ -19,7 +19,11 @@ export default async function Page() {
         <div className="stack">
           <Card>
             <h2 style={{ marginTop: 0 }}>Workspaces</h2>
-            <Link href="/app/workspaces">Switch or manage your workspaces</Link>
+            <Button variant="outline" asChild>
+              <Link href="/app/workspaces">
+                Switch or manage your workspaces
+              </Link>
+            </Button>
           </Card>
           {invoiceAccess.allowed && (
             <Card>
@@ -28,9 +32,11 @@ export default async function Page() {
                 Review reporting deadlines and record the accountant's
                 submission reference.
               </p>
-              <Link href="/account/invoices" prefetch={false}>
-                Open private invoice queue
-              </Link>
+              <Button variant="outline" asChild>
+                <Link href="/account/invoices" prefetch={false}>
+                  Open private invoice queue
+                </Link>
+              </Button>
             </Card>
           )}
           <Card>

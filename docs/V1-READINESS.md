@@ -1,6 +1,10 @@
 # V1 readiness
 
-Mode: reference. Checked October 2, 2026. Current release: owner personal alpha. A deployment or prerelease is not completion of paid V1.
+Mode: reference. Checked October 3, 2026. Current release: owner personal alpha. A deployment or prerelease is not completion of paid V1.
+
+The owner explicitly accepted the five real saved-post analyses in the conversation, after giving the library, scope and evidence refinements now implemented. This completes that pilot's owner review. It does not invent numerical quality scores, per-point annotations or the separate 40-clip/two-repository benchmark. The owner also reported the accountant needs no further documents beyond existing Stripe artifacts; no repeated company-record request is needed for the selected merchant-of-record handover.
+
+Read-only live Stripe checks on October 3 confirm charges/payouts enabled, details submitted, no currently/past-due verification fields, all six subscription prices and both top-ups, the enabled signed-webhook destination and a live portal with invoice history, payment-method updates and period-end cancellation. Native Managed Payments settings show Ready to use and all products eligible. There was no payment or customer creation in this check. The selected final market policy is consumer countries where Stripe assumes applicable indirect-tax compliance; countries it merely accepts for payment are a different scope. Market enforcement, release disclosures and final workflow acceptance remain distinct from account readiness.
 
 ## Verified journeys
 

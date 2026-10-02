@@ -60,6 +60,8 @@ Search, tags and state filters already exist. More categories and ranking should
 
 ## What to report when testing
 
+Your conversation review accepted the five real saved-post analyses. Their requested collection, whole-post and evidence-viewing improvements are now implemented. You do not need to review the same five again to complete that pilot; broader quality acceptance remains separately recorded.
+
 Record the page, approximate time, device and action that failed. Include the visible error and whether the source was saved. Avoid repeated submissions after an unclear write result. Do not send private tokens or full archives in GitHub issues. Screenshots should omit personal or sensitive content.
 
 The [implementation record](../implementation-status.md) lists exact test evidence. [Deployment instructions](vibescroller-deployment.md) describe environment setup. [The publication checklist](../../legal/POLICY-IMPLEMENTATION.md) and [accountant handover](operator-tax-and-publication.md) remain required for paid release. No professional legal review has been claimed.
