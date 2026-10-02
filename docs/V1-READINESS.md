@@ -15,6 +15,7 @@ Mode: reference. Checked October 2, 2026. Current release: owner personal alpha.
 - Private operator settlement export passed actual dedicated sandbox reads and authentication/account/pagination boundary tests.
 - Production workspace export schema 1.2.0 returned all 112 current sources and 16 categories without storage capabilities, credentials or temporary repository context. Structured plan editing saved a reviewed version in staging, with execution still separately gated.
 - Actual staging credential rotation migrated one current GitHub connection from version 2 to 3 and preserved a successful selected-repository read. A three-frame retained-evidence recovery batch verified hashes and refused newer source deletion; independently scheduled object backups remain separate.
+- Production source permalinks retained an older record across reload and background refresh outside the first library page. Its insights, timestamped evidence and private images passed phone-sized native interactions and all six layout widths.
 
 See [implementation evidence](implementation-status.md) for commands, failures, timestamps and limitations. Provider-clock advancement does not advance the application clock; annual monthly granting remains a separate boundary.
 
