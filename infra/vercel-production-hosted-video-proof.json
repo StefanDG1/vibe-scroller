@@ -1,0 +1,40 @@
+{
+  "checkedAt": "2026-10-02T17:25:09.210Z",
+  "environment": "production",
+  "commit": "2449e6e99797a39da1a93e5934db384c6e646229",
+  "deployment": "dpl_Afn6Gqxp3Dc6EKsKd85fgLFUqEiQ",
+  "synthetic": true,
+  "nativeUpload": true,
+  "seconds": 15,
+  "automaticTranscriptCharacters": 213,
+  "transcriptSegments": 4,
+  "frameTimesMs": [0, 6000, 10000, 12000],
+  "insights": 4,
+  "visualOnlyMeasurements": ["44 PX", "16 PX"],
+  "actualFrameCitations": true,
+  "categories": [
+    "Interface readability",
+    "Product design",
+    "General advice",
+    "Touch targets",
+    "Interaction design",
+    "Visual hierarchy"
+  ],
+  "privateFrameBrowser": {
+    "complete": true,
+    "width": 960,
+    "height": 540
+  },
+  "privateInlineImages": 4,
+  "retainedAfterReload": true,
+  "layoutWidthsWithoutPageOverflow": [320, 360, 390, 412, 768, 1440],
+  "personalPlanApproval": false,
+  "paidApiFallback": false,
+  "computeCredits": 1,
+  "walletReserved": 0,
+  "inferenceReservations": 6,
+  "allInferenceReservationsSettled": true,
+  "rawMediaExpiryHours": 24,
+  "sparseCoverage": true,
+  "fullBenchmarkPassed": false
+}

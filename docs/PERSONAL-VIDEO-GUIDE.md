@@ -12,6 +12,8 @@ This personal alpha uses your paired Windows laptop for offline English transcri
 
 Your ChatGPT allowance is separate from VibeScroller's media compute allowance. This permission does not authorize coding or a pull request. Those require a separate reviewed plan and bounded execution approval.
 
+If **Analysis provider** is shown, keep **My ChatGPT plan · paired laptop** selected. The separately tested **Cloud processing · app credits** option uses managed models and its own permission; it does not use your ChatGPT allowance. There is no automatic switch between these routes.
+
 ## Keep the existing laptop connection running
 
 The owner's private configuration is at `private/personal-runner-production.json`. From the repository folder, run:
