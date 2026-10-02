@@ -55,6 +55,7 @@ type Initial = {
   customerRoutes?: {
     status: string;
     models: { id: string; version: string; maxProviderUsdCents: number }[];
+    execution?: { localReady: boolean; cloudReady: boolean };
   };
 };
 const id = (o: any) => o._id ?? o.id;
@@ -1419,6 +1420,7 @@ export function Console({
                 </label>
                 <Button
                   busy={busy}
+                  disabled={selected.review !== "accepted"}
                   onClick={async () => {
                     try {
                       await call("editPlan", {
@@ -1454,6 +1456,7 @@ export function Console({
                 proposal={selected}
                 call={call}
                 routes={data.customerRoutes}
+                busy={busy}
               />
             </>
           )}
@@ -3444,13 +3447,27 @@ function PersonalSourceAnalysis({
     </section>
   );
 }
-function ExecutionApproval({ proposal, call, routes }: any) {
+function ExecutionApproval({ proposal, call, routes, busy }: any) {
   const [executor, setExecutor] = useState("local"),
     [ceiling, setCeiling] = useState(100),
     [modelId, setModelId] = useState(""),
     [highRisk, setHighRisk] = useState(false);
   const model = routes?.models.find((m: any) => m.id === modelId);
   const cloud = executor !== "local";
+  const saved =
+    proposal.review === "accepted" &&
+    !!proposal.planHash &&
+    !!proposal.plan?.files?.length;
+  const ready = cloud
+    ? routes?.execution?.cloudReady === true
+    : routes?.execution?.localReady === true;
+  const reason = !saved
+    ? "Review and save a plan version to enable execution approval."
+    : !ready
+      ? cloud
+        ? "Cloud execution is awaiting isolation and funding verification."
+        : "Laptop coding is awaiting verified isolation. Your video analysis connection remains separate."
+      : undefined;
   return (
     <section className="panel">
       <h2>Separate execution approval</h2>
@@ -3465,9 +3482,16 @@ function ExecutionApproval({ proposal, call, routes }: any) {
       <label>
         Executor
         <select value={executor} onChange={(e) => setExecutor(e.target.value)}>
-          <option value="local">Paired laptop, own local Codex session</option>
-          <option value="cloud">Metered cloud, managed API</option>
-          <option value="customer" disabled={!routes?.models.length}>
+          <option value="local" disabled={!routes?.execution?.localReady}>
+            Paired laptop, own local Codex session
+          </option>
+          <option value="cloud" disabled={!routes?.execution?.cloudReady}>
+            Metered cloud, managed API
+          </option>
+          <option
+            value="customer"
+            disabled={!routes?.execution?.cloudReady || !routes?.models.length}
+          >
             Metered cloud, your OpenAI API credential
           </option>
         </select>
@@ -3524,9 +3548,17 @@ function ExecutionApproval({ proposal, call, routes }: any) {
         I explicitly approve protected changes in this exact plan. Owner or
         administrator permission and final patch review are required.
       </label>
-      <button
-        className="primary"
-        disabled={executor === "customer" && !model}
+      {reason && <p>{reason}</p>}
+      <Button
+        primary
+        busy={busy}
+        disabled={
+          !saved ||
+          !ready ||
+          (executor === "customer" && !model) ||
+          (cloud &&
+            (!Number.isSafeInteger(ceiling) || ceiling < 1 || ceiling > 10000))
+        }
         onClick={() =>
           call("approve", {
             id: id(proposal),
@@ -3553,7 +3585,7 @@ function ExecutionApproval({ proposal, call, routes }: any) {
         }
       >
         Approve exact scope and funding route
-      </button>
+      </Button>
       <p className="fine">
         Missing isolation blocks execution. No automatic paid fallback.
       </p>

@@ -67,6 +67,14 @@ export const customerRoutes = query({
       .unique();
     return {
       status: key?.status ?? "disconnected",
+      execution: {
+        localReady:
+          process.env.LOCAL_ISOLATION_VERIFIED === "true" &&
+          process.env.DISABLE_LOCAL !== "true",
+        cloudReady:
+          process.env.CLOUD_VERIFIED === "true" &&
+          process.env.DISABLE_CLOUD !== "true",
+      },
       models:
         key?.status === "verified"
           ? customerModels()

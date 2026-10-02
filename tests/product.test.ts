@@ -90,7 +90,7 @@ describe("VibeScroller product boundaries", () => {
       }))!;
       expect(
         await a.query(api.jobs.customerRoutes, { organizationId: org }),
-      ).toEqual({ status: "stored", models: [] });
+      ).toMatchObject({ status: "stored", models: [] });
       await expect(
         t.mutation(internal.jobs.verifiedCredential, {
           organizationId: org,
@@ -259,7 +259,7 @@ describe("VibeScroller product boundaries", () => {
       expect(states.managed?.state).toBe("running");
       expect(
         await a.query(api.jobs.customerRoutes, { organizationId: org }),
-      ).toEqual({ status: "disconnected", models: [] });
+      ).toMatchObject({ status: "disconnected", models: [] });
     } finally {
       vi.unstubAllEnvs();
     }
