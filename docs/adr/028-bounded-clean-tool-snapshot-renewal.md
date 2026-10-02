@@ -1,6 +1,6 @@
 # ADR 028: bounded clean tool snapshot renewal
 
-Status: implementation accepted; production activation requires real renewal acceptance. Date: October 2, 2026.
+Status: accepted; bounded production renewal and replacement worker acceptance passed. Date: October 2, 2026.
 
 Seven-day tool snapshots need renewal before expiry. Clone only an already verified clean tool snapshot within the configured Vercel project. Initial seeds must match the explicitly configured media/coding snapshot IDs and require their existing worker verification. Never snapshot a customer workload or use a user-supplied image identifier.
 

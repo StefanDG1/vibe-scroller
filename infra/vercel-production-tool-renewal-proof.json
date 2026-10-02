@@ -1,0 +1,52 @@
+{
+  "checkedAt": "2026-10-02T16:05:24.649Z",
+  "matchingWorkers": 0,
+  "actual": [
+    {
+      "kind": "media",
+      "parentSnapshotId": "snap_D825bB8G79fujekpIZidRbNTCgP1",
+      "snapshotId": "snap_0beuOOaRqPwGc179CbYY9Vw1Q9aH",
+      "expiresAt": "2026-10-09T16:01:56.071Z",
+      "computeSeconds": 20,
+      "leaseCleared": true,
+      "renewed": true,
+      "stopDeleteAcknowledged": true,
+      "brokerSelectionVerified": true,
+      "providerExpiryLowerBoundVerified": true,
+      "observedProviderExpiry": "2026-10-09T16:03:46.169Z",
+      "regionVerified": "fra1"
+    },
+    {
+      "kind": "coding",
+      "parentSnapshotId": "snap_J20Ty9EtuYzhEk1bWNO6oYFQd7qn",
+      "snapshotId": "snap_Jj6eRvfsx1DJ8tIbXKcHv3ZMwnN6",
+      "expiresAt": "2026-10-09T16:02:20.625Z",
+      "computeSeconds": 18,
+      "leaseCleared": true,
+      "renewed": true,
+      "stopDeleteAcknowledged": true,
+      "brokerSelectionVerified": true,
+      "providerExpiryLowerBoundVerified": true,
+      "observedProviderExpiry": "2026-10-09T16:04:01.577Z",
+      "regionVerified": "fra1"
+    }
+  ],
+  "environment": "production",
+  "commit": "b89e50a89cccf6bba421e9dc96f79ea94676abec",
+  "renewalEnabled": true,
+  "normalNotDueChecks": {
+    "media": false,
+    "coding": false
+  },
+  "replacementWorkerTests": {
+    "command": "pnpm exec vitest run --config private/vercel-production.config.ts",
+    "passed": 4,
+    "log": "outputs/renewed-production-workers-live.log"
+  },
+  "limitations": [
+    "Only clean infrastructure tool images are renewed; customer workloads are never snapshotted.",
+    "Creation expiry is retained as a conservative lower bound; provider expiry increased after later image use.",
+    "Operator compute acknowledgements do not establish a settled provider invoice.",
+    "This is infrastructure acceptance, not paid public release acceptance."
+  ]
+}
