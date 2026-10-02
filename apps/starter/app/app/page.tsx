@@ -16,5 +16,9 @@ export default async function Page({
       : {},
   );
   const draft = query.draft?.slice(0, 2048);
+  if (!id)
+    redirect(
+      `/app/workspaces${draft ? `?draft=${encodeURIComponent(draft)}` : ""}`,
+    );
   redirect(`/app/${id}${draft ? `?draft=${encodeURIComponent(draft)}` : ""}`);
 }

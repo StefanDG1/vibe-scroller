@@ -47,10 +47,9 @@ export const ensureDefault = mutation({
         });
       return selected.workspace._id;
     }
-    if (memberships.length >= 10)
-      fail(
-        "Your existing workspaces are unavailable. Contact support before creating another.",
-      );
+    // Provision only on first entry. Rendering/prefetching /app after a user
+    // deletes their workspace must not undo that deletion.
+    if (actor.defaultWorkspaceId || memberships.length) return null;
     await limit(ctx, `org:${actor._id}`, 5);
     const id = await ctx.db.insert("organizations", {
       name: "Personal workspace",
@@ -90,6 +89,8 @@ export const create = mutation({
       userId: actor._id,
       role: "owner",
     });
+    if (!actor.defaultWorkspaceId)
+      await ctx.db.patch(actor._id, { defaultWorkspaceId: id });
     await audit(ctx, id, actor._id, "organization.created", id);
     return id;
   },

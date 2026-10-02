@@ -8,7 +8,9 @@ export function Header() {
         {company.product.name}
       </Link>
       <nav className="navlinks" aria-label="Main">
-        <Link href="/app">Workspace</Link>
+        <Link href="/app" prefetch={false}>
+          Workspace
+        </Link>
         <Link href="/docs">Help</Link>
         <Link href="/account">Account</Link>
       </nav>

@@ -95,6 +95,10 @@ export const deleteAccount = mutation({
       .collect();
     for (const m of memberships) {
       if (m.role === "owner") {
+        const org = await ctx.db.get(m.organizationId);
+        // A confirmed workspace deletion already locks access and schedules
+        // its purge. Finishing account deletion must not wait for that batch.
+        if (!org || org.status === "deleting") continue;
         const others = await ctx.db
           .query("memberships")
           .withIndex("by_org", (q) => q.eq("organizationId", m.organizationId))

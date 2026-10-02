@@ -69,9 +69,47 @@ it("uses existing memberships, remembers a selected workspace and rechecks lost 
   await t.run(async (ctx) => {
     await ctx.db.patch(first, { status: "deleting" });
   });
-  const replacement = await owner.mutation(api.organizations.ensureDefault, {});
-  expect(replacement).not.toBe(first);
+  expect(await owner.mutation(api.organizations.ensureDefault, {})).toBeNull();
   expect((await t.run((ctx) => ctx.db.get(first)))?.status).toBe("deleting");
+});
+it("does not undo deletion on dashboard prefetch, even after the purge, and allows explicit recreation", async () => {
+  const { t, owner } = await setup();
+  const first = await owner.mutation(api.organizations.create, {
+    name: "Deliberately removed",
+  });
+  await owner.mutation(api.organizations.remove, {
+    organizationId: first,
+    confirmation: "Deliberately removed",
+  });
+  expect(await owner.mutation(api.organizations.ensureDefault, {})).toBeNull();
+  await t.mutation(internal.maintenance.purgeOrganization, {
+    organizationId: first,
+  });
+  expect(await owner.mutation(api.organizations.ensureDefault, {})).toBeNull();
+  expect((await owner.query(api.accounts.current, {})).organizations).toEqual(
+    [],
+  );
+  const next = await owner.mutation(api.organizations.create, {
+    name: "Explicit replacement",
+  });
+  expect(await owner.mutation(api.organizations.ensureDefault, {})).toBe(next);
+});
+it("allows identity deletion while a confirmed workspace purge is queued", async () => {
+  const { t, owner, userId } = await setup();
+  const workspace = await owner.mutation(api.organizations.ensureDefault, {});
+  await owner.mutation(api.organizations.remove, {
+    organizationId: workspace!,
+    confirmation: "Personal workspace",
+  });
+  expect(
+    await owner.mutation(api.accounts.deleteAccount, {
+      confirmation: "owner@example.test",
+    }),
+  ).toEqual({ status: "deleting" });
+  expect((await t.run((ctx) => ctx.db.get(userId)))?.status).toBe("deleting");
+  await expect(owner.query(api.accounts.current, {})).rejects.toThrow(
+    "Account unavailable",
+  );
 });
 it("rejects foreign selections, anonymous access, deleting accounts and recovery lock", async () => {
   const { t, owner, userId } = await setup();
