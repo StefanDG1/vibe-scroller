@@ -44,7 +44,7 @@ it("bounds timestamped inline frames and excludes remote image fetches, tools an
       "observed-model",
       "text",
       undefined,
-      Array(25).fill(frame),
+      Array(49).fill(frame),
     ),
   ).toThrow();
 });

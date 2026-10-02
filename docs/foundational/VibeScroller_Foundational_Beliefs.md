@@ -31,3 +31,5 @@ The Agora transcript argues for building a persuasive logical and emotional argu
 The sequence should allow a prospect to decline. If their current tools work well, their sources rarely deserve action, or the enabled service does not justify its price, the offer has not earned the purchase. The next research task is to test these conditions with real prospective users, not to make the language more forceful.
 
 October 2 evidence review: bounded owner-only production draft-PR and lifecycle demonstrations can support the inspectability and permission argument when labeled synthetic. They do not validate the six beliefs with prospects or establish measured value, public availability or hosted commercial ChatGPT approval. Keep merge and confirmed benefit separate.
+
+October 3, F005: Whole-post defaults and optional exclusions reduce selection effort while preserving control. Inspectable private frames support the evidence belief. No calibrated truth ranking or exhaustive video coverage has been established; the six beliefs and permission boundaries remain unchanged.

@@ -1,4 +1,4 @@
-import { afterEach, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { convexTest } from "convex-test";
 import rateLimiterTest from "@convex-dev/rate-limiter/test";
 import workflowTest from "@convex-dev/workflow/test";
@@ -10,7 +10,12 @@ import {
   publicPreviewAddress,
 } from "../packages/providers/source-preview";
 const modules = import.meta.glob("../convex/**/*.ts");
-afterEach(() => vi.unstubAllEnvs());
+beforeEach(() => vi.useFakeTimers());
+afterEach(() => {
+  vi.clearAllTimers();
+  vi.useRealTimers();
+  vi.unstubAllEnvs();
+});
 it("denies private destinations and unrelated image URLs while preserving valid escaped post metadata", () => {
   for (const address of [
     "127.0.0.1",
@@ -141,4 +146,25 @@ it("deletion and changed post identity prevent late preview restoration and remo
       (x) => x.key === `${org}/late-image`,
     ),
   ).toBe(true);
+});
+
+it("accepts an actual provider publication timestamp but never fabricates one from import time", () => {
+  const html =
+    '<meta property="og:url" content="https://www.instagram.com/reel/ABCdef123/"><meta property="og:image" content="https://scontent.cdninstagram.com/image.jpg">';
+  const source = "https://www.instagram.com/reel/ABCdef123/";
+  expect(postPreviewMetadata(html, source)).not.toHaveProperty("publishedAt");
+  expect(
+    postPreviewMetadata(
+      html +
+        '<meta property="article:published_time" content="2026-08-01T12:00:00Z">',
+      source,
+    )?.publishedAt,
+  ).toBe(Date.parse("2026-08-01T12:00:00Z"));
+  expect(
+    postPreviewMetadata(
+      html +
+        '<meta property="article:published_time" content="2999-01-01T00:00:00Z">',
+      source,
+    ),
+  ).not.toHaveProperty("publishedAt");
 });

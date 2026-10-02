@@ -1969,7 +1969,13 @@ describe("persisted matching jobs", () => {
         generation: 1,
         createdAt: Date.now(),
         updatedAt: Date.now(),
-        analysis: insightOutput.parse(fixture),
+        analysis: {
+          ...(insightOutput.parse(fixture) as any),
+          insights: [
+            ...fixture.insights,
+            { ...fixture.insights[0], id: "synthetic-excluded-point" },
+          ],
+        },
       }),
     );
     const repositoryId = await t.mutation(internal.jobs.saveRepository, {
@@ -2000,6 +2006,7 @@ describe("persisted matching jobs", () => {
     });
     const args = { id: sourceId, repositoryId, maxCredits: 10 };
     const first = await a.mutation(api.jobs.reserveMatch, args);
+    expect(first.source.analysis.insights).toHaveLength(2);
     await expect(a.mutation(api.jobs.reserveMatch, args)).rejects.toThrow();
     await t.mutation(internal.jobs.finishMatch, {
       organizationId: org,
@@ -2055,6 +2062,30 @@ describe("persisted matching jobs", () => {
       proposalId: proposalId!,
     });
     expect((await a.mutation(api.jobs.reserveMatch, args)).cached).toBe(true);
+    const subset = await a.mutation(api.jobs.reserveMatch, {
+      ...args,
+      insightIds: ["synthetic-excluded-point"],
+    });
+    expect(subset.semanticKey).not.toBe(first.semanticKey);
+    expect(subset.source.analysis.insights.map((i: any) => i.id)).toEqual([
+      "synthetic-excluded-point",
+    ]);
+    await expect(
+      t.mutation(internal.product.addProposal, {
+        sourceId,
+        repositoryId,
+        detail,
+        matchKey: subset.semanticKey,
+        sourceGeneration: 1,
+      }),
+    ).rejects.toThrow("INVALID_EVIDENCE");
+    await t.mutation(internal.jobs.finishMatch, {
+      organizationId: org,
+      key: subset.key,
+      semanticKey: subset.semanticKey,
+      credits: 0,
+    });
+
     await t.run(async (ctx) => {
       const proposal = await ctx.db.get(proposalId!);
       await ctx.db.patch(proposalId!, {

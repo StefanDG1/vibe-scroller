@@ -2,9 +2,9 @@
 
 Mode: how-to.
 
-Open Library to filter by a category and sort imported sources. Searching ranks matching sources by relevance; clearing the search restores date or title sorting. If a disposition filter returns an empty page with a Load more button, continue to check the remaining sources. Open a source card to see its complete summary, insights and private evidence.
+Open Library to see all posts, filter Analyzed, Not analyzed or Processing, and choose a broad collection or a specific topic. Sorting separates Added to app, Saved on platform and Post published dates, as well as title and recent updates. Unavailable publication dates appear last and are never replaced with import dates. Searching ranks matching sources by relevance; clearing the search restores date or title sorting. If a disposition filter returns an empty page with a Load more button, continue to check the remaining sources. Open a source card to see its complete summary, insights and private evidence.
 
-Open Categories in a source to edit comma-separated names. Up to eight categories may be assigned. Leaving the field empty clears the assignments. Manual choices survive later analysis. New analysis may reuse a category or create a new subject when none fits; source content cannot give it permissions.
+Open Categories in a source to edit comma-separated names. Up to eight specific topics may be assigned. Broad collections are derived from these subjects. Subject / Subtopic can describe a useful narrower topic without deeper navigation. Leaving the field empty clears the assignments. Manual choices survive later analysis. New analysis may reuse a category or create a new subject when none fits; source content cannot give it permissions.
 
 Workspace owners and admins can open Suggest a shared category and submit a name. This is optional. Only the name is submitted, and it is not immediately made public. Videos, transcripts, frames and insights remain private. Avoid personal names or confidential project details in a shared suggestion.
 

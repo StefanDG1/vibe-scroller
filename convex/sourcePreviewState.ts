@@ -1,5 +1,6 @@
 import { internalMutation } from "./_generated/server";
 import { v } from "convex/values";
+import { syncCategories } from "./categories";
 import { wallet } from "./product";
 import { queueDeletion } from "./assets";
 import { containsSecret, ensure } from "../packages/policy";
@@ -39,6 +40,7 @@ export const finish = internalMutation({
     size: v.optional(v.number()),
     etag: v.optional(v.string()),
     title: v.optional(v.string()),
+    publishedAt: v.optional(v.number()),
   },
   handler: async (ctx, a) => {
     const s = await ctx.db.get(a.id);
@@ -115,6 +117,12 @@ export const finish = internalMutation({
     });
     await ctx.db.patch(s._id, {
       linkPreview: { state: "ready", assetId, updatedAt: Date.now() },
+      ...(a.publishedAt &&
+      Number.isSafeInteger(a.publishedAt) &&
+      a.publishedAt > 0 &&
+      a.publishedAt <= Date.now() + 86400000
+        ? { publishedAt: a.publishedAt }
+        : {}),
       ...(a.title &&
       !containsSecret(a.title) &&
       s.title === "Imported video link"
@@ -122,6 +130,7 @@ export const finish = internalMutation({
         : {}),
       updatedAt: Date.now(),
     });
+    await syncCategories(ctx, (await ctx.db.get(a.id))!);
     return true;
   },
 });

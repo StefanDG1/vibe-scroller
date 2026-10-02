@@ -127,7 +127,7 @@ describe("evolving category boundaries", () => {
           category: "reading",
         })
       ).items[0].categoryNames,
-    ).toEqual(["Reading"]);
+    ).toEqual(["Learning", "Reading"]);
     await a.mutation(api.product.deleteSource, { id });
     expect(
       await t.run((ctx) =>
@@ -228,4 +228,136 @@ describe("evolving category boundaries", () => {
       a.query(api.product.library, { organizationId: org, sort: "invalid" }),
     ).rejects.toThrow();
   });
+});
+
+it("groups broad subjects, keeps specific topics private, and separates import from publication dates", async () => {
+  const { t, a, b, org, source } = await setup();
+  const first = await source("Synthetic recipe"),
+    second = await source("Synthetic fashion"),
+    third = await source("Synthetic cooking pending");
+  await t.run(async (ctx) => {
+    await ctx.db.patch(first, {
+      createdAt: 3000,
+      publishedAt: 1000,
+      originalSavedAt: 9000,
+      analysis: {
+        insights: [
+          {
+            title: "Synthetic recipe point",
+            topics: ["Food / Baking"],
+            categories: ["other"],
+          },
+        ],
+      },
+    });
+    await ctx.db.patch(second, {
+      createdAt: 1000,
+      publishedAt: 9000,
+      originalSavedAt: 1000,
+      analysis: {
+        insights: [
+          {
+            title: "Synthetic styling point",
+            topics: ["Fashion / Styling"],
+            categories: ["other"],
+          },
+        ],
+      },
+    });
+    await ctx.db.patch(third, {
+      state: "queued",
+      createdAt: 2000,
+      analysis: undefined,
+    });
+  });
+  await t.mutation(internal.categories.backfill, {});
+  expect(
+    (
+      await a.query(api.product.library, {
+        organizationId: org,
+        sort: "newest",
+      })
+    ).items[0]._id,
+  ).toBe(first);
+  expect(
+    (
+      await a.query(api.product.library, {
+        organizationId: org,
+        sort: "published",
+      })
+    ).items.map((s) => s._id),
+  ).toEqual([second, first, third]);
+  expect(
+    (await a.query(api.product.library, { organizationId: org, sort: "saved" }))
+      .items[0]._id,
+  ).toBe(first);
+  const food = await a.query(api.product.library, {
+    organizationId: org,
+    category: "domain_food",
+    sort: "published",
+  });
+  expect(food.items.map((s) => s._id)).toEqual([first]);
+  expect(
+    (
+      await a.query(api.product.library, {
+        organizationId: org,
+        state: "not_analyzed",
+      })
+    ).items.map((s) => s._id),
+  ).toEqual([third]);
+  expect(
+    (
+      await a.query(api.product.library, {
+        organizationId: org,
+        state: "in_progress",
+      })
+    ).items.map((s) => s._id),
+  ).toEqual([third]);
+  expect(
+    (
+      await a.query(api.product.library, {
+        organizationId: org,
+        category: "domain_food",
+        state: "not_analyzed",
+      })
+    ).items,
+  ).toEqual([]);
+  const categories = await a.query(api.categories.list, {
+    organizationId: org,
+  });
+  expect(categories.find((c) => c.key === "domain_food")).toMatchObject({
+    level: "collection",
+    count: 1,
+  });
+  expect(categories.find((c) => c.name === "Food / Baking")).toMatchObject({
+    level: "topic",
+    parents: ["Food"],
+  });
+  await expect(
+    b.query(api.product.library, {
+      organizationId: org,
+      category: "domain_food",
+    }),
+  ).rejects.toThrow();
+  await a.mutation(api.categories.assign, {
+    id: first,
+    names: ["Fashion / Styling"],
+  });
+  await t.mutation(internal.categories.backfill, {});
+  expect(
+    (
+      await a.query(api.product.library, {
+        organizationId: org,
+        category: "domain_food",
+      })
+    ).items,
+  ).toEqual([]);
+  expect(
+    (
+      await a.query(api.product.library, {
+        organizationId: org,
+        category: "domain_fashion",
+      })
+    ).items,
+  ).toHaveLength(2);
 });

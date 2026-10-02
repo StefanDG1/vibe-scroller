@@ -67,6 +67,7 @@ export const productTables = {
     title: v.string(),
     sourceCreatedAt: v.number(),
     sourceUpdatedAt: v.number(),
+    publishedAt: v.optional(v.number()),
     savedAt: v.number(),
   })
     .index("by_org", ["organizationId"])
@@ -83,6 +84,11 @@ export const productTables = {
       "sourceUpdatedAt",
     ])
     .index("by_category_saved", ["organizationId", "categoryKey", "savedAt"])
+    .index("by_category_published", [
+      "organizationId",
+      "categoryKey",
+      "publishedAt",
+    ])
     .searchIndex("category_search", {
       searchField: "searchable",
       filterFields: ["organizationId", "categoryKey"],
@@ -114,6 +120,7 @@ export const productTables = {
     attempt: v.number(),
     reservationKey: v.string(),
     proposalId: v.optional(v.id("proposals")),
+    insightIds: v.optional(v.array(v.string())),
   })
     .index("by_key", ["key"])
     .index("by_org", ["organizationId"]),
@@ -235,6 +242,7 @@ export const productTables = {
         title: v.string(),
         description: v.string(),
         durationSeconds: v.optional(v.number()),
+        publishedAt: v.optional(v.number()),
         byteLength: v.optional(v.number()),
         acquiredAt: v.number(),
       }),
@@ -271,6 +279,8 @@ export const productTables = {
     kind: v.string(),
     title: v.string(),
     categoryKeys: v.optional(v.array(v.string())),
+    domainKeys: v.optional(v.array(v.string())),
+    publishedAt: v.optional(v.number()),
     categoryNames: v.optional(v.array(v.string())),
     categoryOverride: v.optional(v.array(v.string())),
     url: v.optional(v.string()),
@@ -302,9 +312,11 @@ export const productTables = {
     generation: v.number(),
   })
     .index("by_org", ["organizationId"])
+    .index("by_org_created", ["organizationId", "createdAt"])
     .index("by_org_title", ["organizationId", "title"])
     .index("by_org_updated", ["organizationId", "updatedAt"])
     .index("by_org_saved", ["organizationId", "originalSavedAt"])
+    .index("by_org_published", ["organizationId", "publishedAt"])
     .index("by_personal_device_state", [
       "personalAnalysis.deviceId",
       "personalAnalysis.state",

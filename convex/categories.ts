@@ -17,6 +17,7 @@ import {
 } from "../packages/categories";
 import { ensure, containsSecret } from "../packages/policy";
 import { internal } from "./_generated/api";
+import { categoryDomains } from "../packages/categories/domains";
 export async function vocabulary(
   ctx: QueryCtx,
   organizationId: Doc<"sources">["organizationId"],
@@ -33,13 +34,19 @@ export async function syncCategories(
   source: Doc<"sources">,
   analysis = source.analysis,
 ) {
-  const categories =
+  const topics =
     source.state === "deleted"
       ? []
       : resolveCategories(
           analysisCategoryNames(source, analysis),
           await vocabulary(ctx, source.organizationId),
         );
+  const broad =
+    source.state === "deleted" || !topics.length ? [] : categoryDomains(topics);
+  const categories = [
+    ...broad.map((d) => ({ key: d.key, name: d.name, aliases: [] })),
+    ...topics.filter((t) => !t.key.startsWith("domain_")),
+  ];
   const old = await ctx.db
     .query("sourceCategories")
     .withIndex("by_source", (q) => q.eq("sourceId", source._id))
@@ -77,6 +84,7 @@ export async function syncCategories(
       sourceCreatedAt: source.createdAt,
       sourceUpdatedAt: source.updatedAt,
       savedAt: source.originalSavedAt ?? source.createdAt,
+      publishedAt: source.publishedAt ?? 0,
       updatedAt: Date.now(),
     };
     if (previous) await ctx.db.patch(previous._id, fields);
@@ -123,6 +131,7 @@ export async function syncCategories(
     }
   }
   await ctx.db.patch(source._id, {
+    domainKeys: broad.map((d) => d.key),
     categoryKeys: categories.map((c) => c.key),
     categoryNames: categories.map((c) => c.name),
   });
@@ -137,7 +146,15 @@ export const list = query({
         .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
         .take(200)
     )
-      .map((c) => ({ key: c.key, name: c.name, count: c.count }))
+      .map((c) => ({
+        key: c.key,
+        name: c.name,
+        count: c.count,
+        level: c.key.startsWith("domain_") ? "collection" : "topic",
+        parents: c.key.startsWith("domain_")
+          ? []
+          : categoryDomains([c]).map((d) => d.name),
+      }))
       .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
   },
 });

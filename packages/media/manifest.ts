@@ -17,7 +17,7 @@ const manifestSchema = z
           })
           .strict(),
       )
-      .max(24),
+      .max(48),
   })
   .strict();
 export function decoderManifest(value: unknown, normalizedPcm = false) {

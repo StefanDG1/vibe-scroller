@@ -58,3 +58,11 @@ Assign the next ID and add a row above:
 - Decision and reasons:
 - Validation test and success/failure criteria:
 - Affected sections/copy and remaining uncertainty:
+
+## F005: whole-post review and simple library navigation
+
+Source: owner's October 3 review of real saved-video analyses and phone screenshot. The owner said overall analysis was quite good and requested broad collections, specific topics, analysis/date filters, whole-post proposal defaults, optional exclusions and an in-app evidence gallery. This is one owner observation, not five completed accuracy reviews or a customer testimonial.
+
+Research and Avatar support investigating retrieval and review friction; general Food/Fashion navigation does not establish a new paying audience. Offer may describe tested navigation and whole-post defaults after deployment. Beliefs retain source evidence, an honest no-fit result and separate coding/cost approval. Reviewed broad labels and opt-in shared name suggestions do not authorize cross-tenant training.
+
+Decision: adopt the requested navigation and scope defaults in V1. Increase bounded personal-route frame coverage without claiming every scene was seen. Defer calibrated quality, usefulness and claim-support ranking to V1.1; model confidence is not independent truth verification. Validate dated sorting, tenant isolation, exclusions at proposal commit, private gallery dismissal and mobile keyboard/focus before claiming availability. Actual owner-plan tokens and Sandbox estimates must remain separate from API charges and provider invoices. See [ADR 032](../adr/032-library-collections-and-whole-post-scope.md).

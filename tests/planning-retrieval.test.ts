@@ -674,3 +674,61 @@ it("binds dynamic plan inspection to the current immutable manifest without pers
     JSON.stringify(await t.run((ctx) => ctx.db.get(proposalId))),
   ).not.toContain("late implementation");
 });
+
+it("defaults the project shortlist to the whole post and binds exclusions to distinct cached selection", async () => {
+  const { t, a, sourceId } = await setup();
+  await t.run(async (ctx) => {
+    const s = await ctx.db.get(sourceId);
+    await ctx.db.patch(sourceId, {
+      analysis: {
+        ...s!.analysis,
+        insights: [
+          ...s!.analysis.insights,
+          { ...s!.analysis.insights[0], id: "synthetic-second-point" },
+        ],
+      },
+    });
+  });
+  const args = { id: sourceId, maxCredits: 10, key: "whole-post-selection-01" };
+  const all = await a.mutation(api.retrieval.start, args);
+  expect(all.insights.map((i: any) => i.id)).toEqual([
+    "synthetic-main-point",
+    "synthetic-second-point",
+  ]);
+  await t.mutation(internal.retrieval.finish, {
+    id: sourceId,
+    key: all.key,
+    semanticKey: all.semanticKey,
+    generation: 1,
+    insightIds: all.insights.map((i: any) => i.id),
+    bases: all.bases,
+    credits: 0,
+    candidates: [],
+    noFitReason: "Synthetic no match",
+  });
+  expect((await a.mutation(api.retrieval.start, args)).cached).toBe(true);
+  const subset = await a.mutation(api.retrieval.start, {
+    ...args,
+    key: "subset-selection-02",
+    insightIds: ["synthetic-second-point"],
+  });
+  expect(subset.semanticKey).not.toBe(all.semanticKey);
+  expect(subset.insights.map((i: any) => i.id)).toEqual([
+    "synthetic-second-point",
+  ]);
+  await t.mutation(internal.retrieval.finish, {
+    id: sourceId,
+    key: subset.key,
+    semanticKey: subset.semanticKey,
+    generation: 1,
+    insightIds: ["synthetic-second-point"],
+    bases: subset.bases,
+    credits: 0,
+  });
+  await expect(
+    a.mutation(api.retrieval.start, { ...args, insightIds: [] }),
+  ).rejects.toThrow();
+  await expect(
+    a.mutation(api.retrieval.start, { ...args, insightIds: ["unknown"] }),
+  ).rejects.toThrow();
+});

@@ -17,7 +17,7 @@ export async function preparePersonalInput(
     media.durationMs < 1 ||
     media.durationMs > 600000 ||
     !Array.isArray(media.frames) ||
-    media.frames.length > 24 ||
+    media.frames.length > 48 ||
     (!media.audio && !media.frames.length) ||
     media.coverage !==
       (media.audio

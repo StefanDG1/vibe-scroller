@@ -147,6 +147,9 @@ export const finish = internalMutation({
           acquiredAt: Date.now(),
         },
         ...(acquisition.title ? { title: acquisition.title } : {}),
+        ...(acquisition.publishedAt
+          ? { publishedAt: acquisition.publishedAt }
+          : {}),
       });
     }
     if (!a.media || a.computeCredits === undefined) {
@@ -167,7 +170,7 @@ export const finish = internalMutation({
     ensure(
       a.media.durationMs > 0 &&
         a.media.durationMs <= 600000 &&
-        a.media.frames.length <= 24,
+        a.media.frames.length <= 48,
       "INVALID_EVIDENCE",
       "Invalid prepared media.",
     );

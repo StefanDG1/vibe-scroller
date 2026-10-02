@@ -44,6 +44,7 @@ export const retrieve = internalAction({
           size: preview.bytes.length,
           etag: metadata.etag || "",
           title: preview.title,
+          publishedAt: preview.publishedAt,
         },
       );
       if (!accepted)

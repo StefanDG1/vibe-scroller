@@ -35,9 +35,12 @@ if audio:
     manifest['audio']='audio.wav'
     assert (root/'audio.wav').stat().st_size <= 19_500_000
 if video:
-    # Bound thumbnail decoding independently. Rank visible changes within static shots.
-    run(['ffmpeg','-nostdin','-threads','2','-i',str(source),'-vf','fps=1/2,scale=160:-2',
-         '-frames:v','300','-q:v','8',str(root/'candidate-%03d.jpg')],90)
+    # Dense candidates catch fast cuts. Work remains bounded to 600 small images
+    # and 48 full-size frames; these are samples, not exhaustive scene coverage.
+    fps = 4 if duration <= 90 else 2 if duration <= 300 else 1
+    step_ms = 1000 // fps
+    run(['ffmpeg','-nostdin','-threads','2','-i',str(source),'-vf',f'fps={fps},scale=160:-2',
+         '-frames:v','600','-q:v','8',str(root/'candidate-%03d.jpg')],90)
     candidates = sorted(root.glob('candidate-*.jpg'))
     changes, previous = [], None
     for index, path in enumerate(candidates):
@@ -45,13 +48,15 @@ if video:
             current = image.convert('L')
             if previous is not None:
                 score = ImageStat.Stat(ImageChops.difference(previous, current)).mean[0]
-                if score >= 2: changes.append((score, index * 2000))
+                if score >= 2: changes.append((score, index * step_ms))
             previous = current.copy()
-    count=min(12,max(2,int(duration/3)))
+    count=min(16,max(2,int(duration/2)))
     selected = {int(duration*i/count*1000): 'periodic sample' for i in range(count)}
+    if candidates:
+        selected[(len(candidates)-1) * step_ms] = 'periodic sample'
     for score, ms in sorted(changes, reverse=True):
-        if len(selected) >= 24: break
-        if not any(abs(ms - old) < 500 for old in selected):
+        if len(selected) >= 48: break
+        if not any(abs(ms - old) < step_ms for old in selected):
             selected[ms] = 'visible change within sampled frames'
     for i, (ms, reason) in enumerate(sorted(selected.items())):
         name=f'frame-{i:03}.jpg'

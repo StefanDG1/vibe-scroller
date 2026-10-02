@@ -121,6 +121,9 @@ def acquire(raw):
     base.update(title=str(info.get('title') or '')[:160],
                 description=str(info.get('description') or '')[:6000],
                 extractor=str(info.get('extractor_key') or '')[:80])
+    timestamp = info.get('timestamp')
+    if isinstance(timestamp, (int, float)) and math.isfinite(timestamp) and 0 < timestamp <= time.time() + 86400:
+        base['publishedAt'] = int(timestamp * 1000)
     if duration is not None:
         base['durationSeconds'] = duration
     formats = info.get('formats') or []

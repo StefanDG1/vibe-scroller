@@ -31,7 +31,7 @@ export const mediaStagePayload = z.strictObject({
       }),
     )
     .min(1)
-    .max(224),
+    .max(248),
   warnings: z.array(z.string().max(2000)).max(20),
   computeCredits: z.number().int().min(0).max(10),
 });

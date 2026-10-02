@@ -4,6 +4,7 @@ import { ensure, containsSecret } from "../packages/policy";
 import { writeAccess, fail } from "./lib";
 import { reserve, settle, digest } from "./product";
 import { selectionCurrent } from "../packages/repositories/selection";
+import { selectedInsights } from "../packages/insights/scope";
 const candidate = v.object({
   repositoryId: v.id("repositories"),
   reason: v.string(),
@@ -11,7 +12,8 @@ const candidate = v.object({
 export const start = mutation({
   args: {
     id: v.id("sources"),
-    insightId: v.string(),
+    insightId: v.optional(v.string()),
+    insightIds: v.optional(v.array(v.string())),
     maxCredits: v.number(),
     key: v.string(),
   },
@@ -19,9 +21,11 @@ export const start = mutation({
     const source = await ctx.db.get(a.id);
     if (!source) fail("Source unavailable.");
     const { actor } = await writeAccess(ctx, source.organizationId);
-    const insight = source.analysis?.insights?.find(
-      (item: any) => item.id === a.insightId,
+    const insights = selectedInsights(
+      source.analysis?.insights ?? [],
+      a.insightIds ?? (a.insightId ? [a.insightId] : undefined),
     );
+    const insight = insights[0];
     ensure(
       source.state === "ready" && insight,
       "CONTEXT_REQUIRED",
@@ -56,9 +60,9 @@ export const start = mutation({
       JSON.stringify({
         source: source._id,
         generation: source.generation,
-        insight,
+        insights,
         bases,
-        version: "semantic-profile-selection-v1",
+        version: "semantic-profile-selection-v2",
       }),
     );
     if (
@@ -69,6 +73,7 @@ export const start = mutation({
         cached: true,
         source,
         insight,
+        insights,
         repositories,
         bases,
         semanticKey,
@@ -89,6 +94,7 @@ export const start = mutation({
       cached: false,
       source,
       insight,
+      insights,
       repositories,
       bases,
       semanticKey,
@@ -102,7 +108,8 @@ export const finish = internalMutation({
     key: v.string(),
     semanticKey: v.string(),
     generation: v.number(),
-    insightId: v.string(),
+    insightId: v.optional(v.string()),
+    insightIds: v.optional(v.array(v.string())),
     bases: v.array(
       v.object({
         repositoryId: v.id("repositories"),
@@ -169,6 +176,7 @@ export const finish = internalMutation({
       key: a.semanticKey,
       generation: a.generation,
       insightId: a.insightId,
+      insightIds: a.insightIds ?? (a.insightId ? [a.insightId] : undefined),
       bases: a.bases,
       candidates: a.candidates ?? [],
       noFitReason: a.noFitReason ?? "",

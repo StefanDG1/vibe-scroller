@@ -148,7 +148,9 @@ export function postPreviewMetadata(html: string, sourceUrl: string) {
       const name = attrs.get("property") || attrs.get("name");
       if (
         name &&
-        ["og:image", "og:url", "og:title"].includes(name) &&
+        ["og:image", "og:url", "og:title", "article:published_time"].includes(
+          name,
+        ) &&
         !fields.has(name)
       )
         fields.set(name, attrs.get("content") || "");
@@ -186,12 +188,25 @@ export function postPreviewMetadata(html: string, sourceUrl: string) {
   }
   const image = fields.get("og:image");
   if (!image) return null;
-  return { image, title: (fields.get("og:title") || "").slice(0, 160) };
+  const date = fields.get("article:published_time") || "";
+  const timestamp = /^\d{4}-\d{2}-\d{2}T/.test(date) ? Date.parse(date) : NaN;
+  const publishedAt =
+    Number.isFinite(timestamp) &&
+    timestamp > 0 &&
+    timestamp <= Date.now() + 86400000
+      ? timestamp
+      : undefined;
+  return {
+    image,
+    title: (fields.get("og:title") || "").slice(0, 160),
+    ...(publishedAt ? { publishedAt } : {}),
+  };
 }
 export async function sourcePreview(sourceUrl: string) {
   const policy = acquisitionPolicy(sourceUrl);
   let image: string;
   let title = "";
+  let publishedAt: number | undefined;
   if (policy.platform === "youtube") {
     const u = new URL(policy.url),
       id =
@@ -213,6 +228,7 @@ export async function sourcePreview(sourceUrl: string) {
     if (!metadata) return null;
     image = metadata.image;
     title = metadata.title;
+    publishedAt = metadata.publishedAt;
   }
   const hosts = {
     instagram: ["*.cdninstagram.com", "*.fbcdn.net"],
@@ -233,5 +249,5 @@ export async function sourcePreview(sourceUrl: string) {
     bytes[2] !== 255
   )
     throw Error("Preview image denied");
-  return { bytes, title };
+  return { bytes, title, ...(publishedAt ? { publishedAt } : {}) };
 }

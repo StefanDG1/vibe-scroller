@@ -324,14 +324,18 @@ export const library = query({
     ].includes(a.state ?? "")
       ? a.state
       : undefined;
+    const notAnalyzed = a.state === "not_analyzed";
+    const inProgress = a.state === "in_progress";
     ensure(
-      !a.state || sourceState || disposition,
+      !a.state || sourceState || disposition || notAnalyzed || inProgress,
       "INVALID_INPUT",
       "Invalid source filter.",
     );
     const sort = a.sort ?? "newest";
     ensure(
-      ["newest", "oldest", "title", "updated", "saved"].includes(sort),
+      ["newest", "oldest", "title", "updated", "saved", "published"].includes(
+        sort,
+      ),
       "INVALID_INPUT",
       "Invalid sort order.",
     );
@@ -373,18 +377,30 @@ export const library = query({
         .filter((q) =>
           sourceState
             ? q.eq(q.field("state"), sourceState)
-            : q.neq(q.field("state"), "deleted"),
+            : notAnalyzed
+              ? q.and(
+                  q.neq(q.field("state"), "ready"),
+                  q.neq(q.field("state"), "deleted"),
+                )
+              : inProgress
+                ? q.or(
+                    q.eq(q.field("state"), "queued"),
+                    q.eq(q.field("state"), "processing"),
+                  )
+                : q.neq(q.field("state"), "deleted"),
         )
         .paginate({ numItems: 30, cursor: a.cursor ?? null });
     } else if (a.category) {
       const index =
-        sort === "title"
-          ? "by_category_title"
-          : sort === "updated"
-            ? "by_category_updated"
-            : sort === "saved"
-              ? "by_category_saved"
-              : "by_category_created";
+        sort === "published"
+          ? "by_category_published"
+          : sort === "title"
+            ? "by_category_title"
+            : sort === "updated"
+              ? "by_category_updated"
+              : sort === "saved"
+                ? "by_category_saved"
+                : "by_category_created";
       const links = await ctx.db
         .query("sourceCategories")
         .withIndex(index, (q) =>
@@ -406,13 +422,15 @@ export const library = query({
       };
     } else {
       const index =
-        sort === "title"
-          ? "by_org_title"
-          : sort === "updated"
-            ? "by_org_updated"
-            : sort === "saved"
-              ? "by_org_saved"
-              : "by_org";
+        sort === "published"
+          ? "by_org_published"
+          : sort === "title"
+            ? "by_org_title"
+            : sort === "updated"
+              ? "by_org_updated"
+              : sort === "saved"
+                ? "by_org_saved"
+                : "by_org_created";
       result = await ctx.db
         .query("sources")
         .withIndex(index, (q) => q.eq("organizationId", a.organizationId))
@@ -420,13 +438,26 @@ export const library = query({
         .filter((q) =>
           sourceState
             ? q.eq(q.field("state"), sourceState)
-            : q.neq(q.field("state"), "deleted"),
+            : notAnalyzed
+              ? q.and(
+                  q.neq(q.field("state"), "ready"),
+                  q.neq(q.field("state"), "deleted"),
+                )
+              : inProgress
+                ? q.or(
+                    q.eq(q.field("state"), "queued"),
+                    q.eq(q.field("state"), "processing"),
+                  )
+                : q.neq(q.field("state"), "deleted"),
         )
         .paginate({ numItems: 30, cursor: a.cursor ?? null });
     }
     const page = [];
     for (const source of result.page) {
       if (!source || (sourceState && source.state !== sourceState)) continue;
+      if (notAnalyzed && source.state === "ready") continue;
+      if (inProgress && !["queued", "processing"].includes(source.state))
+        continue;
       if (
         !disposition ||
         (
@@ -951,8 +982,10 @@ export const recordAcquisition = internalMutation({
         acquiredAt: Date.now(),
       },
       ...(metadata.title ? { title: metadata.title } : {}),
+      ...(metadata.publishedAt ? { publishedAt: metadata.publishedAt } : {}),
       updatedAt: Date.now(),
     });
+    await syncCategories(ctx, (await ctx.db.get(a.id))!);
     return true;
   },
 });
@@ -1650,7 +1683,10 @@ export const addProposal = internalMutation({
       d.repositoryEvidence,
       a.inspectedContext ?? r.contextExcerpts ?? [],
     );
-    const insights = s.analysis?.insights ?? [];
+    const insights = (s.analysis?.insights ?? []).filter(
+      (i: any) =>
+        !matchingJob?.insightIds || matchingJob.insightIds.includes(i.id),
+    );
     const insightIds = new Set(insights.map((i: any) => i.id));
     const evidenceKey = (e: any) =>
       JSON.stringify([e.kind, e.id, e.startMs, e.endMs]);

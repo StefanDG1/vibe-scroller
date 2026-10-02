@@ -29,6 +29,8 @@ import {
 } from "lucide-react";
 import { AccountMenu } from "./account-menu";
 import { PlanEditor } from "./plan-editor";
+import { ChoiceSelect } from "./choice-select";
+import { EvidenceViewer } from "./evidence-viewer";
 import { AnalysisReview } from "./analysis-review";
 import { reviewedPlan } from "../../../packages/plans/editor";
 import { CookieSettings, rejectAnalytics } from "./consent";
@@ -46,7 +48,13 @@ type Initial = {
   };
   sources: any[];
   selectedSource?: any;
-  categories?: { key: string; name: string; count: number }[];
+  categories?: {
+    key: string;
+    name: string;
+    count: number;
+    level?: string;
+    parents?: string[];
+  }[];
   libraryNext?: string | null;
   repositories: any[];
   proposals: any[];
@@ -824,18 +832,22 @@ export function Console({
                 </label>
                 <label>
                   <span className="sr-only">Filter sources</span>
-                  <select
+                  <ChoiceSelect
+                    aria-label="Filter sources"
                     value={filter}
-                    onChange={(e) => {
-                      setFilter(e.target.value);
+                    onValueChange={(value) => {
+                      setFilter(value);
                       const u = new URL(location.href);
-                      u.searchParams.set("state", e.target.value);
+                      u.searchParams.set("state", value);
                       history.replaceState(null, "", u);
                     }}
                   >
-                    <option value="">All sources</option>
+                    <option value="">All posts</option>
+                    <option value="ready">Analyzed</option>
+                    <option value="not_analyzed">Not analyzed</option>
+                    <option value="in_progress">Processing</option>
                     {[
-                      "ready",
+                      "failed",
                       "needs_upload",
                       "no_fit",
                       "already_implemented",
@@ -846,48 +858,68 @@ export function Console({
                         {label(s)}
                       </option>
                     ))}
-                  </select>
+                  </ChoiceSelect>
                 </label>
                 <label>
                   <span className="sr-only">Category</span>
-                  <select
+                  <ChoiceSelect
+                    aria-label="Category"
                     value={category}
-                    onChange={(e) => {
-                      setCategory(e.target.value);
+                    onValueChange={(value) => {
+                      setCategory(value);
                       const u = new URL(location.href);
-                      u.searchParams.set("category", e.target.value);
+                      u.searchParams.set("category", value);
                       history.replaceState(null, "", u);
                     }}
                   >
                     <option value="">All categories</option>
                     {(data.categories ?? [])
                       .filter((c) => c.count > 0)
+                      .sort(
+                        (a, b) =>
+                          Number(b.level === "collection") -
+                            Number(a.level === "collection") ||
+                          a.name.localeCompare(b.name),
+                      )
                       .map((c) => (
-                        <option key={c.key} value={c.key}>
+                        <option
+                          key={c.key}
+                          value={c.key}
+                          data-group={
+                            c.level === "collection" ? "Collections" : "Topics"
+                          }
+                        >
+                          {c.level === "topic" &&
+                          c.parents?.length &&
+                          !c.name.startsWith(`${c.parents[0]} / `)
+                            ? `${c.parents[0]} / `
+                            : ""}
                           {c.name} ({c.count})
                         </option>
                       ))}
-                  </select>
+                  </ChoiceSelect>
                 </label>
                 <label>
                   <span className="sr-only">Sort sources</span>
-                  <select
+                  <ChoiceSelect
+                    aria-label="Sort sources"
                     value={search ? "relevance" : sort}
                     disabled={Boolean(search)}
-                    onChange={(e) => {
-                      setSort(e.target.value);
+                    onValueChange={(value) => {
+                      setSort(value);
                       const u = new URL(location.href);
-                      u.searchParams.set("sort", e.target.value);
+                      u.searchParams.set("sort", value);
                       history.replaceState(null, "", u);
                     }}
                   >
                     {search && <option value="relevance">Most relevant</option>}
-                    <option value="newest">Newest imported</option>
-                    <option value="oldest">Oldest imported</option>
-                    <option value="saved">Recently saved</option>
+                    <option value="newest">Added to app · newest</option>
+                    <option value="oldest">Added to app · oldest</option>
+                    <option value="saved">Saved on platform · newest</option>
+                    <option value="published">Post published · newest</option>
                     <option value="updated">Recently updated</option>
                     <option value="title">Title A-Z</option>
-                  </select>
+                  </ChoiceSelect>
                 </label>
                 {(search || filter || category || sort !== "newest") && (
                   <Button
@@ -907,6 +939,11 @@ export function Console({
                   </Button>
                 )}
               </div>
+              {sort === "published" && !search && (
+                <p className="fine">
+                  Posts with an unavailable publication date appear last.
+                </p>
+              )}
               {libraryError && (
                 <div className="panel error" role="alert">
                   {libraryError}
@@ -959,6 +996,25 @@ export function Console({
                           ))}
                         </ul>
                         <div className="row wrap">
+                          {s.createdAt && (
+                            <span className="fine">
+                              Added {new Date(s.createdAt).toLocaleDateString()}
+                            </span>
+                          )}
+                          {sort === "published" && (
+                            <span className="fine">
+                              {s.publishedAt
+                                ? `Published ${new Date(s.publishedAt).toLocaleDateString()}`
+                                : "Publication date unavailable"}
+                            </span>
+                          )}
+                          {sort === "saved" && (
+                            <span className="fine">
+                              {s.originalSavedAt
+                                ? `Saved ${new Date(s.originalSavedAt).toLocaleDateString()}`
+                                : "Save date unavailable"}
+                            </span>
+                          )}
                           {s.insightCount > 0 && (
                             <span className="tag">
                               {s.insightCount} insights
@@ -1089,7 +1145,12 @@ export function Console({
                     (r) =>
                       `${r.installationId}:${r.id}` === f.get("repository"),
                   );
-                  if (!choice) return;
+                  if (!choice) {
+                    setNotice(
+                      "Choose an authorized repository before connecting it.",
+                    );
+                    return;
+                  }
                   await call("connectRepository", {
                     organizationId,
                     installationId: choice.installationId,
@@ -1100,11 +1161,12 @@ export function Console({
               >
                 <h2>Select a repository</h2>
                 <p>
-                  Install the GitHub App on the repositories you choose, then
-                  link your GitHub account to this workspace.
+                  On GitHub, choose All repositories or Only select
+                  repositories. Then link your account and choose a project
+                  here. You can change GitHub access later.
                 </p>
                 <a
-                  href="https://github.com/apps/vibescroller-stefandg1-staging/installations/new"
+                  href="https://github.com/apps/vibescroller/installations/new"
                   target="_blank"
                   rel="noreferrer"
                 >
@@ -1119,7 +1181,7 @@ export function Console({
                 )}
                 <label>
                   Authorized repository
-                  <select name="repository" required defaultValue="">
+                  <ChoiceSelect name="repository" required defaultValue="">
                     <option value="" disabled>
                       Choose a repository
                     </option>
@@ -1131,7 +1193,7 @@ export function Console({
                         {r.fullName}
                       </option>
                     ))}
-                  </select>
+                  </ChoiceSelect>
                 </label>
                 <button
                   className="primary"
@@ -1340,7 +1402,7 @@ export function Console({
                   <h2>Review the assessment</h2>
                   <label>
                     Reviewer assessment
-                    <select
+                    <ChoiceSelect
                       name="disposition"
                       defaultValue={selected.disposition}
                     >
@@ -1356,7 +1418,7 @@ export function Console({
                           {label(value)}
                         </option>
                       ))}
-                    </select>
+                    </ChoiceSelect>
                   </label>
                   <label>
                     Evidence and reason for any correction
@@ -2393,10 +2455,10 @@ function CaptureForm({
     >
       <label>
         Source type
-        <select
+        <ChoiceSelect
           disabled={importBusy}
           value={kind}
-          onChange={(e) => setKind(e.target.value)}
+          onValueChange={(value) => setKind(value)}
         >
           {!existingSourceId && <option value="url">Video URL</option>}
           {!existingSourceId && (
@@ -2404,7 +2466,7 @@ function CaptureForm({
           )}
           <option value="upload">Permitted media upload</option>
           <option value="text">Supplied transcript</option>
-        </select>
+        </ChoiceSelect>
       </label>
       {!existingSourceId && kind !== "import" && (
         <label>
@@ -2561,15 +2623,16 @@ function CaptureForm({
         content for processing
       </label>
       {personalEnabled && cloudEnabled && (
-        <label>
+        <label htmlFor="analysis-provider-choice">
           Analysis provider
-          <select
+          <ChoiceSelect
+            id="analysis-provider-choice"
             value={analysisRoute}
-            onChange={(e) => setAnalysisRoute(e.target.value)}
+            onValueChange={(value) => setAnalysisRoute(value)}
           >
             <option value="personal">My ChatGPT plan · paired laptop</option>
             <option value="cloud">Cloud processing · app credits</option>
-          </select>
+          </ChoiceSelect>
         </label>
       )}
       {personalEnabled &&
@@ -2592,10 +2655,10 @@ function CaptureForm({
               <>
                 <label>
                   Computer
-                  <select
+                  <ChoiceSelect
                     value={chosenDevice}
-                    onChange={(e) => {
-                      setChosenDevice(e.target.value);
+                    onValueChange={(value) => {
+                      setChosenDevice(value);
                       setChosenModel("");
                     }}
                   >
@@ -2605,13 +2668,13 @@ function CaptureForm({
                         {d.name}
                       </option>
                     ))}
-                  </select>
+                  </ChoiceSelect>
                 </label>
                 <label>
                   ChatGPT model
-                  <select
+                  <ChoiceSelect
                     value={effectiveModel}
-                    onChange={(e) => setChosenModel(e.target.value)}
+                    onValueChange={(value) => setChosenModel(value)}
                   >
                     {!computer && (
                       <option value="">Connect your computer first</option>
@@ -2621,7 +2684,7 @@ function CaptureForm({
                         {m.displayName}
                       </option>
                     ))}
-                  </select>
+                  </ChoiceSelect>
                 </label>
                 <label className="check">
                   <input name="ownPlan" type="checkbox" required />
@@ -2758,7 +2821,8 @@ function SourceDetail({
 }: any) {
   const [detail, setDetail] = useState(source);
   const [detailLoading, setDetailLoading] = useState(!demo);
-  const [selectedInsight, setSelectedInsight] = useState("");
+  const [excludedInsights, setExcludedInsights] = useState<string[]>([]);
+  const [viewFrame, setViewFrame] = useState<string>();
   const [allFrames, setAllFrames] = useState(false);
   const [categoryDraft, setCategoryDraft] = useState("");
   const [transcriptOpen, setTranscriptOpen] = useState(false);
@@ -2777,9 +2841,12 @@ function SourceDetail({
     detail.mediaEvidence ??
     []
   ).filter((e: any) => e.kind === "frame");
-  const insightId = selectedInsight || detail.analysis?.insights?.[0]?.id;
+  const insightIds = (detail.analysis?.insights ?? [])
+    .map((i: any) => i.id)
+    .filter((key: string) => !excludedInsights.includes(key));
   const selection =
-    detail.repositorySelection?.insightId === insightId
+    JSON.stringify(detail.repositorySelection?.insightIds) ===
+    JSON.stringify(insightIds)
       ? detail.repositorySelection
       : undefined;
   useEffect(() => {
@@ -2844,8 +2911,43 @@ function SourceDetail({
       ? (summary.match(/^.{1,280}[.!?](?:\s|$)/)?.[0]?.trim() ??
         `${summary.slice(0, 280).replace(/\s+\S*$/, "")}…`)
       : summary;
+  const citedFrames = new Set(
+    insights.flatMap((i: any) =>
+      (i.evidence ?? [])
+        .filter((e: any) => e.kind === "frame")
+        .map((e: any) => e.id),
+    ),
+  );
+  const highlightedFrames = savedFrames.filter((frame: any) =>
+    citedFrames.has(frame.id),
+  );
+  const visibleFrames = allFrames
+    ? savedFrames
+    : highlightedFrames.length
+      ? highlightedFrames.slice(0, 8)
+      : savedFrames.slice(0, 4);
   return (
     <>
+      {viewFrame && (
+        <EvidenceViewer
+          key={viewFrame}
+          frames={
+            savedFrames.some((f: any) => f.id === viewFrame)
+              ? savedFrames
+              : [
+                  {
+                    id: viewFrame,
+                    startMs:
+                      insights
+                        .flatMap((i: any) => i.evidence ?? [])
+                        .find((e: any) => e.id === viewFrame)?.startMs ?? 0,
+                  },
+                ]
+          }
+          initialId={viewFrame}
+          onClose={() => setViewFrame(undefined)}
+        />
+      )}
       {detail.url && (
         <a
           className="panel source-origin"
@@ -2905,6 +3007,9 @@ function SourceDetail({
             {detail.originalSavedAt
               ? ` Original save date supplied by the import: ${new Date(detail.originalSavedAt).toLocaleString()}.`
               : " Original save date unknown."}{" "}
+            {detail.publishedAt
+              ? `Post published ${new Date(detail.publishedAt).toLocaleString()}.`
+              : "Post publication date unavailable."}
           </p>
         </details>
       </div>
@@ -2971,13 +3076,13 @@ function SourceDetail({
                     {i.evidence?.map((e: any) => (
                       <li key={e.id}>
                         {e.kind === "frame" && !demo && (
-                          <a
-                            href={`/api/evidence/${encodeURIComponent(e.id)}?view=true`}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                          <button
+                            type="button"
+                            className="evidence-link"
+                            onClick={() => setViewFrame(e.id)}
                           >
                             Frame · {(e.startMs / 1000).toFixed(1)}s
-                          </a>
+                          </button>
                         )}
                         {e.kind === "transcript" && (
                           <a
@@ -3079,12 +3184,12 @@ function SourceDetail({
         <section className="panel" aria-label="Video evidence">
           <h2>Video evidence</h2>
           <div className="evidence-grid">
-            {savedFrames.slice(0, allFrames ? 24 : 4).map((frame: any) => (
+            {visibleFrames.map((frame: any) => (
               <figure key={frame.id}>
-                <a
-                  href={`/api/evidence/${encodeURIComponent(frame.id)}?view=true`}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  type="button"
+                  className="evidence-image-button"
+                  onClick={() => setViewFrame(frame.id)}
                 >
                   <Image
                     src={`/api/evidence/${encodeURIComponent(frame.id)}?inline=true`}
@@ -3095,18 +3200,18 @@ function SourceDetail({
                     loading="lazy"
                     decoding="async"
                   />
-                </a>
+                </button>
                 <figcaption>{(frame.startMs / 1000).toFixed(1)}s</figcaption>
               </figure>
             ))}
           </div>
-          {savedFrames.length > 4 && (
+          {savedFrames.length > visibleFrames.length || allFrames ? (
             <Button onClick={() => setAllFrames(!allFrames)}>
               {allFrames
                 ? "Show fewer frames"
                 : `View all ${savedFrames.length} frames`}
             </Button>
-          )}
+          ) : null}
           <p className="fine">
             Selected frames support the analysis. Sampling can miss short
             scenes.
@@ -3117,7 +3222,14 @@ function SourceDetail({
         className="panel source-notes"
         onToggle={(e) => {
           if (e.currentTarget.open)
-            setCategoryDraft((detail.categoryNames ?? []).join(", "));
+            setCategoryDraft(
+              (detail.categoryNames ?? [])
+                .filter(
+                  (_: string, index: number) =>
+                    !detail.categoryKeys?.[index]?.startsWith("domain_"),
+                )
+                .join(", "),
+            );
         }}
       >
         <summary>
@@ -3254,25 +3366,39 @@ function SourceDetail({
         <h2>Applies to your projects</h2>
         {detail.analysis?.insights?.length > 0 && (
           <>
-            <label>
-              Main point for project selection
-              <select
-                value={insightId}
-                onChange={(event) => setSelectedInsight(event.target.value)}
-              >
-                {detail.analysis.insights.map((insight: any) => (
-                  <option key={insight.id} value={insight.id}>
-                    {insight.title}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <p>
+              Use{" "}
+              {insightIds.length === detail.analysis.insights.length
+                ? "the whole post"
+                : `${insightIds.length} selected main points`}
+              .
+            </p>
+            <details className="point-selection">
+              <summary>Advanced · choose main points</summary>
+              {detail.analysis.insights.map((insight: any) => (
+                <label key={insight.id}>
+                  <input
+                    type="checkbox"
+                    checked={!excludedInsights.includes(insight.id)}
+                    onChange={(event) =>
+                      setExcludedInsights((old) =>
+                        event.target.checked
+                          ? old.filter((key) => key !== insight.id)
+                          : [...old, insight.id],
+                      )
+                    }
+                  />
+                  {insight.title}
+                </label>
+              ))}
+            </details>
             <button
               className="secondary"
+              disabled={busy || readOnly || !insightIds.length}
               onClick={() =>
                 call("suggestRepositories", {
                   id: id(source),
-                  insightId,
+                  insightIds,
                   maxCredits: 10,
                 })
               }
@@ -3302,10 +3428,12 @@ function SourceDetail({
                     <p>{candidate.reason}</p>
                     <button
                       className="secondary"
+                      disabled={busy || readOnly || !insightIds.length}
                       onClick={() =>
                         call("match", {
                           id: id(source),
                           repositoryId: candidate.repositoryId,
+                          insightIds,
                           maxCredits: 10,
                         })
                       }
@@ -3338,12 +3466,18 @@ function SourceDetail({
             className="secondary"
             key={id(r)}
             disabled={
-              busy || detail.state !== "ready" || !r.enabled || !r.confirmed
+              busy ||
+              readOnly ||
+              !insightIds.length ||
+              detail.state !== "ready" ||
+              !r.enabled ||
+              !r.confirmed
             }
             onClick={() =>
               call("match", {
                 id: id(source),
                 repositoryId: id(r),
+                insightIds,
                 maxCredits: 10,
               })
             }
@@ -3521,10 +3655,10 @@ function PersonalSourceAnalysis({
               <>
                 <label>
                   Computer
-                  <select
+                  <ChoiceSelect
                     value={deviceId}
-                    onChange={(e) => {
-                      setDeviceId(e.target.value);
+                    onValueChange={(value) => {
+                      setDeviceId(value);
                       setModel("");
                       setConsent(false);
                     }}
@@ -3535,14 +3669,14 @@ function PersonalSourceAnalysis({
                         {d.name}
                       </option>
                     ))}
-                  </select>
+                  </ChoiceSelect>
                 </label>
                 <label>
                   Account model
-                  <select
+                  <ChoiceSelect
                     value={model}
-                    onChange={(e) => {
-                      setModel(e.target.value);
+                    onValueChange={(value) => {
+                      setModel(value);
                       setConsent(false);
                     }}
                   >
@@ -3552,7 +3686,7 @@ function PersonalSourceAnalysis({
                         {m.displayName}
                       </option>
                     ))}
-                  </select>
+                  </ChoiceSelect>
                 </label>
                 <label className="check-label">
                   <input
@@ -3643,9 +3777,13 @@ function ExecutionApproval({ proposal, call, routes, busy }: any) {
         Plan version: {proposal.version} · Hash:{" "}
         <code>{proposal.planHash ?? "Save a validated plan first"}</code>
       </p>
-      <label>
+      <label htmlFor="executor-choice">
         Executor
-        <select value={executor} onChange={(e) => setExecutor(e.target.value)}>
+        <ChoiceSelect
+          id="executor-choice"
+          value={executor}
+          onValueChange={(value) => setExecutor(value)}
+        >
           <option value="local" disabled={!routes?.execution?.localReady}>
             Paired laptop, own local Codex session
           </option>
@@ -3658,15 +3796,15 @@ function ExecutionApproval({ proposal, call, routes, busy }: any) {
           >
             Metered cloud, your OpenAI API credential
           </option>
-        </select>
+        </ChoiceSelect>
       </label>
       {executor === "customer" && (
         <>
           <label>
             Reviewed model
-            <select
+            <ChoiceSelect
               value={modelId}
-              onChange={(e) => setModelId(e.target.value)}
+              onValueChange={(value) => setModelId(value)}
             >
               <option value="">Choose a verified model</option>
               {routes?.models.map((m: any) => (
@@ -3674,7 +3812,7 @@ function ExecutionApproval({ proposal, call, routes, busy }: any) {
                   {m.id} · {m.version}
                 </option>
               ))}
-            </select>
+            </ChoiceSelect>
           </label>
           <p>
             Separate provider ceiling:{" "}

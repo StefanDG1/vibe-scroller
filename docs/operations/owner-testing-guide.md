@@ -75,3 +75,11 @@ Open Categories inside a source to edit its names. A new valid topic can be crea
 ## Download your work
 
 As workspace owner, open Privacy and choose Export workspace content. The JSON download includes saved sources and insights, proposals and plans, feedback, repository profiles and commit manifests, coding/PR history and workspace categories. It excludes deleted sources, private storage links, credential bindings and temporary raw repository context. This is a live paginated export, not an atomic database snapshot; records created after it starts are excluded, and losing owner access interrupts the download. Account profile/membership data has its separate account export.
+
+## Library refinement, October 3
+
+Open Library and choose All posts, Analyzed, Not analyzed or Processing. The category menu separates broad Collections from specific Topics. Use Added to app for the import date, Saved on platform for the export's save date, and Post published for a verified original timestamp. Missing original dates are labeled unavailable. Search uses relevance until cleared.
+
+Open a post to inspect its summary and main points. Evidence frames open inside the app; use Close or Escape, or the previous/next controls. The original post card still opens Instagram. Project suggestions start with the whole post; expand Advanced only to exclude points. Finding a project or matching a repository does not approve coding.
+
+Connect GitHub through the dedicated [VibeScroller App](https://github.com/apps/vibescroller/installations/new). GitHub offers All repositories or Only select repositories. Link your GitHub account to the workspace, select a project, and confirm its profile before requesting context or a plan. Repository access can be changed in GitHub settings. Commercial execution remains governed by current release gates.

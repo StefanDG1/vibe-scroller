@@ -1,4 +1,5 @@
 import { RETRIEVAL_VERSION } from "../packages/repositories/retrieval";
+import { selectedInsights } from "../packages/insights/scope";
 import { exportRecord } from "../packages/privacy/export";
 import { internal } from "./_generated/api";
 import { workflow } from "./workflows";
@@ -398,6 +399,7 @@ export const reserveMatch = mutation({
     id: v.id("sources"),
     repositoryId: v.id("repositories"),
     maxCredits: v.number(),
+    insightIds: v.optional(v.array(v.string())),
   },
   handler: async (ctx, a) => {
     const source = await ctx.db.get(a.id),
@@ -420,14 +422,26 @@ export const reserveMatch = mutation({
       "QUOTE_CHANGED",
       "Review the current 10-credit quote.",
     );
-    const semanticKey = `match:${RETRIEVAL_VERSION}:${source._id}:${source.generation}:${repo._id}:${repo.sha}:${repo.profileVersion}`;
+    const insights = selectedInsights(
+      source.analysis?.insights ?? [],
+      a.insightIds,
+    );
+    const scopedSource = {
+      ...source,
+      analysis: { ...source.analysis, insights },
+    };
+    const suffix =
+      insights.length === source.analysis.insights.length
+        ? ""
+        : `:scope:${await digest(JSON.stringify(insights.map((i: any) => i.id)))}`;
+    const semanticKey = `match:${RETRIEVAL_VERSION}:${source._id}:${source.generation}:${repo._id}:${repo.sha}:${repo.profileVersion}${suffix}`;
     const old = await ctx.db
       .query("matchingJobs")
       .withIndex("by_key", (q) => q.eq("key", semanticKey))
       .unique();
     if (old?.proposalId)
       return {
-        source,
+        source: scopedSource,
         repo,
         key: old.reservationKey,
         semanticKey,
@@ -451,6 +465,7 @@ export const reserveMatch = mutation({
         state: "pending",
         attempt,
         reservationKey: key,
+        insightIds: insights.map((i: any) => i.id),
         updatedAt: Date.now(),
       });
     else
@@ -462,10 +477,11 @@ export const reserveMatch = mutation({
         state: "pending",
         attempt,
         reservationKey: key,
+        insightIds: insights.map((i: any) => i.id),
         createdAt: Date.now(),
         updatedAt: Date.now(),
       });
-    return { source, repo, key, semanticKey, cached: false };
+    return { source: scopedSource, repo, key, semanticKey, cached: false };
   },
 });
 export const finishMatch = internalMutation({

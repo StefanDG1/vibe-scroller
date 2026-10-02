@@ -4,8 +4,8 @@
   "media": {
     "max_upload_bytes": 250000000,
     "max_duration_seconds": 600,
-    "initial_frame_target": 24,
-    "max_initial_frames": 120,
+    "initial_frame_target": 48,
+    "max_initial_frames": 48,
     "sandbox_vcpu": 2,
     "sandbox_memory_gib": 1,
     "decoder_network": "disabled_after_acquisition"

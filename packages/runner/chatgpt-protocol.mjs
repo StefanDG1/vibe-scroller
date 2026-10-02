@@ -114,7 +114,7 @@ export function inferenceRequest(
     !input.trim() ||
     input.length > 120000 ||
     !Array.isArray(frames) ||
-    frames.length > 24 ||
+    frames.length > 48 ||
     (reasoningEffort !== undefined &&
       !["low", "medium", "high"].includes(reasoningEffort)) ||
     (instructions !== undefined &&

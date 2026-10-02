@@ -96,6 +96,7 @@ export const acquisitionManifest = z
     ]),
     title: z.string().max(160),
     description: z.string().max(6000),
+    publishedAt: z.number().int().min(1).max(4102444800000).optional(),
     durationSeconds: z.number().min(0).max(600).optional(),
     byteLength: z.number().int().min(1).max(250000000).optional(),
     extractor: z.string().max(80),

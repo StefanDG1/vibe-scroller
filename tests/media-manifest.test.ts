@@ -32,7 +32,7 @@ it("rejects traversal, duplicated files, fabricated coverage, invalid timing and
     { durationSeconds: 8, coverage: "visual_only", frames: [] },
     {
       ...sample,
-      frames: Array.from({ length: 25 }, (_, index) => ({
+      frames: Array.from({ length: 49 }, (_, index) => ({
         ...sample.frames[0],
         id: `frame-${String(index).padStart(3, "0")}.jpg`,
       })),
