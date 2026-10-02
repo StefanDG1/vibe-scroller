@@ -3554,7 +3554,9 @@ function PersonalSourceAnalysis({
   );
 }
 function ExecutionApproval({ proposal, call, routes, busy }: any) {
-  const [executor, setExecutor] = useState("local"),
+  const [executor, setExecutor] = useState(
+      routes?.execution?.localReady ? "local" : "cloud",
+    ),
     [ceiling, setCeiling] = useState(100),
     [modelId, setModelId] = useState(""),
     [highRisk, setHighRisk] = useState(false);
@@ -3735,6 +3737,13 @@ function RunCard({ run, title, call, busy, readOnly }: any) {
           <summary>Review patch and check report</summary>
           <pre>{run.patch}</pre>
           <p>{run.report}</p>
+          {run.state === "awaiting_review" && (
+            <p className="fine">
+              The reviewed patch and title will be shared with the selected
+              GitHub repository. Detailed check output and source evidence stay
+              private.
+            </p>
+          )}
           {run.state === "awaiting_review" && (
             <button
               className="primary"

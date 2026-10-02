@@ -407,6 +407,17 @@ export async function publish(input: {
     "POLICY_BLOCKED",
     "Patch contains a secret or oversized file.",
   );
+  ensure(
+    input.title.trim().length > 0 &&
+      input.title.length <= 160 &&
+      ![...input.title].some((character) => {
+        const code = character.charCodeAt(0);
+        return code < 32 || code === 127;
+      }) &&
+      !containsSecret(input.title),
+    "POLICY_BLOCKED",
+    "The reviewed PR title must be bounded and contain no credentials.",
+  );
   const token = await installationToken(input.installationId),
     root = `/repos/${input.fullName}`,
     branch = `vibescroller/run-${input.runId}`,
@@ -548,7 +559,7 @@ export async function publish(input: {
     head: branch,
     base: repo.default_branch,
     draft: true,
-    body: `${marker}\n\nPrepared from an explicitly approved VibeScroller plan. Benefit remains unmeasured.\n\nPrivate source evidence stays in the authenticated application.\n\nChecks and limitations:\n${input.report.slice(0, 4000)}`,
+    body: `${marker}\n\nPrepared from an explicitly approved VibeScroller plan. Benefit remains unmeasured.\n\nPrivate source evidence stays in the authenticated application.\n\nDetailed check output and source evidence remain in the authenticated application. Review the private report before merging.`,
   });
   return {
     number: pr.number,

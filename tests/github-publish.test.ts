@@ -60,7 +60,7 @@ it("preserves trusted executable modes and rejects symbolic links before writing
     files: [{ path: "scripts/task.sh", content: "echo approved\n" }],
     allowedPaths: ["scripts/task.sh"],
     highRisk: false,
-    report: "Synthetic test only",
+    report: "Exit 0: Private transcript marker SYNTHETIC-PRIVATE-CHECK-OUTPUT",
     reviewedPatch: reviewedCloudPatch(
       [{ path: "scripts/task.sh", content: "echo before\n" }],
       [{ path: "scripts/task.sh", content: "echo approved\n" }],
@@ -71,7 +71,16 @@ it("preserves trusted executable modes and rejects symbolic links before writing
     expect(
       writes.find((w) => w.path.endsWith("/git/trees")).body.tree[0].mode,
     ).toBe("100755");
+    const publishedBody = writes.find((w) => w.path.endsWith("/pulls")).body
+      .body;
+    expect(publishedBody).not.toContain("SYNTHETIC-PRIVATE-CHECK-OUTPUT");
+    expect(publishedBody).not.toContain("Private transcript marker");
+    expect(publishedBody).toContain("authenticated application");
     writes.length = 0;
+    await expect(
+      publish({ ...input, title: "Invalid\nPR title" }),
+    ).rejects.toThrow("POLICY_BLOCKED");
+    expect(writes).toEqual([]);
     await expect(
       publish({
         ...input,

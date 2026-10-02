@@ -1,0 +1,16 @@
+{
+  "at": "2026-10-02T15:09:41.271Z",
+  "commit": "df713b730abc54d6ce8255c09b0172e4e715fff3",
+  "environment": "production",
+  "synthetic": true,
+  "initialState": "failed before compute",
+  "firstState": "canceled",
+  "repeatedState": "canceled",
+  "generation": 2,
+  "repeatedGeneration": 2,
+  "eventCountUnchanged": true,
+  "spentCreditsUnchanged": true,
+  "reservedBalance": 0,
+  "sandboxCreated": false,
+  "paidV1Established": false
+}
