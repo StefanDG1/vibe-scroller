@@ -3,7 +3,8 @@ import Stripe from "stripe";
 import { action } from "./_generated/server";
 import { api, internal } from "./_generated/api";
 import { v } from "convex/values";
-import { pricing, ensure, taxTreatment } from "../packages/policy";
+import { pricing, ensure } from "../packages/policy";
+import { checkoutPaymentRoute } from "../packages/providers/stripe-checkout";
 function stripe() {
   const key = process.env.STRIPE_SECRET_KEY;
   ensure(
@@ -247,7 +248,14 @@ export const checkout = action({
       "RELEASE_GATE",
       "Live checkout is disabled.",
     );
-    const treatment = taxTreatment(tax, a.country, false, false, live);
+    const route = checkoutPaymentRoute({
+      tax,
+      country: a.country,
+      live,
+      route: process.env.STRIPE_BILLING_ROUTE,
+      managedVerified: process.env.STRIPE_MANAGED_PAYMENTS_VERIFIED === "true",
+    });
+    const treatment = route.treatment;
     const price = priceId(a.tier, a.interval);
     ensure(
       price,
@@ -275,7 +283,9 @@ export const checkout = action({
       "CATALOGUE_MISMATCH",
       "The Stripe price does not match the approved catalogue.",
     );
-    let customer = auth.billing?.customerId;
+    let customer = auth.billing?.providerDeletedAt
+      ? undefined
+      : auth.billing?.customerId;
     if (!customer) {
       const created = await client.customers.create(
         {
@@ -286,7 +296,9 @@ export const checkout = action({
             product: "vibescroller",
           },
         },
-        { idempotencyKey: `vibescroller:customer:${a.organizationId}` },
+        {
+          idempotencyKey: `vibescroller:customer:${a.organizationId}${auth.billing?.providerDeletedAt ? `:${auth.billing.providerDeletedAt}` : ""}`,
+        },
       );
       customer = await ctx.runMutation(internal.billing.attach, {
         organizationId: a.organizationId,
@@ -324,13 +336,11 @@ export const checkout = action({
     const session = await client.checkout.sessions.create(
       {
         customer,
+        integration_identifier: "vibescroller_subscription_vksnqjrt",
         mode: "subscription",
         line_items: [{ price, quantity: 1 }],
         billing_address_collection: "required",
-        automatic_tax: {
-          enabled: ["domestic_vat", "destination_vat"].includes(treatment),
-        },
-        customer_update: { address: "auto" },
+        ...route.options,
         consent_collection: { terms_of_service: "required" },
         metadata: {
           product: "vibescroller",
@@ -345,6 +355,7 @@ export const checkout = action({
             tier: a.tier,
             interval: a.interval,
             organizationId: a.organizationId,
+            billingRoute: process.env.STRIPE_BILLING_ROUTE ?? "direct",
           },
         },
         expires_at: Math.floor(reserved.expires / 1000),

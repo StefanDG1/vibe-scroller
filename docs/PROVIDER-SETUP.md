@@ -34,7 +34,11 @@ Create the private EU-jurisdiction bucket and restricted upload/download identit
 
 ## Configure Stripe
 
-Use Exponential Education SRL's merchant account only to sell VibeScroller subscriptions. Verify the legal entity, bank payout details, currency, tax configuration, support contact, and statement descriptor in the actual account. Do not alter another product's existing prices or webhook routing.
+Use the dedicated VibeScroller Stripe account under Exponential Education SRL, as authorized on October 2. Reuse verified legal-entity details through Stripe's supported flow. Verify charge/payout readiness, payout details, currency, support contact and statement descriptor in the actual account. Do not alter the education platform's prices, keys, subscriptions or webhook routing. See [ADR 017](adr/017-dedicated-stripe-and-managed-payments.md).
+
+The preferred launch route is Managed Payments, subject to its account/product eligibility and operator acceptance of the provider terms. Prepare it in a dedicated sandbox first. Stripe handles covered customer-sales VAT and transaction invoices through Link. Keep direct-sale tax modes as alternatives; never silently fall back from a refused Managed Payments checkout to direct processing.
+
+Provision the catalogue using the matching deployment-independent secret environment: STRIPE_SECRET_KEY, STRIPE_ACCOUNT_ID and STRIPE_MODE. Run node scripts/stripe-catalogue.mjs for test mode; live mode requires the separately authorized --live flag. The command checks the credential's own Romanian account before mutations. It prints only configuration IDs and readiness flags, never keys. Its output deliberately leaves LIVE_CHECKOUT_ENABLED=false. Configure the dedicated portal, signed webhook, country policy and provider approvals before activation.
 
 Create the six subscription prices and optional top-up products in sandbox first. Add stable metadata identifying VibeScroller and the catalogue version. Use separate environment IDs. Configure customer portal actions and the signature-protected webhook endpoint.
 

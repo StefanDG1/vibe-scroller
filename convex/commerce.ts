@@ -130,8 +130,23 @@ export const grantPeriod = internalMutation({
     verifiedPayment: v.boolean(),
     upgradeAt: v.optional(v.number()),
     invoiceId: v.optional(v.string()),
+    billingRevision: v.optional(v.number()),
   },
   handler: async (ctx, a) => {
+    if (a.billingRevision !== undefined) {
+      const current = await ctx.db
+        .query("billing")
+        .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
+        .unique();
+      if (
+        !current ||
+        current.providerDeletedAt ||
+        current.status !== "active" ||
+        current.subscriptionId !== a.subscription ||
+        current.appliedRevision !== a.billingRevision
+      )
+        return;
+    }
     ensure(
       a.verifiedPayment && a.end > a.start,
       "PAYMENT_REQUIRED",

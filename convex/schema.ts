@@ -60,6 +60,7 @@ export default defineSchema({
     verifiedAt: v.number(),
     revision: v.number(),
     appliedRevision: v.optional(v.number()),
+    providerDeletedAt: v.optional(v.number()),
     checkoutKey: v.optional(v.string()),
     checkoutIntent: v.optional(v.string()),
     checkoutExpires: v.optional(v.number()),

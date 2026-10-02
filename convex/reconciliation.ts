@@ -4,6 +4,10 @@ import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import Stripe from "stripe";
 import { ensure, monthlyAnchor } from "../packages/policy";
+import {
+  missingStripeCustomer,
+  confirmStripeCustomerDeleted,
+} from "../packages/providers/stripe-deletion";
 export const stripeEvent = internalAction({
   args: { body: v.string(), signature: v.string() },
   handler: async (ctx, a) => {
@@ -27,7 +31,7 @@ export const stripeEvent = internalAction({
       (event.account && event.account !== account)
     )
       return { status: 400 };
-    const own = await client.accounts.retrieve(account);
+    const own = await client.accounts.retrieve(null);
     if (own.id !== account) return { status: 400 };
     const object = event.data.object as any;
     if (event.type === "charge.refunded") {
@@ -93,7 +97,10 @@ export const stripeEvent = internalAction({
         });
     }
     if (
-      event.type === "checkout.session.completed" &&
+      [
+        "checkout.session.completed",
+        "checkout.session.async_payment_succeeded",
+      ].includes(event.type) &&
       object.mode === "payment"
     ) {
       const session = await client.checkout.sessions.retrieve(object.id, {
@@ -111,7 +118,11 @@ export const stripeEvent = internalAction({
         });
         if (
           linked?.organizationId === session.metadata.organizationId &&
+          session.livemode === (process.env.STRIPE_MODE === "live") &&
           [200, 550].includes(credits) &&
+          session.line_items?.data.length === 1 &&
+          !session.line_items.has_more &&
+          line?.quantity === 1 &&
           line?.price?.id === process.env[`STRIPE_TOPUP_${credits}_PRICE_ID`]
         )
           await ctx.runMutation(internal.commerce.grantTopup, {
@@ -122,9 +133,11 @@ export const stripeEvent = internalAction({
       }
     }
     const customer =
-      typeof object.customer === "string"
-        ? object.customer
-        : object.customer?.id;
+      event.type === "customer.deleted"
+        ? object.id
+        : typeof object.customer === "string"
+          ? object.customer
+          : object.customer?.id;
     if (customer)
       await ctx.runAction(internal.reconciliation.customer, {
         customerId: customer,
@@ -143,12 +156,37 @@ export const customer = internalAction({
     const client = new Stripe(process.env.STRIPE_SECRET_KEY);
     const reserved = await ctx.runMutation(internal.billing.reserveRefresh, a);
     if (!reserved) return;
-    const all = await client.subscriptions.list({
-      customer: a.customerId,
-      status: "all",
-      limit: 100,
-      expand: ["data.latest_invoice"],
-    });
+    const account = process.env.STRIPE_ACCOUNT_ID;
+    ensure(
+      account && (await client.accounts.retrieve(null)).id === account,
+      "BILLING_UNAVAILABLE",
+      "The Stripe account does not match billing configuration.",
+    );
+    if (await confirmStripeCustomerDeleted(client, a.customerId)) {
+      await ctx.runMutation(internal.billing.providerDeleted, {
+        customerId: a.customerId,
+        revision: reserved.revision,
+      });
+      return;
+    }
+    let all;
+    try {
+      all = await client.subscriptions.list({
+        customer: a.customerId,
+        status: "all",
+        limit: 100,
+        expand: ["data.latest_invoice"],
+      });
+    } catch (error) {
+      if (!missingStripeCustomer(error)) throw error;
+      if (!(await confirmStripeCustomerDeleted(client, a.customerId)))
+        throw error;
+      await ctx.runMutation(internal.billing.providerDeleted, {
+        customerId: a.customerId,
+        revision: reserved.revision,
+      });
+      return;
+    }
     const sub = all.data
       .filter((s) => s.metadata.product === "vibescroller")
       .sort((a, b) => b.created - a.created)[0];
@@ -206,8 +244,12 @@ export const customer = internalAction({
           ? Math.max(start, upgrade.prorationDate * 1000)
           : undefined,
         invoiceId: invoice.id,
+        billingRevision: reserved.revision,
       });
-    if (process.env.RO_INVOICE_SCOPE_VERIFIED === "true")
+    if (
+      sub.metadata.billingRoute !== "managed_payments" &&
+      process.env.RO_INVOICE_SCOPE_VERIFIED === "true"
+    )
       await ctx.runMutation(internal.privacy.invoiceTask, {
         organizationId: reserved.organizationId,
         invoiceId: invoice.id,

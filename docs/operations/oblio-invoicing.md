@@ -2,6 +2,8 @@
 
 Mode: how-to. Checked October 1, 2026. Only the accountant has Oblio access. No API credentials, document creation, SPV authorization or purchase has occurred.
 
+October 2 update: the owner selected [Stripe Managed Payments if eligible](../adr/017-dedicated-stripe-and-managed-payments.md). Account/product activation and sandbox verification remain pending. For covered Managed Payments transactions, Link supplies the customer tax invoice. Do not duplicate it by treating Exponential Education as the customer transaction's merchant of record. The direct-invoice queue described below does not receive Managed Payments subscriptions. The accountant still handles the company's records, income, provider fees and payout reconciliation. Use Stripe's balance/payout reports with separate withheld_tax and fee_net_of_withheld_tax columns; a fee total that includes withheld tax is not simply a processing expense. Agree the accounting treatment and secure reporting procedure with the accountant. No automated Managed Payments accountant export or legal approval is claimed.
+
 ## Keep one accounting workflow
 
 Use the existing invoice compliance queue and accountant workflow first. Stripe supplies payment/invoice identifiers; a receipt or PDF alone does not establish Romanian reporting compliance. The queue retains the source invoice, due date, status and actual submission receipt reference. Record that reference after the accountant handles an applicable invoice. Document generation alone is not successful submission.
