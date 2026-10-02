@@ -53,6 +53,7 @@ type Initial = {
   notifications: any[];
   usage: any;
   devices?: any[];
+  connections?: { provider: string; status: string; updatedAt: number }[];
   measured?: number;
   githubChoices?: { id: number; fullName: string; installationId: number }[];
   customerRoutes?: {
@@ -280,7 +281,18 @@ export function Console({
     };
   }, [demo, organizationId, view, search, filter, category, sort]);
   useEffect(() => {
-    const draft = new URL(window.location.href).searchParams.get("draft");
+    const currentUrl = new URL(window.location.href);
+    const github = currentUrl.searchParams.get("github");
+    if (!demo && ["connected", "failed"].includes(github ?? "")) {
+      setNotice(
+        github === "connected"
+          ? "GitHub connected. Choose a repository."
+          : "GitHub connection failed. Try linking again; your existing selections are unchanged.",
+      );
+      currentUrl.searchParams.delete("github");
+      window.history.replaceState(null, "", currentUrl);
+    }
+    const draft = currentUrl.searchParams.get("draft");
     if (!demo && draft) {
       const url = new URL(window.location.href);
       url.searchParams.delete("draft");
@@ -1399,6 +1411,9 @@ export function Console({
                       busy={busy}
                       key={d}
                       primary={d === "accepted"}
+                      disabled={
+                        d === "accepted" && selected.disposition !== "relevant"
+                      }
                       onClick={async () => {
                         await call("decide", {
                           id: id(selected),
@@ -1677,14 +1692,27 @@ export function Console({
                 <Button busy={busy} onClick={() => go("projects")}>
                   Manage selected repositories
                 </Button>
-                <Button
-                  busy={busy}
-                  onClick={() =>
-                    call("revoke", { organizationId, provider: "github" })
-                  }
-                >
-                  Disconnect GitHub
-                </Button>
+                {data.connections?.some(
+                  (connection) =>
+                    connection.provider === "github" &&
+                    connection.status === "connected",
+                ) ? (
+                  <Button
+                    busy={busy}
+                    onClick={() =>
+                      call("revoke", { organizationId, provider: "github" })
+                    }
+                  >
+                    Disconnect GitHub
+                  </Button>
+                ) : (
+                  <a
+                    className="secondary"
+                    href={`/api/github/connect?org=${organizationId}`}
+                  >
+                    Link GitHub account
+                  </a>
+                )}
               </div>
               <form
                 className="panel"
@@ -2705,7 +2733,14 @@ function SourceDetail({
   const [transcriptOpen, setTranscriptOpen] = useState(false);
   const transcript = useRef<HTMLDetailsElement>(null);
   const sourceId = id(source);
-  const sourceRevision = `${source.generation}:${source.updatedAt}:${source.personalAnalysis?.state}`;
+  const proposalRevision = (source.proposals ?? [])
+    .map(
+      (proposal: any) =>
+        `${id(proposal)}:${proposal.updatedAt}:${proposal.version}:${proposal.review}`,
+    )
+    .sort()
+    .join("|");
+  const sourceRevision = `${source.generation}:${source.updatedAt}:${source.personalAnalysis?.state}:${proposalRevision}`;
   const savedFrames = (
     detail.originalMediaEvidence ??
     detail.mediaEvidence ??
@@ -2755,7 +2790,7 @@ function SourceDetail({
       });
     return () => abort.abort();
     // The workspace projection is a new object after every poll. Reload private
-    // evidence only when this source's actual revision changes.
+    // evidence only when this source or its linked proposal revision changes.
     // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, [sourceId, sourceRevision, org, demo]);
   const insights =

@@ -1,0 +1,19 @@
+{
+  "verifiedAt": "2026-10-02T13:07:50.253Z",
+  "workflowRun": 37010330657,
+  "commit": "f53a6b047af4e79cd977aea749d82a9f691daf03",
+  "workflowConclusion": "success",
+  "frames": 149,
+  "frameBytes": 17021599,
+  "databaseArchives": 1,
+  "markerArchives": 1,
+  "allAuthenticated": true,
+  "allContentHashesVerified": true,
+  "jpegMagicVerified": true,
+  "plaintextFilesWritten": false,
+  "temporaryMediaIncluded": false,
+  "storageCredentialsExported": false,
+  "retentionDays": 7,
+  "earliestEvidenceRestoreUntil": "2026-10-09T13:02:20.598Z",
+  "servingProductionRestored": false
+}

@@ -15,6 +15,58 @@ const syntheticPlan = {
   rollback: "Revert",
   unknowns: [],
 };
+it("restricts verified cloud workers to acceptance subjects until a separate public release approval", async () => {
+  const { t, a, b, org, proposalId } = await setup();
+  const query = () => a.query(api.jobs.customerRoutes, { organizationId: org });
+  vi.stubEnv("CLOUD_VERIFIED", "true");
+  vi.stubEnv("CLOUD_PUBLIC_RELEASE_APPROVED", "false");
+  try {
+    expect((await query()).execution.cloudReady).toBe(false);
+    await a.mutation(api.product.editPlan, {
+      id: proposalId,
+      version: 1,
+      plan: syntheticPlan,
+    });
+    const proposal = await a.query(api.product.proposal, { id: proposalId });
+    await expect(
+      a.mutation(api.jobs.approve, {
+        id: proposalId,
+        version: proposal.version,
+        planHash: proposal.planHash!,
+        baseSha: proposal.baseSha,
+        executor: "cloud",
+        fundingRoute: "managed_api",
+        maxCredits: 25,
+        allowedPaths: ["README.md"],
+        highRisk: false,
+      }),
+    ).rejects.toThrow("ISOLATION_UNAVAILABLE");
+    expect(
+      await t.run(async (ctx) => (await ctx.db.query("runs").collect()).length),
+    ).toBe(0);
+    vi.stubEnv(
+      "CLOUD_EXECUTION_SUBJECTS_JSON",
+      JSON.stringify(["synthetic-planning-b"]),
+    );
+    expect((await query()).execution.cloudReady).toBe(false);
+    vi.stubEnv(
+      "CLOUD_EXECUTION_SUBJECTS_JSON",
+      JSON.stringify(["synthetic-planning-a"]),
+    );
+    expect((await query()).execution.cloudReady).toBe(true);
+    await expect(
+      b.query(api.jobs.customerRoutes, { organizationId: org }),
+    ).rejects.toThrow();
+    vi.stubEnv("CLOUD_EXECUTION_SUBJECTS_JSON", "invalid");
+    expect((await query()).execution.cloudReady).toBe(false);
+    vi.stubEnv("CLOUD_PUBLIC_RELEASE_APPROVED", "true");
+    expect((await query()).execution.cloudReady).toBe(true);
+    vi.stubEnv("DISABLE_CLOUD", "true");
+    expect((await query()).execution.cloudReady).toBe(false);
+  } finally {
+    vi.unstubAllEnvs();
+  }
+});
 it("keeps cancellation fenced and reserved until matching teardown evidence, then settles exactly once", async () => {
   const { t, a, org, owner, proposalId, repositories } = await setup();
   const id = await t.run(async (ctx) => {

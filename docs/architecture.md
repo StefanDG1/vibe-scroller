@@ -12,23 +12,23 @@ The optional runner is a small execution service, not a second product interface
 
 ## Components
 
-| Component | Selected implementation | Responsibility |
-| --- | --- | --- |
-| Web application | Next.js App Router, TypeScript, shadcn-style components | Public site, authenticated UI, callbacks, lightweight authenticated endpoints |
-| Identity | WorkOS AuthKit | Email-code and Google sign-in, sessions, identity lifecycle |
-| Application data | Convex | Workspace data, authorization, reactive queries, indexes, vector retrieval, budgets |
-| Durable jobs | Convex workflow component plus outbox records | Stage orchestration, retries, waits, lease recovery |
-| Private objects | R2 bucket with explicit EU jurisdiction | Temporary media, evidence frames, exports, approved patch artifacts |
-| Cloud worker | E2B usage-based ephemeral CPU sandbox | Bounded media preparation and approved cloud coding |
-| Local runner | Node.js service using Codex app-server over stdio | Paired, user-approved local coding; optional local media processing |
-| Media tools | yt-dlp, FFmpeg, PySceneDetect | Supported URL retrieval, audio extraction, timestamped frame selection |
-| Local ASR | faster-whisper | Optional local transcription on supported hardware |
-| Managed ASR | OpenAI transcription API | Hosted transcription without a mandatory local GPU |
-| Reasoning | Provider adapter, initial text/image model | Insights, project matching, planning, and review |
-| Repository access | GitHub App and Octokit | Selected repositories, snapshots, branches, PRs, events |
-| Repository context | Repomix plus explicit filtering | Bounded, commit-aware code context |
-| Billing | Stripe Billing and Checkout | Subscriptions, portal, invoices, refunds, lifecycle events |
-| Notifications | In-app records, Resend adapter, Telegram bot | Optional delivery without making chat the source of truth |
+| Component          | Selected implementation                                 | Responsibility                                                                      |
+| ------------------ | ------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Web application    | Next.js App Router, TypeScript, shadcn-style components | Public site, authenticated UI, callbacks, lightweight authenticated endpoints       |
+| Identity           | WorkOS AuthKit                                          | Email-code and Google sign-in, sessions, identity lifecycle                         |
+| Application data   | Convex                                                  | Workspace data, authorization, reactive queries, indexes, vector retrieval, budgets |
+| Durable jobs       | Convex workflow component plus outbox records           | Stage orchestration, retries, waits, lease recovery                                 |
+| Private objects    | R2 bucket with explicit EU jurisdiction                 | Temporary media, evidence frames, exports, approved patch artifacts                 |
+| Cloud worker       | Vercel Sandbox ephemeral microVM, persistence disabled  | Bounded media preparation and approved cloud coding                                 |
+| Local runner       | Node.js service using Codex app-server over stdio       | Paired, user-approved local coding; optional local media processing                 |
+| Media tools        | yt-dlp, FFmpeg, PySceneDetect                           | Supported URL retrieval, audio extraction, timestamped frame selection              |
+| Local ASR          | faster-whisper                                          | Optional local transcription on supported hardware                                  |
+| Managed ASR        | OpenAI transcription API                                | Hosted transcription without a mandatory local GPU                                  |
+| Reasoning          | Provider adapter, initial text/image model              | Insights, project matching, planning, and review                                    |
+| Repository access  | GitHub App and Octokit                                  | Selected repositories, snapshots, branches, PRs, events                             |
+| Repository context | Repomix plus explicit filtering                         | Bounded, commit-aware code context                                                  |
+| Billing            | Stripe Billing and Checkout                             | Subscriptions, portal, invoices, refunds, lifecycle events                          |
+| Notifications      | In-app records, Resend adapter, Telegram bot            | Optional delivery without making chat the source of truth                           |
 
 Provider facts and limitations are recorded in [Sources](SOURCES.md), especially S01, S04, S10, S16, S19, and S20. Selection does not imply that a complete integration already exists.
 

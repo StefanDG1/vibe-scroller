@@ -18,10 +18,16 @@ it("does not advertise hosted media after its verified free-plan boundary expire
   vi.stubEnv("MANAGED_INFERENCE_ROUTE", "cloudflare_free");
   vi.stubEnv("DISABLE_INFERENCE", "false");
   vi.stubEnv("MEDIA_VERIFIED", "true");
+  vi.stubEnv("HOSTED_MEDIA_ANALYSIS_VERIFIED", "false");
   vi.stubEnv("ACQUISITION_VERIFIED", "true");
   vi.stubEnv("CLOUDFLARE_AI_TOKEN", "synthetic-token");
   vi.stubEnv("CLOUDFLARE_ACCOUNT_ID", "synthetic-account");
   vi.stubEnv("CLOUDFLARE_FREE_PLAN_VERIFIED_AT", new Date().toISOString());
+  expect(
+    (await user.query(api.aiPreferences.read, { organizationId: org }))
+      .cloudAnalysisEnabled,
+  ).toBe(false);
+  vi.stubEnv("HOSTED_MEDIA_ANALYSIS_VERIFIED", "true");
   expect(
     (await user.query(api.aiPreferences.read, { organizationId: org }))
       .cloudAnalysisEnabled,

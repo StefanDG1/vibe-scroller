@@ -47,6 +47,11 @@ export const analyze = internalAction({
     let reusedMediaGeneration: number | undefined;
     try {
       ensure(
+        process.env.HOSTED_MEDIA_ANALYSIS_VERIFIED === "true",
+        "SETUP_REQUIRED",
+        "Hosted audiovisual analysis is awaiting its licensed model and end-to-end verification.",
+      );
+      ensure(
         ((source.kind === "upload" && source.objectKey) ||
           (source.kind === "url" && source.url && source.rightsAttested)) &&
           process.env.DISABLE_INFERENCE !== "true",
@@ -372,6 +377,7 @@ export const analyze = internalAction({
               "CONTEXT_REQUIRED",
               "BUDGET_EXCEEDED",
               "QUOTE_CHANGED",
+              "SETUP_REQUIRED",
             ].find((code) => error.message.includes(code)) ?? error.name)
           : "UnknownError";
       console.error(JSON.stringify({ stage: "media_analysis", category }));

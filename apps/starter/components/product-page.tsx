@@ -33,6 +33,7 @@ export async function ProductPage({
     githubChoices,
     organization,
     customerRoutes,
+    connections,
     aiPreference,
     categories,
     selectedSource,
@@ -52,6 +53,7 @@ export async function ProductPage({
     c.query(api.githubLinks.choices, { organizationId }),
     c.query(api.organizations.details, { organizationId }),
     c.query(api.jobs.customerRoutes, { organizationId }),
+    c.query(api.jobs.connections, { organizationId }),
     c.query(api.aiPreferences.read, { organizationId }),
     c.query(api.categories.list, { organizationId }),
     sourceId
@@ -88,6 +90,7 @@ export async function ProductPage({
         devices,
         githubChoices,
         customerRoutes,
+        connections,
         aiPreference,
         measured: overview.measured,
       }}

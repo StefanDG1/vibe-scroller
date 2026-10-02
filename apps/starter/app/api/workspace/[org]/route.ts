@@ -17,6 +17,7 @@ export async function GET(
       devices,
       githubChoices,
       customerRoutes,
+      connections,
       aiPreference,
       categories,
       selectedSource,
@@ -35,6 +36,7 @@ export async function GET(
       c.query(api.devices.list, { organizationId }),
       c.query(api.githubLinks.choices, { organizationId }),
       c.query(api.jobs.customerRoutes, { organizationId }),
+      c.query(api.jobs.connections, { organizationId }),
       c.query(api.aiPreferences.read, { organizationId }),
       c.query(api.categories.list, { organizationId }),
       q.get("sourceId")
@@ -58,6 +60,7 @@ export async function GET(
         devices,
         githubChoices,
         customerRoutes,
+        connections,
         aiPreference,
         categories,
         selectedSource,

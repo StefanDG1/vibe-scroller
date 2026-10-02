@@ -25,3 +25,7 @@ Keep MEDIA_VERIFIED, ACQUISITION_VERIFIED and CLOUD_VERIFIED false during migrat
 Customer jobs explicitly disable provider persistence and have bounded lifetimes. Normal completion and cancellation stop/delete the sandbox. External cancellation uses Sandbox.get with resume=false, and repeats safely for already deleted jobs. Log only coarse acknowledgement and credit settlement. Verify orphan cleanup independently; a stopped VM is not a deletion audit.
 
 Pause the three verification flags when image expiry, isolation, broker, spend or teardown acceptance fails. Never restore E2B or unrestricted execution. Preserve prior approved evidence and use an exact verified Vercel frontend deployment for rollback. Frontend rollback does not undo backend state or charges.
+
+## Restrict acceptance before public release
+
+Worker verification and public commercial approval are separate. Set CLOUD_PUBLIC_RELEASE_APPROVED=false and provide CLOUD_EXECUTION_SUBJECTS_JSON as a JSON array containing only the verified operator identity for production acceptance. An absent, malformed or oversized list denies execution. CLOUD_VERIFIED still needs to be true, and DISABLE_CLOUD=true denies everyone. Approval, worker claim and publication all recheck this audience. Do not enable public release merely because an owner integration test passed. Hosted video analysis additionally requires HOSTED_MEDIA_ANALYSIS_VERIFIED=true after its licensed vision model and actual audiovisual quality checks; media-worker verification alone does not enable it.

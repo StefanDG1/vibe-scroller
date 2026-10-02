@@ -11,8 +11,17 @@ afterEach(() => {
   vi.unstubAllEnvs();
   preparation.mockReset();
 });
-it("refuses unknown and over-reservation compute rates before creating any media worker", async () => {
-  for (const rate of ["", "NaN", "0", "-1", "0.04"]) {
+it("refuses unknown compute rates and unverified hosted analysis before creating any media worker", async () => {
+  const cases = [
+    ...["", "NaN", "0", "-1", "0.04"].map((rate) => ({
+      rate,
+      verified: "true",
+      category: "QUOTE_CHANGED",
+    })),
+    { rate: "0.02", verified: "false", category: "SETUP_REQUIRED" },
+  ];
+  for (const { rate, verified, category } of cases) {
+    vi.stubEnv("HOSTED_MEDIA_ANALYSIS_VERIFIED", verified);
     vi.stubEnv("SANDBOX_CREDITS_PER_SECOND", rate);
     const t = convexTest(schema, import.meta.glob("../convex/**/*.ts"));
     const id = await t.run(async (ctx) => {
@@ -50,6 +59,6 @@ it("refuses unknown and over-reservation compute rates before creating any media
     expect(preparation).not.toHaveBeenCalled();
     const source = await t.run((ctx) => ctx.db.get(id));
     expect(source?.state).toBe("failed");
-    expect(source?.error).toContain("QUOTE_CHANGED");
+    expect(source?.error).toContain(category);
   }
 });

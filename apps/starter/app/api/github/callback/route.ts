@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
       code,
     });
     const response = NextResponse.redirect(
-      new URL(`/app/${organizationId}/repos?github=connected`, req.url),
+      new URL(`/app/${organizationId}/projects?github=connected`, req.url),
     );
     response.cookies.delete({ name: "vibe-github-link", path: "/api/github" });
     return response;

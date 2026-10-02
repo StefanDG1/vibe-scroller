@@ -17,6 +17,7 @@ import {
 } from "../packages/providers/customerAi";
 import { ensure, validatePaths, containsSecret } from "../packages/policy";
 import { reserve, settle, digest, wallet } from "./product";
+import { cloudExecutionAllowed } from "./lib/cloudAccess";
 const org = { organizationId: v.id("organizations") };
 async function approvalActive(
   ctx: import("./_generated/server").QueryCtx,
@@ -59,7 +60,7 @@ export const authorizeCredential = query({
 export const customerRoutes = query({
   args: org,
   handler: async (ctx, a) => {
-    await access(ctx, a.organizationId);
+    const { actor } = await access(ctx, a.organizationId);
     const key = await ctx.db
       .query("connections")
       .withIndex("by_provider", (q) =>
@@ -72,9 +73,7 @@ export const customerRoutes = query({
         localReady:
           process.env.LOCAL_ISOLATION_VERIFIED === "true" &&
           process.env.DISABLE_LOCAL !== "true",
-        cloudReady:
-          process.env.CLOUD_VERIFIED === "true" &&
-          process.env.DISABLE_CLOUD !== "true",
+        cloudReady: cloudExecutionAllowed(actor.subject),
       },
       models:
         key?.status === "verified"
@@ -544,7 +543,7 @@ export const approve = mutation({
       "Choose an explicit funding route.",
     );
     ensure(
-      a.executor !== "cloud" || process.env.CLOUD_VERIFIED === "true",
+      a.executor !== "cloud" || cloudExecutionAllowed(actor.actor.subject),
       "ISOLATION_UNAVAILABLE",
       "Cloud execution is waiting for its isolation and billing verification.",
     );
@@ -763,6 +762,12 @@ export const authorizePublication = mutation({
     );
     const p = await ctx.db.get(r.proposalId),
       repo = await ctx.db.get(r.repositoryId);
+    const actor = await ctx.db.get(r.approvedBy);
+    ensure(
+      r.executor !== "cloud" || (actor && cloudExecutionAllowed(actor.subject)),
+      "POLICY_BLOCKED",
+      "Cloud execution is unavailable for this account.",
+    );
     ensure(
       p &&
         repo &&
@@ -1067,6 +1072,12 @@ export const claimCloud = internalMutation({
       return null;
     const p = await ctx.db.get(r.proposalId),
       repo = await ctx.db.get(r.repositoryId);
+    const actor = await ctx.db.get(r.approvedBy);
+    ensure(
+      actor && cloudExecutionAllowed(actor.subject),
+      "POLICY_BLOCKED",
+      "Cloud execution is unavailable for this account.",
+    );
     ensure(
       p?.planHash === r.planHash && repo?.sha === r.baseSha && repo.enabled,
       "APPROVAL_STALE",

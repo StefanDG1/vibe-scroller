@@ -768,7 +768,8 @@ async function startSource(
   }
   if (s.kind !== "text")
     ensure(
-      process.env.MANAGED_INFERENCE_ROUTE === "cloudflare_free",
+      process.env.MANAGED_INFERENCE_ROUTE === "cloudflare_free" &&
+        process.env.HOSTED_MEDIA_ANALYSIS_VERIFIED === "true",
       "SETUP_REQUIRED",
       "Select the configured cloud media route explicitly; no personal-plan fallback is used.",
     );

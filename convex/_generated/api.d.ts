@@ -34,6 +34,7 @@ import type * as invoiceAccounting from "../invoiceAccounting.js";
 import type * as invoiceOperations from "../invoiceOperations.js";
 import type * as jobs from "../jobs.js";
 import type * as lib from "../lib.js";
+import type * as lib_cloudAccess from "../lib/cloudAccess.js";
 import type * as lib_deletionMarkers from "../lib/deletionMarkers.js";
 import type * as lib_githubAuthorization from "../lib/githubAuthorization.js";
 import type * as lib_inference from "../lib/inference.js";
@@ -96,6 +97,7 @@ declare const fullApi: ApiFromModules<{
   invoiceOperations: typeof invoiceOperations;
   jobs: typeof jobs;
   lib: typeof lib;
+  "lib/cloudAccess": typeof lib_cloudAccess;
   "lib/deletionMarkers": typeof lib_deletionMarkers;
   "lib/githubAuthorization": typeof lib_githubAuthorization;
   "lib/inference": typeof lib_inference;

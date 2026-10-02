@@ -16,6 +16,7 @@ export const read = query({
         process.env.DISABLE_INFERENCE !== "true" &&
         process.env.MANAGED_INFERENCE_ROUTE === "cloudflare_free" &&
         process.env.MEDIA_VERIFIED === "true" &&
+        process.env.HOSTED_MEDIA_ANALYSIS_VERIFIED === "true" &&
         freeWorkersConfigured(),
       linkAnalysisEnabled:
         process.env.ACQUISITION_VERIFIED === "true" &&

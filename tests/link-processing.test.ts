@@ -40,6 +40,7 @@ beforeEach(() => {
   vi.useFakeTimers();
   vi.stubEnv("ACQUISITION_VERIFIED", "true");
   vi.stubEnv("MEDIA_VERIFIED", "true");
+  vi.stubEnv("HOSTED_MEDIA_ANALYSIS_VERIFIED", "true");
   vi.stubEnv("MANAGED_INFERENCE_ROUTE", "cloudflare_free");
   vi.stubEnv("DISABLE_INFERENCE", "false");
 });

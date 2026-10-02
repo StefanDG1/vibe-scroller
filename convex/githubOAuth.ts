@@ -22,7 +22,9 @@ export const complete = action({
       actor: actor._id,
     });
     ensure(
-      process.env.GITHUB_APP_CLIENT_ID && process.env.GITHUB_APP_CLIENT_SECRET,
+      process.env.GITHUB_APP_CLIENT_ID &&
+        process.env.GITHUB_APP_CLIENT_SECRET &&
+        /^\d+$/.test(process.env.GITHUB_APP_ID ?? ""),
       "SETUP_REQUIRED",
       "Configure GitHub OAuth.",
     );
