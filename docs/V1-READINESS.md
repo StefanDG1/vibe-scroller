@@ -13,6 +13,8 @@ Mode: reference. Checked October 2, 2026. Current release: owner personal alpha.
 - A locked separate hosted database and owned JPEG restore applied a newer deletion marker and quarantined restored credentials; deleted evidence could not be restored. The normal generic email path delivered to Resend's official test recipient and honored opt-out.
 - Independent restricted production database export, encrypted GitHub artifact storage, authenticated in-memory recovery inspection and seven-day retention passed. Object bytes and bulk R2 restoration remain separate gates.
 - Private operator settlement export passed actual dedicated sandbox reads and authentication/account/pagination boundary tests.
+- Production workspace export schema 1.2.0 returned all 112 current sources and 16 categories without storage capabilities, credentials or temporary repository context. Structured plan editing saved a reviewed version in staging, with execution still separately gated.
+- Actual staging credential rotation migrated one current GitHub connection from version 2 to 3 and preserved a successful selected-repository read. A three-frame retained-evidence recovery batch verified hashes and refused newer source deletion; independently scheduled object backups remain separate.
 
 See [implementation evidence](implementation-status.md) for commands, failures, timestamps and limitations. Provider-clock advancement does not advance the application clock; annual monthly granting remains a separate boundary.
 
@@ -26,7 +28,7 @@ See [implementation evidence](implementation-status.md) for commands, failures, 
 | Public identity              | Google audience publication and actual logout/fresh owner Google sign-in passed; verify email-code, expired-session and recovery journeys                                                                                       |
 | Billing activation           | Confirm Managed Payments activation/terms and enforce the selected consumer market at the provider-collected boundary; do not infer this from an app country dropdown or a test checkout                                        |
 | Company and policies         | Match active merchant/operator roles, provider fee/accountant treatment, applicable reporting, retained policy versions and publication approval. No professional review has been claimed                                       |
-| Recovery and security        | Independent scheduled encrypted production database backup passed; finish bulk R2 object recovery, the full identity/tenant/rights and deletion matrix, and remaining threat acceptance                                         |
+| Recovery and security        | Independent database backup and bounded retained-frame batch recovery passed; finish independent object-backup scheduling/storage, the full identity/tenant/rights and deletion matrix, and remaining threat acceptance         |
 | Quality and accessibility    | Complete the specified rights-cleared clip/repository benchmark and the full keyboard/mobile journey matrix; actual Android hardware is deferred to V1.1 by the owner                                                           |
 | Final production journey     | Verify the complete enabled route on the final domain. A live purchase/refund test is explicitly excluded by the owner and must remain recorded as not performed                                                                |
 

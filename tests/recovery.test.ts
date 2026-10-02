@@ -2,6 +2,7 @@ import { afterEach, expect, it, vi } from "vitest";
 import { convexTest } from "convex-test";
 import schema from "../convex/schema";
 import { api, internal } from "../convex/_generated/api";
+import type { EvidenceFrame } from "../packages/recovery/evidence-backup.mjs";
 const modules = import.meta.glob("../convex/**/*.ts");
 afterEach(() => vi.unstubAllEnvs());
 async function setup() {
@@ -119,4 +120,109 @@ it("preserves workspace deletion markers after purge and prevents a late callbac
   });
   expect(JSON.stringify(latest.page)).not.toContain("recovery-a@example.test");
   expect(JSON.stringify(latest.page)).not.toContain("synthetic-recovery-a");
+});
+
+it("inventories only surviving retained frames and fences deletion or source changes between pages", async () => {
+  const { t, org, other } = await setup();
+  const state = await t.run(async (ctx) => {
+    const source = await ctx.db.insert("sources", {
+      organizationId: org,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      key: "synthetic-evidence-inventory",
+      canonical: "synthetic:evidence-inventory",
+      kind: "text",
+      title: "Synthetic evidence inventory",
+      tags: [],
+      state: "ready",
+      coverage: "full_sampled",
+      generation: 2,
+      rightsAttested: true,
+    });
+    for (const [key, extra] of [
+      ["retained", {}],
+      ["retired", {}],
+      ["expired", { expiresAt: Date.now() - 1000 }],
+      ["temporary", { kind: "normalized_audio", type: "audio/wav" }],
+      ["foreign", { organizationId: other }],
+    ] as const)
+      await ctx.db.insert("assets", {
+        organizationId: org,
+        sourceId: source,
+        key: `${org}/${key}`,
+        size: 40,
+        type: "image/jpeg",
+        kind: "evidence",
+        state: "complete",
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        ...extra,
+      });
+    await ctx.db.insert("objectDeletions", {
+      key: `${org}/retired`,
+      state: "deleted",
+      attempts: 1,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+    return { source, key: `${org}/retained` };
+  });
+  const asOf = Date.now() + 10;
+  vi.useFakeTimers();
+  vi.setSystemTime(asOf);
+  try {
+    const entries = [];
+    let cursor: string | null = null,
+      pages = 0;
+    do {
+      const page: {
+        entries: EvidenceFrame[];
+        isDone: boolean;
+        cursor: string;
+      } = await t.query(internal.recovery.evidencePage, {
+        asOf,
+        cursor,
+        limit: 2,
+      });
+      entries.push(...page.entries);
+      pages++;
+      cursor = page.isDone ? null : page.cursor;
+    } while (cursor);
+    expect(pages).toBe(3);
+    expect(entries).toHaveLength(1);
+    expect(entries[0]).toMatchObject({
+      key: state.key,
+      generation: 2,
+      type: "image/jpeg",
+    });
+    await t.run((ctx) => ctx.db.patch(state.source, { generation: 3 }));
+    expect(
+      await t.query(internal.recovery.evidenceCurrent, {
+        key: state.key,
+        asOf,
+      }),
+    ).toMatchObject({ generation: 3 });
+    await t.run((ctx) =>
+      ctx.db.insert("tombstones", {
+        target: state.source,
+        organizationId: org,
+        at: asOf,
+      }),
+    );
+    expect(
+      await t.query(internal.recovery.evidenceCurrent, {
+        key: state.key,
+        asOf,
+      }),
+    ).toBeNull();
+    await expect(
+      t.query(internal.recovery.evidencePage, {
+        asOf,
+        cursor: null,
+        limit: 26,
+      }),
+    ).rejects.toThrow("INVALID_INPUT");
+  } finally {
+    vi.useRealTimers();
+  }
 });

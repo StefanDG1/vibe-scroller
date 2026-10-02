@@ -1,0 +1,30 @@
+{
+  "observedAt": "2026-10-02T07:46:48.719Z",
+  "environment": "dedicated development and locked recovery",
+  "ownedSynthetic": true,
+  "servingProductionWrites": false,
+  "objectsRequested": 3,
+  "inventoryPages": 1,
+  "backup": {
+    "visited": 3,
+    "saved": 3,
+    "skipped": 0,
+    "bytes": 58197,
+    "encrypted": true
+  },
+  "restored": {
+    "restored": 3,
+    "bytes": 58197,
+    "hashVerified": true
+  },
+  "newerDeletionRefused": true,
+  "noPostDeletionWrite": true,
+  "credentialsQuarantined": true,
+  "plaintextRemoved": true,
+  "syntheticObjectsPurged": true,
+  "limitations": [
+    "Three owned synthetic retained JPEGs; temporary raw media deliberately excluded",
+    "Recovery destination remains locked; no serving production object was overwritten",
+    "Encrypted object artifacts retained privately on the operator laptop; independently scheduled object backups remain unverified"
+  ]
+}

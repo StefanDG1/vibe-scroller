@@ -4,6 +4,109 @@ import { v } from "convex/values";
 import { ensure } from "../packages/policy";
 import { redactSource } from "./product";
 import { rememberDeletion, subjectHash } from "./lib/deletionMarkers";
+import type { QueryCtx } from "./_generated/server";
+
+async function retainedFrame(ctx: QueryCtx, key: string, asOf: number) {
+  const asset = await ctx.db
+    .query("assets")
+    .withIndex("by_key", (q) => q.eq("key", key))
+    .unique();
+  if (
+    !asset ||
+    asset.kind !== "evidence" ||
+    asset.type !== "image/jpeg" ||
+    asset.state !== "complete" ||
+    !asset.sourceId ||
+    asset._creationTime > asOf ||
+    (asset.expiresAt !== undefined && asset.expiresAt <= Date.now())
+  )
+    return null;
+  const source = await ctx.db.get(asset.sourceId),
+    organization = await ctx.db.get(asset.organizationId);
+  if (
+    !source ||
+    source.organizationId !== asset.organizationId ||
+    source.state === "deleted" ||
+    organization?.status !== "active"
+  )
+    return null;
+  const [retired, tombstone, deletedWorkspace] = await Promise.all([
+    ctx.db
+      .query("objectDeletions")
+      .withIndex("by_key", (q) => q.eq("key", key))
+      .unique(),
+    ctx.db
+      .query("tombstones")
+      .withIndex("by_target", (q) => q.eq("target", source._id))
+      .first(),
+    ctx.db
+      .query("deletionMarkers")
+      .withIndex("by_target", (q) =>
+        q.eq("kind", "workspace").eq("target", asset.organizationId),
+      )
+      .unique(),
+  ]);
+  if (retired || tombstone || deletedWorkspace) return null;
+  return {
+    organizationId: asset.organizationId,
+    sourceId: source._id,
+    generation: source.generation,
+    key: asset.key,
+    type: asset.type,
+    size: asset.size,
+    restoreUntil: Math.min(asOf + 7 * 86400000, asset.expiresAt ?? Infinity),
+    ...(asset.expiresAt === undefined ? {} : { expiresAt: asset.expiresAt }),
+  };
+}
+
+// Internal, read-only operator inventory. Temporary audio/uploads are deliberately
+// excluded; backing them up would undermine their short processing retention.
+export const evidenceCheckpoint = internalQuery({
+  args: {},
+  handler: () => ({ asOf: Date.now() }),
+});
+export const evidencePage = internalQuery({
+  args: {
+    cursor: v.union(v.string(), v.null()),
+    asOf: v.number(),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, a) => {
+    ensure(
+      Number.isSafeInteger(a.asOf) && a.asOf > 0 && a.asOf <= Date.now(),
+      "INVALID_INPUT",
+      "Invalid evidence backup checkpoint.",
+    );
+    ensure(
+      a.limit === undefined ||
+        (Number.isSafeInteger(a.limit) && a.limit >= 1 && a.limit <= 25),
+      "INVALID_INPUT",
+      "Evidence inventory pages must contain one to 25 records.",
+    );
+    const rows = await ctx.db
+      .query("assets")
+      .paginate({ cursor: a.cursor, numItems: a.limit ?? 25 });
+    const candidates = await Promise.all(
+      rows.page.map((row) => retainedFrame(ctx, row.key, a.asOf)),
+    );
+    return {
+      entries: candidates.filter((frame) => frame !== null),
+      isDone: rows.isDone,
+      cursor: rows.continueCursor,
+    };
+  },
+});
+export const evidenceCurrent = internalQuery({
+  args: { key: v.string(), asOf: v.number() },
+  handler: async (ctx, a) => {
+    ensure(
+      Number.isSafeInteger(a.asOf) && a.asOf > 0 && a.asOf <= Date.now(),
+      "INVALID_INPUT",
+      "Invalid evidence backup checkpoint.",
+    );
+    return retainedFrame(ctx, a.key, a.asOf);
+  },
+});
 const entry = v.object({
   kind: v.union(
     v.literal("source"),
