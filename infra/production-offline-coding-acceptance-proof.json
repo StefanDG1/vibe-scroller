@@ -34,5 +34,27 @@
     "Owned synthetic React/TypeScript project only",
     "Pinned pnpm 12.3.4 and cached package versions only",
     "No general customer repository or public funding certification"
-  ]
+  ],
+  "postDeploymentObservation": {
+    "checkedAt": "2026-10-02T18:10:55.092Z",
+    "commit": "21ccb440c904cf5c68391385829fdd3712aaa5da",
+    "dispatchRestored": true,
+    "cleanRenewalRestored": true,
+    "replacementDisabled": true,
+    "publicDisabled": true,
+    "exactOwnerOnly": true,
+    "brokerSelectedAcceptedImage": true,
+    "zeroWorkers": true,
+    "deploymentId": "dpl_uf9NiQNWsYSSvWFifgouXXW6piA2",
+    "requiredCi": 37045577637,
+    "versionWorkflow": 37045578201,
+    "prereleaseWorkflow": 37045682474,
+    "nativeAccountVersion": "0.1.0-alpha.20261002180943.g21ccb440c904",
+    "ownedHostedVideoReload": {
+      "width": 390,
+      "privateImagesLoaded": 4,
+      "visualMeasurementsVisible": true,
+      "pageOverflow": false
+    }
+  }
 }
