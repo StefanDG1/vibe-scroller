@@ -163,3 +163,38 @@ export const failed = internalMutation({
       });
   },
 });
+
+// Operator recovery only, after independently checking provider cleanup.
+// Cron and force-renewal do not bypass the retry budget. The exact failed
+// record must still be selected and renewal must be disabled while recovering.
+export const acknowledgeFailure = internalMutation({
+  args: {
+    kind,
+    snapshotId: v.string(),
+    updatedAt: v.number(),
+    cleanupConfirmed: v.boolean(),
+  },
+  handler: async (ctx, a) => {
+    const item = await ctx.db
+      .query("sandboxToolSnapshots")
+      .withIndex("by_kind", (q) => q.eq("kind", a.kind))
+      .unique();
+    ensure(
+      item &&
+        item.snapshotId === a.snapshotId &&
+        item.updatedAt === a.updatedAt &&
+        item.lastError &&
+        !item.lease &&
+        a.cleanupConfirmed &&
+        process.env.SANDBOX_SNAPSHOT_RENEWAL_ENABLED !== "true" &&
+        process.env.RESTORE_LOCK !== "true",
+      "APPROVAL_STALE",
+      "Verify the exact failed maintenance attempt and its cleanup first.",
+    );
+    scope(item.projectId, item.teamId);
+    await ctx.db.patch(item._id, {
+      retryAfter: undefined,
+      updatedAt: Date.now(),
+    });
+  },
+});

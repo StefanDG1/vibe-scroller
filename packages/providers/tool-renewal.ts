@@ -25,6 +25,7 @@ export async function renewCleanTools(item: {
   const started = Date.now();
   let vm: Sandbox | undefined, candidate: Snapshot | undefined;
   let deleted = false;
+  let stage = "create";
   try {
     vm = await Sandbox.create({
       ...credentials,
@@ -36,6 +37,7 @@ export async function renewCleanTools(item: {
         kind: item.kind,
       },
     });
+    stage = "setup";
     const setup = await vm.runCommand({
       sudo: true,
       cmd: "bash",
@@ -54,6 +56,7 @@ export async function renewCleanTools(item: {
       item.kind === "coding"
         ? 'test "$(pnpm --version)" = 12.3.4; node --version; git --version'
         : `test "$(yt-dlp --version)" = '${downloader.version}'; python3 -c 'from PIL import Image'; ffmpeg -nostdin -threads 1 -v error -f lavfi -i color=c=black:s=16x16:d=0.04 -f null -`;
+    stage = "probe";
     const check = await vm.runCommand({
       sudo: true,
       cmd: "unshare",
@@ -61,7 +64,7 @@ export async function renewCleanTools(item: {
         ...namespaceCommand(false),
         "bash",
         "-c",
-        `set -eu; test "$(id -u)" = 1001; test "$(awk '/^CapBnd:/ {print $2}' /proc/self/status)" = 0000000000000000; test "$(awk '/^NoNewPrivs:/ {print $2}' /proc/self/status)" = 1; test ! -r /root; test ! -r /home/ubuntu; test "$(wc -l </proc/net/route)" = 1; ${toolCheck}`,
+        `set -eu; test "$(id -u)" = 1001; test "$(awk '/^CapBnd:/ {print $2}' /proc/self/status)" = 0000000000000000; test "$(awk '/^NoNewPrivs:/ {print $2}' /proc/self/status)" = 1; test ! -r /root; test ! -r /home/ubuntu; awk 'NF && $1 != "Iface" {exit 1}' /proc/net/route; ${toolCheck}`,
       ],
       timeoutMs: 30000,
     });
@@ -70,11 +73,13 @@ export async function renewCleanTools(item: {
       "POLICY_BLOCKED",
       "Clean tool isolation or version verification failed.",
     );
+    stage = "snapshot";
     candidate = await vm.snapshot({ expiration: 7 * 86400000 });
     const next = toolSnapshot({
       snapshotId: candidate.snapshotId,
       expiresAt: candidate.expiresAt?.getTime(),
     });
+    stage = "teardown";
     await vm.stop({ signal: AbortSignal.timeout(30000) });
     await vm.delete({ signal: AbortSignal.timeout(30000) });
     deleted = true;
@@ -90,7 +95,9 @@ export async function renewCleanTools(item: {
       await candidate
         .delete({ signal: AbortSignal.timeout(30000) })
         .catch(() => {});
-    throw Error("CLEAN_TOOL_RENEWAL_FAILED");
+    // Fixed stages are safe operational diagnostics; provider output may
+    // contain capabilities and is never forwarded to logs or customer errors.
+    throw Error(`CLEAN_TOOL_RENEWAL_FAILED:${stage}`);
   } finally {
     if (vm && !deleted) {
       // Attempt deletion even when the separate stop receipt is unavailable.

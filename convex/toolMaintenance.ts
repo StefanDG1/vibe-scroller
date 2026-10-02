@@ -91,7 +91,7 @@ export const renew = internalAction({
         expiresAt: next.expiresAt,
         computeSeconds: next.computeSeconds,
       };
-    } catch {
+    } catch (error) {
       if (next) {
         const observed = await ctx
           .runQuery(internal.sandboxSnapshots.current, { kind: a.kind })
@@ -123,9 +123,14 @@ export const renew = internalAction({
         kind: a.kind,
         lease,
       });
-      throw Error(
-        "Clean tools renewal receipt is incomplete. Inspect the active image before retrying.",
-      );
+      const diagnostic =
+        error instanceof Error &&
+        /^CLEAN_TOOL_RENEWAL_FAILED:(create|setup|probe|snapshot|teardown)$/.test(
+          error.message,
+        )
+          ? error.message
+          : "CLEAN_TOOL_RENEWAL_FAILED:promotion";
+      throw Error(`${diagnostic}. Inspect the active image before retrying.`);
     }
   },
 });

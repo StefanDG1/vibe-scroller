@@ -163,10 +163,37 @@ it("leases one scoped clean renewal, requires teardown and preserves the prior i
       force: true,
     }),
   ).toBeNull();
-  await t.run(async (ctx) => {
-    const current = await ctx.db.query("sandboxToolSnapshots").first();
-    await ctx.db.patch(current!._id, { retryAfter: undefined });
-  });
+  const failed = (await t.query(internal.sandboxSnapshots.current, {
+    kind: "media",
+  }))!;
+  const receipt = {
+    kind: "media" as const,
+    snapshotId: failed.snapshotId,
+    updatedAt: failed.updatedAt,
+    cleanupConfirmed: true,
+  };
+  await expect(
+    t.mutation(internal.sandboxSnapshots.acknowledgeFailure, receipt),
+  ).rejects.toThrow("APPROVAL_STALE");
+  vi.stubEnv("SANDBOX_SNAPSHOT_RENEWAL_ENABLED", "false");
+  await expect(
+    t.mutation(internal.sandboxSnapshots.acknowledgeFailure, {
+      ...receipt,
+      cleanupConfirmed: false,
+    }),
+  ).rejects.toThrow("APPROVAL_STALE");
+  await expect(
+    t.mutation(internal.sandboxSnapshots.acknowledgeFailure, {
+      ...receipt,
+      snapshotId: "snap_wrongsynthetic123",
+    }),
+  ).rejects.toThrow("APPROVAL_STALE");
+  await t.mutation(internal.sandboxSnapshots.acknowledgeFailure, receipt);
+  expect(
+    (await t.query(internal.sandboxSnapshots.current, { kind: "media" }))!
+      .retryAfter,
+  ).toBeUndefined();
+  vi.stubEnv("SANDBOX_SNAPSHOT_RENEWAL_ENABLED", "true");
   vi.stubEnv("RESTORE_LOCK", "true");
   expect(
     await t.mutation(internal.sandboxSnapshots.claim, {
