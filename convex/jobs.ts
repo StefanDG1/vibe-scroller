@@ -1,3 +1,4 @@
+import { RETRIEVAL_VERSION } from "../packages/repositories/retrieval";
 import { internal } from "./_generated/api";
 import { workflow } from "./workflows";
 import {
@@ -407,7 +408,7 @@ export const reserveMatch = mutation({
       "QUOTE_CHANGED",
       "Review the current 10-credit quote.",
     );
-    const semanticKey = `match:${source._id}:${source.generation}:${repo._id}:${repo.sha}:${repo.profileVersion}`;
+    const semanticKey = `match:${RETRIEVAL_VERSION}:${source._id}:${source.generation}:${repo._id}:${repo.sha}:${repo.profileVersion}`;
     const old = await ctx.db
       .query("matchingJobs")
       .withIndex("by_key", (q) => q.eq("key", semanticKey))

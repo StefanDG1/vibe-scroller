@@ -1,3 +1,5 @@
+import { validateInspectedContext } from "../packages/repositories/retrieval";
+import { inspectedContextValidator } from "../packages/repositories/context";
 import {
   query,
   mutation,
@@ -1465,6 +1467,7 @@ export const addProposal = internalMutation({
     detail: v.any(),
     matchKey: v.optional(v.string()),
     sourceGeneration: v.optional(v.number()),
+    inspectedContext: v.optional(inspectedContextValidator),
   },
   handler: async (ctx, a) => {
     const s = await ctx.db.get(a.sourceId),
@@ -1497,7 +1500,12 @@ export const addProposal = internalMutation({
       "BASE_CHANGED",
       "Matching context changed.",
     );
-    validateRepositoryEvidence(d.repositoryEvidence, r.contextExcerpts ?? []);
+    if (a.inspectedContext)
+      validateInspectedContext(a.inspectedContext, r.manifestEntries ?? []);
+    validateRepositoryEvidence(
+      d.repositoryEvidence,
+      a.inspectedContext ?? r.contextExcerpts ?? [],
+    );
     const insights = s.analysis?.insights ?? [];
     const insightIds = new Set(insights.map((i: any) => i.id));
     const evidenceKey = (e: any) =>

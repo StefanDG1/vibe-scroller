@@ -7,6 +7,7 @@ import {
   publish,
   github,
   installationToken,
+  retrieveContext,
 } from "../packages/providers/github";
 import { encrypt, decrypt } from "../packages/providers/secrets";
 import { discoverCustomerModels } from "../packages/providers/customerAi";
@@ -239,6 +240,14 @@ export const draftPlan = action({
     };
     try {
       await authorizeRepository(ctx, context.repo);
+      const inspected = await retrieveContext(
+        context.repo,
+        JSON.stringify({
+          title: context.proposal.title,
+          detail: context.proposal.detail,
+        }),
+        context.proposal.detail.repositoryEvidence ?? [],
+      );
       const result = await infer(
         ctx,
         z.toJSONSchema(planInput),
@@ -248,14 +257,15 @@ export const draftPlan = action({
           reviewerCorrection: context.proposal.reviewerCorrection,
           businessProfile: context.repo.profile,
           baseSha: context.repo.sha,
-          excerpts: context.repo.contextExcerpts,
-          inspectedTree: context.repo.contextTree,
+          excerpts: inspected.excerpts,
+          inspectedTree: inspected.tree,
         },
         3000,
       );
       await ctx.runMutation(internal.planning.finish, {
         ...finish,
         plan: result.output,
+        inspectedContext: inspected.excerpts,
         credits: result.credits,
       });
     } catch {
@@ -395,6 +405,17 @@ export const match = action({
     if (context.cached) return;
     try {
       await authorizeRepository(ctx, context.repo);
+      const inspected = await retrieveContext(
+        context.repo,
+        JSON.stringify({
+          title: context.source.title,
+          insights: context.source.analysis.insights.map((point: any) => ({
+            title: point.title,
+            claim: point.claim,
+            interpretation: point.interpretation,
+          })),
+        }),
+      );
       const schema = structuredClone(proposalSchema);
       Object.assign(schema.properties.repositoryId, {
         const: context.repo._id,
@@ -415,11 +436,11 @@ export const match = action({
       Object.assign(
         schema.properties.repositoryEvidence.items.properties.path,
         {
-          enum: (context.repo.contextExcerpts ?? []).map((e) => e.path),
+          enum: inspected.excerpts.map((e) => e.path),
         },
       );
       ensure(
-        context.repo.contextExcerpts?.length,
+        inspected.excerpts.length,
         "CONTEXT_REQUIRED",
         "Refresh this repository to obtain verified line-bounded excerpts before matching.",
       );
@@ -446,8 +467,8 @@ export const match = action({
             sha: context.repo.sha,
             profileVersion: context.repo.profileVersion,
             profile: context.repo.profile,
-            excerpts: context.repo.contextExcerpts ?? [],
-            inspectedTree: context.repo.contextTree ?? "",
+            excerpts: inspected.excerpts,
+            inspectedTree: inspected.tree,
             structuralSummary:
               context.repo.snapshotSummary?.baseSha === context.repo.sha &&
               context.repo.snapshotSummary?.profileVersion ===
@@ -465,6 +486,7 @@ export const match = action({
         detail: result.output,
         matchKey: context.semanticKey,
         sourceGeneration: context.source.generation,
+        inspectedContext: inspected.excerpts,
       });
       ensure(
         proposalId,

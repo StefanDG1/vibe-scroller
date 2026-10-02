@@ -397,3 +397,55 @@ it("drafts no executable approval, rejects uninspected or unsafe files and disca
   expect(current.plan.scope).toBe("Explicit newer owner edit");
   expect(current.planDraftVersion).toBe(1);
 });
+it("binds dynamic plan inspection to the current immutable manifest without persisting raw context", async () => {
+  const { t, a, org, proposalId, repositories } = await setup();
+  const blobSha = "d".repeat(40);
+  await t.run((ctx) =>
+    ctx.db.patch(repositories[0], {
+      manifestEntries: [
+        { path: "src/uninspected.ts", blobSha, mode: "100644", size: 5000 },
+      ],
+    }),
+  );
+  const started = await a.mutation(api.planning.start, {
+    id: proposalId,
+    version: 1,
+    maxCredits: 10,
+    key: "test000000000000",
+  });
+  const inspectedContext = [
+    {
+      path: "src/uninspected.ts",
+      blobSha,
+      startLine: 100,
+      endLine: 101,
+      content:
+        "// Owned synthetic late implementation\nexport function removeSource() {}",
+    },
+  ];
+  const finish = {
+    id: proposalId,
+    organizationId: org,
+    key: started.key,
+    version: 1,
+    baseSha: "a".repeat(40),
+    credits: 0,
+    plan: {
+      ...syntheticPlan,
+      files: [{ path: "src/uninspected.ts", isNew: false }],
+    },
+    inspectedContext,
+  };
+  await expect(
+    t.mutation(internal.planning.finish, {
+      ...finish,
+      inspectedContext: [{ ...inspectedContext[0], blobSha: "e".repeat(40) }],
+    }),
+  ).rejects.toThrow("INVALID_EVIDENCE");
+  await t.mutation(internal.planning.finish, finish);
+  const proposal = await a.query(api.product.proposal, { id: proposalId });
+  expect(proposal.planDraft.files[0].path).toBe("src/uninspected.ts");
+  expect(
+    JSON.stringify(await t.run((ctx) => ctx.db.get(proposalId))),
+  ).not.toContain("late implementation");
+});

@@ -1,4 +1,14 @@
 import { ensure } from "../policy";
+import { v } from "convex/values";
+export const inspectedContextValidator = v.array(
+  v.object({
+    path: v.string(),
+    startLine: v.number(),
+    endLine: v.number(),
+    content: v.string(),
+    blobSha: v.string(),
+  }),
+);
 export type RepositoryExcerpt = {
   path: string;
   startLine: number;

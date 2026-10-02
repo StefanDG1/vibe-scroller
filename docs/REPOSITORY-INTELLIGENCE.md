@@ -30,7 +30,7 @@ For local folders, the runner maps a selected repository ID to a locally configu
 
 ## Bounded context
 
-Cache structural summaries by repository ID, commit SHA, profile version, extraction version, and exclusion manifest. A matching job retrieves only the relevant files and summaries within its budget.
+Cache structural summaries by repository ID, commit SHA, profile version, extraction version, and exclusion manifest. A matching job retrieves bounded source-aware windows from at most 24 eligible files at the selected immutable commit, with a 40,000-character total and 4,000-character per-file limit. Path ranking is lexical; missing context still requires an honest needs_context result. Dynamic raw excerpts are not added to a persistent cache. See [the retrieval decision](adr/021-source-aware-repository-evidence.md).
 
 Use commit differences to decide which summaries need rebuilding. A dependency change invalidates related technical assumptions. A profile change invalidates business-fit results even when code is unchanged.
 

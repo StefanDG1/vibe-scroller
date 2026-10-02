@@ -96,7 +96,7 @@ try {
     maxCredits: 10,
   });
   const proposal = inline(
-    `const rows = await ctx.db.query("proposals").withIndex("by_source", q => q.eq("sourceId", ${JSON.stringify(sourceId)})).collect();const repo = await ctx.db.get(${JSON.stringify(context.repositoryId)});const p = rows.find(p => p.repositoryId===repo?._id && p.baseSha===repo.sha && p.profileVersion===repo.profileVersion);return p && {id:p._id,version:p.version,disposition:p.disposition};`,
+    `const rows = await ctx.db.query("proposals").withIndex("by_source", q => q.eq("sourceId", ${JSON.stringify(sourceId)})).collect();const repo = await ctx.db.get(${JSON.stringify(context.repositoryId)});const p = rows.filter(p => p.repositoryId===repo?._id && p.baseSha===repo.sha && p.profileVersion===repo.profileVersion).sort((a,b)=>b.createdAt-a.createdAt)[0];return p && {id:p._id,version:p.version,disposition:p.disposition};`,
   );
   if (!proposal) throw Error("Current proposal unavailable.");
   evidence.matchDisposition = proposal.disposition;

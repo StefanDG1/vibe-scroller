@@ -11,6 +11,13 @@ import {
   type PreviousSnapshot,
 } from "../repositories/snapshotCache";
 import { ensure, containsSecret, prState, validatePaths } from "../policy";
+import {
+  focusedExcerpt,
+  retrievalFiles,
+  validateInspectedContext,
+} from "../repositories/retrieval";
+import { validateRepositoryEvidence } from "../repositories/context";
+import type { ManifestEntry } from "../repositories/snapshotCache";
 export async function github(
   path: string,
   token: string,
@@ -219,6 +226,78 @@ export async function snapshot(
         "Structural manifest and inspected-path summary only. Eligible files were not all read; no semantic implementation or business outcome is inferred.",
     },
   };
+}
+export async function retrieveContext(
+  repo: {
+    installationId: number;
+    providerId: number;
+    fullName: string;
+    sha: string;
+    manifestEntries?: ManifestEntry[];
+  },
+  focus: string,
+  evidence: { path: string; startLine: number; endLine: number }[] = [],
+) {
+  ensure(
+    /^[\w.-]+\/[\w.-]+$/.test(repo.fullName) && /^[a-f0-9]{40}$/.test(repo.sha),
+    "INVALID_INPUT",
+    "Invalid repository snapshot.",
+  );
+  ensure(
+    repo.manifestEntries?.length,
+    "CONTEXT_REQUIRED",
+    "Refresh the selected repository's immutable manifest before matching.",
+  );
+  const files = retrievalFiles(repo.manifestEntries, focus, [
+    ...new Set(evidence.map((row) => row.path)),
+  ]);
+  const token = await installationToken(repo.installationId);
+  const current = await github(`/repos/${repo.fullName}`, token);
+  ensure(
+    current.id === repo.providerId,
+    "FORBIDDEN",
+    "Repository identity changed.",
+  );
+  // Blob identities come from the approved manifest, never from model-supplied refs.
+  const excerpts: RepositoryExcerpt[] = [];
+  let remaining = 40000;
+  for (const file of files) {
+    if (remaining < 100) break;
+    const blob = await github(
+      `/repos/${repo.fullName}/git/blobs/${file.blobSha}`,
+      token,
+    );
+    ensure(
+      blob.encoding === "base64",
+      "INVALID_EVIDENCE",
+      "Unsupported repository blob encoding.",
+    );
+    const bytes = Buffer.from(blob.content, "base64");
+    ensure(
+      bytes.length === file.size &&
+        bytes.length <= 100000 &&
+        createHash("sha1")
+          .update(`blob ${bytes.length}\0`)
+          .update(bytes)
+          .digest("hex") === file.blobSha,
+      "INVALID_EVIDENCE",
+      "Repository blob does not match the selected snapshot.",
+    );
+    const cited = evidence.filter((row) => row.path === file.path);
+    const selected = focusedExcerpt(
+      file,
+      bytes.toString("utf8"),
+      focus,
+      remaining,
+      cited.length ? Math.min(...cited.map((row) => row.startLine)) : undefined,
+    );
+    if (!selected) continue;
+    excerpts.push(selected);
+    remaining -= selected.content.length;
+  }
+  validateInspectedContext(excerpts, repo.manifestEntries);
+  validateRepositoryEvidence(evidence, excerpts);
+  return { excerpts, tree: preparedTree(excerpts) };
 }
 export async function publish(input: {
   installationId: number;

@@ -1,3 +1,5 @@
+import { validateInspectedContext } from "../packages/repositories/retrieval";
+import { inspectedContextValidator } from "../packages/repositories/context";
 import { mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import { writeAccess, fail } from "./lib";
@@ -69,6 +71,7 @@ export const finish = internalMutation({
     version: v.number(),
     baseSha: v.string(),
     plan: v.optional(v.any()),
+    inspectedContext: v.optional(inspectedContextValidator),
     credits: v.number(),
   },
   handler: async (ctx, a) => {
@@ -121,6 +124,11 @@ export const finish = internalMutation({
       ["owner", "admin", "member"].includes(membership.role);
     let plan;
     if (a.plan && valid) {
+      if (a.inspectedContext)
+        validateInspectedContext(
+          a.inspectedContext,
+          repo.manifestEntries ?? [],
+        );
       plan = planInput.parse(a.plan);
       validatePaths(
         plan.files.map((file) => file.path),
@@ -134,7 +142,7 @@ export const finish = internalMutation({
               safePath(file.path) &&
               (file.isNew
                 ? !repo.manifest.includes(file.path)
-                : repo.contextExcerpts?.some(
+                : (a.inspectedContext ?? repo.contextExcerpts)?.some(
                     (excerpt) => excerpt.path === file.path,
                   )),
           ),
