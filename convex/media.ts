@@ -3,7 +3,10 @@ import { internalAction } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { visionRequest, visionText } from "../packages/providers/vision";
-import { prepareMedia } from "../packages/providers/media";
+import {
+  prepareMedia,
+  MediaPreparationError,
+} from "../packages/providers/media";
 import { decoder } from "../packages/media/decoder";
 import { signedObject, objectMetadata } from "../packages/providers/storage";
 import { infer, inferMedia } from "./lib/inference";
@@ -31,6 +34,7 @@ export const analyze = internalAction({
     )
       return;
     let credits = 0;
+    let inferenceStarted = false;
     const deadline = Date.now() + 540000;
     const timeRemaining = () =>
       ensure(
@@ -43,8 +47,8 @@ export const analyze = internalAction({
     let reusedMediaGeneration: number | undefined;
     try {
       ensure(
-        source.kind === "upload" &&
-          source.objectKey &&
+        ((source.kind === "upload" && source.objectKey) ||
+          (source.kind === "url" && source.url && source.rightsAttested)) &&
           process.env.DISABLE_INFERENCE !== "true",
         "MEDIA_UNAVAILABLE",
         "Permitted media processing is unavailable.",
@@ -53,8 +57,8 @@ export const analyze = internalAction({
       const evidence: {
         kind: string;
         id: string;
-        startMs: number;
-        endMs: number;
+        startMs: number | null;
+        endMs: number | null;
       }[] = [];
       const transcript: {
         id: string;
@@ -67,6 +71,7 @@ export const analyze = internalAction({
         observation: string;
         timestampMs: number;
       }[] = [];
+      let caption: string | undefined;
       const cached = await ctx.runQuery(internal.product.cachedMediaStage, {
         id: args.id,
         pipelineVersion,
@@ -82,7 +87,10 @@ export const analyze = internalAction({
         else credits = payload.computeCredits;
         stagesCommitted = true;
       } else {
-        const media = await prepareMedia(source.objectKey, decoder);
+        const media = await prepareMedia(
+          source.kind === "url" ? { url: source.url! } : source.objectKey!,
+          decoder,
+        );
         const rate = Number(process.env.E2B_CREDITS_PER_SECOND);
         ensure(
           Number.isFinite(rate) && rate > 0,
@@ -95,8 +103,28 @@ export const analyze = internalAction({
           "BUDGET_EXCEEDED",
           "Media compute exceeded the approved allowance.",
         );
+        if (media.acquisition) {
+          const saved = await ctx.runMutation(
+            internal.product.recordAcquisition,
+            { ...args, manifest: media.acquisition },
+          );
+          ensure(
+            saved,
+            "APPROVAL_STALE",
+            "Source changed before metadata commit.",
+          );
+          caption = media.acquisition.description || undefined;
+          if (caption)
+            evidence.push({
+              kind: "caption",
+              id: "post_caption",
+              startMs: null,
+              endMs: null,
+            });
+        }
         if (media.audio) {
           timeRemaining();
+          inferenceStarted = true;
           const asr = await inferMedia(
             ctx,
             "@cf/openai/whisper-large-v3-turbo",
@@ -172,6 +200,7 @@ export const analyze = internalAction({
             );
             timeRemaining();
             const request = visionRequest(pixels);
+            inferenceStarted = true;
             const visual = await inferMedia(
               ctx,
               request.model,
@@ -235,7 +264,7 @@ export const analyze = internalAction({
           }
         }
         ensure(
-          evidence.length > 0,
+          transcript.length > 0 || observations.length > 0,
           "CONTEXT_REQUIRED",
           "No usable speech or visual evidence was obtained.",
         );
@@ -255,18 +284,19 @@ export const analyze = internalAction({
         transcript: text,
         coverage,
         evidence,
-        cache: cached
-          ? undefined
-          : {
-              pipelineVersion,
-              payload: {
-                transcript,
-                observations,
-                evidence,
-                warnings,
-                computeCredits: credits,
+        cache:
+          cached || source.kind === "url"
+            ? undefined
+            : {
+                pipelineVersion,
+                payload: {
+                  transcript,
+                  observations,
+                  evidence,
+                  warnings,
+                  computeCredits: credits,
+                },
               },
-            },
       });
       ensure(staged, "APPROVAL_STALE", "Source changed before analysis.");
       stagesCommitted = true;
@@ -281,6 +311,7 @@ export const analyze = internalAction({
         { oneOf: evidence.map((item) => ({ const: item })) },
       );
       timeRemaining();
+      inferenceStarted = true;
       const result = await infer(
         ctx,
         bounded,
@@ -290,6 +321,7 @@ export const analyze = internalAction({
           processingRunId: `${source._id}:${args.generation}`,
           coverage,
           transcript,
+          caption,
           observations,
           evidence,
           warnings,
@@ -313,6 +345,20 @@ export const analyze = internalAction({
         generation: args.generation,
       });
     } catch (error) {
+      if (error instanceof MediaPreparationError) {
+        if (error.acquisition)
+          await ctx.runMutation(internal.product.recordAcquisition, {
+            ...args,
+            manifest: error.acquisition,
+          });
+        const rate = Number(process.env.E2B_CREDITS_PER_SECOND);
+        if (
+          error.computeSeconds !== undefined &&
+          Number.isFinite(rate) &&
+          rate > 0
+        )
+          credits = Math.ceil(error.computeSeconds * rate);
+      }
       for (const key of stagesCommitted ? [] : stagedKeys)
         await ctx.runMutation(internal.assets.queueEvidenceDeletion, { key });
       const category =
@@ -330,9 +376,15 @@ export const analyze = internalAction({
       console.error(JSON.stringify({ stage: "media_analysis", category }));
       await ctx.runMutation(internal.product.commitAnalysis, {
         ...args,
-        error: `Media analysis unavailable (${category}). Review the selected provider and isolated worker. No content or funding route was fabricated. The reservation remains held for reconciliation.`,
+        error:
+          error instanceof MediaPreparationError
+            ? error.message
+            : `Media analysis unavailable (${category}). Review the selected provider and isolated worker. No funding fallback was used.`,
         credits,
-        retainReservation: true,
+        retainReservation:
+          inferenceStarted ||
+          (error instanceof MediaPreparationError &&
+            error.computeSeconds === undefined),
       });
     }
   },

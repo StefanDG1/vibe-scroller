@@ -11,6 +11,10 @@ export const read = query({
       hostedStatus: "awaiting_commercial_access" as const,
       active: false as const,
       personalAlphaEnabled: personalAllowed(actor.subject),
+      cloudAnalysisEnabled:
+        process.env.DISABLE_INFERENCE !== "true" &&
+        process.env.MANAGED_INFERENCE_ROUTE === "cloudflare_free" &&
+        process.env.MEDIA_VERIFIED === "true",
       linkAnalysisEnabled:
         process.env.ACQUISITION_VERIFIED === "true" &&
         process.env.MEDIA_VERIFIED === "true",

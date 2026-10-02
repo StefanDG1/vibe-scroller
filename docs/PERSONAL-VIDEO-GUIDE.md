@@ -32,7 +32,9 @@ The app lists only models returned by the connected account. It does not promise
 
 The JSON or HTML ZIP import extracts Saved links and their relevant metadata in your browser. The whole archive is not uploaded. Saved exports usually contain links rather than playable saved videos. Importing links does not itself provide audio or images for analysis.
 
-Open an imported source and attach a permitted video file to analyze it. Automatic retrieval of Instagram Saved media is not implemented. Do not supply Instagram passwords or session cookies as a workaround.
+Choose automatic analysis in the import dialog, select your online laptop and available ChatGPT model, then approve the displayed allowance. The app saves the links and starts an isolated public-link downloader for up to five sources per batch. The original ZIP stays on your device. Completed duplicates keep their existing results without another analysis charge.
+
+Retrieval depends on the platform permitting public access. The actual August-export test returned Instagram HTTP 429 for a Reel, and the multi-image carousel is unsupported by this downloader. Those outcomes remain visible; they do not produce an invented transcript. If a post is private, removed, login-gated or rate-limited, a permitted media upload remains the optional fallback. Do not supply Instagram passwords or session cookies as a workaround. The four existing operator-assisted analyses remain available in your library.
 
 ## If analysis stops
 

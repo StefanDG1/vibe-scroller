@@ -28,6 +28,10 @@ import { queueDeletion } from "./assets";
 import { mediaStagePayload } from "../packages/media/stages";
 import { personalAllowed } from "./lib/personalAccess";
 import { syncCategories } from "./categories";
+import {
+  acquisitionManifest,
+  acquisitionPolicy,
+} from "../packages/media/acquisition";
 const org = { organizationId: v.id("organizations") };
 export async function wallet(ctx: MutationCtx, id: Id<"organizations">) {
   let w = await ctx.db
@@ -722,50 +726,112 @@ export async function digest(text: string) {
     x.toString(16).padStart(2, "0"),
   ).join("");
 }
+async function startSource(
+  ctx: MutationCtx,
+  a: { id: Id<"sources">; maxCredits: number },
+) {
+  const s = await ctx.db.get(a.id);
+  if (!s || s.state === "deleted") fail("Source unavailable.");
+  await writeAccess(ctx, s.organizationId, ["owner", "admin", "member"]);
+  ensure(
+    a.maxCredits === 10,
+    "QUOTE_CHANGED",
+    "Review the current 10-credit maximum.",
+  );
+  ensure(
+    process.env.DISABLE_INFERENCE !== "true",
+    "POLICY_BLOCKED",
+    "Analysis is paused.",
+  );
+  if (s.state === "ready" || s.state === "processing" || s.state === "queued")
+    return;
+  if (s.kind === "url") {
+    ensure(
+      process.env.ACQUISITION_VERIFIED === "true" &&
+        process.env.MEDIA_VERIFIED === "true" &&
+        s.url &&
+        s.rightsAttested,
+      "MEDIA_UNAVAILABLE",
+      "Public-link processing is not configured.",
+    );
+    acquisitionPolicy(s.url);
+  }
+  if (s.kind !== "text")
+    ensure(
+      process.env.MANAGED_INFERENCE_ROUTE === "cloudflare_free",
+      "SETUP_REQUIRED",
+      "Select the configured cloud media route explicitly; no personal-plan fallback is used.",
+    );
+  await reserve(
+    ctx,
+    s.organizationId,
+    `source:${s._id}:${s.generation + 1}`,
+    10,
+  );
+  await ctx.db.patch(s._id, {
+    state: "queued",
+    generation: s.generation + 1,
+    error: undefined,
+  });
+  await workflow.start(
+    ctx,
+    internal.workflows.sourceAnalysis,
+    {
+      id: s._id,
+      generation: s.generation + 1,
+      media: s.kind !== "text",
+    },
+    {
+      startAsync: true,
+      onComplete: internal.workflows.completed,
+      context: null,
+    },
+  );
+}
 export const processSource = mutation({
   args: { id: v.id("sources"), maxCredits: v.number() },
+  handler: startSource,
+});
+export const processBatch = mutation({
+  args: { ids: v.array(v.id("sources")), maxCredits: v.number() },
   handler: async (ctx, a) => {
-    const s = await ctx.db.get(a.id);
-    if (!s || s.state === "deleted") fail("Source unavailable.");
-    await writeAccess(ctx, s.organizationId, ["owner", "admin", "member"]);
     ensure(
-      a.maxCredits === 10,
-      "QUOTE_CHANGED",
-      "Review the current 10-credit maximum.",
+      a.ids.length > 0 &&
+        a.ids.length <= 5 &&
+        new Set(a.ids).size === a.ids.length,
+      "INVALID_INPUT",
+      "Choose one to five distinct sources.",
     );
-    ensure(
-      process.env.DISABLE_INFERENCE !== "true",
-      "POLICY_BLOCKED",
-      "Analysis is paused.",
-    );
-    ensure(
-      s.state !== "needs_upload",
-      "UPLOAD_REQUIRED",
-      "Upload permitted media or supply a transcript.",
-    );
-    if (s.state === "ready" || s.state === "processing" || s.state === "queued")
-      return;
-    await reserve(
-      ctx,
-      s.organizationId,
-      `source:${s._id}:${s.generation + 1}`,
-      10,
-    );
-    await ctx.db.patch(s._id, {
-      state: "queued",
-      generation: s.generation + 1,
-      error: undefined,
-    });
-    await workflow.start(
-      ctx,
-      internal.workflows.sourceAnalysis,
-      {
-        id: s._id,
-        generation: s.generation + 1,
-        media: s.kind === "upload",
+    // One transaction reserves the complete batch or rolls it back. Each source
+    // is authorized before ready/queued deduplication can disclose its state.
+    for (const id of a.ids)
+      await startSource(ctx, { id, maxCredits: a.maxCredits });
+    return { reviewed: a.ids.length };
+  },
+});
+export const recordAcquisition = internalMutation({
+  args: { id: v.id("sources"), generation: v.number(), manifest: v.any() },
+  handler: async (ctx, a) => {
+    const source = await ctx.db.get(a.id);
+    if (
+      !source ||
+      source.kind !== "url" ||
+      source.state === "deleted" ||
+      source.generation !== a.generation
+    )
+      return false;
+    const { schemaVersion: _schemaVersion, ...metadata } =
+      acquisitionManifest.parse(a.manifest);
+    await ctx.db.patch(a.id, {
+      acquisition: {
+        ...metadata,
+        basis: "permitted_public_fetch",
+        acquiredAt: Date.now(),
       },
-      { onComplete: internal.workflows.completed, context: null },
-    );
+      ...(metadata.title ? { title: metadata.title } : {}),
+      updatedAt: Date.now(),
+    });
+    return true;
   },
 });
 export const workerSource = internalQuery({
@@ -784,6 +850,18 @@ export const commitAnalysis = internalMutation({
   },
   handler: async (ctx, a) => {
     const s = await ctx.db.get(a.id);
+    if (s && (s.state === "deleted" || s.generation !== a.generation)) {
+      // A late worker may settle its confirmed usage, but never restore content.
+      // Unknown provider usage continues to require reconciliation.
+      if (!a.retainReservation)
+        await settle(
+          ctx,
+          s.organizationId,
+          `source:${s._id}:${a.generation}`,
+          a.credits,
+        );
+      return;
+    }
     if (
       !s ||
       s.state === "deleted" ||
@@ -803,7 +881,8 @@ export const commitAnalysis = internalMutation({
       ensure(
         s.kind === "text"
           ? analysis.coverage === "caption_only"
-          : s.kind === "upload" && analysis.coverage === s.mediaCoverage,
+          : ["upload", "url"].includes(s.kind) &&
+              analysis.coverage === s.mediaCoverage,
         "INVALID_EVIDENCE",
         "Analysis coverage does not match verified processing.",
       );
@@ -1035,6 +1114,21 @@ export const attachSource = mutation({
           updatedAt: Date.now(),
         });
     for (const p of proposals) await ctx.db.delete(p._id);
+    for (const stage of await ctx.db
+      .query("mediaStages")
+      .withIndex("by_source", (q) => q.eq("sourceId", s._id))
+      .collect())
+      await ctx.db.delete(stage._id);
+    for (const asset of await ctx.db
+      .query("assets")
+      .withIndex("by_org", (q) => q.eq("organizationId", s.organizationId))
+      .collect())
+      if (
+        asset.sourceId === s._id &&
+        asset.key !== a.objectKey &&
+        asset.kind === "evidence"
+      )
+        await queueDeletion(ctx, asset.key);
     if (s.objectKey && s.objectKey !== a.objectKey)
       await queueDeletion(ctx, s.objectKey);
     await ctx.db.patch(s._id, {
@@ -1048,6 +1142,7 @@ export const attachSource = mutation({
       searchable: [s.title, a.text, ...s.tags].filter(Boolean).join(" "),
       personalAnalysis: undefined,
       personalMedia: undefined,
+      acquisition: undefined,
       mediaEvidence: undefined,
       originalMediaEvidence: undefined,
       mediaCoverage: undefined,
@@ -1512,8 +1607,8 @@ export const stageMedia = internalMutation({
       v.object({
         kind: v.string(),
         id: v.string(),
-        startMs: v.number(),
-        endMs: v.number(),
+        startMs: v.union(v.number(), v.null()),
+        endMs: v.union(v.number(), v.null()),
       }),
     ),
   },
@@ -1535,12 +1630,19 @@ export const stageMedia = internalMutation({
     );
     for (const e of a.evidence) {
       ensure(
-        ["frame", "transcript"].includes(e.kind) &&
-          Number.isSafeInteger(e.startMs) &&
-          Number.isSafeInteger(e.endMs) &&
-          e.startMs >= 0 &&
-          e.endMs >= e.startMs &&
-          e.endMs <= 600000,
+        e.kind === "caption"
+          ? source.kind === "url" &&
+              source.acquisition?.status === "acquired" &&
+              !!source.acquisition.description &&
+              e.id === "post_caption" &&
+              e.startMs === null &&
+              e.endMs === null
+          : ["frame", "transcript"].includes(e.kind) &&
+              Number.isSafeInteger(e.startMs) &&
+              Number.isSafeInteger(e.endMs) &&
+              e.startMs! >= 0 &&
+              e.endMs! >= e.startMs! &&
+              e.endMs! <= 600000,
         "INVALID_EVIDENCE",
         "Invalid evidence timing.",
       );

@@ -25,6 +25,7 @@ it("keeps plan preference personal, off by default and independent of hosted aut
     active: false,
     personalAlphaEnabled: false,
     linkAnalysisEnabled: false,
+    cloudAnalysisEnabled: false,
   });
   await expect(
     bob.mutation(api.aiPreferences.save, {

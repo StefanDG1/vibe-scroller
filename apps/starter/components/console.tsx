@@ -39,6 +39,7 @@ type Initial = {
     active: boolean;
     personalAlphaEnabled?: boolean;
     linkAnalysisEnabled?: boolean;
+    cloudAnalysisEnabled?: boolean;
   };
   sources: any[];
   categories?: { key: string; name: string; count: number }[];
@@ -920,7 +921,7 @@ export function Console({
                                 s.pullRequests.filter((p: any) => p.mergedAt)
                                   .length
                               }{" "}
-                              merged PR ·{" "}
+                              merged PR Ã‚·{" "}
                               {
                                 s.pullRequests.filter(
                                   (p: any) => p.state === "open",
@@ -1095,7 +1096,7 @@ export function Console({
                       call("draftProfile", { id: id(r), maxCredits: 10 })
                     }
                   >
-                    Draft a business profile · reserve up to 10 credits
+                    Draft a business profile Ã‚· reserve up to 10 credits
                   </Button>
                   {r.profileDraft &&
                     r.profileDraftSha === r.sha &&
@@ -1602,10 +1603,10 @@ export function Console({
                   change the funding route of a current task.
                 </p>
                 <p>
-                  Personal alpha accounts can pair a laptop and approve
-                  supplied-text analysis from the source screen. ChatGPT consent
-                  stays on that laptop. Video processing needs its separate
-                  media integration. Coding requires verified isolation and
+                  Personal alpha accounts can pair a laptop and approve text and
+                  video analysis from the source screen. Audio is transcribed on
+                  that laptop; sampled frames and text use your connected
+                  ChatGPT account. Coding requires verified isolation and
                   separate approval.
                 </p>
                 <a
@@ -1822,7 +1823,7 @@ export function Console({
                 <article className="panel" key={id(d)}>
                   <h3>{d.name}</h3>
                   <p>
-                    {d.state} · Fingerprint {d.fingerprint}
+                    {d.state} Ã‚· Fingerprint {d.fingerprint}
                   </p>
                   <Button
                     busy={busy}
@@ -1956,6 +1957,7 @@ export function Console({
               devices={data.devices ?? []}
               personalEnabled={data.aiPreference?.personalAlphaEnabled}
               linkAnalysisEnabled={data.aiPreference?.linkAnalysisEnabled}
+              cloudEnabled={data.aiPreference?.cloudAnalysisEnabled}
               sharedDraft={sharedDraft}
               demo={demo}
               organizationId={organizationId}
@@ -1988,6 +1990,7 @@ function CaptureForm({
   devices = [],
   personalEnabled = false,
   linkAnalysisEnabled = false,
+  cloudEnabled = false,
   sharedDraft,
 }: any) {
   const [kind, setKind] = useState(existingSourceId ? "upload" : "url");
@@ -2012,11 +2015,19 @@ function CaptureForm({
     )?.slug ||
     computer?.personalModels[0]?.slug ||
     "";
-  const automatic =
+  const personalAutomatic =
     personalEnabled &&
     autoAnalyze &&
     (kind === "upload" ||
       (linkAnalysisEnabled && ["url", "import"].includes(kind)));
+  const cloudAutomatic =
+    !personalEnabled &&
+    cloudEnabled &&
+    autoAnalyze &&
+    (kind === "upload" ||
+      kind === "text" ||
+      (linkAnalysisEnabled && ["url", "import"].includes(kind)));
+  const automatic = personalAutomatic || cloudAutomatic;
   const approval = {
     deviceId: chosenDevice,
     model: effectiveModel,
@@ -2025,7 +2036,9 @@ function CaptureForm({
     maxComputeCredits: 10,
   };
   const checkAutomatic = async (f: FormData) => {
-    if (!automatic) return;
+    if (cloudAutomatic && f.get("cloudCredits") !== "on")
+      throw new Error("Approve the processing-credit maximum before analysis.");
+    if (!personalAutomatic) return;
     if (!computer || !effectiveModel || f.get("ownPlan") !== "on")
       throw new Error(
         "Choose your online computer and approve using your ChatGPT plan.",
@@ -2098,10 +2111,15 @@ function CaptureForm({
                   .filter((entry: any) => entry.accepted && entry.sourceId)
                   .map((entry: any) => ({ id: entry.sourceId, generation: 0 }));
                 if (sources.length) {
-                  const queued = await call("approvePersonalBatch", {
-                    ...approval,
-                    sources,
-                  });
+                  const queued = personalAutomatic
+                    ? await call("approvePersonalBatch", {
+                        ...approval,
+                        sources,
+                      })
+                    : await call("processBatch", {
+                        ids: sources.map((source: any) => source.id),
+                        maxCredits: 10,
+                      });
                   if (queued === undefined)
                     throw new Error(
                       "Your links were saved. Analysis was not approved; open their status to retry.",
@@ -2123,6 +2141,7 @@ function CaptureForm({
           setSaving(true);
           setImportError("");
           try {
+            await checkAutomatic(f);
             const file = f.get("file") as File;
             if (!file?.size || file.size > 250000000)
               throw new Error("Choose a video or audio file up to 250 MB.");
@@ -2188,6 +2207,13 @@ function CaptureForm({
                 rightsAttested: f.get("rights") === "on",
               });
             if (!sourceId) return;
+            if (cloudAutomatic) {
+              if (f.get("cloudCredits") !== "on")
+                throw new Error(
+                  "Approve the processing-credit maximum before analysis.",
+                );
+              await call("process", { id: sourceId, maxCredits: 10 });
+            }
             if (personalEnabled && autoAnalyze) {
               const approved = await call("approvePersonalAnalysis", {
                 id: sourceId,
@@ -2241,15 +2267,17 @@ function CaptureForm({
             });
           if (!sourceId) return;
           if (automatic) {
-            const queued = await call("approvePersonalBatch", {
-              ...approval,
-              sources: [
-                {
-                  id: sourceId,
-                  generation: existingSourceId ? existingGeneration + 1 : 0,
-                },
-              ],
-            });
+            const queued = personalAutomatic
+              ? await call("approvePersonalBatch", {
+                  ...approval,
+                  sources: [
+                    {
+                      id: sourceId,
+                      generation: existingSourceId ? existingGeneration + 1 : 0,
+                    },
+                  ],
+                })
+              : await call("process", { id: sourceId, maxCredits: 10 });
             if (queued === undefined) {
               onDone(sourceId);
               return;
@@ -2501,10 +2529,39 @@ function CaptureForm({
             )}
           </section>
         )}
+      {!personalEnabled &&
+        cloudEnabled &&
+        (kind === "upload" ||
+          kind === "text" ||
+          (linkAnalysisEnabled && ["url", "import"].includes(kind))) && (
+          <section
+            className="upload-analysis form-grid"
+            aria-label="Automatic cloud analysis"
+          >
+            <label className="check">
+              <input
+                type="checkbox"
+                checked={autoAnalyze}
+                onChange={(e) => setAutoAnalyze(e.target.checked)}
+              />
+              Transcribe and analyze automatically
+            </label>
+            {autoAnalyze && (
+              <label className="check">
+                <input name="cloudCredits" type="checkbox" required />
+                Use cloud processing, up to 10 credits per source
+                {kind === "import" ? ", up to five sources per batch" : ""}. No
+                personal-plan or paid AI fallback.
+              </label>
+            )}
+          </section>
+        )}
       <p className="fine">
-        {automatic
-          ? "Keep your paired laptop on until analysis finishes. Public links are retrieved when the platform permits access."
-          : "Saving does not start analysis. Supplied text has no implied audio or visual coverage."}
+        {cloudAutomatic
+          ? "Processing continues in the background. Public links are retrieved when the platform permits access."
+          : automatic
+            ? "Keep your paired laptop on until analysis finishes. Public links are retrieved when the platform permits access."
+            : "Saving does not start analysis. Supplied text has no implied audio or visual coverage."}
       </p>
       <button
         className="primary"
@@ -2533,7 +2590,7 @@ function CaptureForm({
               ? kind === "upload"
                 ? "Uploading..."
                 : "Saving..."
-              : kind === "upload" && personalEnabled && autoAnalyze
+              : kind === "upload" && automatic
                 ? "Upload and analyze"
                 : existingSourceId
                   ? "Attach permitted content"
@@ -2654,7 +2711,7 @@ function SourceDetail({
   const overview =
     summary.length > 280
       ? (summary.match(/^.{1,280}[.!?](?:\s|$)/)?.[0]?.trim() ??
-        `${summary.slice(0, 280).replace(/\s+\S*$/, "")}…`)
+        `${summary.slice(0, 280).replace(/\s+\S*$/, "")}Ã¢â‚¬Â¦`)
       : summary;
   return (
     <>
@@ -2752,7 +2809,7 @@ function SourceDetail({
               disabled={busy}
               aria-busy={busy || undefined}
             >
-              {busy ? "Saving…" : "Save categories"}
+              {busy ? "SavingÃ¢â‚¬Â¦" : "Save categories"}
             </button>
           </form>
         )}
@@ -2791,7 +2848,7 @@ function SourceDetail({
         {detailLoading && (
           <output aria-live="polite">
             <Loader2 className="spinner" size={16} aria-hidden="true" /> Loading
-            source details…
+            source detailsÃ¢â‚¬Â¦
           </output>
         )}
         {!detailLoading &&
@@ -2813,7 +2870,7 @@ function SourceDetail({
               {!!i.evidence?.length && (
                 <details className="insight-evidence">
                   <summary>
-                    Evidence · {i.evidence.length}{" "}
+                    Evidence Ã‚· {i.evidence.length}{" "}
                     {i.evidence.length === 1 ? "reference" : "references"}
                   </summary>
                   <ul className="evidence-links">
@@ -2825,7 +2882,7 @@ function SourceDetail({
                             target="_blank"
                             rel="noopener noreferrer"
                           >
-                            Frame · {(e.startMs / 1000).toFixed(1)}s
+                            Frame Ã‚· {(e.startMs / 1000).toFixed(1)}s
                           </a>
                         )}
                         {e.kind === "transcript" && (
@@ -2842,7 +2899,7 @@ function SourceDetail({
                               }
                             }}
                           >
-                            Transcript ·{" "}
+                            Transcript Ã‚·{" "}
                             {e.startMs === null
                               ? "supplied text"
                               : `${(e.startMs / 1000).toFixed(1)}s`}
@@ -2869,7 +2926,7 @@ function SourceDetail({
                           e.kind !== "transcript" &&
                           (e.kind !== "frame" || demo) && (
                             <span>
-                              {label(e.kind)} ·{" "}
+                              {label(e.kind)} Ã‚·{" "}
                               {e.startMs === null
                                 ? "Supplied text"
                                 : `${(e.startMs / 1000).toFixed(1)}s`}
@@ -2907,7 +2964,8 @@ function SourceDetail({
             ?.filter((e: any) => e.kind === "transcript")
             .map((e: any) => (
               <p key={e.id} className="fine">
-                Original transcript segment: {(e.startMs / 1000).toFixed(1)}–
+                Original transcript segment: {(e.startMs / 1000).toFixed(1)}
+                Ã¢â‚¬â€œ
                 {(e.endMs / 1000).toFixed(1)} seconds.
               </p>
             ))}
@@ -3106,7 +3164,7 @@ function SourceDetail({
             key={id(p)}
             onClick={() => onProposal(p)}
           >
-            {p.title} · {label(p.disposition)}
+            {p.title} Ã‚· {label(p.disposition)}
           </button>
         ))}
         {repos.map((r: any) => (
@@ -3241,8 +3299,8 @@ function PersonalSourceAnalysis({
       )}
       {source.personalAnalysis && (
         <p>
-          Personal analysis: {label(source.personalAnalysis.state)} ·{" "}
-          {source.personalAnalysis.model} · {source.personalAnalysis.effort}{" "}
+          Personal analysis: {label(source.personalAnalysis.state)} Ã‚·{" "}
+          {source.personalAnalysis.model} Ã‚· {source.personalAnalysis.effort}{" "}
           reasoning.{" "}
           {source.personalAnalysis.inputTokens === undefined
             ? "Plan usage is not yet reported."
@@ -3394,7 +3452,7 @@ function ExecutionApproval({ proposal, call, routes }: any) {
         Base commit: <code>{proposal.baseSha ?? "Synthetic base"}</code>
       </p>
       <p>
-        Plan version: {proposal.version} · Hash:{" "}
+        Plan version: {proposal.version} Ã‚· Hash:{" "}
         <code>{proposal.planHash ?? "Save a validated plan first"}</code>
       </p>
       <label>
@@ -3418,7 +3476,7 @@ function ExecutionApproval({ proposal, call, routes }: any) {
               <option value="">Choose a verified model</option>
               {routes?.models.map((m: any) => (
                 <option key={m.id} value={m.id}>
-                  {m.id} · {m.version}
+                  {m.id} Ã‚· {m.version}
                 </option>
               ))}
             </select>
@@ -3501,8 +3559,8 @@ function RunCard({ run, call }: any) {
       <span className="status">{label(run.state)}</span>
       <h2>Run {id(run)}</h2>
       <p>
-        {run.executor} · {label(run.fundingRoute)} · Ceiling {run.maxCredits}{" "}
-        credits
+        {run.executor} Ã‚· {label(run.fundingRoute)} Ã‚· Ceiling{" "}
+        {run.maxCredits} credits
       </p>
       {run.fundingRoute === "customer_api_key" && (
         <p>
@@ -3554,7 +3612,7 @@ function RunCard({ run, call }: any) {
             target="_blank"
             rel="noopener noreferrer"
           >
-            {label(run.prState ?? "status unavailable")} · Open GitHub PR
+            {label(run.prState ?? "status unavailable")} Ã‚· Open GitHub PR
           </a>
           <button
             className="secondary"
