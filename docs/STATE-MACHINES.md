@@ -36,15 +36,17 @@ The default V1 flow requires a final patch review before publication. A user can
 
 The GitHub projection has `state=open|closed`, `isDraft`, and nullable `mergedAt`. User-facing statuses derive from these fields:
 
-| Condition | Label |
-| --- | --- |
-| Open and draft | Draft PR |
-| Open and not draft | Open PR |
-| Closed with mergedAt | Merged |
-| Closed without mergedAt | Closed without merge |
-| Cannot verify after access loss | Status unavailable |
+| Condition                       | Label                |
+| ------------------------------- | -------------------- |
+| Open and draft                  | Draft PR             |
+| Open and not draft              | Open PR              |
+| Closed with mergedAt            | Merged               |
+| Closed without mergedAt         | Closed without merge |
+| Cannot verify after access loss | Status unavailable   |
 
 A merged PR remains a historical merge even when a subsequent PR reverts it. Add a `reverted` outcome with evidence rather than rewriting history. A reopened unmerged PR returns to open. A delayed close event cannot overwrite a newer merged state without authoritative reconciliation.
+
+Reversal evidence uses the bounded immutable-tree comparison in [ADR 024](adr/024-authoritative-pr-reversal-evidence.md). A revert message alone is not evidence. Preserve verified merge and reversal history across later access loss; expose incomplete inspection rather than claiming every reversal can be discovered.
 
 ## Outcomes
 

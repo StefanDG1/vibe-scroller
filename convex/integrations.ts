@@ -5,7 +5,6 @@ import { api, internal } from "./_generated/api";
 import {
   snapshot,
   publish,
-  github,
   installationToken,
   retrieveContext,
 } from "../packages/providers/github";
@@ -13,7 +12,8 @@ import { encrypt, decrypt } from "../packages/providers/secrets";
 import { discoverCustomerModels } from "../packages/providers/customerAi";
 import { deleteObject as removeStoredObject } from "../packages/providers/storage";
 import { objectMetadata } from "../packages/providers/storage";
-import { ensure, prState } from "../packages/policy";
+import { ensure } from "../packages/policy";
+import { observePR } from "../packages/providers/pr-observation";
 import insightSchema from "../contracts/insight.schema.json";
 import proposalSchema from "../contracts/proposal.schema.json";
 import { authorizeRepository } from "./lib/githubAuthorization";
@@ -644,14 +644,14 @@ export const refreshPR = action({
     const observedAt = Date.now();
     try {
       const token = await installationToken(run.repo!.installationId);
-      const p = await github(
-        `/repos/${run.repo!.fullName}/pulls/${run.prNumber}`,
+      const observation = await observePR(
+        { ...run, repo: run.repo!, prNumber: run.prNumber },
         token,
+        observedAt,
       );
       await ctx.runMutation(internal.jobs.projectPR, {
         id: a.id,
-        state: prState(p),
-        mergedAt: p.merged_at ?? undefined,
+        ...observation,
         observedAt,
       });
     } catch {
@@ -669,16 +669,17 @@ export const reconcilePRs = internalAction({
     const runs = await ctx.runQuery(internal.jobs.prRuns, a);
     for (const r of runs.page) {
       try {
-        const token = await installationToken(r.repo.installationId),
-          p = await github(
-            `/repos/${r.repo.fullName}/pulls/${r.prNumber}`,
-            token,
-          );
+        const token = await installationToken(r.repo.installationId);
+        const observedAt = Date.now();
+        const observation = await observePR(
+          { ...r, prNumber: r.prNumber! },
+          token,
+          observedAt,
+        );
         await ctx.runMutation(internal.jobs.projectPR, {
           id: r._id,
-          state: prState(p),
-          mergedAt: p.merged_at ?? undefined,
-          observedAt: Date.now(),
+          ...observation,
+          observedAt,
         });
       } catch {
         await ctx.runMutation(internal.jobs.projectPR, {
@@ -702,14 +703,14 @@ export const reconcilePRRun = internalAction({
     const observedAt = Date.now();
     try {
       const token = await installationToken(run.repo.installationId);
-      const pr = await github(
-        `/repos/${run.repo.fullName}/pulls/${run.prNumber}`,
+      const observation = await observePR(
+        { ...run, prNumber: run.prNumber! },
         token,
+        observedAt,
       );
       await ctx.runMutation(internal.jobs.projectPR, {
         id: run._id,
-        state: prState(pr),
-        mergedAt: pr.merged_at ?? undefined,
+        ...observation,
         observedAt,
       });
     } catch {

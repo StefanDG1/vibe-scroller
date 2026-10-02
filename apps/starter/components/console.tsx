@@ -1525,7 +1525,18 @@ export function Console({
             <>
               {data.runs.length ? (
                 data.runs.map((r) => (
-                  <RunCard key={id(r)} run={r} call={call} />
+                  <RunCard
+                    key={id(r)}
+                    run={r}
+                    title={
+                      data.proposals.find(
+                        (proposal) => id(proposal) === r.proposalId,
+                      )?.title
+                    }
+                    call={call}
+                    busy={busy}
+                    readOnly={readOnly}
+                  />
                 ))
               ) : (
                 <div className="empty">
@@ -3687,11 +3698,11 @@ function ExecutionApproval({ proposal, call, routes, busy }: any) {
     </section>
   );
 }
-function RunCard({ run, call }: any) {
+function RunCard({ run, title, call, busy, readOnly }: any) {
   return (
     <article className="panel">
       <span className="status">{label(run.state)}</span>
-      <h2>Run {id(run)}</h2>
+      <h2>{title ?? "Coding task"}</h2>
       <p>
         {run.executor} · {label(run.fundingRoute)} · Ceiling {run.maxCredits}{" "}
         credits
@@ -3712,30 +3723,38 @@ function RunCard({ run, call }: any) {
         ))}
       </ul>
       {run.error && <p role="alert">{run.error}</p>}
+      {/^Exit (?!0\b)\d+:/m.test(run.report ?? "") && (
+        <p className="notice">
+          Some approved checks failed. Review the report before publishing.
+        </p>
+      )}
       {run.patch && (
         <details>
           <summary>Review patch and check report</summary>
           <pre>{run.patch}</pre>
           <p>{run.report}</p>
-          <button
-            className="primary"
-            onClick={async () => {
-              const hash = await crypto.subtle.digest(
-                "SHA-256",
-                new TextEncoder().encode(run.patch),
-              );
-              const patchDigest = Array.from(new Uint8Array(hash), (n) =>
-                n.toString(16).padStart(2, "0"),
-              ).join("");
-              call("publish", {
-                id: id(run),
-                generation: run.generation,
-                patchDigest,
-              });
-            }}
-          >
-            Approve this patch for a draft PR
-          </button>
+          {run.state === "awaiting_review" && (
+            <button
+              className="primary"
+              disabled={busy || readOnly}
+              onClick={async () => {
+                const hash = await crypto.subtle.digest(
+                  "SHA-256",
+                  new TextEncoder().encode(run.patch),
+                );
+                const patchDigest = Array.from(new Uint8Array(hash), (n) =>
+                  n.toString(16).padStart(2, "0"),
+                ).join("");
+                call("publish", {
+                  id: id(run),
+                  generation: run.generation,
+                  patchDigest,
+                });
+              }}
+            >
+              Approve this patch for a draft PR
+            </button>
+          )}
         </details>
       )}
       {run.prUrl && (
@@ -3750,6 +3769,7 @@ function RunCard({ run, call }: any) {
           </a>
           <button
             className="secondary"
+            disabled={busy || readOnly}
             onClick={() => call("refreshPR", { id: id(run) })}
           >
             Refresh authoritative PR status
@@ -3760,14 +3780,37 @@ function RunCard({ run, call }: any) {
               ? new Date(run.observedAt).toLocaleString()
               : "not checked"}
           </p>
+          {run.reverted && (
+            <p>
+              Reverted ·{" "}
+              <a
+                href={run.reverted.url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                View verified reversal
+              </a>
+              . The original merge remains in its history.
+            </p>
+          )}
+          {["unverified", "search_limited"].includes(run.revertStatus) &&
+            !run.reverted && (
+              <p className="fine">
+                The bounded reversal check is incomplete. The historical merge
+                remains recorded.
+              </p>
+            )}
         </>
       )}
-      <button
-        className="secondary"
-        onClick={() => call("cancel", { id: id(run) })}
-      >
-        Cancel pending execution
-      </button>
+      {!["completed", "canceled", "publishing"].includes(run.state) && (
+        <button
+          className="secondary"
+          disabled={busy || readOnly}
+          onClick={() => call("cancel", { id: id(run) })}
+        >
+          Cancel pending execution
+        </button>
+      )}
     </article>
   );
 }

@@ -1,5 +1,9 @@
 import { defineTable } from "convex/server";
 import { v } from "convex/values";
+import {
+  revertEvidenceValidator,
+  revertStatusValidator,
+} from "./lib/prObservation";
 const tenant = {
   organizationId: v.id("organizations"),
   createdAt: v.number(),
@@ -395,6 +399,10 @@ export const productTables = {
     prUrl: v.optional(v.string()),
     prState: v.optional(v.string()),
     mergedAt: v.optional(v.string()),
+    mergeCommitSha: v.optional(v.string()),
+    reverted: v.optional(revertEvidenceValidator),
+    revertStatus: v.optional(revertStatusValidator),
+    revertProbeHead: v.optional(v.string()),
     observedAt: v.optional(v.number()),
     error: v.optional(v.string()),
     events: v.array(v.string()),

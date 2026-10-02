@@ -18,6 +18,10 @@ import {
 import { ensure, validatePaths, containsSecret } from "../packages/policy";
 import { reserve, settle, digest, wallet } from "./product";
 import { cloudExecutionAllowed } from "./lib/cloudAccess";
+import {
+  revertEvidenceValidator,
+  revertStatusValidator,
+} from "./lib/prObservation";
 const org = { organizationId: v.id("organizations") };
 async function approvalActive(
   ctx: import("./_generated/server").QueryCtx,
@@ -867,14 +871,46 @@ export const projectPR = internalMutation({
     id: v.id("runs"),
     state: v.string(),
     mergedAt: v.optional(v.string()),
+    mergeCommitSha: v.optional(v.string()),
+    reverted: v.optional(revertEvidenceValidator),
+    revertStatus: v.optional(revertStatusValidator),
+    revertProbeHead: v.optional(v.string()),
     observedAt: v.number(),
   },
   handler: async (ctx, a) => {
     const r = await ctx.db.get(a.id);
     if (!r || !r.prNumber || (r.observedAt ?? 0) > a.observedAt) return;
+    ensure(
+      Number.isFinite(a.observedAt) &&
+        a.observedAt >= 0 &&
+        (!a.mergeCommitSha || /^[a-f0-9]{40}$/.test(a.mergeCommitSha)) &&
+        (!a.revertProbeHead || /^[a-f0-9]{40}$/.test(a.revertProbeHead)),
+      "INVALID_EVIDENCE",
+      "Invalid authoritative PR observation.",
+    );
+    if (a.reverted) {
+      const repo = await ctx.db.get(r.repositoryId);
+      ensure(
+        (a.mergedAt ?? r.mergedAt) &&
+          a.reverted.mergeCommitSha ===
+            (a.mergeCommitSha ?? r.mergeCommitSha) &&
+          /^[a-f0-9]{40}$/.test(a.reverted.revertCommitSha) &&
+          a.reverted.url ===
+            `https://github.com/${repo?.fullName}/commit/${a.reverted.revertCommitSha}` &&
+          Number.isFinite(a.reverted.observedAt) &&
+          a.reverted.observedAt >= 0 &&
+          a.reverted.observedAt <= a.observedAt,
+        "INVALID_EVIDENCE",
+        "Revert evidence does not match this historical merge.",
+      );
+    }
     await ctx.db.patch(a.id, {
       prState: a.state,
       mergedAt: a.mergedAt ?? r.mergedAt,
+      mergeCommitSha: a.mergeCommitSha ?? r.mergeCommitSha,
+      reverted: a.reverted ?? r.reverted,
+      revertStatus: a.revertStatus ?? r.revertStatus,
+      revertProbeHead: a.revertProbeHead ?? r.revertProbeHead,
       observedAt: a.observedAt,
     });
   },

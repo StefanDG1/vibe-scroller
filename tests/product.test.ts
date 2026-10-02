@@ -1154,6 +1154,43 @@ describe("VibeScroller product boundaries", () => {
     await t.run(async (ctx) => {
       expect((await ctx.db.get(ids[0]))?.prState).toBe("merged");
     });
+    const reversed = {
+      mergeCommitSha: "a".repeat(40),
+      revertCommitSha: "b".repeat(40),
+      url: `https://github.com/test/synthetic/commit/${"b".repeat(40)}`,
+      observedAt: 210,
+    };
+    await expect(
+      t.mutation(internal.jobs.projectPR, {
+        id: ids[0],
+        state: "merged",
+        observedAt: 210,
+        mergeCommitSha: "a".repeat(40),
+        reverted: {
+          ...reversed,
+          url: "https://github.com/foreign/repo/commit/" + "b".repeat(40),
+        },
+      }),
+    ).rejects.toThrow("INVALID_EVIDENCE");
+    await t.mutation(internal.jobs.projectPR, {
+      id: ids[0],
+      state: "merged",
+      observedAt: 210,
+      mergeCommitSha: "a".repeat(40),
+      reverted: reversed,
+      revertStatus: "verified",
+    });
+    await t.mutation(internal.jobs.projectPR, {
+      id: ids[0],
+      state: "access_lost",
+      observedAt: 220,
+    });
+    await t.run(async (ctx) => {
+      const r = await ctx.db.get(ids[0]);
+      expect(r?.mergedAt).toBe("2026-09-30T00:00:00Z");
+      expect(r?.reverted).toEqual(reversed);
+      expect(r?.prState).toBe("access_lost");
+    });
   });
   it("imports a full 500-row paid batch and deduplicates it without per-row credit use", async () => {
     const { t, a, org } = await setup();

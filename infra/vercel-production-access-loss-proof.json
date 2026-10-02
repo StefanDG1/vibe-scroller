@@ -1,0 +1,14 @@
+{
+  "at": "2026-10-02T13:59:06.091Z",
+  "commit": "2217064553bbdef5d0500f1500c0657104a770af",
+  "environment": "production",
+  "synthetic": true,
+  "actualDraftPR": 9,
+  "selectedRepositories": 1,
+  "suspensionScopedToDedicatedApp": true,
+  "accessLossRecognized": true,
+  "installationRestored": true,
+  "authoritativeDraftRecovered": true,
+  "repeatedRefreshIdempotent": true,
+  "paidReleaseEstablished": false
+}
