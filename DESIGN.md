@@ -273,3 +273,13 @@ October 2 native Chrome checks covered 320, 360, 390, 412, 768 and 1440 CSS pixe
 | A source detail existed only in client state; reload returned to the library. Refreshing a first page could remove an older selected source. | A tenant-scoped source URL restores the selected record, and background refresh reads that record independently of the paginated/filter result. |
 
 Retain the existing dark overview, main-point cards and 44 px controls. The actual local detail stayed readable at 320/360/390/412/768/1440 without page overflow. A filtered library with zero rows still returned its separately authorized selected source. Native clicking, reload and background refresh passed; an initial automation reloaded before asynchronous navigation finished and was corrected. Invalid/deleted source links reveal no private record. This verifies source navigation and its states, not a complete mobile execution/PR journey.
+
+## Public policy reading
+
+| Before                                                        | After                                                                     | Why                                                     |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------- |
+| Separate website copies could omit newer merchant disclosures | Build/dev synchronize canonical drafts; validation rejects stale copies   | The displayed policy must match the reviewed source     |
+| Markdown references and lists appeared as literal text        | Safe semantic Markdown with working policy links and list/table structure | Readers can follow their rights and payment disclosures |
+| Wide provider tables were plain wrapped text                  | A keyboard-focusable horizontal table region inside the dark article      | Preserve readable columns without phone page overflow   |
+
+No animation is needed for reading policies. Raw HTML and image loading are disabled. Link transformation accepts secure provider/contact links and known policy references; executable, credential-bearing and protocol-relative URLs are rejected. Review-draft status stays visible until actual publication approval. Browser verification follows the production build.

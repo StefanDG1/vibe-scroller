@@ -8,6 +8,12 @@ Cancel in the application's billing settings. You can also contact contact@expon
 
 Cancellation normally takes effect at the end of the paid period. Weekly means seven days, not a calendar week. The confirmation states the final access date and whether another payment is scheduled. Keep the confirmation in your billing history.
 
+## Merchant payment support
+
+The checkout and receipt identify the merchant for your transaction. For Stripe Managed Payments purchases, Link provides transaction invoices, order management and payment support. You may use the receipt’s merchant support link or contact VibeScroller with an order reference for help with the service or a refund request. We coordinate the request with the applicable payment route; you do not need to determine the technical provider responsible before reporting a problem.
+
+Cancellation in VibeScroller billing settings remains available. Merchant terms do not replace the service commitments or mandatory rights described here. A provider sandbox does not expose every live Link order-management feature, so that limitation must be recorded before release rather than represented as a completed live purchase test.
+
 ## Initial refund policy
 
 For an individual's first subscription, we offer a refund of subscription charges made during the first 14 days when the request is made within that period. This includes weekly renewals charged inside that initial window. This voluntary policy does not reduce any statutory right, including rights that apply in other circumstances.

@@ -52,6 +52,14 @@ Cancel through the billing settings without contacting sales. Cancellation stops
 
 We may change prices for future renewal periods with clear advance notice. We do not retroactively increase the price of an already approved job or remove an allowance already purchased for its current period. You can cancel before a new price takes effect.
 
+## Payment merchant and invoices
+
+The checkout identifies the merchant for each transaction. When it uses Stripe Managed Payments, Link acts as merchant of record for that purchase and supplies the transaction invoice, applicable tax handling and payment support under its displayed terms. VibeScroller remains responsible for operating the software, its service commitments and handling service complaints. Your service and mandatory consumer rights are not removed by the payment arrangement.
+
+Use the billing settings to manage renewal and request service support. The receipt also links to the applicable merchant’s order and payment support. Do not send card details to VibeScroller support. Where Link is merchant of record, we do not issue a second Exponential Education consumer invoice for the same purchase. Our accountant receives the company’s separate settlement and provider accounting records.
+
+The initial paid offer is for private consumers in the countries and territories supported by the displayed merchant. For Stripe Managed Payments purchases, Stripe Checkout collects the billing address and determines transaction eligibility, available currency options and applicable taxes. Restricted territories and business purchases remain unavailable. A change to direct billing requires a separately reviewed country and tax configuration; a refused Managed Payments transaction does not automatically switch to direct billing.
+
 ## Acceptable use and suspension
 
 Follow the [acceptable-use policy](ACCEPTABLE-USE.md). We can restrict work needed to protect accounts, comply with law, prevent unauthorized processing, or respond to credible abuse. We will explain a restriction when doing so is lawful and safe and provide a way to contact us.

@@ -2,8 +2,20 @@ import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { resolve, dirname, relative, join } from "node:path";
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
+import { publicPolicyDocuments } from "../packages/policy/public-documents.ts";
 const root = resolve(import.meta.dirname, "..");
 const errors = [];
+for (const name of Object.values(publicPolicyDocuments)) {
+  const source = join(root, "legal", `${name}.md`),
+    bundled = join(root, "apps/starter/content/legal", `${name}.md`);
+  if (
+    !existsSync(bundled) ||
+    !readFileSync(source).equals(readFileSync(bundled))
+  )
+    errors.push(
+      `Public policy draft is stale: ${name}. Run node scripts/sync-legal.mjs.`,
+    );
+}
 if (existsSync(join(root, ".git"))) {
   const tracked = execFileSync("git", ["ls-files", "-z"], {
     cwd: root,

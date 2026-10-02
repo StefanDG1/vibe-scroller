@@ -3,18 +3,9 @@ import { join } from "node:path";
 import { notFound } from "next/navigation";
 import { PublicPage } from "@/components/site";
 import Link from "next/link";
+import { PolicyDocument } from "@/components/policy-document";
+import { publicPolicyDocuments as legal } from "../../../../packages/policy/public-documents";
 import pricing from "../../../../contracts/pricing.json";
-const legal: Record<string, string> = {
-  legal: "LEGAL-NOTICE",
-  terms: "TERMS",
-  privacy: "PRIVACY",
-  cookies: "COOKIES",
-  refunds: "REFUNDS",
-  "acceptable-use": "ACCEPTABLE-USE",
-  copyright: "COPYRIGHT",
-  subprocessors: "SUBPROCESSORS",
-  dpa: "DPA",
-};
 const pages: Record<string, { title: string; body: string[] }> = {
   "how-it-works": {
     title: "From saved idea to reviewed change",
@@ -165,19 +156,7 @@ export default async function Page({
         <p className="notice">
           Review draft · Not yet effective. No legal review is claimed.
         </p>
-        <article className="policy-document">
-          {text.split(/\n\s*\n/).map((s, i) =>
-            s.startsWith("# ") ? (
-              <h1 key={i}>{s.slice(2)}</h1>
-            ) : s.startsWith("## ") ? (
-              <h2 key={i}>{s.slice(3)}</h2>
-            ) : (
-              <p key={i} style={{ whiteSpace: "pre-wrap" }}>
-                {s}
-              </p>
-            ),
-          )}
-        </article>
+        <PolicyDocument text={text} />
       </PublicPage>
     );
   }

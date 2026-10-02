@@ -17,19 +17,19 @@ Do not remove a draft label merely because a page builds. Do not publish the ina
 
 ## Bind policy to behavior
 
-| Policy statement            | Required implementation                                                   |
-| --------------------------- | ------------------------------------------------------------------------- |
-| No silent paid fallback     | Funding-route lock and explicit reapproval test                           |
-| Temporary originals         | Storage lifecycle plus cleanup sweeper and deletion receipts              |
-| Private library             | Tenant-scoped queries, private bucket, no indexed private routes          |
-| Easy cancellation           | Authenticated cancellation action and emailed confirmation                |
-| First 14-day refund policy  | Invoice-aware refund workflow covering eligible weekly renewals           |
-| Separate optional consent   | Independent stored consent choices, no bundled prechecked box             |
-| Provider disconnection      | Credential revocation, job cancellation, clear retained-data behavior     |
-| No cross-customer training  | Disabled data export/training routes and tested privacy defaults          |
+| Policy statement | Required implementation |
+| --- | --- |
+| No silent paid fallback | Funding-route lock and explicit reapproval test |
+| Temporary originals | Storage lifecycle plus cleanup sweeper and deletion receipts |
+| Private library | Tenant-scoped queries, private bucket, no indexed private routes |
+| Easy cancellation | Authenticated cancellation action and emailed confirmation |
+| First 14-day refund policy | Invoice-aware refund workflow covering eligible weekly renewals |
+| Separate optional consent | Independent stored consent choices, no bundled prechecked box |
+| Provider disconnection | Credential revocation, job cancellation, clear retained-data behavior |
+| No cross-customer training | Disabled data export/training routes and tested privacy defaults |
 | Account export and deletion | Bounded export job, access control, deletion tombstones, backup treatment |
-| Rights requests             | Support workflow, identity verification, deadlines, and audit record      |
-| AI transparency             | Labels, output provenance, and deployment-specific legal assessment       |
+| Rights requests | Support workflow, identity verification, deadlines, and audit record |
+| AI transparency | Labels, output provenance, and deployment-specific legal assessment |
 
 ## Implement checkout consent
 
