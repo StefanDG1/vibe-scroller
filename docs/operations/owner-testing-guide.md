@@ -4,7 +4,7 @@ Mode: how-to. Last checked October 2, 2026. This guide distinguishes working che
 
 ## Start here
 
-The real address is https://scroll.companynerve.com/app on your laptop or phone. HTTPS, clean production Google sign-in and automatic default workspace entry work. Google remains restricted to the configured test user. Existing active workspaces are reused; switching is available from Account. The dark interface and automatic laptop-assisted audio/visual analysis passed production verification on October 1. Reload an old tab to load the latest interface.
+The real address is https://scroll.companynerve.com/app on your laptop or phone. HTTPS, clean production Google sign-in and automatic default workspace entry work. The dedicated Google OAuth audience was published as In production on October 2, with the correct product homepage, privacy and terms links and operator support email. A fresh owner Google sign-in after actual logout returned to the existing workspace. This removes the Google test-user restriction; it does not approve hosted ChatGPT access or paid V1. Existing active workspaces are reused; switching is available from Account. The dark interface and automatic laptop-assisted audio/visual analysis passed production verification on October 1. Reload an old tab to load the latest interface.
 
 Production hosting now uses the owner's Vercel Pro team. Reload the page after the host change; your same-domain login remains usable.
 

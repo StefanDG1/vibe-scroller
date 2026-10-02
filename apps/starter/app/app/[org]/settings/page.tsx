@@ -3,7 +3,6 @@ import type { Id } from "../../../../../../convex/_generated/dataModel";
 import { ActionForm } from "@/components/action-form";
 import { renameOrganization, deleteOrganization } from "@/app/actions";
 import { Card, Input, Label, Button } from "@companynerve/ui";
-import { RecipePicker } from "@/components/header";
 export default async function Page({
   params,
 }: {
@@ -32,14 +31,6 @@ export default async function Page({
               maxLength={80}
             />
           </ActionForm>
-        </Card>
-        <Card>
-          <h2>Appearance</h2>
-          <p className="muted">
-            Preview another recipe in this browser. Change company-config to
-            choose the default for your product.
-          </p>
-          <RecipePicker />
         </Card>
         {info.role === "owner" && (
           <>

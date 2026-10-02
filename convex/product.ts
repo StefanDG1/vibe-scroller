@@ -499,7 +499,7 @@ export const detail = query({
       )
         ? s.repositorySelection
         : undefined,
-      proposals,
+      proposals: proposals.filter((p) => p.organizationId === s.organizationId),
     };
   },
 });
@@ -1322,7 +1322,10 @@ export const proposal = query({
     const p = await ctx.db.get(a.id);
     if (!p) fail("Proposal unavailable.");
     await access(ctx, p.organizationId);
-    return { ...p, repo: await ctx.db.get(p.repositoryId) };
+    const repo = await ctx.db.get(p.repositoryId);
+    if (!repo || repo.organizationId !== p.organizationId)
+      fail("Proposal unavailable.");
+    return { ...p, repo };
   },
 });
 export const decide = mutation({
@@ -1423,7 +1426,8 @@ export const editPlan = mutation({
       true,
     );
     const repo = await ctx.db.get(p.repositoryId);
-    if (!repo) fail("Repository unavailable.");
+    if (!repo || repo.organizationId !== p.organizationId)
+      fail("Repository unavailable.");
     for (const f of plan.files)
       ensure(
         f.isNew || repo.manifest.includes(f.path),

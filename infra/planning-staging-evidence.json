@@ -1,10 +1,10 @@
 {
-  "observedAt": "2026-10-02T02:54:37.556Z",
+  "observedAt": "2026-10-02T05:09:46.389Z",
   "environment": "dedicated staging, administrator CLI test identity for the existing owner",
   "browserJourneyTested": false,
   "labeledOwnedSourceId": "mx79ca9f0c2cct8d7dhx4p0v198fcpfy",
   "selectionPassed": true,
-  "profileDraftPassed": false,
+  "profileDraftPassed": true,
   "planDraftPassed": false,
   "noExecutionOrPublication": true,
   "previousAttempts": [
@@ -39,9 +39,18 @@
       "selectionPassed": true,
       "profileDraftPassed": false,
       "planDraftPassed": false
+    },
+    {
+      "observedAt": "2026-10-02T02:54:37.556Z",
+      "failureStage": "profile_draft",
+      "failureCategory": "CONTEXT_REQUIRED",
+      "selectionPassed": true,
+      "profileDraftPassed": false,
+      "planDraftPassed": false
     }
   ],
   "selectionCount": 0,
-  "failureStage": "profile_draft",
-  "failureCategory": "CONTEXT_REQUIRED"
+  "savedProfileConfirmationPreserved": true,
+  "matchDisposition": "needs_context",
+  "planDraftSkipped": "Actual matching did not produce a relevant proposal; no reviewer correction forced acceptance."
 }

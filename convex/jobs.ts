@@ -23,6 +23,8 @@ async function approvalActive(
   if (process.env.RESTORE_LOCK === "true") return false;
   const organization = await ctx.db.get(run.organizationId);
   const actor = await ctx.db.get(run.approvedBy);
+  const repository = await ctx.db.get(run.repositoryId);
+  const proposal = await ctx.db.get(run.proposalId);
   const membership = await ctx.db
     .query("memberships")
     .withIndex("by_pair", (q) =>
@@ -32,6 +34,9 @@ async function approvalActive(
   return (
     organization?.status === "active" &&
     actor?.status === "active" &&
+    repository?.organizationId === run.organizationId &&
+    proposal?.organizationId === run.organizationId &&
+    proposal.repositoryId === run.repositoryId &&
     !!membership &&
     ["owner", "admin", "member"].includes(membership.role)
   );
@@ -494,6 +499,11 @@ export const approve = mutation({
     const actor = await writeAccess(ctx, p.organizationId);
     const repo = await ctx.db.get(p.repositoryId);
     ensure(
+      repo?.organizationId === p.organizationId,
+      "FORBIDDEN",
+      "Repository unavailable.",
+    );
+    ensure(
       repo &&
         repo.enabled &&
         repo.confirmed &&
@@ -668,10 +678,20 @@ export const run = query({
     const r = await ctx.db.get(a.id);
     if (!r) fail("Run unavailable.");
     await access(ctx, r.organizationId);
+    const repo = await ctx.db.get(r.repositoryId),
+      proposal = await ctx.db.get(r.proposalId);
+    if (
+      !repo ||
+      !proposal ||
+      repo.organizationId !== r.organizationId ||
+      proposal.organizationId !== r.organizationId ||
+      proposal.repositoryId !== r.repositoryId
+    )
+      fail("Run unavailable.");
     return {
       ...r,
-      repo: await ctx.db.get(r.repositoryId),
-      proposal: await ctx.db.get(r.proposalId),
+      repo,
+      proposal,
     };
   },
 });
@@ -736,6 +756,9 @@ export const authorizePublication = mutation({
     ensure(
       p &&
         repo &&
+        p.organizationId === r.organizationId &&
+        repo.organizationId === r.organizationId &&
+        p.repositoryId === r.repositoryId &&
         repo.enabled &&
         p.planHash === r.planHash &&
         repo.sha === r.baseSha,

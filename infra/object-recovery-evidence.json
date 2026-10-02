@@ -1,0 +1,21 @@
+{
+  "synthetic": true,
+  "observedAt": "2026-10-02T04:40:25.701Z",
+  "database": "resolute-ladybug-999",
+  "lockedDestination": "rare-echidna-358",
+  "productionWrites": false,
+  "bytes": 19399,
+  "encryptedFrameRecovered": true,
+  "physicalMissingBeforeRestore": true,
+  "hashMatched": true,
+  "tamperedArchiveDenied": true,
+  "privateAccessDeniedWhileLocked": true,
+  "newerSourceDeletionPreventsRestore": true,
+  "temporaryObjectPurged": true,
+  "credentialsQuarantined": true,
+  "plaintextDatabaseArchiveRemoved": true,
+  "limitations": [
+    "One owned JPEG in a separate locked database recovery; no serving production database or customer object was overwritten.",
+    "Backup storage remains private on the operator laptop; this does not certify independent scheduled production backups or bulk raw-media recovery."
+  ]
+}

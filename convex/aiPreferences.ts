@@ -2,6 +2,7 @@ import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { access } from "./lib";
 import { personalAllowed } from "./lib/personalAccess";
+import { freeWorkersConfigured } from "../packages/providers/workers-plan";
 export const read = query({
   args: { organizationId: v.id("organizations") },
   handler: async (ctx, args) => {
@@ -14,7 +15,8 @@ export const read = query({
       cloudAnalysisEnabled:
         process.env.DISABLE_INFERENCE !== "true" &&
         process.env.MANAGED_INFERENCE_ROUTE === "cloudflare_free" &&
-        process.env.MEDIA_VERIFIED === "true",
+        process.env.MEDIA_VERIFIED === "true" &&
+        freeWorkersConfigured(),
       linkAnalysisEnabled:
         process.env.ACQUISITION_VERIFIED === "true" &&
         process.env.MEDIA_VERIFIED === "true",

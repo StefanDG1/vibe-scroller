@@ -1,0 +1,336 @@
+{
+  "observedAt": "2026-10-02T05:07:02.603985+00:00",
+  "environment": "production Chrome desktop viewport emulation",
+  "baseCommit": "f2a4725cdd76904a66f9b7b9d9214dbf7a3e3005",
+  "measurements": [
+    {
+      "view": "projects",
+      "width": 320,
+      "overflow": false,
+      "main": true,
+      "heading": "Projects",
+      "small": []
+    },
+    {
+      "view": "projects",
+      "width": 360,
+      "overflow": false,
+      "main": true,
+      "heading": "Projects",
+      "small": []
+    },
+    {
+      "view": "projects",
+      "width": 390,
+      "overflow": false,
+      "main": true,
+      "heading": "Projects",
+      "small": []
+    },
+    {
+      "view": "projects",
+      "width": 412,
+      "overflow": false,
+      "main": true,
+      "heading": "Projects",
+      "small": []
+    },
+    {
+      "view": "projects",
+      "width": 768,
+      "overflow": false,
+      "main": true,
+      "heading": "Projects",
+      "small": []
+    },
+    {
+      "view": "projects",
+      "width": 1440,
+      "overflow": false,
+      "main": true,
+      "heading": "Projects",
+      "small": []
+    },
+    {
+      "view": "proposals",
+      "width": 320,
+      "overflow": false,
+      "main": true,
+      "heading": "Proposals",
+      "small": []
+    },
+    {
+      "view": "proposals",
+      "width": 360,
+      "overflow": false,
+      "main": true,
+      "heading": "Proposals",
+      "small": []
+    },
+    {
+      "view": "proposals",
+      "width": 390,
+      "overflow": false,
+      "main": true,
+      "heading": "Proposals",
+      "small": []
+    },
+    {
+      "view": "proposals",
+      "width": 412,
+      "overflow": false,
+      "main": true,
+      "heading": "Proposals",
+      "small": []
+    },
+    {
+      "view": "proposals",
+      "width": 768,
+      "overflow": false,
+      "main": true,
+      "heading": "Proposals",
+      "small": []
+    },
+    {
+      "view": "proposals",
+      "width": 1440,
+      "overflow": false,
+      "main": true,
+      "heading": "Proposals",
+      "small": []
+    },
+    {
+      "view": "runs",
+      "width": 320,
+      "overflow": false,
+      "main": true,
+      "heading": "Runs & PRs",
+      "small": []
+    },
+    {
+      "view": "runs",
+      "width": 360,
+      "overflow": false,
+      "main": true,
+      "heading": "Runs & PRs",
+      "small": []
+    },
+    {
+      "view": "runs",
+      "width": 390,
+      "overflow": false,
+      "main": true,
+      "heading": "Runs & PRs",
+      "small": []
+    },
+    {
+      "view": "runs",
+      "width": 412,
+      "overflow": false,
+      "main": true,
+      "heading": "Runs & PRs",
+      "small": []
+    },
+    {
+      "view": "runs",
+      "width": 768,
+      "overflow": false,
+      "main": true,
+      "heading": "Runs & PRs",
+      "small": []
+    },
+    {
+      "view": "runs",
+      "width": 1440,
+      "overflow": false,
+      "main": true,
+      "heading": "Runs & PRs",
+      "small": []
+    },
+    {
+      "view": "connections",
+      "width": 320,
+      "overflow": false,
+      "main": true,
+      "heading": "Connections",
+      "small": [
+        {
+          "name": "",
+          "h": 18,
+          "w": 18
+        }
+      ]
+    },
+    {
+      "view": "connections",
+      "width": 360,
+      "overflow": false,
+      "main": true,
+      "heading": "Connections",
+      "small": [
+        {
+          "name": "",
+          "h": 18,
+          "w": 18
+        }
+      ]
+    },
+    {
+      "view": "connections",
+      "width": 390,
+      "overflow": false,
+      "main": true,
+      "heading": "Connections",
+      "small": [
+        {
+          "name": "",
+          "h": 18,
+          "w": 18
+        }
+      ]
+    },
+    {
+      "view": "connections",
+      "width": 412,
+      "overflow": false,
+      "main": true,
+      "heading": "Connections",
+      "small": [
+        {
+          "name": "",
+          "h": 18,
+          "w": 18
+        }
+      ]
+    },
+    {
+      "view": "connections",
+      "width": 768,
+      "overflow": false,
+      "main": true,
+      "heading": "Connections",
+      "small": [
+        {
+          "name": "",
+          "h": 18,
+          "w": 18
+        }
+      ]
+    },
+    {
+      "view": "connections",
+      "width": 1440,
+      "overflow": false,
+      "main": true,
+      "heading": "Connections",
+      "small": [
+        {
+          "name": "",
+          "h": 18,
+          "w": 18
+        }
+      ]
+    },
+    {
+      "view": "runners",
+      "width": 320,
+      "overflow": false,
+      "main": true,
+      "heading": "Computers",
+      "small": []
+    },
+    {
+      "view": "runners",
+      "width": 360,
+      "overflow": false,
+      "main": true,
+      "heading": "Computers",
+      "small": []
+    },
+    {
+      "view": "runners",
+      "width": 390,
+      "overflow": false,
+      "main": true,
+      "heading": "Computers",
+      "small": []
+    },
+    {
+      "view": "runners",
+      "width": 412,
+      "overflow": false,
+      "main": true,
+      "heading": "Computers",
+      "small": []
+    },
+    {
+      "view": "runners",
+      "width": 768,
+      "overflow": false,
+      "main": true,
+      "heading": "Computers",
+      "small": []
+    },
+    {
+      "view": "runners",
+      "width": 1440,
+      "overflow": false,
+      "main": true,
+      "heading": "Computers",
+      "small": []
+    },
+    {
+      "view": "billing",
+      "width": 320,
+      "overflow": false,
+      "main": true,
+      "heading": "Billing and allowances",
+      "small": []
+    },
+    {
+      "view": "billing",
+      "width": 360,
+      "overflow": false,
+      "main": true,
+      "heading": "Billing and allowances",
+      "small": []
+    },
+    {
+      "view": "billing",
+      "width": 390,
+      "overflow": false,
+      "main": true,
+      "heading": "Billing and allowances",
+      "small": []
+    },
+    {
+      "view": "billing",
+      "width": 412,
+      "overflow": false,
+      "main": true,
+      "heading": "Billing and allowances",
+      "small": []
+    },
+    {
+      "view": "billing",
+      "width": 768,
+      "overflow": false,
+      "main": true,
+      "heading": "Billing and allowances",
+      "small": []
+    },
+    {
+      "view": "billing",
+      "width": 1440,
+      "overflow": false,
+      "main": true,
+      "heading": "Billing and allowances",
+      "small": []
+    }
+  ],
+  "limitations": [
+    "Actual viewport checks, not physical Android testing.",
+    "Empty proposal/PR views do not verify completed approval or PR inspection.",
+    "Account/settings dark-only cleanup requires its own publication check."
+  ]
+}

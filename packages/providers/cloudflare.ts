@@ -1,15 +1,10 @@
 import { ensure } from "../policy";
+import { authorizeMoondream, MOONDREAM_MODEL } from "./vision";
+import { freeWorkersConfigured } from "./workers-plan";
 export const cfTextModel = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
 export function freeCloudflare() {
-  const verified = Date.parse(
-    process.env.CLOUDFLARE_FREE_PLAN_VERIFIED_AT ?? "",
-  );
   ensure(
-    process.env.CLOUDFLARE_AI_TOKEN &&
-      process.env.CLOUDFLARE_ACCOUNT_ID &&
-      Number.isFinite(verified) &&
-      Date.now() - verified < 86400000 &&
-      verified <= Date.now(),
+    freeWorkersConfigured(),
     "SETUP_REQUIRED",
     "Verify the Workers Free plan before inference. No paid fallback is available.",
   );
@@ -27,9 +22,11 @@ export function cfQuote(
 }
 export async function cfRun(model: string, input: unknown) {
   freeCloudflare();
+  if (model === MOONDREAM_MODEL) authorizeMoondream();
   ensure(
     [
       cfTextModel,
+      MOONDREAM_MODEL,
       "@cf/openai/whisper-large-v3-turbo",
       "@cf/meta/llama-3.2-11b-vision-instruct",
     ].includes(model),

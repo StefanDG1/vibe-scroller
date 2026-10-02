@@ -23,6 +23,12 @@ export const start = mutation({
     const repo = await ctx.db.get(proposal.repositoryId),
       source = await ctx.db.get(proposal.sourceId);
     ensure(
+      repo?.organizationId === proposal.organizationId &&
+        source?.organizationId === proposal.organizationId,
+      "FORBIDDEN",
+      "Proposal context unavailable.",
+    );
+    ensure(
       proposal.review === "accepted" &&
         proposal.version === a.version &&
         repo?.enabled &&
@@ -100,6 +106,8 @@ export const finish = internalMutation({
     const valid =
       proposal.review === "accepted" &&
       proposal.version === a.version &&
+      repo?.organizationId === proposal.organizationId &&
+      source?.organizationId === proposal.organizationId &&
       repo?.enabled &&
       repo.confirmed &&
       repo.sha === a.baseSha &&

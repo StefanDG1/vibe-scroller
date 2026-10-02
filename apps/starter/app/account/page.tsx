@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { backend, api } from "@/lib/backend";
-import { Header, RecipePicker } from "@/components/header";
+import { Header } from "@/components/header";
 import { ActionForm } from "@/components/action-form";
 import { deleteAccount, logout } from "@/app/actions";
 import { Card, Input, Label, Button } from "@companynerve/ui";
@@ -39,10 +39,6 @@ export default async function Page() {
             <form action={logout}>
               <Button variant="outline">Sign out</Button>
             </form>
-          </Card>
-          <Card>
-            <h2 style={{ marginTop: 0 }}>Appearance</h2>
-            <RecipePicker />
           </Card>
           <Card>
             <h2 style={{ marginTop: 0 }}>Your data</h2>
