@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-02T12:57:52.827Z",
+  "environment": "dedicated development",
+  "synthetic": true,
+  "actualIsolatedChecksStarted": true,
+  "state": "canceled",
+  "generation": 2,
+  "latePatchAbsent": true,
+  "prAbsent": true,
+  "terminationReceipt": "Teardown confirmed; service credits settled: 1.",
+  "workspaceReservedCredits": 0,
+  "knownComputeSettled": true
+}

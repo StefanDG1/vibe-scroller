@@ -12,7 +12,7 @@ jobs:
   backup:
     if: github.repository == 'StefanDG1/vibe-scroller' && github.ref == 'refs/heads/main' && vars.VIBE_BACKUP_ENABLED == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -24,6 +24,12 @@ jobs:
       - run: pnpm install --frozen-lockfile --ignore-scripts
       - name: Export and encrypt without deploying or running mutations
         run: node scripts/production-backup.mjs
+        env:
+          VIBE_BACKUP_ENABLED: "true"
+          CONVEX_DEPLOY_KEY: ${{ secrets.VIBE_BACKUP_CONVEX_KEY }}
+          BACKUP_ENCRYPTION_KEY: ${{ secrets.VIBE_BACKUP_ENCRYPTION_KEY }}
+      - name: Read and encrypt retained evidence without exporting storage credentials
+        run: node scripts/production-evidence-backup.mjs
         env:
           VIBE_BACKUP_ENABLED: "true"
           CONVEX_DEPLOY_KEY: ${{ secrets.VIBE_BACKUP_CONVEX_KEY }}

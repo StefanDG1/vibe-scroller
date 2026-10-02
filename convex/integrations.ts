@@ -238,8 +238,10 @@ export const draftPlan = action({
       version: context.proposal.version,
       baseSha: context.repo.sha,
     };
+    let stage = "authorization";
     try {
       await authorizeRepository(ctx, context.repo);
+      stage = "repository_context";
       const inspected = await retrieveContext(
         context.repo,
         JSON.stringify({
@@ -248,6 +250,7 @@ export const draftPlan = action({
         }),
         context.proposal.detail.repositoryEvidence ?? [],
       );
+      stage = "inference";
       const result = await infer(
         ctx,
         z.toJSONSchema(planInput),
@@ -262,13 +265,30 @@ export const draftPlan = action({
         },
         3000,
       );
+      stage = "plan_validation";
       await ctx.runMutation(internal.planning.finish, {
         ...finish,
         plan: result.output,
         inspectedContext: inspected.excerpts,
         credits: result.credits,
       });
-    } catch {
+    } catch (error) {
+      const category =
+        error instanceof Error
+          ? ([
+              "SETUP_REQUIRED",
+              "PROVIDER_ERROR",
+              "COST_RECONCILIATION_REQUIRED",
+              "BUDGET_EXCEEDED",
+              "INVALID_EVIDENCE",
+              "FORBIDDEN",
+              "REPO_TOO_LARGE",
+              "POLICY_BLOCKED",
+            ].find((code) => error.message.includes(code)) ?? error.name)
+          : "UnknownError";
+      console.error(
+        JSON.stringify({ operation: "draft_plan", stage, category }),
+      );
       await ctx.runMutation(internal.planning.finish, {
         ...finish,
         credits: 0,

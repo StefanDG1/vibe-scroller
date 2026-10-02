@@ -195,6 +195,23 @@ it("inventories only surviving retained frames and fences deletion or source cha
       generation: 2,
       type: "image/jpeg",
     });
+    vi.stubEnv("R2_ENDPOINT", "https://synthetic.eu.r2.cloudflarestorage.com");
+    vi.stubEnv("R2_BUCKET", "synthetic-evidence");
+    vi.stubEnv("R2_ACCESS_KEY_ID", "synthetic-backup-read-key");
+    vi.stubEnv("R2_SECRET_ACCESS_KEY", "synthetic-backup-read-secret");
+    const lease = await t.query(internal.recoveryStorage.evidenceReadLease, {
+      key: state.key,
+      asOf,
+    });
+    expect(lease).not.toBeNull();
+    expect(new URL(lease!.url).searchParams.get("X-Amz-Expires")).toBe("60");
+    for (const name of ["retired", "expired", "temporary", "foreign"])
+      expect(
+        await t.query(internal.recoveryStorage.evidenceReadLease, {
+          key: `${org}/${name}`,
+          asOf,
+        }),
+      ).toBeNull();
     await t.run((ctx) => ctx.db.patch(state.source, { generation: 3 }));
     expect(
       await t.query(internal.recovery.evidenceCurrent, {
@@ -211,6 +228,12 @@ it("inventories only surviving retained frames and fences deletion or source cha
     );
     expect(
       await t.query(internal.recovery.evidenceCurrent, {
+        key: state.key,
+        asOf,
+      }),
+    ).toBeNull();
+    expect(
+      await t.query(internal.recoveryStorage.evidenceReadLease, {
         key: state.key,
         asOf,
       }),

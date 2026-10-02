@@ -56,6 +56,7 @@ import type * as profiles from "../profiles.js";
 import type * as projects from "../projects.js";
 import type * as reconciliation from "../reconciliation.js";
 import type * as recovery from "../recovery.js";
+import type * as recoveryStorage from "../recoveryStorage.js";
 import type * as retrieval from "../retrieval.js";
 import type * as runnerProtocol from "../runnerProtocol.js";
 import type * as sandboxBroker from "../sandboxBroker.js";
@@ -117,6 +118,7 @@ declare const fullApi: ApiFromModules<{
   projects: typeof projects;
   reconciliation: typeof reconciliation;
   recovery: typeof recovery;
+  recoveryStorage: typeof recoveryStorage;
   retrieval: typeof retrieval;
   runnerProtocol: typeof runnerProtocol;
   sandboxBroker: typeof sandboxBroker;

@@ -1,0 +1,27 @@
+{
+  "at": "2026-10-02T12:50:17.365Z",
+  "synthetic": true,
+  "environment": "development",
+  "repository": "StefanDG1/vibe-scroller",
+  "currentBase": "3644b94c25f6c8048a2ed44d975b33f16ceff667",
+  "provider": "Vercel Sandbox",
+  "separateStagingProject": true,
+  "model": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+  "actualModelGeneration": true,
+  "reviewedPlanVersion": 3,
+  "approvedFileCount": 1,
+  "maximumCredits": 25,
+  "actualDraftPR": 8,
+  "prState": "closed_unmerged",
+  "closedUnmerged": true,
+  "runState": "completed",
+  "idempotentRefresh": true,
+  "usage": {
+    "reserved": 0,
+    "spent": 7
+  },
+  "limitations": [
+    "Bounded synthetic documentation task; full production UI, merge/revert and commercial funding acceptance remain open.",
+    "Initial model patch was refused on factual review before revised successful run."
+  ]
+}

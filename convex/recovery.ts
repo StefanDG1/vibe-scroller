@@ -6,7 +6,12 @@ import { redactSource } from "./product";
 import { rememberDeletion, subjectHash } from "./lib/deletionMarkers";
 import type { QueryCtx } from "./_generated/server";
 
-async function retainedFrame(ctx: QueryCtx, key: string, asOf: number) {
+export async function retainedFrame(ctx: QueryCtx, key: string, asOf: number) {
+  ensure(
+    Number.isSafeInteger(asOf) && asOf > 0 && asOf <= Date.now(),
+    "INVALID_INPUT",
+    "Invalid evidence backup checkpoint.",
+  );
   const asset = await ctx.db
     .query("assets")
     .withIndex("by_key", (q) => q.eq("key", key))

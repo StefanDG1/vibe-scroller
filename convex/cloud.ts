@@ -20,6 +20,9 @@ export const execute = internalAction({
     let sandbox;
     let credits = 0;
     let computeStarted = 0;
+    let generationUsageKnown = false;
+    let completed = false;
+    let terminatedSandboxId: string | undefined;
     let stage = "authorization";
     try {
       await authorizeRepository(ctx, run.repo);
@@ -90,6 +93,7 @@ export const execute = internalAction({
         },
       });
       credits = generated.credits;
+      generationUsageKnown = true;
       if (credits + run.computeReserve > run.maxCredits)
         throw new Error("Budget exhausted before test execution.");
       const status = await ctx.runQuery(internal.jobs.workerRun, {
@@ -103,21 +107,26 @@ export const execute = internalAction({
         throw new Error("Run canceled.");
       await authorizeRepository(ctx, run.repo);
       stage = "isolated_checks";
+      await ctx.runMutation(internal.jobs.isolatedChecksStarted, {
+        id: run._id,
+        generation: run.generation,
+      });
       const checked = await checkPatch(
         sandbox,
         generated.base,
         generated.changes,
         run.plan.tests,
       );
+      const sandboxId = sandbox.sandboxId;
       await sandbox.kill();
+      terminatedSandboxId = sandboxId;
       sandbox = undefined;
-      const seconds = Math.ceil((Date.now() - computeStarted) / 1000),
-        cost =
-          credits +
-          Math.ceil(
-            seconds * Number(process.env.SANDBOX_CREDITS_PER_SECOND ?? "1"),
-          );
-      await ctx.runMutation(internal.jobs.completeCloud, {
+      const seconds = Math.min(
+          run.maxSeconds,
+          Math.ceil((Date.now() - computeStarted) / 1000),
+        ),
+        cost = credits + Math.ceil(seconds * run.computeRate);
+      completed = await ctx.runMutation(internal.jobs.completeCloud, {
         id: run._id,
         generation: run.generation,
         patch: checked.patch,
@@ -145,7 +154,26 @@ export const execute = internalAction({
         error: `Cloud task failed or stopped at ${stage} (${category}). Review provider and usage; no draft PR was published.`,
       });
     } finally {
-      if (sandbox) await sandbox.kill();
+      if (sandbox) {
+        await sandbox.kill();
+        terminatedSandboxId = sandbox.sandboxId;
+      }
+      // An acknowledged stop/delete plus measured generation allows release
+      // of the unused service-credit hold. Unknown creation, teardown or
+      // generation cost keeps its reservation for operator reconciliation.
+      if (terminatedSandboxId && generationUsageKnown && !completed) {
+        const seconds = Math.min(
+          run.maxSeconds,
+          Math.ceil((Date.now() - computeStarted) / 1000),
+        );
+        const cost = credits + Math.ceil(seconds * run.computeRate);
+        await ctx.runMutation(internal.jobs.reconcileTerminatedCloud, {
+          id: run._id,
+          generation: run.generation,
+          sandboxId: terminatedSandboxId,
+          credits: cost,
+        });
+      }
     }
   },
 });

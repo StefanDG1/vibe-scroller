@@ -2770,7 +2770,9 @@ function SourceDetail({
     [];
   const summary =
     detail.summary ??
-    "No analysis available. Upload permitted content or supply a transcript.";
+    (["queued", "processing"].includes(detail.state)
+      ? "Analysis is underway."
+      : "No analysis yet.");
   const overview =
     summary.length > 280
       ? (summary.match(/^.{1,280}[.!?](?:\s|$)/)?.[0]?.trim() ??

@@ -13,6 +13,8 @@ const credentials = {
   projectId: process.env.VERCEL_SANDBOX_PROJECT_ID,
   teamId: process.env.VERCEL_SANDBOX_TEAM_ID,
 };
+if (!/^prj_[A-Za-z0-9]+$/.test(credentials.projectId))
+  throw Error("Invalid dedicated project identifier");
 const kind = process.argv[2];
 if (!["media", "coding"].includes(kind)) throw Error("Use media or coding");
 const base =
@@ -98,8 +100,11 @@ try {
     expiration: 7 * 24 * 60 * 60 * 1000,
   });
   const proof = {
-    createdAt: new Date().toISOString(),
+    createdAt: snapshot.createdAt.toISOString(),
+    expiresAt: snapshot.expiresAt?.toISOString(),
     snapshotId: snapshot.snapshotId,
+    projectId: credentials.projectId,
+    teamId: credentials.teamId,
     baseImage: base,
     region: "fra1",
     customerDataPresent: false,
@@ -111,7 +116,7 @@ try {
     verified: false,
   };
   writeFileSync(
-    "private/vercel-" + kind + "-build.json",
+    "private/vercel-" + kind + "-" + credentials.projectId + "-build.json",
     JSON.stringify(proof, null, 2),
   );
   console.log(JSON.stringify(proof));

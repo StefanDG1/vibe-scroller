@@ -2,6 +2,7 @@ import { expect, it, vi } from "vitest";
 import { convexTest } from "convex-test";
 import schema from "../convex/schema";
 import { api, internal } from "../convex/_generated/api";
+import { reserve } from "../convex/product";
 const modules = import.meta.glob("../convex/**/*.ts");
 const syntheticPlan = {
   scope: "Owned synthetic change",
@@ -14,6 +15,91 @@ const syntheticPlan = {
   rollback: "Revert",
   unknowns: [],
 };
+it("keeps cancellation fenced and reserved until matching teardown evidence, then settles exactly once", async () => {
+  const { t, a, org, owner, proposalId, repositories } = await setup();
+  const id = await t.run(async (ctx) => {
+    const now = Date.now();
+    const id = await ctx.db.insert("runs", {
+      organizationId: org,
+      createdAt: now,
+      updatedAt: now,
+      proposalId,
+      repositoryId: repositories[0],
+      approvedBy: owner,
+      planHash: "b".repeat(64),
+      baseSha: "a".repeat(40),
+      version: 1,
+      executor: "cloud",
+      fundingRoute: "managed_api",
+      maxCredits: 10,
+      allowedPaths: ["README.md"],
+      highRisk: false,
+      state: "running",
+      generation: 1,
+      expiresAt: now + 60000,
+      leaseUntil: now + 60000,
+      events: ["Isolated sandbox started: vercel:synthetic-cancel"],
+    });
+    await reserve(ctx, org, `run:${id}`, 10);
+    return id;
+  });
+  await a.mutation(api.jobs.cancel, { id });
+  await t.mutation(internal.jobs.failCloud, {
+    id,
+    generation: 1,
+    credits: 0,
+    error: "Synthetic provider failure",
+  });
+  expect(
+    (await a.query(api.product.usage, { organizationId: org })).wallet!
+      .reserved,
+  ).toBe(10);
+  const receipt = {
+    id,
+    generation: 1,
+    sandboxId: "vercel:synthetic-cancel",
+    credits: 3,
+  };
+  await expect(
+    t.mutation(internal.jobs.reconcileTerminatedCloud, {
+      ...receipt,
+      sandboxId: "vercel:foreign",
+    }),
+  ).rejects.toThrow("APPROVAL_STALE");
+  await expect(
+    t.mutation(internal.jobs.reconcileTerminatedCloud, {
+      ...receipt,
+      credits: 11,
+    }),
+  ).rejects.toThrow("BUDGET_EXCEEDED");
+  await t.mutation(internal.jobs.reconcileTerminatedCloud, receipt);
+  await t.mutation(internal.jobs.reconcileTerminatedCloud, receipt);
+  await expect(
+    t.mutation(internal.jobs.reconcileTerminatedCloud, {
+      ...receipt,
+      credits: 2,
+    }),
+  ).rejects.toThrow("COST_RECONCILIATION_REQUIRED");
+  expect(
+    (await a.query(api.product.usage, { organizationId: org })).wallet,
+  ).toMatchObject({ reserved: 0, spent: 3 });
+  expect(
+    await t.mutation(internal.jobs.completeCloud, {
+      id,
+      generation: 1,
+      patch: "late",
+      changes: [],
+      report: "late",
+      credits: 3,
+    }),
+  ).toBe(false);
+  const run = await t.run((ctx) => ctx.db.get(id));
+  expect(run).toMatchObject({ state: "canceled", generation: 2 });
+  expect(run!.patch).toBeUndefined();
+  expect(
+    run!.events.filter((e) => e.startsWith("Teardown confirmed")),
+  ).toHaveLength(1);
+});
 it("denies foreign tenant read/write routes and rejects an asset linked across workspaces", async () => {
   const { t, a, b, org, sourceId, proposalId, foreign } = await setup();
   const workspace = { organizationId: org };

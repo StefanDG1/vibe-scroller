@@ -1112,7 +1112,14 @@ export const claimCloud = internalMutation({
       leaseUntil: Date.now() + maxSeconds * 1000,
       updatedAt: Date.now(),
     });
-    return { ...r, repo, plan: p.plan, computeReserve, maxSeconds };
+    return {
+      ...r,
+      repo,
+      plan: p.plan,
+      computeReserve,
+      maxSeconds,
+      computeRate: rate,
+    };
   },
 });
 export const sandboxStarted = internalMutation({
@@ -1124,6 +1131,67 @@ export const sandboxStarted = internalMutation({
         events: [...r.events, `Isolated sandbox started: ${a.sandboxId}`],
         updatedAt: Date.now(),
       });
+  },
+});
+export const isolatedChecksStarted = internalMutation({
+  args: { id: v.id("runs"), generation: v.number() },
+  handler: async (ctx, a) => {
+    const r = await ctx.db.get(a.id);
+    ensure(
+      r?.state === "running" &&
+        r.generation === a.generation &&
+        (await approvalActive(ctx, r)),
+      "APPROVAL_STALE",
+      "Execution was canceled before checks.",
+    );
+    await ctx.db.patch(r._id, {
+      events: [...r.events, "Isolated checks running."],
+      updatedAt: Date.now(),
+    });
+  },
+});
+export const reconcileTerminatedCloud = internalMutation({
+  args: {
+    id: v.id("runs"),
+    generation: v.number(),
+    sandboxId: v.string(),
+    credits: v.number(),
+  },
+  handler: async (ctx, a) => {
+    const r = await ctx.db.get(a.id);
+    if (!r) return;
+    ensure(
+      r.executor === "cloud" &&
+        ((r.state === "failed" && r.generation === a.generation) ||
+          (r.state === "canceled" && r.generation > a.generation)) &&
+        r.events.includes(`Isolated sandbox started: ${a.sandboxId}`),
+      "APPROVAL_STALE",
+      "Termination does not match the dispatched worker.",
+    );
+    ensure(
+      Number.isSafeInteger(a.credits) &&
+        a.credits >= 0 &&
+        a.credits <= r.maxCredits,
+      "BUDGET_EXCEEDED",
+      "Termination usage exceeds its approved reservation.",
+    );
+    const receipt = `Teardown confirmed; service credits settled: ${a.credits}.`;
+    const previous = r.events.find((event) =>
+      event.startsWith("Teardown confirmed; service credits settled:"),
+    );
+    if (previous) {
+      ensure(
+        previous === receipt,
+        "COST_RECONCILIATION_REQUIRED",
+        "The recorded termination settlement differs.",
+      );
+      return;
+    }
+    await settle(ctx, r.organizationId, `run:${r._id}`, a.credits);
+    await ctx.db.patch(r._id, {
+      events: [...r.events, receipt],
+      updatedAt: Date.now(),
+    });
   },
 });
 export const completeCloud = internalMutation({
@@ -1143,7 +1211,7 @@ export const completeCloud = internalMutation({
       r.state !== "running" ||
       r.leaseUntil < Date.now()
     )
-      return;
+      return false;
     ensure(
       await approvalActive(ctx, r),
       "FORBIDDEN",
@@ -1172,6 +1240,7 @@ export const completeCloud = internalMutation({
       state: "awaiting_review",
       updatedAt: Date.now(),
     });
+    return true;
   },
 });
 export const failCloud = internalMutation({
