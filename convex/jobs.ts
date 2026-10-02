@@ -251,6 +251,8 @@ export const storeSecret = internalMutation({
       await ctx.db.patch(old._id, {
         ...stored,
         revision: crypto.randomUUID(),
+        refreshLeaseKey: undefined,
+        refreshLeaseExpiresAt: undefined,
         availableModels: [],
         status: a.provider === "openai" ? "stored" : "connected",
         updatedAt: Date.now(),

@@ -137,3 +137,88 @@ export const choices = query({
       );
   },
 });
+
+// A one-use refresh token must never be consumed concurrently or revive a revoked connection.
+export const claimRefresh = internalMutation({
+  args: { id: v.id("connections"), previous: v.string(), leaseKey: v.string() },
+  handler: async (ctx, a) => {
+    const row = await ctx.db.get(a.id);
+    const org = row && (await ctx.db.get(row.organizationId));
+    ensure(
+      row?.provider === "github" &&
+        row.status === "connected" &&
+        row.ciphertext === a.previous &&
+        org?.status === "active",
+      "RECONNECT_REQUIRED",
+      "GitHub connection changed.",
+    );
+    ensure(
+      !row.refreshLeaseKey || (row.refreshLeaseExpiresAt ?? 0) <= Date.now(),
+      "CONNECTION_BUSY",
+      "GitHub authorization is being renewed. Retry shortly.",
+    );
+    await ctx.db.patch(row._id, {
+      refreshLeaseKey: a.leaseKey,
+      refreshLeaseExpiresAt: Date.now() + 120000,
+    });
+  },
+});
+export const finishRefresh = internalMutation({
+  args: {
+    id: v.id("connections"),
+    previous: v.string(),
+    leaseKey: v.string(),
+    ciphertext: v.string(),
+    keyVersion: v.string(),
+  },
+  handler: async (ctx, a) => {
+    const row = await ctx.db.get(a.id);
+    const org = row && (await ctx.db.get(row.organizationId));
+    if (
+      !row ||
+      row.provider !== "github" ||
+      row.status !== "connected" ||
+      row.ciphertext !== a.previous ||
+      row.refreshLeaseKey !== a.leaseKey ||
+      (row.refreshLeaseExpiresAt ?? 0) <= Date.now() ||
+      org?.status !== "active"
+    )
+      return false;
+    await ctx.db.patch(row._id, {
+      ciphertext: a.ciphertext,
+      keyVersion: a.keyVersion,
+      revision: crypto.randomUUID(),
+      refreshLeaseKey: undefined,
+      refreshLeaseExpiresAt: undefined,
+      updatedAt: Date.now(),
+    });
+    return true;
+  },
+});
+export const failRefresh = internalMutation({
+  args: { id: v.id("connections"), previous: v.string(), leaseKey: v.string() },
+  handler: async (ctx, a) => {
+    const row = await ctx.db.get(a.id);
+    if (row?.ciphertext === a.previous && row.refreshLeaseKey === a.leaseKey)
+      await ctx.db.patch(row._id, {
+        status: "needs_reconnect",
+        refreshLeaseKey: undefined,
+        refreshLeaseExpiresAt: undefined,
+        updatedAt: Date.now(),
+      });
+  },
+});
+
+export const invalidateCredential = internalMutation({
+  args: { id: v.id("connections"), previous: v.string() },
+  handler: async (ctx, a) => {
+    const row = await ctx.db.get(a.id);
+    if (row?.provider === "github" && row.ciphertext === a.previous)
+      await ctx.db.patch(row._id, {
+        status: "needs_reconnect",
+        refreshLeaseKey: undefined,
+        refreshLeaseExpiresAt: undefined,
+        updatedAt: Date.now(),
+      });
+  },
+});

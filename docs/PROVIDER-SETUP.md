@@ -20,6 +20,8 @@ Register an app for selected repositories. Grant metadata and content read for a
 
 Configure signed webhooks and store the private key only in the trusted backend. Install on a disposable test repository and verify access removal. Show selected repositories in onboarding and let the user pause each one.
 
+New GitHub App authorizations preserve encrypted expiring access and refresh credentials. Expired legacy connections require one reconnect; future renewals use the official one-use refresh grant with same-user and selected-repository verification. See [ADR 019](adr/019-expiring-github-user-authorization.md). Never replace this with a non-expiring broad personal token.
+
 ## Configure AI
 
 Set the managed API credential and allowed model registry. Record pricing, data terms, and spending limits. Test transcription, image input, structured output, rate-limit handling, and cancellation accounting with bounded paid calls.

@@ -33,6 +33,14 @@ Repository: https://github.com/StefanDG1/vibe-scroller
 
 ## Evidence
 
+### October 2: durable GitHub authorization and responsive production checks
+
+Main b902bdf published successfully through Vercel and Convex bold-lemur-667. Native production Chrome opened the owned synthetic source at 320, 360, 390, 412, 768 and 1440 CSS pixels. All widths showed main points, a compact category control, no horizontal overflow and no corrupted punctuation. Visible mobile button/link targets were at least 40 CSS pixels in both dimensions. The desktop brand link was 32 pixels high; it is a known remaining target-size check, not a complete accessibility pass. Private measurements and screenshot remain ignored.
+
+The real development snapshot refresh failed GITHUB_UNAVAILABLE and left profile drafting without inspected context. The OAuth adapter had discarded the refresh token associated with expiring GitHub user tokens. ADR 019 adds encrypted versioned credentials, documented renewal, same-user verification, atomic one-use leases and fences against reconnect/revoke races. Old expired connections need one reconnect. No real refresh or plan-generation success is claimed from component tests.
+
+Windows `pnpm check` after the renewal fix passed 194 application tests, eleven authentication tests, six PCM tests, lint, types, document checks and both builds. Three credential-gated suites remained skipped. A temporary separate preview deployment rare-echidna-358 was created for a locked hosted restore rehearsal, with one-day expiry and execution/billing/email disabled. Its first deployment failed because auth configuration required WORKOS_CLIENT_ID; the non-secret staging client ID was configured before retry. Provider runtime secrets were not copied. Hosted import and deletion results are recorded separately when complete.
+
 ### October 2: exact cloud publication, owned production video and Managed top-ups
 
 Main 0410a18479b04fe1af8c191fb9bf3ad501f6faa8 passed Verify template 36955401772, Version main update 36955401794 and Publish verified alpha 36955478276. GitHub reported its Vercel deployment successful. The production Convex deployment was bold-lemur-667.

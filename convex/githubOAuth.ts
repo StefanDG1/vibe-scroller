@@ -5,6 +5,7 @@ import { api, internal } from "./_generated/api";
 import { github } from "../packages/providers/github";
 import { encrypt } from "../packages/providers/secrets";
 import { ensure } from "../packages/policy";
+import { githubCredential } from "../packages/providers/github-user";
 export const complete = action({
   args: {
     organizationId: v.id("organizations"),
@@ -25,6 +26,7 @@ export const complete = action({
       "SETUP_REQUIRED",
       "Configure GitHub OAuth.",
     );
+    const issuedAt = Date.now();
     const response = await fetch(
       "https://github.com/login/oauth/access_token",
       {
@@ -89,7 +91,11 @@ export const complete = action({
     await ctx.runMutation(internal.jobs.storeSecret, {
       organizationId: a.organizationId,
       provider: "github",
-      ...encrypt(token.access_token, a.organizationId, "github"),
+      ...encrypt(
+        JSON.stringify(githubCredential(token, user.id, issuedAt)),
+        a.organizationId,
+        "github",
+      ),
     });
     await ctx.runMutation(internal.githubLinks.save, {
       organizationId: a.organizationId,

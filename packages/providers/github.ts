@@ -31,13 +31,13 @@ export async function github(
       : {}),
     signal: AbortSignal.timeout(30000),
   });
-  ensure(
-    res.ok,
-    "GITHUB_UNAVAILABLE",
-    res.status === 401 || res.status === 403 || res.status === 404
-      ? "Repository access unavailable. Reconnect GitHub."
-      : "GitHub request failed.",
-  );
+  if (!res.ok)
+    throw Object.assign(
+      new Error(
+        `GITHUB_UNAVAILABLE: ${[401, 403, 404].includes(res.status) ? "Repository access unavailable. Reconnect GitHub." : "GitHub request failed."}`,
+      ),
+      { status: res.status },
+    );
   return res.status === 204 ? null : res.json();
 }
 export async function installationToken(installationId: number) {

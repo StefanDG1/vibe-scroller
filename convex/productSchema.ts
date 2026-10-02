@@ -461,6 +461,8 @@ export const productTables = {
     ciphertext: v.string(),
     keyVersion: v.string(),
     revision: v.optional(v.string()),
+    refreshLeaseKey: v.optional(v.string()),
+    refreshLeaseExpiresAt: v.optional(v.number()),
     availableModels: v.optional(v.array(v.string())),
     status: v.string(),
   })
