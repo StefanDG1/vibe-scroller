@@ -1,0 +1,25 @@
+{
+  "observedAt": "2026-10-02T19:37:58.130Z",
+  "realNewerOwnerLinks": 5,
+  "readySources": 5,
+  "privateThumbnailsReady": 5,
+  "totalInsights": 26,
+  "sampledFrames": [
+    17,
+    22,
+    24,
+    24,
+    24
+  ],
+  "automaticWhisperTranscription": true,
+  "connectedOwnerChatGPTPlan": true,
+  "observedModel": "gpt-5.6-sol",
+  "reasoningEffort": "medium",
+  "sourceMediaSupplied": false,
+  "transcriptSupplied": false,
+  "browserCredentialsSupplied": false,
+  "paidInferenceFallback": false,
+  "humanReviewed": 0,
+  "completeBenchmark": false,
+  "customerContentPublished": false
+}
