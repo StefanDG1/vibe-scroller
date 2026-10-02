@@ -50,7 +50,7 @@ The isolated cloud route now has a complete owner production acceptance exercise
 
 Use Runs & PRs to inspect the report and patch. Only an awaiting-review patch has a publication button. Open the real GitHub PR from the status link; Refresh authoritative PR status checks GitHub again. A verified reversal has its own evidence link and keeps the original merge history. Merge does not mean measured benefit.
 
-Cloud checks use a bounded text snapshot and currently have no application dependency cache or unrestricted network. Read exclusions and failed checks before publication; a documentation check does not certify the whole repository. Checks that rewrite sources are refused rather than silently changing the published files.
+Cloud checks use a bounded text snapshot and a reviewed offline dependency cache for pnpm 12.3.4 projects with cached package versions. Real React/TypeScript checks passed on the selected production worker. Missing packages, unsupported managers and install scripts cannot obtain network access or a fallback. Read exclusions and failed checks before publication; this small checked project does not certify every repository. Checks that rewrite sources are refused rather than silently changing the published files.
 
 ## Storage and evidence
 

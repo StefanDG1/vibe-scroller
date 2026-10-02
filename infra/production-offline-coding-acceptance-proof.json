@@ -1,0 +1,38 @@
+{
+  "checkedAt": "2026-10-02T18:08:21.176Z",
+  "environment": "production",
+  "synthetic": true,
+  "testedBaseCommit": "5d1ec6e4446339a01db5606154d7a6c1f6eaa89a",
+  "workingTreeFix": "offline metadata copy preserves existing read-only files on repeated preparation",
+  "snapshotId": "snap_sPadVi6UNVUuoiaAFxaWsA7toW4G",
+  "previousSnapshotId": "snap_Jj6eRvfsx1DJ8tIbXKcHv3ZMwnN6",
+  "lockfileSha256": "6f09041049ff14f07e137baf09be9c155f2138214cd23f2893a7d60fa804ef9f",
+  "cacheBytes": 1528587050,
+  "selectedBrokerImageVerified": true,
+  "actualOfflineReactTypecheckAndRender": true,
+  "lifecycleAndPnpmHooksNotExecuted": true,
+  "readOnlyStore": true,
+  "validUncachedPackageRefused": true,
+  "repeatedPreparationPassed": true,
+  "exactReviewedSourceChecks": true,
+  "independentZeroWorkerInventory": true,
+  "incompleteCandidateDeleted": true,
+  "independentDeletionObservation": "deleted",
+  "previousRollbackImagePreserved": true,
+  "publicReleaseApproved": false,
+  "commands": [
+    "pnpm exec vitest run --config private/selected-offline-coding.config.ts",
+    "pnpm check",
+    "pnpm exec vitest run --config private/finalize-offline-coding.config.ts"
+  ],
+  "logs": [
+    "outputs/offline-coding-selected-production-worker-retest.log",
+    "outputs/check-20261002-offline-metadata-reuse.log",
+    "outputs/offline-coding-final-observation-retest.log"
+  ],
+  "limitations": [
+    "Owned synthetic React/TypeScript project only",
+    "Pinned pnpm 12.3.4 and cached package versions only",
+    "No general customer repository or public funding certification"
+  ]
+}

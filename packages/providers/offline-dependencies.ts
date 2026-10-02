@@ -32,7 +32,7 @@ export async function prepareOfflineDependencies(
     "The selected coding image has no verified offline dependency cache.",
   );
   const metadata = await sandbox.commands.run(
-    "mkdir -p /home/user/.cache/pnpm/v11 && cp -r /opt/vibe/pnpm-metadata/v11/metadata /opt/vibe/pnpm-metadata/v11/metadata-full /home/user/.cache/pnpm/v11/",
+    "mkdir -p /home/user/.cache/pnpm/v11 && cp -r --update=none /opt/vibe/pnpm-metadata/v11/metadata /opt/vibe/pnpm-metadata/v11/metadata-full /home/user/.cache/pnpm/v11/",
     { user: "user", timeoutMs: 30000 },
   );
   ensure(

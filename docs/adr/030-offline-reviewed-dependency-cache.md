@@ -1,6 +1,6 @@
 # ADR 030: reviewed offline coding dependencies
 
-Status: actual isolated React/TypeScript acceptance passed; production promotion pending. Date: October 2, 2026.
+Status: actual isolated and broker-selected production React/TypeScript acceptance passed; exact-owner access only. Date: October 2, 2026.
 
 The initial clean coding image had pnpm and Git but no application dependencies. A documentation-only check could pass while a React task could not type-check. Customer coding workers must remain offline and must not receive registry tokens, online installation, repository hooks or a mutable cache shared with other customers.
 
@@ -13,3 +13,5 @@ The first real cached install failed because metadata was missing. pnpm's generi
 Changing the active coding image is an explicit operator action, separate from automatic clone renewal. Pause cloud dispatch and renewal, configure the exact independently tested candidate, require current project/team/expiry, no active queued/running/publishing cloud run, no maintenance lease and the unchanged previous snapshot/timestamp. The internal replaceVerifiedCoding mutation cannot choose a customer filesystem or silently promote an unverified fallback. Recheck the actual broker-selected image and provider worker after promotion, then turn the replacement gate off. Automatic clean renewal preserves the accepted cache and never snapshots customer work.
 
 Relevant official documentation: [pnpm frozen/offline installation](https://pnpm.io/cli/install), [cache permissions](https://pnpm.io/settings#cachedir), [Vercel metered Sandbox pricing](https://vercel.com/docs/sandbox/pricing). Pro credit is finite; package downloads do not make compute or snapshot storage unmetered.
+
+The actual guarded promotion committed while dispatch and renewal were paused. Its empty mutation response initially broke the operator test's JSON parser; an authoritative record and independent broker read verified the committed image without repeating promotion. The selected worker then exposed a repeated-preparation failure: copying public read-only metadata twice attempted to overwrite existing files. Preserve existing metadata with cp --update=none inside that same disposable job. The real selected-worker retest passed both the React checks and valid missing-package refusal. An independent provider inventory found zero workers. The unused incomplete candidate was deleted; Snapshot.get retained its deleted status rather than returning 404. The previous verified rollback image remains available. See [the scoped proof](../../infra/production-offline-coding-acceptance-proof.json). This does not approve public execution or certify all repositories.
