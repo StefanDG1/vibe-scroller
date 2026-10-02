@@ -151,6 +151,8 @@ export const execute = internalAction({
         id: run._id,
         generation: run.generation,
         credits,
+        beforeSandboxCreation:
+          stage === "authorization" && computeStarted === 0,
         error: `Cloud task failed or stopped at ${stage} (${category}). Review provider and usage; no draft PR was published.`,
       });
     } finally {

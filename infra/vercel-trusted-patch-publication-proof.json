@@ -1,0 +1,23 @@
+{
+  "at": "2026-10-02T14:45:22.026Z",
+  "frontendBackendCommit": "d781b87f353bd2c2ada192870e91beea5dada9fc",
+  "environment": "production",
+  "synthetic": true,
+  "actualInitialAssessment": "no_fit",
+  "explicitReviewerCorrection": true,
+  "planAndExecutionApproval": "operator authenticated CLI; bounded synthetic scope",
+  "patchPublicationApproval": "native authenticated browser",
+  "fundingRoute": "managed_api",
+  "maxCredits": 10,
+  "actualChecksPassed": true,
+  "actualDraftPR": "https://github.com/StefanDG1/vibe-scroller/pull/11",
+  "headSha": "97dd90049be06f449b11be05b1e4b3ca06cd526e",
+  "approvedPaths": ["docs/verification/2026-10-02-trusted-patch-acceptance.md"],
+  "canonicalReviewPatchSha256": "6a2ca3b8f0344ce4c29cf5c62d8f7bbd05a6be6aa6c2d3ed1bec23c579e044d1",
+  "githubContentsMatchReviewedBytes": true,
+  "closedWithoutMerge": true,
+  "nativeClosureObserved": true,
+  "reservedBalance": 0,
+  "independentWorkerDeletionVerified": true,
+  "publicOrHostedSubscriptionEligibilityEstablished": false
+}

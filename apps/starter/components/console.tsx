@@ -3711,9 +3711,11 @@ function RunCard({ run, title, call, busy, readOnly }: any) {
         <p>
           Customer API model: {run.customerModel?.id}. Provider ceiling USD{" "}
           {((run.maxProviderUsdCents ?? 0) / 100).toFixed(2)}.{" "}
-          {run.providerRequestState === "settled"
-            ? `Reported provider usage USD ${(run.providerUsdCents / 100).toFixed(2)}.`
-            : `Provider request: ${label(run.providerRequestState ?? "unissued")}. Unknown usage requires reconciliation.`}
+          {!run.providerRequestState
+            ? "No provider request was issued."
+            : run.providerRequestState === "settled"
+              ? `Reported provider usage USD ${(run.providerUsdCents / 100).toFixed(2)}.`
+              : `Provider request: ${label(run.providerRequestState ?? "unissued")}. Unknown usage requires reconciliation.`}
         </p>
       )}
       <p>Benefit: not measured</p>

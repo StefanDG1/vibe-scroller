@@ -1296,13 +1296,43 @@ export const failCloud = internalMutation({
     generation: v.number(),
     credits: v.number(),
     error: v.string(),
+    beforeSandboxCreation: v.optional(v.boolean()),
   },
   handler: async (ctx, a) => {
     const r = await ctx.db.get(a.id);
     if (!r) return;
-    /* Leave reservation active until exact residual compute cost is reconciled. */ if (
-      r.generation === a.generation
-    )
+    if (a.beforeSandboxCreation) {
+      ensure(
+        r.executor === "cloud" &&
+          a.credits === 0 &&
+          ((r.generation === a.generation &&
+            ["running", "failed"].includes(r.state)) ||
+            (r.state === "canceled" && r.generation === a.generation + 1)) &&
+          !r.events.some((event) =>
+            event.startsWith("Isolated sandbox started:"),
+          ) &&
+          (!r.providerRequestState || r.providerRequestState === "reserved"),
+        "COST_RECONCILIATION_REQUIRED",
+        "Zero-usage failure does not match an unstarted execution.",
+      );
+      await settle(ctx, r.organizationId, `run:${r._id}`, 0);
+      const notice =
+        "Authorization stopped before sandbox creation or model use; unused reservation released.";
+      await ctx.db.patch(r._id, {
+        state: r.state === "canceled" ? "canceled" : "failed",
+        error: a.error,
+        providerRequestState:
+          r.fundingRoute === "customer_api_key"
+            ? undefined
+            : r.providerRequestState,
+        events: r.events.includes(notice) ? r.events : [...r.events, notice],
+        updatedAt: Date.now(),
+      });
+      return;
+    }
+    // Unknown creation or request exposure retains its hold. A late failure
+    // cannot erase an accepted artifact or completed publication receipt.
+    if (r.generation === a.generation && r.state === "running")
       await ctx.db.patch(a.id, {
         state: "failed",
         error: a.error,

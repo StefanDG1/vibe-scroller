@@ -15,6 +15,91 @@ const syntheticPlan = {
   rollback: "Revert",
   unknowns: [],
 };
+it("releases a known unstarted authorization failure once without reviving cancellation or overwriting completed output", async () => {
+  const { t, a, org, owner, proposalId, repositories } = await setup();
+  const seed = async (state: string, events: string[] = []) =>
+    t.run(async (ctx) => {
+      const now = Date.now();
+      const id = await ctx.db.insert("runs", {
+        organizationId: org,
+        createdAt: now,
+        updatedAt: now,
+        proposalId,
+        repositoryId: repositories[0],
+        approvedBy: owner,
+        planHash: "b".repeat(64),
+        baseSha: "a".repeat(40),
+        version: 1,
+        executor: "cloud",
+        fundingRoute: "managed_api",
+        maxCredits: 10,
+        allowedPaths: ["README.md"],
+        highRisk: false,
+        state,
+        generation: 1,
+        expiresAt: now + 60000,
+        leaseUntil: now + 60000,
+        events,
+      });
+      await reserve(ctx, org, `run:${id}`, 10);
+      return id;
+    });
+  const running = await seed("running");
+  await t.run((ctx) =>
+    ctx.db.patch(running, {
+      fundingRoute: "customer_api_key",
+      providerRequestState: "reserved",
+      maxProviderUsdCents: 100,
+    }),
+  );
+  const receipt = {
+    id: running,
+    generation: 1,
+    credits: 0,
+    error: "Synthetic authorization refusal",
+    beforeSandboxCreation: true,
+  };
+  await t.mutation(internal.jobs.failCloud, receipt);
+  await t.mutation(internal.jobs.failCloud, receipt);
+  expect(
+    (await a.query(api.product.usage, { organizationId: org })).wallet,
+  ).toMatchObject({ reserved: 0, spent: 0 });
+  expect((await t.run((ctx) => ctx.db.get(running)))!.events).toHaveLength(1);
+  expect(
+    (await t.run((ctx) => ctx.db.get(running)))!.providerRequestState,
+  ).toBeUndefined();
+  const canceled = await seed("running");
+  await a.mutation(api.jobs.cancel, { id: canceled });
+  await t.mutation(internal.jobs.failCloud, { ...receipt, id: canceled });
+  expect(await t.run((ctx) => ctx.db.get(canceled))).toMatchObject({
+    state: "canceled",
+    generation: 2,
+  });
+  expect(
+    (await a.query(api.product.usage, { organizationId: org })).wallet!
+      .reserved,
+  ).toBe(0);
+  const started = await seed("running", [
+    "Isolated sandbox started: vercel:synthetic-exposure",
+  ]);
+  await expect(
+    t.mutation(internal.jobs.failCloud, { ...receipt, id: started }),
+  ).rejects.toThrow("COST_RECONCILIATION_REQUIRED");
+  expect(
+    (await a.query(api.product.usage, { organizationId: org })).wallet!
+      .reserved,
+  ).toBe(10);
+  const completed = await seed("awaiting_review");
+  await t.mutation(internal.jobs.failCloud, {
+    id: completed,
+    generation: 1,
+    credits: 0,
+    error: "Late duplicate failure",
+  });
+  expect((await t.run((ctx) => ctx.db.get(completed)))!.state).toBe(
+    "awaiting_review",
+  );
+});
 it("restricts verified cloud workers to acceptance subjects until a separate public release approval", async () => {
   const { t, a, b, org, proposalId } = await setup();
   const query = () => a.query(api.jobs.customerRoutes, { organizationId: org });

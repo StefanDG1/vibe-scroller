@@ -14,3 +14,5 @@ October 2, F004: the owner approved Managed Payments' supported consumer markets
 | 2026-10-01 | F003 | Recorded private screenshots/crops, category/ranking and retrieval scope | Owner instruction; complete evidence retention and conversational retrieval remain unverified |
 
 | 2026-10-01 | Personal production evidence | Updated Research/Offer with real three-Reel and carousel audio/vision results | Operator-assisted retrieval, private evidence and 21 cited insights; no automatic Instagram sync, commercial hosted eligibility or measured customer benefit. Avatar and Beliefs remain consistent with review and permission boundaries |
+
+| 2026-10-02 | Owner production PR evidence | Updated Research and Offer with bounded real draft publication, lifecycle and trusted-byte evidence; reviewed Avatar and Beliefs without promoting hypotheses | Synthetic one-file operator exercises, not customer outcomes, general coding quality, measured benefit or paid release. Original four real posts still have 21 cited insights. Hosted vision and commercial eligibility remain gated. |

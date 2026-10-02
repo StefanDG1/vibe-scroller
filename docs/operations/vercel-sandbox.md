@@ -29,3 +29,7 @@ Pause the three verification flags when image expiry, isolation, broker, spend o
 ## Restrict acceptance before public release
 
 Worker verification and public commercial approval are separate. Set CLOUD_PUBLIC_RELEASE_APPROVED=false and provide CLOUD_EXECUTION_SUBJECTS_JSON as a JSON array containing only the verified operator identity for production acceptance. An absent, malformed or oversized list denies execution. CLOUD_VERIFIED still needs to be true, and DISABLE_CLOUD=true denies everyone. Approval, worker claim and publication all recheck this audience. Do not enable public release merely because an owner integration test passed. Hosted video analysis additionally requires HOSTED_MEDIA_ANALYSIS_VERIFIED=true after its licensed vision model and actual audiovisual quality checks; media-worker verification alone does not enable it.
+
+## Reconcile failures before work begins
+
+A trusted authorization failure before sandbox creation or model use releases the unused service-credit reservation at zero. Its receipt requires no sandbox-start marker, no issued customer-provider request and the matching generation. Cancellation stays canceled; accepted output and publication receipts cannot be overwritten by late failures. Unknown creation, model usage or teardown still retains its hold for reconciliation. This is not a generic zero-cost exception.
