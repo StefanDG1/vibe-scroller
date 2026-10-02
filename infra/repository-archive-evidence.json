@@ -1,0 +1,16 @@
+{
+  "observedAt": "2026-10-02T06:28:09.452Z",
+  "environment": "owned selected GitHub repository, local trusted broker read only",
+  "sourceCommit": "968626b0baf4ba3add96296b85e6f4e93b5ef7cf",
+  "compressedBytes": 1915725,
+  "eligibleFiles": 946,
+  "verifiedSafeTextFiles": 942,
+  "omittedCredentialOrBinaryFiles": 4,
+  "milliseconds": 2095,
+  "allSelectedBlobHashesVerified": true,
+  "credentialsForwardedToArchiveHost": false,
+  "noInference": true,
+  "noSandboxExecution": true,
+  "noPublication": true,
+  "rawArchivePersisted": false
+}

@@ -18,6 +18,86 @@ import {
 } from "../repositories/retrieval";
 import { validateRepositoryEvidence } from "../repositories/context";
 import type { ManifestEntry } from "../repositories/snapshotCache";
+export async function repositoryArchive(
+  fullName: string,
+  baseSha: string,
+  token: string,
+) {
+  ensure(
+    /^[\w.-]+\/[\w.-]+$/.test(fullName) && /^[a-f0-9]{40}$/.test(baseSha),
+    "INVALID_INPUT",
+    "Invalid immutable archive selection.",
+  );
+  const response = await fetch(
+    `https://api.github.com/repos/${fullName}/zipball/${baseSha}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+      redirect: "manual",
+      signal: AbortSignal.timeout(30000),
+    },
+  );
+  ensure(
+    response.status === 302 && response.headers.get("location"),
+    "GITHUB_UNAVAILABLE",
+    "The selected repository archive is unavailable.",
+  );
+  const target = new URL(response.headers.get("location")!);
+  ensure(
+    target.protocol === "https:" &&
+      target.hostname === "codeload.github.com" &&
+      !target.username &&
+      !target.password &&
+      target.port === "" &&
+      target.pathname === `/${fullName}/legacy.zip/${baseSha}`,
+    "POLICY_BLOCKED",
+    "GitHub returned an unexpected archive location.",
+  );
+  // The redirect is a short-lived GitHub capability. Never log it or forward the installation token.
+  const archive = await fetch(target, {
+    redirect: "error",
+    signal: AbortSignal.timeout(30000),
+  });
+  ensure(
+    archive.ok && archive.body,
+    "GITHUB_UNAVAILABLE",
+    "Repository archive download failed.",
+  );
+  const declared = Number(archive.headers.get("content-length") ?? 0);
+  ensure(
+    declared <= 25000000,
+    "REPO_TOO_LARGE",
+    "Repository archive exceeds its download quote.",
+  );
+  const reader = archive.body.getReader(),
+    chunks: Uint8Array[] = [];
+  let length = 0;
+  try {
+    while (true) {
+      const next = await reader.read();
+      if (next.done) break;
+      length += next.value.length;
+      ensure(
+        length <= 25000000,
+        "REPO_TOO_LARGE",
+        "Repository archive exceeds its download quote.",
+      );
+      chunks.push(next.value);
+    }
+  } finally {
+    await reader.cancel().catch(() => {});
+  }
+  const result = new Uint8Array(length);
+  let offset = 0;
+  for (const chunk of chunks) {
+    result.set(chunk, offset);
+    offset += chunk.length;
+  }
+  return result;
+}
 export async function github(
   path: string,
   token: string,

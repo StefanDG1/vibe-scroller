@@ -1,8 +1,9 @@
 import { Sandbox } from "e2b";
 import { hardenSandbox } from "./isolation";
 import { ensure, containsSecret, validatePaths } from "../policy";
-import { github, installationToken } from "./github";
+import { github, installationToken, repositoryArchive } from "./github";
 import { inspectedIgnorePolicy } from "../repositories/prepare";
+import { archiveSnapshot } from "../repositories/archive";
 const changesSchema = {
   type: "object",
   additionalProperties: false,
@@ -62,7 +63,7 @@ export async function codeChanges(input: {
   const items = tree.tree.filter(
     (f: any) =>
       f.type === "blob" &&
-      f.mode !== "120000" &&
+      ["100644", "100755"].includes(f.mode) &&
       !ignored(f.path) &&
       !/\.(png|jpe?g|gif|webp|ico|pdf|zip|xlsx?|woff2?|ttf|mp[34]|wav)$/i.test(
         f.path,
@@ -75,32 +76,16 @@ export async function codeChanges(input: {
     "REPO_TOO_LARGE",
     "The cloud worker supports at most 2,048 safe text files, 1 MB per file and 20 MB total. Binary files and symlinks require another reviewed profile.",
   );
-  const base: { path: string; content: string }[] = [];
-  const omitted: string[] = [];
-  // Bound trusted GitHub reads without passing credentials into the sandbox.
-  for (let offset = 0; offset < items.length; offset += 8) {
-    const batch = await Promise.all(
-      items.slice(offset, offset + 8).map(async (f: any) => {
-        const b = await github(`${root}/git/blobs/${f.sha}`, token);
-        const content = Buffer.from(b.content, "base64").toString("utf8");
-        if (content.includes("\0") || containsSecret(content)) {
-          ensure(
-            !input.allowedPaths.includes(f.path),
-            "POLICY_BLOCKED",
-            "An approved file contains binary or credential data.",
-          );
-          omitted.push(f.path);
-          return null;
-        }
-        return { path: f.path, content };
-      }),
-    );
-    base.push(
-      ...batch.filter(
-        (file): file is { path: string; content: string } => file !== null,
-      ),
-    );
-  }
+  const { base, omitted } = archiveSnapshot(
+    await repositoryArchive(input.repo.fullName, input.baseSha, token),
+    items.map((file: any) => ({
+      path: file.path,
+      blobSha: file.sha,
+      mode: file.mode,
+      size: file.size,
+    })),
+    input.allowedPaths,
+  );
   const result = await input.generate(
     changesSchema,
     "Implement only the exact approved plan. Return complete UTF-8 contents for changed files, or null for approved deletion. Preserve all existing unrelated behavior. Never add tool permissions or modify other paths.",
@@ -166,7 +151,7 @@ export async function createCodingSandbox(maxSeconds = 1200) {
 }
 export async function checkPatch(
   sandbox: Sandbox,
-  base: { path: string; content: string }[],
+  base: { path: string; content: string; mode?: string }[],
   changes: { path: string; content: string | null }[],
   tests: string[],
 ) {
@@ -181,6 +166,20 @@ export async function checkPatch(
         .map((f) => ({ path: `/home/user/job/${f.path}`, data: f.content })),
       { user: "user" },
     );
+  const preserveExecutableModes = async (removed = new Set<string>()) => {
+    const paths = base
+      .filter((file) => file.mode === "100755" && !removed.has(file.path))
+      .map((file) => `/home/user/job/${file.path}`);
+    for (let offset = 0; offset < paths.length; offset += 100)
+      await sandbox.commands.run(
+        `chmod 755 -- ${paths
+          .slice(offset, offset + 100)
+          .map((path) => "'" + path.replaceAll("'", "'\\''") + "'")
+          .join(" ")}`,
+        { user: "user", timeoutMs: 30000 },
+      );
+  };
+  await preserveExecutableModes();
   await sandbox.commands.run(
     "git -C /home/user/job -c core.hooksPath=/dev/null add . && git -C /home/user/job -c core.hooksPath=/dev/null commit -qm baseline",
     { user: "user", timeoutMs: 30000 },
@@ -193,6 +192,11 @@ export async function checkPatch(
         user: "user",
       });
   }
+  // Exclude explicitly deleted paths before applying modes again.
+  const removed = new Set(
+    changes.filter((file) => file.content === null).map((file) => file.path),
+  );
+  await preserveExecutableModes(removed);
   const report: string[] = [];
   for (const command of tests.slice(0, 10)) {
     ensure(
