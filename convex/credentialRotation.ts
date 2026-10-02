@@ -43,9 +43,13 @@ export const rotate = internalAction({
 });
 export const status = internalAction({
   args: {},
-  handler: async (ctx): Promise<{ oldVersions: number }> => {
+  handler: async (
+    ctx,
+  ): Promise<{ oldVersions: number; checked: number; unreadable: number }> => {
     let cursor: string | null = null,
-      oldVersions = 0;
+      oldVersions = 0,
+      checked = 0,
+      unreadable = 0;
     do {
       const page: {
         page: Doc<"connections">[];
@@ -55,8 +59,21 @@ export const status = internalAction({
       oldVersions += page.page.filter(
         (r) => r.keyVersion !== (process.env.SECRET_KEY_VERSION ?? "1"),
       ).length;
+      for (const row of page.page) {
+        checked++;
+        try {
+          decrypt(
+            row.ciphertext,
+            row.keyVersion,
+            row.organizationId,
+            row.provider,
+          );
+        } catch {
+          unreadable++;
+        }
+      }
       cursor = page.isDone ? null : page.continueCursor;
     } while (cursor);
-    return { oldVersions };
+    return { oldVersions, checked, unreadable };
   },
 });
