@@ -1,6 +1,6 @@
 # Your VibeScroller testing guide
 
-Mode: how-to. Last checked October 2, 2026. This guide distinguishes working checks from work still underway. It is not a production-ready announcement.
+Mode: how-to. Last checked October 3, 2026. This guide distinguishes working checks from work still underway. It is not a production-ready announcement.
 
 ## Start here
 
@@ -83,3 +83,5 @@ Open Library and choose All posts, Analyzed, Not analyzed or Processing. The cat
 Open a post to inspect its summary and main points. Evidence frames open inside the app; use Close or Escape, or the previous/next controls. The original post card still opens Instagram. Project suggestions start with the whole post; expand Advanced only to exclude points. Finding a project or matching a repository does not approve coding.
 
 Connect GitHub through the dedicated [VibeScroller App](https://github.com/apps/vibescroller/installations/new). GitHub offers All repositories or Only select repositories. Link your GitHub account to the workspace, select a project, and confirm its profile before requesting context or a plan. Repository access can be changed in GitHub settings. Commercial execution remains governed by current release gates.
+
+The additional real URL-only example completed in about three minutes, including preparation, with five saved main points and 22 retained frames. The separate rapid-cut decoder probe retained 48 frames; the cap does not force 48 duplicates for every video. Your earlier five-post review batch used 14 service compute credits including retries, with a 0.14 EUR internal cost ceiling. That ceiling is not a provider invoice. Reasoning used your ChatGPT allowance; transcription used local Whisper, and isolated audio/frame preparation used Vercel Sandbox. Actual billed infrastructure, shared included usage and laptop electricity are separate. Comparative quality scores remain a V1.1 calibration task.

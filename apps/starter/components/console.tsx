@@ -889,11 +889,6 @@ export function Console({
                             c.level === "collection" ? "Collections" : "Topics"
                           }
                         >
-                          {c.level === "topic" &&
-                          c.parents?.length &&
-                          !c.name.startsWith(`${c.parents[0]} / `)
-                            ? `${c.parents[0]} / `
-                            : ""}
                           {c.name} ({c.count})
                         </option>
                       ))}
@@ -3079,7 +3074,12 @@ function SourceDetail({
                           <button
                             type="button"
                             className="evidence-link"
-                            onClick={() => setViewFrame(e.id)}
+                            onClick={(event) => {
+                              event.currentTarget.focus({
+                                preventScroll: true,
+                              });
+                              setViewFrame(e.id);
+                            }}
                           >
                             Frame · {(e.startMs / 1000).toFixed(1)}s
                           </button>
@@ -3189,7 +3189,10 @@ function SourceDetail({
                 <button
                   type="button"
                   className="evidence-image-button"
-                  onClick={() => setViewFrame(frame.id)}
+                  onClick={(event) => {
+                    event.currentTarget.focus({ preventScroll: true });
+                    setViewFrame(frame.id);
+                  }}
                 >
                   <Image
                     src={`/api/evidence/${encodeURIComponent(frame.id)}?inline=true`}

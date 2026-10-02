@@ -24,8 +24,13 @@ export function EvidenceViewer({
   const frame = frames[index];
   useEffect(() => {
     const d = dialog.current;
+    const previous = document.activeElement;
     d?.showModal();
-    return () => d?.close();
+    return () => {
+      d?.close();
+      if (previous instanceof HTMLElement && previous.isConnected)
+        previous.focus({ preventScroll: true });
+    };
   }, []);
   useEffect(() => {
     const element = dialog.current;
