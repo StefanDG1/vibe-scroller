@@ -50,6 +50,71 @@ export const seed = internalMutation({
     });
   },
 });
+
+// Explicit operator tool updates are distinct from automatic clone renewal.
+// The gate names the exact independently tested candidate, never a customer VM.
+export const replaceVerifiedCoding = internalMutation({
+  args: {
+    previousSnapshotId: v.string(),
+    previousUpdatedAt: v.number(),
+    snapshotId: v.string(),
+    expiresAt: v.number(),
+    projectId: v.string(),
+    teamId: v.string(),
+  },
+  handler: async (ctx, a) => {
+    scope(a.projectId, a.teamId);
+    ensure(
+      process.env.SANDBOX_TOOL_REPLACEMENT_ENABLED === "true" &&
+        process.env.SANDBOX_SNAPSHOT_RENEWAL_ENABLED !== "true" &&
+        process.env.DISABLE_CLOUD === "true" &&
+        process.env.RESTORE_LOCK !== "true" &&
+        process.env.VERCEL_CODING_REPLACEMENT_SNAPSHOT === a.snapshotId,
+      "POLICY_BLOCKED",
+      "Pause dispatch and renewal; configure the exact independently verified clean candidate.",
+    );
+    toolSnapshot(a);
+    ensure(
+      a.expiresAt > Date.now() + 5 * 86400000 &&
+        a.expiresAt <= Date.now() + 7 * 86400000 + 300000,
+      "POLICY_BLOCKED",
+      "The candidate needs its observed bounded provider expiry.",
+    );
+    for (const state of ["queued", "running", "publishing"]) {
+      const active = await ctx.db
+        .query("runs")
+        .withIndex("by_state", (q) => q.eq("state", state))
+        .filter((q) => q.eq(q.field("executor"), "cloud"))
+        .first();
+      ensure(
+        !active,
+        "POLICY_BLOCKED",
+        "Finish or cancel active cloud work before changing its tool profile.",
+      );
+    }
+    const item = await ctx.db
+      .query("sandboxToolSnapshots")
+      .withIndex("by_kind", (q) => q.eq("kind", "coding"))
+      .unique();
+    ensure(
+      item &&
+        item.snapshotId === a.previousSnapshotId &&
+        item.updatedAt === a.previousUpdatedAt &&
+        !item.lease &&
+        a.snapshotId !== item.snapshotId,
+      "APPROVAL_STALE",
+      "The verified coding image changed or maintenance is active.",
+    );
+    await ctx.db.patch(item._id, {
+      snapshotId: a.snapshotId,
+      parentSnapshotId: item.snapshotId,
+      expiresAt: a.expiresAt,
+      updatedAt: Date.now(),
+      lastError: undefined,
+      retryAfter: undefined,
+    });
+  },
+});
 export const claim = internalMutation({
   args: { kind, lease: v.string(), force: v.boolean() },
   handler: async (ctx, a) => {

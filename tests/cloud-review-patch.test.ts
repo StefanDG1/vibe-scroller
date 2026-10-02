@@ -55,7 +55,7 @@ it("checks cannot supply a forged guest diff or mutate a tested source into the 
   expect(result.patch).toContain("+reviewed");
   expect(result.patch).not.toContain("forged guest diff");
   expect(commands.some((command) => command.includes("diff --"))).toBe(false);
-  expect(snapshots).toHaveLength(2);
+  expect(snapshots).toHaveLength(3);
   await expect(
     checkPatch(sandbox, base, changes, ["mutate source"]),
   ).rejects.toThrow("POLICY_BLOCKED");

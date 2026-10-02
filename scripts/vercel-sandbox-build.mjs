@@ -17,6 +17,44 @@ if (!/^prj_[A-Za-z0-9]+$/.test(credentials.projectId))
   throw Error("Invalid dedicated project identifier");
 const kind = process.argv[2];
 if (!["media", "coding"].includes(kind)) throw Error("Use media or coding");
+const withCache = process.argv.includes("--foundation-cache");
+if (withCache && kind !== "coding")
+  throw Error("Only coding uses the reviewed dependency cache");
+const cacheProfile = withCache
+  ? JSON.parse(readFileSync("infra/offline-dependency-cache.json", "utf8"))
+  : undefined;
+const cacheLock = withCache ? readFileSync("pnpm-lock.yaml") : undefined;
+const cacheManifests = withCache
+  ? [
+      "package.json",
+      "apps/starter/package.json",
+      "apps/marketing/package.json",
+    ].map((path) => ({ path, content: readFileSync(path) }))
+  : [];
+if (
+  cacheLock &&
+  createHash("sha256").update(cacheLock).digest("hex") !==
+    cacheProfile.lockfileSha256
+)
+  throw Error("Review the public lockfile cache profile before rebuilding");
+if (
+  cacheManifests.some(
+    (file) =>
+      createHash("sha256").update(file.content).digest("hex") !==
+      cacheProfile.manifests[file.path],
+  )
+)
+  throw Error("Review public manifest hashes before rebuilding");
+if (
+  withCache &&
+  (!Array.isArray(cacheProfile.metadataPackages) ||
+    cacheProfile.metadataPackages.length === 0 ||
+    cacheProfile.metadataPackages.length > 1000 ||
+    !cacheProfile.metadataPackages.every((name) =>
+      /^(?:@[a-z0-9._-]+\/)?[a-z0-9._-]+$/.test(name),
+    ))
+)
+  throw Error("Review the bounded public registry metadata names");
 const base =
   "vercel/sandbox/universal@sha256:c77f7436b9bc0a8b01ef7b09dbcea2de6a18a9fe2aafa89996d2da193da72cf0";
 const release = JSON.parse(readFileSync("infra/downloader.json", "utf8"));
@@ -69,6 +107,64 @@ try {
     throw Error("Clean image installation failed");
   }
   let versions = (await install.stdout()).trim();
+  let cacheBytes;
+  if (cacheLock) {
+    await sandbox.writeFiles([
+      { path: "/opt/vibe/cache-build/pnpm-lock.yaml", content: cacheLock },
+      {
+        path: "/opt/vibe/cache-build/pnpm-workspace.yaml",
+        content: Buffer.from(
+          'packages: ["apps/*"]\nsupportedArchitectures:\n  os: [linux]\n  cpu: [x64]\n  libc: [glibc]\n',
+        ),
+      },
+      ...cacheManifests.map((file) => ({
+        path: "/opt/vibe/cache-build/" + file.path,
+        content: file.content,
+      })),
+    ]);
+    const fetched = await sandbox.runCommand({
+      sudo: true,
+      cmd: "bash",
+      args: [
+        "-c",
+        "set -eu; cd /opt/vibe/cache-build; pnpm install --frozen-lockfile --ignore-scripts --ignore-pnpmfile --no-runtime --store-dir /opt/vibe/pnpm-store --config.cache-dir=/opt/vibe/pnpm-metadata --registry=https://registry.npmjs.org --config.manage-package-manager-versions=false --config.package-manager-strict=false --config.fetch-retries=0 --reporter=append-only >/opt/vibe/cache-build/fetch.log 2>&1",
+      ],
+      timeoutMs: 200000,
+    });
+    if (fetched.exitCode !== 0) throw Error("Reviewed dependency fetch failed");
+    await sandbox.writeFiles([
+      {
+        path: "/opt/vibe/cache-build/metadata.mjs",
+        content: readFileSync("scripts/mirror-registry-metadata.mjs"),
+      },
+      {
+        path: "/opt/vibe/cache-build/names.json",
+        content: Buffer.from(JSON.stringify(cacheProfile.metadataPackages)),
+      },
+    ]);
+    const metadata = await sandbox.runCommand({
+      sudo: true,
+      cmd: "node",
+      args: [
+        "/opt/vibe/cache-build/metadata.mjs",
+        "/opt/vibe/cache-build/names.json",
+      ],
+      timeoutMs: 180000,
+    });
+    if (metadata.exitCode !== 0)
+      throw Error("Reviewed public metadata caching failed");
+    const sealed = await sandbox.runCommand({
+      sudo: true,
+      cmd: "bash",
+      args: [
+        "-c",
+        `set -eu; bytes=$(du -sb /opt/vibe/pnpm-store /opt/vibe/pnpm-metadata | awk '{n+=$1} END {print n}'); test "$bytes" -le 2147483648; printf '%s\\n' "$bytes"; printf '%s\\n' '${cacheProfile.lockfileSha256}' > /opt/vibe/foundation-cache.sha256; chmod -R a+rX,a-w /opt/vibe/pnpm-store /opt/vibe/pnpm-metadata; rm -rf /opt/vibe/cache-build`,
+      ],
+      timeoutMs: 20000,
+    });
+    if (sealed.exitCode !== 0) throw Error("Dependency cache sealing failed");
+    cacheBytes = Number((await sealed.stdout()).trim());
+  }
   if (kind === "media") {
     const res = await fetch(release.url, {
       signal: AbortSignal.timeout(60000),
@@ -110,6 +206,13 @@ try {
     customerDataPresent: false,
     credentialsInVm: false,
     kind,
+    dependencyCache: withCache
+      ? {
+          lockfileSha256: cacheProfile.lockfileSha256,
+          bytes: cacheBytes,
+          scriptsExecuted: false,
+        }
+      : undefined,
     downloadRelease: kind === "media" ? release : undefined,
     toolVersions: versions,
     expiresAfterDays: 7,

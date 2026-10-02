@@ -6,6 +6,81 @@ import { toolSnapshot } from "../packages/policy/tool-snapshots";
 import { signSandboxRequest } from "../packages/policy/sandbox-broker";
 const modules = import.meta.glob("../convex/**/*.ts");
 afterEach(() => vi.unstubAllEnvs());
+it("explicit coding profile replacement requires paused dispatch/renewal, exact candidate scope and a fresh prior record", async () => {
+  const t = convexTest(schema, modules),
+    now = Date.now();
+  for (const [key, value] of Object.entries({
+    VERCEL_SANDBOX_PROJECT_ID: "prj_synthetic",
+    VERCEL_SANDBOX_TEAM_ID: "team_synthetic",
+    VERCEL_CODING_SNAPSHOT: "snap_oldsynthetic123",
+    VERCEL_CODING_REPLACEMENT_SNAPSHOT: "snap_newsynthetic123",
+    SANDBOX_TOOL_REPLACEMENT_ENABLED: "true",
+    SANDBOX_SNAPSHOT_RENEWAL_ENABLED: "false",
+    DISABLE_CLOUD: "true",
+  }))
+    vi.stubEnv(key, value);
+  await t.mutation(internal.sandboxSnapshots.seed, {
+    kind: "coding",
+    snapshotId: "snap_oldsynthetic123",
+    expiresAt: now + 86400000,
+    projectId: "prj_synthetic",
+    teamId: "team_synthetic",
+  });
+  const old = await t.query(internal.sandboxSnapshots.current, {
+    kind: "coding",
+  });
+  const next = {
+    previousSnapshotId: old!.snapshotId,
+    previousUpdatedAt: old!.updatedAt,
+    snapshotId: "snap_newsynthetic123",
+    expiresAt: now + 7 * 86400000,
+    projectId: "prj_synthetic",
+    teamId: "team_synthetic",
+  };
+  for (const [key, value] of [
+    ["DISABLE_CLOUD", "false"],
+    ["SANDBOX_SNAPSHOT_RENEWAL_ENABLED", "true"],
+    ["RESTORE_LOCK", "true"],
+    ["SANDBOX_TOOL_REPLACEMENT_ENABLED", "false"],
+  ]) {
+    vi.stubEnv(key, value);
+    await expect(
+      t.mutation(internal.sandboxSnapshots.replaceVerifiedCoding, next),
+    ).rejects.toThrow("POLICY_BLOCKED");
+    vi.stubEnv(
+      key,
+      key === "DISABLE_CLOUD" || key === "SANDBOX_TOOL_REPLACEMENT_ENABLED"
+        ? "true"
+        : "false",
+    );
+  }
+  await expect(
+    t.mutation(internal.sandboxSnapshots.replaceVerifiedCoding, {
+      ...next,
+      snapshotId: "snap_unreviewed123",
+    }),
+  ).rejects.toThrow("POLICY_BLOCKED");
+  await expect(
+    t.mutation(internal.sandboxSnapshots.replaceVerifiedCoding, {
+      ...next,
+      previousUpdatedAt: old!.updatedAt - 1,
+    }),
+  ).rejects.toThrow("APPROVAL_STALE");
+  await expect(
+    t.mutation(internal.sandboxSnapshots.replaceVerifiedCoding, {
+      ...next,
+      projectId: "prj_foreign",
+    }),
+  ).rejects.toThrow("POLICY_BLOCKED");
+  await t.mutation(internal.sandboxSnapshots.replaceVerifiedCoding, next);
+  expect(
+    (await t.query(internal.sandboxSnapshots.current, { kind: "coding" }))
+      ?.snapshotId,
+  ).toBe(next.snapshotId);
+  await expect(
+    t.mutation(internal.sandboxSnapshots.replaceVerifiedCoding, next),
+  ).rejects.toThrow("APPROVAL_STALE");
+});
 it("refuses expired, expiring and unsafe tool images instead of silently selecting an unverified fallback", () => {
   const now = Date.now();
   for (const value of [

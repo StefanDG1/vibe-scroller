@@ -5,6 +5,7 @@ import { github, installationToken, repositoryArchive } from "./github";
 import { inspectedIgnorePolicy } from "../repositories/prepare";
 import { archiveSnapshot } from "../repositories/archive";
 import { reviewedCloudPatch } from "../repositories/reviewPatch";
+import { prepareOfflineDependencies } from "./offline-dependencies";
 const changesSchema = {
   type: "object",
   additionalProperties: false,
@@ -210,6 +211,9 @@ export async function checkPatch(
       executable:
         base.find((original) => original.path === file.path)?.mode === "100755",
     });
+  await sandbox.verifySnapshot([...expected.values()]);
+  await prepareOfflineDependencies(sandbox, [...expected.values()], tests);
+  // Installation must not rewrite manifests, lockfiles or any reviewed source.
   await sandbox.verifySnapshot([...expected.values()]);
   const report: string[] = [];
   for (const command of tests.slice(0, 10)) {
