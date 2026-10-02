@@ -26,6 +26,11 @@ export async function processPersonalJob(
     job.deadline > Date.now() + (job.media ? 905000 : 185000)
   )
     throw new Error("PERSONAL_JOB_INVALID");
+  if (
+    job.caption !== undefined &&
+    (typeof job.caption !== "string" || job.caption.length > 6000)
+  )
+    throw new Error("PERSONAL_JOB_INVALID");
   const abort = new AbortController();
   const combined = AbortSignal.any([
     abort.signal,
@@ -98,6 +103,13 @@ export async function processPersonalJob(
             endMs: null,
           },
         ];
+    if (job.caption)
+      evidence.push({
+        kind: "caption",
+        id: "post_caption",
+        startMs: null,
+        endMs: null,
+      });
     stage = "inference";
     if (mediaInput)
       await request("heartbeat", { ...reference, stage: "analyzing" });
@@ -111,6 +123,7 @@ export async function processPersonalJob(
         mediaInput
           ? {
               durationMs: job.media.durationMs,
+              ...(job.caption ? { postCaption: job.caption } : {}),
               automaticTranscript: mediaInput.transcript,
               transcriptionWarnings: mediaInput.transcriptionWarnings ?? [],
               sampledFrames: mediaInput.frameEvidence,

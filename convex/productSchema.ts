@@ -195,6 +195,19 @@ export const productTables = {
     .index("by_expiry", ["expiresAt"]),
   sources: defineTable({
     ...tenant,
+    acquisition: v.optional(
+      v.object({
+        basis: v.literal("permitted_public_fetch"),
+        status: v.string(),
+        downloaderVersion: v.string(),
+        extractor: v.string(),
+        title: v.string(),
+        description: v.string(),
+        durationSeconds: v.optional(v.number()),
+        byteLength: v.optional(v.number()),
+        acquiredAt: v.number(),
+      }),
+    ),
     personalMedia: v.optional(v.any()),
     personalAnalysis: v.optional(
       v.object({
@@ -242,8 +255,8 @@ export const productTables = {
         v.object({
           kind: v.string(),
           id: v.string(),
-          startMs: v.number(),
-          endMs: v.number(),
+          startMs: v.union(v.number(), v.null()),
+          endMs: v.union(v.number(), v.null()),
         }),
       ),
     ),

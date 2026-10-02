@@ -8,6 +8,10 @@ No application code from Kinetexa, Vydero, or the WorkOS starter is copied into 
 
 The original research report remains in the owner's Downloads folder. This repository stores an analysis and source fingerprint, not the report's personal career details or unresolved embedded citations.
 
+## Media acquisition runtime
+
+The optional E2B acquisition image installs the official yt-dlp Linux release recorded in `infra/downloader.json`, verified against its published SHA-256. Its bundled executable includes material under its upstream distribution terms; it does not inherit VibeScroller's MIT license. Upstream source and distribution notices are available at [yt-dlp](https://github.com/yt-dlp/yt-dlp). FFmpeg is supplied by the pinned Debian base package and retains its package license. Neither executable nor creator media is redistributed in this source repository.
+
 ## SEO audit snapshot
 
 The `seo-audit` skill is copied from coreyhaines31/marketingskills at commit `5b2c0007766c6a1cf1d53fd8fc73e979e0821022`. Its MIT license, copyright notice, and references are retained in `.agents/skills/seo-audit`. The original `companynerve-launch` skill is covered by this repository's MIT license. Earlier copied notices remain unchanged.

@@ -5,11 +5,34 @@ import { ensure } from "../policy";
 import { decoderManifest } from "../media/manifest";
 import { createHash } from "node:crypto";
 import { exactArrayBuffer } from "./binary";
+import {
+  acquisitionManifest,
+  acquisitionPolicy,
+  acquisitionMessage,
+} from "../media/acquisition";
+import { acquirer } from "../media/acquirer";
+import { hardenAcquisition } from "./acquisition-isolation";
+import type { z } from "zod";
+type Acquisition = z.infer<typeof acquisitionManifest>;
+export class MediaPreparationError extends Error {
+  constructor(
+    public readonly computeSeconds: number | undefined,
+    public readonly acquisition?: Acquisition,
+  ) {
+    super(
+      acquisition && acquisition.status !== "acquired"
+        ? acquisitionMessage(acquisition.status)
+        : "Media preparation did not complete.",
+    );
+  }
+}
 export async function prepareMedia(
-  objectKey: string,
+  input: string | { url: string },
   decoder: string,
   normalizedPcm = false,
 ) {
+  const link =
+    typeof input === "string" ? undefined : acquisitionPolicy(input.url);
   ensure(
     process.env.MEDIA_VERIFIED === "true" &&
       process.env.E2B_API_KEY &&
@@ -17,52 +40,106 @@ export async function prepareMedia(
     "MEDIA_UNAVAILABLE",
     "Verify the pinned isolated media image before processing.",
   );
+  if (link)
+    ensure(
+      process.env.ACQUISITION_VERIFIED === "true" &&
+        process.env.E2B_ACQUISITION_TEMPLATE,
+      "MEDIA_UNAVAILABLE",
+      "The isolated link downloader has not been verified.",
+    );
   const started = Date.now();
   let killed = false;
-  const sandbox = await Sandbox.create(process.env.E2B_MEDIA_TEMPLATE, {
-    apiKey: process.env.E2B_API_KEY,
-    allowInternetAccess: false,
-    secure: true,
-    timeoutMs: 300000,
-    metadata: { product: "vibescroller", class: "media" },
-  });
+  let acquisition: Acquisition | undefined;
+  const sandbox = await Sandbox.create(
+    link
+      ? process.env.E2B_ACQUISITION_TEMPLATE!
+      : process.env.E2B_MEDIA_TEMPLATE,
+    {
+      apiKey: process.env.E2B_API_KEY,
+      allowInternetAccess: Boolean(link),
+      ...(link
+        ? { network: { allowOut: link.domains, denyOut: ["0.0.0.0/0"] } }
+        : {}),
+      secure: true,
+      timeoutMs: 300000,
+      metadata: {
+        product: "vibescroller",
+        class: link ? "public-acquisition" : "media",
+      },
+    },
+  );
   try {
+    if (link) {
+      await hardenAcquisition(sandbox);
+      await sandbox.commands.run("mkdir -p /home/user/media", {
+        user: "user",
+        timeoutMs: 10000,
+      });
+      await sandbox.files.write(
+        "/home/user/media/request.json",
+        JSON.stringify({ url: link.url }),
+        { user: "user" },
+      );
+      await sandbox.files.write("/home/user/media/acquire.py", acquirer, {
+        user: "user",
+      });
+      await sandbox.commands.run("python3 /home/user/media/acquire.py", {
+        user: "user",
+        timeoutMs: 100000,
+      });
+      const raw = await sandbox.files.read("/home/user/media/acquisition.json");
+      ensure(
+        raw.length <= 15000,
+        "INVALID_MEDIA_MANIFEST",
+        "Source metadata exceeded its limit.",
+      );
+      acquisition = acquisitionManifest.parse(JSON.parse(raw));
+      ensure(
+        acquisition.status === "acquired",
+        "SOURCE_UNAVAILABLE",
+        acquisitionMessage(acquisition.status),
+      );
+      // No source-network access is needed by FFmpeg or any subsequent decoder.
+      await sandbox.updateNetwork({ denyOut: ["0.0.0.0/0"], allowOut: [] });
+    }
     await hardenSandbox(sandbox);
-    const res = await fetch(signedObject(objectKey, "GET", 300), {
-      signal: AbortSignal.timeout(60000),
-    });
-    ensure(
-      res.ok && Number(res.headers.get("content-length")) <= 250000000,
-      "SOURCE_UNAVAILABLE",
-      "Source object is unavailable or exceeds the limit.",
-    );
-    let bytes = 0;
-    const stream = res.body!.pipeThrough(
-      new TransformStream<Uint8Array, Uint8Array>({
-        transform(chunk, controller) {
-          bytes += chunk.byteLength;
-          ensure(
-            bytes <= 250000000,
-            "SOURCE_UNAVAILABLE",
-            "Source exceeds its byte limit.",
-          );
-          controller.enqueue(chunk);
-        },
-      }),
-    );
-    await sandbox.commands.run("mkdir -p /home/user/media", {
-      user: "user",
-      timeoutMs: 10000,
-    });
-    await sandbox.files.write("/home/user/media/input", stream, {
-      user: "user",
-    });
+    if (!link) {
+      const res = await fetch(signedObject(input as string, "GET", 300), {
+        signal: AbortSignal.timeout(60000),
+      });
+      ensure(
+        res.ok && Number(res.headers.get("content-length")) <= 250000000,
+        "SOURCE_UNAVAILABLE",
+        "Source object is unavailable or exceeds the limit.",
+      );
+      let bytes = 0;
+      const stream = res.body!.pipeThrough(
+        new TransformStream<Uint8Array, Uint8Array>({
+          transform(chunk, controller) {
+            bytes += chunk.byteLength;
+            ensure(
+              bytes <= 250000000,
+              "SOURCE_UNAVAILABLE",
+              "Source exceeds its byte limit.",
+            );
+            controller.enqueue(chunk);
+          },
+        }),
+      );
+      await sandbox.commands.run("mkdir -p /home/user/media", {
+        user: "user",
+        timeoutMs: 10000,
+      });
+      await sandbox.files.write("/home/user/media/input", stream, {
+        user: "user",
+      });
+    }
     await sandbox.files.write("/home/user/media/decode.py", decoder, {
       user: "user",
     });
     await sandbox.commands.run("python3 /home/user/media/decode.py", {
       user: "user",
-      timeoutMs: 240000,
+      timeoutMs: link ? 160000 : 240000,
     });
     const rawManifest = await sandbox.files.read(
       "/home/user/media/manifest.json",
@@ -111,10 +188,30 @@ export async function prepareMedia(
       manifest,
       audio,
       frames,
+      ...(acquisition ? { acquisition } : {}),
       computeSeconds: Math.ceil((Date.now() - started) / 1000),
     };
+  } catch {
+    try {
+      if (!killed) await sandbox.kill();
+      killed = true;
+    } catch {
+      /* Retain the reservation when termination cannot be confirmed. */
+    }
+    throw new MediaPreparationError(
+      killed
+        ? Math.min(300, Math.ceil((Date.now() - started) / 1000))
+        : undefined,
+      acquisition,
+    );
   } finally {
-    if (!killed) await sandbox.kill();
+    if (!killed) {
+      try {
+        await sandbox.kill();
+      } catch {
+        /* The caller receives an uncertain compute result. */
+      }
+    }
   }
 }
 export async function transcribe(audio: Uint8Array, key: string) {

@@ -38,6 +38,7 @@ type Initial = {
     hostedStatus: string;
     active: boolean;
     personalAlphaEnabled?: boolean;
+    linkAnalysisEnabled?: boolean;
   };
   sources: any[];
   categories?: { key: string; name: string; count: number }[];
@@ -102,11 +103,13 @@ const Button = ({
 );
 
 function SourceThumbnail({ source, demo }: { source: any; demo: boolean }) {
-  const frame = (
-    source.originalMediaEvidence ??
-    source.mediaEvidence ??
-    []
-  ).find((e: any) => e.kind === "frame");
+  const frame =
+    (source.originalMediaEvidence ?? source.mediaEvidence ?? []).find(
+      (e: any) => e.kind === "frame",
+    ) ??
+    (source.personalMedia?.frames?.[0]
+      ? { id: source.personalMedia.frames[0].assetId, kind: "frame" }
+      : undefined);
   const [failedId, setFailedId] = useState<string>(),
     [loadedId, setLoadedId] = useState<string>();
   const failed = Boolean(frame && failedId === frame.id),
@@ -994,6 +997,7 @@ export function Console({
               personalEnabled={
                 !demo && data.aiPreference?.personalAlphaEnabled === true
               }
+              linkAnalysisEnabled={data.aiPreference?.linkAnalysisEnabled}
               call={call}
               onProposal={(p: any) => {
                 setSelected(p);
@@ -1951,6 +1955,7 @@ export function Console({
             <CaptureForm
               devices={data.devices ?? []}
               personalEnabled={data.aiPreference?.personalAlphaEnabled}
+              linkAnalysisEnabled={data.aiPreference?.linkAnalysisEnabled}
               sharedDraft={sharedDraft}
               demo={demo}
               organizationId={organizationId}
@@ -1982,6 +1987,7 @@ function CaptureForm({
   existingGeneration,
   devices = [],
   personalEnabled = false,
+  linkAnalysisEnabled = false,
   sharedDraft,
 }: any) {
   const [kind, setKind] = useState(existingSourceId ? "upload" : "url");
@@ -2006,6 +2012,30 @@ function CaptureForm({
     )?.slug ||
     computer?.personalModels[0]?.slug ||
     "";
+  const automatic =
+    personalEnabled &&
+    autoAnalyze &&
+    (kind === "upload" ||
+      (linkAnalysisEnabled && ["url", "import"].includes(kind)));
+  const approval = {
+    deviceId: chosenDevice,
+    model: effectiveModel,
+    effort: "medium",
+    useOwnPlan: true,
+    maxComputeCredits: 10,
+  };
+  const checkAutomatic = async (f: FormData) => {
+    if (!automatic) return;
+    if (!computer || !effectiveModel || f.get("ownPlan") !== "on")
+      throw new Error(
+        "Choose your online computer and approve using your ChatGPT plan.",
+      );
+    const fresh = await call("checkPersonalSession", { organizationId });
+    if (fresh !== true)
+      throw new Error(
+        "Sign in again before approving analysis. Your import preview is preserved.",
+      );
+  };
   const [manifest, setManifest] = useState<any>(null);
   const [importError, setImportError] = useState("");
   const [preview, setPreview] = useState<ImportPreview | null>(null);
@@ -2032,7 +2062,12 @@ function CaptureForm({
             setImportError("");
             const { importBatch } =
               await import("../../../packages/instagram-import");
-            const batch = importBatch(preview.links, importOffset);
+            await checkAutomatic(f);
+            const batch = importBatch(
+              preview.links,
+              importOffset,
+              automatic ? 5 : 500,
+            );
             if (!batch.count) return;
             const result = await call("importLinks", {
               organizationId,
@@ -2058,6 +2093,21 @@ function CaptureForm({
                 ],
               }));
               setImportOffset(importOffset + batch.count);
+              if (automatic) {
+                const sources = result.entries
+                  .filter((entry: any) => entry.accepted && entry.sourceId)
+                  .map((entry: any) => ({ id: entry.sourceId, generation: 0 }));
+                if (sources.length) {
+                  const queued = await call("approvePersonalBatch", {
+                    ...approval,
+                    sources,
+                  });
+                  if (queued === undefined)
+                    throw new Error(
+                      "Your links were saved. Analysis was not approved; open their status to retry.",
+                    );
+                }
+              }
             }
           } catch (error) {
             setImportError(
@@ -2165,24 +2215,56 @@ function CaptureForm({
             setSaving(false);
           }
           return;
-        } else if (existingSourceId)
-          await call("attachSource", {
-            id: existingSourceId,
-            text: f.get("text"),
-            rightsAttested: f.get("rights") === "on",
-          });
-        else
-          await call("capture", {
-            organizationId,
-            key: crypto.randomUUID(),
-            kind,
-            title: f.get("title"),
-            ...(kind === "url"
-              ? { url: f.get("url") }
-              : { text: f.get("text") }),
-            rightsAttested: f.get("rights") === "on",
-          });
-        onDone();
+        }
+        if (saving) return;
+        setSaving(true);
+        setImportError("");
+        try {
+          await checkAutomatic(f);
+          let sourceId = existingSourceId;
+          if (existingSourceId)
+            await call("attachSource", {
+              id: existingSourceId,
+              text: f.get("text"),
+              rightsAttested: f.get("rights") === "on",
+            });
+          else
+            sourceId = await call("capture", {
+              organizationId,
+              key: crypto.randomUUID(),
+              kind,
+              title: String(f.get("title") || "Saved video"),
+              ...(kind === "url"
+                ? { url: f.get("url") }
+                : { text: f.get("text") }),
+              rightsAttested: f.get("rights") === "on",
+            });
+          if (!sourceId) return;
+          if (automatic) {
+            const queued = await call("approvePersonalBatch", {
+              ...approval,
+              sources: [
+                {
+                  id: sourceId,
+                  generation: existingSourceId ? existingGeneration + 1 : 0,
+                },
+              ],
+            });
+            if (queued === undefined) {
+              onDone(sourceId);
+              return;
+            }
+          }
+          onDone(sourceId);
+        } catch (error) {
+          setImportError(
+            error instanceof Error
+              ? error.message
+              : "The source could not be saved.",
+          );
+        } finally {
+          setSaving(false);
+        }
       }}
     >
       <label>
@@ -2205,10 +2287,12 @@ function CaptureForm({
           Title
           <input
             name="title"
-            required={kind !== "upload"}
+            required={kind === "text"}
             maxLength={160}
             placeholder={
-              kind === "upload" ? "Uses the filename if empty" : undefined
+              kind === "upload"
+                ? "Uses the filename if empty"
+                : "Optional title"
             }
           />
         </label>
@@ -2352,71 +2436,74 @@ function CaptureForm({
         <input name="rights" type="checkbox" required />I may submit this
         content for processing
       </label>
-      {kind === "upload" && personalEnabled && (
-        <section
-          className="upload-analysis form-grid"
-          aria-label="Automatic analysis"
-        >
-          <label className="check">
-            <input
-              type="checkbox"
-              checked={autoAnalyze}
-              onChange={(e) => setAutoAnalyze(e.target.checked)}
-            />
-            Transcribe and analyze after upload
-          </label>
-          {autoAnalyze && (
-            <>
-              <label>
-                Computer
-                <select
-                  value={chosenDevice}
-                  onChange={(e) => {
-                    setChosenDevice(e.target.value);
-                    setChosenModel("");
-                  }}
-                >
-                  <option value="">Choose an online computer</option>
-                  {eligible.map((d: any) => (
-                    <option key={id(d)} value={id(d)}>
-                      {d.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                ChatGPT model
-                <select
-                  value={effectiveModel}
-                  onChange={(e) => setChosenModel(e.target.value)}
-                >
-                  {!computer && (
-                    <option value="">Connect your computer first</option>
-                  )}
-                  {computer?.personalModels.map((m: any) => (
-                    <option key={m.slug} value={m.slug}>
-                      {m.displayName}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="check">
-                <input name="ownPlan" type="checkbox" required />
-                Use my ChatGPT plan for this video with medium reasoning.
-                Reserve up to 10 credits for isolated media preparation.
-              </label>
-              <p className="fine">
-                Audio is transcribed locally on your laptop. Sampled frames and
-                the transcript go to your connected OpenAI account. No paid AI
-                fallback.
-              </p>
-            </>
-          )}
-        </section>
-      )}
+      {personalEnabled &&
+        (kind === "upload" ||
+          (linkAnalysisEnabled && ["url", "import"].includes(kind))) && (
+          <section
+            className="upload-analysis form-grid"
+            aria-label="Automatic analysis"
+          >
+            <label className="check">
+              <input
+                type="checkbox"
+                checked={autoAnalyze}
+                onChange={(e) => setAutoAnalyze(e.target.checked)}
+              />
+              Transcribe and analyze automatically
+            </label>
+            {autoAnalyze && (
+              <>
+                <label>
+                  Computer
+                  <select
+                    value={chosenDevice}
+                    onChange={(e) => {
+                      setChosenDevice(e.target.value);
+                      setChosenModel("");
+                    }}
+                  >
+                    <option value="">Choose an online computer</option>
+                    {eligible.map((d: any) => (
+                      <option key={id(d)} value={id(d)}>
+                        {d.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  ChatGPT model
+                  <select
+                    value={effectiveModel}
+                    onChange={(e) => setChosenModel(e.target.value)}
+                  >
+                    {!computer && (
+                      <option value="">Connect your computer first</option>
+                    )}
+                    {computer?.personalModels.map((m: any) => (
+                      <option key={m.slug} value={m.slug}>
+                        {m.displayName}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="check">
+                  <input name="ownPlan" type="checkbox" required />
+                  Use my ChatGPT plan with medium reasoning. Reserve up to 10
+                  compute credits per video
+                  {kind === "import" ? ", up to five videos per batch" : ""}.
+                </label>
+                <p className="fine">
+                  Audio is transcribed locally on your laptop. Sampled frames
+                  and the transcript go to your connected OpenAI account. No
+                  paid AI fallback.
+                </p>
+              </>
+            )}
+          </section>
+        )}
       <p className="fine">
-        {kind === "upload" && personalEnabled && autoAnalyze
-          ? "Keep your paired laptop on until analysis finishes."
+        {automatic
+          ? "Keep your paired laptop on until analysis finishes. Public links are retrieved when the platform permits access."
           : "Saving does not start analysis. Supplied text has no implied audio or visual coverage."}
       </p>
       <button
@@ -2437,16 +2524,22 @@ function CaptureForm({
               ? "Importing links..."
               : preview?.links.length && importOffset >= preview.links.length
                 ? "Import complete"
-                : importOffset
-                  ? "Import next batch"
-                  : "Import reviewed links"
+                : automatic
+                  ? "Import and analyze reviewed links"
+                  : importOffset
+                    ? "Import next batch"
+                    : "Import reviewed links"
             : saving
-              ? "Uploading..."
+              ? kind === "upload"
+                ? "Uploading..."
+                : "Saving..."
               : kind === "upload" && personalEnabled && autoAnalyze
                 ? "Upload and analyze"
                 : existingSourceId
                   ? "Attach permitted content"
-                  : "Save source"}
+                  : automatic
+                    ? "Add and analyze"
+                    : "Save source"}
       </button>
       {importError && <p role="alert">{importError}</p>}
       {manifest && (
@@ -2480,6 +2573,7 @@ function SourceDetail({
   repos,
   devices,
   personalEnabled,
+  linkAnalysisEnabled,
   call,
   onProposal,
 }: any) {
@@ -2754,7 +2848,25 @@ function SourceDetail({
                               : `${(e.startMs / 1000).toFixed(1)}s`}
                           </a>
                         )}
-                        {e.kind !== "transcript" &&
+                        {e.kind === "caption" &&
+                          detail.acquisition?.description && (
+                            <a
+                              href="#source-caption"
+                              onClick={() => {
+                                const target = document.getElementById(
+                                  "source-caption",
+                                ) as HTMLDetailsElement | null;
+                                if (target) {
+                                  target.open = true;
+                                  target.focus({ preventScroll: true });
+                                }
+                              }}
+                            >
+                              Post caption
+                            </a>
+                          )}
+                        {e.kind !== "caption" &&
+                          e.kind !== "transcript" &&
                           (e.kind !== "frame" || demo) && (
                             <span>
                               {label(e.kind)} ·{" "}
@@ -2771,7 +2883,11 @@ function SourceDetail({
             </article>
           ))}
         {!detailLoading && !insights.length && !detail.error && (
-          <p>No main points yet. Add permitted media to start analysis.</p>
+          <p>
+            {["processing", "queued"].includes(detail.state)
+              ? "Analysis is underway."
+              : "No main points yet. Review the source's analysis options."}
+          </p>
         )}
         <details
           id="source-transcript"
@@ -2800,6 +2916,14 @@ function SourceDetail({
           )}
         </details>
       </section>
+      {detail.acquisition?.description && (
+        <details id="source-caption" className="panel" tabIndex={-1}>
+          <summary>Post caption</summary>
+          <p style={{ whiteSpace: "pre-wrap" }}>
+            {detail.acquisition.description}
+          </p>
+        </details>
+      )}
       {!demo && savedFrames.length > 0 && (
         <section className="panel" aria-label="Video evidence">
           <h2>Video evidence</h2>
@@ -2853,6 +2977,7 @@ function SourceDetail({
             existingGeneration={detail.generation}
             devices={devices}
             personalEnabled={personalEnabled}
+            linkAnalysisEnabled={linkAnalysisEnabled}
             onDone={() => {}}
           />
         </section>
@@ -3012,6 +3137,7 @@ function SourceDetail({
           <PersonalSourceAnalysis
             source={detail}
             devices={devices}
+            linkAnalysisEnabled={linkAnalysisEnabled}
             call={call}
           />
         )}
@@ -3043,7 +3169,12 @@ function SourceDetail({
     </>
   );
 }
-function PersonalSourceAnalysis({ source, devices, call }: any) {
+function PersonalSourceAnalysis({
+  source,
+  devices,
+  call,
+  linkAnalysisEnabled,
+}: any) {
   const [deviceId, setDeviceId] = useState(""),
     [model, setModel] = useState(""),
     [consent, setConsent] = useState(false),
@@ -3068,7 +3199,7 @@ function PersonalSourceAnalysis({ source, devices, call }: any) {
           aria-label="Analysis progress"
           aria-live="polite"
         >
-          {(source.kind === "upload"
+          {(source.kind !== "text"
             ? [
                 "Preparing media",
                 "Transcribing audio",
@@ -3077,7 +3208,7 @@ function PersonalSourceAnalysis({ source, devices, call }: any) {
             : ["Analyzing text and saving insights"]
           ).map((step, index) => {
             const active =
-              source.kind !== "upload"
+              source.kind === "text"
                 ? 0
                 : source.personalAnalysis.state === "preparing"
                   ? 0
@@ -3132,7 +3263,11 @@ function PersonalSourceAnalysis({ source, devices, call }: any) {
         >
           Cancel personal analysis
         </Button>
-      ) : !["text", "upload"].includes(source.kind) ? (
+      ) : !(
+          source.kind === "text" ||
+          source.kind === "upload" ||
+          (source.kind === "url" && linkAnalysisEnabled)
+        ) ? (
         <p>
           Upload the permitted video to start automatic transcription and frame
           analysis.
@@ -3141,7 +3276,7 @@ function PersonalSourceAnalysis({ source, devices, call }: any) {
         source.state !== "ready" && (
           <>
             <p>
-              {source.kind === "upload"
+              {source.kind !== "text"
                 ? "Your laptop transcribes audio locally, then sends sampled frames and the transcript to your ChatGPT account. Media preparation reserves up to 10 compute credits."
                 : "Your laptop sends this text to your ChatGPT account."}{" "}
               No VibeScroller inference credits or paid AI fallback. Your
@@ -3217,7 +3352,7 @@ function PersonalSourceAnalysis({ source, devices, call }: any) {
                         model,
                         effort: "medium",
                         useOwnPlan: true,
-                        ...(source.kind === "upload"
+                        ...(source.kind !== "text"
                           ? { maxComputeCredits: 10 }
                           : {}),
                       });
@@ -3227,7 +3362,7 @@ function PersonalSourceAnalysis({ source, devices, call }: any) {
                     }
                   }}
                 >
-                  {source.kind === "upload"
+                  {source.kind !== "text"
                     ? "Transcribe and analyze video"
                     : "Analyze with my plan"}
                 </Button>

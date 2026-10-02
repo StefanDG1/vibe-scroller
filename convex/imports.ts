@@ -76,7 +76,9 @@ export const links = mutation({
           accepted: true,
           sourceId: id,
           message:
-            "Saved. Supply permitted media or a transcript before analysis.",
+            process.env.ACQUISITION_VERIFIED === "true"
+              ? "Saved. Ready for permitted link retrieval."
+              : "Saved. Link retrieval is not configured; permitted media can be attached.",
         });
       } catch (error) {
         if (error instanceof Error && error.message.includes("QUOTA_EXCEEDED"))

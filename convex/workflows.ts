@@ -36,6 +36,30 @@ export const sourceAnalysis = workflow
     }
     return null;
   });
+export const personalPreparation = workflow
+  .define({
+    args: { id: v.id("sources"), generation: v.number() },
+    returns: v.null(),
+  })
+  .handler(async (step, a): Promise<null> => {
+    try {
+      await step.runAction(internal.personalMedia.prepare, a, {
+        retry: false,
+        name: "bounded-personal-media-v1",
+      });
+    } catch {
+      const source = await step.runQuery(internal.product.workerSource, {
+        id: a.id,
+      });
+      if (source)
+        await step.runMutation(
+          internal.personalMediaState.finish,
+          { ...a, organizationId: source.organizationId },
+          { name: "personal-media-reconciliation-v1" },
+        );
+    }
+    return null;
+  });
 export const coding = workflow
   .define({
     args: { id: v.id("runs"), generation: v.number() },

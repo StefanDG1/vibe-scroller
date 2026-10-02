@@ -32,6 +32,12 @@ For BYO keys, test encryption, rotation, redaction, revocation, and provider-cos
 
 Create the private EU-jurisdiction bucket and restricted upload/download identities. Enable lifecycle rules and verify deletion. Configure the cloud sandbox account with conservative resource and spend limits. Build the pinned images and test isolation before enabling the cloud button.
 
+## Verify the public-link worker
+
+For the optional personal alpha, build the separate acquisition image with `node --env-file=.env.local scripts/e2b-acquisition-build.mjs`, then run `node --env-file=.env.local scripts/e2b-acquisition-test.mjs`. A failed check leaves the image unverified. Set backend-only `E2B_ACQUISITION_TEMPLATE` to the exact verified `pinnedTarget` and `ACQUISITION_VERIFIED=true` only after the matching evidence exists. Preserve `MEDIA_VERIFIED`, the original pinned media image and its reviewed compute rate. Do not put E2B credentials or local ChatGPT credentials into browser configuration.
+
+This worker retrieves permitted supported public posts, without login cookies. Platform rate limits, removed/private posts and unsupported carousels remain saved links with explicit failures. Isolation evidence does not establish reliable access to every Instagram post. See [ADR 018](adr/018-bounded-public-link-acquisition.md).
+
 ## Configure Stripe
 
 Use the dedicated VibeScroller Stripe account under Exponential Education SRL, as authorized on October 2. Reuse verified legal-entity details through Stripe's supported flow. Verify charge/payout readiness, payout details, currency, support contact and statement descriptor in the actual account. Do not alter the education platform's prices, keys, subscriptions or webhook routing. See [ADR 017](adr/017-dedicated-stripe-and-managed-payments.md).

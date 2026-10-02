@@ -33,6 +33,7 @@ const operations = {
   startDevice: ["mutation", api.devices.start],
   approveDevice: ["mutation", api.devices.approve],
   approvePersonalAnalysis: ["mutation", api.personalAnalysis.approve],
+  approvePersonalBatch: ["mutation", api.personalAnalysis.approveBatch],
   checkPersonalSession: ["query", api.personalAnalysis.checkSession],
   cancelPersonalAnalysis: ["mutation", api.personalAnalysis.cancel],
 } as const;
@@ -123,6 +124,12 @@ export async function POST(req: NextRequest) {
         "This action is unavailable with your current workspace or repository access.",
       RIGHTS_REQUIRED:
         "Confirm that you may save and process this content before continuing.",
+      UPLOAD_REQUIRED:
+        "The link downloader is not available for this source. Your saved link remains available; attach permitted media or retry after setup.",
+      UNSUPPORTED_SOURCE:
+        "Use a single supported video or post link. This source format cannot be retrieved automatically.",
+      MEDIA_UNAVAILABLE:
+        "The isolated media worker is unavailable. Your source is saved; no alternative provider was used.",
       INVALID_INPUT:
         "Some submitted fields are invalid. Review the source and try again.",
       REAUTH_REQUIRED:

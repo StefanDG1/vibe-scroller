@@ -6,6 +6,10 @@ import { settle } from "./product";
 import type { QueryCtx, MutationCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 import { personalAllowed } from "./lib/personalAccess";
+import {
+  acquisitionManifest,
+  acquisitionMessage,
+} from "../packages/media/acquisition";
 
 async function current(
   ctx: QueryCtx,
@@ -17,7 +21,8 @@ async function current(
     !s ||
     s.state !== "processing" ||
     s.generation !== a.generation ||
-    j?.state !== "preparing"
+    j?.state !== "preparing" ||
+    j.expiresAt <= Date.now()
   )
     return null;
   const actor = await ctx.db.get(j.actor),
@@ -98,6 +103,7 @@ export const finish = internalMutation({
     organizationId: v.id("organizations"),
     computeCredits: v.optional(v.number()),
     media: v.optional(v.any()),
+    acquisition: v.optional(v.any()),
   },
   handler: async (ctx, a) => {
     // Settle the independently reserved compute even if cancellation changed the source generation.
@@ -118,15 +124,42 @@ export const finish = internalMutation({
       j?.state !== "preparing"
     )
       return false;
+    if (!(await current(ctx, a))) {
+      await settle(ctx, a.organizationId, `source:${a.id}:${a.generation}`, 0);
+      await ctx.db.patch(a.id, {
+        state: "failed",
+        personalAnalysis: { ...j, state: "expired" },
+        error:
+          "Your analysis permission expired or was disconnected. Review the connection before retrying.",
+        updatedAt: Date.now(),
+      });
+      return false;
+    }
+    const acquisition = a.acquisition
+      ? acquisitionManifest.parse(a.acquisition)
+      : undefined;
+    if (acquisition) {
+      const { schemaVersion: _schemaVersion, ...metadata } = acquisition;
+      await ctx.db.patch(a.id, {
+        acquisition: {
+          ...metadata,
+          basis: "permitted_public_fetch",
+          acquiredAt: Date.now(),
+        },
+        ...(acquisition.title ? { title: acquisition.title } : {}),
+      });
+    }
     if (!a.media || a.computeCredits === undefined) {
       await settle(ctx, a.organizationId, `source:${a.id}:${a.generation}`, 0);
       await ctx.db.patch(a.id, {
         state: "failed",
         personalAnalysis: { ...j, state: "failed" },
         error:
-          a.computeCredits === undefined
-            ? "Media preparation stopped. Compute usage needs reconciliation before retrying. No alternate AI provider was used."
-            : "Media preparation did not complete. No alternate AI provider was used.",
+          acquisition && acquisition.status !== "acquired"
+            ? acquisitionMessage(acquisition.status)
+            : a.computeCredits === undefined
+              ? "Media preparation stopped. Compute usage needs reconciliation before retrying. No alternate AI provider was used."
+              : "Media preparation did not complete. No alternate AI provider was used.",
         updatedAt: Date.now(),
       });
       return false;

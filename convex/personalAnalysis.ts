@@ -5,7 +5,8 @@ import {
   internalQuery,
 } from "./_generated/server";
 import { internal } from "./_generated/api";
-import type { QueryCtx } from "./_generated/server";
+import type { QueryCtx, MutationCtx } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
 import { v } from "convex/values";
 import { access, writeAccess, recentAuthentication, limit, audit } from "./lib";
 import { ensure, containsSecret } from "../packages/policy";
@@ -14,6 +15,25 @@ import { reserve, settle } from "./product";
 import { personalAllowed } from "./lib/personalAccess";
 import { releaseUnstarted } from "./personalMediaState";
 import { syncCategories, vocabulary } from "./categories";
+import { acquisitionPolicy } from "../packages/media/acquisition";
+import { workflow } from "./workflows";
+
+export const personalApprovalFields = {
+  deviceId: v.id("devices"),
+  model: v.string(),
+  effort: v.union(v.literal("low"), v.literal("medium"), v.literal("high")),
+  useOwnPlan: v.boolean(),
+  maxComputeCredits: v.optional(v.number()),
+};
+export type PersonalApproval = {
+  id: Id<"sources">;
+  generation: number;
+  deviceId: Id<"devices">;
+  model: string;
+  effort: "low" | "medium" | "high";
+  useOwnPlan: boolean;
+  maxComputeCredits?: number;
+};
 
 // A personal alpha is explicitly bound to verified WorkOS subjects. Email or
 // a saved preference cannot activate subscription permission for hosted users.
@@ -79,75 +99,109 @@ export const approve = mutation({
   args: {
     id: v.id("sources"),
     generation: v.number(),
-    deviceId: v.id("devices"),
-    model: v.string(),
-    effort: v.union(v.literal("low"), v.literal("medium"), v.literal("high")),
-    useOwnPlan: v.boolean(),
-    maxComputeCredits: v.optional(v.number()),
+    ...personalApprovalFields,
+  },
+  handler: approvePersonal,
+});
+export const approveBatch = mutation({
+  args: {
+    sources: v.array(v.object({ id: v.id("sources"), generation: v.number() })),
+    ...personalApprovalFields,
   },
   handler: async (ctx, a) => {
-    const source = await ctx.db.get(a.id);
     ensure(
-      source && source.state !== "deleted",
-      "FORBIDDEN",
-      "Source unavailable.",
+      a.sources.length > 0 &&
+        a.sources.length <= 5 &&
+        new Set(a.sources.map((s) => s.id)).size === a.sources.length,
+      "INVALID_INPUT",
+      "Approve up to five distinct sources per batch.",
     );
-    const { actor } = await writeAccess(ctx, source.organizationId);
-    await recentAuthentication(ctx);
-    await limit(ctx, `personal-approval:${actor._id}`, 6);
-    const device = await ctx.db.get(a.deviceId);
+    const started: Id<"sources">[] = [];
+    for (const item of a.sources) {
+      const source = await ctx.db.get(item.id);
+      ensure(source, "FORBIDDEN", "Source unavailable.");
+      // Authorization precedes the duplicate check, including already-ready rows.
+      await writeAccess(ctx, source.organizationId);
+      if (["ready", "queued", "processing"].includes(source.state)) continue;
+      await approvePersonal(ctx, {
+        ...item,
+        deviceId: a.deviceId,
+        model: a.model,
+        effort: a.effort,
+        useOwnPlan: a.useOwnPlan,
+        maxComputeCredits: a.maxComputeCredits,
+      });
+      started.push(item.id);
+    }
+    return { started };
+  },
+});
+export async function approvePersonal(ctx: MutationCtx, a: PersonalApproval) {
+  const source = await ctx.db.get(a.id);
+  ensure(
+    source && source.state !== "deleted",
+    "FORBIDDEN",
+    "Source unavailable.",
+  );
+  const { actor } = await writeAccess(ctx, source.organizationId);
+  await recentAuthentication(ctx);
+  await limit(ctx, `personal-approval:${actor._id}`, 6);
+  const device = await ctx.db.get(a.deviceId);
+  ensure(
+    personalAllowed(actor.subject) &&
+      a.useOwnPlan &&
+      device?.state === "paired" &&
+      device.owner === actor._id &&
+      device.organizationId === source.organizationId,
+    "FORBIDDEN",
+    "Use your own paired computer and explicit plan permission.",
+  );
+  ensure(
+    source.generation === a.generation &&
+      !["queued", "processing", "ready"].includes(source.state),
+    "APPROVAL_STALE",
+    "Review the current source state before approving.",
+  );
+  ensure(
+    ((source.kind === "text" && source.text) ||
+      (source.kind === "upload" && source.objectKey) ||
+      (source.kind === "url" &&
+        source.url &&
+        process.env.ACQUISITION_VERIFIED === "true")) &&
+      source.rightsAttested,
+    "UPLOAD_REQUIRED",
+    "The link downloader is unavailable. Save this link or attach permitted media.",
+  );
+  ensure(
+    (device.personalSeenAt ?? 0) > Date.now() - 60000 &&
+      /^[a-f0-9]{64}$/.test(device.personalProfileBinding ?? "") &&
+      device.personalModels?.some((m) => m.slug === a.model),
+    "SETUP_REQUIRED",
+    "Start the personal analysis runner and choose an available account model.",
+  );
+  const generation = source.generation + 1;
+  const media = source.kind !== "text";
+  if (source.kind === "url") acquisitionPolicy(source.url!);
+  if (media) {
+    const unresolved = await ctx.db
+      .query("reservations")
+      .withIndex("by_org", (q) => q.eq("organizationId", source.organizationId))
+      .collect();
     ensure(
-      personalAllowed(actor.subject) &&
-        a.useOwnPlan &&
-        device?.state === "paired" &&
-        device.owner === actor._id &&
-        device.organizationId === source.organizationId,
-      "FORBIDDEN",
-      "Use your own paired computer and explicit plan permission.",
+      !unresolved.some(
+        (r) =>
+          r.key.startsWith(`personal-media:${source._id}:`) &&
+          r.state === "active",
+      ),
+      "COST_RECONCILIATION_REQUIRED",
+      "Reconcile the earlier media compute reservation before retrying.",
     );
     ensure(
-      source.generation === a.generation &&
-        !["queued", "processing", "ready"].includes(source.state),
-      "APPROVAL_STALE",
-      "Review the current source state before approving.",
-    );
-    ensure(
-      ((source.kind === "text" && source.text) ||
-        (source.kind === "upload" && source.objectKey)) &&
-        source.rightsAttested,
-      "UPLOAD_REQUIRED",
-      "Attach permitted media before analyzing this link.",
-    );
-    ensure(
-      (device.personalSeenAt ?? 0) > Date.now() - 60000 &&
-        /^[a-f0-9]{64}$/.test(device.personalProfileBinding ?? "") &&
-        device.personalModels?.some((m) => m.slug === a.model),
+      a.maxComputeCredits === 10 && process.env.MEDIA_VERIFIED === "true",
       "SETUP_REQUIRED",
-      "Start the personal analysis runner and choose an available account model.",
+      "Approve the verified media worker's maximum 10 compute credits.",
     );
-    const generation = source.generation + 1;
-    const media = source.kind === "upload";
-    if (media) {
-      const unresolved = await ctx.db
-        .query("reservations")
-        .withIndex("by_org", (q) =>
-          q.eq("organizationId", source.organizationId),
-        )
-        .collect();
-      ensure(
-        !unresolved.some(
-          (r) =>
-            r.key.startsWith(`personal-media:${source._id}:`) &&
-            r.state === "active",
-        ),
-        "COST_RECONCILIATION_REQUIRED",
-        "Reconcile the earlier media compute reservation before retrying.",
-      );
-      ensure(
-        a.maxComputeCredits === 10 && process.env.MEDIA_VERIFIED === "true",
-        "SETUP_REQUIRED",
-        "Approve the verified media worker's maximum 10 compute credits.",
-      );
+    if (source.kind === "upload") {
       const asset = await ctx.db
         .query("assets")
         .withIndex("by_key", (q) => q.eq("key", source.objectKey!))
@@ -160,54 +214,65 @@ export const approve = mutation({
         "UPLOAD_INVALID",
         "The original media is unavailable.",
       );
-      await reserve(
-        ctx,
-        source.organizationId,
-        `personal-media:${source._id}:${generation}`,
-        10,
-      );
     }
     await reserve(
       ctx,
       source.organizationId,
-      `source:${source._id}:${generation}`,
-      0,
+      `personal-media:${source._id}:${generation}`,
+      10,
     );
-    await ctx.db.patch(source._id, {
+  }
+  await reserve(
+    ctx,
+    source.organizationId,
+    `source:${source._id}:${generation}`,
+    0,
+  );
+  await ctx.db.patch(source._id, {
+    generation,
+    state: media ? "processing" : "queued",
+    personalMedia: undefined,
+    error: undefined,
+    personalAnalysis: {
+      deviceId: device._id,
+      actor: actor._id,
       generation,
-      state: media ? "processing" : "queued",
-      personalMedia: undefined,
-      error: undefined,
-      personalAnalysis: {
-        deviceId: device._id,
-        actor: actor._id,
-        generation,
-        model: a.model,
-        profileBinding: device.personalProfileBinding!,
-        effort: a.effort,
-        state: media ? "preparing" : "queued",
-        approvedAt: Date.now(),
-        expiresAt: Date.now() + 900000,
-        leaseUntil: 0,
-        deadline: 0,
-        stage: media ? "preparing" : "analyzing",
-      },
-      updatedAt: Date.now(),
-    });
-    if (media)
-      await ctx.scheduler.runAfter(0, internal.personalMedia.prepare, {
-        id: source._id,
-        generation,
-      });
-    await audit(
+      model: a.model,
+      profileBinding: device.personalProfileBinding!,
+      effort: a.effort,
+      state: media ? "preparing" : "queued",
+      approvedAt: Date.now(),
+      expiresAt: Date.now() + 900000,
+      leaseUntil: 0,
+      deadline: 0,
+      stage: media ? "preparing" : "analyzing",
+    },
+    updatedAt: Date.now(),
+  });
+  if (media)
+    await workflow.start(
       ctx,
-      source.organizationId,
-      actor._id,
-      "personal_analysis_approved",
-      `${source._id}:${generation}`,
+      internal.workflows.personalPreparation,
+      { id: source._id, generation },
+      {
+        onComplete: internal.workflows.completed,
+        context: null,
+        startAsync: true,
+      },
     );
-  },
-});
+  if (media)
+    await ctx.scheduler.runAfter(900000, internal.personalMediaState.expire, {
+      id: source._id,
+      generation,
+    });
+  await audit(
+    ctx,
+    source.organizationId,
+    actor._id,
+    "personal_analysis_approved",
+    `${source._id}:${generation}`,
+  );
+}
 export const cancel = mutation({
   args: { id: v.id("sources") },
   handler: async (ctx, { id }) => {
@@ -366,13 +431,13 @@ export const dispatch = internalMutation({
           continue;
         }
         const leaseUntil = now + 40000,
-          deadline = now + (source.kind === "upload" ? 900000 : 180000);
+          deadline = now + (source.kind !== "text" ? 900000 : 180000);
         await ctx.db.patch(source._id, {
           state: "processing",
           personalAnalysis: {
             ...job,
             state: "running",
-            stage: source.kind === "upload" ? "transcribing" : "analyzing",
+            stage: source.kind !== "text" ? "transcribing" : "analyzing",
             leaseUntil,
             deadline,
           },
@@ -387,16 +452,17 @@ export const dispatch = internalMutation({
             effort: job.effort,
             profileBinding: job.profileBinding,
             text: source.text,
+            ...(source.acquisition?.description
+              ? { caption: source.acquisition.description }
+              : {}),
             categoryVocabulary: (
               await vocabulary(ctx, source.organizationId)
             ).map((c) => c.name),
             coverage:
-              source.kind === "upload"
+              source.kind !== "text"
                 ? source.personalMedia?.coverage
                 : "caption_only",
-            ...(source.kind === "upload"
-              ? { media: source.personalMedia }
-              : {}),
+            ...(source.kind !== "text" ? { media: source.personalMedia } : {}),
             leaseUntil,
             deadline,
           },
@@ -440,7 +506,7 @@ export const dispatch = internalMutation({
     ensure(
       source &&
         source.organizationId === device.organizationId &&
-        ["text", "upload"].includes(source.kind) &&
+        ["text", "upload", "url"].includes(source.kind) &&
         source.state === "processing" &&
         job?.deviceId === device._id &&
         job.actor === device.owner &&
@@ -464,7 +530,7 @@ export const dispatch = internalMutation({
       return { valid: true, deadline: job.deadline };
     }
     const output: any = insightOutput.parse(a.output);
-    if (source.kind === "upload")
+    if (source.kind !== "text")
       output.warnings = [
         ...new Set([
           "Video frames are sampled; short scenes can be missed. Automatic transcription can contain errors.",
@@ -477,18 +543,18 @@ export const dispatch = internalMutation({
         output.sourceId === source._id &&
         output.processingRunId === `${source._id}:${job.generation}` &&
         output.coverage ===
-          (source.kind === "upload"
+          (source.kind !== "text"
             ? source.personalMedia?.coverage
             : "caption_only"),
       "INVALID_EVIDENCE",
       "Invalid personal source output.",
     );
     const transcript =
-      source.kind === "upload"
+      source.kind !== "text"
         ? validateTranscript(a.transcript, source.personalMedia)
         : [];
     const evidenceList =
-      source.kind === "upload"
+      source.kind !== "text"
         ? [
             ...transcript.map((s: any) => ({
               kind: "transcript",
@@ -511,7 +577,14 @@ export const dispatch = internalMutation({
               endMs: null,
             },
           ];
-    if (source.kind === "upload")
+    if (source.acquisition?.description)
+      evidenceList.push({
+        kind: "caption",
+        id: "post_caption",
+        startMs: null,
+        endMs: null,
+      });
+    if (source.kind !== "text")
       for (const frame of source.personalMedia.frames) {
         const assetId = ctx.db.normalizeId("assets", frame.assetId);
         const asset = assetId ? await ctx.db.get(assetId) : null;
@@ -554,7 +627,7 @@ export const dispatch = internalMutation({
     await ctx.db.patch(source._id, {
       state: "ready",
       analysis: output,
-      ...(source.kind === "upload"
+      ...(source.kind !== "text"
         ? {
             text: transcript.map((s: any) => s.text).join(" "),
             mediaCoverage: output.coverage,
@@ -584,7 +657,7 @@ export const dispatch = internalMutation({
     });
     await syncCategories(ctx, (await ctx.db.get(source._id))!, output);
     await ctx.db.patch(device._id, { activePersonalSource: undefined });
-    if (source.kind === "upload")
+    if (source.kind !== "text")
       await ctx.scheduler.runAfter(0, internal.assets.expireOriginal, {
         sourceId: source._id,
         generation: source.generation,

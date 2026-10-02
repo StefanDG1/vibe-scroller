@@ -2,7 +2,10 @@
 import { internalAction } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
-import { prepareMedia } from "../packages/providers/media";
+import {
+  prepareMedia,
+  MediaPreparationError,
+} from "../packages/providers/media";
 import { personalDecoder } from "../packages/media/decoder-personal";
 import { signedObject, objectMetadata } from "../packages/providers/storage";
 import { createHash, randomUUID } from "node:crypto";
@@ -26,7 +29,7 @@ export const prepare = internalAction({
         "The media worker's configured ceiling exceeds the approved budget.",
       );
       const prepared = await prepareMedia(
-        source.objectKey!,
+        source.kind === "url" ? { url: source.url! } : source.objectKey!,
         personalDecoder,
         true,
       );
@@ -123,10 +126,25 @@ export const prepare = internalAction({
       stage = "queue";
       const accepted = await ctx.runMutation(
         internal.personalMediaState.finish,
-        { ...a, organizationId: source.organizationId, computeCredits, media },
+        {
+          ...a,
+          organizationId: source.organizationId,
+          computeCredits,
+          media,
+          ...(prepared.acquisition
+            ? { acquisition: prepared.acquisition }
+            : {}),
+        },
       );
       if (accepted) return;
     } catch (error) {
+      if (
+        error instanceof MediaPreparationError &&
+        error.computeSeconds !== undefined
+      )
+        computeCredits = Math.ceil(
+          error.computeSeconds * Number(process.env.E2B_CREDITS_PER_SECOND),
+        );
       const message = error instanceof Error ? error.message : "";
       const category =
         [
@@ -147,6 +165,9 @@ export const prepare = internalAction({
         ...a,
         organizationId: source.organizationId,
         ...(computeCredits === undefined ? {} : { computeCredits }),
+        ...(error instanceof MediaPreparationError && error.acquisition
+          ? { acquisition: error.acquisition }
+          : {}),
       });
     }
     for (const key of staged)

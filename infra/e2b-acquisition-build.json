@@ -1,0 +1,45 @@
+{
+  "alias": "vibescroller-v1-acquisition",
+  "name": "vibescroller-v1-acquisition",
+  "tags": ["staging-v1-acquisition"],
+  "templateId": "8lr3pcu9zambqbes7oa8",
+  "buildId": "60c0015e-6f71-4dba-9e4b-944f172c5b97",
+  "baseImage": {
+    "image": "node:24-bookworm-slim",
+    "digest": "sha256:5cbc7caba8c2c0f0bca675d1b61b9f2857e1cf1853c6164ee9dd409501a936e7",
+    "platform": "linux/amd64",
+    "source": "https://hub.docker.com/_/node",
+    "verifiedAt": "2026-09-30"
+  },
+  "downloader": {
+    "version": "2026.08.19",
+    "url": "https://github.com/yt-dlp/yt-dlp/releases/download/2026.08.19/yt-dlp_linux",
+    "sha256": "58162f9bfdc27458ea47bfcb311cf47028f17d8154a8bf7d689861d46399230a"
+  },
+  "createdAt": "2026-10-02T01:27:05.649Z",
+  "verified": true,
+  "pinnedTarget": "vibescroller-v1-acquisition:pinned-60c0015e-6f71-4dba-9e4b-944f172c5b97",
+  "isolationEvidence": {
+    "time": "2026-10-02T01:53:02.534Z",
+    "synthetic": true,
+    "checks": {
+      "unprivileged": true,
+      "root_secret_denied": true,
+      "host_mount_absent": true,
+      "no_provider_credentials": true,
+      "mmds_denied": true,
+      "loopback_control_denied": true,
+      "private_denied": true,
+      "ipv6_loopback_denied": true,
+      "allowed_host_response": true,
+      "unlisted_host_denied": true,
+      "sudo_denied": true,
+      "no_effective_capabilities": true,
+      "decode_network_denied": true
+    },
+    "decodedFrames": 4,
+    "pcmAudio": true,
+    "workerBoundaryTests": 5,
+    "cleanupAcknowledged": true
+  }
+}

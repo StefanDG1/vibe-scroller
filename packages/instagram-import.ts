@@ -238,10 +238,12 @@ export function summarize(rows: ImportRow[], format: string): ImportPreview {
   };
 }
 
-export function importBatch(links: LinkValue[], offset: number) {
+export function importBatch(links: LinkValue[], offset: number, maximum = 500) {
+  if (!Number.isSafeInteger(maximum) || maximum < 1 || maximum > 500)
+    throw new Error("Invalid import batch size.");
   const batch: LinkValue[] = [];
   let bytes = 2;
-  for (const link of links.slice(offset, offset + 500)) {
+  for (const link of links.slice(offset, offset + maximum)) {
     const size =
       new TextEncoder().encode(JSON.stringify(link)).length +
       (batch.length ? 1 : 0);

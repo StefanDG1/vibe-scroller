@@ -33,6 +33,20 @@ Repository: https://github.com/StefanDG1/vibe-scroller
 
 ## Evidence
 
+### October 2 link-acquisition and Managed Payments work, after 3c7a927
+
+Working-tree verification, not yet a production deployment: separately built yt-dlp acquisition image `60c0015e-6f71-4dba-9e4b-944f172c5b97`, checksum-pinned release 2026.08.19. `node --env-file=.env.local scripts/e2b-acquisition-test.mjs` passed allowed-host, unlisted-host, private-address, metadata, control-service, privilege and offline-decode checks. The initial test incorrectly required UID 1000; E2B's unprivileged user has another UID. The corrected test requires nonroot and verifies capabilities/root-file denial independently. No isolation requirement was removed.
+
+Actual supplied-link retrieval caught an unsupported CLI flag and yt-dlp's successful one-download exit code 101; both were corrected. A real supplied Reel returned HTTP 429; the supplied carousel returned unsupported. No platform access restriction was bypassed. Private diagnostic material remains ignored. The actual development app approval/workflow ran acquisition, saved a failure and settled one measured compute credit plus zero inference credits. No ChatGPT inference was attempted for that failed acquisition. This is failure-path evidence, not successful automatic Instagram acquisition.
+
+The dedicated Managed Payments sandbox `acct_1ULtJOBhjxoLBZHf` completed Starter weekly, monthly, annual and Pro annual purchases through `billingV1:checkout`. Actual provider webhooks granted respectively 65, 250, 250 and 600 included credits; annual plans grant the first monthly allowance. Pro weekly/monthly purchase completion remains under verification. Starter monthly also passed duplicate reconciliation, real signed-event replay, invalid-signature/mode/account rejection, portal creation, period-end cancellation and full test-refund reversal of its 250-credit pool; refresh did not restore refunded credits. No real money was paid.
+
+The dedicated live Managed Payments Checkout configuration probe created then immediately expired one session, with no payment attempt, customer or subscription. Exact policy URLs were saved and independently reloaded in the dedicated account. Live checkout and public release remain disabled pending the remaining V1 and publication gates. The old Education account was untouched.
+
+A new sandbox's default test secret was accidentally exposed while inspecting key-page accessibility labels. It was immediately rotated with expiration set to Now before further testing. The replacement standard key was not read; a separately scoped test key is stored privately. No live key was exposed. Future key-page inspection filters credential-bearing accessibility labels.
+
+October 2, 03:57 Europe/Berlin, Windows working tree: `pnpm check` passed 114 document validations, 12 skill snapshots, lint, workspace types, 181 app tests (three credential-gated tests skipped), 11 auth tests, six PCM boundary tests and both production builds. `pnpm audit --prod --audit-level high` found no known vulnerabilities. The verified Linux acquisition worker passed five additional boundary tests, including output overflow/deadline termination, refusal without retry, unknown/over-limit/carousel rejection, exit-code 101 validation and unsafe URL rejection. Native Chrome at 390 CSS pixels showed the automatic-analysis dialog without horizontal overflow; the offline-computer state was explicit. This is local UI verification, not physical Android acceptance.
+
 2026-09-30, Windows, Node 24, pnpm 12.3.4: `pnpm install --frozen-lockfile` passed without production credentials. Initial preservation commit `bf362dc`.
 
 Provider sign-in pages opened before implementation. GitHub CLI is authenticated. Browser sessions alone do not prove VibeScroller-specific registration or scopes.

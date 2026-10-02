@@ -1132,6 +1132,7 @@ export async function redactSource(ctx: MutationCtx, id: Id<"sources">) {
     correctionAuthor: undefined,
     personalAnalysis: undefined,
     personalMedia: undefined,
+    acquisition: undefined,
     repositorySelection: undefined,
     originalSavedAt: undefined,
     url: undefined,

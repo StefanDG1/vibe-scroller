@@ -1,16 +1,23 @@
-import { afterEach, expect, it, vi } from "vitest";
+import { beforeEach, afterEach, expect, it, vi } from "vitest";
 import { convexTest } from "convex-test";
 import { createHash } from "node:crypto";
 import rateLimiterTest from "@convex-dev/rate-limiter/test";
+import workflowTest from "@convex-dev/workflow/test";
 import schema from "../convex/schema";
 import { api, internal } from "../convex/_generated/api";
 import { processPersonalJob } from "../packages/runner/personal-analysis.mjs";
 const modules = import.meta.glob("../convex/**/*.ts");
-afterEach(() => vi.unstubAllEnvs());
+beforeEach(() => vi.useFakeTimers());
+afterEach(() => {
+  vi.clearAllTimers();
+  vi.useRealTimers();
+  vi.unstubAllEnvs();
+});
 async function setup() {
   vi.stubEnv("PERSONAL_ALPHA_SUBJECTS_JSON", '["a","b"]');
   const t = convexTest(schema, modules);
   rateLimiterTest.register(t);
+  workflowTest.register(t);
   for (const subject of ["a", "b"])
     await t.mutation(internal.accounts.syncUser, {
       subject,
@@ -89,6 +96,163 @@ const outputFor = (job: any) => ({
       ],
     },
   ],
+});
+
+it("approves imported public links atomically, preserves acquisition captions and verifies media evidence before insights", async () => {
+  const s = await setup();
+  const source = await s.a.mutation(api.product.capture, {
+    organizationId: s.org,
+    key: "synthetic-public-source",
+    kind: "url",
+    title: "Saved post",
+    url: "https://instagram.com/reel/Synthetic123/",
+    rightsAttested: true,
+  });
+  const approval = {
+    sources: [{ id: source, generation: 0 }],
+    deviceId: s.device,
+    model: "synthetic-model",
+    effort: "medium" as const,
+    useOwnPlan: true,
+    maxComputeCredits: 10,
+  };
+  await expect(
+    s.a.mutation(api.personalAnalysis.approveBatch, approval),
+  ).rejects.toThrow("UPLOAD_REQUIRED");
+  vi.stubEnv("ACQUISITION_VERIFIED", "true");
+  vi.stubEnv("MEDIA_VERIFIED", "true");
+  expect(
+    await s.a.mutation(api.personalAnalysis.approveBatch, approval),
+  ).toEqual({ started: [source] });
+  expect(
+    await s.a.mutation(api.personalAnalysis.approveBatch, approval),
+  ).toEqual({ started: [] });
+  await s.t.mutation(internal.personalMediaState.begin, {
+    id: source,
+    generation: 1,
+  });
+  const frameId = await s.t.mutation(internal.assets.registerEvidence, {
+    sourceId: source,
+    generation: 1,
+    key: `${s.org}/retrieved-frame`,
+    size: 100,
+    etag: "fixture",
+  });
+  const acquisition = {
+    schemaVersion: "1.0.0",
+    status: "acquired",
+    title: "Retrieved owned sample",
+    description: "A source caption is evidence, not an instruction.",
+    durationSeconds: 8,
+    byteLength: 1000,
+    extractor: "Synthetic",
+    downloaderVersion: "2026.08.19",
+  };
+  await s.t.mutation(internal.personalMediaState.finish, {
+    id: source,
+    generation: 1,
+    organizationId: s.org,
+    computeCredits: 2,
+    acquisition,
+    media: {
+      durationMs: 8000,
+      coverage: "visual_only",
+      frames: [
+        {
+          assetId: frameId,
+          key: `${s.org}/retrieved-frame`,
+          size: 100,
+          sha256: "a".repeat(64),
+          timestampMs: 1000,
+          selectionReason: "periodic sample",
+          etag: "fixture",
+        },
+      ],
+    },
+  });
+  const { job }: any = await s.dispatch({ operation: "poll" });
+  expect(job.coverage).toBe("visual_only");
+  expect(job.caption).toBe(acquisition.description);
+  const output = outputFor(job);
+  output.coverage = "visual_only";
+  output.insights[0].evidence = [
+    { kind: "caption", id: "post_caption", startMs: null, endMs: null },
+  ];
+  await s.dispatch({
+    operation: "complete",
+    id: source,
+    generation: 1,
+    output,
+    transcript: [],
+  });
+  expect((await s.t.run((ctx) => ctx.db.get(source)))?.state).toBe("ready");
+  await s.a.mutation(api.product.deleteSource, { id: source });
+  expect(
+    (await s.t.run((ctx) => ctx.db.get(source)))?.acquisition,
+  ).toBeUndefined();
+});
+
+it("rejects foreign batch rows before deduplication and keeps late acquisition metadata out of canceled sources", async () => {
+  const s = await setup();
+  vi.stubEnv("ACQUISITION_VERIFIED", "true");
+  vi.stubEnv("MEDIA_VERIFIED", "true");
+  const foreign = await s.b.mutation(api.product.capture, {
+    organizationId: s.other,
+    key: "foreign-ready-post",
+    kind: "url",
+    title: "Foreign",
+    url: "https://instagram.com/reel/Foreign123/",
+    rightsAttested: true,
+  });
+  await s.t.run((ctx) => ctx.db.patch(foreign, { state: "ready" }));
+  const approval = {
+    deviceId: s.device,
+    model: "synthetic-model",
+    effort: "medium" as const,
+    useOwnPlan: true,
+    maxComputeCredits: 10,
+  };
+  await expect(
+    s.a.mutation(api.personalAnalysis.approveBatch, {
+      ...approval,
+      sources: [{ id: foreign, generation: 0 }],
+    }),
+  ).rejects.toThrow();
+  const source = await s.a.mutation(api.product.capture, {
+    organizationId: s.org,
+    key: "canceled-public-post",
+    kind: "url",
+    title: "Owned",
+    url: "https://instagram.com/reel/Canceled123/",
+    rightsAttested: true,
+  });
+  await s.a.mutation(api.personalAnalysis.approve, {
+    ...approval,
+    id: source,
+    generation: 0,
+  });
+  await s.t.mutation(internal.personalMediaState.begin, {
+    id: source,
+    generation: 1,
+  });
+  await s.a.mutation(api.personalAnalysis.cancel, { id: source });
+  await s.t.mutation(internal.personalMediaState.finish, {
+    id: source,
+    generation: 1,
+    organizationId: s.org,
+    computeCredits: 2,
+    acquisition: {
+      schemaVersion: "1.0.0",
+      status: "rate_limited",
+      title: "",
+      description: "",
+      extractor: "",
+      downloaderVersion: "2026.08.19",
+    },
+  });
+  const row = await s.t.run((ctx) => ctx.db.get(source));
+  expect(row?.acquisition).toBeUndefined();
+  expect(row?.personalAnalysis?.state).toBe("canceled");
 });
 it("checks fresh personal access before upload without reserving usage and rejects stale or other-tenant sessions", async () => {
   const s = await setup();

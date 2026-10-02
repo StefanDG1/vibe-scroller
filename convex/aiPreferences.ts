@@ -11,6 +11,9 @@ export const read = query({
       hostedStatus: "awaiting_commercial_access" as const,
       active: false as const,
       personalAlphaEnabled: personalAllowed(actor.subject),
+      linkAnalysisEnabled:
+        process.env.ACQUISITION_VERIFIED === "true" &&
+        process.env.MEDIA_VERIFIED === "true",
     };
   },
 });
