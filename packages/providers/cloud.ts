@@ -4,6 +4,7 @@ import { ensure, containsSecret, validatePaths } from "../policy";
 import { github, installationToken, repositoryArchive } from "./github";
 import { inspectedIgnorePolicy } from "../repositories/prepare";
 import { archiveSnapshot } from "../repositories/archive";
+import { reviewedCloudPatch } from "../repositories/reviewPatch";
 const changesSchema = {
   type: "object",
   additionalProperties: false,
@@ -149,6 +150,8 @@ export async function checkPatch(
   changes: { path: string; content: string | null }[],
   tests: string[],
 ) {
+  // The review artifact comes from trusted input, never guest Git output.
+  const patch = reviewedCloudPatch(base, changes);
   await sandbox.commands.run(
     "mkdir -p /home/user/job && git -C /home/user/job init -q && git -C /home/user/job config user.name VibeScroller && git -C /home/user/job config user.email noreply@vibescroller.invalid",
     { user: "user", timeoutMs: 30000 },
@@ -191,6 +194,23 @@ export async function checkPatch(
     changes.filter((file) => file.content === null).map((file) => file.path),
   );
   await preserveExecutableModes(removed);
+  const expected = new Map<
+    string,
+    { path: string; content: string | null; mode?: string; executable: boolean }
+  >(
+    base.map((file) => [
+      file.path,
+      { ...file, executable: file.mode === "100755" },
+    ]),
+  );
+  for (const file of changes)
+    expected.set(file.path, {
+      ...file,
+      mode: undefined,
+      executable:
+        base.find((original) => original.path === file.path)?.mode === "100755",
+    });
+  await sandbox.verifySnapshot([...expected.values()]);
   const report: string[] = [];
   for (const command of tests.slice(0, 10)) {
     ensure(
@@ -216,23 +236,9 @@ export async function checkPatch(
     report.push(
       `Exit ${result.exitCode}: ${command}\n${result.stdout.slice(-1500)}\n${result.stderr.slice(-1500)}`,
     );
+    // A check may create build outputs, but cannot rewrite the tested sources.
+    await sandbox.verifySnapshot([...expected.values()]);
   }
-  // Include newly created files in the review diff without committing them.
-  await sandbox.commands.run(
-    "git -C /home/user/job -c core.hooksPath=/dev/null add -N .",
-    { user: "user", timeoutMs: 30000 },
-  );
-  const patch = (
-    await sandbox.commands.run(
-      "git -C /home/user/job -c core.hooksPath=/dev/null diff --no-ext-diff --no-textconv --binary",
-      { user: "user", timeoutMs: 30000 },
-    )
-  ).stdout;
-  ensure(
-    patch.length <= 300000 && !containsSecret(patch),
-    "POLICY_BLOCKED",
-    "Patch artifact exceeds its bounds or contains a credential.",
-  );
   return { patch, report: report.join("\n\n") };
 }
 export async function killSandbox(sandboxId: string) {

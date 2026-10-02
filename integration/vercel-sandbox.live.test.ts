@@ -128,6 +128,32 @@ it("real ephemeral Vercel adapter checks an owned synthetic patch and refuses sy
     );
     const read = await sandbox.files.read("/home/user/job/README.md");
     expect(read).toContain("Bounded Vercel");
+    await expect(
+      checkPatch(
+        sandbox,
+        [{ path: "README.md", content: "original\n", mode: "100644" }],
+        [{ path: "README.md", content: "approved\n" }],
+        ["printf 'changed by check' > README.md"],
+      ),
+    ).rejects.toThrow("POLICY_BLOCKED");
+    await sandbox.commands.run(
+      "rm -f /home/user/job/README.md; ln -s /etc/passwd /home/user/job/README.md",
+      { user: "user" },
+    );
+    await expect(
+      sandbox.verifySnapshot([
+        { path: "README.md", content: "approved\n", executable: false },
+      ]),
+    ).rejects.toThrow("POLICY_BLOCKED");
+    await sandbox.commands.run(
+      "rm -f /home/user/job/README.md; printf 'approved\\n' > /home/user/job/README.md; ln /home/user/job/README.md /home/user/job/readme-hardlink",
+      { user: "user" },
+    );
+    await expect(
+      sandbox.verifySnapshot([
+        { path: "README.md", content: "approved\n", executable: false },
+      ]),
+    ).rejects.toThrow("POLICY_BLOCKED");
     await stopJobSandbox(sandbox.sandboxId);
     await sandbox.kill();
     await stopJobSandbox(sandbox.sandboxId);

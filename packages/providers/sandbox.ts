@@ -1,7 +1,7 @@
 import { Sandbox, APIError, type NetworkPolicy } from "@vercel/sandbox";
 import { Writable } from "node:stream";
 import { dirname } from "node:path";
-import { randomBytes } from "node:crypto";
+import { randomBytes, createHash } from "node:crypto";
 import { signSandboxRequest } from "../policy/sandbox-broker";
 import { publicProxy, publicBridge } from "../media/public-proxy";
 import { ensure } from "../policy";
@@ -190,6 +190,35 @@ try:
  finally: os.close(file)
 finally: os.close(fd)`;
 
+const verifySnapshot = `import os,stat,hashlib,json,sys
+for item in json.loads(sys.argv[1]):
+ parts=item['path'].removeprefix('/home/user/').split('/')
+ fd=os.open('/home/user',os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW)
+ file=None
+ try:
+  try:
+   for part in parts[:-1]:
+    nextfd=os.open(part,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW,dir_fd=fd); os.close(fd); fd=nextfd
+   file=os.open(parts[-1],os.O_RDONLY|os.O_NOFOLLOW|os.O_NONBLOCK,dir_fd=fd)
+  except FileNotFoundError:
+   assert item['hash'] is None; continue
+  assert item['hash'] is not None
+  info=os.fstat(file)
+  assert stat.S_ISREG(info.st_mode) and info.st_uid==1001 and info.st_nlink==1 and info.st_size==item['size']
+  assert bool(info.st_mode & 0o111)==item['executable']
+  digest=hashlib.sha256()
+  with os.fdopen(file,'rb',closefd=False) as stream:
+   remaining=item['size']+1
+   while remaining:
+    data=stream.read(min(65536,remaining))
+    if not data: break
+    remaining-=len(data); digest.update(data)
+  assert digest.hexdigest()==item['hash']
+ finally:
+  if file is not None: os.close(file)
+  os.close(fd)
+print('verified')`;
+
 export class JobSandbox {
   readonly sandboxId: string;
   private online: boolean;
@@ -249,6 +278,42 @@ export class JobSandbox {
   commands = {
     run: (command: string, options?: Options) => this.run(command, options),
   };
+  async verifySnapshot(
+    files: { path: string; content: string | null; executable: boolean }[],
+  ) {
+    ensure(
+      files.length > 0 && files.length <= 2068,
+      "POLICY_BLOCKED",
+      "Snapshot verification exceeds its bound.",
+    );
+    for (let offset = 0; offset < files.length; offset += 100) {
+      const expected = files.slice(offset, offset + 100).map((file) => {
+        const content =
+          file.content === null ? null : Buffer.from(file.content, "utf8");
+        return {
+          path: pathInJob(`/home/user/job/${file.path}`),
+          hash:
+            content === null
+              ? null
+              : createHash("sha256").update(content).digest("hex"),
+          size: content?.length ?? 0,
+          executable: file.executable,
+        };
+      });
+      const result = await this.sdk.runCommand({
+        sudo: true,
+        cmd: "python3",
+        args: ["-c", verifySnapshot, JSON.stringify(expected)],
+        timeoutMs: 30000,
+        signal: AbortSignal.timeout(40000),
+      });
+      ensure(
+        result.exitCode === 0 && (await result.stdout()).trim() === "verified",
+        "POLICY_BLOCKED",
+        "Approved checks changed the exact tested source snapshot. Review a new generated patch.",
+      );
+    }
+  }
   files = {
     write: async (
       pathOrFiles: string | { path: string; data: FileData }[],

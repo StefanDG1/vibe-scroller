@@ -1,0 +1,11 @@
+{
+  "at": "2026-10-02T14:14:19.489Z",
+  "commit": "a0c8aa939fd3e9b7cd93e0d2bbede1b8cb39e65b",
+  "environment": "production",
+  "synthetic": true,
+  "prNumber": 9,
+  "independentSandboxGetStatus": 404,
+  "resume": false,
+  "providerDeletionVerified": true,
+  "credentialsLogged": false
+}

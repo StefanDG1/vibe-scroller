@@ -40,6 +40,7 @@ import type * as lib_githubAuthorization from "../lib/githubAuthorization.js";
 import type * as lib_inference from "../lib/inference.js";
 import type * as lib_invoiceOperator from "../lib/invoiceOperator.js";
 import type * as lib_personalAccess from "../lib/personalAccess.js";
+import type * as lib_prObservation from "../lib/prObservation.js";
 import type * as limitsV1 from "../limitsV1.js";
 import type * as localResults from "../localResults.js";
 import type * as maintenance from "../maintenance.js";
@@ -103,6 +104,7 @@ declare const fullApi: ApiFromModules<{
   "lib/inference": typeof lib_inference;
   "lib/invoiceOperator": typeof lib_invoiceOperator;
   "lib/personalAccess": typeof lib_personalAccess;
+  "lib/prObservation": typeof lib_prObservation;
   limitsV1: typeof limitsV1;
   localResults: typeof localResults;
   maintenance: typeof maintenance;

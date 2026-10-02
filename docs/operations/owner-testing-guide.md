@@ -44,7 +44,11 @@ Connect GitHub and select only the repositories you want reviewed. Inspect the p
 
 Open a proposal and accept only a relevant change you want. Choose the quoted draft action, then review scope, existing/new files, steps, checks, risks and rollback in the plan fields. JSON is available in its disclosure, and Export plan downloads your current edits. Save new plan version records the reviewed plan and invalidates older execution approvals. Saving does not start coding; choose a verified executor and funding route in the separate approval section.
 
-The isolated cloud draft-PR route has staging evidence. The production GitHub callback is corrected and linking is present; the complete fresh repository/plan/PR journey still needs acceptance. The Windows local coding route remains blocked by its failed isolation check. ChatGPT consent does not remove that block. Unattended work still requires the specific approved task and budget.
+The isolated cloud route now has a complete owner production acceptance exercise: reviewed plan, exact bounded approval, isolated checks, separate patch approval, real draft PR, closure, reopening, merge and verified reversal. It used one explicitly synthetic documentation file. The app preserved its historical merge and accurately recovered from temporary GitHub access loss. Cloud execution remains restricted to the verified owner while commercial funding, quality and provider gates are completed. The Windows local coding route remains blocked by its failed isolation check. ChatGPT consent does not remove that block. Unattended work still requires the specific approved task and budget.
+
+Use Runs & PRs to inspect the report and patch. Only an awaiting-review patch has a publication button. Open the real GitHub PR from the status link; Refresh authoritative PR status checks GitHub again. A verified reversal has its own evidence link and keeps the original merge history. Merge does not mean measured benefit.
+
+Cloud checks use a bounded text snapshot and currently have no application dependency cache or unrestricted network. Read exclusions and failed checks before publication; a documentation check does not certify the whole repository. Checks that rewrite sources are refused rather than silently changing the published files.
 
 ## Storage and evidence
 

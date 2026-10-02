@@ -1,0 +1,42 @@
+{
+  "at": "2026-10-02T14:18:39.935Z",
+  "environment": "production",
+  "synthetic": true,
+  "executionFrontendCommit": "2217064553bbdef5d0500f1500c0657104a770af",
+  "reconciliationFrontendBackendCommit": "a0c8aa939fd3e9b7cd93e0d2bbede1b8cb39e65b",
+  "baseSha": "2217064553bbdef5d0500f1500c0657104a770af",
+  "reviewedPlanVersion": 3,
+  "maxCredits": 10,
+  "executor": "cloud",
+  "fundingRoute": "managed_api",
+  "approvedChangedPaths": [
+    "docs/verification/2026-10-02-production-cloud-workflow.md"
+  ],
+  "isolatedCheckExit": 0,
+  "executionUid": 1001,
+  "snapshotExclusions": 4,
+  "fullRepositoryCoverage": false,
+  "patchSeparatelyApproved": true,
+  "actualDraftPR": "https://github.com/StefanDG1/vibe-scroller/pull/9",
+  "nativeObservedStates": [
+    "draft",
+    "closed_unmerged",
+    "draft",
+    "open",
+    "merged"
+  ],
+  "mergeCommitSha": "281aad7975581c55bfddd0b86fe95d4fdc62a006",
+  "reversalPR": "https://github.com/StefanDG1/vibe-scroller/pull/10",
+  "reversalCommitSha": "dd397918c757fa57a4ac251c4924f6d0a534dfd0",
+  "authoritativeReversalVerified": true,
+  "historicalMergePreserved": true,
+  "repeatedRefreshIdempotent": true,
+  "reservedBalance": 0,
+  "nativeRunLayoutWidths": [320, 360, 390, 412, 768, 1440],
+  "pageOverflow": false,
+  "smallVisibleButtonsBelow40px": 0,
+  "webhookConfigurationVerified": false,
+  "customerChatGPTPooled": false,
+  "livePurchaseMade": false,
+  "paidV1Established": false
+}

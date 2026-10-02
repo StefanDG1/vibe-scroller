@@ -618,6 +618,7 @@ export const publishRun = action({
         allowedPaths: run.allowedPaths,
         highRisk: run.highRisk,
         report: run.report ?? "No passing checks reported.",
+        reviewedPatch: run.patch!,
       });
       await ctx.runMutation(internal.jobs.recordPR, {
         id: run._id,

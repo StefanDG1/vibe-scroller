@@ -18,6 +18,7 @@ import {
 } from "../repositories/retrieval";
 import { validateRepositoryEvidence } from "../repositories/context";
 import type { ManifestEntry } from "../repositories/snapshotCache";
+import { verifyLocalPatch } from "../runner/patch";
 export async function repositoryArchive(
   fullName: string,
   baseSha: string,
@@ -390,6 +391,7 @@ export async function publish(input: {
   allowedPaths: string[];
   highRisk: boolean;
   report: string;
+  reviewedPatch: string;
 }) {
   validatePaths(
     input.files.map((f) => f.path),
@@ -456,6 +458,42 @@ export async function publish(input: {
     modes.set(file.path, original?.mode ?? "100644");
   }
   const entries = [];
+  // Rebuild the reviewed text against authoritative immutable base blobs.
+  // Neither guest Git output nor a second file list can change what was approved.
+  const reviewed = await verifyLocalPatch(
+    input.reviewedPatch,
+    input.allowedPaths,
+    input.highRisk,
+    async (path) => {
+      const original = baseTree.tree.find((entry: any) => entry.path === path);
+      if (!original) return null;
+      ensure(
+        original.type === "blob" &&
+          ["100644", "100755"].includes(original.mode),
+        "POLICY_BLOCKED",
+        "Review base is not a regular text file.",
+      );
+      const blob = await github(`${root}/git/blobs/${original.sha}`, token);
+      ensure(
+        blob.encoding === "base64" &&
+          typeof blob.content === "string" &&
+          blob.content.length <= 1400000,
+        "POLICY_BLOCKED",
+        "Review base exceeds its bound.",
+      );
+      return Buffer.from(blob.content, "base64").toString("utf8");
+    },
+  );
+  const sort = (files: { path: string; content: string | null }[]) =>
+    files
+      .map((file) => ({ path: file.path, content: file.content }))
+      .sort((a, b) => a.path.localeCompare(b.path));
+  ensure(
+    JSON.stringify(sort(reviewed.changes)) ===
+      JSON.stringify(sort(input.files)),
+    "APPROVAL_STALE",
+    "Published file contents differ from the exact reviewed patch.",
+  );
   for (const f of input.files) {
     const blob =
       f.content === null

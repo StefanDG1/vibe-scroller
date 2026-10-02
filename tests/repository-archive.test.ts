@@ -134,6 +134,7 @@ it("allows only GitHub's exact archive redirect, bounds downloads, and never for
 it("preserves executable file modes without shell expansion and never chmods a deleted file after the patch", async () => {
   const commands: string[] = [];
   const sandbox = {
+    verifySnapshot: async () => {},
     files: { write: async () => {}, remove: async () => {} },
     commands: {
       run: async (command: string) => {

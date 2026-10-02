@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-02T14:28:54.954Z",
+  "environment": "production isolated worker",
+  "workingTreeBaseCommit": "dd397918c757fa57a4ac251c4924f6d0a534dfd0",
+  "sourceSha256": {
+    "packages/providers/cloud.ts": "7425ac6f050c3e3f575efa34444e7549d89e5ec4c2860c99e3ae3fa6727dd96b",
+    "packages/providers/github.ts": "be453b83e9844230ff2f406545948c7237b2a386ecf530f320de9e154f9f695c",
+    "packages/providers/sandbox.ts": "c3e769e9d8c60b03c48eac77d6536470c307d2b09eea16f518e919e3cf02b5d9",
+    "packages/repositories/reviewPatch.ts": "9af018f888e29c4b03025e3ee7e3d022887e0c377e90422e9adee132057806ed"
+  },
+  "command": "pnpm exec vitest run --config private/vercel-production.config.ts -t 'real ephemeral Vercel adapter'",
+  "passed": 1,
+  "intentionallyUnselected": 3,
+  "ownedSyntheticSource": true,
+  "normalTrustedPatch": true,
+  "sourceMutationRefused": true,
+  "symlinkSubstitutionRefused": true,
+  "hardlinkSubstitutionRefused": true,
+  "workerStoppedAndDeleted": true,
+  "customerDataUsed": false,
+  "publicReleaseEstablished": false
+}
