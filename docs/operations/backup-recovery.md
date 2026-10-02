@@ -1,6 +1,6 @@
 # Recover a workspace backup
 
-Mode: how-to. Locked hosted staging database restoration passed on October 2. A bounded owned evidence-frame recovery also passed. The independent production database exporter and schedule are implemented; their first GitHub execution and bulk object recovery acceptance are recorded separately.
+Mode: how-to. Locked hosted staging database restoration passed on October 2. A bounded owned evidence-frame recovery also passed. The independent production database exporter and schedule are implemented; their first GitHub execution passed; bulk object recovery acceptance remains separate.
 
 The dedicated staging rehearsal encrypts a Convex export with AES-256-GCM, decrypts it offline, validates every document and rejects altered authenticated metadata. It exports the latest deletion markers separately after the snapshot. This verifies archive integrity, not a hosted database import or object-storage recovery.
 
@@ -35,3 +35,7 @@ Store the key as VIBE_BACKUP_CONVEX_KEY and the independent AES-256 backup key a
 scripts/production-backup.mjs checks the backend's actual deployment identity before exporting. It bounds exports to 200 MB, removes temporary plaintext, encrypts the database ZIP and the separately captured latest deletion manifest, and emits only coarse operational counts. GitHub stores the sealed JSON artifacts for seven days. This uses GitHub as a backup processing/storage provider; its applicable agreement, processing locations and publication register require review before paid launch. No EU-only processing claim is made.
 
 The database-backup utility authenticates archive purpose, source deployment, commit, content hash and seven-day expiry. Decryption requires a different named recovery destination under restore lock. It does not import or unlock any database. Obtain the newest independent deletion manifest after the snapshot, apply it before serving traffic, quarantine credentials and repeat the existing hosted/tenant/private-object checks. The daily snapshot is not permission to restore deleted content. R2 object bytes and bulk object disaster recovery remain separate acceptance work.
+
+## Independent backup verification
+
+The first real production dispatch, workflow run 36970054399 at commit f2ccdf42b3d447e2d075d1cc13ce93b6194739f5, succeeded. The downloaded encrypted artifact authenticated and parsed in memory: 138,841 database bytes, 91 tables and three latest deletion markers. No plaintext archive was written during verification. The restricted key was denied environment reads and an empty-input mutation probe. An initial verifier incorrectly expected document fields on table metadata and ISO marker timestamps; those assumptions were corrected before the successful inspection. See [production backup evidence](../../infra/production-backup-evidence.json). This is an actual independent backup, not a serving-production restore or bulk object recovery.

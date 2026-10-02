@@ -1,0 +1,24 @@
+{
+  "observedAt": "2026-10-02T05:45:42.397Z",
+  "deployment": "bold-lemur-667",
+  "sourceCommit": "f2ccdf42b3d447e2d075d1cc13ce93b6194739f5",
+  "workflowRun": 36970054399,
+  "workflowSucceeded": true,
+  "independentEncryptedArtifactDownloaded": true,
+  "restrictedKeyEnvironmentReadDenied": true,
+  "restrictedKeyMutationDenied": true,
+  "archiveAuthenticatedAndParsed": true,
+  "unlockedRestoreDenied": true,
+  "plaintextArchiveWritten": false,
+  "databaseBytes": 138841,
+  "parsedTables": 91,
+  "latestDeletionMarkers": 3,
+  "retentionDays": 7,
+  "runtimeEnvironmentArchived": false,
+  "objectBytesIncluded": false,
+  "limitations": [
+    "Actual production database backup to GitHub encrypted artifacts, not a production database import.",
+    "A locked hosted restore and owned object recovery were tested separately in staging.",
+    "Bulk R2 recovery, key-rotation drill and provider/publication review remain incomplete."
+  ]
+}

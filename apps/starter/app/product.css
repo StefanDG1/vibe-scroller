@@ -6,7 +6,17 @@
   --panel: #191919;
   --teal: #f4f4f4;
   --line: #333333;
-  --muted: #a8a8a8;
+  --subtle: #a8a8a8;
+  --background: #101010;
+  --foreground: #f4f4f4;
+  --card: #191919;
+  --muted: #262626;
+  --muted-foreground: #a8a8a8;
+  --primary: #f4f4f4;
+  --primary-foreground: #101010;
+  --border: #333333;
+  --ring: #c4c4c4;
+  --destructive: #b4233c;
   --soft: #262626;
 }
 
@@ -88,13 +98,13 @@ h3 {
   font-size: 1.05rem;
 }
 p {
-  color: var(--muted);
+  color: var(--subtle);
   max-width: 72ch;
 }
 small,
 .fine {
   font-size: 0.8rem;
-  color: var(--muted);
+  color: var(--subtle);
 }
 pre {
   max-width: 100%;
@@ -152,7 +162,7 @@ code,
   flex-wrap: wrap;
 }
 .muted {
-  color: var(--muted);
+  color: var(--subtle);
 }
 .brand {
   font-size: 1.22rem;
@@ -373,12 +383,12 @@ summary {
 }
 .coverage {
   background: var(--canvas);
-  color: var(--muted);
+  color: var(--subtle);
   border: 1px solid var(--line);
 }
 .tag {
   background: var(--canvas);
-  color: var(--muted);
+  color: var(--subtle);
   font-weight: 400;
 }
 .product-shell {
@@ -406,7 +416,7 @@ summary {
 .workspace-label {
   padding: 0 12px;
   font-size: 0.8rem;
-  color: var(--muted);
+  color: var(--subtle);
 }
 .product-rail nav {
   display: grid;
@@ -423,7 +433,7 @@ summary {
   border-radius: 6px;
   font-size: 0.85rem;
   min-height: 44px;
-  color: var(--muted);
+  color: var(--subtle);
 }
 .product-rail nav button span {
   font-size: 1.2rem;
@@ -447,7 +457,7 @@ summary {
   text-align: left;
   background: none;
   padding: 0;
-  color: var(--muted);
+  color: var(--subtle);
   min-height: 44px;
 }
 .product-body {
@@ -623,7 +633,7 @@ summary {
   font-size: 0.8rem;
   padding-left: 19px;
   margin: 6px 0 12px;
-  color: var(--muted);
+  color: var(--subtle);
 }
 .panel {
   min-width: 0;
@@ -891,7 +901,7 @@ textarea {
   .mobile-nav button {
     border: 0;
     background: none;
-    color: var(--muted);
+    color: var(--subtle);
     font-size: 0.66rem;
     display: flex;
     flex-direction: column;
@@ -1149,7 +1159,7 @@ button:disabled {
   justify-content: center;
   border: 0;
   background: none;
-  color: var(--muted);
+  color: var(--subtle);
   border-radius: 10px;
   flex-shrink: 0;
 }
@@ -1410,7 +1420,7 @@ dialog.capture-modal::backdrop {
 .site-footer button {
   background: none;
   border: 0;
-  color: var(--muted);
+  color: var(--subtle);
   text-align: left;
   padding: 0;
   min-height: 44px;
@@ -1708,6 +1718,11 @@ dialog.capture-modal::backdrop {
 .account-page .navlinks {
   flex-wrap: wrap;
 }
+.workspace-settings {
+  max-width: 840px;
+  margin: 24px auto;
+  padding-inline: clamp(16px, 3vw, 32px);
+}
 .account-page .topbar .wordmark,
 .account-page .navlinks a,
 .account-page .card > a,
@@ -1756,7 +1771,7 @@ dialog.capture-modal::backdrop {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: var(--muted);
+  color: var(--subtle);
   font-size: 14px;
 }
 .processing-steps li.current,
@@ -1796,7 +1811,7 @@ dialog.capture-modal::backdrop {
   border-radius: 10px;
 }
 .evidence-grid figcaption {
-  color: var(--muted);
+  color: var(--subtle);
   font-size: 12px;
   margin-top: 6px;
 }
