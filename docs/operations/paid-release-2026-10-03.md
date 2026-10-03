@@ -6,6 +6,8 @@ The owner approved the current policies and the existing video analyses, and rep
 
 Live checkout uses the dedicated VibeScroller account and versioned tax-covered country rule. Native production Starter weekly handoff reached Stripe's live EUR 5.99 Checkout with Managed Payments, required terms and billing address, correct returns and policy v1-2026-10-03.1. The unpaid test session was expired. No card, purchase or refund was attempted; Stripe reported no subscriptions or invoices for that customer and all app grants predated the test. See [the unpaid handoff](evidence/live-unpaid-checkout-20261003.json). This is not a live-payment test.
 
+Application commit 2e3c02f4f8b5721f4c3127f351a46fef76e34310 is READY on Vercel and its exact version is visible in the production Account menu. Verify, Version and prerelease workflows passed for that commit. The final authenticated source view passed six widths, loaded its thumbnail and eight selected private frames, and opened a loaded image in the dismissible native dialog. See [the deployment and native receipt](evidence/paid-release-deployment-20261003.json). Documentation-only follow-up commits do not replace this deployed application version.
+
 ## Gate evidence and precise scope
 
 | Gate              | Available evidence                                                                                                                                                                                                       | Limit or remaining work                                                                                                  |

@@ -1,0 +1,52 @@
+{
+  "observedAt": "2026-10-03T10:51:51Z",
+  "environment": "production",
+  "canonicalOrigin": "https://scroll.companynerve.com",
+  "applicationCommit": "2e3c02f4f8b5721f4c3127f351a46fef76e34310",
+  "applicationVersion": "0.1.0-alpha.20261003104416.g2e3c02f4f8b5",
+  "deployment": {
+    "provider": "vercel",
+    "id": "dpl_DmmJdhLTTJXpaFrUknbxnsMUaxo5",
+    "state": "READY",
+    "buildPolicy": "fixed Basic, normal queued Git build"
+  },
+  "github": {
+    "verify": { "run": 37117398344, "conclusion": "success" },
+    "version": { "run": 37117398294, "conclusion": "success" },
+    "prerelease": { "run": 37117461787, "conclusion": "success" },
+    "allRunsBoundToApplicationCommit": true
+  },
+  "nativeAuthenticatedSource": {
+    "widths": [320, 390, 430, 768, 1024, 1440],
+    "mainPointsPresentAtEveryWidth": true,
+    "horizontalOverflow": false,
+    "allVisibleButtonsMinimum44By44CssPixels": true,
+    "thumbnailLoaded": true,
+    "eightSelectedEvidenceFramesLoadedAfterNativeScroll": true,
+    "imageDialogOpened": true,
+    "dialogImageLoaded": true,
+    "escapeDismissedDialog": true,
+    "accountMenuBuildVersionVerified": true,
+    "mobileSourceAndDialogScreenshotsVisuallyInspected": true,
+    "privateCustomerImagesPublished": false
+  },
+  "failedProbeHandling": [
+    "Initial hidden browser probe deferred lazy images. Focus emulation and native scrolling loaded all nine source images without an application change.",
+    "First dialog assertion incorrectly required an explicit role attribute instead of the native dialog element. The corrected native open-dialog assertion and image-load wait passed.",
+    "First dialog screenshot used document origin instead of the scrolled visual viewport and captured only the backdrop. Correct viewport coordinates and a loaded-image assertion produced the inspected image viewer."
+  ],
+  "billing": {
+    "liveManagedCheckoutEnabled": true,
+    "actualUnpaidLiveHandoffVerified": true,
+    "actualPurchaseAttempted": false,
+    "actualRefundAttempted": false,
+    "unpaidSessionExpired": true,
+    "evidence": "live-unpaid-checkout-20261003.json"
+  },
+  "limits": [
+    "Physical Android hardware testing remains deferred.",
+    "The numerical human benchmark is incomplete; this receipt does not claim all V1 acceptance criteria passed.",
+    "No actual live payment or refund was tested, as instructed by the owner.",
+    "The EUR 10 Google inference pilot ceiling and all service budgets are unchanged."
+  ]
+}
