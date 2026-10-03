@@ -11,10 +11,10 @@ def load() -> dict[str, Any]:
 def calculate(data: dict[str, Any], overrides: dict[str, float] | None = None) -> dict[str, Any]:
     p = {k: float(v["value"]) for k,v in data["inputs"].items()}
     p.update(overrides or {})
-    for key in ("utilization", "refund_rate", "starter_share", "weekly_share", "monthly_share", "target_margin"):
+    for key in ("utilization", "refund_rate", "starter_share", "weekly_share", "monthly_share", "target_margin", "managed_payments_rate"):
         if not 0 <= p[key] <= 1: raise ValueError(f"{key} must be between zero and one")
     if p["weekly_share"] + p["monthly_share"] > 1: raise ValueError("Interval shares exceed one")
-    if p["eur_ron"] <= 0 or p["credit_cost_eur"] < 0: raise ValueError("Invalid FX or credit cost")
+    if p["eur_ron"] <= 0 or p["credit_cost_eur"] < 0 or p["radar_screen_ron"] < 0 or p["screened_per_payment"] < 0: raise ValueError("Invalid FX or credit cost")
     intervals = {"weekly":p["weekly_share"], "monthly":p["monthly_share"], "annual":1-p["weekly_share"]-p["monthly_share"]}
     pay_freq = {"weekly":p["days_year"] / p["days_week"] / p["months_year"], "monthly":1., "annual":1/p["months_year"]}
     tier_rows=[]
@@ -24,8 +24,8 @@ def calculate(data: dict[str, Any], overrides: dict[str, float] | None = None) -
         credits=intervals["weekly"]*t["weekly_credits"]*pay_freq["weekly"] + (intervals["monthly"]+intervals["annual"])*t["monthly_credits"]
         revenue=gross*(1-p["refund_rate"])/(1+p["consumer_vat_rate"])
         refunds_net=gross*p["refund_rate"]/(1+p["consumer_vat_rate"])
-        pct_fees=gross*(p["card_rate"]+p["billing_rate"]+p["tax_fee_rate"])
-        fixed_fees=payments*p["payment_fixed_ron"]/p["eur_ron"]
+        pct_fees=gross*(p["card_rate"]+p["billing_rate"]+p["tax_fee_rate"]+p["managed_payments_rate"])
+        fixed_fees=payments*(p["payment_fixed_ron"]+p["radar_screen_ron"]*p["screened_per_payment"])/p["eur_ron"]
         fx=gross*p["fx_reserve_rate"]
         dispute=payments*p["dispute_probability"]*p["dispute_fee_eur"]
         compute=credits*p["credit_cost_eur"]*p["utilization"]
@@ -67,7 +67,7 @@ def main():
         margin=f"{row['margin']:.1%}" if row['margin'] is not None else 'Not defined'
         lines.append(f"| {row['users']} | EUR {row['revenue']:.2f} | EUR {row['costs']:.2f} | EUR {row['profit']:.2f} | {margin} |")
     ex=payload['clip_example']
-    lines+=['', '## Illustrative 90-second source','',f"Buffered source-understanding estimate: EUR {ex['buffered_eur']:.4f}, quoted at {ex['quote_credits']} credits under these assumptions. This excludes project matching, plan generation, and code execution. It is not a throughput or accuracy benchmark.",'', '## Accounting limits','', 'Annual cash arrives upfront but revenue is normalized monthly. Payment fees use normalized payment frequency. Refunds reduce revenue and original fees remain expensed. Metered credit ceilings already include the relevant supplier-tax and retry exposure. Do not add that exposure twice. Fixed costs are scenario inputs and must rise when actual provider tiers, accountant costs, backups, or paid support require it.']
+    lines+=['', '## Illustrative 90-second source','',f"Buffered source-understanding estimate: EUR {ex['buffered_eur']:.4f}, quoted at {ex['quote_credits']} credits under these assumptions. This excludes project matching, plan generation, and code execution. It is not a throughput or accuracy benchmark.",'', '## Accounting limits','', 'Annual cash arrives upfront but revenue is normalized monthly. Payment fees use normalized payment frequency. Refunds reduce revenue and original fees remain expensed. Metered credit ceilings already include the relevant supplier-tax and retry exposure. Do not add that exposure twice. Managed Payments cases add its 3.5 percent gross-transaction fee and retain separate Billing/payment fees. The selected advanced Radar screening quote includes unsuccessful attempts through an explicit planning multiplier; ordinary included fraud handling is not billed twice. Separate Tax-calculation fees are zero for these cases. Fixed costs are scenario inputs and must rise when actual provider tiers, accountant costs, backups, or paid support require it.']
     (ROOT/'RESULTS.md').write_text('\n'.join(lines)+'\n',encoding='utf-8')
     for r in results: print(r['name'],r['breakeven'],r['users_for_target'],round(r['mix']['revenue'],2),round(r['mix']['variable'],2))
 

@@ -10,9 +10,7 @@ export default function Home() {
     <PublicPage>
       <section className="hero">
         <div>
-          <p className="release-note">
-            Development preview · Your approval stays in the loop
-          </p>
+          <p className="release-note">Your approval stays in the loop</p>
           <h1>Turn saved videos into changes worth building.</h1>
           <p className="hero-copy">
             You save useful videos faster than you can use them. Give those
@@ -28,8 +26,8 @@ export default function Home() {
             </Link>
           </div>
           <p className="fine">
-            Browser first. Optional laptop runner. Metered cloud execution stays
-            gated until verified.
+            Capture in your browser. Review the evidence, plan and funding
+            before any coding task.
           </p>
         </div>
         <div className="workflow-preview">
@@ -135,8 +133,9 @@ export default function Home() {
           </article>
         </div>
         <p>
-          Weekly and annual choices are in the proposed catalogue. Live checkout
-          is disabled pending provider, tax and release evidence.
+          Weekly, monthly and annual choices are available in your account.
+          Checkout confirms the total, currency and applicable tax before
+          payment.
         </p>
         <Link href="/pricing">Compare the catalogue</Link>
       </section>

@@ -52,7 +52,7 @@ export async function startV1Checkout(_: FormState, d: FormData) {
       organizationId: org(d),
       tier: val(d, "tier") as "starter" | "pro",
       interval: val(d, "interval") as "weekly" | "monthly" | "annual",
-      country: val(d, "country"),
+      country: val(d, "country") || undefined,
       termsAccepted: d.get("terms") === "on",
       immediateService: d.get("immediate") === "on",
     });
@@ -100,7 +100,7 @@ export async function buyV1Credits(_: FormState, d: FormData) {
     ).action(api.billingV1.topup, {
       organizationId: org(d),
       pack: val(d, "pack") as "200" | "550",
-      country: val(d, "country"),
+      country: val(d, "country") || undefined,
       termsAccepted: d.get("terms") === "on",
       immediateService: d.get("immediate") === "on",
     });

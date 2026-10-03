@@ -24,6 +24,17 @@ class ModelTests(unittest.TestCase):
         self.assertIsNone(calculate(self.d,{'credit_cost_eur':.03,'utilization':1})['users_for_target'])
     def test_invalid_mix(self):
         with self.assertRaises(ValueError): calculate(self.d,{'weekly_share':.8,'monthly_share':.8})
+    def test_managed_fee_uses_gross_not_net_tax_revenue(self):
+        before=calculate(self.d,{'managed_payments_rate':0})
+        after=calculate(self.d,{'managed_payments_rate':.035})
+        self.assertAlmostEqual(after['mix']['variable']-before['mix']['variable'],before['mix']['gross']*.035)
+        self.assertEqual(after['mix']['revenue'],before['mix']['revenue'])
+    def test_screening_counts_attempts_without_changing_compute(self):
+        before=calculate(self.d,{'radar_screen_ron':0})
+        after=calculate(self.d,{'radar_screen_ron':.31,'screened_per_payment':1.2})
+        expected=before['mix']['payments']*.31*1.2/before['inputs']['eur_ron']
+        self.assertAlmostEqual(after['mix']['variable']-before['mix']['variable'],expected)
+        self.assertEqual(after['mix']['compute'],before['mix']['compute'])
     def test_example_has_positive_rounded_quote(self):
         ex=clip_example(self.d); self.assertGreater(ex['quote_credits'],0)
         self.assertGreaterEqual(ex['quote_credits']*.01,ex['buffered_eur'])

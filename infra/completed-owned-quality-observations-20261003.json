@@ -1,0 +1,43 @@
+{
+  "checkedAt": "2026-10-03T10:06:54.631725+00:00",
+  "synthetic": true,
+  "datasetVersion": "owned-forty-plus-licensed-accent-20261003-v3",
+  "codeCommit": "1d0340d2adecc96427e427ce0139a55d07d2c20a",
+  "uploaded": 41,
+  "states": {
+    "ready": 41
+  },
+  "actualSuccessfulMatchingResults": 82,
+  "expectedMatchingResults": 82,
+  "humanReviewedNumerically": 0,
+  "ownerQualitativelyAccepted": 23,
+  "newExamplesNotHumanAccepted": 18,
+  "missingCategories": [],
+  "successfulAnalysisInferenceEstimateEUR": 0.533296,
+  "matchingInferenceEstimateEUR": 0.307903,
+  "successfulServiceCredits": 124,
+  "successfulProcessingSeconds": {
+    "minimum": 40.492,
+    "median": 51.526,
+    "maximum": 160.072
+  },
+  "completeBenchmark": false,
+  "publicReleaseApproved": false,
+  "limitations": [
+    "Forty owned synthetic clips contain twenty scenarios and twenty labeled variants using two US-English voices. One separately licensed human British-English excerpt broadens accent coverage; it is not representative of all accents.",
+    "The owner qualitatively accepted the original 23 completed examples. Numeric supported-point and timestamp metrics remain unannotated; the additional 18 examples are not marked human accepted.",
+    "All forty original clips eventually succeeded. Three failed initial attempts were preserved and received one explicit bounded retry under the corrected provider-settlement code. Unknown historical holds were not released.",
+    "Two repositories are owned local excerpt fixtures, not installed customer repositories. Matching used actual metered inference and strict references; this dataset did not publish GitHub tasks.",
+    "Receipts show conservative EUR inference estimates and service credits, not paid provider invoices or all-in infrastructure costs. Settled USD invoice cost remains unknown.",
+    "The dataset was authored before inference. Pipeline fixes were deployed during collection, so it is not a paired comparison of one unchanged model/prompt version."
+  ],
+  "notCustomerData": true,
+  "strictEvaluationExit": 2,
+  "ownerReviewIsNotNumericQualityScoring": true,
+  "licensedAccentAttribution": {
+    "speaker": "Matthew Hansen / PodPedia",
+    "source": "https://commons.wikimedia.org/wiki/File:EN-Lemmings(VideoGame).ogg",
+    "license": "https://creativecommons.org/licenses/by-sa/3.0/",
+    "changes": "First 40 seconds with an attribution card; private only"
+  }
+}

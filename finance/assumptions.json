@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "as_of": "2026-09-30",
+  "as_of": "2026-10-03",
   "description": "Planning assumptions, not observed financial results. FX and tax rates are scenarios, not verified company settings.",
   "inputs": {
     "consumer_vat_rate": {
@@ -200,14 +200,14 @@
       "note": "Include billed reasoning tokens where applicable."
     },
     "sandbox_cpu_usd_second": {
-      "value": 1.4e-05,
+      "value": 1.4e-5,
       "unit": "USD per vCPU-second",
       "kind": "published",
       "source": "https://e2b.dev/pricing",
       "note": "Base resource price, verify current invoice."
     },
     "sandbox_memory_usd_second": {
-      "value": 4.5e-06,
+      "value": 4.5e-6,
       "unit": "USD per GiB-second",
       "kind": "published",
       "source": "https://e2b.dev/pricing",
@@ -261,6 +261,27 @@
       "kind": "assumption",
       "source": "Network, storage, and minimum-billing reserve",
       "note": "Example only. Actual cost ledger replaces this input."
+    },
+    "managed_payments_rate": {
+      "value": 0,
+      "unit": "fraction of gross transaction amount including indirect tax",
+      "kind": "scenario",
+      "source": "https://support.stripe.com/questions/managed-payments-pricing?locale=en-GB",
+      "note": "Legacy direct-payment cases remain unchanged; selected Managed Payments cases use 3.5 percent in addition to payment and subscription Billing fees. Its indirect-tax handling is not added again as a separate Tax fee."
+    },
+    "radar_screen_ron": {
+      "value": 0,
+      "unit": "RON per screened transaction",
+      "kind": "scenario",
+      "source": "Owner-authorized VibeScroller Radar Plus dashboard quote, October 3 2026",
+      "note": "Managed Payments includes ordinary fraud handling; selected advanced country-rule configuration has a separately approved RON 0.31 screening quote."
+    },
+    "screened_per_payment": {
+      "value": 1.1,
+      "unit": "screened attempts per successful payment",
+      "kind": "assumption",
+      "source": "Conservative planning assumption; not a provider observation",
+      "note": "Include declined/uncompleted screening exposure. Replace using actual fee records."
     }
   },
   "tiers": {
@@ -350,19 +371,41 @@
         "credit_cost_eur": 0.03,
         "utilization": 1
       }
+    },
+    {
+      "name": "Managed Payments launch, full allowance",
+      "overrides": {
+        "managed_payments_rate": 0.035,
+        "radar_screen_ron": 0.31,
+        "tax_fee_rate": 0,
+        "utilization": 1
+      }
+    },
+    {
+      "name": "Managed Payments all annual, full allowance",
+      "overrides": {
+        "managed_payments_rate": 0.035,
+        "radar_screen_ron": 0.31,
+        "tax_fee_rate": 0,
+        "weekly_share": 0,
+        "monthly_share": 0,
+        "utilization": 1
+      }
+    },
+    {
+      "name": "Managed Payments Starter annual, full allowance",
+      "overrides": {
+        "managed_payments_rate": 0.035,
+        "radar_screen_ron": 0.31,
+        "tax_fee_rate": 0,
+        "starter_share": 1,
+        "weekly_share": 0,
+        "monthly_share": 0,
+        "utilization": 1
+      }
     }
   ],
-  "customer_counts": [
-    0,
-    1,
-    5,
-    10,
-    25,
-    50,
-    100,
-    250,
-    500
-  ],
+  "customer_counts": [0, 1, 5, 10, 25, 50, 100, 250, 500],
   "excluded": [
     "Founder salary",
     "Marketing",

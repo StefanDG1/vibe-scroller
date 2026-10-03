@@ -1,0 +1,47 @@
+{
+  "at": "2026-10-03T10:10:22.232998+00:00",
+  "environment": "production",
+  "noNewGrants": true,
+  "unchangedCeilings": true,
+  "oldUnknownHoldsPreserved": true,
+  "initialObservationSource": "private/owned-review-budget-before.mjs output before resume; initial snapshot later overwritten by the same read-only observer, preserved here from the recorded tool result",
+  "before": {
+    "all": {
+      "ceiling": 1000,
+      "spent": 142,
+      "reserved": 50
+    },
+    "trial": {
+      "ceiling": 200,
+      "spent": 142,
+      "reserved": 50
+    },
+    "google": {
+      "ceilingMicros": 10000000,
+      "spentMicros": 618383,
+      "reservedMicros": 265043
+    },
+    "qaAvailableCredits": 67
+  },
+  "after": {
+    "all": {
+      "ceiling": 1000,
+      "spent": 197,
+      "reserved": 50
+    },
+    "trial": {
+      "ceiling": 200,
+      "spent": 142,
+      "reserved": 50
+    },
+    "google": {
+      "ceilingMicros": 10000000,
+      "spentMicros": 998555,
+      "reservedMicros": 265043
+    },
+    "qaAvailableCredits": 12
+  },
+  "newSettledServiceCredits": 55,
+  "newConservativeGoogleEstimateMicros": 380172,
+  "customerTrialBudgetUnaffected": true
+}

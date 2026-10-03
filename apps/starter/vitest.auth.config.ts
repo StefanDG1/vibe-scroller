@@ -12,7 +12,10 @@ export default defineConfig({
   },
   test: {
     server: { deps: { inline: ["@workos-inc/authkit-nextjs"] } },
-    include: ["apps/starter/auth-redirect.test.ts"],
+    include: [
+      "apps/starter/auth-redirect.test.ts",
+      "apps/starter/billing-actions.test.ts",
+    ],
     environment: "node",
   },
 });
