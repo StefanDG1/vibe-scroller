@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
       COST_RECONCILIATION_REQUIRED:
         "Provider usage is uncertain or exceeded its approved ceiling. No automatic retry was issued.",
       PROVIDER_LIMIT:
-        "The verified free inference allowance is reserved or exhausted. Try after it resets; no paid provider was used.",
+        "The selected inference budget is reserved or exhausted. Review connection and usage before retrying; no funding fallback was used.",
       INSUFFICIENT_CREDITS:
         "The available allowance cannot cover this reservation. Review usage and the maximum budget.",
       QUOTA_EXCEEDED:
