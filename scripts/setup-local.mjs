@@ -1,24 +1,9 @@
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { randomBytes } from "node:crypto";
 import { resolve } from "node:path";
+import { parseEnv } from "node:util";
+import { inspectSetup } from "./setup-preflight.mjs";
 const root = resolve(import.meta.dirname, "..");
-function parse(text) {
-  return Object.fromEntries(
-    text
-      .split(/\r?\n/)
-      .filter((l) => l && !l.startsWith("#") && l.includes("="))
-      .map((l) => {
-        const i = l.indexOf("=");
-        return [
-          l.slice(0, i).trim(),
-          l
-            .slice(i + 1)
-            .trim()
-            .replace(/^(["'])(.*)\1$/, "$2"),
-        ];
-      }),
-  );
-}
 const source = resolve(root, ".env.local"),
   target = resolve(root, "apps/starter/.env.local");
 if (!existsSync(source)) {
@@ -27,9 +12,26 @@ if (!existsSync(source)) {
   );
   process.exit(1);
 }
-const env = parse(readFileSync(source, "utf8"));
-const existing = existsSync(target) ? parse(readFileSync(target, "utf8")) : {};
+const env = parseEnv(readFileSync(source, "utf8"));
+const existing = existsSync(target)
+  ? parseEnv(readFileSync(target, "utf8"))
+  : {};
+if (
+  !inspectSetup({
+    ...env,
+    ...existing,
+    CONVEX_URL: env.CONVEX_URL || env.NEXT_PUBLIC_CONVEX_URL,
+    WORKOS_CLIENT_ID: env.WORKOS_CLIENT_ID,
+    WORKOS_API_KEY: env.WORKOS_API_KEY,
+  }).ready
+) {
+  console.error(
+    "Setup preflight failed. Run node scripts/setup-preflight.mjs; no setting values printed.",
+  );
+  process.exit(1);
+}
 const values = {
+  ...existing,
   NEXT_PUBLIC_CONVEX_URL: env.CONVEX_URL || env.NEXT_PUBLIC_CONVEX_URL,
   WORKOS_CLIENT_ID: env.WORKOS_CLIENT_ID,
   WORKOS_API_KEY: env.WORKOS_API_KEY,
@@ -52,7 +54,7 @@ if (missing.length) {
 writeFileSync(
   target,
   Object.entries(values)
-    .map(([k, v]) => `${k}=${v}`)
+    .map(([k, v]) => `${k}=${JSON.stringify(v)}`)
     .join("\n") + "\n",
   { mode: 0o600 },
 );

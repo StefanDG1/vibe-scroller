@@ -54,6 +54,7 @@ export const invoiceTask = internalMutation({
 export const sweep = internalMutation({
   args: {},
   handler: async (ctx) => {
+    if (process.env.RESTORE_LOCK === "true") return;
     for (const stage of await ctx.db
       .query("mediaStages")
       .withIndex("by_updated", (q) =>
@@ -101,6 +102,8 @@ export const retentionPage = internalMutation({
     cursor: v.union(v.string(), v.null()),
   },
   handler: async (ctx, a) => {
+    if (process.env.RESTORE_LOCK === "true")
+      return { isDone: false, continueCursor: a.cursor ?? "", paused: true };
     const result = await ctx.db
       .query(a.section)
       .paginate({ cursor: a.cursor, numItems: 5 });

@@ -25,6 +25,9 @@
     "template:export": "node scripts/export-template.mjs",
     "format": "prettier --write .",
     "setup:local": "node scripts/setup-local.mjs",
+    "setup:preflight": "node scripts/setup-preflight.mjs",
+    "review:prepare": "node scripts/prepare-quality-review.ts",
+    "costs:reconcile": "node scripts/reconcile-costs.ts",
     "lint": "oxlint apps/starter convex packages tests scripts --react-plugin --jsx-a11y-plugin --nextjs-plugin --ignore-pattern 'packages/runner/protocol/**' --ignore-pattern 'convex/_generated/**' --ignore-pattern '**/node_modules/**' --max-warnings 0"
   },
   "dependencies": {

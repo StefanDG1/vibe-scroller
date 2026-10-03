@@ -698,6 +698,7 @@ export const refreshPR = action({
 export const reconcilePRs = internalAction({
   args: { cursor: v.optional(v.string()) },
   handler: async (ctx, a): Promise<void> => {
+    if (process.env.RESTORE_LOCK === "true") return;
     const runs = await ctx.runQuery(internal.jobs.prRuns, a);
     for (const r of runs.page) {
       try {
@@ -730,6 +731,7 @@ export const reconcilePRs = internalAction({
 export const reconcilePRRun = internalAction({
   args: { id: v.id("runs") },
   handler: async (ctx, a) => {
+    if (process.env.RESTORE_LOCK === "true") return;
     const run = await ctx.runQuery(internal.jobs.prRun, a);
     if (!run) return;
     const observedAt = Date.now();
@@ -757,6 +759,7 @@ export const reconcilePRRun = internalAction({
 export const deleteObject = internalAction({
   args: { key: v.string() },
   handler: async (ctx, a) => {
+    if (process.env.RESTORE_LOCK === "true") return;
     await removeStoredObject(a.key);
     await ctx.runMutation(internal.assets.deleteReceipt, a);
   },

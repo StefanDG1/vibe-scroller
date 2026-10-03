@@ -27,6 +27,78 @@ async function setup() {
     });
   return { t, a, b, org, other, userId };
 }
+it("does not dispatch restored deletion work while the recovery destination is locked", async () => {
+  const { t } = await setup();
+  const deletion = await t.run((ctx) =>
+    ctx.db.insert("objectDeletions", {
+      key: "synthetic-restored-object",
+      state: "pending",
+      attempts: 0,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    }),
+  );
+  vi.stubEnv("RESTORE_LOCK", "true");
+  await t.mutation(internal.privacy.sweep, {});
+  const state = await t.run(async (ctx) => ({
+    row: await ctx.db.get(deletion),
+    scheduled: await ctx.db.system.query("_scheduled_functions").collect(),
+  }));
+  expect(state.row?.attempts).toBe(0);
+  expect(state.scheduled).toHaveLength(0);
+});
+it("refuses external callbacks and background dispatch while locked even with configured credentials", async () => {
+  const { t, org } = await setup();
+  vi.stubEnv("RESTORE_LOCK", "true");
+  vi.stubEnv("STRIPE_SECRET_KEY", "sk_test_synthetic_unit_only");
+  vi.stubEnv("GITHUB_WEBHOOK_SECRET", "synthetic_unit_only");
+  vi.stubEnv("EMAIL_REAL_DELIVERY_ENABLED", "true");
+  vi.stubEnv("RESEND_API_KEY", "synthetic_unit_only");
+  vi.stubEnv("RESEND_FROM", "synthetic@example.test");
+  vi.stubEnv("APP_URL", "https://synthetic.example.test");
+  const fetch = vi
+    .spyOn(globalThis, "fetch")
+    .mockRejectedValue(new Error("External dispatch must not run"));
+  try {
+    expect(
+      await t.action(internal.reconciliation.stripeEvent, {
+        body: "{}",
+        signature: "synthetic",
+      }),
+    ).toMatchObject({ status: 503 });
+    expect(
+      await t.action(internal.payments.webhook, {
+        body: "{}",
+        signature: "synthetic",
+      }),
+    ).toMatchObject({ status: 503 });
+    expect(
+      await t.action(internal.githubEvents.webhook, {
+        body: "{}",
+        signature: "synthetic",
+        delivery: "synthetic-delivery",
+      }),
+    ).toMatchObject({ status: 503 });
+    await t.action(internal.reconciliation.allBilling, {});
+    await t.action(internal.payments.reconcile, {});
+    await t.action(internal.integrations.reconcilePRs, {});
+    await t.action(internal.integrations.deleteObject, {
+      key: "synthetic/object",
+    });
+    expect(
+      await t.mutation(internal.email.notify, {
+        organizationId: org,
+        key: "synthetic",
+      }),
+    ).toMatchObject({ sent: false });
+    await expect(
+      t.mutation(internal.email.stagingDeliveryTest, {}),
+    ).rejects.toThrow("recovery");
+    expect(fetch).not.toHaveBeenCalled();
+  } finally {
+    fetch.mockRestore();
+  }
+});
 it("blocks private access during restoration and reapplies a latest source marker without touching a foreign workspace", async () => {
   const { t, a, org, other } = await setup();
   const ids = await t.run(async (ctx) => {

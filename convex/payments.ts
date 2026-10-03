@@ -96,6 +96,7 @@ export const refreshBilling = action({
 export const webhook = internalAction({
   args: { body: v.string(), signature: v.string() },
   handler: async (ctx, { body, signature }) => {
+    if (process.env.RESTORE_LOCK === "true") return { status: 503 };
     const client = stripe();
     let event: Stripe.Event;
     try {
@@ -132,6 +133,7 @@ export const webhook = internalAction({
 export const reconcile = internalAction({
   args: { cursor: v.optional(v.string()) },
   handler: async (ctx, { cursor }) => {
+    if (process.env.RESTORE_LOCK === "true") return;
     if (!process.env.STRIPE_SECRET_KEY) return;
     const result = await ctx.runQuery(internal.billing.customers, {
       cursor: cursor ?? null,

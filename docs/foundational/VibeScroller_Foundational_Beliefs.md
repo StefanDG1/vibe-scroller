@@ -39,3 +39,7 @@ October 3, F006: individual and business buyers may use the same bounded offer w
 ## Current release evidence, October 3
 
 The six beliefs remain unchanged: inspect source evidence, accept honest no-fit, keep explicit funding/approval and distinguish merge from measured benefit. Public metered-route and unpaid checkout evidence now support availability claims within the tested scope. They do not establish numerical accuracy, unlimited capacity, universal source retrieval, commercial ChatGPT permission or independent legal review. See [the public release record](../operations/paid-release-2026-10-03.md).
+
+## Post-V1 scope, October 3
+
+F007 records the owner-authorized preparation of one personal deployment path on the same core. Independent setup support still needs two fresh own-account testers and an upgrade; no fully local or self-contained claim follows. The technical developer/founder positioning, actual prices, explicit funding and six beliefs remain unchanged. Documentation now distinguishes hosted users, personal deployers, contributors and operators. Retained quality cases are development evidence, not an untouched benchmark; no new human scores, customers, savings or invoices were invented. See [the execution ledger](../POST-V1-EXECUTION.md).

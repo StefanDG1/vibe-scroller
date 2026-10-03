@@ -1,29 +1,26 @@
-# CompanyNerve documentation
+# VibeScroller documentation
 
-For optional launch summaries, see [LaunchProof setup](operations/launchproof.md), [contract and limits](launchproof-contract.md), and the separate [integration handoff](launchproof-handoff.md).
+Mode: reference. Updated October 3, 2026. VibeScroller keeps a permitted source, its cited insights, a project decision and an approved implementation together. A no-fit result is a valid decision.
 
-Start with [decisions](decisions.md), then [status](status.md). Start with [local setup](local-development.md) to use the starter.
+| Reader            | Start here                                                                                                                                               | Scope                                                               |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| Hosted user       | [First source tutorial](HOSTED-TUTORIAL.md), [owner guide](operations/owner-testing-guide.md)                                                            | Browser use without mandatory GitHub or a laptop                    |
+| Personal deployer | [Personal setup](PERSONAL-SETUP.md), [local development](local-development.md)                                                                           | Own provider accounts; independent tester acceptance remains open   |
+| Contributor       | [Contributor guide](CONTRIBUTING.md), [AGENTS](../AGENTS.md), [start here](START-HERE.md)                                                                | One maintained core, tests and contribution boundaries              |
+| Operator          | [Deployment](operations/vibescroller-deployment.md), [recovery](operations/backup-recovery.md), [provider register](operations/provider-verification.md) | Named environments, credentials, reservations and incident controls |
 
-| Document                                                   | Purpose                                                    |
-| ---------------------------------------------------------- | ---------------------------------------------------------- |
-| [Product brief](product.md)                                | Audience, promised outcome, and template boundary          |
-| [Report analysis](research/report-analysis.md)             | What to retain, change, defer, and verify                  |
-| [Repository assessment](research/repository-assessment.md) | Commit-specific evidence and reuse decisions               |
-| [Architecture](architecture.md)                            | Organization of the website and starter                    |
-| [Architecture decisions](adr/0001-template-boundaries.md)  | Why the initial architecture stays small                   |
-| [Domain contracts](contracts.md)                           | Runtime contracts and future integration boundaries        |
-| [Threat model](security/threat-model.md)                   | Trust boundaries and failure cases                         |
-| [Implementation plan](plan.md)                             | Milestones, dependencies, and completion evidence          |
-| [Acceptance criteria](acceptance.md)                       | Definition of a usable template and launch                 |
-| [Deployment runbook](operations/deployment.md)             | GitHub, Vercel, Convex, WorkOS, Stripe, and DNS sequencing |
-| [Environment inventory](operations/environment.md)         | Secrets, environment isolation, and ownership              |
-| [Authentication setup](operations/authentication.md)       | Email codes, Google-only login, and independent product credentials |
-| [Design directions](design/directions.md)                  | Five recipes with layout, type, and behavior               |
-| [Visual board](design/concepts.html)                       | Static concept previews for voting                         |
-| [Design ballot](design/ballot.md)                          | Record the preferred CompanyNerve identity                 |
-| [Landing-page brief](design/landing-page.md)               | Customer-facing content, routes, and truthful CTAs         |
-| [Future products](future-products.md)                      | Separate repositories and integration acceptance           |
-| [Skill maintenance](skills.md)                             | Bundled skills, portability, provenance, and updates       |
-| [Founder handoff](founder-handoff.md)                      | Review implementation and remaining owner decisions        |
+Use [V1 readiness](V1-READINESS.md) as the current capability record. [Release history](operations/paid-release-2026-10-03.md) and [implementation status](implementation-status.md) retain historical evidence. [Post-V1 execution](POST-V1-EXECUTION.md) records package progress and remaining human dependencies. Earlier CompanyNerve documents remain provenance; they do not define current product availability.
 
-For a hosted product, use [launch operations](operations/launch.md), [Google Search Console](operations/search.md), and [reuse and skill choices](research/reuse-and-skills.md).
+| Reference                                                                                                                  | Purpose                                                    |
+| -------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| [PRD](PRD.md), [decisions](decisions.md), [architecture](architecture.md)                                                  | Product requirements, owner decisions and boundaries       |
+| [Capabilities and troubleshooting](CAPABILITIES.md)                                                                        | Demonstrated, limited and unavailable routes               |
+| [Foundational documents](foundational/README.md)                                                                           | Audience, offer, beliefs and claim evidence                |
+| [API contracts](API-CONTRACTS.md), [data model](DATA-MODEL.md), [state machines](STATE-MACHINES.md)                        | Serialized behavior and tenant rules                       |
+| [Billing](BILLING-AND-TAX.md), [funding](AI-PROVIDERS.md)                                                                  | Credits, explicit funding and provider restrictions        |
+| [Numerical review](operations/numerical-review.md), [cost reconciliation](operations/cost-reconciliation.md)               | Human annotation and invoice preparation                   |
+| [Usability and cohort protocol](operations/independent-use-study.md), [measurement audit](operations/measurement-audit.md) | Independent completion, consent and honest denominators    |
+| [Recovery rehearsal](operations/full-recovery-rehearsal.md)                                                                | Separate locked destination and serving-test prerequisites |
+| [Release gates](LAUNCH-CHECKLIST.md), [security](SECURITY.md), [versioning](VERSIONING.md)                                 | Release decisions, private reporting and exact versions    |
+
+For inherited template maintenance only: [LaunchProof](operations/launchproof.md), [design recipes](design/directions.md) and [export provenance](research/repository-assessment.md). These are not required hosted onboarding steps.

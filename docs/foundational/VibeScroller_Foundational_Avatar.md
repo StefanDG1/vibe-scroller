@@ -123,3 +123,7 @@ October 3, F006: business buyer eligibility is an owner-approved checkout scope,
 ## Current release evidence, October 3
 
 The initial adult developer/founder audience is unchanged. Normal browser use can choose the metered cloud route without a laptop. The owner’s personal ChatGPT analysis remains a separately supported paired-laptop route; do not promise general paid-hosted subscription access. A business purchase adds no enterprise scope or guaranteed repository coverage. See [the public release record](../operations/paid-release-2026-10-03.md).
+
+## Post-V1 scope, October 3
+
+F007 records the owner-authorized preparation of one personal deployment path on the same core. Independent setup support still needs two fresh own-account testers and an upgrade; no fully local or self-contained claim follows. The technical developer/founder positioning, actual prices, explicit funding and six beliefs remain unchanged. Documentation now distinguishes hosted users, personal deployers, contributors and operators. Retained quality cases are development evidence, not an untouched benchmark; no new human scores, customers, savings or invoices were invented. See [the execution ledger](../POST-V1-EXECUTION.md).

@@ -6,6 +6,8 @@ import { v } from "convex/values";
 export const webhook = internalAction({
   args: { body: v.string(), signature: v.string(), delivery: v.string() },
   handler: async (ctx, a) => {
+    if (process.env.RESTORE_LOCK === "true")
+      return { status: 503, category: "RECOVERY_LOCKED" };
     const secret = process.env.GITHUB_WEBHOOK_SECRET;
     if (
       !secret ||

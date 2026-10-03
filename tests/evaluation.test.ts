@@ -121,3 +121,90 @@ it("runs the actual evaluator command and refuses to overwrite an existing repor
     for (const file of [path, output]) if (existsSync(file)) unlinkSync(file);
   }
 });
+
+it("rejects related variants crossing splits and tuning cases labeled held out", () => {
+  expect(() =>
+    evaluateBenchmark({
+      ...data,
+      clips: [
+        { ...data.clips[0], scenarioId: "same", split: "development" },
+        { ...data.clips[0], id: "variant", scenarioId: "same" },
+      ],
+    }),
+  ).toThrow("variants");
+  expect(() =>
+    evaluateBenchmark({
+      ...data,
+      clips: [{ ...data.clips[0], scenarioId: "same", usedForTuning: true }],
+    }),
+  ).toThrow("Tuning");
+  const legacy = evaluateBenchmark(data);
+  expect(legacy.provenanceComplete).toBe(false);
+  expect(legacy.independentScenarioCount).toBeNull();
+  expect(legacy.untouchedQualityTargetMet).toBe(false);
+  expect(
+    evaluateBenchmark({ ...data, results: [] }).settledUsdCents,
+  ).toBeNull();
+});
+
+it("separates complete quality evidence from pending provider costs", () => {
+  const categories = [
+    "coding",
+    "changing_text",
+    "accented_english",
+    "noisy_audio",
+    "caption_disagreement",
+    "old_api",
+    "satire",
+    "unsupported_claim",
+    "non_code",
+    "no_fit",
+    "already_implemented",
+  ];
+  const complete = {
+    ...data,
+    provenance: {
+      frozenAt: "2026-01-01T00:00:00.000Z",
+      manifestSha256: "a".repeat(64),
+      untouchedHeldOut: true,
+    },
+    clips: Array.from({ length: 40 }, (_, i) => ({
+      ...data.clips[0],
+      id: `clip-${i}`,
+      scenarioId: `scenario-${i % 20}`,
+      usedForTuning: false,
+      categories,
+      expected: [
+        { repositoryId: "a", disposition: "no_fit" },
+        { repositoryId: "b", disposition: "no_fit" },
+      ],
+    })),
+    results: Array.from({ length: 40 }, (_, i) => ({
+      ...data.results[0],
+      clipId: `clip-${i}`,
+      reviewer: "synthetic-test-reviewer",
+      matches: [
+        { repositoryId: "a", disposition: "no_fit" },
+        { repositoryId: "b", disposition: "no_fit" },
+      ],
+    })),
+  };
+  const report = evaluateBenchmark(complete);
+  expect(report.completeDataset).toBe(true);
+  expect(report.independentScenarioCount).toBe(20);
+  expect(report.suggestedQualityTargetMet).toBe(true);
+  expect(report.costComplete).toBe(false);
+  expect(report.settledUsdCents).toBeNull();
+  expect(
+    evaluateBenchmark({
+      ...complete,
+      provenance: { ...complete.provenance, untouchedHeldOut: false },
+    }).completeDataset,
+  ).toBe(false);
+  expect(
+    evaluateBenchmark({
+      ...complete,
+      results: complete.results.map(({ reviewer: _reviewer, ...r }) => r),
+    }).completeDataset,
+  ).toBe(false);
+});

@@ -8,6 +8,8 @@ export const resend: Resend = new Resend(components.resend, {
 export const stagingDeliveryTest = internalMutation({
   args: {},
   handler: async (ctx) => {
+    if (process.env.RESTORE_LOCK === "true")
+      throw new Error("Email delivery is disabled during recovery.");
     if (
       !process.env.RESEND_FROM ||
       !process.env.RESEND_API_KEY ||
@@ -40,6 +42,11 @@ export const stagingDeliveryStatus = internalQuery({
 export const notify = internalMutation({
   args: { organizationId: v.id("organizations"), key: v.string() },
   handler: async (ctx, a) => {
+    if (process.env.RESTORE_LOCK === "true")
+      return {
+        sent: false,
+        reason: "Email delivery is disabled during recovery.",
+      };
     if (
       process.env.EMAIL_REAL_DELIVERY_ENABLED !== "true" ||
       !process.env.RESEND_API_KEY ||

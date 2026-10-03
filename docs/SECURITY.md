@@ -10,22 +10,22 @@ Tenant identity and authorization must be verified at every server boundary. A v
 
 ## Threat controls
 
-| Threat | Required controls | Evidence |
-| --- | --- | --- |
-| Cross-workspace access | Server membership checks, tenant-filtered indexes, scoped signed assets | Foreign IDs fail for every record family |
-| Account takeover | WorkOS session controls, secure cookies, reauthentication for sensitive connections | Callback, logout, session expiry, and CSRF tests |
-| Prompt injection | Untrusted content separation, schema validation, tool policy outside prompts | Malicious video, README, and issue fixtures cannot obtain secrets or new permissions |
-| SSRF | Source allowlist, public-IP checks, redirect revalidation, metadata/internal ranges blocked | IPv4, IPv6, rebinding, encoded host, and redirect tests |
-| Media parser exploit | Patched decoder in isolated ephemeral sandbox, bytes/time/decoded-size limits | Adversarial malformed media and resource-limit tests |
-| Repository code execution | No scripts during analysis; sandboxed tests; no hooks or host mounts | Malicious install and test scripts cannot escape |
-| Credential theft | Managed secret boundary, encryption, short-lived job grants, redaction | Secrets absent from prompts, artifacts, browser state, and logs |
-| Unauthorized code change | Plan-hash approval, path policies, base-SHA checks, trusted publisher | Old approval and forbidden path rejected |
-| Duplicate costs | Atomic reservations, idempotent stages, bounded retries | Concurrent requests cannot overspend |
-| Forged webhook | Signature validation on raw body, mode/account checks, deduplication | Wrong signature and wrong Stripe account never grant access |
-| Stale runner | Leases, generation fencing, cancellation, revocation | Late result cannot publish |
-| Cached private data leak | Workspace-only cache, no private service-worker cache, signed assets | Account switch and shared device tests |
-| Supply-chain compromise | Lockfile, pinned images, licence inventory, dependency scan, reviewed updates | Build provenance and dependency report |
-| Data resurrection | Deletion tombstones, restore procedure, retention sweeper | Restore cannot expose deleted content |
+| Threat                    | Required controls                                                                           | Evidence                                                                             |
+| ------------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Cross-workspace access    | Server membership checks, tenant-filtered indexes, scoped signed assets                     | Foreign IDs fail for every record family                                             |
+| Account takeover          | WorkOS session controls, secure cookies, reauthentication for sensitive connections         | Callback, logout, session expiry, and CSRF tests                                     |
+| Prompt injection          | Untrusted content separation, schema validation, tool policy outside prompts                | Malicious video, README, and issue fixtures cannot obtain secrets or new permissions |
+| SSRF                      | Source allowlist, public-IP checks, redirect revalidation, metadata/internal ranges blocked | IPv4, IPv6, rebinding, encoded host, and redirect tests                              |
+| Media parser exploit      | Patched decoder in isolated ephemeral sandbox, bytes/time/decoded-size limits               | Adversarial malformed media and resource-limit tests                                 |
+| Repository code execution | No scripts during analysis; sandboxed tests; no hooks or host mounts                        | Malicious install and test scripts cannot escape                                     |
+| Credential theft          | Managed secret boundary, encryption, short-lived job grants, redaction                      | Secrets absent from prompts, artifacts, browser state, and logs                      |
+| Unauthorized code change  | Plan-hash approval, path policies, base-SHA checks, trusted publisher                       | Old approval and forbidden path rejected                                             |
+| Duplicate costs           | Atomic reservations, idempotent stages, bounded retries                                     | Concurrent requests cannot overspend                                                 |
+| Forged webhook            | Signature validation on raw body, mode/account checks, deduplication                        | Wrong signature and wrong Stripe account never grant access                          |
+| Stale runner              | Leases, generation fencing, cancellation, revocation                                        | Late result cannot publish                                                           |
+| Cached private data leak  | Workspace-only cache, no private service-worker cache, signed assets                        | Account switch and shared device tests                                               |
+| Supply-chain compromise   | Lockfile, pinned images, licence inventory, dependency scan, reviewed updates               | Build provenance and dependency report                                               |
+| Data resurrection         | Deletion tombstones, restore procedure, retention sweeper                                   | Restore cannot expose deleted content                                                |
 
 ## Web application
 
@@ -74,3 +74,7 @@ Maintain a vulnerability-reporting contact and private reporting route. Acknowle
 No open critical or high-risk issue in tenant isolation, credential protection, billing authorization, code isolation, or publication permission can pass the paid launch gate. Lower-severity issues need an owner, mitigation, and target date.
 
 Automated scans supplement code review and adversarial tests. Record what was tested and what was not. The phrase "fully secure" must not appear as a factual claim in launch copy.
+
+## Private reporting route
+
+Use [GitHub private vulnerability reporting](https://github.com/StefanDG1/vibe-scroller/security/advisories/new) when enabled. If unavailable, use the address on [the contact page](https://scroll.companynerve.com/contact) to request a private exchange. Never publish credentials or private media/code in an issue. Send version, safe error code, UTC time and a minimal synthetic reproduction. Redact cookies, signing URLs, keys, identities and source content. No bounty, response deadline or independent audit is promised.

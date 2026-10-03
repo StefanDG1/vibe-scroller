@@ -1,38 +1,35 @@
-# Run your copy locally
+# Develop VibeScroller locally
 
-Use Node.js 24 and pnpm 12.3.4. Install with `pnpm install --frozen-lockfile` from the repository root.
+Mode: how-to. Use Node 24 and pnpm 12.3.4 from the repository root. The production application is `apps/starter`; its name reflects the CompanyNerve export. `apps/marketing` remains an inherited build target, while VibeScroller's public routes live in the application.
 
-## Marketing and design previews
+## Preview without provider accounts
 
-Run `pnpm dev:marketing` and open http://localhost:3000. The five landing pages are under `/designs`. Generated products include the marketing application with their own branding.
+```powershell
+pnpm install --frozen-lockfile
+node scripts/setup-preflight.mjs --demo
+pnpm dev
+```
 
-## Authenticated starter
+Open `http://localhost:3001/demo`. The banner identifies synthetic data. Demo actions do not import media, call AI, charge a payment or write a repository. `/demo?uiState=empty`, `/demo?uiState=loading` and `/demo?uiState=error` expose fixture states. A fixture is not an integration test.
 
-1. Run `pnpm convex:dev`. Choose a new project in your own Convex account. The CLI creates an ignored root `.env.local`.
-2. Create this product's own WorkOS project/environment. Configure AuthKit with the exact redirect `http://localhost:3001/callback`, homepage/sign-out URI `http://localhost:3001`, and Initiate login URL `http://localhost:3001/sign-in`. Enable Magic Auth email one-time codes and Google OAuth only. Disable email/password, passkeys, SSO, and other social providers. Follow [authentication setup](operations/authentication.md) for the product's independent Google OAuth client.
-3. Add `WORKOS_CLIENT_ID` and `WORKOS_API_KEY` to the ignored root `.env.local` from that WorkOS environment.
-4. Set the same variables in the matching Convex deployment. Use `pnpm exec convex env set NAME` and pipe the value on stdin, or a temporary ignored environment file. Never paste a secret into shell history or a committed file.
-5. Run `pnpm setup:local`. It writes `apps/starter/.env.local` and generates a session-encryption secret. It preserves that secret on repeat runs.
-6. Run `pnpm dev` and open http://localhost:3001. Create an account using an email code, then create a workspace and project. Sign out and verify a separate Google sign-in. Neither flow should ask you to create a password.
+## Configure your own development accounts
 
-Keep `pnpm convex:dev` running while changing the backend. The CLI updates generated types. Commit `convex/_generated` without environment values. WorkOS authenticates users; Convex owns organizations and roles. WorkOS SSO organization synchronization is not implemented.
+1. Run `pnpm convex:dev` and select a new project in your own account. Keep its generated ignored root `.env.local`. Never select the operator's production deployment for development.
+2. In your own WorkOS environment enable Magic Auth and Google only. Set callback `http://localhost:3001/callback`, sign-out/homepage `http://localhost:3001` and initiate-login URL `http://localhost:3001/sign-in`. Provision your own Google consent client as described in [authentication](operations/authentication.md).
+3. Put that environment's `WORKOS_CLIENT_ID` and server-only `WORKOS_API_KEY` in root `.env.local`. Set matching backend values through the provider's secret interface or stdin without printing values. Use `.env.example` for names, never production values.
+4. Run `node scripts/setup-preflight.mjs`, then `pnpm setup:local`. Preflight reports names and pass/fail only; setup writes the ignored app environment and preserves its session secret. Restart `pnpm dev` after changes.
+5. Sign in with an email code, verify Google separately and confirm sign-out. First sign-in creates a default workspace. Open Library; GitHub and billing are not required to save metadata. Follow [personal setup](PERSONAL-SETUP.md) before enabling analysis or storage.
 
-## Stripe test billing
+The helper validates configuration, not provider authentication or commercial access. Do not turn verification flags on to silence an error. Keep `convex:dev` running for backend development and commit generated types without environment values.
 
-Set `STRIPE_SECRET_KEY`, `STRIPE_PRO_PRICE_ID`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_MODE=test`, and `APP_URL=http://localhost:3001` in the Convex development deployment. Create a recurring test-mode price and a dedicated customer portal configuration. Set `STRIPE_PORTAL_CONFIG_ID` to that configuration ID to avoid changing shared account defaults. Register the Convex HTTP endpoint `/stripe/webhook` for checkout completion, subscription lifecycle, invoice paid, and invoice payment failure events.
+## Optional billing tests
 
-Open a workspace's Billing page as its owner. The provider shows the actual price and currency. Return from checkout, refresh billing, and try the Pro report. Cancel using the portal and refresh again. Only the backend's verified state grants access.
+Ordinary library setup does not require live Stripe. The catalogue is Starter and Pro with weekly/monthly/annual intervals, not the exported starter's Free/Pro project limit. Use [the billing contract](BILLING-AND-TAX.md) and [provider setup](PROVIDER-SETUP.md) in your own dedicated sandbox. The VibeScroller webhook is `/stripe/v1/webhook` on the Convex HTTP origin. The inherited `/stripe/webhook` is a separate foundation route and does not verify V1 entitlements.
 
-Billing is optional for ordinary Free-plan product use. Without Stripe settings, the billing action returns an integration error rather than a fake successful checkout. The default maximum is three Free projects or 100 Pro projects. There are at most 50 members and ten organizations per user.
+Use the sandbox catalogue utility only with its matching account and mode. Live-price creation and charges require separate operator authorization. Absent billing configuration shows unavailable checkout, never a simulated success. Personal use remains subject to core quotas, explicit reservations and its enabled funding route.
 
-## Verification
+## Verify a change
 
-Run `pnpm check`. The backend tests use synthetic users and do not need provider accounts. They verify cross-organization access, roles/invitations, revocation, quotas, deletion, and payment boundaries. A build is not verification of a hosted provider configuration. Use the [authentication checks](operations/authentication.md#verify-the-provider-setup) for email delivery, Google callbacks, and rejection of invalid codes.
+Run `pnpm check`, `node scripts/audit-dependencies.mjs` and `git diff --check`. Check formatting on changed files. Record browser, integration and secret-scan evidence using [the contributor guide](CONTRIBUTING.md). A build does not prove account-backed setup, Android hardware, a billing settlement or a sandbox boundary.
 
-## Create a new product
-
-Run `pnpm template:export -- --name my-product --out ../my-product`. The output path must not exist and must be outside the source repository. The export preserves source, docs, skills, tests, and a lockfile, including the marketing app, but omits secrets and local provider configuration. Set website/app domains and support email in company configuration before publishing. Follow [launch operations](operations/launch.md) for the hosted setup.
-
-Run a fresh install and build from the exported directory. Change `packages/company-config/index.ts`, then provision your own provider projects. Each product owns its WorkOS environment, Google OAuth client/consent branding, callback URLs, and session secret. Do not inherit CompanyNerve or suite credentials. Exporting source does not configure any provider.
-
-Before live billing, review tax registration and Stripe Tax requirements for your markets. Tax calculation is not enabled by this sandbox example. Prefer a restricted key with only the customer, subscription, Checkout, and portal permissions the backend needs; verify those permissions in your own sandbox.
+The original template export command remains provenance, not VibeScroller's personal installer. Independent setup and upgrade evidence must come from clean checkouts and testers' own accounts.

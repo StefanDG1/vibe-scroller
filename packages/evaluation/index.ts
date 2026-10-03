@@ -26,6 +26,14 @@ export const benchmarkInput = z
     modelVersion: z.string().min(1),
     promptVersion: z.string().min(1),
     reviewer: z.string().min(1),
+    provenance: z
+      .object({
+        frozenAt: z.string().datetime(),
+        manifestSha256: z.string().regex(/^[a-f0-9]{64}$/),
+        untouchedHeldOut: z.boolean(),
+      })
+      .strict()
+      .optional(),
     repositories: z
       .array(
         z
@@ -38,6 +46,8 @@ export const benchmarkInput = z
         z
           .object({
             id: z.string().min(1),
+            scenarioId: z.string().min(1).optional(),
+            usedForTuning: z.boolean().optional(),
             split: z.enum(["development", "held_out"]),
             rights: z
               .object({
@@ -69,6 +79,7 @@ export const benchmarkInput = z
           processedSeconds: z.number().nonnegative(),
           settledUsdCents: z.number().nonnegative().nullable(),
           reviewed: z.boolean(),
+          reviewer: z.string().min(1).optional(),
           mainPoints: z.number().int().nonnegative(),
           supportedMainPoints: z.number().int().nonnegative(),
           inventedFileClaims: z.number().int().nonnegative(),
@@ -118,7 +129,16 @@ export function evaluateBenchmark(raw: unknown, now = Date.now()) {
     throw Error("Duplicate evaluation identifier");
   const repositories = new Set(input.repositories.map((r) => r.id)),
     clips = new Map(input.clips.map((c) => [c.id, c]));
+  const scenarioSplits = new Map<string, string>();
   for (const clip of input.clips) {
+    if (clip.scenarioId) {
+      const split = scenarioSplits.get(clip.scenarioId);
+      if (split && split !== clip.split)
+        throw Error("Related scenario variants cross evaluation splits");
+      scenarioSplits.set(clip.scenarioId, clip.split);
+    }
+    if (clip.split === "held_out" && clip.usedForTuning === true)
+      throw Error("Tuning cases cannot be held out");
     if (
       Date.parse(clip.rights.permittedRetentionUntil) <= now ||
       !unique(clip.expected.map((m) => m.repositoryId)) ||
@@ -212,7 +232,15 @@ export function evaluateBenchmark(raw: unknown, now = Date.now()) {
   const missingRepositoryReferences = [...repositories].filter(
     (id) => !coveredRepositories.has(id),
   );
+  const provenanceComplete = Boolean(
+    input.provenance &&
+    input.provenance.untouchedHeldOut &&
+    Date.parse(input.provenance.frozenAt) <= now &&
+    input.clips.every((c) => c.scenarioId && c.usedForTuning !== undefined) &&
+    reviewed.every((r) => r.reviewer),
+  );
   const complete =
+    provenanceComplete &&
     input.clips.length >= 40 &&
     held.length > 0 &&
     missingCategories.length === 0 &&
@@ -222,7 +250,15 @@ export function evaluateBenchmark(raw: unknown, now = Date.now()) {
     reviewed.every(
       (r) => r.matches.length === clips.get(r.clipId)!.expected.length,
     );
-  const costKnown = results.every((r) => r.settledUsdCents !== null);
+  const costKnown =
+    results.length === held.length &&
+    held.length > 0 &&
+    results.every((r) => r.settledUsdCents !== null);
+  const qualityTargetMet =
+    complete &&
+    sum("criticalInventedClaims") === 0 &&
+    sum("mainPoints") > 0 &&
+    sum("supportedMainPoints") / sum("mainPoints") >= 0.9;
   return {
     datasetVersion: input.datasetVersion,
     codeCommit: input.codeCommit,
@@ -232,6 +268,15 @@ export function evaluateBenchmark(raw: unknown, now = Date.now()) {
     observedAt: new Date(now).toISOString(),
     clipCount: input.clips.length,
     heldOutCount: held.length,
+    independentScenarioCount: input.clips.every((c) => c.scenarioId)
+      ? scenarioSplits.size
+      : null,
+    heldOutScenarioCount: held.every((c) => c.scenarioId)
+      ? new Set(held.map((c) => c.scenarioId)).size
+      : null,
+    provenanceComplete,
+    untouchedQualityTargetMet: qualityTargetMet,
+    costComplete: costKnown,
     observedHeldOutCount: results.length,
     reviewedHeldOutCount: reviewed.length,
     missingCategories,
@@ -258,11 +303,7 @@ export function evaluateBenchmark(raw: unknown, now = Date.now()) {
       ? results.reduce((s, r) => s + r.settledUsdCents!, 0)
       : null,
     unknownCostCount: results.filter((r) => r.settledUsdCents === null).length,
-    suggestedQualityTargetMet:
-      complete &&
-      sum("criticalInventedClaims") === 0 &&
-      sum("mainPoints") > 0 &&
-      sum("supportedMainPoints") / sum("mainPoints") >= 0.9,
+    suggestedQualityTargetMet: qualityTargetMet,
     limitations: input.limitations,
   };
 }

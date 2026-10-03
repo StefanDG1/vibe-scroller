@@ -1,17 +1,19 @@
 # VibeScroller
 
-A web application for capturing permitted video sources, reviewing cited insights, matching ideas to repositories and approving bounded coding plans. Built from CompanyNerve 0.1.0-alpha.1 with its exported foundation and lockfile.
+Make scrolling productive. Keep permitted sources in a library, inspect cited insights, check their fit to selected projects and review a plan before approving code. No fit and already implemented are useful outcomes too.
 
-The owner personal alpha is at https://scroll.companynerve.com/app. Start with [the testing guide](docs/operations/owner-testing-guide.md) or [automatic video analysis](docs/PERSONAL-VIDEO-GUIDE.md). Production personal uploads passed automatic local Whisper transcription and sampled-frame ChatGPT-plan analysis. Instagram Saved import saves links and metadata locally from the archive; supported public links use bounded automatic retrieval. Private, rate-limited and unsupported posts can require permitted-media fallback. The paired laptop must remain online for the personal route.
+Use [the hosted application](https://scroll.companynerve.com/app) and [first-source tutorial](docs/HOSTED-TUTORIAL.md). GitHub is optional for the first library result. Managed analysis and approved Vercel coding use explicit funding, reservations and existing ceilings. Personal ChatGPT analysis requires the user's eligible paired laptop; general hosted commercial ChatGPT access and Windows local coding remain gated.
 
-[V1 readiness](docs/V1-READINESS.md), [implementation evidence](docs/implementation-status.md), [deployment instructions](docs/operations/vibescroller-deployment.md), [versioning](docs/VERSIONING.md) and [release gates](docs/LAUNCH-CHECKLIST.md) distinguish tested alpha behavior from paid V1 readiness. No private archive, company record or production credential is included.
+Start with [the documentation map](docs/README.md), [capabilities and limits](docs/CAPABILITIES.md), [current readiness](docs/V1-READINESS.md) and [implementation evidence](docs/implementation-status.md). Numerical human scoring, settled provider invoices, full serving recovery and independent setup acceptance remain open. No accuracy percentage, customer savings or unlimited usage is promised.
 
-Use Node 24 and the pinned pnpm version. Run `pnpm install --frozen-lockfile`, follow [local setup](docs/local-development.md), then run `pnpm dev` for the app or `pnpm dev:marketing` for the website.
+For a labeled synthetic preview, use Node 24 and pnpm 12.3.4:
 
-Both applications share company configuration, design recipes, and UI. Authentication, tenancy, billing and shared design packages extend the exported CompanyNerve foundation. No credentials or production data are included.
+```powershell
+pnpm install --frozen-lockfile
+node scripts/setup-preflight.mjs --demo
+pnpm dev
+```
 
-Authentication uses email one-time codes and Google OAuth only. Follow [authentication setup](docs/operations/authentication.md): enable Magic Auth and Google in your own WorkOS environment, disable passwords and other methods, and provision this product's own Google OAuth client/consent branding, callbacks, and session secret. Never inherit CompanyNerve or suite credentials. Exporting source does not configure or verify providers.
+Open `http://localhost:3001/demo`. Real setup uses [your own provider accounts](docs/PERSONAL-SETUP.md); [contribution](docs/CONTRIBUTING.md) and [private security reporting](docs/SECURITY.md) have separate paths. Keep credentials, source archives and private evidence out of Git.
 
-Edit `packages/company-config/index.ts`, replace the example domains and support email, and choose your recipe. Review marketing copy and privacy disclosures for your product before publishing. Follow [launch operations](docs/operations/launch.md) for hosting, authentication, billing, and search setup.
-
-Run `pnpm check` before deployment.
+V1-authored code uses MIT, preserving CompanyNerve's exported foundation and upstream notices. Hosting, managed processing and support are the paid service's value. Both routes use one maintained core. V2 remains a separate decision. See [versioning](docs/VERSIONING.md) for immutable alpha releases and exact deployed commits.
