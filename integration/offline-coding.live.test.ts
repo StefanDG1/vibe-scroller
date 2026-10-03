@@ -102,3 +102,51 @@ it("the selected worker checks owned React/TypeScript offline and refuses hooks,
     await sandbox.kill();
   }
 }, 180000);
+
+it("explicit pnpm scripts run without automatic pre/post or default pnpmfile hooks", async () => {
+  const vm = await createJobSandbox("coding", 180);
+  try {
+    await hardenSandbox(vm);
+    const pkg = JSON.parse(
+      readFileSync("fixtures/offline-coding/react/package.json", "utf8"),
+    );
+    pkg.scripts = {
+      check: "node -e \"console.log('APPROVED_CHECK_RAN')\"",
+      precheck:
+        "node -e \"require('fs').writeFileSync('IMPLICIT_HOOK_RAN','pre')\"",
+      postcheck:
+        "node -e \"require('fs').writeFileSync('IMPLICIT_HOOK_RAN','post')\"",
+    };
+    const files = [
+      { path: "package.json", content: JSON.stringify(pkg), mode: "100644" },
+      ...["pnpm-lock.yaml", "pnpm-workspace.yaml"].map((path) => ({
+        path,
+        content: readFileSync("fixtures/offline-coding/react/" + path, "utf8"),
+        mode: "100644",
+      })),
+      {
+        path: ".pnpmfile.mjs",
+        content: "throw new Error('DEFAULT_PNPM_HOOK_RAN');",
+        mode: "100644",
+      },
+      {
+        path: ".pnpmfile.cjs",
+        content: "throw new Error('LEGACY_PNPM_HOOK_RAN');",
+        mode: "100644",
+      },
+      { path: "owned.txt", content: "owned original", mode: "100644" },
+    ];
+    const checked = await checkPatch(
+      vm,
+      files,
+      [{ path: "owned.txt", content: "owned reviewed" }],
+      [
+        "pnpm run check && test ! -e IMPLICIT_HOOK_RAN && test ! -e INSTALL_SCRIPT_RAN",
+      ],
+    );
+    expect(checked.report).toContain("APPROVED_CHECK_RAN");
+    expect(checked.report).toContain("Exit 0:");
+  } finally {
+    await vm.kill();
+  }
+}, 180000);

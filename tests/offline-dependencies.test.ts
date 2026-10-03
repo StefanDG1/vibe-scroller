@@ -27,7 +27,7 @@ it("pnpm preparation has no network, hooks, lifecycle scripts, cache writes or v
     "--ignore-scripts",
     "--ignore-pnpmfile",
     "--no-runtime",
-    "--config.manage-package-manager-versions=false",
+    "--pm-on-fail=ignore",
     "--config.verify-store-integrity=true",
   ])
     expect(commands[2]).toContain(flag);

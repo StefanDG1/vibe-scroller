@@ -127,7 +127,7 @@ try {
       cmd: "bash",
       args: [
         "-c",
-        "set -eu; cd /opt/vibe/cache-build; pnpm install --frozen-lockfile --ignore-scripts --ignore-pnpmfile --no-runtime --store-dir /opt/vibe/pnpm-store --config.cache-dir=/opt/vibe/pnpm-metadata --registry=https://registry.npmjs.org --config.manage-package-manager-versions=false --config.package-manager-strict=false --config.fetch-retries=0 --reporter=append-only >/opt/vibe/cache-build/fetch.log 2>&1",
+        "set -eu; cd /opt/vibe/cache-build; pnpm install --frozen-lockfile --ignore-scripts --ignore-pnpmfile --no-runtime --store-dir /opt/vibe/pnpm-store --config.cache-dir=/opt/vibe/pnpm-metadata --registry=https://registry.npmjs.org --pm-on-fail=ignore --config.fetch-retries=0 --reporter=append-only >/opt/vibe/cache-build/fetch.log 2>&1",
       ],
       timeoutMs: 200000,
     });

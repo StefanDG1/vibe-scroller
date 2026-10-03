@@ -180,6 +180,19 @@ export const namespaceCommand = (online: boolean) => [
   "PATH=/usr/local/bin:/usr/bin:/bin",
   "HOME=/home/user",
   "LANG=C.UTF-8",
+  // The pinned offline tool must not auto-install or rewrite the approved
+  // lockfile when pnpm run/exec verifies dependencies or manages its version.
+  ...(!online
+    ? [
+        "PNPM_CONFIG_PM_ON_FAIL=ignore",
+        "PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false",
+        "PNPM_CONFIG_IGNORE_PNPMFILE=true",
+        "PNPM_CONFIG_ENABLE_PRE_POST_SCRIPTS=false",
+        "PNPM_CONFIG_OFFLINE=true",
+        "PNPM_CONFIG_FROZEN_LOCKFILE=true",
+        "PNPM_CONFIG_IGNORE_SCRIPTS=true",
+      ]
+    : []),
   ...(online ? ["VIBE_DOWNLOAD_PROXY=http://127.0.0.1:47891"] : []),
 ];
 

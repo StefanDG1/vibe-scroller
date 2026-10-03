@@ -41,7 +41,7 @@ export async function prepareOfflineDependencies(
     "The reviewed public registry metadata is unavailable.",
   );
   const installed = await sandbox.commands.run(
-    "pnpm install --offline --frozen-store --frozen-lockfile --ignore-scripts --ignore-pnpmfile --no-runtime --store-dir /opt/vibe/pnpm-store --config.package-import-method=copy --config.manage-package-manager-versions=false --config.package-manager-strict=false --config.verify-store-integrity=true --reporter=append-only",
+    "pnpm install --offline --frozen-store --frozen-lockfile --ignore-scripts --ignore-pnpmfile --no-runtime --store-dir /opt/vibe/pnpm-store --config.package-import-method=copy --pm-on-fail=ignore --config.verify-store-integrity=true --reporter=append-only",
     { user: "user", cwd: "/home/user/job", timeoutMs: 120000 },
   );
   ensure(

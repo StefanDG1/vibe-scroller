@@ -32,6 +32,10 @@ import { PlanEditor } from "./plan-editor";
 import { ChoiceSelect } from "./choice-select";
 import { EvidenceViewer } from "./evidence-viewer";
 import { AnalysisReview } from "./analysis-review";
+import {
+  availableProcessingCredits,
+  cloudExecutionEstimate,
+} from "../../../packages/plans/execution-quote";
 import { reviewedPlan } from "../../../packages/plans/editor";
 import { CookieSettings, rejectAnalytics } from "./consent";
 import { track } from "@/lib/analytics";
@@ -1578,6 +1582,7 @@ export function Console({
                 proposal={selected}
                 call={call}
                 routes={data.customerRoutes}
+                usage={data.usage}
                 busy={busy}
               />
             </>
@@ -3796,13 +3801,19 @@ function PersonalSourceAnalysis({
     </section>
   );
 }
-function ExecutionApproval({ proposal, call, routes, busy }: any) {
+function ExecutionApproval({ proposal, call, routes, usage, busy }: any) {
+  const available = availableProcessingCredits(usage?.pools ?? []);
   const [executor, setExecutor] = useState(
       routes?.execution?.localReady ? "local" : "cloud",
     ),
-    [ceiling, setCeiling] = useState(100),
+    [ceiling, setCeiling] = useState(() => Math.min(30, available)),
     [modelId, setModelId] = useState(""),
     [highRisk, setHighRisk] = useState(false);
+  const estimate = cloudExecutionEstimate(
+    ceiling,
+    routes?.execution?.computeReservationCredits,
+    routes?.execution?.creditsPerSecond,
+  );
   const model = routes?.models.find((m: any) => m.id === modelId);
   const cloud = executor !== "local";
   const saved =
@@ -3891,9 +3902,17 @@ function ExecutionApproval({ proposal, call, routes, busy }: any) {
         </label>
       )}
       <p>
-        Maximum runtime: 20 minutes. Permitted files come from the reviewed
-        plan. Publication requires final patch review.
+        {cloud && estimate
+          ? `Up to ${Math.floor(estimate.maximumSeconds / 60)}m ${estimate.maximumSeconds % 60}s within this ceiling, including up to ${estimate.computeCredits} compute credits. ${available} credits available.`
+          : "Permitted files come from the reviewed plan."}{" "}
+        Publication requires final patch review.
       </p>
+      {cloud && (!estimate || ceiling > available) && (
+        <output>
+          Choose a ceiling your available credits can cover, including isolated
+          compute and inference.
+        </output>
+      )}
       <label className="check">
         <input
           type="checkbox"
@@ -3911,8 +3930,7 @@ function ExecutionApproval({ proposal, call, routes, busy }: any) {
           !saved ||
           !ready ||
           (executor === "customer" && !model) ||
-          (cloud &&
-            (!Number.isSafeInteger(ceiling) || ceiling < 1 || ceiling > 10000))
+          (cloud && (!estimate || ceiling > available))
         }
         onClick={() =>
           call("approve", {

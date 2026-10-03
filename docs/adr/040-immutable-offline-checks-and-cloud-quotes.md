@@ -1,0 +1,15 @@
+# ADR 040: Immutable offline checks and cloud quotes
+
+Status: diagnosed correction; production retry pending. Date: 3 October 2026.
+
+A real owned audiovisual source produced a relevant proposal citing the existing PROVIDER_LIMIT message. Native review accepted it, corrected prose checks to the actual pnpm lint and pnpm typecheck commands, saved a new plan version and separately approved a 30-credit cloud ceiling. The first run failed safely during isolated checks; no PR was published. Confirmed teardown settled four service credits.
+
+A deterministic diagnostic against the same immutable repository and production-selected coding image reproduced a pnpm-lock.yaml change after pnpm lint. Initial preparation preserved the lockfile. The third snapshot verification rejected its later automatic modification. Preserve the failure and do not waive byte, ownership, link or executable-mode checks.
+
+Keep the pinned pnpm 12.3.4 and existing read-only cache. Every offline command receives explicit pnpm configuration disabling automatic dependency installation, package-manager switching/downloads, pnpmfile hooks, implicit pre/post scripts and network installation. Use the current pmOnFail setting rather than removed manager-version flags. Explicit approved scripts still run; snapshot verification follows preparation and each check. The corrected real diagnostic ran actual oxlint on 364 files and root plus both application TypeScript checks, with all reviewed sources unchanged and finally-confirmed teardown. This diagnostic used deterministic patch bytes, not a successful inference-funded coding task.
+
+The configured production compute reserve is ten credits at the previously reviewed 0.02-credit/second rate. A 30-credit approval therefore caps compute at 500 seconds and leaves the remaining ceiling for inference; the fixed EUR 10 pilot provider ceiling is unchanged. Count-before-generation and settlement remain authoritative. Cloud approval now defaults to at most 30 currently available credits, excludes expired and reserved pools, and displays the actual bounded compute/runtime split. The display cannot grant execution and is rechecked by atomic backend reservation.
+
+Generated plan checks must be executable commands based on inspected stack evidence. They remain editable and require explicit review; the prompt correction cannot guarantee model correctness.
+
+Official references: [pnpm manager policy](https://pnpm.io/settings/cli#pmonfail), [automatic dependency checks](https://pnpm.io/settings/build#verifydepsbeforerun), [pnpm hooks](https://pnpm.io/pnpmfile#ignorepnpmfile). Actual evidence: outputs/google-coding-diagnostic-third.log and outputs/google-coding-diagnostic-corrected.log. Public media/execution and live billing approval remain separate gates.

@@ -79,6 +79,10 @@ export const customerRoutes = query({
           process.env.LOCAL_ISOLATION_VERIFIED === "true" &&
           process.env.DISABLE_LOCAL !== "true",
         cloudReady: cloudExecutionAllowed(actor.subject),
+        computeReservationCredits: Number(
+          process.env.CLOUD_COMPUTE_RESERVE_CREDITS ?? "10000",
+        ),
+        creditsPerSecond: Number(process.env.SANDBOX_CREDITS_PER_SECOND ?? "1"),
       },
       models:
         key?.status === "verified"
