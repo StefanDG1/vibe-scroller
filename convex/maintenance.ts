@@ -14,6 +14,13 @@ export const purgeOrganization = internalMutation({
     if (!org || org.status !== "deleting") return;
     await rememberDeletion(ctx, "workspace", organizationId);
     for (const table of [
+      "knowledgePolicies",
+      "knowledgeTopics",
+      "knowledgeMembers",
+      "knowledgeJobs",
+      "knowledgeEvaluations",
+      "issueDrafts",
+      "issueAttempts",
       "creditPools",
       "sourceCounts",
       "mediaStages",

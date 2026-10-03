@@ -78,6 +78,7 @@ async function activeRun(
     repo?.enabled &&
       repo.confirmed &&
       repo.sha === r.baseSha &&
+      (repo.selectionVersion ?? 0) === (r.selectionVersion ?? 0) &&
       proposal?.planHash === r.planHash &&
       proposal.version === r.version &&
       proposal.profileVersion === repo.profileVersion,
@@ -162,6 +163,7 @@ export const dispatch = internalMutation({
           !repo?.enabled ||
           !repo.confirmed ||
           repo.sha !== r.baseSha ||
+          (repo.selectionVersion ?? 0) !== (r.selectionVersion ?? 0) ||
           p?.planHash !== r.planHash ||
           p.version !== r.version ||
           p.profileVersion !== repo.profileVersion

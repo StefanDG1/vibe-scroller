@@ -2,10 +2,17 @@
 import { action } from "./_generated/server";
 import { v } from "convex/values";
 import { api, internal } from "./_generated/api";
+import { discoverRepositories } from "../packages/providers/github-discovery";
 import { github } from "../packages/providers/github";
-import { encrypt } from "../packages/providers/secrets";
+import { decrypt, encrypt } from "../packages/providers/secrets";
 import { ensure } from "../packages/policy";
-import { githubCredential } from "../packages/providers/github-user";
+import {
+  decodeGitHubCredential,
+  githubRefreshRequired,
+  refreshGitHubCredential,
+  githubCredential,
+  type GitHubUserCredential,
+} from "../packages/providers/github-user";
 export const complete = action({
   args: {
     organizationId: v.id("organizations"),
@@ -52,44 +59,7 @@ export const complete = action({
       "GitHub authorization was not completed.",
     );
     const user = await github("/user", token.access_token);
-    const installations = [];
-    for (let page = 1; page <= 10; page++) {
-      const batch = await github(
-        `/user/installations?per_page=100&page=${page}`,
-        token.access_token,
-      );
-      for (const i of batch.installations.filter(
-        (i: any) =>
-          i.app_id === Number(process.env.GITHUB_APP_ID) && !i.suspended_at,
-      )) {
-        const repositories = [];
-        for (let rp = 1; rp <= 10; rp++) {
-          const selected = await github(
-            `/user/installations/${i.id}/repositories?per_page=100&page=${rp}`,
-            token.access_token,
-          );
-          repositories.push(
-            ...selected.repositories
-              .filter(
-                (r: any) =>
-                  r.permissions?.push ||
-                  r.permissions?.maintain ||
-                  r.permissions?.admin,
-              )
-              .map((r: any) => ({ id: r.id, fullName: r.full_name })),
-          );
-          if (selected.repositories.length < 100) break;
-          ensure(
-            rp < 10,
-            "REPO_TOO_LARGE",
-            "Select fewer repositories for this installation.",
-          );
-        }
-        installations.push({ installationId: i.id, repositories });
-      }
-      if (batch.installations.length < 100) break;
-      ensure(page < 10, "REPO_TOO_LARGE", "Too many installations.");
-    }
+    const installations = await discoverRepositories(token.access_token);
     await ctx.runMutation(internal.jobs.storeSecret, {
       organizationId: a.organizationId,
       provider: "github",
@@ -101,6 +71,65 @@ export const complete = action({
     });
     await ctx.runMutation(internal.githubLinks.save, {
       organizationId: a.organizationId,
+      githubUserId: user.id,
+      installations,
+    });
+  },
+});
+
+export const refreshChoices = action({
+  args: { organizationId: v.id("organizations") },
+  handler: async (ctx, a): Promise<void> => {
+    await ctx.runQuery(api.jobs.authorizeOwner, a);
+    let row = await ctx.runQuery(internal.jobs.secret, {
+      ...a,
+      provider: "github",
+    });
+    ensure(row?.status === "connected", "FORBIDDEN", "Reconnect GitHub.");
+    let credential = decodeGitHubCredential(
+      decrypt(row.ciphertext, row.keyVersion, a.organizationId, "github"),
+    );
+    if (githubRefreshRequired(credential)) {
+      const leaseKey = crypto.randomUUID();
+      await ctx.runMutation(internal.githubLinks.claimRefresh, {
+        id: row._id,
+        previous: row.ciphertext,
+        leaseKey,
+      });
+      try {
+        const renewed = await refreshGitHubCredential(
+          credential as GitHubUserCredential,
+        );
+        const user = await github("/user", renewed.accessToken);
+        ensure(
+          user.id === renewed.githubUserId,
+          "FORBIDDEN",
+          "GitHub identity changed.",
+        );
+        const saved = await ctx.runMutation(
+          internal.githubLinks.finishRefresh,
+          {
+            id: row._id,
+            previous: row.ciphertext,
+            leaseKey,
+            ...encrypt(JSON.stringify(renewed), a.organizationId, "github"),
+          },
+        );
+        ensure(saved, "FORBIDDEN", "GitHub connection changed.");
+        credential = renewed;
+      } catch (error) {
+        await ctx.runMutation(internal.githubLinks.failRefresh, {
+          id: row._id,
+          previous: row.ciphertext,
+          leaseKey,
+        });
+        throw error;
+      }
+    }
+    const user = await github("/user", credential.accessToken);
+    const installations = await discoverRepositories(credential.accessToken);
+    await ctx.runMutation(internal.githubLinks.save, {
+      ...a,
       githubUserId: user.id,
       installations,
     });

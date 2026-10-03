@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "explanation": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1200
+    },
+    "claims": {
+      "maxItems": 12,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1200
+          },
+          "references": {
+            "minItems": 1,
+            "maxItems": 12,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "sourceId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "generation": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "insightId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                }
+              },
+              "required": ["sourceId", "generation", "revision", "insightId"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["text", "references"],
+        "additionalProperties": false
+      }
+    },
+    "relations": {
+      "maxItems": 12,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "similar",
+              "complementary",
+              "conflicting",
+              "useful_connection"
+            ]
+          },
+          "explanation": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1200
+          },
+          "references": {
+            "minItems": 2,
+            "maxItems": 12,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "sourceId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "generation": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "insightId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                }
+              },
+              "required": ["sourceId", "generation", "revision", "insightId"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["kind", "explanation", "references"],
+        "additionalProperties": false
+      }
+    },
+    "uncertainty": {
+      "type": "string",
+      "maxLength": 1200
+    }
+  },
+  "required": ["explanation", "claims", "relations", "uncertainty"],
+  "additionalProperties": false
+}

@@ -1,0 +1,151 @@
+import { defineTable } from "convex/server";
+import { v } from "convex/values";
+const tenant = {
+  organizationId: v.id("organizations"),
+  createdAt: v.number(),
+  updatedAt: v.number(),
+};
+export const evidenceRef = v.object({
+  sourceId: v.id("sources"),
+  generation: v.number(),
+  revision: v.number(),
+  insightId: v.string(),
+});
+export const knowledgeTables = {
+  knowledgePolicies: defineTable({
+    ...tenant,
+    enabled: v.boolean(),
+    ceiling: v.number(),
+    used: v.number(),
+    period: v.string(),
+    actor: v.id("users"),
+    version: v.number(),
+    state: v.string(),
+  }).index("by_org", ["organizationId"]),
+  knowledgeTopics: defineTable({
+    ...tenant,
+    key: v.string(),
+    name: v.string(),
+    pinned: v.boolean(),
+    sourceCount: v.optional(v.number()),
+    insightCount: v.optional(v.number()),
+    version: v.number(),
+    state: v.string(),
+    resumeCursor: v.optional(v.string()),
+    redirect: v.optional(v.id("knowledgeTopics")),
+  })
+    .index("by_org", ["organizationId"])
+    .index("by_key", ["organizationId", "key"]),
+  knowledgeMembers: defineTable({
+    ...tenant,
+    topicId: v.id("knowledgeTopics"),
+    sourceId: v.id("sources"),
+    generation: v.number(),
+    revision: v.number(),
+    insightId: v.string(),
+    sourceTitle: v.optional(v.string()),
+    excluded: v.boolean(),
+    manual: v.boolean(),
+  })
+    .index("by_org", ["organizationId"])
+    .index("by_source", ["sourceId"])
+    .index("by_topic", ["topicId"])
+    .index("by_topic_source", ["topicId", "sourceId"])
+    .searchIndex("search_title", {
+      searchField: "sourceTitle",
+      filterFields: ["organizationId"],
+    }),
+  knowledgeJobs: defineTable({
+    ...tenant,
+    topicId: v.id("knowledgeTopics"),
+    actor: v.id("users"),
+    version: v.number(),
+    policyVersion: v.number(),
+    cursor: v.union(v.string(), v.null()),
+    next: v.union(v.string(), v.null()),
+    done: v.boolean(),
+    state: v.string(),
+    key: v.string(),
+    credits: v.optional(v.number()),
+    startedAt: v.optional(v.number()),
+    references: v.array(evidenceRef),
+    output: v.optional(v.any()),
+    processingVersion: v.string(),
+    model: v.optional(v.string()),
+  })
+    .index("by_org", ["organizationId"])
+    .index("by_org_state", ["organizationId", "state"])
+    .index("by_topic", ["topicId"])
+    .index("by_key", ["key"]),
+  knowledgeEvaluations: defineTable({
+    ...tenant,
+    topicId: v.id("knowledgeTopics"),
+    repositoryId: v.id("repositories"),
+    actor: v.id("users"),
+    topicVersion: v.number(),
+    baseSha: v.string(),
+    profileVersion: v.number(),
+    selectionVersion: v.optional(v.number()),
+    references: v.array(evidenceRef),
+    sourceSetHash: v.string(),
+    key: v.string(),
+    state: v.string(),
+    decision: v.string(),
+    output: v.optional(v.any()),
+    credits: v.optional(v.number()),
+    processingVersion: v.string(),
+    model: v.optional(v.string()),
+    inspected: v.optional(v.any()),
+    covered: v.number(),
+    omitted: v.boolean(),
+  })
+    .index("by_org", ["organizationId"])
+    .index("by_org_state", ["organizationId", "state"])
+    .index("by_topic", ["topicId"])
+    .index("by_topic_repo", ["topicId", "repositoryId"])
+    .index("by_repo", ["repositoryId"])
+    .index("by_key", ["key"]),
+  issueDrafts: defineTable({
+    ...tenant,
+    evaluationId: v.id("knowledgeEvaluations"),
+    repositoryId: v.id("repositories"),
+    topicId: v.id("knowledgeTopics"),
+    topicVersion: v.number(),
+    baseSha: v.string(),
+    profileVersion: v.number(),
+    selectionVersion: v.optional(v.number()),
+    references: v.array(evidenceRef),
+    title: v.string(),
+    body: v.string(),
+    hash: v.string(),
+    version: v.number(),
+    marker: v.string(),
+    state: v.string(),
+    visibility: v.optional(v.string()),
+    permissionCheckedAt: v.optional(v.number()),
+    sensitive: v.boolean(),
+    followUp: v.boolean(),
+  })
+    .index("by_org", ["organizationId"])
+    .index("by_repo", ["repositoryId"])
+    .index("by_evaluation", ["evaluationId"]),
+  issueAttempts: defineTable({
+    ...tenant,
+    draftId: v.id("issueDrafts"),
+    repositoryId: v.id("repositories"),
+    actor: v.id("users"),
+    hash: v.string(),
+    draftVersion: v.number(),
+    marker: v.string(),
+    state: v.string(),
+    visibility: v.string(),
+    number: v.optional(v.number()),
+    url: v.optional(v.string()),
+    observedAt: v.optional(v.number()),
+    externalState: v.optional(v.string()),
+    externalEdited: v.optional(v.boolean()),
+  })
+    .index("by_org", ["organizationId"])
+    .index("by_draft", ["draftId"])
+    .index("by_repo", ["repositoryId"]),
+};

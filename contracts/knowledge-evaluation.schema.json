@@ -1,0 +1,162 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "disposition": {
+      "type": "string",
+      "enum": [
+        "relevant",
+        "no_fit",
+        "already_implemented",
+        "unsupported_claim",
+        "needs_context",
+        "defer"
+      ]
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 180
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1200
+    },
+    "problem": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1200
+    },
+    "approach": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1200
+    },
+    "acceptance": {
+      "minItems": 1,
+      "maxItems": 8,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1200
+      }
+    },
+    "tests": {
+      "minItems": 1,
+      "maxItems": 8,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1200
+      }
+    },
+    "risks": {
+      "maxItems": 8,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1200
+      }
+    },
+    "alternatives": {
+      "maxItems": 8,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1200
+      }
+    },
+    "questions": {
+      "maxItems": 8,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1200
+      }
+    },
+    "references": {
+      "minItems": 1,
+      "maxItems": 12,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sourceId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "generation": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "insightId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          }
+        },
+        "required": ["sourceId", "generation", "revision", "insightId"],
+        "additionalProperties": false
+      }
+    },
+    "repositoryEvidence": {
+      "maxItems": 12,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "startLine": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "endLine": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "explanation": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1200
+          }
+        },
+        "required": ["path", "startLine", "endLine", "explanation"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "disposition",
+    "title",
+    "rationale",
+    "problem",
+    "approach",
+    "acceptance",
+    "tests",
+    "risks",
+    "alternatives",
+    "questions",
+    "references",
+    "repositoryEvidence"
+  ],
+  "additionalProperties": false
+}

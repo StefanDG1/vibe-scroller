@@ -39,6 +39,7 @@ import {
   hostedSourceAllowed,
 } from "./lib/hostedMediaAccess";
 import { syncCategories } from "./categories";
+import { syncKnowledge } from "./knowledge";
 import {
   acquisitionManifest,
   acquisitionPolicy,
@@ -1157,6 +1158,7 @@ export const commitAnalysis = internalMutation({
     });
     if (analysis)
       await syncCategories(ctx, (await ctx.db.get(s._id))!, analysis);
+    await syncKnowledge(ctx, (await ctx.db.get(s._id))!);
     await ctx.db.insert("notifications", {
       organizationId: s.organizationId,
       createdAt: Date.now(),
@@ -1258,6 +1260,7 @@ export const editSource = mutation({
         : {}),
       updatedAt: Date.now(),
     });
+    await syncKnowledge(ctx, (await ctx.db.get(s._id))!);
   },
 });
 export const attachSource = mutation({
@@ -1459,6 +1462,13 @@ export async function redactSource(ctx: MutationCtx, id: Id<"sources">) {
     updatedAt: Date.now(),
   });
   await syncCategories(ctx, (await ctx.db.get(id))!);
+  await syncKnowledge(ctx, (await ctx.db.get(id))!);
+  await ctx.scheduler.runAfter(0, internal.knowledge.redactDerived, {
+    organizationId: s.organizationId,
+    sourceId: id,
+    section: "knowledgeJobs",
+    cursor: null,
+  });
   await ctx.db.patch(id, { categoryOverride: undefined });
   for (const asset of await ctx.db
     .query("assets")
@@ -1487,6 +1497,7 @@ export const repositories = query({
       confirmed: r.confirmed,
       profile: r.profile,
       profileVersion: r.profileVersion,
+      selectionVersion: r.selectionVersion ?? 0,
       profileDraft: r.profileDraft,
       profileDraftSha: r.profileDraftSha,
       profileDraftVersion: r.profileDraftVersion,
@@ -1508,7 +1519,11 @@ export const saveProfile = mutation({
     const repo = await ctx.db.get(a.id);
     if (!repo) fail("Repository unavailable.");
     await writeAccess(ctx, repo.organizationId, ["owner", "admin"]);
-    ensure(a.profile.length <= 8000, "INVALID_INPUT", "Profile too long.");
+    ensure(
+      a.profile.length <= 8000 && !containsSecret(a.profile),
+      "INVALID_INPUT",
+      "Profile is too long or includes credentials.",
+    );
     await ctx.db.patch(a.id, {
       profile: a.profile,
       confirmed: a.confirmed,
@@ -1526,6 +1541,10 @@ export const saveProfile = mutation({
           review: "needs_context",
           planHash: undefined,
         });
+    await ctx.scheduler.runAfter(0, internal.repositorySelection.invalidate, {
+      repositoryId: repo._id,
+      cursor: null,
+    });
   },
 });
 export const proposals = query({

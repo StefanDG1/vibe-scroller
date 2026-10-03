@@ -47,3 +47,7 @@ F007 records the owner-authorized preparation of one personal deployment path on
 ## Connected workspace knowledge and issues, October 3
 
 F008 extends the inspectable workflow to combined source knowledge and reviewed issues. The six belief requirements remain evidence, context, useful decisions, control, bounded funding and personally demonstrated value. A topic connection, AI-inferred goal or closed issue is not verified truth or benefit. The issue path requires its own approval, and the coding/PR path keeps separate approval. Demonstrated organization quality and independent user comprehension remain missing. See [the V1 implementation plan](../V1-KNOWLEDGE-LIBRARY-PLAN.md).
+
+## Knowledge implementation evidence, October 3
+
+The current engineering extension adds workspace topics, persistent organization corrections, a repository checklist, reviewable AI context and separately approved issue drafts/publication. These extend the F008 owner brief using existing analysis and provider paths. The technical developer/founder audience, six belief requirements, prices, funding limits and V2 exclusions remain unchanged. Local regression is not proof of model quality, independent comprehension, comparative value or customer demand. Availability claims require exact deployment/provider acceptance in [the execution ledger](../V1-KNOWLEDGE-EXECUTION.md).

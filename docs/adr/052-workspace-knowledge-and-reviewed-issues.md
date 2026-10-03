@@ -11,3 +11,7 @@ A GitHub installation grant and an app selection are separate. Unselected reposi
 Issues become an alternative reviewed output to coding. Publication requires verified issue permissions, current access and separate approval of exact target/title/body. Repository visibility and departing private information are explicit. Unknown results reconcile before retry. Existing separate coding, patch, draft-PR and merge boundaries remain. A closed issue is not measured benefit.
 
 This is V1 scope. V2, new businesses, account provisioning, advertising and autonomous customer deployment remain excluded. The planning request changes no runtime provider permission, budget, pricing, database schema or production behavior. Required evidence covers isolation/deletion, bounded updates, persistent corrections, current repository context, real issue integration, mobile/desktop use and independent comprehension. The plan retains uncompleted earlier release/study gates.
+
+## Implementation instruction and verification
+
+The owner's October 3 implementation request supersedes the planning-only scope above. The extension reuses existing tenancy, inference/budgets, categories, profiles, snapshots and coding/PR boundaries. [The execution ledger](../V1-KNOWLEDGE-EXECUTION.md) distinguishes implemented contracts/screens/jobs from actual provider, issue publication, independent quality/comprehension and deployment acceptance. No new provider permission or cap increase follows from implementation.

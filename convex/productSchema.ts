@@ -335,6 +335,7 @@ export const productTables = {
     }),
   repositories: defineTable({
     ...tenant,
+    selectionVersion: v.optional(v.number()),
     installationId: v.number(),
     providerId: v.number(),
     fullName: v.string(),
@@ -347,6 +348,7 @@ export const productTables = {
     profileDraftVersion: v.optional(v.number()),
     profileDraftKey: v.optional(v.string()),
     profileDraftActor: v.optional(v.id("users")),
+    profileDraftSelectionVersion: v.optional(v.number()),
     profileVersion: v.number(),
     confirmed: v.boolean(),
     manifest: v.array(v.string()),
@@ -421,6 +423,7 @@ export const productTables = {
     baseSha: v.string(),
     version: v.number(),
     executor: v.string(),
+    selectionVersion: v.optional(v.number()),
     fundingRoute: v.string(),
     customerModel: v.optional(v.any()),
     credentialRevision: v.optional(v.string()),

@@ -3,6 +3,41 @@ import { v } from "convex/values";
 import { writeAccess, fail } from "./lib";
 import { ensure, containsSecret } from "../packages/policy";
 import { reserve, settle } from "./product";
+import { internal } from "./_generated/api";
+export const confirmDraft = mutation({
+  args: {
+    id: v.id("repositories"),
+    sha: v.string(),
+    version: v.number(),
+    selectionVersion: v.optional(v.number()),
+    profile: v.string(),
+  },
+  handler: async (ctx, a) => {
+    const r = await ctx.db.get(a.id);
+    ensure(r?.enabled, "FORBIDDEN", "Repository unavailable.");
+    await writeAccess(ctx, r.organizationId, ["owner", "admin"]);
+    ensure(
+      r.sha === a.sha &&
+        (r.selectionVersion ?? 0) === (a.selectionVersion ?? 0) &&
+        r.profileVersion === a.version &&
+        a.profile.length > 0 &&
+        a.profile.length <= 8000 &&
+        !containsSecret(a.profile),
+      "APPROVAL_STALE",
+      "Review the current repository/context version.",
+    );
+    await ctx.db.patch(r._id, {
+      profile: a.profile,
+      confirmed: true,
+      profileVersion: r.profileVersion + 1,
+      updatedAt: Date.now(),
+    });
+    await ctx.scheduler.runAfter(0, internal.repositorySelection.invalidate, {
+      repositoryId: r._id,
+      cursor: null,
+    });
+  },
+});
 
 export const start = mutation({
   args: { id: v.id("repositories"), key: v.string(), maxCredits: v.number() },
@@ -39,6 +74,7 @@ export const start = mutation({
     await ctx.db.patch(repo._id, {
       profileDraftKey: key,
       profileDraftActor: actor._id,
+      profileDraftSelectionVersion: repo.selectionVersion ?? 0,
       updatedAt: Date.now(),
     });
     return { repo, cached: false, key };
@@ -52,6 +88,7 @@ export const finish = internalMutation({
     key: v.string(),
     sha: v.string(),
     version: v.number(),
+    selectionVersion: v.optional(v.number()),
     profile: v.optional(v.string()),
     credits: v.number(),
     retainReservation: v.optional(v.boolean()),
@@ -90,6 +127,7 @@ export const finish = internalMutation({
     const current =
       repo.enabled &&
       repo.sha === a.sha &&
+      (repo.selectionVersion ?? 0) === (a.selectionVersion ?? 0) &&
       repo.profileVersion === a.version &&
       actor?.status === "active" &&
       organization?.status === "active" &&
@@ -98,8 +136,13 @@ export const finish = internalMutation({
     if (!a.retainReservation)
       await settle(ctx, a.organizationId, a.key, a.credits);
     await ctx.db.patch(repo._id, {
-      profileDraftKey: undefined,
-      profileDraftActor: undefined,
+      profileDraftKey: a.retainReservation ? repo.profileDraftKey : undefined,
+      profileDraftActor: a.retainReservation
+        ? repo.profileDraftActor
+        : undefined,
+      profileDraftSelectionVersion: a.retainReservation
+        ? repo.profileDraftSelectionVersion
+        : undefined,
       ...(current && a.profile !== undefined
         ? {
             profileDraft: a.profile,

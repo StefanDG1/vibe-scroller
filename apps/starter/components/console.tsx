@@ -28,6 +28,8 @@ import {
   Check,
 } from "lucide-react";
 import { AccountMenu } from "./account-menu";
+import { KnowledgeLibrary } from "./knowledge-library";
+import { RepositoryChecklist, BusinessContext } from "./repository-checklist";
 import { PlanEditor } from "./plan-editor";
 import { ChoiceSelect } from "./choice-select";
 import { policyRelease } from "../../../packages/policy/publication";
@@ -447,6 +449,9 @@ export function Console({
       selected &&
       ["queued", "processing"].includes(selected.state)) ||
     data.sources.some((s) => ["queued", "processing"].includes(s.state)) ||
+    data.repositories.some((r) =>
+      ["preparing", "drafting_context"].includes(r.status),
+    ) ||
     data.runs.some((r) =>
       ["queued", "running", "publishing"].includes(r.state),
     );
@@ -760,6 +765,16 @@ export function Console({
               </>
             )}
           </output>
+          {view === "library" && (
+            <KnowledgeLibrary
+              key={organizationId}
+              organizationId={organizationId}
+              repositories={data.repositories}
+              readOnly={readOnly}
+              demo={demo}
+              call={call}
+            />
+          )}
           {(view === "home" || view === "library") && (
             <>
               {view === "home" && (
@@ -1136,167 +1151,30 @@ export function Console({
                 Only explicitly selected GitHub App repositories are analyzed.
                 Confirm a profile before matching.
               </p>
-              <form
-                className="panel form-grid"
-                onSubmit={async (e) => {
-                  e.preventDefault();
-                  const f = new FormData(e.currentTarget);
-                  const choice = data.githubChoices?.find(
-                    (r) =>
-                      `${r.installationId}:${r.id}` === f.get("repository"),
-                  );
-                  if (!choice) {
-                    setNotice(
-                      "Choose an authorized repository before connecting it.",
-                    );
-                    return;
-                  }
-                  await call("connectRepository", {
-                    organizationId,
-                    installationId: choice.installationId,
-                    providerId: choice.id,
-                    fullName: choice.fullName,
-                  });
-                }}
-              >
-                <h2>Select a repository</h2>
-                <p>
-                  On GitHub, choose All repositories or Only select
-                  repositories. Then link your account and choose a project
-                  here. You can change GitHub access later.
-                </p>
-                <a
-                  href="https://github.com/apps/vibescroller/installations/new"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Install the GitHub App
-                </a>
-                {!demo && (
-                  <a
-                    href={`/api/github/connect?organizationId=${organizationId}`}
-                  >
-                    Link GitHub account
-                  </a>
-                )}
-                <label>
-                  Authorized repository
-                  <ChoiceSelect name="repository" required defaultValue="">
-                    <option value="" disabled>
-                      Choose a repository
-                    </option>
-                    {data.githubChoices?.map((r) => (
-                      <option
-                        key={`${r.installationId}:${r.id}`}
-                        value={`${r.installationId}:${r.id}`}
-                      >
-                        {r.fullName}
-                      </option>
-                    ))}
-                  </ChoiceSelect>
-                </label>
-                <button
-                  className="primary"
-                  disabled={busy || !data.githubChoices?.length}
-                >
-                  Verify and snapshot selected repository
-                </button>
-              </form>
+              <RepositoryChecklist
+                organizationId={organizationId}
+                repositories={data.repositories}
+                choices={data.githubChoices ?? []}
+                call={call}
+                readOnly={readOnly}
+                demo={demo}
+              />
               {data.repositories.map((r) => (
-                <form
-                  className="panel"
-                  key={id(r)}
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    const f = new FormData(e.currentTarget);
-                    call("saveProfile", {
-                      id: id(r),
-                      profile: f.get("profile"),
-                      confirmed: f.get("confirmed") === "on",
-                      enabled: f.get("enabled") === "on",
-                    });
-                  }}
-                >
-                  <h2>{r.fullName}</h2>
-                  <p className="code-label">Base {r.sha}</p>
-                  <Button
-                    busy={busy}
-                    disabled={readOnly || !r.enabled || !!r.profileDraftKey}
-                    onClick={() =>
-                      call("draftProfile", { id: id(r), maxCredits: 10 })
-                    }
-                  >
-                    Draft a business profile · reserve up to 10 credits
-                  </Button>
-                  {r.profileDraft &&
-                    r.profileDraftSha === r.sha &&
-                    r.profileDraftVersion === r.profileVersion && (
-                      <details>
-                        <summary>
-                          Unconfirmed AI draft. Edit the profile below before
-                          confirming.
-                        </summary>
-                        <pre>{r.profileDraft}</pre>
-                        <Button
-                          busy={busy}
-                          onClick={() => {
-                            const form =
-                              document.querySelector<HTMLTextAreaElement>(
-                                `textarea[data-repository="${id(r)}"]`,
-                              );
-                            if (form) {
-                              form.value = r.profileDraft;
-                              const confirmation =
-                                form.form?.querySelector<HTMLInputElement>(
-                                  'input[name="confirmed"]',
-                                );
-                              if (confirmation) confirmation.checked = false;
-                              form.focus();
-                            }
-                          }}
-                        >
-                          Copy draft into the editable profile
-                        </Button>
-                      </details>
-                    )}
-                  <label>
-                    Purpose, audience, stage, goals, business model, constraints
-                    and non-goals
-                    <textarea
-                      data-repository={id(r)}
-                      name="profile"
-                      defaultValue={r.profile}
-                      onChange={(event) => {
-                        const confirmation =
-                          event.currentTarget.form?.querySelector<HTMLInputElement>(
-                            'input[name="confirmed"]',
-                          );
-                        if (confirmation) confirmation.checked = false;
-                      }}
-                      rows={7}
-                    />
-                  </label>
-                  <label className="check">
-                    <input
-                      type="checkbox"
-                      name="confirmed"
-                      defaultChecked={r.confirmed}
-                    />
-                    I confirm this business profile
-                  </label>
-                  <label className="check">
-                    <input
-                      type="checkbox"
-                      name="enabled"
-                      defaultChecked={r.enabled}
-                    />
-                    Enable matching for this repository
-                  </label>
-                  <button className="secondary" disabled={busy}>
-                    Save profile
-                  </button>
-                </form>
+                <BusinessContext
+                  key={`${id(r)}:${r.profileVersion}:${r.selectionVersion ?? 0}:${r.profileDraftSha ?? ""}`}
+                  repo={r}
+                  call={call}
+                  readOnly={readOnly || demo}
+                />
               ))}
+              <KnowledgeLibrary
+                key={`project-knowledge:${organizationId}`}
+                organizationId={organizationId}
+                repositories={data.repositories}
+                readOnly={readOnly}
+                demo={demo}
+                call={call}
+              />
               {demo && (
                 <div className="panel">
                   <h2>Demo Planner</h2>

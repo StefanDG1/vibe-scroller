@@ -186,3 +186,7 @@ F007 records the owner-authorized preparation of one personal deployment path on
 ## Connected workspace knowledge and issues, October 3
 
 F008 is explicit owner steering, not new customer research. The owner approved separate workspace knowledge libraries, automatic organization, AI-drafted business context with confirmation/correction, app-level repository checklists after a GitHub All repositories grant, and reviewed issue output. Existing retrieval/review hypotheses justify testing these connections, but do not establish organization accuracy, recurring value or issue-first demand. Private knowledge is not cross-customer training. The plan retains source evidence, disagreement, no-fit and funding boundaries. See [the V1 implementation plan](../V1-KNOWLEDGE-LIBRARY-PLAN.md).
+
+## Knowledge implementation evidence, October 3
+
+The current engineering extension adds workspace topics, persistent organization corrections, a repository checklist, reviewable AI context and separately approved issue drafts/publication. These extend the F008 owner brief using existing analysis and provider paths. The technical developer/founder audience, six belief requirements, prices, funding limits and V2 exclusions remain unchanged. Local regression is not proof of model quality, independent comprehension, comparative value or customer demand. Availability claims require exact deployment/provider acceptance in [the execution ledger](../V1-KNOWLEDGE-EXECUTION.md).

@@ -2056,3 +2056,48 @@ dialog.capture-modal::backdrop {
 .source-origin > svg {
   flex-shrink: 0;
 }
+
+.knowledge-library {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+.knowledge-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 1rem;
+}
+.knowledge-library .panel {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.knowledge-library textarea,
+.knowledge-library input {
+  width: 100%;
+  max-width: 100%;
+}
+.knowledge-library input[type="checkbox"] {
+  width: auto;
+}
+.knowledge-evidence {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.knowledge-markdown {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.knowledge-markdown pre {
+  max-width: 100%;
+  overflow-x: auto;
+}
+.knowledge-library button {
+  min-height: 44px;
+  white-space: normal;
+}
+.knowledge-library .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}

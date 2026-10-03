@@ -91,4 +91,5 @@ export async function authorizeRepository(
   );
   if (executionBaseSha)
     await verifyExecutionBase(repo, current, executionBaseSha, token);
+  return current;
 }

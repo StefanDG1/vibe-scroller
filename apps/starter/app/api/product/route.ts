@@ -3,6 +3,23 @@ import { backend, api, configured } from "@/lib/backend";
 import { withAuth } from "@workos-inc/authkit-nextjs";
 import { allowedRequestOrigin } from "@/lib/request-origin";
 const operations = {
+  knowledgeList: ["query", api.knowledge.list],
+  knowledgeDetail: ["query", api.knowledge.detail],
+  knowledgePolicy: ["query", api.knowledge.policy],
+  knowledgeIdeas: ["query", api.knowledge.evaluations],
+  knowledgeConfigure: ["mutation", api.knowledge.configure],
+  knowledgeCorrect: ["mutation", api.knowledge.correct],
+  knowledgeEvaluate: ["mutation", api.knowledge.startEvaluation],
+  knowledgeDecide: ["mutation", api.knowledge.decide],
+  issueList: ["query", api.issues.list],
+  issueCreate: ["mutation", api.issues.create],
+  issueEdit: ["mutation", api.issues.edit],
+  issuePrepare: ["action", api.issueActions.prepare],
+  issuePublish: ["action", api.issueActions.publish],
+  issueRefresh: ["action", api.issueActions.refresh],
+  selectRepositories: ["action", api.integrations.selectRepositories],
+  refreshGithubChoices: ["action", api.githubOAuth.refreshChoices],
+  confirmProfile: ["mutation", api.profiles.confirmDraft],
   capture: ["mutation", api.product.capture],
   importLinks: ["mutation", api.imports.links],
   process: ["mutation", api.product.processSource],
@@ -92,6 +109,14 @@ export async function POST(req: NextRequest) {
     );
   } catch (error) {
     const messages: Record<string, string> = {
+      PUBLICATION_UNKNOWN:
+        "GitHub may have created this issue. Refresh its stored attempt to reconcile; no blind retry is allowed.",
+      DUPLICATE_ISSUE:
+        "This idea already has an issue draft. Review the existing draft or explicitly choose a follow-up.",
+      POLICY_BLOCKED:
+        "This action is paused or its text failed privacy/security checks. Review the current setup and permitted text.",
+      REPOSITORY_LIMIT:
+        "This selection exceeds the existing repository allowance. Choose fewer projects.",
       GITHUB_UNAVAILABLE:
         "GitHub access is unavailable or expired. Reconnect the selected GitHub account before continuing.",
       PROVIDER_ERROR:

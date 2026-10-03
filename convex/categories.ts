@@ -5,6 +5,7 @@ import {
   internalQuery,
 } from "./_generated/server";
 import { v } from "convex/values";
+import { syncKnowledge } from "./knowledge";
 import type { QueryCtx, MutationCtx } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import { access, writeAccess, limit } from "./lib";
@@ -199,6 +200,7 @@ export const assign = mutation({
       updatedAt: Date.now(),
     });
     const saved = await ctx.db.get(source._id);
+    if (saved) await syncKnowledge(ctx, saved);
     return {
       saved: true,
       names: saved?.categoryNames ?? [],
