@@ -860,3 +860,44 @@ it("serializes each workspace's synthesis queue while preserving separate approv
   );
   expect(reservations.filter((r) => r.state === "active")).toHaveLength(1);
 });
+
+it("keeps legacy insights retrievable when topic labels are empty, absent or unusable", async () => {
+  const s = await setup();
+  for (const [key, categories] of [
+    ["legacy categories", ["engineering"]],
+    ["legacy unsorted", []],
+  ] as const) {
+    const id = await s.source(key);
+    await s.t.run(async (ctx) => {
+      const source = (await ctx.db.get(id))!;
+      await ctx.db.patch(id, {
+        analysis: {
+          ...source.analysis,
+          insights: source.analysis.insights.map((point: any) => ({
+            ...point,
+            topics: [],
+            categories,
+          })),
+        },
+      });
+    });
+  }
+  await s.topic();
+  const topics = (
+    await s.a.query(api.knowledge.list, { organizationId: s.org })
+  ).items;
+  expect(topics.map((t) => t.name).sort()).toEqual([
+    "Unsorted ideas",
+    "engineering",
+  ]);
+  for (const topic of topics)
+    expect(
+      (await s.a.query(api.knowledge.detail, { id: topic._id })).members.filter(
+        (m) => !!m.evidence,
+      ),
+    ).toHaveLength(1);
+  await s.t.mutation(internal.knowledge.backfill, {});
+  expect(
+    await s.t.run((ctx) => ctx.db.query("knowledgeMembers").collect()),
+  ).toHaveLength(2);
+});

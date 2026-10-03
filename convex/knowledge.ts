@@ -178,6 +178,20 @@ async function touch(ctx: MutationCtx, topicId: Id<"knowledgeTopics">) {
   });
 }
 // Classification reuses approved analysis. No new media processing or charge occurs here.
+function topicNames(source: Doc<"sources">, point: any): string[] {
+  const candidates =
+    source.categoryOverride ??
+    (point?.topics?.length ? point.topics : (point?.categories ?? []));
+  const names = candidates.flatMap((name: string) => {
+    try {
+      const normalized = categoryName(name);
+      return containsSecret(normalized) ? [] : [normalized];
+    } catch {
+      return [];
+    }
+  });
+  return names.length ? names : ["Unsorted ideas"];
+}
 export async function syncKnowledge(ctx: MutationCtx, source: Doc<"sources">) {
   if (process.env.RESTORE_LOCK === "true") return;
   const old = await ctx.db
@@ -199,8 +213,7 @@ export async function syncKnowledge(ctx: MutationCtx, source: Doc<"sources">) {
   for (const m of old) {
     const point = points.find((i: any) => i.id === m.insightId);
     const topic = await ctx.db.get(m.topicId);
-    const names =
-      source.categoryOverride ?? point?.topics ?? point?.categories ?? [];
+    const names = topicNames(source, point);
     const keys = names.flatMap((name: string) => {
       try {
         return [categoryKey(categoryName(name))];
@@ -229,8 +242,7 @@ export async function syncKnowledge(ctx: MutationCtx, source: Doc<"sources">) {
     }
   }
   for (const point of points) {
-    const names =
-      source.categoryOverride ?? point.topics ?? point.categories ?? [];
+    const names = topicNames(source, point);
     for (const name of names.slice(0, limits.topicsPerSource)) {
       let normalized: string;
       try {
