@@ -36,6 +36,8 @@ The active [provider register](SUBPROCESSORS.md) identifies the services used fo
 
 Storage configured in an EU jurisdiction does not mean every AI or authentication operation occurs only in the EU. Before enabling a provider, we verify its applicable agreement, processing locations, and lawful transfer safeguards where required. The published register states the actual configured route. We do not claim that this draft proves those agreements are in place.
 
+The selected metered cloud route uses Google Cloud's Gemini model through its EU inference endpoint. It receives normalized audio, selected frames and the relevant text or repository context needed for the approved operation. The application records the selected model, measured usage, transcription uncertainty and a conservative cost estimate. A regional endpoint does not establish that all account, security or support processing remains in the EU. We do not request grounding, external model tools, explicit context caching or request/response logging for this route. Google's applicable abuse-monitoring and implicit-cache rules can still apply; our own media deletion schedule does not erase provider records or establish zero retention.
+
 When you provide your own API key or use local Codex, that provider's own account and data terms also apply. In the enabled personal video route, a paired laptop transcribes audio locally and sends the transcript and sampled frames through your own supported ChatGPT-plan connection. Local subscription credentials remain on that laptop. The computer must stay connected while processing. Telegram capture is deferred and is not active in this deployment.
 
 ## Retention

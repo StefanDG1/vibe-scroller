@@ -2,6 +2,10 @@
 import json, subprocess, pathlib, resource, hashlib
 from PIL import Image, ImageChops, ImageStat
 root = pathlib.Path('/home/user/media')
+def bounded_candidates(paths, duration, step_ms):
+    assert duration > 0 and step_ms > 0
+    # FFmpeg's FPS rounding can emit a terminal image after the source ends.
+    return [path for index, path in enumerate(paths) if index * step_ms < duration * 1000]
 resource.setrlimit(resource.RLIMIT_FSIZE, (300_000_000, 300_000_000))
 resource.setrlimit(resource.RLIMIT_CPU, (180, 180))
 source = root / 'input'
@@ -41,7 +45,7 @@ if video:
     step_ms = 1000 // fps
     run(['ffmpeg','-nostdin','-threads','2','-i',str(source),'-vf',f'fps={fps},scale=160:-2',
          '-frames:v','600','-q:v','8',str(root/'candidate-%03d.jpg')],90)
-    candidates = sorted(root.glob('candidate-*.jpg'))
+    candidates = bounded_candidates(sorted(root.glob('candidate-*.jpg')), duration, step_ms)
     changes, previous = [], None
     for index, path in enumerate(candidates):
         with Image.open(path) as image:
