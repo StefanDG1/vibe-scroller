@@ -2071,6 +2071,9 @@ dialog.capture-modal::backdrop {
   min-width: 0;
   overflow-wrap: anywhere;
 }
+.knowledge-library [aria-label="Topic detail"] {
+  scroll-margin-top: 80px;
+}
 .knowledge-library textarea,
 .knowledge-library input {
   width: 100%;
