@@ -1,9 +1,9 @@
 {
   "schemaVersion": "1.0.0",
   "packageManager": "pnpm@12.3.4",
-  "lockfileSha256": "6f09041049ff14f07e137baf09be9c155f2138214cd23f2893a7d60fa804ef9f",
+  "lockfileSha256": "d0dbede2d4ca9163cb7a5058d2a901f788ccc7e3e4867ded0f33566ed50a30b2",
   "publicSourceRepository": "https://github.com/StefanDG1/vibe-scroller",
-  "sourceCommit": "cb1a59c8b4d27fc92d16ebdd672225407298755a",
+  "sourceCommit": "6c0dc45e18850fa34177ee920d0732e28f65a955",
   "registry": "https://registry.npmjs.org",
   "maxBytes": 2147483648,
   "platform": {
@@ -17,7 +17,7 @@
   "snapshotExpiryDays": 7,
   "publicReleaseApproved": false,
   "manifests": {
-    "package.json": "ab8c5e321e186b1fb73790ed310d14092743e6cef77efecc6fb1e1607a31fd49",
+    "package.json": "a21502c70fede8ddfd1b87460ee9b96c314b68f9f16adbb3166c30c03c1bd63a",
     "apps/starter/package.json": "edffbb6393ac5f0287910403ff650bddc03080ecf302c34b0176d73e2eeb7dd9",
     "apps/marketing/package.json": "c1fbbc5349d6ef649154b4e33e01b53a39a49dc34427b8de3dbf6c3147e2b763"
   },
@@ -845,5 +845,13 @@
     "zod",
     "zod-to-json-schema",
     "zwitch"
-  ]
+  ],
+  "patches": [
+    {
+      "package": "braces@3.0.3",
+      "path": "patches/braces@3.0.3.patch",
+      "sha256": "650a329569b522e182f3ccf9f51e500035f551d3bcf80bfde06bdb6530b534fd"
+    }
+  ],
+  "patchReviewBaseCommit": "6c0dc45e18850fa34177ee920d0732e28f65a955"
 }

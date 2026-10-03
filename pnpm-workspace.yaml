@@ -12,3 +12,6 @@ allowBuilds:
 minimumReleaseAgeExclude:
   - '@opennextjs/cloudflare@1.20.7'
   - posthog-js@1.435.5
+
+patchedDependencies:
+  braces@3.0.3: patches/braces@3.0.3.patch

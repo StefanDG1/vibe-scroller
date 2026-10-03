@@ -1,0 +1,14 @@
+[
+  {
+    "advisory": "GHSA-vfj7-8cjw-p6xm",
+    "module": "braces",
+    "version": "3.0.3",
+    "status": "local_mitigation",
+    "patch": "patches/braces@3.0.3.patch",
+    "sha256": "650a329569b522e182f3ccf9f51e500035f551d3bcf80bfde06bdb6530b534fd",
+    "recheckBy": "2026-11-02T00:00:00Z",
+    "decision": "docs/adr/042-bounded-braces-depth-mitigation.md",
+    "tests": "tests/braces-depth.test.ts",
+    "scope": "Bound compile, expand and stringify recursive AST traversal. Not an upstream fixed release."
+  }
+]

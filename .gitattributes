@@ -2,3 +2,5 @@
 *.png binary
 *.woff2 binary
 .agents/** -text
+# Unified dependency patches retain the leading space of empty context lines.
+patches/*.patch whitespace=-blank-at-eol

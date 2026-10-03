@@ -1,6 +1,7 @@
 import { Sandbox } from "@vercel/sandbox";
 import { readFileSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
+import { reviewedDependencyPatches } from "./dependency-patches.mjs";
 const token = process.env.VERCEL_OIDC_TOKEN ?? process.env.VERCEL_SANDBOX_TOKEN;
 if (
   !token ||
@@ -30,6 +31,9 @@ const cacheManifests = withCache
       "apps/starter/package.json",
       "apps/marketing/package.json",
     ].map((path) => ({ path, content: readFileSync(path) }))
+  : [];
+const cachePatches = withCache
+  ? reviewedDependencyPatches(cacheProfile.patches, readFileSync)
   : [];
 if (
   cacheLock &&
@@ -114,10 +118,23 @@ try {
       {
         path: "/opt/vibe/cache-build/pnpm-workspace.yaml",
         content: Buffer.from(
-          'packages: ["apps/*"]\nsupportedArchitectures:\n  os: [linux]\n  cpu: [x64]\n  libc: [glibc]\n',
+          'packages: ["apps/*"]\nsupportedArchitectures:\n  os: [linux]\n  cpu: [x64]\n  libc: [glibc]\n' +
+            (cachePatches.length
+              ? "patchedDependencies:\n" +
+                cachePatches
+                  .map(
+                    (patch) =>
+                      `  ${JSON.stringify(patch.package)}: ${JSON.stringify(patch.path)}\n`,
+                  )
+                  .join("")
+              : ""),
         ),
       },
       ...cacheManifests.map((file) => ({
+        path: "/opt/vibe/cache-build/" + file.path,
+        content: file.content,
+      })),
+      ...cachePatches.map((file) => ({
         path: "/opt/vibe/cache-build/" + file.path,
         content: file.content,
       })),
