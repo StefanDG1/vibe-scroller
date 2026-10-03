@@ -1,0 +1,28 @@
+{
+  "at": "2026-10-03T10:17:59.130Z",
+  "environment": "production",
+  "codeCommit": "1d0340d2adecc96427e427ce0139a55d07d2c20a",
+  "policy": "v1-2026-10-03.1",
+  "changed": [
+    "STRIPE_MANAGED_COUNTRY_RULE_PROOF",
+    "HOSTED_MEDIA_ANALYSIS_VERIFIED",
+    "HOSTED_MEDIA_ACCEPTANCE_ENABLED",
+    "CLOUD_PUBLIC_RELEASE_APPROVED",
+    "HOSTED_MEDIA_PUBLIC_RELEASE_APPROVED",
+    "STRIPE_MANAGED_PAYMENTS_VERIFIED",
+    "BILLING_RELEASE_APPROVED",
+    "LIVE_CHECKOUT_ENABLED"
+  ],
+  "qualityNumericalBenchmarkPassed": false,
+  "noRealPurchase": true,
+  "noBudgetChanges": true,
+  "unsupportedHostedChatGPTEnabled": false,
+  "catalogue": {
+    "liveEnabled": true,
+    "catalogueConfigured": true,
+    "sandboxEnabled": false,
+    "billingCountryRequired": false
+  },
+  "completedAt": "2026-10-03T10:18:20.244Z",
+  "scope": "Historical initial activation; final checkout required subsequent country/origin fixes and unpaid handoff proof."
+}

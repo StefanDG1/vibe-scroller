@@ -119,3 +119,7 @@ October 2 evidence review: the owner production workflow supplies a concrete ins
 October 3, F005: The owner requested broad collections and simple specific topics for mixed saved content. This supports testing retrieval friction with the existing behavioral avatar; Food and Fashion labels do not establish a new validated customer segment.
 
 October 3, F006: business buyer eligibility is an owner-approved checkout scope, not validation of a new enterprise audience. The working developer/founder avatar and unmeasured demand remain unchanged.
+
+## Current release evidence, October 3
+
+The initial adult developer/founder audience is unchanged. Normal browser use can choose the metered cloud route without a laptop. The owner’s personal ChatGPT analysis remains a separately supported paired-laptop route; do not promise general paid-hosted subscription access. A business purchase adds no enterprise scope or guaranteed repository coverage. See [the public release record](../operations/paid-release-2026-10-03.md).

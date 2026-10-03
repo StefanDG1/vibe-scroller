@@ -30,26 +30,26 @@ Repository: https://github.com/StefanDG1/vibe-scroller
 
 ## Work packages
 
-| Package | State            | Evidence                                                                                                                                     |
-| ------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| WP01    | verified_staging | Export preserved; frozen install, CI, builds and secret scanning passed                                                                      |
-| WP02    | in_progress      | Dark console and production desktop/mobile source checks passed; full accessibility acceptance remains                                       |
-| WP03    | in_progress      | Production Google login/default workspace and canonical reauthentication passed; broader recovery/logout acceptance remains                  |
-| WP04    | in_progress      | Actual supplied ZIP imported four links; their media was attached and analyzed in production; physical Android deferred                      |
-| WP05    | in_progress      | Atomic reservations, stage commits and workflows; interruption/cost reconciliation pending                                                   |
-| WP06    | in_progress      | Production local Whisper and personal ChatGPT audio/vision passed on three real Reels and one carousel; hosted commercial access gated       |
-| WP07    | in_progress      | Search/categories/sort and private evidence browser checks passed; late-object retirement and private evidence checks passed in production   |
-| WP08    | in_progress      | Selected GitHub App, nested exclusions, hash reuse and Repomix tree; real profile draft passed; quality benchmark pending                    |
-| WP09    | in_progress      | Semantic selection returned honest no-fit; reviewed AI draft plan implemented; live matching limited by free allowance                       |
-| WP10    | in_progress      | Real free managed route; revision-bound customer-key broker implemented; funded customer request not tested                                  |
-| WP11    | blocked_external | Pairing/lease/result code and vault test; actual native isolation failed                                                                     |
-| WP12    | in_progress      | Real isolated metered cloud coding produced a reviewed patch; cost calibration and outage cases remain                                       |
-| WP13    | in_progress      | Real draft PR 3 and automatic reopen/closure; merge/revert/access-loss staging remains                                                       |
-| WP14    | in_progress      | Normal generic hosted email delivered to official test recipient; opt-out passed; Telegram deferred by user                                  |
-| WP15    | in_progress      | Six prices/top-ups, real renewals/failure/portal/refund checks passed; operator settlement export verified; live release gated               |
-| WP16    | in_progress      | Locked database and owned-frame restore passed; object retirement and joined tenant boundaries fixed; independent backups/full matrix remain |
-| WP17    | in_progress      | 208 app, 11 auth and six PCM tests plus both builds passed; broad benchmark/device/security acceptance remains                               |
-| WP18    | blocked_external | Personal production alpha verified; applicable tax/invoicing, legal publication and paid/public release acceptance remain                    |
+| Package | Current state    | Evidence and limit                                                                                                                            |
+| ------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| WP01    | verified         | Official separated export, pinned compatible stack, notices, builds and staged scans                                                          |
+| WP02    | verified_bounded | Dark responsive library, post/evidence/plan and billing controls; native six-width and keyboard checks; no blanket certification              |
+| WP03    | verified_bounded | Actual production Google/email-code/default workspace, foreign identities, native recovery/deletion; natural JWT-expiry claim excluded        |
+| WP04    | verified_bounded | Actual supplied four-link ZIP and newer public-link analyses, previews/background states; platform refusals honest; Android hardware deferred |
+| WP05    | verified_bounded | Durable workflow, atomic reservations/settlements/cancellation and stage reuse; historical unknown holds retained                             |
+| WP06    | verified_bounded | Automatic actual personal Whisper/ChatGPT and included Google audio/visual routes; hosted commercial SIWC gated                               |
+| WP07    | verified_bounded | Collections/topics, state/date sorting, private source permalinks/frame viewer, retention and deletion controls                               |
+| WP08    | verified_bounded | Public selected-repository App/profile/context and exclusions; actual context evidence; arbitrary repository coverage not certified           |
+| WP09    | verified_bounded | Actual useful/no-fit matching, whole-source default, Advanced exclusions and editable approval-bound plans                                    |
+| WP10    | verified_bounded | Included metered route and explicit personal funding passed; customer-key credential-dependent cases remain distinguished                     |
+| WP11    | gated_optional   | Personal pairing/analysis passed; failed Windows coding isolation remains disabled, with verified browser cloud alternative                   |
+| WP12    | verified_bounded | Selected Google-funded isolated coding/checks, broker controls, repeated cancellation and confirmed deletion                                  |
+| WP13    | verified_bounded | Actual draft PR, merge/closure/reopen/ready/reversal/access recovery and signed production webhook reconciliation                             |
+| WP14    | verified_bounded | In-app preferences, actual generic hosted email/opt-out; Telegram explicitly deferred by owner                                                |
+| WP15    | verified_bounded | All six sandbox subscriptions/two top-ups and lifecycle; verified unpaid native live Managed handoff; real purchase excluded                  |
+| WP16    | verified_bounded | 155 expanded real rights checks, source deletion/exports, locked independent restore/tombstones/quarantine; full serving cutover separate     |
+| WP17    | in_progress      | 319 app/fourteen auth tests, full builds and native journey evidence; 41 analyses/82 comparisons complete, numerical annotation incomplete    |
+| WP18    | verified_bounded | Supported public media/coding and live Managed checkout enabled; owner-approved versioned policies; latest commit/CI receipt follows          |
 
 ## Evidence
 
@@ -1237,3 +1237,23 @@ Native billing custom menus opened and dismissed at 320, 360, 390, 412, 768 and 
 ADR 049 preserves omitted country in subscription and top-up Server Actions. Its actual form/route regression first failed in outputs/checkout-form-country-before-fix.log, then all fourteen authentication/action tests passed in outputs/checkout-form-country-after-fix.log. Direct billing, excluded countries and missing consent retain refusal. The release resumes only after the exact fixed frontend deploy and another unpaid native handoff. The owner forbids a real buying/refund test; it remains excluded.
 
 `pnpm check` passed in outputs/bounded-public-checkout-fix-full-check.log: 317 application tests plus three explicit external skips, fourteen authentication/form-action tests, six PCM, three proxy, three frame-sampling and five build-policy tests, 149-document validation, lint, all type checks and both production builds. `python finance/test_model.py` separately passed ten financial tests; the artifact-engine workbook reconciled 39 calculated amounts and two independent assumption changes without formula errors. Native Excel is not claimed. No extra remote build was requested for verification.
+
+## 3 October 2026: missing backend return URL and fail-closed readiness
+
+Country fix c4a32c89c63ae7ad4865444f8af6133d451b4590 reached READY deployment dpl_6NdjV6sU9qjtmuhSc9nambzfLatk; required Verify 37116242736 and Version 37116242739 passed. The corrected phone-width form reached the backend, which returned Invalid URL. Production APP_URL was absent despite the frontend's configured canonical domain. LIVE_CHECKOUT_ENABLED was immediately reset false again. The privately captured provider log was inspected with credential/URL redaction; no payment or card was submitted. No unknown result was retried blindly.
+
+APP_URL is now explicitly https://scroll.companynerve.com in the selected production backend. ADR 050 adds a strict canonical return-origin readiness check and validates the origin before provider calls or checkout-intent writes in both billing actions. Six focused tests passed in outputs/checkout-origin-guard-tests.log. Production activation and final unpaid session verification remain pending this corrected backend deployment. The earlier activation receipt remains historical and cannot establish current live availability.
+
+The first origin-guard full check stopped at TypeScript because the new test guessed billingAccounts instead of the actual billing table. That check is retained in outputs/checkout-origin-guard-full-check.log. The test now queries the real billing record and asserts it exists before checking the absent intent. This prevents an empty wrong-table query from posing as a passing persistence check. No production schema was changed.
+
+## 3 October 2026: live unpaid handoff verified and release guide
+
+The return-origin guard passed the complete local retest in outputs/checkout-origin-guard-full-retest.log, and production functions/schema deployed successfully to bold-lemur-667 in outputs/checkout-origin-guard-production-deploy.log. The final complete local run, including the remaining top-up dark custom menus, passed in outputs/paid-checkout-final-full-check.log: 319 app tests plus three explicit external skips, fourteen authentication/form-action tests, six PCM, three proxy, three frame-sampling and five build-policy tests, lint/types/document validation and both builds.
+
+A pre-existing failed checkout reservation then hit Stripe’s minimum thirty-minute creation lifetime. The selected owner attempt was independently reconciled against zero actual customer Checkout sessions before clearing only its matching lock. The first helper incorrectly guessed the intent format and made no mutation; the subsequent privileged clear returned void, which its JSON decoder incorrectly rejected. Authoritative read-only recovery verified the lock clear and zero provider sessions rather than repeating the mutation. This was a known-unstarted attempt, not a cleared unknown funding hold.
+
+A fresh native phone-width form then reached the actual live Stripe EUR 5.99 weekly Starter checkout. Independent provider retrieval verified livemode, Managed Payments, price/interval, account/customer/intent binding, required current policy consent and billing address, and canonical return URLs. No payment details, card, purchase or refund were submitted. The session was expired unpaid. The first post-expiration assertion wrongly rejected the pre-existing included trial pool; recovery independently confirmed zero subscriptions/invoices, trial status and all three grants predating checkout. Only the exact provider-expired lock was cleared. No allowance grant or paid entitlement was made. Evidence: [unpaid live handoff](operations/evidence/live-unpaid-checkout-20261003.json) and [known-unstarted reconciliation](operations/evidence/known-unstarted-checkout-reconciliation-20261003.json).
+
+Public supported metered media/coding and live Managed Payments are enabled with current policies and unchanged ceilings. The [release record](operations/paid-release-2026-10-03.md) maps all gates and precise limitations. The owner guide, provider/deployment instructions and all four foundational documents now reflect current availability. Numerical human annotation, wider coverage, provider invoices and complete serving cutover remain validation work, not fabricated passes. Optional Windows coding and commercial hosted SIWC remain gated; physical Android, Telegram and Gemini are deferred. No new purchase or live buying test occurred.
+
+A fresh whitelisted production flag read confirms canonical APP_URL, selected Google route/current tariff review, matching policy release, verified Vercel workers and public media/coding/Managed billing switches. Capture/inference/publication/restore kill controls were not active. The direct-tax catalogue field remains pending evidence because the selected route is Managed Payments; it is not a direct-billing approval. Coarse configuration: [final flags](operations/evidence/public-release-final-flags-20261003.json). The official OpenAI plan-usage overview was rechecked October 3 and still directs paid/remotely hosted integrations to its interest process; no new commercial approval was inferred.

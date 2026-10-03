@@ -1,0 +1,14 @@
+{
+  "at": "2026-10-03T10:32:07.131Z",
+  "environment": "production",
+  "knownFailure": "provider refused expires_at below minimum before creation; earlier origin error before provider request",
+  "providerSessionsExamined": 0,
+  "matchingProviderSessions": 0,
+  "knownUnstartedOnly": true,
+  "unknownReservationReleased": false,
+  "entitlementGranted": false,
+  "noPaymentAttempt": true,
+  "matchingCheckoutLockCleared": true,
+  "authoritativeReadAfterVoidResponse": true,
+  "noMutationInRecoveryObservation": true
+}

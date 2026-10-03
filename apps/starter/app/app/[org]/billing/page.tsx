@@ -208,23 +208,34 @@ export default async function Page({
               }
             >
               <input type="hidden" name="organizationId" value={org} />
-              <label>
+              <label htmlFor="topup-pack">
                 One-time pack
-                <select name="pack">
+                <ChoiceSelect
+                  id="topup-pack"
+                  name="pack"
+                  aria-label="One-time pack"
+                  defaultValue="200"
+                >
                   <option value="200">EUR 10 / 200 credits</option>
                   <option value="550">EUR 25 / 550 credits</option>
-                </select>
+                </ChoiceSelect>
               </label>
               {catalogue.billingCountryRequired && (
-                <label>
+                <label htmlFor="topup-country">
                   Billing country
-                  <select name="country" defaultValue="RO" required>
+                  <ChoiceSelect
+                    id="topup-country"
+                    name="country"
+                    aria-label="Top-up billing country"
+                    defaultValue="RO"
+                    required
+                  >
                     {catalogue.countries.map((country) => (
                       <option key={country} value={country}>
                         {country === "RO" ? "Romania" : country}
                       </option>
                     ))}
-                  </select>
+                  </ChoiceSelect>
                 </label>
               )}
               <label className="checkbox-label">

@@ -1,0 +1,31 @@
+{
+  "observedAt": "2026-10-03T01:25:09.487Z",
+  "environment": "production",
+  "syntheticOwned": true,
+  "baseSha": "cd2fe4d6a95212d5e3854ee7848df237ed732827",
+  "run": "pn7f0hpee0rjhdkprrmgvsnehs8fjrtj",
+  "pr": "https://github.com/StefanDG1/vibe-scroller/pull/13",
+  "state": "completed",
+  "prState": "draft",
+  "checks": ["pnpm lint: exit 0", "pnpm typecheck: exit 0"],
+  "changedPaths": ["apps/starter/app/api/product/route.ts"],
+  "sandboxDeletionStatus": 404,
+  "creditsCeiling": 30,
+  "settlement": [
+    {
+      "credits": 5,
+      "costStatus": "ceiling_only",
+      "costCeilingEur": 0.05
+    }
+  ],
+  "personalPlanPooled": false,
+  "fullRepositoryCoverage": false,
+  "livePurchaseMade": false,
+  "paidV1Established": false,
+  "verifiedMerge": {
+    "state": "MERGED",
+    "at": "2026-10-03T01:26:03Z",
+    "commit": "df647e7963d34fbdf186245eafa5ec09a03cd6d8",
+    "independentlyRechecked": "2026-10-03"
+  }
+}

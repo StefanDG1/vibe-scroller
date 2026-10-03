@@ -174,3 +174,7 @@ Product evidence update, October 2: Vercel Pro now hosts the real domain and eph
 October 3, F005: One owner reported that five newer real saved-video analyses were broadly useful and requested improved navigation and whole-post review. This is qualitative operator feedback, not a completed quality benchmark, demand finding or measured customer benefit.
 
 October 3, F006: the owner approved individuals and businesses through verified Managed Payments markets. This is a purchase-scope decision; no new buyer research, demand or enterprise capability is established.
+
+## Current release evidence, October 3
+
+Observed integration evidence now includes the supported public Google metered/Vercel workflow and an unpaid native live Managed Payments handoff. This is deployment evidence, not a customer study, comparative productivity result or willingness-to-pay validation. The 41-analysis/82-comparison collection has 23 qualitative owner approvals and incomplete numerical human scoring. See [the public release record](../operations/paid-release-2026-10-03.md).

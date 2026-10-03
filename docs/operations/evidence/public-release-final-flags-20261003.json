@@ -1,0 +1,30 @@
+{
+  "at": "2026-10-03T10:39:24.989Z",
+  "environment": "production",
+  "flags": {
+    "APP_URL": "https://scroll.companynerve.com",
+    "STRIPE_MODE": "live",
+    "STRIPE_BILLING_ROUTE": "managed_payments",
+    "POLICY_RELEASE_VERSION": "v1-2026-10-03.1",
+    "ACQUISITION_VERIFIED": "true",
+    "MEDIA_VERIFIED": "true",
+    "CLOUD_VERIFIED": "true",
+    "CLOUD_SANDBOX_PROVIDER": "vercel",
+    "HOSTED_MEDIA_ANALYSIS_VERIFIED": "true",
+    "GOOGLE_INFERENCE_ENABLED": "true",
+    "GOOGLE_INFERENCE_COST_POLICY": "google-eu-standard-2026-10-03-v1",
+    "GOOGLE_INFERENCE_REVIEW_EXPIRES_AT": "2026-10-17T00:00:00.000Z",
+    "MANAGED_INFERENCE_ROUTE": "google_metered",
+    "DISABLE_CAPTURE": "",
+    "DISABLE_INFERENCE": "",
+    "DISABLE_CLOUD": "false",
+    "DISABLE_PUBLICATION": "",
+    "RESTORE_LOCK": "",
+    "CLOUD_PUBLIC_RELEASE_APPROVED": "true",
+    "HOSTED_MEDIA_PUBLIC_RELEASE_APPROVED": "true",
+    "LIVE_CHECKOUT_ENABLED": "true",
+    "BILLING_RELEASE_APPROVED": "true",
+    "STRIPE_MANAGED_PAYMENTS_VERIFIED": "true"
+  },
+  "noSecrets": true
+}

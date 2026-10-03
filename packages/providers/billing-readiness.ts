@@ -4,10 +4,34 @@ import { policyRelease } from "../policy/publication";
 type Environment = Record<string, string | undefined>;
 const tiers = ["STARTER", "PRO"],
   intervals = ["WEEKLY", "MONTHLY", "ANNUAL"];
+export function billingReturnOrigin(env: Environment) {
+  try {
+    const url = new URL(env.APP_URL ?? "");
+    const loopback = ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname);
+    if (
+      url.username ||
+      url.password ||
+      url.pathname !== "/" ||
+      url.search ||
+      url.hash
+    )
+      return undefined;
+    if (
+      url.protocol !== "https:" &&
+      !(env.STRIPE_MODE === "test" && loopback && url.protocol === "http:")
+    )
+      return undefined;
+    if (env.STRIPE_MODE === "live" && loopback) return undefined;
+    return url.origin;
+  } catch {
+    return undefined;
+  }
+}
 export function billingReadiness(env: Environment) {
   const mode = env.STRIPE_MODE;
   const catalogueConfigured =
     ["test", "live"].includes(mode ?? "") &&
+    !!billingReturnOrigin(env) &&
     new RegExp(`^[sr]k_${mode}_`).test(env.STRIPE_SECRET_KEY ?? "") &&
     !!env.STRIPE_ACCOUNT_ID &&
     !!env.STRIPE_V1_WEBHOOK_SECRET &&

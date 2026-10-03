@@ -1,5 +1,8 @@
 import { expect, it } from "vitest";
-import { billingReadiness } from "../packages/providers/billing-readiness";
+import {
+  billingReadiness,
+  billingReturnOrigin,
+} from "../packages/providers/billing-readiness";
 import { policyRelease } from "../packages/policy/publication";
 import {
   managedMarketPolicy,
@@ -7,6 +10,7 @@ import {
 } from "../packages/providers/managed-markets";
 const env: Record<string, string> = {
   STRIPE_MODE: "live",
+  APP_URL: "https://app.example.test",
   STRIPE_SECRET_KEY: "rk_live_synthetic",
   STRIPE_ACCOUNT_ID: "acct_synthetic",
   STRIPE_V1_WEBHOOK_SECRET: "whsec_synthetic",
@@ -89,4 +93,38 @@ it("exposes sandbox checkout independently of live activation and never treats l
       STRIPE_PRO_PRICE_ID: "price_legacy",
     }).catalogueConfigured,
   ).toBe(false);
+});
+
+it("requires a canonical HTTPS return origin in live mode and permits only test loopback HTTP", () => {
+  for (const APP_URL of [
+    undefined,
+    "",
+    "not-a-url",
+    "http://app.example.test",
+    "https://user:password@app.example.test",
+    "https://app.example.test/path",
+    "https://app.example.test/?next=other",
+    "https://app.example.test/#return",
+    "https://localhost:3001",
+  ]) {
+    expect(billingReturnOrigin({ ...env, APP_URL })).toBeUndefined();
+    expect(billingReadiness({ ...env, APP_URL }).liveEnabled).toBe(false);
+  }
+  expect(
+    billingReturnOrigin({ ...env, APP_URL: "https://app.example.test:8443" }),
+  ).toBe("https://app.example.test:8443");
+  expect(
+    billingReturnOrigin({
+      ...env,
+      STRIPE_MODE: "test",
+      APP_URL: "http://localhost:3001",
+    }),
+  ).toBe("http://localhost:3001");
+  expect(
+    billingReturnOrigin({
+      ...env,
+      STRIPE_MODE: "test",
+      APP_URL: "http://remote.example.test",
+    }),
+  ).toBeUndefined();
 });

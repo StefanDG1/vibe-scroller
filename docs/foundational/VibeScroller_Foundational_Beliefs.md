@@ -35,3 +35,7 @@ October 2 evidence review: bounded owner-only production draft-PR and lifecycle 
 October 3, F005: Whole-post defaults and optional exclusions reduce selection effort while preserving control. Inspectable private frames support the evidence belief. No calibrated truth ranking or exhaustive video coverage has been established; the six beliefs and permission boundaries remain unchanged.
 
 October 3, F006: individual and business buyers may use the same bounded offer when release gates pass. The six beliefs, separate permissions and evidence requirements remain unchanged; a business label cannot remove mandatory consumer rights.
+
+## Current release evidence, October 3
+
+The six beliefs remain unchanged: inspect source evidence, accept honest no-fit, keep explicit funding/approval and distinguish merge from measured benefit. Public metered-route and unpaid checkout evidence now support availability claims within the tested scope. They do not establish numerical accuracy, unlimited capacity, universal source retrieval, commercial ChatGPT permission or independent legal review. See [the public release record](../operations/paid-release-2026-10-03.md).

@@ -95,3 +95,19 @@ it("rejects missing consent, disabled countries and wrong provider accounts befo
   );
   expect(mocks.checkout).not.toHaveBeenCalled();
 });
+
+it("refuses a missing return origin before provider calls or billing-intent writes", async () => {
+  const { t, user, args } = await setup();
+  vi.stubEnv("APP_URL", "");
+  await expect(user.action(api.billingV1.topup, args)).rejects.toThrow(
+    "return origin is not configured",
+  );
+  expect(mocks.account).not.toHaveBeenCalled();
+  expect(mocks.price).not.toHaveBeenCalled();
+  expect(mocks.checkout).not.toHaveBeenCalled();
+  const billing = await t.run(
+    async (ctx) => await ctx.db.query("billing").first(),
+  );
+  expect(billing).not.toBeNull();
+  expect(billing?.checkoutIntent).toBeUndefined();
+});

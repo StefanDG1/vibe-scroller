@@ -4,7 +4,10 @@ import { action } from "./_generated/server";
 import { api, internal } from "./_generated/api";
 import { v } from "convex/values";
 import { pricing, ensure } from "../packages/policy";
-import { billingReadiness } from "../packages/providers/billing-readiness";
+import {
+  billingReadiness,
+  billingReturnOrigin,
+} from "../packages/providers/billing-readiness";
 import { checkoutPaymentRoute } from "../packages/providers/stripe-checkout";
 import { managedMarketVerified } from "../packages/providers/managed-markets";
 import { policyRelease } from "../packages/policy/publication";
@@ -258,6 +261,12 @@ export const checkout = action({
       "Accept the displayed service terms before checkout.",
     );
     const live = process.env.STRIPE_MODE === "live";
+    const origin = billingReturnOrigin(process.env);
+    ensure(
+      origin,
+      "BILLING_UNAVAILABLE",
+      "The checkout return origin is not configured.",
+    );
     const tax = await ctx.runQuery(internal.commerce.taxConfig, {});
     ensure(
       !live || billingReadiness(process.env).liveEnabled,
@@ -351,7 +360,6 @@ export const checkout = action({
         policyRelease.id,
       ]),
     });
-    const origin = new URL(process.env.APP_URL!).origin;
     const session = await client.checkout.sessions.create(
       {
         customer,
@@ -446,6 +454,12 @@ export const topup = action({
       "Accept the displayed terms before purchasing credits.",
     );
     const live = process.env.STRIPE_MODE === "live";
+    const origin = billingReturnOrigin(process.env);
+    ensure(
+      origin,
+      "BILLING_UNAVAILABLE",
+      "The checkout return origin is not configured.",
+    );
     const tax = await ctx.runQuery(internal.commerce.taxConfig, {});
     const route = checkoutPaymentRoute({
       tax,
@@ -471,7 +485,6 @@ export const topup = action({
       "CATALOGUE_MISMATCH",
       "Top-up catalogue mismatch.",
     );
-    const origin = new URL(process.env.APP_URL!).origin;
     await ctx.runMutation(internal.commerce.recordAcceptance, {
       organizationId: a.organizationId,
       termsVersion: policyRelease.id,
