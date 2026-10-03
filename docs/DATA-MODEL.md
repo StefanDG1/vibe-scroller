@@ -86,3 +86,5 @@ The implemented extension adds workspace-owned knowledgeTopics, knowledgeMembers
 ## Bounded repository selection
 
 Repository records add optional snapshotPaths and preparationError. Legacy missing scope means the eligible tree. snapshotSummary records selectedPaths, repositoryEligibleFileCount, eligibleFileCount and omittedEligibleFileCount, bound into its cache key. A changed selection uses the existing selectionVersion; unfinished scope changes cannot authorize evidence retrieval or new knowledge evaluations. Confirmed profiles persist. See [ADR 053](adr/053-explicit-bounded-repository-snapshots.md).
+
+knowledgeTopics has a topic-name search index with organizationId/state filters. Renaming updates indexed content through the same versioned mutation; existing records are indexed by Convex without rewriting source or topic data.
