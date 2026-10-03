@@ -106,7 +106,10 @@ export const create = mutation({
         )
         .join("\n") ||
       "File locations are unknown or this is a manual/research task.";
-    const body = `## Problem and context\n\n${output.problem}\n\n## Why this fits ${repo.fullName}\n\n${output.rationale}\n\n## Source insights\n\n${refs}\n\n## Repository evidence\n\n${repoEvidence}\n\n## Suggested approach\n\n${output.approach}\n\n## Acceptance criteria\n\n${bullets(output.acceptance)}\n\n## Tests\n\n${bullets(output.tests)}\n\n## Risks\n\n${bullets(output.risks)}\n\n## Alternatives\n\n${bullets(output.alternatives)}\n\n## Open questions\n\n${bullets(output.questions)}\n\nEvaluated commit: ${e.baseSha}. Confirmed business context version: ${e.profileVersion}. Evidence batch: ${e.covered} insights; ${e.omitted ? "additional library evidence was omitted" : "this topic evidence batch was inspected"}. Benefit and effort remain hypotheses. No coding, branch, PR or merge is approved by this issue.\n\n${marker}`;
+    const snapshotCoverage = repo.snapshotPaths?.length
+      ? ` Explicit snapshot selection: ${repo.snapshotPaths.length} file/folder paths; ${repo.snapshotSummary?.omittedEligibleFileCount ?? "unknown"} eligible repository files omitted. The whole repository was not reviewed.`
+      : " Only bounded repository excerpts were inspected.";
+    const body = `## Problem and context\n\n${output.problem}\n\n## Why this fits ${repo.fullName}\n\n${output.rationale}\n\n## Source insights\n\n${refs}\n\n## Repository evidence\n\n${repoEvidence}\n\n## Suggested approach\n\n${output.approach}\n\n## Acceptance criteria\n\n${bullets(output.acceptance)}\n\n## Tests\n\n${bullets(output.tests)}\n\n## Risks\n\n${bullets(output.risks)}\n\n## Alternatives\n\n${bullets(output.alternatives)}\n\n## Open questions\n\n${bullets(output.questions)}\n\nEvaluated commit: ${e.baseSha}. Confirmed business context version: ${e.profileVersion}. Evidence batch: ${e.covered} insights; ${e.omitted ? "additional library evidence was omitted" : "this topic evidence batch was inspected"}. ${snapshotCoverage} Benefit and effort remain hypotheses. No coding, branch, PR or merge is approved by this issue.\n\n${marker}`;
     safeDraft(output.title, body, marker, false);
     return ctx.db.insert("issueDrafts", {
       organizationId: e.organizationId,

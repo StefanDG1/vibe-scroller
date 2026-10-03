@@ -82,3 +82,7 @@ Billing and legal-retention records are separated from content. Account deletion
 ## Workspace knowledge records
 
 The implemented extension adds workspace-owned knowledgeTopics, knowledgeMembers, knowledgeJobs, knowledgePolicies, knowledgeEvaluations, issueDrafts and issueAttempts. Source references bind source ID/generation/revision/insight ID. Topic versions preserve corrections; evaluations bind repository SHA/profile version/source-set hash. Old single-source proposals remain unchanged. See [the execution ledger](V1-KNOWLEDGE-EXECUTION.md) for bounds, indexes, migration and acceptance.
+
+## Bounded repository selection
+
+Repository records add optional snapshotPaths and preparationError. Legacy missing scope means the eligible tree. snapshotSummary records selectedPaths, repositoryEligibleFileCount, eligibleFileCount and omittedEligibleFileCount, bound into its cache key. A changed selection uses the existing selectionVersion; unfinished scope changes cannot authorize evidence retrieval or new knowledge evaluations. Confirmed profiles persist. See [ADR 053](adr/053-explicit-bounded-repository-snapshots.md).

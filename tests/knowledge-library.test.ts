@@ -550,11 +550,39 @@ it("selects only authorized identities, preserves confirmed context, and fences 
   ).rejects.toThrow("FORBIDDEN");
   const selected = await s.a.mutation(api.repositorySelection.save, {
     organizationId: s.org,
-    choices: [choice],
+    choices: [{ ...choice, snapshotPaths: ["src/", "README.md"] }],
     draftContext: true,
     maxCredits: 0,
   });
   expect(selected[0].draftContext).toBe(false);
+  expect(selected[0].snapshotPaths).toEqual(["README.md", "src"]);
+  const version = selected[0].selectionVersion;
+  await expect(
+    s.a.mutation(api.repositorySelection.save, {
+      organizationId: s.org,
+      choices: [{ ...choice, snapshotPaths: [".env"] }],
+      draftContext: false,
+      maxCredits: 0,
+    }),
+  ).rejects.toThrow("INVALID_INPUT");
+  expect(
+    (await s.t.run((ctx) => ctx.db.get(repositoryId)))!.selectionVersion,
+  ).toBe(version);
+  await expect(
+    s.b.query(api.product.repositories, { organizationId: s.org }),
+  ).rejects.toThrow();
+  await s.t.mutation(internal.repositorySelection.preparationState, {
+    id: repositoryId,
+    actor: s.ownerId,
+    version,
+    state: "needs_attention",
+    error: "REPO_TOO_LARGE",
+  });
+  const projected = (
+    await s.a.query(api.product.repositories, { organizationId: s.org })
+  )[0];
+  expect(projected.preparationError).toBe("REPO_TOO_LARGE");
+  expect(projected.snapshotPaths).toEqual(["README.md", "src"]);
   await s.t.mutation(internal.repositorySelection.preparationState, {
     id: repositoryId,
     actor: s.ownerId,
@@ -564,6 +592,9 @@ it("selects only authorized identities, preserves confirmed context, and fences 
   expect((await s.t.run((ctx) => ctx.db.get(repositoryId)))!.status).toBe(
     "drafting_context",
   );
+  expect(
+    (await s.t.run((ctx) => ctx.db.get(repositoryId)))!.preparationError,
+  ).toBeUndefined();
   expect(
     await s.a.query(api.product.repositories, { organizationId: s.org }),
   ).toHaveLength(1);

@@ -4,6 +4,7 @@ import { writeAccess, fail } from "./lib";
 import { ensure, containsSecret } from "../packages/policy";
 import { reserve, settle } from "./product";
 import { internal } from "./_generated/api";
+import { snapshotScopeCurrent } from "../packages/repositories/scope";
 export const confirmDraft = mutation({
   args: {
     id: v.id("repositories"),
@@ -49,7 +50,9 @@ export const start = mutation({
       "admin",
     ]);
     ensure(
-      repo.enabled && !!repo.contextExcerpts?.length,
+      repo.enabled &&
+        !!repo.contextExcerpts?.length &&
+        snapshotScopeCurrent(repo),
       "CONTEXT_REQUIRED",
       "Refresh an enabled repository snapshot before drafting.",
     );

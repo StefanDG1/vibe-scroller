@@ -19,6 +19,11 @@ import {
 } from "../repositories/retrieval";
 import { validateRepositoryEvidence } from "../repositories/context";
 import type { ManifestEntry } from "../repositories/snapshotCache";
+import {
+  snapshotPaths,
+  withinSnapshot,
+  snapshotScopeCurrent,
+} from "../repositories/scope";
 import { verifyLocalPatch } from "../runner/patch";
 export async function repositoryArchive(
   fullName: string,
@@ -164,7 +169,9 @@ export async function snapshot(
   providerId: number,
   fullName: string,
   previous?: PreviousSnapshot | null,
+  selectedPaths: string[] = [],
 ) {
+  const paths = snapshotPaths(selectedPaths);
   ensure(
     /^[\w.-]+\/[\w.-]+$/.test(fullName),
     "INVALID_INPUT",
@@ -211,7 +218,7 @@ export async function snapshot(
     const blob = await github(`/repos/${fullName}/git/blobs/${sha}`, token);
     return Buffer.from(blob.content, "base64").toString("utf8");
   });
-  const files = tree.tree.filter(
+  const eligible = tree.tree.filter(
     (f: any) =>
       f.type === "blob" &&
       ["100644", "100755"].includes(f.mode) &&
@@ -219,6 +226,15 @@ export async function snapshot(
       Number.isSafeInteger(f.size) &&
       f.size >= 0 &&
       f.size <= RETRIEVAL_BLOB_LIMIT,
+  );
+  const files = eligible.filter((f: any) => withinSnapshot(f.path, paths));
+  ensure(
+    !paths.length ||
+      paths.every((path) =>
+        files.some((f: any) => withinSnapshot(f.path, [path])),
+      ),
+    "CONTEXT_REQUIRED",
+    "Each selected path must contain an eligible file at the current commit.",
   );
   const manifest = files.map((f: any) => f.path);
   const manifestEntries = files.map((f: any) => ({
@@ -307,11 +323,15 @@ export async function snapshot(
             sha,
             profileVersion: previous?.profileVersion ?? 1,
             extractionVersion: EXTRACTION_VERSION,
+            selectedPaths: paths,
             manifestEntries,
           }),
         )
         .digest("hex"),
       eligibleFileCount: manifestEntries.length,
+      selectedPaths: paths,
+      repositoryEligibleFileCount: eligible.length,
+      omittedEligibleFileCount: eligible.length - files.length,
       inspectedPaths: contextFiles,
       languageFileCounts: manifestEntries.reduce(
         (counts: Record<string, number>, entry: { path: string }) => {
@@ -342,11 +362,18 @@ export async function retrieveContext(
     fullName: string;
     sha: string;
     manifestEntries?: ManifestEntry[];
+    snapshotPaths?: string[];
+    snapshotSummary?: { selectedPaths?: string[] };
   },
   focus: string,
   evidence: { path: string; startLine: number; endLine: number }[] = [],
   purpose: "matching" | "planning" = "matching",
 ) {
+  ensure(
+    snapshotScopeCurrent(repo),
+    "CONTEXT_REQUIRED",
+    "Prepare the currently selected snapshot paths before retrieving repository evidence.",
+  );
   ensure(
     /^[\w.-]+\/[\w.-]+$/.test(repo.fullName) && /^[a-f0-9]{40}$/.test(repo.sha),
     "INVALID_INPUT",

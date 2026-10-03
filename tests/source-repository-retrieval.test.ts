@@ -14,6 +14,122 @@ const file = {
   mode: "100644",
   size: 5000,
 };
+it("prepares explicit scope in an oversized tree without reading omitted blobs or relaxing bounds", async () => {
+  const { privateKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
+  vi.stubEnv("GITHUB_APP_ID", "123");
+  vi.stubEnv(
+    "GITHUB_APP_PRIVATE_KEY",
+    privateKey.export({ type: "pkcs8", format: "pem" }).toString(),
+  );
+  const files = [
+    {
+      path: "src/main.ts",
+      sha: "a".repeat(40),
+      type: "blob",
+      mode: "100644",
+      size: 30,
+    },
+    {
+      path: "src/.env",
+      sha: "b".repeat(40),
+      type: "blob",
+      mode: "100644",
+      size: 30,
+    },
+    ...Array.from({ length: 5100 }, (_, n) => ({
+      path: `curriculum/lesson-${n}.json`,
+      sha: "c".repeat(40),
+      type: "blob",
+      mode: "100644",
+      size: 30,
+    })),
+  ];
+  const reads: string[] = [];
+  const calls: string[] = [];
+  vi.stubGlobal("fetch", async (url: string) => {
+    const path = new URL(url).pathname;
+    calls.push(path);
+    if (path.includes("/git/blobs/")) reads.push(path);
+    return Response.json(
+      path.endsWith("/access_tokens")
+        ? { token: "synthetic" }
+        : path === "/installation/repositories"
+          ? { repositories: [{ id: 42, full_name: "owned/synthetic" }] }
+          : path.includes("/git/ref/")
+            ? { object: { sha: "d".repeat(40) } }
+            : path.includes("/git/trees/")
+              ? { truncated: false, tree: files }
+              : path.includes("/git/blobs/")
+                ? {
+                    content: Buffer.from(
+                      "export const synthetic = true;",
+                    ).toString("base64"),
+                  }
+                : { id: 42, default_branch: "main" },
+    );
+  });
+  try {
+    await expect(
+      snapshot(1, 42, "owned/synthetic", null, [".env"]),
+    ).rejects.toThrow("INVALID_INPUT");
+    expect(calls).toHaveLength(0);
+    await expect(snapshot(1, 42, "owned/synthetic")).rejects.toThrow(
+      "REPO_TOO_LARGE",
+    );
+    expect(reads).toHaveLength(0);
+    await expect(
+      snapshot(1, 42, "owned/synthetic", null, ["src2"]),
+    ).rejects.toThrow("CONTEXT_REQUIRED");
+    const selected = await snapshot(1, 42, "owned/synthetic", null, ["src/"]);
+    expect(selected.manifest).toEqual(["src/main.ts"]);
+    expect(reads).toEqual([
+      `/repos/owned/synthetic/git/blobs/${"a".repeat(40)}`,
+    ]);
+    expect(selected.snapshotSummary).toMatchObject({
+      selectedPaths: ["src"],
+      eligibleFileCount: 1,
+      repositoryEligibleFileCount: 5101,
+      omittedEligibleFileCount: 5100,
+    });
+    expect(selected.snapshotSummary.inspectedPaths).toEqual(["src/main.ts"]);
+    const readCount = calls.length;
+    await expect(
+      retrieveContext(
+        {
+          installationId: 1,
+          providerId: 42,
+          fullName: "owned/synthetic",
+          ...selected,
+          snapshotPaths: ["src", "docs"],
+        },
+        "synthetic",
+      ),
+    ).rejects.toThrow("CONTEXT_REQUIRED");
+    expect(calls).toHaveLength(readCount);
+    await expect(
+      snapshot(1, 42, "owned/synthetic", null, ["curriculum"]),
+    ).rejects.toThrow("REPO_TOO_LARGE");
+    // The byte bound must still reject a selection below the file-count bound.
+    files.splice(
+      0,
+      files.length,
+      ...Array.from({ length: 2000 }, (_, n) => ({
+        path: `src/${"x".repeat(230)}${n}.json`,
+        sha: "e".repeat(40),
+        type: "blob",
+        mode: "100644",
+        size: 30,
+      })),
+    );
+    await expect(
+      snapshot(1, 42, "owned/synthetic", null, ["src"]),
+    ).rejects.toThrow("REPO_TOO_LARGE");
+    expect(reads).toHaveLength(1);
+  } finally {
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+  }
+});
 it("retrieves substantive late-file evidence with true line bounds rather than the unrelated prefix", () => {
   const text = [
     ...Array.from({ length: 400 }, () => "// unrelated boilerplate"),

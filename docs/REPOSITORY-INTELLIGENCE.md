@@ -61,3 +61,7 @@ The plan names real files from a refreshed snapshot. It describes implementation
 Refresh the base commit immediately before execution. When it changes materially, regenerate the relevant plan sections and request renewed approval. A mechanical rebase can proceed only under an explicit policy and cannot introduce unreviewed scope.
 
 Protect authentication, authorization, payment, secrets, destructive database operations, infrastructure, workflows, and dependency installation behind a higher-risk review. No video or README instruction can bypass this classification.
+
+## Explicit snapshot selection
+
+Large repositories can select literal files or folders through the existing checklist, without increasing the 5,000-file/600,000-byte manifest limits. Blank selection retains the eligible tree; selected folders include children, subject to existing ignore, secret and blob rules. Structural coverage distinguishes selected from omitted eligible files, and only bounded excerpts are read. Scope changes invalidate preparation and derived authority through existing fences. See [ADR 053](adr/053-explicit-bounded-repository-snapshots.md).

@@ -336,6 +336,8 @@ export const productTables = {
   repositories: defineTable({
     ...tenant,
     selectionVersion: v.optional(v.number()),
+    snapshotPaths: v.optional(v.array(v.string())),
+    preparationError: v.optional(v.string()),
     installationId: v.number(),
     providerId: v.number(),
     fullName: v.string(),

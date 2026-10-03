@@ -9,6 +9,61 @@ import {
   preparedTree,
   inspectedIgnorePolicy,
 } from "../packages/repositories/prepare";
+import {
+  snapshotPaths,
+  withinSnapshot,
+  preparationFailure,
+  snapshotScopeCurrent,
+} from "../packages/repositories/scope";
+it("bounds literal snapshot scope and refuses secrets, traversal, globs and sibling-prefix inclusion", () => {
+  const paths = snapshotPaths(["src/", " README.md ", "src"]);
+  expect(paths).toEqual(["README.md", "src"]);
+  expect(withinSnapshot("src/main.ts", paths)).toBe(true);
+  expect(withinSnapshot("src2/main.ts", paths)).toBe(false);
+  expect(withinSnapshot("src/.env", paths)).toBe(false);
+  expect(withinSnapshot("docs/readme.md", [])).toBe(true);
+  expect(snapshotScopeCurrent({})).toBe(true);
+  expect(
+    snapshotScopeCurrent({
+      snapshotPaths: ["src"],
+      snapshotSummary: { selectedPaths: ["src/"] },
+    }),
+  ).toBe(true);
+  expect(
+    snapshotScopeCurrent({
+      snapshotPaths: ["src", "docs"],
+      snapshotSummary: { selectedPaths: ["src"] },
+    }),
+  ).toBe(false);
+  for (const path of [
+    "",
+    "/src",
+    "../src",
+    "src/../other",
+    "src\\other",
+    "C:/src",
+    ".env",
+    "src/secrets",
+    "src/*",
+    "src//",
+    "src\nother",
+  ])
+    expect(() => snapshotPaths([path])).toThrow("INVALID_INPUT");
+  expect(() =>
+    snapshotPaths(Array.from({ length: 21 }, (_, n) => `src${n}`)),
+  ).toThrow();
+  expect(() =>
+    snapshotPaths(
+      Array.from({ length: 20 }, (_, n) => `${n}${"a".repeat(210)}`),
+    ),
+  ).toThrow();
+  expect(
+    preparationFailure(new Error("REPO_TOO_LARGE: upstream private text")),
+  ).toBe("REPO_TOO_LARGE");
+  expect(
+    preparationFailure(new Error("credential-shaped arbitrary provider error")),
+  ).toBe("PREPARATION_FAILED");
+});
 it("applies project ignores without allowing negated rules to admit secrets or unsafe paths", () => {
   const ignored = repositoryIgnores(["private/**\n!.env\n!.ssh/id_rsa\n"]);
   expect(ignored("private/notes.md")).toBe(true);

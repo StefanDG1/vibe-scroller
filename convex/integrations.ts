@@ -22,6 +22,7 @@ import { failedInferenceSettlement } from "./lib/googleInference";
 import { z } from "zod";
 import { planInput } from "../packages/contracts";
 import { repositoryCheckContext } from "../packages/plans/repository-checks";
+import { preparationFailure } from "../packages/repositories/scope";
 export const draftProfile = action({
   args: { id: v.id("repositories"), maxCredits: v.number() },
   handler: async (ctx, a): Promise<void> => {
@@ -424,14 +425,18 @@ export const selectRepositories = action({
         installationId: v.number(),
         providerId: v.number(),
         fullName: v.string(),
+        snapshotPaths: v.optional(v.array(v.string())),
       }),
     ),
     draftContext: v.boolean(),
     maxCredits: v.number(),
   },
-  handler: async (ctx, a): Promise<{ repository: string; state: string }[]> => {
+  handler: async (
+    ctx,
+    a,
+  ): Promise<{ repository: string; state: string; error?: string }[]> => {
     const selected = await ctx.runMutation(api.repositorySelection.save, a);
-    const result: { repository: string; state: string }[] = [];
+    const result: { repository: string; state: string; error?: string }[] = [];
     const prepare = async (r: (typeof selected)[number]) => {
       const progress = {
         id: r.id,
@@ -452,6 +457,7 @@ export const selectRepositories = action({
           r.providerId,
           r.fullName,
           previous,
+          r.snapshotPaths,
         );
         const id = await ctx.runMutation(internal.jobs.saveRepository, {
           organizationId: a.organizationId,
@@ -477,12 +483,18 @@ export const selectRepositories = action({
           state: "connected",
         });
         return { repository: r.fullName, state: "ready" };
-      } catch {
+      } catch (error) {
+        const code = preparationFailure(error);
         await ctx.runMutation(internal.repositorySelection.preparationState, {
           ...progress,
           state: "needs_attention",
+          error: code,
         });
-        return { repository: r.fullName, state: "needs_attention" };
+        return {
+          repository: r.fullName,
+          state: "needs_attention",
+          error: code,
+        };
       }
     };
     // At most two onboarding preparations in flight; every repository retains its own reservation/fence.
@@ -500,6 +512,7 @@ export const connectRepository = action({
     installationId: v.number(),
     providerId: v.number(),
     fullName: v.string(),
+    snapshotPaths: v.optional(v.array(v.string())),
   },
   handler: async (ctx, a): Promise<string> => {
     await ctx.runQuery(api.jobs.authorizeOwner, {
@@ -514,8 +527,9 @@ export const connectRepository = action({
         installationId: r.installationId,
         providerId: r.providerId,
         fullName: r.fullName,
+        snapshotPaths: r.snapshotPaths,
       }));
-    const selected = await ctx.runMutation(api.repositorySelection.save, {
+    const result = await ctx.runAction(api.integrations.selectRepositories, {
       organizationId: a.organizationId,
       choices: [
         ...choices,
@@ -523,29 +537,26 @@ export const connectRepository = action({
           installationId: a.installationId,
           providerId: a.providerId,
           fullName: a.fullName,
+          snapshotPaths:
+            a.snapshotPaths ??
+            existing.find((r) => r.providerId === a.providerId)
+              ?.snapshotPaths ??
+            [],
         },
       ],
       draftContext: false,
       maxCredits: 0,
     });
-    const approval = selected.find((r) => r.providerId === a.providerId)!;
-    await authorizeRepository(ctx, a);
-    const previous = await ctx.runQuery(internal.jobs.previousSnapshot, {
-      organizationId: a.organizationId,
-      providerId: a.providerId,
-    });
-    const data = await snapshot(
-      a.installationId,
-      a.providerId,
-      a.fullName,
-      previous,
+    const prepared = result.find((r) => r.repository === a.fullName);
+    ensure(
+      prepared?.state === "ready",
+      prepared?.error ?? "PREPARATION_FAILED",
+      "Review this project's preparation status and selected paths.",
     );
-    return ctx.runMutation(internal.jobs.saveRepository, {
-      ...a,
-      ...data,
-      selectionVersion: approval.selectionVersion,
-      snapshotActor: approval.actor,
+    const repositories = await ctx.runQuery(api.product.repositories, {
+      organizationId: a.organizationId,
     });
+    return repositories.find((r) => r.providerId === a.providerId)!._id;
   },
 });
 export const match = action({
