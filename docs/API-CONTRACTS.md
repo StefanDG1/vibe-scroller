@@ -66,3 +66,5 @@ The authenticated product proxy exposes topic lists/details, organization policy
 ## Explicit repository snapshot paths
 
 `selectRepositories` accepts optional `snapshotPaths` on each authorized choice; the legacy `connectRepository` accepts the same optional field and reuses batch preparation. Paths are literal files/folders, at most twenty/300 characters each/4,000 total. Omission preserves existing saved scope; an explicit empty array selects the eligible tree. Invalid or unmatched paths fail closed. Results contain repository, state and an optional safe preparation error code. The repository projection exposes selected paths, safe preparation error and structural coverage at its recorded base. Exact version fences and existing funding/access checks remain. See [ADR 053](adr/053-explicit-bounded-repository-snapshots.md).
+
+The product proxy maps monthly operator-budget and oversized-snapshot refusals to fixed safe messages. It returns only the allowlisted code/message and no-store; provider diagnostics remain server-private. A budget refusal never raises the ceiling or authorizes a funding fallback.

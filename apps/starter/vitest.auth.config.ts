@@ -15,6 +15,7 @@ export default defineConfig({
     include: [
       "apps/starter/auth-redirect.test.ts",
       "apps/starter/billing-actions.test.ts",
+      "apps/starter/product-errors.test.ts",
     ],
     environment: "node",
   },

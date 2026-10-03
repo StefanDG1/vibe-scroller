@@ -45,6 +45,7 @@ export function preparationFailure(error: unknown) {
     "APPROVAL_STALE",
     "BUDGET_EXCEEDED",
     "INSUFFICIENT_CREDITS",
+    "OPERATOR_BUDGET_REACHED",
     "SETUP_REQUIRED",
     "POLICY_BLOCKED",
     "GITHUB_UNAVAILABLE",
