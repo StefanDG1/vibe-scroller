@@ -35,8 +35,6 @@
   "lockedBackgroundProbesReturned": true,
   "restoredDeletionAndInferenceReservationsUnchanged": true,
   "dispatchRetestAt": "2026-10-03T13:06:08.349Z",
-  "recoveryElapsedSeconds": 285.721,
-  "selectedBackupAgeAtStartSeconds": 16986.351,
   "priorProbeFailure": "CLI void success was incorrectly JSON-decoded. Lock/readiness independently verified before bounded no-op retest.",
   "cleanup": {
     "at": "2026-10-03T13:16:12.319Z",
@@ -45,5 +43,8 @@
     "remainingPreviewKeyOptionButtons": 0,
     "productionIdentity": "bold-lemur-667",
     "observedVia": "Native Convex dashboard confirmations and official production identity query"
-  }
+  },
+  "verificationAndRepairElapsedSeconds": 285.721,
+  "selectedBackupAgeAtVerificationStartSeconds": 16986.351,
+  "timingScope": "The start timestamp is the resumed verification/repair window after import; these durations do not measure total creation, import, object restoration or serving recovery."
 }
