@@ -132,6 +132,7 @@ export const productTables = {
     createdAt: v.number(),
     payloadDigest: v.optional(v.string()),
     brokerConsumedAt: v.optional(v.number()),
+    settledMicros: v.optional(v.number()),
   }).index("by_key", ["key"]),
   operatorBudgets: defineTable({
     key: v.string(),
@@ -223,6 +224,9 @@ export const productTables = {
     .index("by_expiry", ["expiresAt"]),
   sources: defineTable({
     ...tenant,
+    processingStartedAt: v.optional(v.number()),
+    processingReceipt: v.optional(v.any()),
+    speechProvenance: v.optional(v.any()),
     linkPreview: v.optional(
       v.object({
         state: v.union(

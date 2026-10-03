@@ -3497,6 +3497,56 @@ function SourceDetail({
       </section>
       <div className="panel">
         <h2>Processing and retention</h2>
+        {detail.processingReceipt && (
+          <details>
+            <summary>
+              Cloud · {detail.processingReceipt.chargedCredits} credits ·{" "}
+              {Math.round(
+                (detail.processingReceipt.completedAt -
+                  detail.processingReceipt.startedAt) /
+                  1000,
+              )}
+              s
+            </summary>
+            <p>
+              Model: {detail.processingReceipt.model}. Funded by your
+              VibeScroller allowance.
+            </p>
+            <p>
+              Inference estimate:{" "}
+              {new Intl.NumberFormat("en", {
+                style: "currency",
+                currency: "EUR",
+                minimumFractionDigits: 4,
+                maximumFractionDigits: 4,
+              }).format(detail.processingReceipt.inferenceMicros / 1000000)}
+              . This includes a conservative currency and tax provision; it is
+              not a provider invoice. Cloud preparation used{" "}
+              {detail.processingReceipt.computeCredits} processing credits.
+            </p>
+            <p>
+              {detail.processingReceipt.inputTokens.toLocaleString()} input
+              tokens · {detail.processingReceipt.outputTokens.toLocaleString()}{" "}
+              output tokens, including thinking.
+            </p>
+            {detail.processingReceipt.reusedMedia && (
+              <p>Previously prepared speech and frames were reused.</p>
+            )}
+          </details>
+        )}
+        {detail.speechProvenance && (
+          <details>
+            <summary>Transcription details</summary>
+            <p>
+              {detail.speechProvenance.model} ·{" "}
+              {detail.speechProvenance.language || "Language uncertain"} ·
+              approximate timestamps
+            </p>
+            {detail.speechProvenance.uncertainty && (
+              <p>{detail.speechProvenance.uncertainty}</p>
+            )}
+          </details>
+        )}
         {personalEnabled && (
           <PersonalSourceAnalysis
             source={detail}

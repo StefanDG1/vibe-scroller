@@ -125,6 +125,6 @@ export const settle = internalMutation({
       spent: budget.spent + a.micros,
       updatedAt: Date.now(),
     });
-    await ctx.db.patch(hold._id, { state: "settled" });
+    await ctx.db.patch(hold._id, { state: "settled", settledMicros: a.micros });
   },
 });

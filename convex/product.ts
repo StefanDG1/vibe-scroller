@@ -29,6 +29,10 @@ import type { MutationCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 import { queueDeletion } from "./assets";
 import { mediaStagePayload } from "../packages/media/stages";
+import {
+  processingReceipt,
+  speechProvenance,
+} from "../packages/media/provenance";
 import { personalAllowed } from "./lib/personalAccess";
 import {
   hostedMediaAllowed,
@@ -924,6 +928,8 @@ async function startSource(
     state: "queued",
     generation: s.generation + 1,
     managedAnalysisActor: s.kind !== "text" ? actor._id : undefined,
+    processingStartedAt: Date.now(),
+    processingReceipt: undefined,
     error: undefined,
   });
   await workflow.start(
@@ -1018,6 +1024,7 @@ export const commitAnalysis = internalMutation({
     credits: v.number(),
     retainReservation: v.optional(v.boolean()),
     reusedMediaGeneration: v.optional(v.number()),
+    receipt: v.optional(v.any()),
   },
   handler: async (ctx, a) => {
     const s = await ctx.db.get(a.id);
@@ -1041,6 +1048,17 @@ export const commitAnalysis = internalMutation({
     )
       return;
     let analysis: any;
+    const receipt = a.receipt ? processingReceipt.parse(a.receipt) : undefined;
+    ensure(
+      !receipt ||
+        (!!a.output &&
+          !a.retainReservation &&
+          receipt.generation === a.generation &&
+          receipt.startedAt === s.processingStartedAt &&
+          receipt.chargedCredits === a.credits),
+      "COST_RECONCILIATION_REQUIRED",
+      "Processing receipt is not bound to this settled result.",
+    );
     if (a.output) {
       ensure(
         !s.managedAnalysisActor || (await hostedSourceAllowed(ctx, s)),
@@ -1123,6 +1141,7 @@ export const commitAnalysis = internalMutation({
         .join(" "),
       coverage: analysis?.coverage ?? s.coverage,
       error: a.error,
+      processingReceipt: receipt,
       updatedAt: Date.now(),
     });
     if (analysis)
@@ -1322,6 +1341,9 @@ export const attachSource = mutation({
       personalAnalysis: undefined,
       personalMedia: undefined,
       acquisition: undefined,
+      processingReceipt: undefined,
+      processingStartedAt: undefined,
+      speechProvenance: undefined,
       mediaEvidence: undefined,
       originalMediaEvidence: undefined,
       mediaCoverage: undefined,
@@ -1409,6 +1431,9 @@ export async function redactSource(ctx: MutationCtx, id: Id<"sources">) {
     mediaEvidence: undefined,
     mediaCoverage: undefined,
     originalText: undefined,
+    processingReceipt: undefined,
+    processingStartedAt: undefined,
+    speechProvenance: undefined,
     originalMediaEvidence: undefined,
     correctionAuthor: undefined,
     personalAnalysis: undefined,
@@ -1880,6 +1905,7 @@ export const stageMedia = internalMutation({
     generation: v.number(),
     transcript: v.string(),
     coverage: v.string(),
+    speech: v.optional(v.any()),
     cache: v.optional(
       v.object({ pipelineVersion: v.string(), payload: v.any() }),
     ),
@@ -1946,6 +1972,7 @@ export const stageMedia = internalMutation({
     }
     await ctx.db.patch(source._id, {
       text: a.transcript,
+      speechProvenance: a.speech ? speechProvenance.parse(a.speech) : undefined,
       mediaCoverage: a.coverage,
       mediaEvidence: a.evidence,
       updatedAt: Date.now(),

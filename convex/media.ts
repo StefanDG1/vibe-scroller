@@ -16,13 +16,19 @@ import { createHash } from "node:crypto";
 import { mediaStagePayload } from "../packages/media/stages";
 import { sampledFrames } from "../packages/media/sampling";
 import { googleSpeech, googleFrames } from "./lib/googleMedia";
+import {
+  googleCostPolicy,
+  googleInferenceModel,
+} from "../packages/providers/google-inference";
+import { speechProvenance } from "../packages/media/provenance";
+import type { z } from "zod";
 const google = process.env.MANAGED_INFERENCE_ROUTE === "google_metered";
 const mediaDecoder = google ? decoder.replace("'48k'", "'32k'") : decoder;
 const pipelineVersion = createHash("sha256")
   .update(
     mediaDecoder +
       (google
-        ? ":media-v1.5:gemini-3.5-flash-lite:eu:changes16:structural3"
+        ? ":media-v1.6:gemini-3.5-flash-lite:eu:changes16:structural3:receipt1"
         : `:media-v1.3:whisper-large-v3-turbo:${process.env.VISION_MODEL ?? "@cf/meta/llama-3.2-11b-vision-instruct"}:changes4:structured2`),
   )
   .digest("hex");
@@ -41,6 +47,9 @@ export const analyze = internalAction({
       return;
     let credits = 0;
     let inferenceMicros = 0;
+    let inputTokens = 0,
+      outputTokens = 0;
+    let speechMetadata: z.infer<typeof speechProvenance> | undefined;
     const remainingMicros = () =>
       Math.max(0, (10 - credits) * 10000 - inferenceMicros);
     let inferenceStarted = false;
@@ -98,11 +107,15 @@ export const analyze = internalAction({
         observations.push(...payload.observations);
         evidence.push(...payload.evidence);
         warnings.push(...payload.warnings);
+        speechMetadata = payload.speech;
         if (cached.generation < args.generation)
           reusedMediaGeneration = cached.generation;
         else credits = payload.computeCredits;
-        if (cached.generation === args.generation)
+        if (cached.generation === args.generation) {
           inferenceMicros = payload.inferenceMicros ?? 0;
+          inputTokens = payload.inputTokens ?? 0;
+          outputTokens = payload.outputTokens ?? 0;
+        }
         stagesCommitted = true;
       } else {
         const rate = Number(process.env.SANDBOX_CREDITS_PER_SECOND);
@@ -154,6 +167,14 @@ export const analyze = internalAction({
             : undefined;
           if (speech) {
             inferenceMicros += speech.usage.costMicros;
+            inputTokens += speech.usage.inputTokens;
+            outputTokens += speech.usage.outputTokens;
+            speechMetadata = {
+              model: googleInferenceModel,
+              language: speech.output.language,
+              uncertainty: speech.output.uncertainty,
+              timing: "approximate",
+            };
             warnings.push(
               `Speech was transcribed by ${speech.model}; its timestamps are approximate. ${speech.output.uncertainty}`.slice(
                 0,
@@ -246,6 +267,8 @@ export const analyze = internalAction({
             inferenceStarted = true;
             const visual = await googleFrames(ctx, batch, remainingMicros());
             inferenceMicros += visual.usage.costMicros;
+            inputTokens += visual.usage.inputTokens;
+            outputTokens += visual.usage.outputTokens;
             for (const item of visual.output.observations)
               googleObservations.set(item.id, item.observation);
           }
@@ -348,6 +371,7 @@ export const analyze = internalAction({
       const staged = await ctx.runMutation(internal.product.stageMedia, {
         ...args,
         transcript: text,
+        speech: speechMetadata,
         coverage,
         evidence,
         cache:
@@ -361,7 +385,14 @@ export const analyze = internalAction({
                   evidence,
                   warnings,
                   computeCredits: credits,
-                  ...(google ? { inferenceMicros } : {}),
+                  ...(google
+                    ? {
+                        inferenceMicros,
+                        inputTokens,
+                        outputTokens,
+                        speech: speechMetadata,
+                      }
+                    : {}),
                 },
               },
       });
@@ -417,6 +448,28 @@ export const analyze = internalAction({
             ? Math.ceil((inferenceMicros + result.usage.costMicros) / 10000)
             : result.credits),
         reusedMediaGeneration,
+        ...(google
+          ? {
+              receipt: {
+                generation: args.generation,
+                route: "google_metered",
+                model: googleInferenceModel,
+                costPolicy: googleCostPolicy,
+                startedAt: source.processingStartedAt ?? source.updatedAt,
+                completedAt: Date.now(),
+                inputTokens: inputTokens + result.usage.inputTokens,
+                outputTokens: outputTokens + result.usage.outputTokens,
+                inferenceMicros: inferenceMicros + result.usage.costMicros,
+                computeCredits: credits,
+                chargedCredits:
+                  credits +
+                  Math.ceil(
+                    (inferenceMicros + result.usage.costMicros) / 10000,
+                  ),
+                reusedMedia: reusedMediaGeneration !== undefined,
+              },
+            }
+          : {}),
       });
       await ctx.runMutation(internal.assets.expireOriginal, {
         sourceId: source._id,

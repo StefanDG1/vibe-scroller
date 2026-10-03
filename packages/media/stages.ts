@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { speechProvenance } from "./provenance";
 const timing = {
   startMs: z.number().int().min(0).max(600000),
   endMs: z.number().int().min(0).max(600000),
@@ -35,4 +36,7 @@ export const mediaStagePayload = z.strictObject({
   warnings: z.array(z.string().max(2000)).max(20),
   computeCredits: z.number().int().min(0).max(10),
   inferenceMicros: z.number().int().min(0).max(100000).optional(),
+  inputTokens: z.number().int().min(0).max(1000000).optional(),
+  outputTokens: z.number().int().min(0).max(100000).optional(),
+  speech: speechProvenance.optional(),
 });

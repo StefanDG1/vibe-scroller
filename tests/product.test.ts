@@ -763,12 +763,46 @@ describe("VibeScroller product boundaries", () => {
       coverage: "audio_only",
       insights: fixture.insights.map((i) => ({ ...i, evidence })),
     };
+    const receipt = {
+      generation: 2,
+      route: "google_metered",
+      model: "gemini-3.5-flash-lite",
+      costPolicy: "google-eu-standard-2026-10-03-v1",
+      startedAt: 1000,
+      completedAt: 2000,
+      inputTokens: 100,
+      outputTokens: 100,
+      inferenceMicros: 500,
+      computeCredits: 0,
+      chargedCredits: 1,
+      reusedMedia: true,
+    };
+    await t.run((ctx) => ctx.db.patch(sourceId, { processingStartedAt: 1000 }));
+    await expect(
+      t.mutation(internal.product.commitAnalysis, {
+        id: sourceId,
+        generation: 2,
+        output,
+        credits: 1,
+        receipt: { ...receipt, generation: 3 },
+      }),
+    ).rejects.toThrow("COST_RECONCILIATION_REQUIRED");
+    await expect(
+      t.mutation(internal.product.commitAnalysis, {
+        id: sourceId,
+        generation: 2,
+        output,
+        credits: 1,
+        receipt: { ...receipt, startedAt: 999 },
+      }),
+    ).rejects.toThrow("COST_RECONCILIATION_REQUIRED");
     await t.mutation(internal.product.commitAnalysis, {
       id: sourceId,
       generation: 2,
       output,
       credits: 1,
       reusedMediaGeneration: 1,
+      receipt,
     });
     await t.mutation(internal.product.commitAnalysis, {
       id: sourceId,
@@ -783,6 +817,12 @@ describe("VibeScroller product boundaries", () => {
       expect(wallet?.reserved).toBe(0);
     });
     await a.mutation(api.product.deleteSource, { id: sourceId });
+    await t.run(async (ctx) => {
+      const deleted = await ctx.db.get(sourceId);
+      expect(deleted?.processingReceipt).toBeUndefined();
+      expect(deleted?.processingStartedAt).toBeUndefined();
+      expect(deleted?.speechProvenance).toBeUndefined();
+    });
     expect(
       await t.query(internal.product.cachedMediaStage, {
         id: sourceId,
