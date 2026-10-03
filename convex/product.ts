@@ -1498,6 +1498,16 @@ export const repositories = query({
       profile: r.profile,
       profileVersion: r.profileVersion,
       selectionVersion: r.selectionVersion ?? 0,
+      snapshotPaths: r.snapshotPaths ?? [],
+      preparationError: r.preparationError,
+      snapshotCoverage: r.snapshotSummary
+        ? {
+            selectedPaths: r.snapshotSummary.selectedPaths ?? [],
+            includedFiles: r.snapshotSummary.eligibleFileCount,
+            omittedFiles: r.snapshotSummary.omittedEligibleFileCount ?? 0,
+            baseSha: r.snapshotSummary.baseSha,
+          }
+        : undefined,
       profileDraft: r.profileDraft,
       profileDraftSha: r.profileDraftSha,
       profileDraftVersion: r.profileDraftVersion,

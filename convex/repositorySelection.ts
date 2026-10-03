@@ -5,10 +5,12 @@ import { writeAccess, limit } from "./lib";
 import { ensure } from "../packages/policy";
 import { wallet } from "./product";
 import { actorCurrent } from "./knowledge";
+import { snapshotPaths } from "../packages/repositories/scope";
 const choice = v.object({
   installationId: v.number(),
   providerId: v.number(),
   fullName: v.string(),
+  snapshotPaths: v.optional(v.array(v.string())),
 });
 export const save = mutation({
   args: {
@@ -62,6 +64,15 @@ export const save = mutation({
       .query("repositories")
       .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
       .collect();
+    // Validate every requested scope before changing selection or starting provider work.
+    const choices = a.choices.map((c) => ({
+      ...c,
+      snapshotPaths: snapshotPaths(
+        c.snapshotPaths ??
+          old.find((r) => r.providerId === c.providerId)?.snapshotPaths ??
+          [],
+      ),
+    }));
     const draftCount = a.draftContext
       ? a.choices.filter(
           (c) => !old.find((r) => r.providerId === c.providerId)?.confirmed,
@@ -86,17 +97,28 @@ export const save = mutation({
           { repositoryId: r._id, cursor: null },
         );
       }
-    for (const c of a.choices) {
+    for (const c of choices) {
       const previous = old.find((r) => r.providerId === c.providerId);
       const selectionVersion = (previous?.selectionVersion ?? 0) + 1;
       let id;
       if (previous) {
         id = previous._id;
+        const scopeChanged =
+          JSON.stringify(previous.snapshotPaths ?? []) !==
+          JSON.stringify(c.snapshotPaths);
         await ctx.db.patch(id, {
           ...c,
           enabled: true,
           selectionVersion,
           status: "preparing",
+          preparationError: undefined,
+          ...(scopeChanged
+            ? {
+                profileDraft: undefined,
+                profileDraftSha: undefined,
+                profileDraftVersion: undefined,
+              }
+            : {}),
           updatedAt: Date.now(),
         });
       } else
@@ -139,6 +161,7 @@ export const preparationState = internalMutation({
       v.literal("connected"),
       v.literal("needs_attention"),
     ),
+    error: v.optional(v.string()),
   },
   handler: async (ctx, a) => {
     if (process.env.RESTORE_LOCK === "true") return;
@@ -152,7 +175,11 @@ export const preparationState = internalMutation({
       ]))
     )
       return;
-    await ctx.db.patch(repo._id, { status: a.state, updatedAt: Date.now() });
+    await ctx.db.patch(repo._id, {
+      status: a.state,
+      preparationError: a.state === "needs_attention" ? a.error : undefined,
+      updatedAt: Date.now(),
+    });
   },
 });
 export const invalidate = internalMutation({

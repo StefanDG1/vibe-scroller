@@ -67,3 +67,7 @@ A job that created a PR but failed before recording completion must reconcile by
 ## Knowledge and issue state
 
 Knowledge jobs move queued to running, then ready, failed, stale or unknown. Unknown usage retains reservations; queued dispatch can recover. Topics show pending, updating, ready or budget_paused. Input/manual-decision changes invalidate results. Issue drafts move draft to approved, then published, denied or unknown. An immutable attempt separates approval from the provider write. External open/closed/reopened, edited, unavailable and access_lost observations do not establish benefit or authorize external edits. Recovery quarantines authority and jobs. See [the execution ledger](V1-KNOWLEDGE-EXECUTION.md).
+
+## Snapshot preparation failures
+
+Repository selection persists preparing, drafting_context, connected or needs_attention under the current actor/selection-version fence. A safe preparationError distinguishes oversized snapshots, missing eligible paths and unavailable access; success clears it. Oversized snapshots require an explicit smaller scope, not a blind retry. Legacy connection uses the same bounded per-project flow. See [ADR 053](adr/053-explicit-bounded-repository-snapshots.md).

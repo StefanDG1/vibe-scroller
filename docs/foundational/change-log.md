@@ -38,3 +38,7 @@ Reviewed all four briefs against the confirmed owner scope and inspected current
 The owner requested implementation of the V1 knowledge plan and ADR 052, superseding planning-only scope. All four foundational documents now distinguish the implemented engineering paths from pending live deployment, issue permission/publication, model quality and independent comprehension. Copy uses Library, Topics, Projects, Ideas and Issues; it preserves evidence, honest no-fit, workspace separation, bounded funding and separate approval. No new demand, customer quote, benefit, price, provider grant or V2 claim was added. [Execution ledger](../V1-KNOWLEDGE-EXECUTION.md).
 
 October 3, F008 live engineering: updated all four briefs together with source-preserving production migration, two bounded syntheses, one six-source no-fit evaluation and preserved confirmed context. Real Issues publication and independent human acceptance remain gated. No customer outcome, demand, measured savings, unlimited allowance or expanded provider permission was inferred.
+
+## October 4: F009 bounded repository preparation
+
+Reviewed the four briefs against the real oversized-snapshot failure and owner correction. Ordinary setup/error copy now describes explicit path selection, preserved limits and omitted coverage. The shared update appended to each brief retains audience, funding and evidence requirements. Local engineering is separate from deployment, two real saved-video issue drafts and independent usefulness; no benefit or publication is inferred.

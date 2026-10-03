@@ -100,6 +100,11 @@ export const evaluate = internalAction({
           baseSha: c.evaluation.baseSha,
           excerpts: inspected.excerpts,
           inspectedTree: inspected.tree,
+          snapshotSelection: {
+            paths: c.repo.snapshotPaths ?? [],
+            omittedEligibleFiles:
+              c.repo.snapshotSummary?.omittedEligibleFileCount ?? 0,
+          },
           coverage:
             "Only supplied bounded excerpts were inspected. Other files are omitted.",
         },

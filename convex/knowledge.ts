@@ -12,6 +12,7 @@ import { access, writeAccess, limit } from "./lib";
 import { ensure, containsSecret } from "../packages/policy";
 import { reserve, settle, digest } from "./product";
 import { categoryKey, categoryName } from "../packages/categories";
+import { snapshotScopeCurrent } from "../packages/repositories/scope";
 import {
   assertReferences,
   limits,
@@ -947,7 +948,8 @@ export const startEvaluation = mutation({
         repo &&
         repo.organizationId === topic.organizationId &&
         repo.enabled &&
-        repo.confirmed,
+        repo.confirmed &&
+        snapshotScopeCurrent(repo),
       "CONTEXT_REQUIRED",
       "Choose a selected repository with confirmed context.",
     );
@@ -1014,6 +1016,7 @@ export const evaluationCurrent = async (
   return (
     !!r?.enabled &&
     r.confirmed &&
+    snapshotScopeCurrent(r) &&
     r.organizationId === e.organizationId &&
     r.sha === e.baseSha &&
     r.profileVersion === e.profileVersion &&

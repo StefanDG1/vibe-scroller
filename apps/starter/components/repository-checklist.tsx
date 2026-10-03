@@ -44,6 +44,14 @@ export function RepositoryChecklist({
     [draft, setDraft] = useState(true),
     [startedAt, setStartedAt] = useState(0),
     [busy, setBusy] = useState(false),
+    [paths, setPaths] = useState<Record<number, string>>(() =>
+      Object.fromEntries(
+        repositories.map((r) => [
+          r.providerId,
+          (r.snapshotPaths ?? []).join("\n"),
+        ]),
+      ),
+    ),
     [progress, setProgress] = useState<any[]>([]);
   const filtered = choices.filter(
       (r) =>
@@ -150,22 +158,45 @@ export function RepositoryChecklist({
         Clear visible choices
       </button>
       {visible.map((r) => (
-        <label className="check" key={`${r.installationId}:${r.id}`}>
-          <input
-            type="checkbox"
-            checked={checked.has(r.id)}
-            disabled={readOnly || busy}
-            onChange={(e) =>
-              setChecked((old) => {
-                const next = new Set(old);
-                if (e.target.checked) next.add(r.id);
-                else next.delete(r.id);
-                return next;
-              })
-            }
-          />
-          {r.fullName}
-        </label>
+        <div key={`${r.installationId}:${r.id}`}>
+          <label className="check">
+            <input
+              type="checkbox"
+              checked={checked.has(r.id)}
+              disabled={readOnly || busy}
+              onChange={(e) =>
+                setChecked((old) => {
+                  const next = new Set(old);
+                  if (e.target.checked) next.add(r.id);
+                  else next.delete(r.id);
+                  return next;
+                })
+              }
+            />
+            {r.fullName}
+          </label>
+          {checked.has(r.id) && (
+            <label>
+              Files or folders to inspect for {r.fullName} (optional)
+              <textarea
+                rows={3}
+                maxLength={4000}
+                value={paths[r.id] ?? ""}
+                disabled={readOnly || busy}
+                placeholder={"README.md\nsrc"}
+                onChange={(e) =>
+                  setPaths((old) => ({ ...old, [r.id]: e.target.value }))
+                }
+              />
+              <span>
+                Leave blank for the eligible repository tree. Enter up to twenty
+                literal paths, one per line. A folder includes its children.
+                Other files will be omitted from project evaluations. Existing
+                file, privacy and processing limits still apply.
+              </span>
+            </label>
+          )}
+        </div>
       ))}
       {!choices.length && (
         <p>
@@ -226,6 +257,10 @@ export function RepositoryChecklist({
                 installationId: c.installationId,
                 providerId: c.id,
                 fullName: c.fullName,
+                snapshotPaths: (paths[c.id] ?? "")
+                  .split(/\r?\n/)
+                  .map((p) => p.trim())
+                  .filter(Boolean),
               })),
               draftContext: draft,
               maxCredits: quote,
@@ -254,14 +289,37 @@ export function RepositoryChecklist({
             <p key={r.repository}>
               {r.repository}: {state.replaceAll("_", " ")}
               {state === "needs_attention"
-                ? ". Retry snapshot/context preparation using this selection; completed drafts are reused."
+                ? preparationMessage(r.error ?? current?.preparationError)
                 : ""}
             </p>
           );
         })}
       </output>
+      {repositories
+        .filter(
+          (r) =>
+            r.enabled &&
+            r.status === "needs_attention" &&
+            !progress.some((p) => p.repository === r.fullName),
+        )
+        .map((r) => (
+          <output key={r._id}>
+            {r.fullName}: {preparationMessage(r.preparationError)}
+          </output>
+        ))}
     </section>
   );
+}
+function preparationMessage(code?: string) {
+  if (code === "REPO_TOO_LARGE")
+    return ". The snapshot exceeds the existing file or size limit. Choose fewer files or folders above, then save again. No context analysis started for this snapshot.";
+  if (code === "CONTEXT_REQUIRED")
+    return ". A selected path has no eligible files. Check the literal path and repository ignore rules, then save again.";
+  if (
+    ["FORBIDDEN", "REAUTH_REQUIRED", "GITHUB_UNAVAILABLE"].includes(code ?? "")
+  )
+    return ". Repository access is unavailable. Review the GitHub connection and installation access, then refresh authorized choices.";
+  return ". Preparation could not finish. Check current access and available processing credits before retrying; completed context drafts are reused.";
 }
 export function BusinessContext({
   repo: r,
@@ -304,6 +362,20 @@ export function BusinessContext({
         Inspected commit {r.sha || "Snapshot pending"}. Context version{" "}
         {r.profileVersion}.
       </p>
+      {!!r.snapshotPaths?.length && (
+        <p>
+          Selected snapshot paths: {r.snapshotPaths.join(", ")}. Evaluations
+          cover this selection, not the whole repository.
+        </p>
+      )}
+      {r.snapshotCoverage && (
+        <p>
+          Snapshot at {r.snapshotCoverage.baseSha}:{" "}
+          {r.snapshotCoverage.includedFiles} eligible files included;{" "}
+          {r.snapshotCoverage.omittedFiles} eligible files omitted. Only bounded
+          excerpts are read.
+        </p>
+      )}
       <button
         disabled={
           readOnly || busy || !r.enabled || !!r.profileDraftKey || !r.sha
