@@ -130,6 +130,8 @@ export const productTables = {
     max: v.number(),
     state: v.string(),
     createdAt: v.number(),
+    payloadDigest: v.optional(v.string()),
+    brokerConsumedAt: v.optional(v.number()),
   }).index("by_key", ["key"]),
   operatorBudgets: defineTable({
     key: v.string(),

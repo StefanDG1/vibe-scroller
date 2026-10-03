@@ -15,10 +15,15 @@ import schema from "../contracts/insight.schema.json";
 import { createHash } from "node:crypto";
 import { mediaStagePayload } from "../packages/media/stages";
 import { sampledFrames } from "../packages/media/sampling";
+import { googleSpeech, googleFrames } from "./lib/googleMedia";
+const google = process.env.MANAGED_INFERENCE_ROUTE === "google_metered";
+const mediaDecoder = google ? decoder.replace("'48k'", "'32k'") : decoder;
 const pipelineVersion = createHash("sha256")
   .update(
-    decoder +
-      `:media-v1.3:whisper-large-v3-turbo:${process.env.VISION_MODEL ?? "@cf/meta/llama-3.2-11b-vision-instruct"}:changes4:structured2`,
+    mediaDecoder +
+      (google
+        ? ":media-v1.4:gemini-3.5-flash-lite:eu:changes16:structured2"
+        : `:media-v1.3:whisper-large-v3-turbo:${process.env.VISION_MODEL ?? "@cf/meta/llama-3.2-11b-vision-instruct"}:changes4:structured2`),
   )
   .digest("hex");
 
@@ -35,6 +40,9 @@ export const analyze = internalAction({
     )
       return;
     let credits = 0;
+    let inferenceMicros = 0;
+    const remainingMicros = () =>
+      Math.max(0, (10 - credits) * 10000 - inferenceMicros);
     let inferenceStarted = false;
     const deadline = Date.now() + 540000;
     const timeRemaining = () =>
@@ -93,6 +101,8 @@ export const analyze = internalAction({
         if (cached.generation < args.generation)
           reusedMediaGeneration = cached.generation;
         else credits = payload.computeCredits;
+        if (cached.generation === args.generation)
+          inferenceMicros = payload.inferenceMicros ?? 0;
         stagesCommitted = true;
       } else {
         const rate = Number(process.env.SANDBOX_CREDITS_PER_SECOND);
@@ -103,7 +113,7 @@ export const analyze = internalAction({
         );
         const media = await prepareMedia(
           source.kind === "url" ? { url: source.url! } : source.objectKey!,
-          decoder,
+          mediaDecoder,
         );
         credits = Math.ceil(media.computeSeconds * rate);
         ensure(
@@ -134,20 +144,36 @@ export const analyze = internalAction({
           await authorize();
           timeRemaining();
           inferenceStarted = true;
-          const asr = await inferMedia(
-            ctx,
-            "@cf/openai/whisper-large-v3-turbo",
-            {
-              audio: Buffer.from(media.audio).toString("base64"),
-              task: "transcribe",
-              vad_filter: true,
-              condition_on_previous_text: false,
-            },
-            Math.max(
-              20,
-              Math.ceil((media.manifest.durationSeconds / 60) * 100),
-            ),
-          );
+          const speech = google
+            ? await googleSpeech(
+                ctx,
+                media.audio,
+                media.manifest.durationSeconds,
+                remainingMicros(),
+              )
+            : undefined;
+          if (speech) {
+            inferenceMicros += speech.usage.costMicros;
+            warnings.push(
+              `Speech was transcribed by ${speech.model}; its timestamps are approximate. ${speech.output.uncertainty}`,
+            );
+          }
+          const asr = speech
+            ? { result: speech.output, usageVerified: true }
+            : await inferMedia(
+                ctx,
+                "@cf/openai/whisper-large-v3-turbo",
+                {
+                  audio: Buffer.from(media.audio).toString("base64"),
+                  task: "transcribe",
+                  vad_filter: true,
+                  condition_on_previous_text: false,
+                },
+                Math.max(
+                  20,
+                  Math.ceil((media.manifest.durationSeconds / 60) * 100),
+                ),
+              );
           const segments = asr.result.segments ?? [];
           ensure(
             Array.isArray(segments) && segments.length <= 200,
@@ -193,7 +219,34 @@ export const analyze = internalAction({
             );
         }
         // A bounded first pass. Preserve periodic samples and visible-change samples.
-        const frames = sampledFrames(media.frames);
+        const frames = sampledFrames(media.frames, google ? 16 : 4);
+        const googleObservations = new Map<string, string>();
+        if (google) {
+          for (let i = 0; i < frames.length;) {
+            await authorize();
+            timeRemaining();
+            const batch: typeof frames = [];
+            let bytes = 0;
+            while (
+              i < frames.length &&
+              batch.length < 4 &&
+              bytes + frames[i].data.length < 3_500_000
+            ) {
+              bytes += frames[i].data.length;
+              batch.push(frames[i++]);
+            }
+            ensure(
+              batch.length > 0,
+              "INVALID_EVIDENCE",
+              "The frame batch exceeds its payload bound.",
+            );
+            inferenceStarted = true;
+            const visual = await googleFrames(ctx, batch, remainingMicros());
+            inferenceMicros += visual.usage.costMicros;
+            for (const item of visual.output.observations)
+              googleObservations.set(item.id, item.observation);
+          }
+        }
         for (const frame of frames) {
           try {
             await authorize();
@@ -204,15 +257,20 @@ export const analyze = internalAction({
               "Selected frame exceeds its byte bound.",
             );
             timeRemaining();
-            const request = visionRequest(pixels);
+            const request = google ? undefined : visionRequest(pixels);
             inferenceStarted = true;
-            const visual = await inferMedia(
-              ctx,
-              request.model,
-              request.input,
-              request.maxNeurons,
-            );
-            const observation = visionText(request.model, visual.result);
+            const visual = request
+              ? await inferMedia(
+                  ctx,
+                  request.model,
+                  request.input,
+                  request.maxNeurons,
+                )
+              : undefined;
+            const observation =
+              request && visual
+                ? visionText(request.model, visual.result)
+                : googleObservations.get(frame.id);
             ensure(
               typeof observation === "string" &&
                 observation.length <= 4000 &&
@@ -257,7 +315,7 @@ export const analyze = internalAction({
               observation,
               timestampMs: frame.timestampMs,
             });
-            if (!visual.usageVerified)
+            if (visual && !visual.usageVerified)
               warnings.push(
                 "The visual endpoint omitted measured neuron usage. Its full free-unit reservation remains held for reconciliation.",
               );
@@ -300,6 +358,7 @@ export const analyze = internalAction({
                   evidence,
                   warnings,
                   computeCredits: credits,
+                  ...(google ? { inferenceMicros } : {}),
                 },
               },
       });
@@ -340,6 +399,8 @@ export const analyze = internalAction({
             { id: source._id },
           ),
         },
+        3000,
+        google ? remainingMicros() : 100000,
       );
       result.output.warnings = [
         ...new Set([...result.output.warnings, ...warnings]),
@@ -347,7 +408,11 @@ export const analyze = internalAction({
       await ctx.runMutation(internal.product.commitAnalysis, {
         ...args,
         output: result.output,
-        credits: credits + result.credits,
+        credits:
+          credits +
+          (google
+            ? Math.ceil((inferenceMicros + result.usage.costMicros) / 10000)
+            : result.credits),
         reusedMediaGeneration,
       });
       await ctx.runMutation(internal.assets.expireOriginal, {

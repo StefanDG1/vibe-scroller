@@ -13,6 +13,7 @@ import { selectionCurrent } from "../packages/repositories/selection";
 import { access, fail, limit, audit, writeAccess } from "./lib";
 import { productLimits } from "./limitsV1";
 import { internal } from "./_generated/api";
+import { googleConfigured } from "../packages/providers/google-inference";
 import {
   safeSourceUrl,
   ensure,
@@ -904,7 +905,11 @@ async function startSource(
   }
   if (s.kind !== "text")
     ensure(
-      process.env.MANAGED_INFERENCE_ROUTE === "cloudflare_free" &&
+      ["cloudflare_free", "google_metered"].includes(
+        process.env.MANAGED_INFERENCE_ROUTE ?? "",
+      ) &&
+        (process.env.MANAGED_INFERENCE_ROUTE !== "google_metered" ||
+          googleConfigured()) &&
         hostedMediaAllowed(actor.subject),
       "SETUP_REQUIRED",
       "Select the configured cloud media route explicitly; no personal-plan fallback is used.",
@@ -1092,12 +1097,15 @@ export const commitAnalysis = internalMutation({
         "Media stage changed before settlement.",
       );
       const payload = mediaStagePayload.parse(stage.payload);
-      await settle(
-        ctx,
-        s.organizationId,
-        `source:${s._id}:${stage.generation}`,
-        payload.computeCredits,
-      );
+      // Cached metered extraction does not establish the old final request's
+      // usage. Preserve that uncertain old hold until operator reconciliation.
+      if (payload.inferenceMicros === undefined)
+        await settle(
+          ctx,
+          s.organizationId,
+          `source:${s._id}:${stage.generation}`,
+          payload.computeCredits,
+        );
     }
     if (!a.retainReservation)
       await settle(

@@ -18,6 +18,7 @@ import insightSchema from "../contracts/insight.schema.json";
 import proposalSchema from "../contracts/proposal.schema.json";
 import { authorizeRepository } from "./lib/githubAuthorization";
 import { infer } from "./lib/inference";
+import { failedInferenceSettlement } from "./lib/googleInference";
 import { z } from "zod";
 import { planInput } from "../packages/contracts";
 export const draftProfile = action({
@@ -40,6 +41,8 @@ export const draftProfile = action({
       sha: context.repo.sha,
       version: context.repo.profileVersion,
     };
+    let inferenceStarted = false;
+    let inferenceCredits: number | undefined;
     try {
       await authorizeRepository(ctx, context.repo);
       const fields = [
@@ -67,6 +70,7 @@ export const draftProfile = action({
           ]),
         ),
       };
+      inferenceStarted = true;
       const result = await infer(
         ctx,
         schema,
@@ -79,6 +83,7 @@ export const draftProfile = action({
         },
         1500,
       );
+      inferenceCredits = result.credits;
       const draft = profileSchema.parse(result.output);
       const profile = fields
         .map((field) => `${field}: ${draft[field]}`)
@@ -105,7 +110,7 @@ export const draftProfile = action({
       console.error(JSON.stringify({ stage: "profile_draft", category }));
       await ctx.runMutation(internal.profiles.finish, {
         ...finish,
-        credits: 0,
+        ...failedInferenceSettlement(error, inferenceStarted, inferenceCredits),
       });
       throw new Error(
         `${category}: Profile drafting failed. No profile was confirmed. Review provider status before retrying.`,
@@ -140,6 +145,8 @@ export const suggestRepositories = action({
       insightIds: context.insights.map((i: any) => i.id),
       bases: context.bases,
     };
+    let inferenceStarted = false;
+    let inferenceCredits: number | undefined;
     try {
       if (!context.repositories.length) {
         await ctx.runMutation(internal.retrieval.finish, {
@@ -175,6 +182,7 @@ export const suggestRepositories = action({
           noFitReason: { type: "string", maxLength: 500 },
         },
       };
+      inferenceStarted = true;
       const result = await infer(
         ctx,
         schema,
@@ -191,6 +199,7 @@ export const suggestRepositories = action({
         },
         1000,
       );
+      inferenceCredits = result.credits;
       const output = z
         .strictObject({
           candidates: z
@@ -213,10 +222,10 @@ export const suggestRepositories = action({
         noFitReason: output.noFitReason,
         credits: result.credits,
       });
-    } catch {
+    } catch (error) {
       await ctx.runMutation(internal.retrieval.finish, {
         ...finish,
-        credits: 0,
+        ...failedInferenceSettlement(error, inferenceStarted, inferenceCredits),
       });
       throw new Error(
         "Repository selection failed. No match was fabricated and no technical evaluation was automatically charged.",
@@ -245,6 +254,8 @@ export const draftPlan = action({
       baseSha: context.repo.sha,
     };
     let stage = "authorization";
+    let inferenceStarted = false;
+    let inferenceCredits: number | undefined;
     try {
       await authorizeRepository(ctx, context.repo);
       stage = "repository_context";
@@ -257,6 +268,7 @@ export const draftPlan = action({
         context.proposal.detail.repositoryEvidence ?? [],
       );
       stage = "inference";
+      inferenceStarted = true;
       const result = await infer(
         ctx,
         z.toJSONSchema(planInput),
@@ -271,6 +283,7 @@ export const draftPlan = action({
         },
         3000,
       );
+      inferenceCredits = result.credits;
       stage = "plan_validation";
       await ctx.runMutation(internal.planning.finish, {
         ...finish,
@@ -297,7 +310,7 @@ export const draftPlan = action({
       );
       await ctx.runMutation(internal.planning.finish, {
         ...finish,
-        credits: 0,
+        ...failedInferenceSettlement(error, inferenceStarted, inferenceCredits),
       });
       throw new Error(
         "Plan drafting failed. No plan was saved or authorized for execution.",
@@ -317,6 +330,8 @@ export const analyze = internalAction({
       source.generation !== a.generation
     )
       return;
+    let inferenceStarted = false;
+    let inferenceCredits: number | undefined;
     try {
       ensure(
         process.env.DISABLE_INFERENCE !== "true",
@@ -343,6 +358,7 @@ export const analyze = internalAction({
       Object.assign(evidenceSchema.kind, { const: "user_note" });
       Object.assign(evidenceSchema.startMs, { const: null });
       Object.assign(evidenceSchema.endMs, { const: null });
+      inferenceStarted = true;
       const result = await infer(
         ctx,
         boundedSchema,
@@ -357,6 +373,7 @@ export const analyze = internalAction({
           ),
         },
       );
+      inferenceCredits = result.credits;
       ensure(
         result.output.coverage === "caption_only",
         "INVALID_EVIDENCE",
@@ -390,7 +407,7 @@ export const analyze = internalAction({
       await ctx.runMutation(internal.product.commitAnalysis, {
         ...a,
         error: `Analysis unavailable (${category}). Check the selected provider, verified model, and worker setup before retrying. No automatic funding fallback was used.`,
-        credits: 0,
+        ...failedInferenceSettlement(error, inferenceStarted, inferenceCredits),
       });
     }
   },
@@ -430,6 +447,8 @@ export const match = action({
   handler: async (ctx, a): Promise<void> => {
     const context = await ctx.runMutation(api.jobs.reserveMatch, a);
     if (context.cached) return;
+    let inferenceStarted = false;
+    let inferenceCredits: number | undefined;
     try {
       await authorizeRepository(ctx, context.repo);
       const inspected = await retrieveContext(
@@ -480,6 +499,7 @@ export const match = action({
           { enum: [...new Set(trustedEvidence.map((e: any) => e[field]))] },
         );
       }
+      inferenceStarted = true;
       const result = await infer(
         ctx,
         schema,
@@ -507,6 +527,7 @@ export const match = action({
           },
         },
       );
+      inferenceCredits = result.credits;
       const proposalId = await ctx.runMutation(internal.product.addProposal, {
         sourceId: a.id,
         repositoryId: a.repositoryId,
@@ -536,7 +557,7 @@ export const match = action({
       await ctx.runMutation(internal.jobs.finishMatch, {
         organizationId: context.source.organizationId,
         key: context.key,
-        credits: 0,
+        ...failedInferenceSettlement(error, inferenceStarted, inferenceCredits),
         semanticKey: context.semanticKey,
       });
       throw new Error(

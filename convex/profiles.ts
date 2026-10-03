@@ -54,6 +54,7 @@ export const finish = internalMutation({
     version: v.number(),
     profile: v.optional(v.string()),
     credits: v.number(),
+    retainReservation: v.optional(v.boolean()),
   },
   handler: async (ctx, a) => {
     const repo = await ctx.db.get(a.id);
@@ -94,7 +95,8 @@ export const finish = internalMutation({
       organization?.status === "active" &&
       membership &&
       ["owner", "admin"].includes(membership.role);
-    await settle(ctx, a.organizationId, a.key, a.credits);
+    if (!a.retainReservation)
+      await settle(ctx, a.organizationId, a.key, a.credits);
     await ctx.db.patch(repo._id, {
       profileDraftKey: undefined,
       profileDraftActor: undefined,

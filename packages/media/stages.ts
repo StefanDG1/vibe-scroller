@@ -21,7 +21,7 @@ export const mediaStagePayload = z.strictObject({
         timestampMs: z.number().int().min(0).max(600000),
       }),
     )
-    .max(4),
+    .max(16),
   evidence: z
     .array(
       z.strictObject({
@@ -34,4 +34,5 @@ export const mediaStagePayload = z.strictObject({
     .max(248),
   warnings: z.array(z.string().max(2000)).max(20),
   computeCredits: z.number().int().min(0).max(10),
+  inferenceMicros: z.number().int().min(0).max(100000).optional(),
 });

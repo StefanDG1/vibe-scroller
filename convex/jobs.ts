@@ -489,11 +489,13 @@ export const finishMatch = internalMutation({
     ...org,
     key: v.string(),
     credits: v.number(),
+    retainReservation: v.optional(v.boolean()),
     semanticKey: v.optional(v.string()),
     proposalId: v.optional(v.id("proposals")),
   },
   handler: async (ctx, a) => {
-    await settle(ctx, a.organizationId, a.key, a.credits);
+    if (!a.retainReservation)
+      await settle(ctx, a.organizationId, a.key, a.credits);
     if (a.semanticKey) {
       const job = await ctx.db
         .query("matchingJobs")

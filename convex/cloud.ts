@@ -49,7 +49,14 @@ export const execute = internalAction({
         maxCredits: run.maxCredits,
         generate: async (schema, prompt, input, maxOutput) => {
           if (run.fundingRoute !== "customer_api_key")
-            return infer(ctx, schema, prompt, input, maxOutput);
+            return infer(
+              ctx,
+              schema,
+              prompt,
+              input,
+              maxOutput,
+              Math.min(100000, (run.maxCredits - run.computeReserve) * 10000),
+            );
           const credential = await ctx.runMutation(
             internal.jobs.startCustomerRequest,
             { id: run._id, generation: run.generation },

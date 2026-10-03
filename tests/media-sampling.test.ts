@@ -40,3 +40,12 @@ it("bounds dense changes and spreads fallback samples without dropping the final
   expect(selected.at(-1)).toBe(46000);
   expect(selected.some((ms) => ms >= 20000 && ms <= 26000)).toBe(true);
 });
+it("supports a bounded denser pass while retaining the first and last scene", () => {
+  const dense = Array.from({ length: 48 }, (_, i) => frame(i * 250, true));
+  const selected = sampledFrames(dense, 16);
+  expect(selected).toHaveLength(16);
+  expect(selected[0].timestampMs).toBe(0);
+  expect(selected.at(-1)?.timestampMs).toBe(11750);
+  expect(new Set(selected.map((f) => f.timestampMs)).size).toBe(16);
+  expect(() => sampledFrames(dense, 49)).toThrow("INVALID_FRAME_LIMIT");
+});

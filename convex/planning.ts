@@ -73,12 +73,14 @@ export const finish = internalMutation({
     plan: v.optional(v.any()),
     inspectedContext: v.optional(inspectedContextValidator),
     credits: v.number(),
+    retainReservation: v.optional(v.boolean()),
   },
   handler: async (ctx, a) => {
     const proposal = await ctx.db.get(a.id);
     // Source deletion removes the proposal. Settle known usage without reviving it.
     if (!proposal) {
-      await settle(ctx, a.organizationId, a.key, a.credits);
+      if (!a.retainReservation)
+        await settle(ctx, a.organizationId, a.key, a.credits);
       return;
     }
     if (
@@ -150,7 +152,8 @@ export const finish = internalMutation({
         "A generated plan must use inspected existing files or explicitly new safe paths.",
       );
     }
-    await settle(ctx, proposal.organizationId, a.key, a.credits);
+    if (!a.retainReservation)
+      await settle(ctx, proposal.organizationId, a.key, a.credits);
     await ctx.db.patch(proposal._id, {
       planDraftKey: undefined,
       planDraftActor: undefined,

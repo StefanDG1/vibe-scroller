@@ -17,6 +17,8 @@ WorkOS identifies the application user. OpenAI authorization grants a separate c
 
 ## Initial managed configuration
 
+The October 3 implementation adds an explicit metered Google Cloud route using the dedicated project and EU gemini-3.5-flash-lite endpoint. [ADR 036](adr/036-bounded-google-eu-inference.md) records prices, short-lived federation, cost holds, the immutable EUR 10 pilot ceiling, automatic speech and sixteen-frame sampling. This is separate from personal Gemini or ChatGPT subscriptions. It remains gated until production federation and actual media acceptance pass; the initial tiny operator CLI check alone does not activate it. The older initial OpenAI candidates below remain alternatives, not the current selected or verified hosted route.
+
 Use a text-and-image model with structured output support for source analysis and project reasoning. The initial candidate is `gpt-5.4-mini`, selected as an economical baseline rather than declared universally best. Its published standard price at research was USD 0.75 per million input tokens and USD 4.50 per million output tokens. See Sources S07 and S08.
 
 Use `gpt-4o-mini-transcribe` as the initial managed ASR candidate, with an estimated published USD 0.003 per audio minute. Benchmark higher-quality transcription for difficult clips and disclose the increased quote before escalation. Audio and raw video are not passed to a model that only accepts text and images. See S09.

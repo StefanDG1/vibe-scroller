@@ -120,6 +120,7 @@ export const finish = internalMutation({
     candidates: v.optional(v.array(candidate)),
     noFitReason: v.optional(v.string()),
     credits: v.number(),
+    retainReservation: v.optional(v.boolean()),
   },
   handler: async (ctx, a) => {
     const source = await ctx.db.get(a.id);
@@ -188,7 +189,8 @@ export const finish = internalMutation({
       membership &&
       ["owner", "admin", "member"].includes(membership.role) &&
       selectionCurrent(selection, source, repositories);
-    await settle(ctx, source.organizationId, a.key, a.credits);
+    if (!a.retainReservation)
+      await settle(ctx, source.organizationId, a.key, a.credits);
     await ctx.db.patch(source._id, {
       selectionPendingKey: undefined,
       selectionActor: undefined,

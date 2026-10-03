@@ -4,6 +4,7 @@ import { access } from "./lib";
 import { personalAllowed } from "./lib/personalAccess";
 import { freeWorkersConfigured } from "../packages/providers/workers-plan";
 import { hostedMediaAllowed } from "./lib/hostedMediaAccess";
+import { googleConfigured } from "../packages/providers/google-inference";
 export const read = query({
   args: { organizationId: v.id("organizations") },
   handler: async (ctx, args) => {
@@ -15,10 +16,12 @@ export const read = query({
       personalAlphaEnabled: personalAllowed(actor.subject),
       cloudAnalysisEnabled:
         process.env.DISABLE_INFERENCE !== "true" &&
-        process.env.MANAGED_INFERENCE_ROUTE === "cloudflare_free" &&
+        ((process.env.MANAGED_INFERENCE_ROUTE === "cloudflare_free" &&
+          freeWorkersConfigured()) ||
+          (process.env.MANAGED_INFERENCE_ROUTE === "google_metered" &&
+            googleConfigured())) &&
         process.env.MEDIA_VERIFIED === "true" &&
-        hostedMediaAllowed(actor.subject) &&
-        freeWorkersConfigured(),
+        hostedMediaAllowed(actor.subject),
       linkAnalysisEnabled:
         process.env.ACQUISITION_VERIFIED === "true" &&
         process.env.MEDIA_VERIFIED === "true",
