@@ -1,0 +1,84 @@
+{
+  "at": "2026-10-03T13:28:26.483Z",
+  "applicationCommit": "d1da93ca88500a8cff212b5a70c4f249b2eded6d",
+  "testedImplementationCommit": "c92f1b0dfcd8531f9a99a3eb418b4df389fa5a74",
+  "pullRequest": 14,
+  "productionDomain": "https://scroll.companynerve.com",
+  "vercelDeployment": "dpl_HVty8oiaKT5X859wwg2HFGDX8LCP",
+  "vercelState": "READY",
+  "buildMachineType": "basic",
+  "buildMachineSelection": "fixed",
+  "elasticConcurrencyEnabled": false,
+  "convexDeployment": "bold-lemur-667",
+  "convexDeploymentPassed": true,
+  "productionRecoveryLock": false,
+  "ci": {
+    "pullRequestVerify": 37125799976,
+    "mainVerify": 37125989128,
+    "version": 37125989130,
+    "release": 37126059770,
+    "allPassed": true
+  },
+  "version": "0.1.0-alpha.20261003132305.gd1da93ca8850",
+  "accountMenuVersionVerified": true,
+  "nativeBrowser": {
+    "previewRouteWidthChecks": 72,
+    "productionRouteWidthChecks": 72,
+    "widths": [320, 390, 430, 768, 1024, 1440],
+    "captureFocusTrapTabs": 12,
+    "escapeAndFocusReturn": true,
+    "authenticatedSourceWidths": 6,
+    "authenticatedSourceImagesLoaded": 9,
+    "privateEvidenceDialogVerified": true,
+    "screenshotsPrivatelyInspected": true,
+    "physicalAndroid": false,
+    "freshUserStudy": false
+  },
+  "http": [
+    {
+      "path": "/api/health",
+      "status": 200,
+      "cacheControl": "no-store",
+      "frameOptions": "DENY",
+      "referrerPolicy": "no-referrer",
+      "redirectOrigin": null
+    },
+    {
+      "path": "/api/product",
+      "status": 307,
+      "cacheControl": "private, no-store",
+      "frameOptions": "DENY",
+      "referrerPolicy": "no-referrer",
+      "redirectOrigin": "https://api.workos.com"
+    },
+    {
+      "path": "/app",
+      "status": 307,
+      "cacheControl": "private, no-store",
+      "frameOptions": "DENY",
+      "referrerPolicy": "no-referrer",
+      "redirectOrigin": "https://api.workos.com"
+    },
+    {
+      "path": "/demo",
+      "status": 200,
+      "cacheControl": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "frameOptions": "DENY",
+      "referrerPolicy": "no-referrer",
+      "redirectOrigin": null
+    },
+    {
+      "path": "/privacy",
+      "status": 200,
+      "cacheControl": "public, max-age=0, must-revalidate",
+      "frameOptions": "DENY",
+      "referrerPolicy": "no-referrer",
+      "redirectOrigin": null
+    }
+  ],
+  "limitations": [
+    "No new inference/coding/payment transaction or customer outcome generated.",
+    "Public/demo and retained authenticated source regression, not independent usability or full serving recovery.",
+    "Documentation receipts may version later without rebuilding this verified application."
+  ]
+}
