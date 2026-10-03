@@ -1,0 +1,407 @@
+"use client";
+import { useState } from "react";
+import { ChoiceSelect } from "./choice-select";
+const fields = [
+  "purpose",
+  "audience",
+  "stage",
+  "goals",
+  "businessModel",
+  "constraints",
+  "nonGoals",
+] as const;
+const labels = {
+  purpose: "Purpose",
+  audience: "Intended users",
+  stage: "Stage",
+  goals: "Goals",
+  businessModel: "Business model",
+  constraints: "Constraints",
+  nonGoals: "Non-goals",
+};
+type Call = (operation: string, args: any) => Promise<any>;
+export function RepositoryChecklist({
+  organizationId,
+  repositories,
+  choices,
+  call,
+  readOnly,
+  demo,
+}: {
+  organizationId: string;
+  repositories: any[];
+  choices: any[];
+  call: Call;
+  readOnly: boolean;
+  demo: boolean;
+}) {
+  const [checked, setChecked] = useState(
+      new Set(repositories.filter((r) => r.enabled).map((r) => r.providerId)),
+    ),
+    [search, setSearch] = useState(""),
+    [installation, setInstallation] = useState(""),
+    [page, setPage] = useState(0),
+    [draft, setDraft] = useState(true),
+    [startedAt, setStartedAt] = useState(0),
+    [busy, setBusy] = useState(false),
+    [progress, setProgress] = useState<any[]>([]);
+  const filtered = choices.filter(
+      (r) =>
+        r.fullName.toLowerCase().includes(search.toLowerCase()) &&
+        (!installation || String(r.installationId) === installation),
+    ),
+    visible = filtered.slice(page * 30, (page + 1) * 30),
+    selected = choices.filter((r) => checked.has(r.id));
+  const quote = draft
+    ? selected.filter(
+        (c) => !repositories.find((r) => r.providerId === c.id)?.confirmed,
+      ).length * 10
+    : 0;
+  return (
+    <section className="panel form-grid">
+      <h2>Select projects</h2>
+      <p>
+        GitHub’s All repositories grant allows discovery. Only the checked
+        subset contributes code to VibeScroller. Future repositories appear
+        unchecked.
+      </p>
+      <div className="actions">
+        <a
+          href="https://github.com/apps/vibescroller/installations/new"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Install or change GitHub App access
+        </a>
+        {!demo && (
+          <a href={`/api/github/connect?organizationId=${organizationId}`}>
+            Link GitHub account
+          </a>
+        )}
+        <button
+          disabled={readOnly || busy || demo}
+          onClick={async () => {
+            setBusy(true);
+            try {
+              await call("refreshGithubChoices", { organizationId });
+            } finally {
+              setBusy(false);
+            }
+          }}
+        >
+          Refresh authorized choices
+        </button>
+      </div>
+      <label>
+        Search repository names
+        <input
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(0);
+          }}
+        />
+      </label>
+      <label>
+        Installation/account
+        <ChoiceSelect
+          value={installation}
+          onValueChange={(value) => {
+            setInstallation(value);
+            setPage(0);
+          }}
+        >
+          <option value="">All installations</option>
+          {[...new Set(choices.map((r) => r.installationId))].map((i) => (
+            <option key={i} value={i}>
+              Installation {i} ·{" "}
+              {
+                choices
+                  .find((r) => r.installationId === i)
+                  ?.fullName.split("/")[0]
+              }
+            </option>
+          ))}
+        </ChoiceSelect>
+      </label>
+      <p>
+        {checked.size} selected · {filtered.length} authorized choices match ·
+        page {page + 1}
+      </p>
+      <button
+        disabled={readOnly || busy}
+        onClick={() =>
+          setChecked((old) => new Set([...old, ...visible.map((r) => r.id)]))
+        }
+      >
+        Select all visible filtered choices ({visible.length})
+      </button>
+      <button
+        disabled={readOnly || busy}
+        onClick={() =>
+          setChecked(
+            (old) =>
+              new Set(
+                [...old].filter((id) => !visible.some((r) => r.id === id)),
+              ),
+          )
+        }
+      >
+        Clear visible choices
+      </button>
+      {visible.map((r) => (
+        <label className="check" key={`${r.installationId}:${r.id}`}>
+          <input
+            type="checkbox"
+            checked={checked.has(r.id)}
+            disabled={readOnly || busy}
+            onChange={(e) =>
+              setChecked((old) => {
+                const next = new Set(old);
+                if (e.target.checked) next.add(r.id);
+                else next.delete(r.id);
+                return next;
+              })
+            }
+          />
+          {r.fullName}
+        </label>
+      ))}
+      {!choices.length && (
+        <p>
+          Link an authorized GitHub account to discover repositories. Library
+          use works without GitHub.
+        </p>
+      )}
+      {repositories
+        .filter((r) => r.enabled && !choices.some((c) => c.id === r.providerId))
+        .map((r) => (
+          <p key={r._id}>
+            {r.fullName}: current access is unavailable. Refresh access or save
+            the remaining selection to remove it.
+          </p>
+        ))}
+      <div className="actions">
+        <button disabled={page === 0} onClick={() => setPage(page - 1)}>
+          Previous choices
+        </button>
+        <button
+          disabled={(page + 1) * 30 >= filtered.length}
+          onClick={() => setPage(page + 1)}
+        >
+          Next choices
+        </button>
+      </div>
+      <label className="check">
+        <input
+          type="checkbox"
+          checked={draft}
+          onChange={(e) => setDraft(e.target.checked)}
+        />
+        Draft business context with AI for unconfirmed projects (default)
+      </label>
+      <p>
+        Snapshot preparation retrieves only selected repository content. Context
+        drafting reserves up to {quote} processing credits in total (10 per
+        unconfirmed project). Confirmed profiles are preserved. Manual context
+        works without AI funding. Existing budgets can refuse or pause
+        individual projects.
+      </p>
+      <button
+        className="primary"
+        disabled={readOnly || busy || demo}
+        onClick={async () => {
+          setBusy(true);
+          setStartedAt(Date.now());
+          setProgress(
+            selected.map((c) => ({
+              repository: c.fullName,
+              state: "preparing",
+            })),
+          );
+          try {
+            const result = await call("selectRepositories", {
+              organizationId,
+              choices: selected.map((c) => ({
+                installationId: c.installationId,
+                providerId: c.id,
+                fullName: c.fullName,
+              })),
+              draftContext: draft,
+              maxCredits: quote,
+            });
+            if (result) setProgress(result);
+          } finally {
+            setBusy(false);
+          }
+        }}
+      >
+        Save selection and prepare context · up to {quote} credits
+      </button>
+      <output aria-live="polite">
+        {progress.map((r) => {
+          const current = repositories.find(
+            (repo) =>
+              repo.fullName === r.repository && repo.updatedAt >= startedAt,
+          );
+          const state =
+            busy && current
+              ? current.status === "connected"
+                ? "ready"
+                : current.status
+              : r.state;
+          return (
+            <p key={r.repository}>
+              {r.repository}: {state.replaceAll("_", " ")}
+              {state === "needs_attention"
+                ? ". Retry snapshot/context preparation using this selection; completed drafts are reused."
+                : ""}
+            </p>
+          );
+        })}
+      </output>
+    </section>
+  );
+}
+export function BusinessContext({
+  repo: r,
+  call,
+  readOnly,
+}: {
+  repo: any;
+  call: Call;
+  readOnly: boolean;
+}) {
+  const initial = r.confirmed ? r.profile : (r.profileDraft ?? r.profile);
+  const parsed = Object.fromEntries(
+    fields.map((f) => {
+      const match = initial.match(
+        new RegExp(
+          `(?:^|\\n\\n)${f}: ([\\s\\S]*?)(?=\\n\\n(?:${fields.join("|")}):|$)`,
+        ),
+      );
+      return [f, match?.[1] ?? "unknown"];
+    }),
+  );
+  const [values, setValues] = useState<Record<string, string>>(parsed),
+    [freeText, setFreeText] = useState(initial),
+    [manual, setManual] = useState(
+      !fields.some((f) => initial.includes(`${f}:`)),
+    ),
+    [busy, setBusy] = useState(false);
+  const profile = manual
+    ? freeText
+    : fields.map((f) => `${f}: ${values[f]}`).join("\n\n");
+  return (
+    <section className="panel form-grid">
+      <h2>{r.fullName}</h2>
+      <p>
+        {r.confirmed
+          ? "Confirmed business context. Later AI drafts propose changes for your review."
+          : "AI proposes context from inspected repository evidence. Unknown facts stay unknown; review guesses before confirming."}
+      </p>
+      <p className="code-label">
+        Inspected commit {r.sha || "Snapshot pending"}. Context version{" "}
+        {r.profileVersion}.
+      </p>
+      <button
+        disabled={
+          readOnly || busy || !r.enabled || !!r.profileDraftKey || !r.sha
+        }
+        onClick={async () => {
+          setBusy(true);
+          try {
+            await call("draftProfile", { id: r._id, maxCredits: 10 });
+          } finally {
+            setBusy(false);
+          }
+        }}
+      >
+        Draft or refresh context · up to 10 credits
+      </button>
+      {r.profileDraftKey && (
+        <p>
+          Context request is pending or its usage needs reconciliation. A
+          duplicate charge is blocked.
+        </p>
+      )}
+      {r.profileDraft && (
+        <details>
+          <summary>Inspect unconfirmed AI proposal and evidence basis</summary>
+          <p>
+            Based on permitted repository excerpts at {r.profileDraftSha};
+            context version {r.profileDraftVersion}. This is an inference, not
+            verified business evidence.
+          </p>
+          <pre>{r.profileDraft}</pre>
+          <button
+            disabled={
+              readOnly ||
+              r.profileDraftSha !== r.sha ||
+              r.profileDraftVersion !== r.profileVersion
+            }
+            onClick={() => {
+              setManual(true);
+              setFreeText(r.profileDraft);
+            }}
+          >
+            Review proposal in editor
+          </button>
+        </details>
+      )}
+      <label className="check">
+        <input
+          type="checkbox"
+          checked={manual}
+          onChange={(e) => setManual(e.target.checked)}
+        />
+        Use a free-text profile (preserves existing profiles)
+      </label>
+      {manual ? (
+        <label>
+          Business context
+          <textarea
+            rows={9}
+            value={freeText}
+            maxLength={8000}
+            onChange={(e) => setFreeText(e.target.value)}
+          />
+        </label>
+      ) : (
+        fields.map((f) => (
+          <label key={f}>
+            {labels[f]}
+            <textarea
+              rows={2}
+              maxLength={700}
+              value={values[f]}
+              onChange={(e) =>
+                setValues((old) => ({ ...old, [f]: e.target.value }))
+              }
+            />
+          </label>
+        ))
+      )}
+      <button
+        className="primary"
+        disabled={readOnly || busy || !r.enabled || !r.sha}
+        onClick={async () => {
+          setBusy(true);
+          try {
+            await call("confirmProfile", {
+              id: r._id,
+              sha: r.sha,
+              version: r.profileVersion,
+              selectionVersion: r.selectionVersion ?? 0,
+              profile,
+            });
+          } finally {
+            setBusy(false);
+          }
+        }}
+      >
+        {r.confirmed ? "Confirm corrections" : "Looks right · confirm context"}
+      </button>
+    </section>
+  );
+}

@@ -5,6 +5,13 @@ export const contentExportSections = [
   "repositories",
   "runs",
   "workspaceCategories",
+  "knowledgeTopics",
+  "knowledgeMembers",
+  "knowledgeJobs",
+  "knowledgeEvaluations",
+  "knowledgePolicies",
+  "issueDrafts",
+  "issueAttempts",
 ] as const;
 export type ContentExportSection = (typeof contentExportSections)[number];
 
@@ -21,6 +28,7 @@ const privateFields = new Set([
   "profileDraftKey",
   "planDraftActor",
   "profileDraftActor",
+  "inspected",
 ]);
 const repositoryContext = new Set([
   "context",

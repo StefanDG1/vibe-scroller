@@ -4,22 +4,22 @@ Mode: reference. These are proposed application interfaces, not existing provide
 
 ## Public and authenticated HTTP boundaries
 
-| Route | Method | Authentication | Contract |
-| --- | --- | --- | --- |
-| `/api/capture` | POST | App session and CSRF protection | URL or uploaded object reference, workspace selection, idempotency key |
-| `/share` | GET or POST | Login before committing an import | Receive share text, show confirmation, then call capture |
-| `/api/uploads/grant` | POST | App session | Bounded media type/size grant to a private object key |
-| `/api/uploads/complete` | POST | App session | Verify object metadata and fingerprint before workflow start |
-| `/api/webhooks/github` | POST | Verified GitHub signature | Persist receipt, acknowledge, process asynchronously |
-| `/api/webhooks/stripe` | POST | Verified Stripe signature | Reject wrong mode or account before entitlement changes |
-| `/api/webhooks/telegram` | POST | Secret webhook header and linked user | Deduplicate update ID, store capture request |
-| `/api/runner/pair/start` | POST | Device challenge, rate-limited | Create short-lived untrusted pairing request |
-| `/api/runner/pair/approve` | POST | Browser session and reauthentication | Bind exact device key and named workspace |
-| `/api/runner/lease` | POST | Narrow device credential | Claim one authorized job compatible with capabilities |
-| `/api/runner/events` | POST | Device credential, current lease | Bounded redacted events with sequence numbers |
-| `/api/runner/artifacts` | POST | Current job capability | Grant upload for approved artifact type and maximum size |
-| `/api/runner/complete` | POST | Current lease and artifact digest | Validate result and move to patch review |
-| `/api/health` | GET | Public minimal output | Service availability only, no secrets or internal configuration |
+| Route                      | Method      | Authentication                        | Contract                                                               |
+| -------------------------- | ----------- | ------------------------------------- | ---------------------------------------------------------------------- |
+| `/api/capture`             | POST        | App session and CSRF protection       | URL or uploaded object reference, workspace selection, idempotency key |
+| `/share`                   | GET or POST | Login before committing an import     | Receive share text, show confirmation, then call capture               |
+| `/api/uploads/grant`       | POST        | App session                           | Bounded media type/size grant to a private object key                  |
+| `/api/uploads/complete`    | POST        | App session                           | Verify object metadata and fingerprint before workflow start           |
+| `/api/webhooks/github`     | POST        | Verified GitHub signature             | Persist receipt, acknowledge, process asynchronously                   |
+| `/api/webhooks/stripe`     | POST        | Verified Stripe signature             | Reject wrong mode or account before entitlement changes                |
+| `/api/webhooks/telegram`   | POST        | Secret webhook header and linked user | Deduplicate update ID, store capture request                           |
+| `/api/runner/pair/start`   | POST        | Device challenge, rate-limited        | Create short-lived untrusted pairing request                           |
+| `/api/runner/pair/approve` | POST        | Browser session and reauthentication  | Bind exact device key and named workspace                              |
+| `/api/runner/lease`        | POST        | Narrow device credential              | Claim one authorized job compatible with capabilities                  |
+| `/api/runner/events`       | POST        | Device credential, current lease      | Bounded redacted events with sequence numbers                          |
+| `/api/runner/artifacts`    | POST        | Current job capability                | Grant upload for approved artifact type and maximum size               |
+| `/api/runner/complete`     | POST        | Current lease and artifact digest     | Validate result and move to patch review                               |
+| `/api/health`              | GET         | Public minimal output                 | Service availability only, no secrets or internal configuration        |
 
 A GET request cannot import, approve, bill, delete, or execute work. The GET share receiver only populates an uncommitted draft. Login callbacks must prevent open redirects and bind the intended draft to the current session.
 
@@ -58,3 +58,7 @@ Webhook handlers retain raw bodies only long enough to verify signatures and per
 The browser receives bounded progress through authenticated Convex subscriptions. The runner sends ordered progress batches over outbound HTTPS. App-server transport stays local over stdio. The app does not expose Codex's local socket to the internet.
 
 A reconnect reads the authoritative run state and events after a cursor. Duplicate events are ignored. Event delivery is not permission to execute a command.
+
+## Knowledge and reviewed issue functions
+
+The authenticated product proxy exposes topic lists/details, organization policy, corrections, evaluations and decisions; repository checklist saving/discovery; profile confirmation; and separate issue draft/edit/prepare/publish/refresh operations. Convex validates workspace access and exact states independently. Strict model/approval contracts are [knowledge synthesis](../contracts/knowledge-synthesis.schema.json), [knowledge evaluation](../contracts/knowledge-evaluation.schema.json) and [issue approval](../contracts/issue-approval.schema.json). Exact title/body SHA-256 and visibility bind publication. Unknown provider writes cannot be retried blindly. See [the execution ledger](V1-KNOWLEDGE-EXECUTION.md).

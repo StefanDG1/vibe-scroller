@@ -20,21 +20,21 @@ Only committed stages can be reused. A failed transcript does not count as a val
 
 ## Retention defaults
 
-| Data | Default policy | Reason |
-| --- | --- | --- |
-| Temporary original media | Delete within 24 hours after successful processing | Processing, not permanent media hosting |
-| Failed acquisition or decode objects | Delete within 24 hours of terminal failure | Avoid abandoned raw media |
-| Abandoned uploads | Delete after 24 hours | Prevent unreferenced storage |
-| Temporary audio and redundant frames | Delete with the raw-media cleanup | Keep only selected evidence |
-| Selected evidence, transcripts, summaries, insights | While the user keeps the source and the workspace is entitled to retention | Product library content |
-| Intermediate cache artifacts | Maximum 7 days, unless promoted to a saved evidence record | Retry support |
-| Raw repository snapshots | Delete within 24 hours after the relevant run or matching operation | Minimize retained code |
-| Repository summaries and manifests | While the repository remains connected, with version pruning | Matching context |
-| Run diagnostic logs | 14 days by default, redacted | Troubleshooting |
-| Security and access audit events | 90 days by default, minimal content | Abuse and incident investigation |
-| Exports | Signed download expires quickly; object deleted after 24 hours | User portability |
-| Service backups | Rolling maximum 30 days for non-statutory content | Recovery with bounded deletion lag |
-| Billing and legal evidence | Separate legally required retention schedule | Do not invent the required period |
+| Data                                                | Default policy                                                             | Reason                                  |
+| --------------------------------------------------- | -------------------------------------------------------------------------- | --------------------------------------- |
+| Temporary original media                            | Delete within 24 hours after successful processing                         | Processing, not permanent media hosting |
+| Failed acquisition or decode objects                | Delete within 24 hours of terminal failure                                 | Avoid abandoned raw media               |
+| Abandoned uploads                                   | Delete after 24 hours                                                      | Prevent unreferenced storage            |
+| Temporary audio and redundant frames                | Delete with the raw-media cleanup                                          | Keep only selected evidence             |
+| Selected evidence, transcripts, summaries, insights | While the user keeps the source and the workspace is entitled to retention | Product library content                 |
+| Intermediate cache artifacts                        | Maximum 7 days, unless promoted to a saved evidence record                 | Retry support                           |
+| Raw repository snapshots                            | Delete within 24 hours after the relevant run or matching operation        | Minimize retained code                  |
+| Repository summaries and manifests                  | While the repository remains connected, with version pruning               | Matching context                        |
+| Run diagnostic logs                                 | 14 days by default, redacted                                               | Troubleshooting                         |
+| Security and access audit events                    | 90 days by default, minimal content                                        | Abuse and incident investigation        |
+| Exports                                             | Signed download expires quickly; object deleted after 24 hours             | User portability                        |
+| Service backups                                     | Rolling maximum 30 days for non-statutory content                          | Recovery with bounded deletion lag      |
+| Billing and legal evidence                          | Separate legally required retention schedule                               | Do not invent the required period       |
 
 These are product defaults, not claims that every provider has the same deletion timing. The privacy page must identify provider-specific differences. Statutory records require a documented operator schedule before live billing.
 
@@ -59,3 +59,7 @@ A future shared cache requires a documented reuse basis, source-access revalidat
 Shared records must not expose who submitted content. Deleting a user's account must delete its association even if an independently authorized shared record remains. Content fingerprints alone are not proof of anonymity.
 
 The first financial model assumes zero cross-customer reuse. Any savings from a future cache require measured hit rate, validity checks, and legal review. Public availability does not by itself grant a right to store or reuse every transcript.
+
+## Workspace knowledge and external issue receipts
+
+Topic memberships, summaries, evaluations and issue drafts use the existing workspace boundary and export/deletion path. Source deletion fences derived reads immediately, then paginated cleanup clears private output and draft text. Minimal external issue receipts survive source deletion. Workspace/account deletion follows the existing content/retention rules. Deleting app content does not delete a GitHub issue; an external edit/deletion requires separate authorization. Raw repository context, credentials and signed private-storage URLs are excluded from exports and default issue text. [The execution ledger](V1-KNOWLEDGE-EXECUTION.md) records migration, recovery quarantine and acceptance.

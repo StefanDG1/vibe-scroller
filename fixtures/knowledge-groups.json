@@ -1,0 +1,51 @@
+{
+  "provenance": "Synthetic material authored for engineering regression; no customer content or independent human judgment.",
+  "split": "development",
+  "groups": [
+    {
+      "id": "similar",
+      "posts": [
+        "Explain the useful result before asking for setup.",
+        "Show the useful outcome before configuration."
+      ],
+      "engineeringExpectation": "similar"
+    },
+    {
+      "id": "complementary",
+      "posts": [
+        "Show a populated example before configuration.",
+        "After the example, offer one clear next decision."
+      ],
+      "engineeringExpectation": "complementary"
+    },
+    {
+      "id": "conflicting",
+      "posts": [
+        "Require configuration before any example.",
+        "Show the example before asking for configuration."
+      ],
+      "engineeringExpectation": "conflicting"
+    },
+    {
+      "id": "unrelated",
+      "posts": [
+        "Explain a project example before setup.",
+        "Use a larger pot to grow a tomato plant."
+      ],
+      "engineeringExpectation": "no forced relationship"
+    },
+    {
+      "id": "duplicate",
+      "posts": [
+        "Explain the useful result before setup.",
+        "Explain the useful result before setup."
+      ],
+      "engineeringExpectation": "repeated copies are not independent corroboration"
+    }
+  ],
+  "independentHumanReference": {
+    "reviewer": null,
+    "reviewedAt": null,
+    "judgments": null
+  }
+}

@@ -3,6 +3,7 @@ import { selectedInsights } from "../packages/insights/scope";
 import { exportRecord } from "../packages/privacy/export";
 import { internal } from "./_generated/api";
 import { workflow } from "./workflows";
+import { actorCurrent, referencesCurrent } from "./knowledge";
 import {
   query,
   mutation,
@@ -96,6 +97,8 @@ export const customerRoutes = query({
 export const saveRepository = internalMutation({
   args: {
     ...org,
+    selectionVersion: v.optional(v.number()),
+    snapshotActor: v.optional(v.id("users")),
     installationId: v.number(),
     providerId: v.number(),
     fullName: v.string(),
@@ -138,8 +141,22 @@ export const saveRepository = internalMutation({
       )
       .unique();
     if (old) {
+      if (a.selectionVersion !== undefined)
+        ensure(
+          old.enabled &&
+            old.selectionVersion === a.selectionVersion &&
+            !!a.snapshotActor &&
+            (await actorCurrent(ctx, a.organizationId, a.snapshotActor, [
+              "owner",
+              "admin",
+            ])),
+          "APPROVAL_STALE",
+          "Repository selection or access changed while preparing its snapshot.",
+        );
+      const { snapshotActor: _actor, ...fields } = a;
       await ctx.db.patch(old._id, {
-        ...a,
+        ...fields,
+        status: "connected",
         snapshotAt: Date.now(),
         updatedAt: Date.now(),
       });
@@ -157,7 +174,9 @@ export const saveRepository = internalMutation({
       "Your repository allowance is full. Disconnect a repository before adding another.",
     );
     return ctx.db.insert("repositories", {
-      ...a,
+      ...(Object.fromEntries(
+        Object.entries(a).filter(([key]) => key !== "snapshotActor"),
+      ) as Omit<typeof a, "snapshotActor">),
       createdAt: Date.now(),
       updatedAt: Date.now(),
       enabled: true,
@@ -678,6 +697,7 @@ export const approve = mutation({
       planHash: a.planHash,
       baseSha: a.baseSha,
       version: a.version,
+      selectionVersion: repo.selectionVersion ?? 0,
       executor: a.executor,
       fundingRoute: a.fundingRoute,
       customerModel,
@@ -803,6 +823,7 @@ export const authorizePublication = mutation({
         p.repositoryId === r.repositoryId &&
         repo.enabled &&
         p.planHash === r.planHash &&
+        (repo.selectionVersion ?? 0) === (r.selectionVersion ?? 0) &&
         repo.sha === r.baseSha,
       "BASE_CHANGED",
       "Approval context changed.",
@@ -985,6 +1006,13 @@ export const exportPage = query({
       v.literal("repositories"),
       v.literal("runs"),
       v.literal("workspaceCategories"),
+      v.literal("knowledgeTopics"),
+      v.literal("knowledgeMembers"),
+      v.literal("knowledgeJobs"),
+      v.literal("knowledgeEvaluations"),
+      v.literal("knowledgePolicies"),
+      v.literal("issueDrafts"),
+      v.literal("issueAttempts"),
     ),
     cursor: v.union(v.string(), v.null()),
     asOf: v.number(),
@@ -1000,8 +1028,23 @@ export const exportPage = query({
       .query(a.section)
       .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
       .paginate({ cursor: a.cursor, numItems: 5 });
+    const permitted = [];
+    for (const row of rows.page) {
+      if (
+        "references" in row &&
+        !(await referencesCurrent(ctx, a.organizationId, row.references))
+      ) {
+        permitted.push({
+          ...row,
+          output: undefined,
+          ...("body" in row
+            ? { title: "Unavailable private draft", body: "" }
+            : {}),
+        });
+      } else permitted.push(row);
+    }
     return {
-      page: rows.page
+      page: permitted
         .filter(
           (row) =>
             Math.floor(row._creationTime) <= a.asOf &&
@@ -1138,7 +1181,10 @@ export const claimCloud = internalMutation({
       "Cloud execution is unavailable for this account.",
     );
     ensure(
-      p?.planHash === r.planHash && repo?.sha === r.baseSha && repo.enabled,
+      p?.planHash === r.planHash &&
+        repo?.sha === r.baseSha &&
+        repo.enabled &&
+        (repo.selectionVersion ?? 0) === (r.selectionVersion ?? 0),
       "APPROVAL_STALE",
       "Execution context changed.",
     );

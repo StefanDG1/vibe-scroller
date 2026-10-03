@@ -63,3 +63,7 @@ Subscription access derives from a verified provider state and the product's gra
 Each external result carries an operation ID, attempt number, lease generation, and artifact digest. Reject a stale generation. A cancellation records intent before sending a stop command. A revoked runner cannot claim new work. The backend refuses stale results after revocation except for a redacted diagnostic receipt.
 
 A job that created a PR but failed before recording completion must reconcile by its idempotent branch and run marker. It must not open another PR on retry.
+
+## Knowledge and issue state
+
+Knowledge jobs move queued to running, then ready, failed, stale or unknown. Unknown usage retains reservations; queued dispatch can recover. Topics show pending, updating, ready or budget_paused. Input/manual-decision changes invalidate results. Issue drafts move draft to approved, then published, denied or unknown. An immutable attempt separates approval from the provider write. External open/closed/reopened, edited, unavailable and access_lost observations do not establish benefit or authorize external edits. Recovery quarantines authority and jobs. See [the execution ledger](V1-KNOWLEDGE-EXECUTION.md).

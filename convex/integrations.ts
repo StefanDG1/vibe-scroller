@@ -41,6 +41,7 @@ export const draftProfile = action({
       key: context.key,
       sha: context.repo.sha,
       version: context.repo.profileVersion,
+      selectionVersion: context.repo.selectionVersion ?? 0,
     };
     let inferenceStarted = false;
     let inferenceCredits: number | undefined;
@@ -415,6 +416,84 @@ export const analyze = internalAction({
     }
   },
 });
+export const selectRepositories = action({
+  args: {
+    organizationId: v.id("organizations"),
+    choices: v.array(
+      v.object({
+        installationId: v.number(),
+        providerId: v.number(),
+        fullName: v.string(),
+      }),
+    ),
+    draftContext: v.boolean(),
+    maxCredits: v.number(),
+  },
+  handler: async (ctx, a): Promise<{ repository: string; state: string }[]> => {
+    const selected = await ctx.runMutation(api.repositorySelection.save, a);
+    const result: { repository: string; state: string }[] = [];
+    const prepare = async (r: (typeof selected)[number]) => {
+      const progress = {
+        id: r.id,
+        actor: r.actor,
+        version: r.selectionVersion,
+      };
+      try {
+        await authorizeRepository(ctx, {
+          ...r,
+          organizationId: a.organizationId,
+        });
+        const previous = await ctx.runQuery(internal.jobs.previousSnapshot, {
+          organizationId: a.organizationId,
+          providerId: r.providerId,
+        });
+        const data = await snapshot(
+          r.installationId,
+          r.providerId,
+          r.fullName,
+          previous,
+        );
+        const id = await ctx.runMutation(internal.jobs.saveRepository, {
+          organizationId: a.organizationId,
+          installationId: r.installationId,
+          providerId: r.providerId,
+          fullName: r.fullName,
+          selectionVersion: r.selectionVersion,
+          snapshotActor: r.actor,
+          ...data,
+        });
+        if (r.draftContext) {
+          await ctx.runMutation(internal.repositorySelection.preparationState, {
+            ...progress,
+            state: "drafting_context",
+          });
+          await ctx.runAction(api.integrations.draftProfile, {
+            id,
+            maxCredits: 10,
+          });
+        }
+        await ctx.runMutation(internal.repositorySelection.preparationState, {
+          ...progress,
+          state: "connected",
+        });
+        return { repository: r.fullName, state: "ready" };
+      } catch {
+        await ctx.runMutation(internal.repositorySelection.preparationState, {
+          ...progress,
+          state: "needs_attention",
+        });
+        return { repository: r.fullName, state: "needs_attention" };
+      }
+    };
+    // At most two onboarding preparations in flight; every repository retains its own reservation/fence.
+    for (let offset = 0; offset < selected.length; offset += 2) {
+      result.push(
+        ...(await Promise.all(selected.slice(offset, offset + 2).map(prepare))),
+      );
+    }
+    return result;
+  },
+});
 export const connectRepository = action({
   args: {
     organizationId: v.id("organizations"),
@@ -426,6 +505,30 @@ export const connectRepository = action({
     await ctx.runQuery(api.jobs.authorizeOwner, {
       organizationId: a.organizationId,
     });
+    const existing = await ctx.runQuery(api.product.repositories, {
+      organizationId: a.organizationId,
+    });
+    const choices = existing
+      .filter((r) => r.enabled && r.providerId !== a.providerId)
+      .map((r) => ({
+        installationId: r.installationId,
+        providerId: r.providerId,
+        fullName: r.fullName,
+      }));
+    const selected = await ctx.runMutation(api.repositorySelection.save, {
+      organizationId: a.organizationId,
+      choices: [
+        ...choices,
+        {
+          installationId: a.installationId,
+          providerId: a.providerId,
+          fullName: a.fullName,
+        },
+      ],
+      draftContext: false,
+      maxCredits: 0,
+    });
+    const approval = selected.find((r) => r.providerId === a.providerId)!;
     await authorizeRepository(ctx, a);
     const previous = await ctx.runQuery(internal.jobs.previousSnapshot, {
       organizationId: a.organizationId,
@@ -437,7 +540,12 @@ export const connectRepository = action({
       a.fullName,
       previous,
     );
-    return ctx.runMutation(internal.jobs.saveRepository, { ...a, ...data });
+    return ctx.runMutation(internal.jobs.saveRepository, {
+      ...a,
+      ...data,
+      selectionVersion: approval.selectionVersion,
+      snapshotActor: approval.actor,
+    });
   },
 });
 export const match = action({

@@ -10,22 +10,22 @@ The product is fully usable in a browser. PWA installation adds supported share-
 
 ## Routes
 
-| Route | Screen | Primary task |
-| --- | --- | --- |
-| `/app` | Home dashboard | Find the next useful action and see recent outcomes |
-| `/app/library` | Saved library | Find videos, read summaries, and filter by usefulness or PR state |
-| `/app/library/:sourceId` | Video detail | Inspect main points, evidence, and project applications |
-| `/app/projects` | Project list | Choose active repositories and identify missing context |
-| `/app/projects/:projectId` | Project detail | Review profile, relevant insights, proposals, and shipped work |
-| `/app/proposals/:proposalId` | Proposal detail | Decide whether the change is worth planning |
-| `/app/plans/:planId` | Plan editor | Review scope, files, tests, risks, and execution budget |
-| `/app/runs/:runId` | Run detail | Follow progress, approvals, checks, patch, and PR |
-| `/app/inbox` | Notifications and pending decisions | Respond without losing the source context |
-| `/app/usage` | Usage | Understand allowances, reservations, actual charges, and renewal |
-| `/app/settings/connections` | Connections | Connect, verify, reconnect, or revoke GitHub, AI, and Telegram |
-| `/app/settings/runners` | Paired computers | Pair devices, map repos, inspect capabilities, revoke access |
-| `/app/settings/privacy` | Privacy | Export, retention, analytics choices, and deletion |
-| `/app/settings/billing` | Billing | Plan interval, tax details, invoices, cancellation, and refunds |
+| Route                        | Screen                              | Primary task                                                      |
+| ---------------------------- | ----------------------------------- | ----------------------------------------------------------------- |
+| `/app`                       | Home dashboard                      | Find the next useful action and see recent outcomes               |
+| `/app/library`               | Saved library                       | Find videos, read summaries, and filter by usefulness or PR state |
+| `/app/library/:sourceId`     | Video detail                        | Inspect main points, evidence, and project applications           |
+| `/app/projects`              | Project list                        | Choose active repositories and identify missing context           |
+| `/app/projects/:projectId`   | Project detail                      | Review profile, relevant insights, proposals, and shipped work    |
+| `/app/proposals/:proposalId` | Proposal detail                     | Decide whether the change is worth planning                       |
+| `/app/plans/:planId`         | Plan editor                         | Review scope, files, tests, risks, and execution budget           |
+| `/app/runs/:runId`           | Run detail                          | Follow progress, approvals, checks, patch, and PR                 |
+| `/app/inbox`                 | Notifications and pending decisions | Respond without losing the source context                         |
+| `/app/usage`                 | Usage                               | Understand allowances, reservations, actual charges, and renewal  |
+| `/app/settings/connections`  | Connections                         | Connect, verify, reconnect, or revoke GitHub, AI, and Telegram    |
+| `/app/settings/runners`      | Paired computers                    | Pair devices, map repos, inspect capabilities, revoke access      |
+| `/app/settings/privacy`      | Privacy                             | Export, retention, analytics choices, and deletion                |
+| `/app/settings/billing`      | Billing                             | Plan interval, tax details, invoices, cancellation, and refunds   |
 
 ## Home dashboard
 
@@ -43,15 +43,15 @@ All counts use the definitions in [Feedback and evaluation](FEEDBACK-AND-EVALUAT
 
 Each source card includes:
 
-| Element | Required content |
-| --- | --- |
-| Identity | Title, platform, original source link, creator if available |
-| Content | One-sentence summary and main-point preview |
-| Evidence | Coverage label and uncertainty indicator |
-| Organization | User tags, AI categories, original collection where known |
+| Element       | Required content                                                   |
+| ------------- | ------------------------------------------------------------------ |
+| Identity      | Title, platform, original source link, creator if available        |
+| Content       | One-sentence summary and main-point preview                        |
+| Evidence      | Coverage label and uncertainty indicator                           |
+| Organization  | User tags, AI categories, original collection where known          |
 | Applicability | Relevant projects and reason preview, or an explicit no-fit result |
-| Progress | Proposal, plan, and PR counts derived from linked records |
-| Action | Open details, review proposal, fix import, or retry with a quote |
+| Progress      | Proposal, plan, and PR counts derived from linked records          |
+| Action        | Open details, review proposal, fix import, or retry with a quote   |
 
 Use a generated neutral placeholder when a thumbnail is missing or unauthorized. Do not hotlink arbitrary creator images that leak customer IP addresses. Do not autoplay a video in a list.
 
@@ -132,3 +132,7 @@ Target WCAG 2.2 AA behavior and document the actual tests. Use visible focus, lo
 Initial budgets are measured targets: public-page LCP at or below 2.5 seconds, INP at or below 200 milliseconds, and CLS at or below 0.1 at the 75th percentile when enough field data exists. Before field data, record lab conditions rather than presenting lab results as user measurements.
 
 Paginate library results in batches of 30. Lazy-load transcripts, frame galleries, diffs, and charts. Load only the selected item's private asset grants. Keep the authenticated initial JavaScript budget under 250 KB compressed where feasible, and record exceptions instead of silently increasing the budget.
+
+## Connected knowledge and reviewed issues
+
+The library keeps existing posts/collections and adds topic cards, batch explanations, original private evidence, persistent correction controls and related-project evaluations. Projects use searchable/paginated repository checkboxes and AI-first editable context. Issues offer exact Markdown preview/export, explicit visibility/rights review and a separate Publish reviewed issue action. Coverage and funding states remain explicit. Engineering/browser acceptance is recorded separately from physical Android and independent comprehension in [the execution ledger](V1-KNOWLEDGE-EXECUTION.md).

@@ -145,3 +145,7 @@ V2-created businesses, autonomous account/domain/merchant provisioning, advertis
 Review found four implementation risks that determine the order: repository selection must precede content retrieval; manual decisions need durable versions before automatic regrouping; multi-source evidence needs a compatible contract before project matching; and issue publication needs its own authorization/idempotency path before any real write. There is no independent evidence yet for organization quality, improved business decisions, lower correction effort or issue-first customer demand.
 
 The finished V1 acceptance journey is: select repositories, confirm AI context, import permitted posts, inspect a coherent topic and its evidence, correct its organization, see distinct repository applications, review a complete issue, explicitly publish it, and observe its real GitHub state. It must work on mobile with no coding approval required.
+
+## Implementation tracking
+
+The owner subsequently requested implementation of W01�W07. Follow [the execution ledger](V1-KNOWLEDGE-EXECUTION.md) for exact implemented behavior, limits, migration, tests and outstanding external acceptance. The requirements and acceptance criteria above remain authoritative; an engineering pass alone does not complete external or independent-user acceptance.

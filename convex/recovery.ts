@@ -263,6 +263,11 @@ export const quarantinePage = internalMutation({
       v.literal("githubBindings"),
       v.literal("runs"),
       v.literal("repositories"),
+      v.literal("knowledgePolicies"),
+      v.literal("knowledgeJobs"),
+      v.literal("knowledgeEvaluations"),
+      v.literal("issueAttempts"),
+      v.literal("issueDrafts"),
     ),
     cursor: v.union(v.string(), v.null()),
   },
@@ -276,7 +281,31 @@ export const quarantinePage = internalMutation({
       .query(a.section)
       .paginate({ cursor: a.cursor, numItems: 25 });
     for (const row of page.page) {
-      if ("fundingRoute" in row) {
+      if ("body" in row)
+        await ctx.db.patch(row._id, {
+          title: "Recovery quarantined draft",
+          body: "",
+          references: [],
+          state: "deleted",
+        });
+      else if ("ceiling" in row)
+        await ctx.db.patch(row._id, {
+          enabled: false,
+          state: "paused",
+          version: row.version + 1,
+        });
+      else if ("topicVersion" in row || "policyVersion" in row)
+        await ctx.db.patch(row._id, {
+          state: "quarantined",
+          output: undefined,
+          updatedAt: Date.now(),
+        });
+      else if ("draftVersion" in row)
+        await ctx.db.patch(row._id, {
+          state: row.number ? "published" : "unknown",
+          updatedAt: Date.now(),
+        });
+      else if ("fundingRoute" in row) {
         if (!["completed", "failed", "canceled"].includes(row.state))
           await ctx.db.patch(row._id, {
             state: "canceled",
@@ -327,9 +356,48 @@ export const readiness = internalQuery({
         ),
       )
       .first();
+    const knowledgeAuthority = await ctx.db
+      .query("knowledgePolicies")
+      .filter((q) => q.eq(q.field("enabled"), true))
+      .first();
+    const activeKnowledge = await ctx.db
+      .query("knowledgeJobs")
+      .filter((q) =>
+        q.or(
+          q.eq(q.field("state"), "queued"),
+          q.eq(q.field("state"), "running"),
+        ),
+      )
+      .first();
+    const activeEvaluation = await ctx.db
+      .query("knowledgeEvaluations")
+      .filter((q) =>
+        q.or(
+          q.eq(q.field("state"), "queued"),
+          q.eq(q.field("state"), "running"),
+        ),
+      )
+      .first();
+    const activeIssue = await ctx.db
+      .query("issueAttempts")
+      .filter((q) =>
+        q.or(
+          q.eq(q.field("state"), "approved"),
+          q.eq(q.field("state"), "publishing"),
+        ),
+      )
+      .first();
     return {
       locked: process.env.RESTORE_LOCK === "true",
-      quarantineComplete: !deleting && !credentials && !device && !activeRun,
+      quarantineComplete:
+        !deleting &&
+        !credentials &&
+        !device &&
+        !activeRun &&
+        !knowledgeAuthority &&
+        !activeKnowledge &&
+        !activeEvaluation &&
+        !activeIssue,
       limitations:
         "Does not establish manifest freshness, restored backup integrity, external media deletion or production readiness.",
     };

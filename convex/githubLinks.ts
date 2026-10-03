@@ -78,6 +78,30 @@ export const save = internalMutation({
         createdAt: Date.now(),
         updatedAt: Date.now(),
       });
+    for (const repo of await ctx.db
+      .query("repositories")
+      .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
+      .collect()) {
+      if (
+        !a.installations.some(
+          (i) =>
+            i.installationId === repo.installationId &&
+            i.repositories.some(
+              (r) => r.id === repo.providerId && r.fullName === repo.fullName,
+            ),
+        )
+      )
+        await ctx.db.patch(repo._id, {
+          enabled: false,
+          selectionVersion: (repo.selectionVersion ?? 0) + 1,
+          status: "access_lost",
+          context: "",
+          contextExcerpts: [],
+          contextFiles: [],
+          contextTree: "",
+          updatedAt: Date.now(),
+        });
+    }
   },
 });
 export const binding = internalQuery({

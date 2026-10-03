@@ -44,6 +44,21 @@ export const webhook = internalAction({
         prNumber,
       });
     }
+    if (payload.issue?.number !== undefined && !payload.issue.pull_request) {
+      const number = payload.issue.number;
+      if (
+        ![installationId, repositoryId, number].every(
+          (n) => Number.isSafeInteger(n) && n > 0,
+        )
+      )
+        return { status: 400 };
+      await ctx.runMutation(internal.issues.enqueueWebhook, {
+        installationId,
+        providerId: repositoryId,
+        number,
+        delivery: a.delivery,
+      });
+    }
     return { status: 200 };
   },
 });

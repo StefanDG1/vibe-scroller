@@ -38,4 +38,16 @@ crons.interval(
   internal.privacy.sweep,
   {},
 );
+crons.interval(
+  "Reconcile reviewed issues",
+  { minutes: 15 },
+  internal.issues.reconcilePage,
+  {},
+);
+crons.interval(
+  "Recover knowledge dispatch",
+  { minutes: 5 },
+  internal.knowledge.recoverPage,
+  {},
+);
 export default crons;

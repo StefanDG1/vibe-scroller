@@ -129,7 +129,13 @@ export async function github(
     );
   return res.status === 204 ? null : res.json();
 }
-export async function installationToken(installationId: number) {
+export async function installationToken(
+  installationId: number,
+  scope?: {
+    repository_ids: number[];
+    permissions: { issues: "write" | "read"; contents: "read" };
+  },
+) {
   const id = process.env.GITHUB_APP_ID,
     key = process.env.GITHUB_APP_PRIVATE_KEY;
   ensure(id && key, "SETUP_REQUIRED", "Configure the VibeScroller GitHub App.");
@@ -141,8 +147,16 @@ export async function installationToken(installationId: number) {
     `/app/installations/${installationId}/access_tokens`,
     jwt,
     "POST",
-    {},
+    scope ?? {},
   );
+  if (scope)
+    ensure(
+      result.permissions?.issues === scope.permissions.issues ||
+        (scope.permissions.issues === "read" &&
+          result.permissions?.issues === "write"),
+      "FORBIDDEN",
+      "The GitHub App needs approved Issues write permission. Review its installation permissions.",
+    );
   return result.token as string;
 }
 export async function snapshot(
@@ -157,14 +171,24 @@ export async function snapshot(
     "Invalid repository.",
   );
   const token = await installationToken(installationId);
-  const permitted = await github(
-    "/installation/repositories?per_page=100",
-    token,
-  );
+  let authorized = false;
+  for (let page = 1; page <= 10; page++) {
+    const permitted = await github(
+      `/installation/repositories?per_page=100&page=${page}`,
+      token,
+    );
+    if (
+      permitted.repositories.some(
+        (r: any) => r.id === providerId && r.full_name === fullName,
+      )
+    ) {
+      authorized = true;
+      break;
+    }
+    if (permitted.repositories.length < 100) break;
+  }
   ensure(
-    permitted.repositories.some(
-      (r: any) => r.id === providerId && r.full_name === fullName,
-    ),
+    authorized,
     "FORBIDDEN",
     "Repository is not in this selected installation.",
   );
