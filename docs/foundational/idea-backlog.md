@@ -70,3 +70,7 @@ Decision: adopt the requested navigation and scope defaults in V1. Increase boun
 ## F006: Individual and business buyers
 
 Source: explicit owner approval on October 3. Adopted for the same Starter/Pro catalogue in verified tax-covered Managed Payments countries. Supersedes F004's consumer-only restriction. Native unpaid sandbox Checkout demonstrated that disabling business-name collection does not remove its business-purchase control. Research and Avatar remain behavioral hypotheses; Offer eligibility changes without enterprise claims; Beliefs preserve permission, cost and statutory-right boundaries. Validate the provider market policy and transaction accounting, retain the separately gated direct route and preserve failed/restricted-country behavior.
+
+## F007: independent use before expansion
+
+Source: owner October 3 instruction to implement the reviewed post-V1 plan. Adopt preparation of one own-account personal path, retaining one maintained core and technical positioning. Research/Avatar demand remains unvalidated; Offer distinguishes managed service and personal provider needs; Beliefs retain evidence, no fit, cost and separate approval. Conflicts: D16 formerly deferred all supported setup; ADR 051 authorizes preparation while independent acceptance remains pending. Tests: two clean-checkout users, cited analysis/export and one upgrade; five hosted first-use observations, genuine later-week value and invoices before growth. No campaign, budget increase, fabricated review or all-local claim follows.

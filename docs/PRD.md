@@ -16,7 +16,7 @@ The first audience is adult individual developers and founders. English is the i
 
 The founder's one-to-five daily English videos provide a starting workload. The service must use quotas and durable jobs rather than assuming every customer has that workload. The founder's laptop is a benchmark device, not a hosting dependency for paying customers.
 
-V1 is public-source under MIT for authored code. Supported independent self-hosting is deferred. A managed paid deployment is the first distribution target.
+V1 is public-source under MIT for authored code. A single user-operated personal deployment path is authorized for post-V1 preparation under ADR 051; independent setup and upgrade acceptance remains pending. Fully self-contained distribution remains deferred. Managed browser access is the current paid distribution.
 
 ## Primary journey
 

@@ -66,6 +66,7 @@ export const purgeOrganization = internalMutation({
 export const cleanup = internalMutation({
   args: {},
   handler: async (ctx) => {
+    if (process.env.RESTORE_LOCK === "true") return;
     const batches = await Promise.all([
       ctx.db
         .query("events")

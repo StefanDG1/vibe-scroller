@@ -172,3 +172,7 @@ October 3, F006: the owner approved individual and business purchases of the sam
 ## Current release evidence, October 3
 
 The six Starter/Pro prices and two top-ups are now configured for live Managed Payments in verified tax-covered markets. Native live Starter weekly handoff reached EUR 5.99 Checkout and was expired unpaid; no real buying/refund test was made. Supported cloud processing and bounded approved coding are enabled. The initial EUR 10 inference pilot ceiling and dated provider checks remain hard limits. Historical proposed catalogue sections above describe the earlier brief; use the current release record for availability. See [the public release record](../operations/paid-release-2026-10-03.md).
+
+## Post-V1 scope, October 3
+
+F007 records the owner-authorized preparation of one personal deployment path on the same core. Independent setup support still needs two fresh own-account testers and an upgrade; no fully local or self-contained claim follows. The technical developer/founder positioning, actual prices, explicit funding and six beliefs remain unchanged. Documentation now distinguishes hosted users, personal deployers, contributors and operators. Retained quality cases are development evidence, not an untouched benchmark; no new human scores, customers, savings or invoices were invented. See [the execution ledger](../POST-V1-EXECUTION.md).

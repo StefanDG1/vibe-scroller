@@ -11,6 +11,7 @@ import {
 export const stripeEvent = internalAction({
   args: { body: v.string(), signature: v.string() },
   handler: async (ctx, a) => {
+    if (process.env.RESTORE_LOCK === "true") return { status: 503 };
     const key = process.env.STRIPE_SECRET_KEY,
       secret = process.env.STRIPE_V1_WEBHOOK_SECRET,
       account = process.env.STRIPE_ACCOUNT_ID;
@@ -274,6 +275,7 @@ export const customer = internalAction({
 export const allBilling = internalAction({
   args: {},
   handler: async (ctx) => {
+    if (process.env.RESTORE_LOCK === "true") return;
     if (!process.env.STRIPE_SECRET_KEY) return;
     const list = await ctx.runQuery(internal.billing.customers, {
       cursor: null,
