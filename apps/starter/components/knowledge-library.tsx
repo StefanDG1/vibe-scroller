@@ -75,6 +75,17 @@ export function KnowledgeLibrary(p: Props) {
     [browsingLaterPages, setBrowsingLaterPages] = useState(false);
   const refreshGeneration = useRef(0),
     detailGeneration = useRef(0);
+  const detailPanel = useRef<HTMLDivElement>(null),
+    detailHeading = useRef<HTMLHeadingElement>(null),
+    topicTrigger = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (!detail?.topic?._id) return;
+    detailHeading.current?.focus({ preventScroll: true });
+    detailPanel.current?.scrollIntoView({
+      block: "start",
+      behavior: "instant",
+    });
+  }, [detail?.topic?._id]);
   async function scopedRead(operation: string, args: any) {
     try {
       return await read(operation, args);
@@ -236,6 +247,8 @@ export function KnowledgeLibrary(p: Props) {
     }
   }
   async function open(topic: any, pageCursor?: string, summaryCursor?: string) {
+    if (!pageCursor && !summaryCursor)
+      topicTrigger.current = document.activeElement as HTMLElement;
     setSelected(topic);
     setDetail(undefined);
     setCursor(pageCursor);
@@ -437,17 +450,20 @@ export function KnowledgeLibrary(p: Props) {
         )}
       </div>
       {selected && detail && (
-        <div className="panel" aria-label="Topic detail">
+        <div className="panel" aria-label="Topic detail" ref={detailPanel}>
           <button
             onClick={() => {
               detailGeneration.current++;
               setSelected(undefined);
               setDetail(undefined);
+              topicTrigger.current?.focus();
             }}
           >
             Close topic
           </button>
-          <h2>{detail.topic.name}</h2>
+          <h2 ref={detailHeading} tabIndex={-1}>
+            {detail.topic.name}
+          </h2>
           <p>{detail.coverage}</p>
           {detail.jobState === "unknown" && (
             <p>
