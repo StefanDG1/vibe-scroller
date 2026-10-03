@@ -242,7 +242,9 @@
     "permissionBypass": false,
     "exactHumanPublicationApproval": false,
     "currentDraftNeedsFreshBaseEvaluation": true,
-    "actualLifecycle": "not tested"
+    "actualLifecycle": "not tested",
+    "emailSecurityScreenPrepared": true,
+    "oneTimeCodeReceived": false
   },
   "organizationPolicy": {
     "testWorkspaces": 2,
@@ -265,5 +267,14 @@
     "version": "Alpha \u00b7 0.1.0-alpha.20261003195407.g77637c55673e",
     "commit": "77637c55673e1fdba9f0a510031a1694285b1d20",
     "timestamp": "2026-10-03T20:02:15.959Z"
+  },
+  "credentialReview": {
+    "timestamp": "2026-10-03T20:05:29.637Z",
+    "commit": "25c79f4f30d3994c420ce4f2645a3f5b1ca755ef",
+    "baseline": "e9b3cfdffcb2f7c5ed348a136b65c7bb8ea65555",
+    "files": 54,
+    "findings": [],
+    "passed": true,
+    "scope": "full changed-file text, private paths, credential patterns and in-memory matching against local secret values; no secret values persisted"
   }
 }
