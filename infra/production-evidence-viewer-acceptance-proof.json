@@ -1,0 +1,102 @@
+{
+  "commit": "3cdf0b783558febd8e1371574277db9906e4d2b5",
+  "environment": "production",
+  "width": 390,
+  "synthetic": true,
+  "initial": {
+    "open": true,
+    "frame": "4.0s \u00b7 3 / 9",
+    "focus": "Close image",
+    "focusInside": true,
+    "decoded": true,
+    "overflow": false
+  },
+  "arrowRight": {
+    "open": true,
+    "frame": "6.0s \u00b7 4 / 9",
+    "focus": "Close image",
+    "focusInside": true,
+    "decoded": true,
+    "overflow": false
+  },
+  "forwardLoop": {
+    "open": true,
+    "frame": "6.0s \u00b7 4 / 9",
+    "focus": "Close image",
+    "focusInside": true,
+    "decoded": true,
+    "overflow": false
+  },
+  "reverseLoop": {
+    "open": true,
+    "frame": "6.0s \u00b7 4 / 9",
+    "focus": "Next frame",
+    "focusInside": true,
+    "decoded": true,
+    "overflow": false
+  },
+  "escape": {
+    "open": false,
+    "focus": null,
+    "focusInside": false,
+    "decoded": false,
+    "restoredThumbnail": "Private sampled video frame at 4.0 seconds",
+    "overflow": false
+  },
+  "sourcePermalinkUnchanged": true,
+  "frameControlsCssPixels": {
+    "width": 48,
+    "height": 48
+  },
+  "widthChecks": [
+    {
+      "width": 320,
+      "overflow": false,
+      "sourceVisible": true,
+      "insightsVisible": true,
+      "frames": 3
+    },
+    {
+      "width": 360,
+      "overflow": false,
+      "sourceVisible": true,
+      "insightsVisible": true,
+      "frames": 3
+    },
+    {
+      "width": 390,
+      "overflow": false,
+      "sourceVisible": true,
+      "insightsVisible": true,
+      "frames": 3
+    },
+    {
+      "width": 412,
+      "overflow": false,
+      "sourceVisible": true,
+      "insightsVisible": true,
+      "frames": 3
+    },
+    {
+      "width": 768,
+      "overflow": false,
+      "sourceVisible": true,
+      "insightsVisible": true,
+      "frames": 3
+    },
+    {
+      "width": 1440,
+      "overflow": false,
+      "sourceVisible": true,
+      "insightsVisible": true,
+      "frames": 3
+    }
+  ],
+  "observedVersion": "0.1.0-alpha.20261003024233.g3cdf0b783558",
+  "deployment": "dpl_GsHNxCFFFUdeKJraPNzJcDu1Ynse",
+  "verifiedAt": "2026-10-03T02:57:11.051234+00:00",
+  "limitations": [
+    "Native Chrome interactions and CSS viewport emulation, not Android hardware or an accessibility certification.",
+    "Private source identifiers, signed image links, screenshots and model outputs remain in ignored private storage."
+  ]
+}

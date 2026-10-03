@@ -1,0 +1,43 @@
+{
+  "checkedAt": "2026-10-03T02:50:14.545Z",
+  "servingCommit": "3cdf0b783558febd8e1371574277db9906e4d2b5",
+  "sourceDeployment": "bold-lemur-667",
+  "destinationDeployment": "rare-echidna-358",
+  "workflowRun": 36970054399,
+  "sourceCommit": "f2ccdf42b3d447e2d075d1cc13ce93b6194739f5",
+  "sourceIsActualProductionBackup": true,
+  "servingProductionMutated": false,
+  "destinationRemainedLocked": true,
+  "runtimeProviderCredentialsAbsent": true,
+  "previousIsolatedDatasetPreservedEncrypted": true,
+  "archiveAuthenticated": true,
+  "archiveBytes": 138841,
+  "latestMarkerCount": 47,
+  "officialHostedImportCompleted": true,
+  "newerDeletionMarkersApplied": true,
+  "archivedSourceDeletionsVerified": 3,
+  "quarantinedRows": 2,
+  "quarantineComplete": true,
+  "privateAccessDenied": true,
+  "completed": true,
+  "plaintextArchivesRemoved": true,
+  "completedAt": "2026-10-03T02:51:03.849Z",
+  "limitations": [
+    "Actual independently exported production database imported only into a separate locked recovery deployment; this is not a serving production replacement.",
+    "Archived source commit is older than the serving commit. Latest production deletion markers were applied independently; provider usage, webhook cursors and old approvals still require reconciliation before any unlock.",
+    "External objects and runtime environment credentials were not restored by this database step.",
+    "The official import included component data. Count verification covered 49 application document tables; 42 component document-table entries were not individually compared after import."
+  ],
+  "temporaryDeploymentCleanup": {
+    "nativeExactPreviewConfirmationCompleted": true,
+    "nativeRedirectedToProjectSettings": true,
+    "removedDeploymentReferenceRejectedByCli": true,
+    "servingProductionIdentityRechecked": true,
+    "cliLimitation": "The post-deletion CLI returned an inaccessible-project error and then a Windows libuv assertion. Native confirmation and project redirect establish deletion; this is not a claimed API 404."
+  },
+  "archiveApplicationTables": 49,
+  "archiveApplicationRecords": 575,
+  "allImportedApplicationTableCountsMatched": true,
+  "archiveComponentTableEntries": 42,
+  "componentTablesIndividuallyVerified": false
+}
