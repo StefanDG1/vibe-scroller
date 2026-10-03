@@ -503,7 +503,7 @@ export const match = action({
       const result = await infer(
         ctx,
         schema,
-        "Assess fit honestly. Return no_fit, already_implemented, unsupported_claim or needs_context whenever appropriate. Existing paths must occur in the manifest. Source evidence must refer to existing supplied evidence. Benefits are hypotheses.",
+        "Assess fit honestly. Return no_fit, already_implemented, unsupported_claim or needs_context whenever appropriate. Existing paths must occur in the manifest. Source evidence must refer to existing supplied evidence. Benefits are hypotheses. Documentation describes requirements, not proof of a missing implementation. For a code or UI change, inspect actual implementation excerpts and cite the observed defect; if the relevant implementation was not inspected or no defect can be established, return needs_context rather than inventing a current problem. Check whether the supplied implementation already satisfies the idea.",
         {
           source: {
             analysis: context.source.analysis,

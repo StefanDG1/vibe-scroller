@@ -2,7 +2,9 @@ import { containsSecret, ensure, excludedPath } from "../policy";
 import type { RepositoryExcerpt } from "./context";
 import type { ManifestEntry } from "./snapshotCache";
 
-export const RETRIEVAL_VERSION = "source-windows-v1";
+export const RETRIEVAL_VERSION = "source-windows-v2";
+// Read bounded windows from normal-sized components, not only small files.
+export const RETRIEVAL_BLOB_LIMIT = 250000;
 const stop = new Set(
   "about after already also application before between change could evidence example file files from have implementation improve insight into more need only point should source synthetic test that their them there these this through useful using video when where which with would".split(
     " ",
@@ -36,11 +38,16 @@ export function retrievalFiles(
     "Requested evidence paths exceed the inspection bound.",
   );
   const terms = retrievalTerms(focus);
+  const interfaceFocus = terms.some((term) =>
+    /^(?:interface|interfaces|readable|readability|button|buttons|contrast|spacing|mobile|touch)$/.test(
+      term,
+    ),
+  );
   const eligible = entries.filter(
     (file) =>
       !excludedPath(file.path) &&
       ["100644", "100755"].includes(file.mode) &&
-      file.size <= 100000 &&
+      file.size <= RETRIEVAL_BLOB_LIMIT &&
       /(?:README|package\.json|\.(?:tsx?|jsx?|mjs|py|md|json|css|go|rs|java|rb))$/i.test(
         file.path,
       ),
@@ -64,6 +71,7 @@ export function retrievalFiles(
               terms,
             ) *
               10 +
+            (interfaceFocus && /\.(?:css|tsx|jsx)$/.test(path) ? 30 : 0) +
             (/^(?:README\.md|package\.json)$/.test(path)
               ? 5
               : /^(?:convex\/|src\/|apps\/starter\/)/.test(path)

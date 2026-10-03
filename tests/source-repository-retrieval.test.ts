@@ -83,6 +83,36 @@ it("prioritizes relevant or cited safe paths, excludes secrets/symlinks, and val
   expect(() => validateInspectedContext([row, row], [file])).toThrow();
   expect(focusedExcerpt(file, "\0binary", "binary", 4000)).toBeNull();
 });
+it("includes larger UI components and styles before specification-only matches within the same context bound", () => {
+  const component = {
+    ...file,
+    path: "apps/web/components/mobile-controls.tsx",
+    size: 149000,
+  };
+  const style = { ...file, path: "apps/web/product.css", size: 35000 };
+  const entries = [
+    ...Array.from({ length: 30 }, (_, n) => ({
+      ...file,
+      path: `docs/mobile-spacing-${n}.md`,
+    })),
+    component,
+    style,
+    { ...file, path: "apps/web/oversized-mobile.tsx", size: 250001 },
+  ];
+  const selected = retrievalFiles(
+    entries,
+    "Readable mobile interface and touch button spacing",
+  );
+  expect(selected).toHaveLength(24);
+  expect(selected).toContainEqual(component);
+  expect(selected).toContainEqual(style);
+  expect(selected.some((entry) => entry.path.includes("oversized"))).toBe(
+    false,
+  );
+  expect(retrievalFiles(entries, "unrelated", [component.path])[0]).toEqual(
+    component,
+  );
+});
 it("uses only recorded immutable blobs and rejects changed bytes or uninspected cited lines", async () => {
   const text =
     "// owned synthetic repository\nexport function removeSource() {}";

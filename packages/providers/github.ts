@@ -13,6 +13,7 @@ import {
 import { ensure, containsSecret, prState, validatePaths } from "../policy";
 import {
   focusedExcerpt,
+  RETRIEVAL_BLOB_LIMIT,
   retrievalFiles,
   validateInspectedContext,
 } from "../repositories/retrieval";
@@ -356,7 +357,7 @@ export async function retrieveContext(
     const bytes = Buffer.from(blob.content, "base64");
     ensure(
       bytes.length === file.size &&
-        bytes.length <= 100000 &&
+        bytes.length <= RETRIEVAL_BLOB_LIMIT &&
         createHash("sha1")
           .update(`blob ${bytes.length}\0`)
           .update(bytes)
