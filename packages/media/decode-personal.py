@@ -39,13 +39,20 @@ if audio:
     manifest['audio']='audio.wav'
     assert (root/'audio.wav').stat().st_size <= 19_500_000
 if video:
+    # A video track can end before its audio. Never invent later video frames.
+    video_duration = duration
+    try:
+        stream_duration = float(video[0].get('duration', duration))
+        if 0 < stream_duration < duration: video_duration = stream_duration
+    except (TypeError, ValueError):
+        pass
     # Dense candidates catch fast cuts. Work remains bounded to 600 small images
     # and 48 full-size frames; these are samples, not exhaustive scene coverage.
     fps = 4 if duration <= 90 else 2 if duration <= 300 else 1
     step_ms = 1000 // fps
-    run(['ffmpeg','-nostdin','-threads','2','-i',str(source),'-vf',f'fps={fps},scale=160:-2',
-         '-frames:v','600','-q:v','8',str(root/'candidate-%03d.jpg')],90)
-    candidates = bounded_candidates(sorted(root.glob('candidate-*.jpg')), duration, step_ms)
+    run(['ffmpeg','-nostdin','-threads','2','-i',str(source),'-vf',f'fps={fps}:start_time=0:eof_action=pass,scale=160:-2,format=yuvj420p',
+         '-frames:v','600','-threads','2','-q:v','8',str(root/'candidate-%03d.jpg')],90)
+    candidates = bounded_candidates(sorted(root.glob('candidate-*.jpg')), video_duration, step_ms)
     changes, previous = [], None
     for index, path in enumerate(candidates):
         with Image.open(path) as image:
@@ -55,7 +62,7 @@ if video:
                 if score >= 2: changes.append((score, index * step_ms))
             previous = current.copy()
     count=min(16,max(2,int(duration/2)))
-    selected = {int(duration*i/count*1000): 'periodic sample' for i in range(count)}
+    selected = {int(video_duration*i/count*1000) // step_ms * step_ms: 'periodic sample' for i in range(count)}
     if candidates:
         selected[(len(candidates)-1) * step_ms] = 'periodic sample'
     for score, ms in sorted(changes, reverse=True):
@@ -64,6 +71,6 @@ if video:
             selected[ms] = 'visible change within sampled frames'
     for i, (ms, reason) in enumerate(sorted(selected.items())):
         name=f'frame-{i:03}.jpg'
-        run(['ffmpeg','-nostdin','-threads','2','-ss',str(ms/1000),'-i',str(source),'-frames:v','1','-vf','scale=960:-2','-q:v','4',str(root/name)],15)
+        run(['ffmpeg','-nostdin','-threads','2','-ss',str(ms/1000),'-i',str(source),'-frames:v','1','-vf','scale=960:-2,format=yuvj420p','-threads','2','-q:v','4',str(root/name)],15)
         manifest['frames'].append({'id':name,'timestampMs':ms,'selectionReason':reason})
 (root/'manifest.json').write_text(json.dumps(manifest))
