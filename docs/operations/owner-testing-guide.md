@@ -1,103 +1,45 @@
-# Your VibeScroller testing guide
+# Your VibeScroller guide
 
-Mode: how-to. Last checked October 3, 2026. This guide distinguishes working checks from work still underway. It is not a production-ready announcement.
+Mode: how-to. Checked October 3, 2026.
 
-## Start here
+Use [VibeScroller](https://scroll.companynerve.com/app) on your phone or laptop. The supported browser workflow and live Managed Payments are enabled. Reload an old tab to load the current interface. No additional login or MFA setup is pending.
 
-The real address is https://scroll.companynerve.com/app on your laptop or phone. HTTPS, clean production Google sign-in and automatic default workspace entry work. The dedicated Google OAuth audience was published as In production on October 2, with the correct product homepage, privacy and terms links and operator support email. A fresh owner Google sign-in after actual logout returned to the existing workspace. This removes the Google test-user restriction; it does not approve hosted ChatGPT access or paid V1. Existing active workspaces are reused; switching is available from Account. The dark interface and automatic laptop-assisted audio/visual analysis passed production verification on October 1. Reload an old tab to load the latest interface.
+## Start with a saved video
 
-Production hosting and isolated preparation now use the owner's Vercel Pro team. E2B is retired; Netlify builds are stopped and its old site is private. Reload the page after the host change; your same-domain login remains usable.
+1. Sign in with your existing Google account. You should reach your default workspace directly. Account lets you switch workspaces.
+2. Open **Library**, then **Add source**. Paste a permitted public video URL, or choose **Instagram export or link import** and select your ZIP, `saved_posts.json` or Saved HTML file. JSON is preferred. Review the links and content permission before **Import reviewed links**. The archive stays on the selecting device; messages and contacts are not uploaded.
+3. Choose automatic analysis and its displayed funding limit. **Cloud processing · app credits** works without a laptop. For your existing personal connection, choose **My ChatGPT plan · paired laptop** and keep the paired computer and runner awake. A saved preference does not authorize switching funding. Imported sources update in the background as each stage finishes.
+4. Open a source row to read its summary and all **Main points**. Expand **Full summary and analysis notes**, transcript or evidence when useful. Evidence opens inside the app with Close, Escape and previous/next controls. The original thumbnail opens the original social post.
+5. Filter **All posts**, **Analyzed**, **Not analyzed** or **Processing**, then choose a broad **Collection** or specific **Topic**. Sort by **Added to app**, **Saved on platform** or **Post published**, or use search. Missing original publication dates remain unavailable rather than guessed. Inside a source, Categories lets you edit names; manual choices survive reprocessing. Shared category suggestions contain no source content and require operator review.
+6. Connect the [VibeScroller GitHub App](https://github.com/apps/vibescroller/installations/new). GitHub offers **All repositories** or **Only select repositories**. Link your account to the workspace, select a project and confirm its profile. Review repository matching and a useful plan. Whole-post points are selected by default; **Advanced** can exclude points. An honest no-fit result needs no coding task.
+7. Review the plan, exact repository/base commit, executor, funding route and quoted maximum before approving coding. Save a new plan version after edits. Then review checks and the resulting patch before separately approving its draft PR. **Runs & PRs** links to the actual GitHub PR and tracks merge or closure. V1 does not merge automatically.
 
-Use the real domain for the personal test. Earlier Cloudflare staging capacity failures remain documented; staging and local builds do not define the current production result.
-
-Use your existing VibeScroller Google identity. Signing into VibeScroller, Instagram and ChatGPT are separate actions. Never paste passwords, cookies or OAuth tokens into the app.
-
-## Import your Instagram Saved list
-
-1. Open the library and choose **Add source**.
-2. Choose **Instagram export or link import**.
-3. Select your ZIP export, or the extracted `saved_posts.json`. JSON is preferred; a Saved HTML file also works. The archive stays on the selecting device.
-4. Review the counts and the listed links. Confirm that you may submit the content, then choose **Import reviewed links**. For a larger export, submit subsequent batches when the button permits it.
-5. Read the import manifest. Select automatic personal analysis with your online computer and account model to process imported links in the background. A saved record without that permission waits for an explicit analysis approval. A platform access failure shows the permitted-media fallback; a quota refusal does not mean the source was saved.
-
-Your supplied August archive produced four distinct links, three Reels and one post of unverified media type. That is what its Saved metadata contains, not a claim about all your current saves. The import saved all four in production and charged zero analysis credits, without uploading the ZIP, messages or contacts.
-
-For a fresh export, use Instagram's Accounts Center information-export controls, select your profile, Saved where offered, all time and JSON. An export usually supplies links and metadata; it does not grant access to other creators' video files. Upload content you may process if a link is private, removed or inaccessible. Do not provide Instagram session cookies.
+Bookmark a source's private Library address to return to its insights after reload. The address still requires workspace access; deletion or lost access prevents reopening it.
 
 ## Use your ChatGPT plan
 
-Keep the paired laptop awake and connected. Choose **Add source** to paste a supported public video link or import your Saved export. Select automatic personal analysis, choose the online computer/model, and review both source permission and plan/compute authorization. The bounded worker attempts retrieval and prepares audio and frames; the paired laptop transcribes and reasons. If the platform blocks retrieval, choose **Permitted media upload** and **Upload and analyze** for content you may process. No transcript is needed. If the app requests **Sign in again**, follow its link before selecting the file again. The authorization requires a fresh website sign-in.
+Your existing personal consent and automatic audio/visual analysis passed. The verified account catalogue offers GPT-5.6 Sol with medium reasoning through this route; GPT-6.1 Sol is not currently advertised there. Local Whisper transcribes English audio, and your plan reasons over text and sampled images. Isolated preparation separately reserves the displayed app compute credits. No transcript is needed from you.
 
-When both routes are available, **Analysis provider** defaults to **My ChatGPT plan · paired laptop**. Keep that selection to use your own plan. The separate **Cloud processing · app credits** option now passed an owned production audio/visual test and does not require the laptop. Choose it deliberately and approve its separate displayed credit limit. It uses the configured managed models, not your ChatGPT plan, and never activates as an automatic fallback. The metered cloud route is now publicly enabled for authenticated accounts under its allowance and budget controls. The supported personal ChatGPT route remains separately restricted; no hosted commercial subscription permission is inferred.
+See [personal runner setup](personal-analysis-runner.md), [local ChatGPT setup](chatgpt-local.md) and [the video guide](../PERSONAL-VIDEO-GUIDE.md) if the paired computer is offline. General hosted commercial ChatGPT-plan access remains disabled pending the official provider prerequisite. Cloud processing uses the configured managed models and app credits, not your ChatGPT allowance. It never silently replaces your personal route. Optional Windows local coding remains disabled after its isolation failure; use the verified Vercel cloud executor for coding.
 
-Production automatic upload passed again on Vercel at its first processing generation on October 2. The isolated worker prepared audio and six sampled frames, offline Whisper supplied the English transcript without any supplied transcript, and your ChatGPT plan saved four cited insights. Private frame viewing and the four saved insights survived a reload; layouts at 320, 360, 390, 412, 768 and 1440 pixels had no page overflow. The explicitly owned synthetic video included visual-only size/spacing markers, correctly read by the model. Watch preparation, transcription and analysis, then review Main points, **Full summary and analysis notes**, the original transcript and private timestamped video evidence.
+## If a link cannot be processed
 
-MP4/WebM input is bounded to 250 MB and ten minutes. Local transcription currently supports English. Whisper uses laptop resources rather than your ChatGPT allowance; isolated media preparation separately reserves up to ten app compute credits. Raw video passes the isolated decoder before normalized audio reaches the local utility.
+Private, deleted, platform-blocked or unsupported posts can fail retrieval even if you can watch them in your own Instagram session. VibeScroller has no live Instagram Saved synchronization and does not request session cookies. Your supplied August ZIP imported all four distinct saved links in production without retaining the ZIP; that does not prove every linked video is publicly retrievable.
 
-Your existing local ChatGPT consent passed. A real text request and a real synthetic-image request succeeded without an API key or alternate funding. The image test used GPT-5.6 Sol with medium reasoning and reported 47 tokens. The account catalogue does not currently expose GPT-6.1 Sol through this route. The app must offer the models the account actually supports.
+If needed, choose **Permitted media upload** and **Upload and analyze** for content you may process. MP4/WebM input is bounded to 250 MB and ten minutes. Automatic transcription and analysis follow the same authorization; no supplied transcript is required. Read a quota or provider refusal before retrying. When asked to **Sign in again**, follow the link before selecting the file again.
 
-The automatic personal route uses the account's advertised GPT-5.6-Sol with medium reasoning during verification. There is no paid inference or alternate-model fallback. See [the complete video guide](../PERSONAL-VIDEO-GUIDE.md), [personal runner setup](personal-analysis-runner.md) and [local ChatGPT setup](chatgpt-local.md). Gemini is a later optional route. Automatic bounded retrieval is implemented for supported public links. The actual first Instagram Reel returned a platform rate limit, and its carousel is unsupported by the video downloader; those cases require permitted media. There is no promise that every Instagram saved post is retrievable.
+## Billing and account controls
 
-## Review and apply a useful idea
+Open **Billing** from your workspace or Account to choose Starter or Pro and a renewal interval. Read and accept the displayed terms before **Continue to checkout**. Stripe Managed Payments confirms the currency, total and applicable tax in supported markets. After a paid subscription is reconciled, Billing provides the customer portal, cancellation, top-ups, plan changes and refund review. A redirect alone never grants allowance.
 
-After an actual analysis completes, review its summary, main points, source evidence and coverage labels. Sampled frames are not every scene. Supplied captions are not a verified audio transcript. Keep an honest no-fit result when a source has no useful connection to a project.
+Sandbox lifecycle tests passed. The actual live Starter weekly form reached EUR 5.99 Checkout and was expired unpaid, as requested. No real purchase or refund was tested. The direct billing route is separately gated.
 
-Connect GitHub and select only the repositories you want reviewed. Inspect the proposed change against its recorded repository commit. Accepting a proposal creates a plan; review and edit it before separately approving coding. That approval binds the plan, repository, executor, funding route and maximum cost. Review the draft PR in GitHub. V1 does not merge or deploy automatically.
+Account and Privacy provide profile/workspace export, deletion, cookies and notification preferences. **Export workspace content** includes retained sources/insights, plans, repository profiles and coding/PR history; it excludes credentials, private storage URLs and deleted sources. It is a paginated export, not an atomic database snapshot. Losing owner access interrupts it. Private evidence is stored under the documented retention policy; deleting a source fences delayed results and queues its objects for removal.
 
-Open a proposal and accept only a relevant change you want. Choose the quoted draft action, then review scope, existing/new files, steps, checks, risks and rollback in the plan fields. JSON is available in its disclosure, and Export plan downloads your current edits. Save new plan version records the reviewed plan and invalidates older execution approvals. Saving does not start coding; choose a verified executor and funding route in the separate approval section.
+## What remains limited
 
-The isolated cloud route now has a complete owner production acceptance exercise: reviewed plan, exact bounded approval, isolated checks, separate patch approval, real draft PR, closure, reopening, merge and verified reversal. It used one explicitly synthetic documentation file. The app preserved its historical merge and accurately recovered from temporary GitHub access loss. Cloud execution remains restricted to the verified owner while commercial funding, quality and provider gates are completed. The Windows local coding route remains blocked by its failed isolation check. ChatGPT consent does not remove that block. Unattended work still requires the specific approved task and budget.
+Sampled frames can miss short scenes and automatic transcripts can contain errors. Forty owned synthetic clips and one licensed human excerpt completed analysis and matching, but the numerical human quality benchmark remains incomplete. Your five real-post reviews and original 23 qualitative approvals are recorded; no repeat review is needed for those.
 
-Use Runs & PRs to inspect the report and patch. Only an awaiting-review patch has a publication button. Open the real GitHub PR from the status link; Refresh authoritative PR status checks GitHub again. A verified reversal has its own evidence link and keeps the original merge history. Merge does not mean measured benefit.
+The EUR 10 Google inference pilot ceiling and service budgets remain unchanged. Exhaustion pauses work; do not repeatedly retry or silently change funding. Physical Android testing is deferred to V1.1. Wider repository coverage, provider-invoice reconciliation and complete disaster cutover remain validation work. Gemini and Telegram are deferred.
 
-Cloud checks use a bounded text snapshot and a reviewed offline dependency cache for pnpm 12.3.4 projects with cached package versions. Real React/TypeScript checks passed on the selected production worker. Missing packages, unsupported managers and install scripts cannot obtain network access or a fallback. Read exclusions and failed checks before publication; this small checked project does not certify every repository. Checks that rewrite sources are refused rather than silently changing the published files.
-
-## Storage and evidence
-
-The ZIP is processed locally and is not retained by the app. Private EU R2 stores selected evidence with Convex metadata. Authenticated frame requests returned private/no-store; unauthenticated requests returned no image bytes. Source deletion fences delayed results and queues associated objects for removal. Successfully processed raw media expires after 24 hours, normalized temporary audio after one hour. Selected evidence follows the documented retention policy. Android hardware testing remains deferred; phone-sized Chrome layouts and interactions passed.
-
-Search, tags and state filters already exist. More categories and ranking should help retrieve relevant analyses, references and repository matches. A general conversational library assistant is not currently verified.
-
-## What to report when testing
-
-Your conversation review accepted the five real saved-post analyses. Their requested collection, whole-post and evidence-viewing improvements are now implemented. You do not need to review the same five again to complete that pilot; broader quality acceptance remains separately recorded.
-
-Record the page, approximate time, device and action that failed. Include the visible error and whether the source was saved. Avoid repeated submissions after an unclear write result. Do not send private tokens or full archives in GitHub issues. Screenshots should omit personal or sensitive content.
-
-The [implementation record](../implementation-status.md) lists exact test evidence. [Deployment instructions](vibescroller-deployment.md) describe environment setup. [The publication checklist](../../legal/POLICY-IMPLEMENTATION.md) and [accountant handover](operator-tax-and-publication.md) remain required for paid release. No professional legal review has been claimed.
-
-## Find the insights and categories
-
-Open Library. Choose Music, Reading or another category, then sort by import date, save date, update date or title. Search finds matching stored sources by relevance. Open a whole source row to read all insights and expand its private evidence. The count on the row shows the full number of insights, even when only three point titles are previewed.
-
-Opening a source gives it a permanent private address under Library. Bookmark that address to return to the same video and insights after reload. Reading an older source stays open while the library refreshes or its current filters exclude that source. The link still requires access to its workspace; deleted and unavailable records cannot be reopened from a bookmark.
-
-Open Categories inside a source to edit its names. A new valid topic can be created by future analysis. Your manual choices survive reprocessing. The shared suggestion control is optional, publishes no source content and requires operator review before a name joins the app-wide vocabulary.
-
-## Download your work
-
-As workspace owner, open Privacy and choose Export workspace content. The JSON download includes saved sources and insights, proposals and plans, feedback, repository profiles and commit manifests, coding/PR history and workspace categories. It excludes deleted sources, private storage links, credential bindings and temporary raw repository context. This is a live paginated export, not an atomic database snapshot; records created after it starts are excluded, and losing owner access interrupts the download. Account profile/membership data has its separate account export.
-
-## Library refinement, October 3
-
-Open Library and choose All posts, Analyzed, Not analyzed or Processing. The category menu separates broad Collections from specific Topics. Use Added to app for the import date, Saved on platform for the export's save date, and Post published for a verified original timestamp. Missing original dates are labeled unavailable. Search uses relevance until cleared.
-
-Open a post to inspect its summary and main points. Evidence frames open inside the app; use Close or Escape, or the previous/next controls. The original post card still opens Instagram. Project suggestions start with the whole post; expand Advanced only to exclude points. Finding a project or matching a repository does not approve coding.
-
-Connect GitHub through the dedicated [VibeScroller App](https://github.com/apps/vibescroller/installations/new). GitHub offers All repositories or Only select repositories. Link your GitHub account to the workspace, select a project, and confirm its profile before requesting context or a plan. Repository access can be changed in GitHub settings. Commercial execution remains governed by current release gates.
-
-The additional real URL-only example completed in about three minutes, including preparation, with five saved main points and 22 retained frames. The separate rapid-cut decoder probe retained 48 frames; the cap does not force 48 duplicates for every video. Your earlier five-post review batch used 14 service compute credits including retries, with a 0.14 EUR internal cost ceiling. That ceiling is not a provider invoice. Reasoning used your ChatGPT allowance; transcription used local Whisper, and isolated audio/frame preparation used Vercel Sandbox. Actual billed infrastructure, shared included usage and laptop electricity are separate. Comparative quality scores remain a V1.1 calibration task.
-
-## Public workflow and billing, October 3
-
-1. Open https://scroll.companynerve.com/app and sign in. You should reach your default workspace directly.
-2. Open Library, then Add source. Paste a permitted public URL or import the reviewed Saved links from your ZIP. The ZIP stays on your selecting device. Choose the permitted automatic-analysis option and its funding route; the library updates as each source progresses.
-3. On your phone without the laptop, deliberately choose Cloud processing with app credits. For your own existing paired-laptop test, choose My ChatGPT plan and keep the laptop/runner awake. The cloud route never silently replaces that choice.
-4. Open a source row for its summary and all main points. Click evidence to view it inside the app. Use Collection/Topic and Analyzed/Not analyzed filters, then select the desired sort date. The original thumbnail opens the original social post.
-5. Connect the VibeScroller GitHub App, choose repository access in GitHub, then select a project in the app. Review matching evidence and a useful plan. Whole-post points are selected by default; Advanced can exclude points.
-6. Review the quoted funding limit and separately approve coding. After checks, review the patch and separately approve its draft PR. Open the real GitHub PR; its merged or closed state returns to the app. Nothing automatically merges.
-7. Open Billing from Account/your workspace to choose Starter or Pro and renewal interval. Read and accept the current terms before Continue to checkout. Stripe confirms your currency, total and applicable tax. After a paid subscription is reconciled, Billing exposes portal, cancellation, top-ups, plan changes and refund review. A redirect alone never grants allowance.
-
-Checkout is live through Managed Payments in verified tax-covered countries. The test reached real live Checkout but was expired without a purchase; no real buying/refund test was performed. Direct billing is not a fallback. Account/content export, deletion and cookie/notification controls remain in Account and Privacy.
-
-The [release record](paid-release-2026-10-03.md) lists dated scope, exact tests and remaining validation. Numerical accuracy, complete disaster cutover and physical Android acceptance are not implied. No additional login is needed now. A processing pause can mean budget/provider headroom is exhausted; avoid repeated retries and check the displayed reason.
+For a failure, record the page, time, device, action and visible error, including whether the source was saved. Keep passwords, tokens and full archives out of GitHub issues. See [the release record](paid-release-2026-10-03.md) for exact evidence and limits, [implementation status](../implementation-status.md) for tests, and [deployment instructions](vibescroller-deployment.md) for operation. Current policies have owner approval; no independent legal review is claimed.
