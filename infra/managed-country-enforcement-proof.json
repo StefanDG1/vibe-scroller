@@ -17,7 +17,17 @@
   "realMoneyTest": false,
   "limitations": [
     "Native rule configuration and sandbox card outcomes do not constitute a live payment test.",
-    "Managed Payments Checkout and renewal acceptance after this rule change are recorded separately.",
+    "The post-rule actual sandbox Managed Payments checkout and one weekly renewal passed; this is not a live payment or all-market certification.",
     "Country enforcement does not establish provider agreements, published policy approval or completion of the paid product."
-  ]
+  ],
+  "postRuleManagedCheckout": {
+    "environment": "sandbox",
+    "synthetic": true,
+    "nativeCardCheckoutPaid": true,
+    "subscriptionStatus": "active",
+    "weeklyTestClockRenewalPaid": true,
+    "renewalInvoiceReason": "subscription_cycle",
+    "includedAllowanceGrants": [65, 65],
+    "realMoneyTest": false
+  }
 }

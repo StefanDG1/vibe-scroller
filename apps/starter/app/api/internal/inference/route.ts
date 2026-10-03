@@ -11,6 +11,7 @@ import {
   googleConfigured,
   googleAccessToken,
   googleGenerate,
+  GoogleProviderError,
 } from "../../../../../../packages/providers/google-inference";
 export const runtime = "nodejs";
 export const maxDuration = 180;
@@ -84,7 +85,20 @@ export async function POST(request: Request) {
       ),
       { headers },
     );
-  } catch {
+  } catch (error) {
+    // Never log prompts, provider bodies, credentials or customer identifiers.
+    console.error(
+      JSON.stringify({
+        stage: "google_inference_broker",
+        category:
+          error instanceof GoogleProviderError
+            ? "provider_http"
+            : "request_failed",
+        ...(error instanceof GoogleProviderError
+          ? { status: error.status }
+          : {}),
+      }),
+    );
     return denied();
   }
 }

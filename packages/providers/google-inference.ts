@@ -29,6 +29,37 @@ export function googleConfigured(env = process.env, now = Date.now()) {
     now < expires
   );
 }
+// Google's structured decoder rejects otherwise valid JSON schemas with long
+// array/length limits. Keep those constraints in the contract and validate the
+// returned object in the caller; supply only the structural grammar here.
+export function googleStructuralSchema(
+  schema: Record<string, any>,
+): Record<string, any> {
+  const output: Record<string, any> = {};
+  if (schema.type) output.type = schema.type;
+  if (Array.isArray(schema.enum)) {
+    output.enum = schema.enum;
+    output.type ??= typeof schema.enum[0];
+  }
+  if (
+    typeof schema.const === "string" ||
+    typeof schema.const === "boolean" ||
+    typeof schema.const === "number"
+  ) {
+    output.type = typeof schema.const;
+    output.enum = [schema.const];
+  }
+  if (schema.required) output.required = schema.required;
+  if (schema.properties)
+    output.properties = Object.fromEntries(
+      Object.entries(schema.properties).map(([key, value]) => [
+        key,
+        googleStructuralSchema(value as Record<string, any>),
+      ]),
+    );
+  if (schema.items) output.items = googleStructuralSchema(schema.items);
+  return output;
+}
 export function googleRequest(payload: InferencePayload) {
   const p = inferencePayload.parse(payload);
   return {
@@ -45,16 +76,19 @@ export function googleRequest(payload: InferencePayload) {
       candidateCount: 1,
       thinkingConfig: { thinkingLevel: "MINIMAL", includeThoughts: false },
       responseMimeType: "application/json",
-      responseJsonSchema: p.schema,
+      responseJsonSchema: googleStructuralSchema(p.schema),
     },
   };
 }
+export class GoogleProviderError extends Error {
+  constructor(public readonly status: number) {
+    super(
+      "PROVIDER_ERROR: The configured Google inference request failed. No fallback was used.",
+    );
+  }
+}
 async function responseJson(response: Response) {
-  ensure(
-    response.ok,
-    "PROVIDER_ERROR",
-    "The configured Google inference request failed. No fallback was used.",
-  );
+  if (!response.ok) throw new GoogleProviderError(response.status);
   const reader = response.body?.getReader();
   ensure(reader, "PROVIDER_ERROR", "Provider response was empty.");
   const chunks: Uint8Array[] = [];

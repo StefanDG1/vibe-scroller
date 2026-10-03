@@ -15,6 +15,7 @@ import {
   googleMicros,
   googleUsage,
   googleRequest,
+  googleStructuralSchema,
 } from "../packages/providers/google-inference";
 const secret = "ab".repeat(32);
 const request = (
@@ -165,6 +166,43 @@ const payload = {
   maxOutput: 256,
   maxMicros: 10000,
 };
+it("lowers complex decoder constraints without mutating the strict caller contract", () => {
+  const contract = {
+    type: "object",
+    additionalProperties: false,
+    required: ["segments", "version"],
+    properties: {
+      version: { const: "1.0.0" },
+      segments: {
+        type: "array",
+        maxItems: 200,
+        items: {
+          type: "object",
+          required: ["start", "text"],
+          properties: {
+            start: { type: ["number", "null"], minimum: 0, maximum: 600 },
+            text: { type: "string", maxLength: 4000 },
+          },
+        },
+      },
+    },
+  };
+  const original = structuredClone(contract);
+  const grammar = googleStructuralSchema(contract);
+  expect(grammar.properties.segments).not.toHaveProperty("maxItems");
+  expect(grammar.properties.segments.items.properties.start).toEqual({
+    type: ["number", "null"],
+  });
+  expect(grammar.properties.version).toEqual({
+    type: "string",
+    enum: ["1.0.0"],
+  });
+  expect(contract).toEqual(original);
+  expect(
+    googleRequest({ ...payload, schema: contract }).systemInstruction.parts[0]
+      .text,
+  ).toContain(JSON.stringify(original));
+});
 const usage = {
   promptTokenCount: 100,
   candidatesTokenCount: 20,

@@ -22,7 +22,7 @@ const pipelineVersion = createHash("sha256")
   .update(
     mediaDecoder +
       (google
-        ? ":media-v1.4:gemini-3.5-flash-lite:eu:changes16:structured2"
+        ? ":media-v1.5:gemini-3.5-flash-lite:eu:changes16:structural3"
         : `:media-v1.3:whisper-large-v3-turbo:${process.env.VISION_MODEL ?? "@cf/meta/llama-3.2-11b-vision-instruct"}:changes4:structured2`),
   )
   .digest("hex");
@@ -155,7 +155,10 @@ export const analyze = internalAction({
           if (speech) {
             inferenceMicros += speech.usage.costMicros;
             warnings.push(
-              `Speech was transcribed by ${speech.model}; its timestamps are approximate. ${speech.output.uncertainty}`,
+              `Speech was transcribed by ${speech.model}; its timestamps are approximate. ${speech.output.uncertainty}`.slice(
+                0,
+                500,
+              ),
             );
           }
           const asr = speech
