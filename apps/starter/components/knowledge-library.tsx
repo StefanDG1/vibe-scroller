@@ -2,6 +2,7 @@
 import { useEffect, useState, useEffectEvent, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import { ChoiceSelect } from "./choice-select";
+import { downloadText } from "@/lib/download";
 
 type Call = (operation: string, args: any) => Promise<any>;
 type Props = {
@@ -11,16 +12,6 @@ type Props = {
   demo: boolean;
   call: Call;
 };
-function download(name: string, value: string) {
-  const url = URL.createObjectURL(
-    new Blob([value], { type: "text/markdown;charset=utf-8" }),
-  );
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = name;
-  a.click();
-  URL.revokeObjectURL(url);
-}
 async function read(operation: string, args: any) {
   const response = await fetch("/api/product", {
     method: "POST",
@@ -958,7 +949,13 @@ function IssueReview({
           Save exact text
         </button>
         <button
-          onClick={() => download("reviewed-issue.md", `# ${title}\n\n${body}`)}
+          onClick={() =>
+            downloadText(
+              "reviewed-issue.md",
+              `# ${title}\n\n${body}`,
+              "text/markdown;charset=utf-8",
+            )
+          }
         >
           Download Markdown
         </button>
