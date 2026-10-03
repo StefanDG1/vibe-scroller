@@ -58,14 +58,14 @@ export function checkoutPaymentRoute(a: {
         a.country === undefined ||
         managedTaxCountries.includes(a.country),
       "COUNTRY_DISABLED",
-      "Consumer purchases are unavailable in this country.",
+      "Purchases are unavailable in this country.",
     );
     ensure(
       a.managedMarket === "provider_supported" ||
         a.managedMarket === "tax_covered" ||
         (!!a.country && a.tax.countries.includes(a.country)),
       "COUNTRY_DISABLED",
-      "Consumer purchases are unavailable in this country.",
+      "Purchases are unavailable in this country.",
     );
     return {
       treatment: "stripe_managed_payments",

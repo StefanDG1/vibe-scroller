@@ -6,7 +6,7 @@ export type CataloguePricing = {
 };
 const version = "1.1.0";
 const metadata = { product: "vibescroller", catalogue: version };
-// Initial consumer software subscription. This is a product classification,
+// Software subscription for individual and business buyers. This is a product classification,
 // not a declaration of the seller's VAT registration or Stripe approval.
 export const softwareTaxCode = "txcd_10103000";
 

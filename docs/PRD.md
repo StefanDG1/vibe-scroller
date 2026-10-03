@@ -12,7 +12,7 @@ The public site uses the motto "Make scrolling productive." It does not promise 
 
 ## Users and boundaries
 
-The first audience is adult individual developers and founders. English is the initial interface and default source language. The owner approved consumer checkout in Stripe Managed Payments' supported markets on October 2, 2026; direct billing retains its separately reviewed country policy. Users can create multiple business profiles and select the repositories each profile owns. Business customers can enquire about a pilot. The application must not advertise unbuilt enterprise features.
+The first audience is adult individual developers and founders. English is the initial interface and default source language. The owner approved individual and business checkout in Stripe Managed Payments' verified tax-covered markets on October 3, 2026; direct billing retains its separately reviewed country policy. Users can create multiple business profiles and select the repositories each profile owns. Businesses may buy the same Starter or Pro service; additional custom scope requires a separate agreement. The application must not advertise unbuilt enterprise features.
 
 The founder's one-to-five daily English videos provide a starting workload. The service must use quotas and durable jobs rather than assuming every customer has that workload. The founder's laptop is a benchmark device, not a hosting dependency for paying customers.
 

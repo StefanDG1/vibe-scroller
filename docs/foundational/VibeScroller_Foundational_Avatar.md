@@ -6,14 +6,14 @@ This completes the original Mark Builds Brands Avatar Sheet Template using the [
 
 ## Demographic and general information
 
-| Template field           | Completion                                                                                          | Basis                                         |
-| ------------------------ | --------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| Age range                | Adults only; a narrower age range is unknown                                                        | Product                                       |
-| Gender                   | No verified distribution; do not gender the copy                                                    | Unknown                                       |
-| Location                 | English interface; consumer checkout in Managed Payments' supported markets once release gates pass | Owner decision October 2; not measured demand |
-| Monthly revenue          | Not known; personal salary and project revenue must not be conflated                                | Unknown                                       |
-| Professional backgrounds | Independent development and technical product founding are the intended focus                       | Product and hypothesis                        |
-| Typical identities       | Person with permission to change a selected repository and responsibility for reviewing the change  | Behavioral hypothesis                         |
+| Template field           | Completion                                                                                                       | Basis                                         |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| Age range                | Adults only; a narrower age range is unknown                                                                     | Product                                       |
+| Gender                   | No verified distribution; do not gender the copy                                                                 | Unknown                                       |
+| Location                 | English interface; individual and business checkout in verified Managed Payments markets once release gates pass | Owner decision October 2; not measured demand |
+| Monthly revenue          | Not known; personal salary and project revenue must not be conflated                                             | Unknown                                       |
+| Professional backgrounds | Independent development and technical product founding are the intended focus                                    | Product and hypothesis                        |
+| Typical identities       | Person with permission to change a selected repository and responsibility for reviewing the change               | Behavioral hypothesis                         |
 
 The first-person identity used for copy exploration is "I build a project and keep finding ideas I might use." This is drafted language, not a customer quote. Do not infer that the buyer runs a profitable SaaS, works full time, has a particular education, or is already subscribed to ChatGPT. Business enquiries are possible, but enterprise administration and team governance cannot be invented to broaden this avatar.
 
@@ -117,3 +117,5 @@ Verify the recurring source-to-project problem, current tool spending, and willi
 October 2 evidence review: the owner production workflow supplies a concrete inspectable approval/PR demonstration, not new buyer research. The working audience and unverified motivation, willingness-to-pay and adoption assumptions above remain unchanged. A synthetic operator exercise cannot become a fictional customer's experience.
 
 October 3, F005: The owner requested broad collections and simple specific topics for mixed saved content. This supports testing retrieval friction with the existing behavioral avatar; Food and Fashion labels do not establish a new validated customer segment.
+
+October 3, F006: business buyer eligibility is an owner-approved checkout scope, not validation of a new enterprise audience. The working developer/founder avatar and unmeasured demand remain unchanged.

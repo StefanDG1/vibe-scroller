@@ -12,7 +12,7 @@ These terms govern the hosted VibeScroller service. Separate open-source licence
 
 You must be at least 18 and able to enter this agreement. Provide accurate account and billing information. Keep access credentials secure and tell us about suspected unauthorized access. A workspace owner is responsible for inviting the right people and assigning appropriate access.
 
-An organization account must be created by someone authorized to act for that organization. A business enquiry does not create a custom contract, service-level guarantee, or enterprise entitlement.
+An organization account must be created by someone authorized to act for that organization. Purchasing for a business does not create a custom contract, service-level guarantee, or enterprise entitlement.
 
 ## What VibeScroller does
 
@@ -56,9 +56,9 @@ We may change prices for future renewal periods with clear advance notice. We do
 
 The checkout identifies the merchant for each transaction. When it uses Stripe Managed Payments, Link acts as merchant of record for that purchase and supplies the transaction invoice, applicable tax handling and payment support under its displayed terms. VibeScroller remains responsible for operating the software, its service commitments and handling service complaints. Your service and mandatory consumer rights are not removed by the payment arrangement.
 
-Use the billing settings to manage renewal and request service support. The receipt also links to the applicable merchant’s order and payment support. Do not send card details to VibeScroller support. Where Link is merchant of record, we do not issue a second Exponential Education consumer invoice for the same purchase. Our accountant receives the company’s separate settlement and provider accounting records.
+Use the billing settings to manage renewal and request service support. The receipt also links to the applicable merchant’s order and payment support. Do not send card details to VibeScroller support. Where Link is merchant of record, we do not issue a second Exponential Education transaction invoice for the same purchase. Our accountant receives the company’s separate settlement and provider accounting records.
 
-The initial paid offer is for private consumers in the countries and territories supported by the displayed merchant. For Stripe Managed Payments purchases, Stripe Checkout collects the billing address and determines transaction eligibility, available currency options and applicable taxes. Restricted territories and business purchases remain unavailable. A change to direct billing requires a separately reviewed country and tax configuration; a refused Managed Payments transaction does not automatically switch to direct billing.
+The paid offer is available to individuals and businesses in the verified tax-covered countries and territories supported by Stripe Managed Payments. Stripe Checkout collects the billing details and determines transaction eligibility, available currency options and applicable taxes. Restricted territories remain unavailable. Purchasing for a business does not add enterprise features or remove rights that apply to someone legally acting as a consumer. A change to direct billing requires a separately reviewed country and tax configuration; a refused Managed Payments transaction does not automatically switch to direct billing.
 
 ## Acceptable use and suspension
 
