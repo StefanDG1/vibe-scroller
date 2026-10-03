@@ -109,6 +109,8 @@ export async function POST(req: NextRequest) {
     );
   } catch (error) {
     const messages: Record<string, string> = {
+      ISSUES_PERMISSION_REQUIRED:
+        "GitHub refused issue access. Ask the App and installation owner to approve Issues permission, then verify again. Your Markdown remains available; no issue was published.",
       PUBLICATION_UNKNOWN:
         "GitHub may have created this issue. Refresh its stored attempt to reconcile; no blind retry is allowed.",
       DUPLICATE_ISSUE:

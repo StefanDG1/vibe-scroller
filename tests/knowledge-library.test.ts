@@ -604,7 +604,7 @@ it("publishes exact reviewed bytes through the isolated issue path and reconcile
     id: s.evaluationId,
     followUp: false,
   });
-  vi.mocked(authorizeRepository).mockResolvedValue({});
+  vi.mocked(authorizeRepository).mockResolvedValue({ private: true });
   vi.mocked(issueAccess).mockResolvedValue({
     token: "synthetic-token",
     visibility: "private",
@@ -675,7 +675,7 @@ it("blocks ambiguous network retries, permission downgrade and public visibility
       id: s.evaluationId,
       followUp: false,
     });
-    vi.mocked(authorizeRepository).mockResolvedValue({});
+    vi.mocked(authorizeRepository).mockResolvedValue({ private: true });
     vi.mocked(issueAccess).mockResolvedValue({
       token: "synthetic-token",
       visibility: "private",
@@ -724,6 +724,42 @@ it("blocks ambiguous network retries, permission downgrade and public visibility
     ).rejects.toThrow();
     vi.resetAllMocks();
   }
+});
+
+it("retains verified visibility on real permission denial without granting publication authority", async () => {
+  const s = await preparedIdea();
+  const id = await s.a.mutation(api.issues.create, {
+    id: s.evaluationId,
+    followUp: false,
+  });
+  vi.mocked(authorizeRepository).mockResolvedValue({ private: false });
+  vi.mocked(issueAccess).mockRejectedValue(
+    new Error("Issues write not granted"),
+  );
+  await expect(s.a.action(api.issueActions.prepare, { id })).rejects.toThrow(
+    "Issues write not granted",
+  );
+  const draft = (await s.a.query(api.issues.list, { organizationId: s.org }))
+    .items[0];
+  expect(draft.visibility).toBe("public");
+  expect(draft.permissionCheckedAt).toBeUndefined();
+  await expect(
+    s.a.mutation(api.issues.approve, {
+      id,
+      version: draft.version,
+      hash: draft.hash,
+      visibility: "public",
+      publicationRights: true,
+    }),
+  ).rejects.toThrow("APPROVAL_STALE");
+  expect(draft.attempts).toEqual([]);
+  expect(createIssue).not.toHaveBeenCalled();
+  vi.stubEnv("DISABLE_ISSUES", "true");
+  vi.mocked(issueAccess).mockClear();
+  await expect(s.a.action(api.issueActions.prepare, { id })).rejects.toThrow(
+    "POLICY_BLOCKED",
+  );
+  expect(issueAccess).not.toHaveBeenCalled();
 });
 
 it("deduplicates normalized aliases, counts all sources, searches source titles and preserves merge totals", async () => {

@@ -55,7 +55,34 @@ it("requests narrow issue permissions, verifies target/visibility and refuses pe
     ),
   ).toBe(true);
 });
+it("reports scoped permission refusal without leaking upstream text or attempting an issue write", async () => {
+  const { privateKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
+  vi.stubEnv("GITHUB_APP_ID", "1");
+  vi.stubEnv(
+    "GITHUB_APP_PRIVATE_KEY",
+    privateKey.export({ type: "pkcs8", format: "pem" }).toString(),
+  );
+  const paths: string[] = [];
+  let status = 422;
+  vi.stubGlobal("fetch", async (url: string) => {
+    paths.push(new URL(url).pathname);
+    return Response.json(
+      { message: "synthetic private upstream detail" },
+      { status },
+    );
+  });
+  const repo = { installationId: 1, providerId: 42, fullName: "owned/test" };
+  for (status of [422, 403]) {
+    await expect(issueAccess(repo)).rejects.toThrow(
+      "ISSUES_PERMISSION_REQUIRED",
+    );
+  }
+  status = 401;
+  await expect(issueAccess(repo)).rejects.toThrow("GITHUB_UNAVAILABLE");
+  expect(paths).toEqual(Array(3).fill("/app/installations/1/access_tokens"));
+});
 it("sends exact title/body once, treats incomplete receipts as unknown and reconciles beyond the first page", async () => {
+  vi.stubEnv("GITHUB_APP_ID", "1");
   const calls: any[] = [],
     body =
       "Exact reviewed body\n\n<!-- vibescroller-issue:synthetic-unique -->";
@@ -83,9 +110,19 @@ it("sends exact title/body once, treats incomplete receipts as unknown and recon
       page === "1"
         ? Array.from({ length: 100 }, (_, i) => ({
             number: 1000 + i,
-            body: "unrelated",
+            body: i === 0 ? body : "unrelated",
+            html_url: `https://github.com/owned/test/issues/${1000 + i}`,
+            performed_via_github_app: { id: 999 },
           }))
-        : [{ number: 1, body, state: "closed" }],
+        : [
+            {
+              number: 1,
+              body,
+              state: "closed",
+              html_url: "https://github.com/owned/test/issues/1",
+              performed_via_github_app: { id: 1 },
+            },
+          ],
     );
   });
   expect(

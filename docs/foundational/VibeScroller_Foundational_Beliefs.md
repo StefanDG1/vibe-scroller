@@ -51,3 +51,7 @@ F008 extends the inspectable workflow to combined source knowledge and reviewed 
 ## Knowledge implementation evidence, October 3
 
 The current engineering extension adds workspace topics, persistent organization corrections, a repository checklist, reviewable AI context and separately approved issue drafts/publication. These extend the F008 owner brief using existing analysis and provider paths. The technical developer/founder audience, six belief requirements, prices, funding limits and V2 exclusions remain unchanged. Local regression is not proof of model quality, independent comprehension, comparative value or customer demand. Availability claims require exact deployment/provider acceptance in [the execution ledger](../V1-KNOWLEDGE-EXECUTION.md).
+
+## Live F008 engineering evidence, October 3
+
+The workspace library is deployed with source-preserving backfill. Two bounded production synthesis batches and one six-source repository evaluation completed through the existing approved funding route. The evaluation returned no fit; confirmed business context remained unchanged. These operator tests do not establish independent comprehension, organization accuracy, comparative value or customer benefit. Actual issue publication remains unavailable until GitHub App/installation permission and exact-text approval are verified. Source privacy, reviewed budgets and separate coding approval remain part of the offer and evidence requirements. See [the execution ledger](../V1-KNOWLEDGE-EXECUTION.md).

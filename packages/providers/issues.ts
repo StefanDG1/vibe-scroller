@@ -1,5 +1,5 @@
 import { github, installationToken } from "./github";
-import { ensure } from "../policy";
+import { ensure, PolicyError } from "../policy";
 // Only the trusted publisher requests this narrow permission; no token reaches inference.
 export async function issueAccess(
   repo: {
@@ -9,14 +9,28 @@ export async function issueAccess(
   },
   write = true,
 ) {
-  const token = await installationToken(repo.installationId, {
-    repository_ids: [repo.providerId],
-    permissions: { issues: write ? "write" : "read", contents: "read" },
-  });
+  let token: string;
+  try {
+    token = await installationToken(repo.installationId, {
+      repository_ids: [repo.providerId],
+      permissions: { issues: write ? "write" : "read", contents: "read" },
+    });
+  } catch (error) {
+    if (error instanceof Error && "status" in error) {
+      throw new PolicyError(
+        [403, 422].includes(Number(error.status))
+          ? "ISSUES_PERMISSION_REQUIRED"
+          : "GITHUB_UNAVAILABLE",
+        "GitHub refused the narrowly scoped issue credential. Review App and installation permissions; no issue write was attempted.",
+      );
+    }
+    throw error;
+  }
   const current = await github(`/repos/${repo.fullName}`, token);
   ensure(
     current.id === repo.providerId &&
       current.full_name === repo.fullName &&
+      typeof current.private === "boolean" &&
       current.has_issues &&
       !current.archived &&
       !current.disabled,
@@ -76,6 +90,10 @@ export async function findIssue(
     const found = issues.find(
       (i: any) =>
         !i.pull_request &&
+        i.performed_via_github_app?.id === Number(process.env.GITHUB_APP_ID) &&
+        Number.isSafeInteger(i.number) &&
+        i.number > 0 &&
+        i.html_url === `https://github.com/${fullName}/issues/${i.number}` &&
         typeof i.body === "string" &&
         i.body.includes(marker),
     );
