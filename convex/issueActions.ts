@@ -12,8 +12,24 @@ import { ensure } from "../packages/policy";
 export const prepare = action({
   args: { id: v.id("issueDrafts") },
   handler: async (ctx, a): Promise<void> => {
+    ensure(
+      process.env.DISABLE_ISSUES !== "true" &&
+        process.env.RESTORE_LOCK !== "true",
+      "POLICY_BLOCKED",
+      "Issue publishing is paused.",
+    );
     const c = await ctx.runQuery(api.issues.context, a);
-    await authorizeRepository(ctx, c.repo, c.draft.baseSha);
+    const target = await authorizeRepository(ctx, c.repo, c.draft.baseSha);
+    ensure(
+      typeof target.private === "boolean",
+      "FORBIDDEN",
+      "Current repository visibility is unavailable.",
+    );
+    await ctx.runMutation(internal.issues.observeVisibility, {
+      ...a,
+      hash: c.draft.hash,
+      visibility: target.private ? "private" : "public",
+    });
     const access = await issueAccess(c.repo);
     await ctx.runMutation(internal.issues.prepared, {
       ...a,

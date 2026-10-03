@@ -188,6 +188,10 @@ export const list = query({
         ...d,
         ...(!surviving ? { title: "Unavailable private draft", body: "" } : {}),
         current: await draftCurrent(ctx, d),
+        permissionCurrent:
+          publicationEnabled() &&
+          !!d.permissionCheckedAt &&
+          Date.now() - d.permissionCheckedAt < 120000,
         repository:
           (await ctx.db.get(d.repositoryId))?.fullName ??
           "Unavailable repository",
@@ -215,6 +219,35 @@ export const context = query({
     const repo = await ctx.db.get(draft.repositoryId);
     ensure(repo?.enabled, "FORBIDDEN", "Repository is no longer selected.");
     return { draft, repo, actor: actor._id };
+  },
+});
+// Visibility is useful for safe export/review even if the separate write-permission request is denied.
+export const observeVisibility = internalMutation({
+  args: {
+    id: v.id("issueDrafts"),
+    hash: v.string(),
+    visibility: v.union(v.literal("private"), v.literal("public")),
+  },
+  handler: async (ctx, a) => {
+    ensure(
+      publicationEnabled(),
+      "POLICY_BLOCKED",
+      "Issue publishing is paused.",
+    );
+    const d = await ctx.db.get(a.id);
+    ensure(
+      d &&
+        d.state === "draft" &&
+        d.hash === a.hash &&
+        (await draftCurrent(ctx, d)),
+      "APPROVAL_STALE",
+      "Review the current draft.",
+    );
+    await writeAccess(ctx, d.organizationId);
+    await ctx.db.patch(d._id, {
+      visibility: a.visibility,
+      permissionCheckedAt: undefined,
+    });
   },
 });
 export const prepared = internalMutation({

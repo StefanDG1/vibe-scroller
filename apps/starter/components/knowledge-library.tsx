@@ -27,14 +27,27 @@ async function read(operation: string, args: any) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ operation, args }),
   });
+  const data = response.headers
+    .get("content-type")
+    ?.includes("application/json")
+    ? await response.json()
+    : undefined;
   if (
     !response.ok ||
     !response.headers.get("content-type")?.includes("application/json")
   )
-    throw new Error(
-      "Knowledge is unavailable. Check your session and current workspace access.",
+    throw Object.assign(
+      new Error(
+        "Knowledge is unavailable. Check your session and current workspace access.",
+      ),
+      {
+        clearWorkspace:
+          response.redirected ||
+          [401, 403, 404].includes(response.status) ||
+          ["FORBIDDEN", "REAUTH_REQUIRED"].includes(data?.code),
+      },
     );
-  return (await response.json()).result;
+  return data.result;
 }
 const synthetic = {
   _id: "demo-topic",
@@ -71,13 +84,40 @@ export function KnowledgeLibrary(p: Props) {
     [browsingLaterPages, setBrowsingLaterPages] = useState(false);
   const refreshGeneration = useRef(0),
     detailGeneration = useRef(0);
+  async function scopedRead(operation: string, args: any) {
+    try {
+      return await read(operation, args);
+    } catch (e) {
+      if (
+        e &&
+        typeof e === "object" &&
+        "clearWorkspace" in e &&
+        e.clearWorkspace
+      ) {
+        refreshGeneration.current++;
+        detailGeneration.current++;
+        setTopics([]);
+        setIdeas([]);
+        setIssues([]);
+        setPolicy(undefined);
+        setSelected(undefined);
+        setDetail(undefined);
+        setNext(null);
+        setIdeaNext(null);
+        setIssueNext(null);
+        setLoading(false);
+      }
+      setMessage(e instanceof Error ? e.message : "Knowledge is unavailable.");
+      throw e;
+    }
+  }
   async function refresh(append = false, topicCursor?: string) {
     if (p.demo) return;
     const generation = ++refreshGeneration.current;
     const detailAtStart = detailGeneration.current;
     try {
       const [list, policy, ideas, drafts] = await Promise.all([
-        read("knowledgeList", {
+        scopedRead("knowledgeList", {
           organizationId: p.organizationId,
           search: searchScope === "topic" ? search || undefined : undefined,
           sourceSearch:
@@ -89,12 +129,12 @@ export function KnowledgeLibrary(p: Props) {
           cursor: topicCursor,
           repositoryId: project || undefined,
         }),
-        read("knowledgePolicy", { organizationId: p.organizationId }),
-        read("knowledgeIdeas", {
+        scopedRead("knowledgePolicy", { organizationId: p.organizationId }),
+        scopedRead("knowledgeIdeas", {
           organizationId: p.organizationId,
           repositoryId: project || undefined,
         }),
-        read("issueList", { organizationId: p.organizationId }),
+        scopedRead("issueList", { organizationId: p.organizationId }),
       ]);
       if (generation !== refreshGeneration.current) return;
       setTopics((old) =>
@@ -190,7 +230,7 @@ export function KnowledgeLibrary(p: Props) {
     }
     setLoading(true);
     try {
-      const response = await read("knowledgeDetail", {
+      const response = await scopedRead("knowledgeDetail", {
         id: topic._id,
         cursor: pageCursor,
         summaryCursor,
@@ -233,6 +273,7 @@ export function KnowledgeLibrary(p: Props) {
               : "Choose a ceiling before enabling funded automatic explanations. Existing analyses can be grouped without new media processing."}
           </p>
           <form
+            key={`${policy?._id ?? "new"}:${policy?.version ?? 0}`}
             className="form-grid"
             onSubmit={(e) => {
               e.preventDefault();
@@ -263,7 +304,7 @@ export function KnowledgeLibrary(p: Props) {
               />
               I approve automatic organization within this ceiling
             </label>
-            <button disabled={p.readOnly || busy || p.demo}>
+            <button disabled={p.readOnly || busy || loading || p.demo}>
               Save organization policy
             </button>
           </form>
@@ -740,11 +781,13 @@ export function KnowledgeLibrary(p: Props) {
         {ideaNext && (
           <button
             onClick={async () => {
-              const r = await read("knowledgeIdeas", {
+              const generation = refreshGeneration.current;
+              const r = await scopedRead("knowledgeIdeas", {
                 organizationId: p.organizationId,
                 repositoryId: project || undefined,
                 cursor: ideaNext,
-              });
+              }).catch(() => null);
+              if (!r || generation !== refreshGeneration.current) return;
               setBrowsingLaterPages(true);
               setIdeas((old) => [...old, ...r.items]);
               setIdeaNext(r.next);
@@ -780,10 +823,12 @@ export function KnowledgeLibrary(p: Props) {
         {issueNext && (
           <button
             onClick={async () => {
-              const r = await read("issueList", {
+              const generation = refreshGeneration.current;
+              const r = await scopedRead("issueList", {
                 organizationId: p.organizationId,
                 cursor: issueNext,
-              });
+              }).catch(() => null);
+              if (!r || generation !== refreshGeneration.current) return;
               setBrowsingLaterPages(true);
               setIssues((old) => [...old, ...r.items]);
               setIssueNext(r.next);
@@ -834,6 +879,7 @@ function IssueReview({
     [message, setMessage] = useState("");
   const changed =
     title !== d.title || body !== d.body || sensitive !== d.sensitive;
+  const permissionCurrent = d.permissionCurrent === true;
   return (
     <article className="panel">
       <h3>{d.repository}</h3>
@@ -850,6 +896,13 @@ function IssueReview({
             ? "PRIVATE repository: everyone with repository access can read this text. Workspace membership and repository membership can differ."
             : "Repository visibility and Issues write permission must be verified before publication."}
       </p>
+      {d.visibility && (
+        <p>
+          {permissionCurrent
+            ? "Issues write permission was verified recently. Publication rechecks current access."
+            : "Issues write permission has not been verified or its check expired. Verify permission before publishing. Markdown export remains available."}
+        </p>
+      )}
       <label>
         Exact issue title
         <input
@@ -948,6 +1001,7 @@ function IssueReview({
           !d.current ||
           changed ||
           !d.visibility ||
+          !permissionCurrent ||
           d.state !== "draft"
         }
         onClick={() =>

@@ -1152,6 +1152,7 @@ export function Console({
                 Confirm a profile before matching.
               </p>
               <RepositoryChecklist
+                key={`selection:${organizationId}`}
                 organizationId={organizationId}
                 repositories={data.repositories}
                 choices={data.githubChoices ?? []}
