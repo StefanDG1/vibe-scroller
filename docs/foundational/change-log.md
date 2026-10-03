@@ -28,3 +28,7 @@ October 3 public-route evidence: reviewed all four documents and appended curren
 ## October 3: F007 independent-use preparation
 
 Reviewed all four briefs against the implementation request and plan review. Updated Research, Avatar, Offer and Beliefs together with the authorized personal-path preparation and evidence limits. Hosted tutorial and product documentation retain the technical audience, no-fit decisions, separate funding/approval and actual availability. Two independent setups, an upgrade, human scoring, invoices and recurring customer evidence remain missing. No new price, policy, customer claim or marketing dispatch.
+
+## October 3: F008 workspace knowledge and issues
+
+Reviewed all four briefs against the confirmed owner scope and inspected current selection, AI profile, category, single-source proposal and JSON export code. Updated Research, Avatar, Offer and Beliefs together. Existing audience, prices, providers and approval boundaries remain. Connected knowledge and reviewed issue publication are planned, not deployed. No new market study, useful-connection verdict, cost, customer outcome or demand evidence was supplied.

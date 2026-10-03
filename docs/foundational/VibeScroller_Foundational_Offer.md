@@ -176,3 +176,7 @@ The six Starter/Pro prices and two top-ups are now configured for live Managed P
 ## Post-V1 scope, October 3
 
 F007 records the owner-authorized preparation of one personal deployment path on the same core. Independent setup support still needs two fresh own-account testers and an upgrade; no fully local or self-contained claim follows. The technical developer/founder positioning, actual prices, explicit funding and six beliefs remain unchanged. Documentation now distinguishes hosted users, personal deployers, contributors and operators. Retained quality cases are development evidence, not an untouched benchmark; no new human scores, customers, savings or invoices were invented. See [the execution ledger](../POST-V1-EXECUTION.md).
+
+## Connected workspace knowledge and issues, October 3
+
+F008 plans a connected workspace library, repository checklist, AI-first context review and reviewed GitHub issues. These are specified additions, not currently available product promises. Existing import, analysis, categories, profiles, plans and separately approved draft PRs are reused. No price, allowance, unlimited inference or universal relevance claim changes. Issue publication requires exact-content review, current GitHub permission and a visible privacy check; no code run is required. See [the V1 implementation plan](../V1-KNOWLEDGE-LIBRARY-PLAN.md).

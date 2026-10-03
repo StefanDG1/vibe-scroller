@@ -46,7 +46,7 @@ The user can record whether the implemented change helped. Merge and business be
 | R10 | Evidence-backed insights | Distinct main points link to transcript or frame evidence. Claims and system interpretations remain separate.          |
 | R11 | Library                  | Browse, search, filter, tag, edit, export, and delete saved content and its derived records.                           |
 | R12 | Private reuse            | Deduplicate within a workspace. A second identical import does not repeat completed processing or billing.             |
-| R13 | Repository selection     | Users choose GitHub installations and repos. No automatic access to all account repositories.                          |
+| R13 | Repository selection     | An explicit All repositories grant is allowed. Only repositories selected in the app supply code for analysis.         |
 | R14 | Business profile         | Store purpose, audience, stage, goals, business model, constraints, and non-goals for each project.                    |
 | R15 | Repository snapshots     | Analyze selected content at a recorded commit. Respect exclusions and scan for secrets.                                |
 | R16 | Selective matching       | Evaluate plausible matches. Return no fit, already implemented, unsupported, or deferred when appropriate.             |
@@ -70,6 +70,10 @@ The user can record whether the implemented change helped. Merge and business be
 | R34 | Evidence of completion   | Test and release records distinguish local, staging, and production verification.                                      |
 | R35 | Source traceability      | Every claim, proposal, and implementation retains provenance and processing versions.                                  |
 | R36 | Account disconnection    | Disconnecting a provider revokes its capabilities without unexpectedly deleting the user's app account.                |
+
+## Confirmed V1 extension
+
+The owner approved separate workspace knowledge libraries, automatic organization with persistent manual corrections, a GitHub repository checklist and AI-drafted business context with easy confirmation/correction. Connected insights can be applied to selected projects and turned into separately reviewed GitHub issues. [The implementation plan](V1-KNOWLEDGE-LIBRARY-PLAN.md) and [ADR 052](adr/052-workspace-knowledge-and-reviewed-issues.md) distinguish existing behavior from missing work, contracts, costs and acceptance. The library extension does not imply cross-workspace reuse or customer-content training. An issue requires its own publication approval; execution and draft PRs keep separate permission. These additions are planned V1 work, not completed acceptance.
 
 ## Release exclusions
 

@@ -182,3 +182,7 @@ Observed integration evidence now includes the supported public Google metered/V
 ## Post-V1 scope, October 3
 
 F007 records the owner-authorized preparation of one personal deployment path on the same core. Independent setup support still needs two fresh own-account testers and an upgrade; no fully local or self-contained claim follows. The technical developer/founder positioning, actual prices, explicit funding and six beliefs remain unchanged. Documentation now distinguishes hosted users, personal deployers, contributors and operators. Retained quality cases are development evidence, not an untouched benchmark; no new human scores, customers, savings or invoices were invented. See [the execution ledger](../POST-V1-EXECUTION.md).
+
+## Connected workspace knowledge and issues, October 3
+
+F008 is explicit owner steering, not new customer research. The owner approved separate workspace knowledge libraries, automatic organization, AI-drafted business context with confirmation/correction, app-level repository checklists after a GitHub All repositories grant, and reviewed issue output. Existing retrieval/review hypotheses justify testing these connections, but do not establish organization accuracy, recurring value or issue-first demand. Private knowledge is not cross-customer training. The plan retains source evidence, disagreement, no-fit and funding boundaries. See [the V1 implementation plan](../V1-KNOWLEDGE-LIBRARY-PLAN.md).
