@@ -1,0 +1,34 @@
+{
+  "checkedAt": "2026-10-03T02:33:34.513893+00:00",
+  "synthetic": true,
+  "datasetVersion": "owned-synthetic-2026-10-03-v2",
+  "codeCommit": "2f64652fad9da7fdf91c6e4485ee0c4de92a8296",
+  "uploaded": 40,
+  "states": {
+    "ready": 23,
+    "failed": 3,
+    "saved": 14
+  },
+  "actualSuccessfulMatchingResults": 46,
+  "expectedMatchingResults": 80,
+  "humanReviewed": 0,
+  "missingCategories": ["accented_english"],
+  "successfulAnalysisInferenceEstimateEUR": 0.281933,
+  "matchingInferenceEstimateEUR": 0.179094,
+  "successfulServiceCredits": 69,
+  "successfulProcessingSeconds": {
+    "minimum": 40.492,
+    "median": 46.836,
+    "maximum": 125.698
+  },
+  "completeBenchmark": false,
+  "publicReleaseApproved": false,
+  "limitations": [
+    "Synthetic owned authoring, not customer videos: twenty scenarios plus twenty labeled variants, two installed US-English synthetic voices; genuine accented English is absent.",
+    "Human review and reference annotations are pending. No human quality scores, supported-point counts, timestamp usefulness or correctness verdicts were fabricated.",
+    "The existing monthly trial ceiling stopped dispatch at 26 of 40; 14 remain saved and unprocessed. Three earlier failures were preserved without retry or unknown-cost release.",
+    "Two repositories are owned local excerpt fixtures, not installed customer repositories. Matching used actual metered inference and strict source/repository references, but no GitHub task was published for these fixtures.",
+    "Successful application receipts show conservative EUR inference estimates and service credits, not a paid provider invoice. USD settled invoice cost is unknown. Compute credits are not a provider bill.",
+    "Dataset authored at 85d50b741b447465249d6ce4be7c51d54ed51804; successful analyses span media pipeline 1.6 and 1.7 because fixes were deployed during the run. Failed results remain recorded."
+  ]
+}

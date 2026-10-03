@@ -39,6 +39,22 @@ export function EvidenceViewer({
       if (event.target === element) onClose();
     };
     const navigate = (event: KeyboardEvent) => {
+      if (event.key === "Tab") {
+        const controls = Array.from(
+          element.querySelectorAll<HTMLButtonElement>("button:not(:disabled)"),
+        );
+        const first = controls[0],
+          last = controls.at(-1);
+        if (
+          first &&
+          last &&
+          ((event.shiftKey && document.activeElement === first) ||
+            (!event.shiftKey && document.activeElement === last))
+        ) {
+          event.preventDefault();
+          (event.shiftKey ? last : first).focus();
+        }
+      }
       if (event.key === "ArrowLeft") {
         event.preventDefault();
         setIndex((i) => Math.max(0, i - 1));
