@@ -5,7 +5,7 @@ import {
   validateInspectedContext,
 } from "../packages/repositories/retrieval";
 import { validateRepositoryEvidence } from "../packages/repositories/context";
-import { retrieveContext } from "../packages/providers/github";
+import { retrieveContext, snapshot } from "../packages/providers/github";
 import { createHash, generateKeyPairSync } from "node:crypto";
 
 const file = {
@@ -112,6 +112,73 @@ it("includes larger UI components and styles before specification-only matches w
   expect(retrievalFiles(entries, "unrelated", [component.path])[0]).toEqual(
     component,
   );
+});
+it("keeps the larger component in the actual snapshot manifest before bounded retrieval", async () => {
+  const text =
+    "export const minimumTouchSize = 44;\n" +
+    "// owned control implementation\n".repeat(4800);
+  const bytes = Buffer.from(text);
+  const blobSha = createHash("sha1")
+    .update(`blob ${bytes.length}\0`)
+    .update(bytes)
+    .digest("hex");
+  const component = {
+    path: "apps/web/mobile-controls.tsx",
+    sha: blobSha,
+    type: "blob",
+    mode: "100644",
+    size: bytes.length,
+  };
+  expect(bytes.length).toBeGreaterThan(100000);
+  const { privateKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
+  vi.stubEnv("GITHUB_APP_ID", "123");
+  vi.stubEnv(
+    "GITHUB_APP_PRIVATE_KEY",
+    privateKey.export({ type: "pkcs8", format: "pem" }).toString(),
+  );
+  vi.stubGlobal("fetch", async (url: string) => {
+    const path = new URL(url).pathname;
+    return Response.json(
+      path.endsWith("/access_tokens")
+        ? { token: "owned" }
+        : path === "/installation/repositories"
+          ? { repositories: [{ id: 42, full_name: "owned/synthetic" }] }
+          : path.includes("/git/ref/")
+            ? { object: { sha: "c".repeat(40) } }
+            : path.includes("/git/trees/")
+              ? {
+                  truncated: false,
+                  tree: [
+                    component,
+                    { ...component, path: ".env", size: 1 },
+                    { ...component, path: "src/link.tsx", mode: "120000" },
+                    { ...component, path: "src/oversized.tsx", size: 250001 },
+                    { ...component, path: "src/invalid.tsx", size: -1 },
+                  ],
+                }
+              : path.includes("/git/blobs/")
+                ? { encoding: "base64", content: bytes.toString("base64") }
+                : { id: 42, default_branch: "main" },
+    );
+  });
+  try {
+    const observed = await snapshot(1, 42, "owned/synthetic");
+    expect(observed.manifest).toEqual([component.path]);
+    const inspected = await retrieveContext(
+      {
+        installationId: 1,
+        providerId: 42,
+        fullName: "owned/synthetic",
+        ...observed,
+      },
+      "mobile touch controls",
+    );
+    expect(inspected.excerpts[0].content).toContain("minimumTouchSize = 44");
+    expect(inspected.excerpts[0].content.length).toBeLessThanOrEqual(4000);
+  } finally {
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+  }
 });
 it("uses only recorded immutable blobs and rejects changed bytes or uninspected cited lines", async () => {
   const text =

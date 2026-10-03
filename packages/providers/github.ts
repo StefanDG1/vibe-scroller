@@ -190,9 +190,11 @@ export async function snapshot(
   const files = tree.tree.filter(
     (f: any) =>
       f.type === "blob" &&
-      f.mode !== "120000" &&
+      ["100644", "100755"].includes(f.mode) &&
       !ignored(f.path) &&
-      f.size <= 100000,
+      Number.isSafeInteger(f.size) &&
+      f.size >= 0 &&
+      f.size <= RETRIEVAL_BLOB_LIMIT,
   );
   const manifest = files.map((f: any) => f.path);
   const manifestEntries = files.map((f: any) => ({
