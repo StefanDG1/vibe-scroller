@@ -32,6 +32,16 @@ Mode: reference. These decisions supersede earlier alternatives in the discussio
 | D26 | Preserve the exact V2 mode label `full retard mode` internally, with finite permissions and spending                                                    | Owner's requested wording                           |
 | D27 | Mark Builds Brands permission is owner-attested; no unsupported affiliation or licence identification                                                   | Owner's permission statement                        |
 
+## Workspace knowledge and issue planning
+
+| ID  | Decision                                                                                                                                                                                          | Basis                                 |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| D28 | Knowledge libraries, connected insights and organization feedback remain separate per workspace. Automatic organization preserves manual corrections.                                             | Owner confirmation October 3; ADR 052 |
+| D29 | Users may grant All repositories in GitHub, then explicitly select the active subset through an app checklist. Unselected code and future repositories are not automatically analyzed.            | Owner request October 3; ADR 052      |
+| D30 | AI drafts project business context by default for user confirmation/correction. Combined ideas can produce separately reviewed GitHub issues without coding approval; coding/PR approvals remain. | Owner confirmation October 3; ADR 052 |
+
+[The V1 knowledge-library plan](V1-KNOWLEDGE-LIBRARY-PLAN.md) specifies missing implementation and acceptance. These product decisions do not claim that new UI, synthesis or issue publication already exists.
+
 ## Current hosting and execution
 
 On October 2, 2026, the owner selected Vercel Pro, withdrew Netlify use and asked to avoid E2B. Vercel Sandbox replaces E2B behind the execution adapter. No new hosting purchase is authorized. Shared included credits do not mean unlimited free execution. [ADR 023](adr/023-vercel-isolated-execution.md) records implementation and verification boundaries.

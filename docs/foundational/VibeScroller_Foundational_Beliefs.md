@@ -43,3 +43,7 @@ The six beliefs remain unchanged: inspect source evidence, accept honest no-fit,
 ## Post-V1 scope, October 3
 
 F007 records the owner-authorized preparation of one personal deployment path on the same core. Independent setup support still needs two fresh own-account testers and an upgrade; no fully local or self-contained claim follows. The technical developer/founder positioning, actual prices, explicit funding and six beliefs remain unchanged. Documentation now distinguishes hosted users, personal deployers, contributors and operators. Retained quality cases are development evidence, not an untouched benchmark; no new human scores, customers, savings or invoices were invented. See [the execution ledger](../POST-V1-EXECUTION.md).
+
+## Connected workspace knowledge and issues, October 3
+
+F008 extends the inspectable workflow to combined source knowledge and reviewed issues. The six belief requirements remain evidence, context, useful decisions, control, bounded funding and personally demonstrated value. A topic connection, AI-inferred goal or closed issue is not verified truth or benefit. The issue path requires its own approval, and the coding/PR path keeps separate approval. Demonstrated organization quality and independent user comprehension remain missing. See [the V1 implementation plan](../V1-KNOWLEDGE-LIBRARY-PLAN.md).
