@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { AccountMenu } from "./account-menu";
 import { KnowledgeLibrary } from "./knowledge-library";
+import { downloadText } from "@/lib/download";
 import { RepositoryChecklist, BusinessContext } from "./repository-checklist";
 import { PlanEditor } from "./plan-editor";
 import { ChoiceSelect } from "./choice-select";
@@ -1446,13 +1447,11 @@ export function Console({
                 <Button
                   busy={busy}
                   onClick={() => {
-                    const a = document.createElement("a");
-                    a.href = URL.createObjectURL(
-                      new Blob([planText], { type: "application/json" }),
+                    downloadText(
+                      "vibescroller-plan.json",
+                      planText,
+                      "application/json",
                     );
-                    a.download = "vibescroller-plan.json";
-                    a.click();
-                    URL.revokeObjectURL(a.href);
                   }}
                 >
                   Export plan
