@@ -22,13 +22,14 @@ import {
 } from "../packages/providers/google-inference";
 import { speechProvenance } from "../packages/media/provenance";
 import type { z } from "zod";
+import type { GoogleMeasuredUsage } from "./lib/googleInference";
 const google = process.env.MANAGED_INFERENCE_ROUTE === "google_metered";
 const mediaDecoder = google ? decoder.replace("'48k'", "'32k'") : decoder;
 const pipelineVersion = createHash("sha256")
   .update(
     mediaDecoder +
       (google
-        ? ":media-v1.6:gemini-3.5-flash-lite:eu:changes16:structural3:receipt1"
+        ? ":media-v1.7:gemini-3.5-flash-lite:eu:changes16:structural3:receipt2"
         : `:media-v1.3:whisper-large-v3-turbo:${process.env.VISION_MODEL ?? "@cf/meta/llama-3.2-11b-vision-instruct"}:changes4:structured2`),
   )
   .digest("hex");
@@ -53,6 +54,13 @@ export const analyze = internalAction({
     const remainingMicros = () =>
       Math.max(0, (10 - credits) * 10000 - inferenceMicros);
     let inferenceStarted = false;
+    let googleUsagePending = false;
+    const recordGoogleUsage = (usage: GoogleMeasuredUsage) => {
+      inferenceMicros += usage.costMicros;
+      inputTokens += usage.inputTokens;
+      outputTokens += usage.outputTokens;
+      googleUsagePending = false;
+    };
     const deadline = Date.now() + 540000;
     const timeRemaining = () =>
       ensure(
@@ -157,18 +165,17 @@ export const analyze = internalAction({
           await authorize();
           timeRemaining();
           inferenceStarted = true;
+          googleUsagePending = google;
           const speech = google
             ? await googleSpeech(
                 ctx,
                 media.audio,
                 media.manifest.durationSeconds,
                 remainingMicros(),
+                recordGoogleUsage,
               )
             : undefined;
           if (speech) {
-            inferenceMicros += speech.usage.costMicros;
-            inputTokens += speech.usage.inputTokens;
-            outputTokens += speech.usage.outputTokens;
             speechMetadata = {
               model: googleInferenceModel,
               language: speech.output.language,
@@ -265,10 +272,13 @@ export const analyze = internalAction({
               "The frame batch exceeds its payload bound.",
             );
             inferenceStarted = true;
-            const visual = await googleFrames(ctx, batch, remainingMicros());
-            inferenceMicros += visual.usage.costMicros;
-            inputTokens += visual.usage.inputTokens;
-            outputTokens += visual.usage.outputTokens;
+            googleUsagePending = true;
+            const visual = await googleFrames(
+              ctx,
+              batch,
+              remainingMicros(),
+              recordGoogleUsage,
+            );
             for (const item of visual.output.observations)
               googleObservations.set(item.id, item.observation);
           }
@@ -415,6 +425,7 @@ export const analyze = internalAction({
       timeRemaining();
       await authorize();
       inferenceStarted = true;
+      googleUsagePending = google;
       const result = await infer(
         ctx,
         bounded,
@@ -435,6 +446,7 @@ export const analyze = internalAction({
         },
         3000,
         google ? remainingMicros() : 100000,
+        recordGoogleUsage,
       );
       result.output.warnings = [
         ...new Set([...result.output.warnings, ...warnings]),
@@ -444,9 +456,7 @@ export const analyze = internalAction({
         output: result.output,
         credits:
           credits +
-          (google
-            ? Math.ceil((inferenceMicros + result.usage.costMicros) / 10000)
-            : result.credits),
+          (google ? Math.ceil(inferenceMicros / 10000) : result.credits),
         reusedMediaGeneration,
         ...(google
           ? {
@@ -457,15 +467,11 @@ export const analyze = internalAction({
                 costPolicy: googleCostPolicy,
                 startedAt: source.processingStartedAt ?? source.updatedAt,
                 completedAt: Date.now(),
-                inputTokens: inputTokens + result.usage.inputTokens,
-                outputTokens: outputTokens + result.usage.outputTokens,
-                inferenceMicros: inferenceMicros + result.usage.costMicros,
+                inputTokens,
+                outputTokens,
+                inferenceMicros,
                 computeCredits: credits,
-                chargedCredits:
-                  credits +
-                  Math.ceil(
-                    (inferenceMicros + result.usage.costMicros) / 10000,
-                  ),
+                chargedCredits: credits + Math.ceil(inferenceMicros / 10000),
                 reusedMedia: reusedMediaGeneration !== undefined,
               },
             }
@@ -513,9 +519,9 @@ export const analyze = internalAction({
           error instanceof MediaPreparationError
             ? error.message
             : `Media analysis unavailable (${category}). Review the selected provider and isolated worker. No funding fallback was used.`,
-        credits,
+        credits: credits + (google ? Math.ceil(inferenceMicros / 10000) : 0),
         retainReservation:
-          inferenceStarted ||
+          (google ? googleUsagePending : inferenceStarted) ||
           (error instanceof MediaPreparationError &&
             error.computeSeconds === undefined),
       });

@@ -1,0 +1,18 @@
+{
+  "at": "2026-10-03",
+  "production": true,
+  "syntheticIdentity": true,
+  "nativeSignup": true,
+  "providerSessionRevoked": true,
+  "browserCookieExpirySimulated": true,
+  "nativeEmailCodeRecovery": true,
+  "sameWorkspaceRestored": true,
+  "immediateJwtInvalidationClaimed": false,
+  "overflow": false,
+  "observedAt": "2026-10-03T02:14:51.057Z",
+  "providerUsersRemaining": 0,
+  "applicationUsersRemaining": 0,
+  "testWorkspacesRemaining": 0,
+  "ownerAccountUntouched": true,
+  "ownedBrowserContextClosed": true
+}

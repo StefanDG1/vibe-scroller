@@ -36,7 +36,19 @@ export function failedInferenceSettlement(
       process.env.MANAGED_INFERENCE_ROUTE === "google_metered",
   };
 }
-export async function inferGoogle(ctx: ActionCtx, payload: InferencePayload) {
+export type GoogleMeasuredUsage = {
+  costMicros: number;
+  inputTokens: number;
+  outputTokens: number;
+  usdEstimate: number;
+  costPolicy: string;
+};
+export type RecordGoogleUsage = (usage: GoogleMeasuredUsage) => void;
+export async function inferGoogle(
+  ctx: ActionCtx,
+  payload: InferencePayload,
+  recordUsage?: RecordGoogleUsage,
+) {
   ensure(
     googleConfigured(),
     "SETUP_REQUIRED",
@@ -101,6 +113,9 @@ export async function inferGoogle(ctx: ActionCtx, payload: InferencePayload) {
     key,
     micros: result.usage.costMicros,
   });
+  // Notify the enclosing media transaction before any output validation. Known
+  // provider usage must not become an unknown service hold on malformed output.
+  recordUsage?.(result.usage);
   if (result.error)
     throw new MeasuredInferenceError(
       Math.ceil(result.usage.costMicros / 10000),

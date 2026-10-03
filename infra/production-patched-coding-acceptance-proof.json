@@ -1,0 +1,24 @@
+{
+  "observedAt": "2026-10-03T01:53:08.953Z",
+  "snapshotId": "snap_KeGpwftyCEZZyE8elL48ODi6pjZj",
+  "previousSnapshotId": "snap_sPadVi6UNVUuoiaAFxaWsA7toW4G",
+  "zeroWorkers": true,
+  "independentExpiry": true,
+  "lockfileSha256": "d0dbede2d4ca9163cb7a5058d2a901f788ccc7e3e4867ded0f33566ed50a30b2",
+  "promoted": true,
+  "brokerSelected": true,
+  "dispatchRestored": true,
+  "renewalRestored": true,
+  "publicReleaseApproved": false,
+  "environment": "production",
+  "testedBaseCommit": "85d50b741b447465249d6ce4be7c51d54ed51804",
+  "brokerSelectedWorker": {
+    "observedAt": "2026-10-03T02:06:09Z",
+    "command": "pnpm exec vitest run --config private/selected-offline-coding.config.ts -t selected worker",
+    "passed": 1,
+    "intentionallyUnselected": 1,
+    "durationSeconds": 48.01,
+    "log": "outputs/braces-broker-selected-offline-worker.log",
+    "ownedReactFixtureOnly": true
+  }
+}

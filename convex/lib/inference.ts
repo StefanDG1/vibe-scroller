@@ -8,7 +8,7 @@ import {
   cfRun,
 } from "../../packages/providers/cloudflare";
 import { ensure } from "../../packages/policy";
-import { inferGoogle } from "./googleInference";
+import { inferGoogle, type RecordGoogleUsage } from "./googleInference";
 export async function infer(
   ctx: ActionCtx,
   schema: unknown,
@@ -16,16 +16,21 @@ export async function infer(
   input: unknown,
   maxOutput = 3000,
   maxMicros = 100000,
+  recordGoogleUsage?: RecordGoogleUsage,
 ) {
   const route = process.env.MANAGED_INFERENCE_ROUTE;
   if (route === "google_metered")
-    return inferGoogle(ctx, {
-      schema: schema as Record<string, unknown>,
-      prompt,
-      parts: [{ text: JSON.stringify(input) }],
-      maxOutput,
-      maxMicros,
-    });
+    return inferGoogle(
+      ctx,
+      {
+        schema: schema as Record<string, unknown>,
+        prompt,
+        parts: [{ text: JSON.stringify(input) }],
+        maxOutput,
+        maxMicros,
+      },
+      recordGoogleUsage,
+    );
   if (route === "convex_free")
     return structuredGateway(schema, prompt, input, maxOutput);
   ensure(
