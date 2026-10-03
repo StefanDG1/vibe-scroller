@@ -1,0 +1,67 @@
+{
+  "verifiedAt": "2026-10-03T23:34:57.819Z",
+  "commit": "4dec93448622441c66d35d2ad56754770b247f22",
+  "version": "0.1.0-alpha.20261003232508.g4dec93448622",
+  "domain": "https://scroll.companynerve.com",
+  "frontend": {
+    "deploymentId": "dpl_EcziF1vcmDNvU9qSUjALYUbtDPeh",
+    "state": "READY",
+    "machine": "basic",
+    "selection": "fixed",
+    "cores": 2,
+    "memoryMiB": 8192
+  },
+  "backend": {
+    "deployment": "bold-lemur-667",
+    "exitCode": 0,
+    "dryRunExitCode": 0,
+    "messageBoundCommit": "4dec93448622441c66d35d2ad56754770b247f22"
+  },
+  "ci": {
+    "pullRequest": 23,
+    "verify": 37161599352,
+    "mainVerify": 37161712109,
+    "mainVersion": 37161712084,
+    "prerelease": 37161775861,
+    "result": "success"
+  },
+  "snapshot": {
+    "eligibleFilesBeforeSelection": 8728,
+    "manifestBytesBeforeSelection": 2774129,
+    "selectedEligibleFiles": 738,
+    "omittedEligibleFiles": 7990,
+    "selectedManifestBytesAtPinnedDiagnostic": 130875,
+    "fileLimit": 5000,
+    "manifestByteLimit": 600000,
+    "actualAppResult": "connected",
+    "snapshotQuoteCredits": 0,
+    "walletBeforeAfterSnapshot": {
+      "spent": 75,
+      "reserved": 10
+    }
+  },
+  "native": {
+    "localDemoChecks": 18,
+    "previewDemoChecks": 18,
+    "productionPopulatedScopeChecks": 6,
+    "productionPassed": 6,
+    "widths": [320, 390, 430, 768, 1024, 1440],
+    "at": "2026-10-03T23:30:46.223Z",
+    "physicalAndroid": "not tested"
+  },
+  "limitations": [
+    "Original populated-scope harness guessed repository order incorrectly; the label-based retest passed.",
+    "Exact source-generated improvement issues and publication are incomplete. Two genuine saved-video VibeScroller evaluations returned no_fit, one credit each.",
+    "Private repository context proposal cost one credit and requires owner confirmation.",
+    "Initial concurrent evaluation was refused by OPERATOR_BUDGET_REACHED before any evaluation record or charge. Known-unstarted retry after context settlement succeeded; no cap increase.",
+    "Useful/already-implemented held-out cases, live issue lifecycle, broader live installation cases, independent comprehension and full interrupted serving recovery remain pending."
+  ],
+  "commands": [
+    "pnpm check",
+    "node scripts/audit-dependencies.mjs",
+    "node outputs/saved-video-scope-staged-credential-review.mjs",
+    "pnpm exec convex deploy --env-file outputs/saved-video-scope-production.env --dry-run --typecheck enable --codegen disable",
+    "pnpm exec convex deploy --env-file outputs/saved-video-scope-production.env --typecheck enable --codegen disable --message <exact commit>",
+    "native browser-harness real-domain version and selected-scope checks"
+  ]
+}

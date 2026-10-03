@@ -432,10 +432,22 @@ export const list = query({
               .eq("organizationId", a.organizationId),
           )
           .paginate(pagination)
-      : await ctx.db
-          .query("knowledgeTopics")
-          .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
-          .paginate(pagination);
+      : a.search?.trim()
+        ? await ctx.db
+            .query("knowledgeTopics")
+            .withSearchIndex("search_name", (q) => {
+              const selected = q
+                .search("name", a.search!.trim().slice(0, 120))
+                .eq("organizationId", a.organizationId);
+              return a.readiness ? selected.eq("state", a.readiness) : selected;
+            })
+            .paginate(pagination)
+        : await ctx.db
+            .query("knowledgeTopics")
+            .withIndex("by_org", (q) =>
+              q.eq("organizationId", a.organizationId),
+            )
+            .paginate(pagination);
     const items = [];
     const seen = new Set<string>();
     for (const row of page.page) {
@@ -445,7 +457,8 @@ export const list = query({
       seen.add(t._id);
       if (
         t.redirect ||
-        (a.search &&
+        (a.sourceSearch &&
+          a.search &&
           !t.name
             .toLowerCase()
             .includes(a.search.toLowerCase().slice(0, 120))) ||

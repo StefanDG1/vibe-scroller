@@ -137,6 +137,10 @@ export async function POST(req: NextRequest) {
         "The selected inference budget is reserved or exhausted. Review connection and usage before retrying; no funding fallback was used.",
       INSUFFICIENT_CREDITS:
         "The available allowance cannot cover this reservation. Review usage and the maximum budget.",
+      OPERATOR_BUDGET_REACHED:
+        "The existing monthly processing ceiling cannot cover this reservation. Check pending work and usage; retry only after headroom is available. No budget was increased.",
+      REPO_TOO_LARGE:
+        "This repository snapshot exceeds the existing file or size limit. Select fewer literal files or folders in Projects, then prepare it again.",
       QUOTA_EXCEEDED:
         "This workspace has reached its source or repository allowance.",
       BASE_CHANGED:

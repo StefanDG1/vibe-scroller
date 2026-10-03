@@ -24,6 +24,49 @@ vi.mock("../convex/lib/githubAuthorization", () => ({
   authorizeRepository: vi.fn(),
 }));
 const modules = import.meta.glob("../convex/**/*.ts");
+it("finds a late topic by title on the first search page while enforcing workspace and readiness in the index", async () => {
+  const s = await setup();
+  await s.t.run(async (ctx) => {
+    const base = {
+      pinned: false,
+      version: 1,
+      sourceCount: 1,
+      insightCount: 1,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+    for (let n = 0; n < 40; n++)
+      await ctx.db.insert("knowledgeTopics", {
+        ...base,
+        organizationId: s.org,
+        key: `old_${n}`,
+        name: `Earlier unrelated topic ${n}`,
+        state: "ready",
+      });
+    for (const [organizationId, state, key] of [
+      [s.org, "ready", "current"],
+      [s.org, "pending", "pending"],
+      [s.foreign, "ready", "foreign"],
+    ] as const)
+      await ctx.db.insert("knowledgeTopics", {
+        ...base,
+        organizationId,
+        key,
+        name: "Push notifications",
+        state,
+      });
+  });
+  const result = await s.a.query(api.knowledge.list, {
+    organizationId: s.org,
+    search: "Push notifications",
+    readiness: "ready",
+  });
+  expect(result.items.map((t) => t.key)).toEqual(["current"]);
+  expect(result.next).toBeNull();
+  await expect(
+    s.b.query(api.knowledge.list, { organizationId: s.org, search: "Push" }),
+  ).rejects.toThrow();
+});
 beforeEach(() => vi.useFakeTimers());
 afterEach(() => {
   vi.useRealTimers();
