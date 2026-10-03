@@ -30,6 +30,7 @@ import {
 import { AccountMenu } from "./account-menu";
 import { PlanEditor } from "./plan-editor";
 import { ChoiceSelect } from "./choice-select";
+import { policyRelease } from "../../../packages/policy/publication";
 import { EvidenceViewer } from "./evidence-viewer";
 import { AnalysisReview } from "./analysis-review";
 import {
@@ -1662,7 +1663,7 @@ export function Console({
                     email: true,
                     telegram: false,
                     analytics: false,
-                    legalVersion: "draft-v1",
+                    legalVersion: policyRelease.id,
                   })
                 }
               >
@@ -2025,7 +2026,7 @@ export function Console({
                     email: false,
                     telegram: false,
                     analytics: false,
-                    legalVersion: "draft-v1",
+                    legalVersion: policyRelease.id,
                   })
                 }
               >

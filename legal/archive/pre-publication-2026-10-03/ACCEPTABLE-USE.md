@@ -1,6 +1,6 @@
 # Acceptable-use policy
 
-Status: published. Effective 3 October 2026. Version: 1.0.0. Release: v1-2026-10-03.1.
+Status: review draft, not yet effective. Version: 1.0.0.
 
 Use VibeScroller only with content, repositories, accounts, and processing rights you are authorized to use.
 

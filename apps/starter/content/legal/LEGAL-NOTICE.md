@@ -1,6 +1,6 @@
 # Legal notice
 
-Status: review draft, not yet effective. Company identity is confirmed against owner-supplied ONRC records. No professional legal review is claimed.
+Status: published. Effective 3 October 2026. Version: 1.0.0. Release: v1-2026-10-03.1.
 
 | Field                  | Detail                                                       |
 | ---------------------- | ------------------------------------------------------------ |

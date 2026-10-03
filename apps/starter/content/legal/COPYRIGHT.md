@@ -1,6 +1,6 @@
 # Content rights and copyright reports
 
-Status: review draft, not yet effective.
+Status: published. Effective 3 October 2026. Version: 1.0.0. Release: v1-2026-10-03.1.
 
 VibeScroller processes content for the user's private workspace. A public URL does not automatically establish permission to download, retain, redistribute, or reuse that content. Users must have an appropriate basis for their requested processing and must not bypass access restrictions.
 

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { PolicyDocument } from "@/components/policy-document";
 import { publicPolicyDocuments as legal } from "../../../../packages/policy/public-documents";
 import pricing from "../../../../contracts/pricing.json";
+import { policyRelease } from "../../../../packages/policy/publication";
 const pages: Record<string, { title: string; body: string[] }> = {
   "how-it-works": {
     title: "From saved idea to reviewed change",
@@ -38,8 +39,8 @@ const pages: Record<string, { title: string; body: string[] }> = {
   status: {
     title: "Service status",
     body: [
-      "Development preview. Live checkout is disabled.",
-      "Product-specific provider integrations and execution isolation require staging verification. This page does not claim production availability.",
+      "Your account shows the current availability of processing, connected providers and checkout before you start work.",
+      "External platforms may restrict source retrieval. An unavailable source remains visible with its actual status; it does not receive an invented analysis.",
       "Contact contact@exponentialeducation.ro for support or a security report.",
     ],
   },
@@ -84,9 +85,9 @@ export default async function Page({
       <PublicPage>
         <h1>A clear allowance for the work you choose.</h1>
         <p>
-          Proposed EUR catalogue. Consumer totals are tax inclusive where
-          applicable. Live checkout is disabled pending official tax evidence
-          and release verification.
+          EUR prices. Checkout confirms your total and applicable taxes.
+          Supported local currencies may include the disclosed conversion fee;
+          EUR remains an option.
         </p>
         <div className="price-grid">
           {Object.entries(pricing.tiers).map(([tier, p]) => (
@@ -123,7 +124,9 @@ export default async function Page({
                   execution, when verified
                 </li>
               </ul>
-              <p className="status">Checkout unavailable</p>
+              <Link className="primary" href={`/app?view=billing&tier=${tier}`}>
+                View {tier === "pro" ? "Pro" : "Starter"} plans
+              </Link>
             </article>
           ))}
         </div>
@@ -141,7 +144,7 @@ export default async function Page({
         </p>
         <p>
           <Link href="/refunds">Refund and withdrawal policy</Link> ·{" "}
-          <Link href="/terms">Terms draft</Link> ·{" "}
+          <Link href="/terms">Terms</Link> ·{" "}
           <Link href="/contact">Business enquiry</Link>
         </p>
       </PublicPage>
@@ -153,9 +156,11 @@ export default async function Page({
     );
     return (
       <PublicPage>
-        <p className="notice">
-          Review draft · Not yet effective. No legal review is claimed.
-        </p>
+        {slug !== "publication-checklist" && (
+          <p className="notice">
+            Effective {policyRelease.effectiveDate} · {policyRelease.id}
+          </p>
+        )}
         <PolicyDocument text={text} />
       </PublicPage>
     );

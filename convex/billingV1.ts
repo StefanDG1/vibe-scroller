@@ -7,6 +7,7 @@ import { pricing, ensure } from "../packages/policy";
 import { billingReadiness } from "../packages/providers/billing-readiness";
 import { checkoutPaymentRoute } from "../packages/providers/stripe-checkout";
 import { managedMarketVerified } from "../packages/providers/managed-markets";
+import { policyRelease } from "../packages/policy/publication";
 function stripe() {
   const key = process.env.STRIPE_SECRET_KEY;
   ensure(
@@ -336,7 +337,7 @@ export const checkout = action({
     );
     await ctx.runMutation(internal.commerce.recordAcceptance, {
       organizationId: a.organizationId,
-      termsVersion: "v1-draft",
+      termsVersion: policyRelease.id,
       immediateService: a.immediateService,
     });
     const reserved = await ctx.runMutation(internal.billing.reserveCheckout, {
@@ -347,7 +348,7 @@ export const checkout = action({
         treatment,
         route.marketPolicy,
         a.immediateService,
-        "v1-draft",
+        policyRelease.id,
       ]),
     });
     const origin = new URL(process.env.APP_URL!).origin;
@@ -365,7 +366,7 @@ export const checkout = action({
           checkoutKey: reserved.key,
           tier: a.tier,
           interval: a.interval,
-          termsVersion: "v1-draft",
+          termsVersion: policyRelease.id,
           taxTreatment: treatment,
           marketPolicy: route.marketPolicy,
         },
@@ -473,7 +474,7 @@ export const topup = action({
     const origin = new URL(process.env.APP_URL!).origin;
     await ctx.runMutation(internal.commerce.recordAcceptance, {
       organizationId: a.organizationId,
-      termsVersion: "v1-draft",
+      termsVersion: policyRelease.id,
       immediateService: a.immediateService,
     });
     const reserved = await ctx.runMutation(internal.billing.reserveCheckout, {
@@ -485,7 +486,7 @@ export const topup = action({
         route.treatment,
         route.marketPolicy,
         a.immediateService,
-        "v1-draft",
+        policyRelease.id,
       ]),
     });
     const session = await client.checkout.sessions.create(
@@ -502,7 +503,7 @@ export const topup = action({
           product: "vibescroller",
           credits: a.pack,
           checkoutKey: reserved.key,
-          termsVersion: "v1-draft",
+          termsVersion: policyRelease.id,
           taxTreatment: route.treatment,
           marketPolicy: route.marketPolicy,
           organizationId: a.organizationId,

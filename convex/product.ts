@@ -123,36 +123,6 @@ export async function reserve(
     "PAYMENT_REQUIRED",
     "New funded work is paused until the unresolved payment failure is resolved. Your library remains available.",
   );
-  const month = new Date().toISOString().slice(0, 7);
-  const operatorKeys = [
-    `all:${month}`,
-    ...(w.tier === "trial" ? [`trial:${month}`] : []),
-  ];
-  for (const budgetKey of operatorKeys) {
-    let budget = await ctx.db
-      .query("operatorBudgets")
-      .withIndex("by_key", (q) => q.eq("key", budgetKey))
-      .unique();
-    if (!budget) {
-      const budgetId = await ctx.db.insert("operatorBudgets", {
-        key: budgetKey,
-        ceiling: budgetKey.startsWith("trial:") ? 200 : 1000,
-        reserved: 0,
-        spent: 0,
-        updatedAt: Date.now(),
-      });
-      budget = (await ctx.db.get(budgetId))!;
-    }
-    ensure(
-      budget.spent + budget.reserved + max <= budget.ceiling,
-      "OPERATOR_BUDGET_REACHED",
-      "Processing is paused at the operator's monthly cost ceiling.",
-    );
-    await ctx.db.patch(budget._id, {
-      reserved: budget.reserved + max,
-      updatedAt: Date.now(),
-    });
-  }
   let pools = await ctx.db
     .query("creditPools")
     .withIndex("by_org", (q) => q.eq("organizationId", id))
@@ -199,6 +169,47 @@ export async function reserve(
       remaining -= take;
     }
     if (!remaining) break;
+  }
+  const organization = await ctx.db.get(id);
+  const owner = organization ? await ctx.db.get(organization.createdBy) : null;
+  const operatorReviewFunded =
+    max > 0 &&
+    owner?.status === "active" &&
+    personalAllowed(owner.subject) &&
+    allocations.every(
+      (allocation) =>
+        valid.find((pool) => pool._id === allocation.poolId)?.kind ===
+        "operator_quality_review",
+    );
+  const month = new Date().toISOString().slice(0, 7);
+  const operatorKeys = [
+    `all:${month}`,
+    ...(w.tier === "trial" && !operatorReviewFunded ? [`trial:${month}`] : []),
+  ];
+  for (const budgetKey of operatorKeys) {
+    let budget = await ctx.db
+      .query("operatorBudgets")
+      .withIndex("by_key", (q) => q.eq("key", budgetKey))
+      .unique();
+    if (!budget) {
+      const budgetId = await ctx.db.insert("operatorBudgets", {
+        key: budgetKey,
+        ceiling: budgetKey.startsWith("trial:") ? 200 : 1000,
+        reserved: 0,
+        spent: 0,
+        updatedAt: Date.now(),
+      });
+      budget = (await ctx.db.get(budgetId))!;
+    }
+    ensure(
+      budget.spent + budget.reserved + max <= budget.ceiling,
+      "OPERATOR_BUDGET_REACHED",
+      "Processing is paused at the operator's monthly cost ceiling.",
+    );
+    await ctx.db.patch(budget._id, {
+      reserved: budget.reserved + max,
+      updatedAt: Date.now(),
+    });
   }
   await ctx.db.patch(w._id, {
     reserved: w.reserved + max,

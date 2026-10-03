@@ -4,7 +4,12 @@ import type { Id } from "../../../../convex/_generated/dataModel";
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ draft?: string; workspace?: string }>;
+  searchParams: Promise<{
+    draft?: string;
+    workspace?: string;
+    view?: string;
+    tier?: string;
+  }>;
 }) {
   const query = await searchParams;
   const id = await (
@@ -19,6 +24,10 @@ export default async function Page({
   if (!id)
     redirect(
       `/app/workspaces${draft ? `?draft=${encodeURIComponent(draft)}` : ""}`,
+    );
+  if (query.view === "billing")
+    redirect(
+      `/app/${id}/billing${query.tier === "pro" ? "?tier=pro" : "?tier=starter"}`,
     );
   redirect(`/app/${id}${draft ? `?draft=${encodeURIComponent(draft)}` : ""}`);
 }

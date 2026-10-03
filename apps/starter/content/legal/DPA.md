@@ -1,6 +1,6 @@
 # Data processing agreement
 
-Status: review draft for organizational customers. It is not executed by this documentation package.
+Status: published. Effective 3 October 2026. Version: 1.0.0. Release: v1-2026-10-03.1. Applies to customer instruction data when accepted with the service terms; publication alone does not execute an agreement.
 
 ## Parties and instructions
 
@@ -42,6 +42,8 @@ The processor provides information reasonably necessary to demonstrate its oblig
 
 ## Schedule of measures
 
-The contractual measure schedule consists of the deployed and verified controls from `docs/SECURITY.md` and the active provider register. Before executing this agreement, replace specification-only descriptions with the actual implemented controls and dated evidence. Do not represent an unbuilt control as a contractual fact.
+The service enforces workspace membership and role checks on private queries and actions. Private evidence uses authenticated, short-lived access and private object storage. Provider credentials are encrypted and are excluded from customer coding tasks. Approved cloud media and coding jobs run in bounded ephemeral microVMs, with restricted network access, cancellation and teardown controls. Coding requires separate approval of the plan, repository, base commit, funding and maximum spend before a patch can be published.
+
+Source and account deletion revoke access, fence delayed results and apply deletion records during backup recovery. Temporary media and retained data follow the [privacy notice](PRIVACY.md). Independently encrypted backups have bounded retention; a restored environment remains locked while later deletions and restored credentials are reconciled. Optional analytics requires separate consent and excludes source content and repository material. These measures describe the deployed controls; they do not claim certification, exhaustive threat coverage or professional review.
 
 This agreement supplements the service terms and prevails for processor obligations where they conflict. Mandatory data-protection law prevails over inconsistent contractual wording.

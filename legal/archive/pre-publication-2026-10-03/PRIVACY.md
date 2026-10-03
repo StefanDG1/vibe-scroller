@@ -1,6 +1,6 @@
 # Privacy notice
 
-Status: published. Effective 3 October 2026. Version: 1.0.0. Release: v1-2026-10-03.1.
+Status: review draft, not yet effective. Version: 1.0.0.
 
 ## Controller and contact
 
@@ -34,7 +34,7 @@ Optional product analytics uses PostHog EU Cloud only after analytics consent. W
 
 The active [provider register](SUBPROCESSORS.md) identifies the services used for authentication, hosting, databases, storage, AI, payments, execution, and communication. Only providers needed for your selected route receive the relevant data.
 
-The production database currently operates in US East, Northern Virginia. Private R2 objects use an EU-jurisdiction bucket; production web functions and execution microVMs use Frankfurt. These regional settings do not mean all authentication, account, support or AI operations occur only in the EU. Before enabling a provider, we verify its applicable agreement, processing locations and transfer safeguards where required. The register states the configured route; this notice does not establish general legal clearance.
+The production database currently operates in US East, Northern Virginia. Private R2 objects use an EU-jurisdiction bucket; production web functions and execution microVMs use Frankfurt. These regional settings do not mean all authentication, account, support or AI operations occur only in the EU. Before enabling a provider, we verify its applicable agreement, processing locations and transfer safeguards where required. The register states the configured route; this draft does not establish general legal clearance.
 
 The selected metered cloud route uses Google Cloud's Gemini model through its EU inference endpoint. It receives normalized audio, selected frames and the relevant text or repository context needed for the approved operation. The application records the selected model, measured usage, transcription uncertainty and a conservative cost estimate. A regional endpoint does not establish that all account, security or support processing remains in the EU. We do not request grounding, external model tools, explicit context caching or request/response logging for this route. Google's applicable abuse-monitoring and implicit-cache rules can still apply; our own media deletion schedule does not erase provider records or establish zero retention.
 

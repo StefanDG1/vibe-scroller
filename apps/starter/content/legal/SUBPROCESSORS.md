@@ -1,6 +1,6 @@
 # Provider and subprocessor register
 
-Status: deployment register review draft, not yet effective. Checked October 3, 2026.
+Status: published. Effective 3 October 2026. Version: 1.0.0. Release: v1-2026-10-03.1.
 
 EXPONENTIAL EDUCATION S.R.L. operates VibeScroller. This register describes configured production services and customer-selected integrations. A provider can process service content on instructions and independently control account, fraud or statutory records. The applicable agreement determines its role.
 

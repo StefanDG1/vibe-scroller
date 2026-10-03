@@ -2,6 +2,7 @@ import Link from "next/link";
 import { backend, api } from "@/lib/backend";
 import type { Id } from "../../../../../../convex/_generated/dataModel";
 import { ActionForm } from "@/components/action-form";
+import { ChoiceSelect } from "@/components/choice-select";
 import {
   startV1Checkout,
   cancelV1Subscription,
@@ -13,8 +14,10 @@ import {
 } from "@/app/actions";
 export default async function Page({
   params,
+  searchParams,
 }: {
   params: Promise<{ org: string }>;
+  searchParams: Promise<{ tier?: string }>;
 }) {
   const { org } = await params,
     c = await backend(),
@@ -24,6 +27,7 @@ export default async function Page({
     c.query(api.commerce.catalogue, {}),
     c.query(api.product.usage, { organizationId }),
   ]);
+  const selectedTier = (await searchParams).tier === "pro" ? "pro" : "starter";
   return (
     <main id="main" className="doc">
       <Link href={`/app/${org}`}>Back to workspace</Link>
@@ -90,37 +94,54 @@ export default async function Page({
             }
           >
             <input type="hidden" name="organizationId" value={org} />
-            <label>
+            <label htmlFor="checkout-tier">
               Plan
-              <select name="tier">
+              <ChoiceSelect
+                id="checkout-tier"
+                name="tier"
+                aria-label="Plan"
+                defaultValue={selectedTier}
+              >
                 <option value="starter">Starter</option>
                 <option value="pro">Pro</option>
-              </select>
+              </ChoiceSelect>
             </label>
-            <label>
+            <label htmlFor="checkout-renewal">
               Renewal
-              <select name="interval">
+              <ChoiceSelect
+                id="checkout-renewal"
+                name="interval"
+                aria-label="Renewal"
+                defaultValue="monthly"
+              >
                 <option value="weekly">Every seven days</option>
                 <option value="monthly">Monthly</option>
                 <option value="annual">Annual with monthly credits</option>
-              </select>
+              </ChoiceSelect>
             </label>
             {catalogue.billingCountryRequired && (
-              <label>
+              <label htmlFor="checkout-country">
                 Billing country
-                <select name="country" defaultValue="RO" required>
+                <ChoiceSelect
+                  id="checkout-country"
+                  name="country"
+                  aria-label="Billing country"
+                  defaultValue="RO"
+                  required
+                >
                   {catalogue.countries.map((country) => (
                     <option key={country} value={country}>
                       {country === "RO" ? "Romania" : country}
                     </option>
                   ))}
-                </select>
+                </ChoiceSelect>
               </label>
             )}
             <label className="checkbox-label">
               <input type="checkbox" name="terms" required />I accept the
-              displayed <Link href="/terms">terms</Link> and credit expiry
-              policy
+              displayed <Link href="/terms">terms</Link>,{" "}
+              <Link href="/refunds">refund and credit expiry policy</Link>, and
+              applicable <Link href="/dpa">data processing terms</Link>
             </label>
             <label className="checkbox-label">
               <input type="checkbox" name="immediate" />I request immediate
@@ -160,12 +181,16 @@ export default async function Page({
           </ActionForm>
           <ActionForm action={quoteV1Change} label="Review plan-change quote">
             <input type="hidden" name="organizationId" value={org} />
-            <label>
+            <label htmlFor="change-tier">
               Target tier
-              <select name="tier">
+              <ChoiceSelect
+                id="change-tier"
+                name="tier"
+                aria-label="Target tier"
+              >
                 <option value="starter">Starter at next renewal</option>
                 <option value="pro">Pro with exact proration</option>
-              </select>
+              </ChoiceSelect>
             </label>
             <p>
               Your renewal interval stays the same. You approve the provider

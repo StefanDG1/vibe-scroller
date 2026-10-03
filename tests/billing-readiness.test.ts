@@ -1,5 +1,6 @@
 import { expect, it } from "vitest";
 import { billingReadiness } from "../packages/providers/billing-readiness";
+import { policyRelease } from "../packages/policy/publication";
 import {
   managedMarketPolicy,
   managedRadarCondition,
@@ -12,6 +13,7 @@ const env: Record<string, string> = {
   STRIPE_PORTAL_CONFIG_ID: "bpc_synthetic",
   LIVE_CHECKOUT_ENABLED: "true",
   BILLING_RELEASE_APPROVED: "true",
+  POLICY_RELEASE_VERSION: policyRelease.id,
   STRIPE_BILLING_ROUTE: "managed_payments",
   STRIPE_MANAGED_PAYMENTS_VERIFIED: "true",
   STRIPE_MANAGED_MARKET: "tax_covered",
@@ -43,6 +45,7 @@ it("requires the complete V1 catalogue, matching key mode and all live release s
     "STRIPE_PORTAL_CONFIG_ID",
     "LIVE_CHECKOUT_ENABLED",
     "BILLING_RELEASE_APPROVED",
+    "POLICY_RELEASE_VERSION",
     "STRIPE_MANAGED_PAYMENTS_VERIFIED",
     "STRIPE_MANAGED_MARKET",
     "STRIPE_MANAGED_COUNTRY_RULE_PROOF",
@@ -56,6 +59,10 @@ it("requires the complete V1 catalogue, matching key mode and all live release s
   ).toBe(false);
   expect(
     billingReadiness({ ...env, STRIPE_MODE: "invalid" }).catalogueConfigured,
+  ).toBe(false);
+  expect(
+    billingReadiness({ ...env, POLICY_RELEASE_VERSION: "v1-draft" })
+      .liveEnabled,
   ).toBe(false);
 });
 it("exposes sandbox checkout independently of live activation and never treats legacy prices as a V1 catalogue", () => {

@@ -4,8 +4,30 @@ import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { publicProxy, publicBridge } from "../packages/media/public-proxy.ts";
 import { publicPolicyDocuments } from "../packages/policy/public-documents.ts";
+import { policyRelease } from "../packages/policy/publication.ts";
 const root = resolve(import.meta.dirname, "..");
 const errors = [];
+const release = JSON.parse(
+  readFileSync(join(root, "legal/RELEASE-2026-10-03.json"), "utf8"),
+);
+if (
+  release.id !== policyRelease.id ||
+  release.effectiveDate !== policyRelease.effectiveDate ||
+  release.operatorApproved !== true
+)
+  errors.push(
+    "Policy publication manifest does not match checkout acceptance.",
+  );
+for (const [name, record] of Object.entries(release.documents)) {
+  const file = join(root, "legal", `${name}.md`);
+  if (
+    createHash("sha256").update(readFileSync(file)).digest("hex") !==
+    record.sha256
+  )
+    errors.push(
+      `Published policy bytes changed without a retained release: ${name}.`,
+    );
+}
 for (const name of Object.values(publicPolicyDocuments)) {
   const source = join(root, "legal", `${name}.md`),
     bundled = join(root, "apps/starter/content/legal", `${name}.md`);

@@ -1,6 +1,6 @@
 # Terms of service
 
-Status: published. Effective 3 October 2026. Version: 1.0.0. Release: v1-2026-10-03.1.
+Status: review draft, not yet effective. Version: 1.0.0. Publication requires the checks in [Policy implementation](POLICY-IMPLEMENTATION.md).
 
 ## Who provides the service
 
@@ -12,7 +12,7 @@ These terms govern the hosted VibeScroller service. Separate open-source licence
 
 You must be at least 18 and able to enter this agreement. Provide accurate account and billing information. Keep access credentials secure and tell us about suspected unauthorized access. A workspace owner is responsible for inviting the right people and assigning appropriate access.
 
-An organization account must be created by someone authorized to act for that organization. For personal data processed on your instructions where you act as controller, the [data processing agreement](DPA.md) forms part of these terms. Your acceptance applies to that agreement for the relevant processing. Purchasing for a business does not create a custom contract, service-level guarantee, or enterprise entitlement.
+An organization account must be created by someone authorized to act for that organization. Purchasing for a business does not create a custom contract, service-level guarantee, or enterprise entitlement.
 
 ## What VibeScroller does
 

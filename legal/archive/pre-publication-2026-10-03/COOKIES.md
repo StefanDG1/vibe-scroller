@@ -1,6 +1,6 @@
 # Cookies and similar storage
 
-Status: published. Effective 3 October 2026. Version: 1.1.0. Release: v1-2026-10-03.1.
+Status: review draft, not yet legally reviewed. Version: 1.1.0-alpha. Updated 1 October 2026.
 
 ## Essential storage
 
@@ -28,6 +28,6 @@ The PWA caches public application assets. It does not cache private transcripts 
 
 You can remove this site's data in your browser. Doing so can sign you out and remove unsent drafts. It does not delete records in your online account. Use app privacy settings for export and deletion.
 
-## Changes
+## Publication checks
 
-Changes to nonessential processing require the relevant consent. The retained publication record identifies this inventory and its implementation checks. Operator approval does not imply professional legal review.
+This implementation inventory is a review draft. Confirm the production names, domains, lifetimes, processing agreement, retention and contact details in the publication checklist before a paid public launch. No legal review is claimed.
