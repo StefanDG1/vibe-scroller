@@ -15,6 +15,74 @@ const syntheticPlan = {
   rollback: "Revert",
   unknowns: [],
 };
+it("refuses guessed generated package checks before saving a draft, without granting execution", async () => {
+  const { t, a, org, proposalId, repositories } = await setup();
+  const content = JSON.stringify({
+    packageManager: "pnpm@12.3.4",
+    scripts: { lint: "oxlint .", typecheck: "tsc --noEmit" },
+  });
+  const inspectedContext = [
+    {
+      path: "README.md",
+      blobSha: "b".repeat(40),
+      startLine: 1,
+      endLine: 1,
+      content: "Owned synthetic documentation",
+    },
+    {
+      path: "package.json",
+      blobSha: "c".repeat(40),
+      startLine: 1,
+      endLine: 1,
+      content,
+    },
+  ];
+  await t.run((ctx) =>
+    ctx.db.patch(repositories[0], {
+      manifestEntries: inspectedContext.map((row) => ({
+        path: row.path,
+        blobSha: row.blobSha,
+        size: row.content.length,
+        mode: "100644",
+      })),
+    }),
+  );
+  const started = await a.mutation(api.planning.start, {
+    id: proposalId,
+    version: 1,
+    maxCredits: 10,
+    key: "package-command-review-01",
+  });
+  const finish = {
+    id: proposalId,
+    organizationId: org,
+    key: started.key,
+    version: 1,
+    baseSha: "a".repeat(40),
+    credits: 0,
+    inspectedContext,
+  };
+  await expect(
+    t.mutation(internal.planning.finish, {
+      ...finish,
+      plan: { ...syntheticPlan, tests: ["npm run lint"] },
+    }),
+  ).rejects.toThrow("INVALID_EVIDENCE");
+  await expect(
+    t.mutation(internal.planning.finish, {
+      ...finish,
+      plan: { ...syntheticPlan, tests: ["pnpm test:invented"] },
+    }),
+  ).rejects.toThrow("INVALID_EVIDENCE");
+  await t.mutation(internal.planning.finish, {
+    ...finish,
+    plan: { ...syntheticPlan, tests: ["pnpm lint", "pnpm typecheck"] },
+  });
+  const proposal = await a.query(api.product.proposal, { id: proposalId });
+  expect(proposal.planDraft.tests).toEqual(["pnpm lint", "pnpm typecheck"]);
+  expect(proposal.planHash).toBeUndefined();
+  expect(proposal.plan).toBeUndefined();
+});
 it("releases a known unstarted authorization failure once without reviving cancellation or overwriting completed output", async () => {
   const { t, a, org, owner, proposalId, repositories } = await setup();
   const seed = async (state: string, events: string[] = []) =>

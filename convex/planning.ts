@@ -11,6 +11,7 @@ import {
 } from "../packages/policy";
 import { planInput } from "../packages/contracts";
 import { reserve, settle } from "./product";
+import { validateGeneratedPackageChecks } from "../packages/plans/repository-checks";
 export const start = mutation({
   args: {
     id: v.id("proposals"),
@@ -132,6 +133,10 @@ export const finish = internalMutation({
           repo.manifestEntries ?? [],
         );
       plan = planInput.parse(a.plan);
+      validateGeneratedPackageChecks(
+        plan.tests,
+        a.inspectedContext ?? repo.contextExcerpts ?? [],
+      );
       validatePaths(
         plan.files.map((file) => file.path),
         plan.files.map((file) => file.path),

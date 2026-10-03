@@ -1,6 +1,6 @@
 # ADR 040: Immutable offline checks and cloud quotes
 
-Status: diagnosed correction; production retry pending. Date: 3 October 2026.
+Status: correction verified in a real production coding task. Date: 3 October 2026.
 
 A real owned audiovisual source produced a relevant proposal citing the existing PROVIDER_LIMIT message. Native review accepted it, corrected prose checks to the actual pnpm lint and pnpm typecheck commands, saved a new plan version and separately approved a 30-credit cloud ceiling. The first run failed safely during isolated checks; no PR was published. Confirmed teardown settled four service credits.
 
@@ -11,5 +11,7 @@ Keep the pinned pnpm 12.3.4 and existing read-only cache. Every offline command 
 The configured production compute reserve is ten credits at the previously reviewed 0.02-credit/second rate. A 30-credit approval therefore caps compute at 500 seconds and leaves the remaining ceiling for inference; the fixed EUR 10 pilot provider ceiling is unchanged. Count-before-generation and settlement remain authoritative. Cloud approval now defaults to at most 30 currently available credits, excludes expired and reserved pools, and displays the actual bounded compute/runtime split. The display cannot grant execution and is rechecked by atomic backend reservation.
 
 Generated plan checks must be executable commands based on inspected stack evidence. They remain editable and require explicit review; the prompt correction cannot guarantee model correctness.
+
+After deployment, a fresh proposal at cd2fe4d received a separately reviewed version 2 plan and 30-credit protected-file/cloud approval. Actual Google generation produced only the approved API message change. The isolated worker passed pnpm lint and pnpm typecheck, confirmed deletion, and settled five service credits. Native final patch approval created draft PR 13; exact CI passed before the operator-authorized merge, and the production app recorded merged. This verifies the new funded route through publication, not arbitrary repository coverage or all paid-release gates. ADR 041 separately addresses the second draft's guessed package checks.
 
 Official references: [pnpm manager policy](https://pnpm.io/settings/cli#pmonfail), [automatic dependency checks](https://pnpm.io/settings/build#verifydepsbeforerun), [pnpm hooks](https://pnpm.io/pnpmfile#ignorepnpmfile). Actual evidence: outputs/google-coding-diagnostic-third.log and outputs/google-coding-diagnostic-corrected.log. Public media/execution and live billing approval remain separate gates.

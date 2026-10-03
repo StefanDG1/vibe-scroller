@@ -31,6 +31,7 @@ export function retrievalFiles(
   entries: ManifestEntry[],
   focus: string,
   required: string[] = [],
+  includePackageManifests = false,
 ) {
   ensure(
     required.length <= 12,
@@ -57,26 +58,50 @@ export function retrievalFiles(
     "CONTEXT_REQUIRED",
     "Cited paths are unavailable in the selected snapshot.",
   );
+  // Planning needs the actual manager and scripts, even when many source paths
+  // outrank package.json. Keep cited files first and the existing 24-file bound.
+  const manifests = includePackageManifests
+    ? eligible
+        .filter(
+          (file) =>
+            file.path === "package.json" ||
+            (file.path.endsWith("/package.json") &&
+              required.some((path) =>
+                path.startsWith(file.path.slice(0, -"package.json".length)),
+              )),
+        )
+        .sort(
+          (a, b) =>
+            Number(b.path === "package.json") -
+              Number(a.path === "package.json") ||
+            a.path.length - b.path.length ||
+            a.path.localeCompare(b.path),
+        )
+        .slice(0, 12)
+        .map((file) => file.path)
+    : [];
   return eligible
     .sort((a, b) => {
       const rank = (path: string) =>
         required.includes(path)
           ? 1000
-          : score(
-              path
-                .replaceAll("/", " ")
-                .replaceAll("_", " ")
-                .replaceAll("-", " ")
-                .replaceAll(".", " "),
-              terms,
-            ) *
-              10 +
-            (interfaceFocus && /\.(?:css|tsx|jsx)$/.test(path) ? 30 : 0) +
-            (/^(?:README\.md|package\.json)$/.test(path)
-              ? 5
-              : /^(?:convex\/|src\/|apps\/starter\/)/.test(path)
-                ? 1
-                : 0);
+          : manifests.includes(path)
+            ? 900
+            : score(
+                path
+                  .replaceAll("/", " ")
+                  .replaceAll("_", " ")
+                  .replaceAll("-", " ")
+                  .replaceAll(".", " "),
+                terms,
+              ) *
+                10 +
+              (interfaceFocus && /\.(?:css|tsx|jsx)$/.test(path) ? 30 : 0) +
+              (/^(?:README\.md|package\.json)$/.test(path)
+                ? 5
+                : /^(?:convex\/|src\/|apps\/starter\/)/.test(path)
+                  ? 1
+                  : 0);
       return rank(b.path) - rank(a.path) || a.path.localeCompare(b.path);
     })
     .slice(0, 24);

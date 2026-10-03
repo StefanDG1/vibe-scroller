@@ -321,6 +321,7 @@ export async function retrieveContext(
   },
   focus: string,
   evidence: { path: string; startLine: number; endLine: number }[] = [],
+  purpose: "matching" | "planning" = "matching",
 ) {
   ensure(
     /^[\w.-]+\/[\w.-]+$/.test(repo.fullName) && /^[a-f0-9]{40}$/.test(repo.sha),
@@ -332,9 +333,12 @@ export async function retrieveContext(
     "CONTEXT_REQUIRED",
     "Refresh the selected repository's immutable manifest before matching.",
   );
-  const files = retrievalFiles(repo.manifestEntries, focus, [
-    ...new Set(evidence.map((row) => row.path)),
-  ]);
+  const files = retrievalFiles(
+    repo.manifestEntries,
+    focus,
+    [...new Set(evidence.map((row) => row.path))],
+    purpose === "planning",
+  );
   const token = await installationToken(repo.installationId);
   const current = await github(`/repos/${repo.fullName}`, token);
   ensure(
@@ -373,7 +377,11 @@ export async function retrieveContext(
       bytes.toString("utf8"),
       focus,
       remaining,
-      cited.length ? Math.min(...cited.map((row) => row.startLine)) : undefined,
+      cited.length
+        ? Math.min(...cited.map((row) => row.startLine))
+        : purpose === "planning" && /(?:^|\/)package\.json$/.test(file.path)
+          ? 1
+          : undefined,
     );
     if (!selected) continue;
     excerpts.push(selected);
