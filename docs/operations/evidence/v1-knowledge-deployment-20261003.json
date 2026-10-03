@@ -1,0 +1,280 @@
+{
+  "recordedAt": "2026-10-03T20:01:47.906364+00:00",
+  "scope": "V1 workspace knowledge and reviewed issues; engineering deployment, external acceptance incomplete",
+  "baseline": "e9b3cfdffcb2f7c5ed348a136b65c7bb8ea65555",
+  "applicationCommit": "77637c55673e1fdba9f0a510031a1694285b1d20",
+  "applicationVersion": "0.1.0-alpha.20261003195407.g77637c55673e",
+  "productionDomain": "https://scroll.companynerve.com",
+  "frontend": {
+    "deployment": "dpl_FQ5Z2S3VvQ932GgGxKyiJx2SU4Q4",
+    "state": "READY",
+    "buildMachine": "basic",
+    "selection": "fixed",
+    "elasticConcurrencyEnabled": false,
+    "assignedCores": 2,
+    "memoryMiB": 8192
+  },
+  "backend": {
+    "deployment": "bold-lemur-667",
+    "deployedCommit": "2169c8a9ad05b61cbe9078b94e7cfbcb873c017c",
+    "command": "pnpm exec convex deploy --yes --typecheck enable --codegen disable",
+    "schemaValidation": "passed; no deleted indexes",
+    "functionAndPackageTreeEquivalentToApplicationCommit": true
+  },
+  "requiredCI": {
+    "pr21Verify": 37149457738,
+    "mainVerify": 37149570602,
+    "mainVersion": 37149570603,
+    "mainVerifiedRelease": 37149635084,
+    "conclusion": "success"
+  },
+  "migration": {
+    "environment": "production bold-lemur-667",
+    "codeCommit": "5d3b8caf65aec5c2c6576128572d9df704a92266",
+    "topics": 131,
+    "members": 303,
+    "eligibleInsightPairs": 142,
+    "missingPairs": 0,
+    "tenancyAndCountViolations": [],
+    "operatorBudgetUnchanged": true,
+    "inferenceJobs": 0
+  },
+  "finalIntegrity": {
+    "environment": "production bold-lemur-667",
+    "timestamp": "2026-10-03T19:55:42.057927+00:00",
+    "sourcesBefore": 183,
+    "sourcesAfter": 183,
+    "originalSourceRecordsChanged": 0,
+    "topics": 131,
+    "memberships": 303,
+    "tenancyAndCountViolationCount": 0,
+    "idempotentBackfillCountsUnchanged": true
+  },
+  "local": {
+    "environment": "Windows, Node 24.12.0, pnpm 12.3.4",
+    "command": "pnpm check",
+    "applicationTestsPassed": 348,
+    "applicationTestsSkipped": 3,
+    "skippedOptInFixtures": [
+      "inference.staging.test.ts (Cloudflare)",
+      "snapshot.staging.test.ts (pinned historical snapshot)",
+      "storage.staging.test.ts (private storage)"
+    ],
+    "authFormTestsPassed": 14,
+    "pcmTestsPassed": 6,
+    "proxyTestsPassed": 3,
+    "samplingTestsPassed": 3,
+    "buildPolicyTestsPassed": 5,
+    "focusedKnowledgeProviderTestsPassed": 20,
+    "lintTypesAndBothProductionBuilds": "passed",
+    "documentationValidation": "passed; 167 documents and 12 skill snapshots"
+  },
+  "dependencyAudit": {
+    "command": "node scripts/audit-dependencies.mjs",
+    "observedAt": "2026-10-03T19:34:17.001Z",
+    "passed": true,
+    "unresolved": 0,
+    "locallyMitigatedHigh": ["GHSA-vfj7-8cjw-p6xm (braces)"],
+    "registryAdvisoriesRemain": true
+  },
+  "productionBrowser": {
+    "environment": "native authenticated Chrome, real scroll.companynerve.com production",
+    "timestamp": "2026-10-03T19:56:28.088Z",
+    "frontendCommit": "77637c55673e1fdba9f0a510031a1694285b1d20",
+    "checks": 24,
+    "passed": 24,
+    "widths": [320, 390, 430, 768, 1024, 1440],
+    "states": ["Library", "topic detail", "issue editor", "Projects"],
+    "topicHeadingVisibilityAndFocus": true,
+    "visibleButtonMinimumHeight": 44,
+    "keyboardTransitions": 10,
+    "keyboardSolidOutlineCount": 10,
+    "physicalAndroid": false,
+    "screenshots": "private; inspected"
+  },
+  "linkTargets": {
+    "timestamp": "2026-10-03T19:58:25.280Z",
+    "environment": "native authenticated Chrome, real domain, frontend 77637c55673e1fdba9f0a510031a1694285b1d20",
+    "results": [
+      {
+        "width": 320,
+        "linkCount": 11,
+        "minimumHeight": 25.59375,
+        "passed": true
+      },
+      {
+        "width": 390,
+        "linkCount": 11,
+        "minimumHeight": 25.59375,
+        "passed": true
+      },
+      {
+        "width": 430,
+        "linkCount": 11,
+        "minimumHeight": 25.59375,
+        "passed": true
+      },
+      {
+        "width": 768,
+        "linkCount": 11,
+        "minimumHeight": 25.59375,
+        "passed": true
+      },
+      {
+        "width": 1024,
+        "linkCount": 11,
+        "minimumHeight": 25.59375,
+        "passed": true
+      },
+      {
+        "width": 1440,
+        "linkCount": 11,
+        "minimumHeight": 25.59375,
+        "passed": true
+      }
+    ]
+  },
+  "markdownDownload": {
+    "environment": "native authenticated Chrome, real scroll.companynerve.com",
+    "frontendCommit": "70b5ce1ffb0c65bd48ae76456ff4162ef13a943b",
+    "timestamp": "2026-10-03T19:49:58.376302+00:00",
+    "downloaded": true,
+    "chromeState": 2,
+    "bytes": 1398,
+    "fileModifiedAt": "2026-10-03T19:49:28.421784+00:00",
+    "exactReviewedMarkdown": true,
+    "sha256": "1b2091d11445a5b45b8e18214a4ccfc4b0f67df42b46efedefdfcc239b7d8a2a",
+    "temporaryOverrideAbsent": true,
+    "initialObservationCorrection": "CDP allow overwrote the existing filename; new-file count was not an authoritative download test."
+  },
+  "pagination": {
+    "environment": "authenticated native Chrome, real production",
+    "frontendCommit": "70b5ce1ffb0c65bd48ae76456ff4162ef13a943b",
+    "topicsBefore": 30,
+    "topicsAfter": 60,
+    "passed": true,
+    "timestamp": "2026-10-03T19:54:04.251Z"
+  },
+  "publicHTTP": {
+    "observedAt": "2026-10-03T19:56:59.638Z",
+    "results": [
+      {
+        "url": "https://scroll.companynerve.com/api/health",
+        "status": 200,
+        "cacheControl": "no-store",
+        "frame": "DENY",
+        "referrer": "no-referrer"
+      },
+      {
+        "url": "https://scroll.companynerve.com/app",
+        "status": 307,
+        "cacheControl": "private, no-store",
+        "frame": "DENY",
+        "referrer": "no-referrer"
+      },
+      {
+        "url": "https://scroll.companynerve.com/api/product",
+        "status": 307,
+        "cacheControl": "private, no-store",
+        "frame": "DENY",
+        "referrer": "no-referrer"
+      }
+    ]
+  },
+  "liveInference": {
+    "route": "existing approved google_metered",
+    "model": "gemini-3.5-flash-lite",
+    "syntheses": [
+      {
+        "state": "ready",
+        "sources": 1,
+        "insights": 6,
+        "credits": 1
+      },
+      {
+        "state": "ready",
+        "sources": 7,
+        "insights": 7,
+        "credits": 1
+      }
+    ],
+    "contextProposalCredits": 2,
+    "confirmedProfileVersionPreserved": 5,
+    "confirmedProfileTextUnchanged": true,
+    "evaluation": {
+      "state": "ready",
+      "decision": "no_fit",
+      "sources": 6,
+      "insights": 12,
+      "credits": 2
+    },
+    "independentHumanQualityJudgment": false,
+    "fundingFallbackOrCreditGrant": false
+  },
+  "issuePublication": {
+    "appPermissions": {
+      "events": ["pull_request"],
+      "permissions": {
+        "contents": "write",
+        "metadata": "read",
+        "pull_requests": "write"
+      },
+      "slug": "vibescroller",
+      "updated_at": "2026-10-02T22:33:34Z"
+    },
+    "repositoryVisibility": {
+      "archived": false,
+      "disabled": false,
+      "has_issues": true,
+      "private": false
+    },
+    "exactSyntheticDraftVersion": 2,
+    "reviewedTextSavedExactly": true,
+    "attempts": 0,
+    "issuesCreated": 0,
+    "initialScopedCredentialRequest": "refused before issue POST; SDK GITHUB_UNAVAILABLE",
+    "laterCurrentBaseGuard": {
+      "status": 400,
+      "body": "{\"error\":\"The repository changed. Refresh its snapshot and review a new plan.\",\"code\":\"BASE_CHANGED\"}"
+    },
+    "securityApproval": "pending; timed requests expired",
+    "codesStored": false,
+    "permissionBypass": false,
+    "exactHumanPublicationApproval": false,
+    "currentDraftNeedsFreshBaseEvaluation": true,
+    "actualLifecycle": "not tested",
+    "emailSecurityScreenPrepared": true,
+    "oneTimeCodeReceived": false
+  },
+  "organizationPolicy": {
+    "testWorkspaces": 2,
+    "enabled": false,
+    "ceilingEach": 10,
+    "usedEach": 10,
+    "newActiveKnowledgeJobs": 0,
+    "existingCostHoldsPreserved": true
+  },
+  "remainingAcceptance": [
+    "GitHub security, Issues permission and installation-owner consent",
+    "Fresh current-base evaluation and exact synthetic publication approval; actual issue bytes and lifecycle",
+    "Real All/restricted/multiple-installation, renamed/transferred/revoked/private cases with authorized accounts",
+    "Independent held-out relation/useful/no-fit/already-implemented judgments and fresh-user comprehension",
+    "Physical Android",
+    "Full interrupted serving recovery; current quarantine/race tests are engineering evidence",
+    "Provider invoice reconciliation and inherited paid-release gates remain separate"
+  ],
+  "accountMenu": {
+    "version": "Alpha \u00b7 0.1.0-alpha.20261003195407.g77637c55673e",
+    "commit": "77637c55673e1fdba9f0a510031a1694285b1d20",
+    "timestamp": "2026-10-03T20:02:15.959Z"
+  },
+  "credentialReview": {
+    "timestamp": "2026-10-03T20:05:29.637Z",
+    "commit": "25c79f4f30d3994c420ce4f2645a3f5b1ca755ef",
+    "baseline": "e9b3cfdffcb2f7c5ed348a136b65c7bb8ea65555",
+    "files": 54,
+    "findings": [],
+    "passed": true,
+    "scope": "full changed-file text, private paths, credential patterns and in-memory matching against local secret values; no secret values persisted"
+  }
+}
