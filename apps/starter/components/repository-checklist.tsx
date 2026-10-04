@@ -491,6 +491,7 @@ export function BusinessContext({
           : "You can use more detail in the sections your project needs."}
       </p>
       <button
+        className="secondary"
         disabled={
           readOnly ||
           busy ||
