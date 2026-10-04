@@ -28,6 +28,7 @@ import {
   profileFieldNames,
   BUSINESS_CONTEXT_VERSION,
 } from "../packages/repositories/business-context";
+import { serializeBusinessProfile } from "../packages/repositories/business-profile";
 export const draftProfile = action({
   args: { id: v.id("repositories"), maxCredits: v.number() },
   handler: async (ctx, a): Promise<void> => {
@@ -54,14 +55,6 @@ export const draftProfile = action({
     try {
       await authorizeRepository(ctx, context.repo);
       const fields = profileFieldNames;
-      const profileSchema = z.strictObject(
-        Object.fromEntries(
-          fields.map((field) => [
-            field,
-            z.string().min(1).max(profileFields[field].limit),
-          ]),
-        ),
-      );
       const schema = {
         type: "object",
         additionalProperties: false,
@@ -69,11 +62,7 @@ export const draftProfile = action({
         properties: Object.fromEntries(
           fields.map((field) => [
             field,
-            {
-              type: "string",
-              minLength: 1,
-              maxLength: profileFields[field].limit,
-            },
+            { type: "string", minLength: 1, maxLength: 8000 },
           ]),
         ),
       };
@@ -93,14 +82,16 @@ export const draftProfile = action({
             : undefined,
           reviewHistory: context.reviewHistory,
           processingVersion: BUSINESS_CONTEXT_VERSION,
+          sectionLengthTargets: Object.fromEntries(
+            fields.map((field) => [field, profileFields[field].limit]),
+          ),
+          totalLengthLimit:
+            "Complete serialized profile under 7,800 characters, including section names. Section targets can vary with evidence; never exceed 8,000 total.",
         },
         2400,
       );
       inferenceCredits = result.credits;
-      const draft = profileSchema.parse(result.output);
-      const profile = fields
-        .map((field) => `${field}: ${draft[field]}`)
-        .join("\n\n");
+      const profile = serializeBusinessProfile(result.output);
       await ctx.runMutation(internal.profiles.finish, {
         ...finish,
         profile,
@@ -121,6 +112,22 @@ export const draftProfile = action({
             (error.name === "ZodError" ? "INVALID_EVIDENCE" : "PROVIDER_ERROR"))
           : "PROVIDER_ERROR";
       console.error(JSON.stringify({ stage: "profile_draft", category }));
+      if (error instanceof z.ZodError)
+        console.error(
+          JSON.stringify({
+            stage: "profile_schema",
+            issues: error.issues
+              .map((i) => ({
+                code: i.code,
+                field: profileFieldNames.includes(
+                  String(i.path[0]) as (typeof profileFieldNames)[number],
+                )
+                  ? String(i.path[0])
+                  : "response",
+              }))
+              .slice(0, 12),
+          }),
+        );
       await ctx.runMutation(internal.profiles.finish, {
         ...finish,
         ...failedInferenceSettlement(error, inferenceStarted, inferenceCredits),
@@ -449,6 +456,7 @@ export const selectRepositories = action({
     const selected = await ctx.runMutation(api.repositorySelection.save, a);
     const result: { repository: string; state: string; error?: string }[] = [];
     const prepare = async (r: (typeof selected)[number]) => {
+      let phase = "authorization";
       const progress = {
         id: r.id,
         actor: r.actor,
@@ -459,10 +467,12 @@ export const selectRepositories = action({
           ...r,
           organizationId: a.organizationId,
         });
+        phase = "previous_snapshot";
         const previous = await ctx.runQuery(internal.jobs.previousSnapshot, {
           organizationId: a.organizationId,
           providerId: r.providerId,
         });
+        phase = "snapshot";
         const data = await snapshot(
           r.installationId,
           r.providerId,
@@ -470,6 +480,7 @@ export const selectRepositories = action({
           previous,
           r.snapshotPaths,
         );
+        phase = "persist_snapshot";
         const id = await ctx.runMutation(internal.jobs.saveRepository, {
           organizationId: a.organizationId,
           installationId: r.installationId,
@@ -480,6 +491,7 @@ export const selectRepositories = action({
           ...data,
         });
         if (r.draftContext) {
+          phase = "draft_context";
           await ctx.runMutation(internal.repositorySelection.preparationState, {
             ...progress,
             state: "drafting_context",
@@ -496,6 +508,20 @@ export const selectRepositories = action({
         return { repository: r.fullName, state: "ready" };
       } catch (error) {
         const code = preparationFailure(error);
+        console.error(
+          JSON.stringify({
+            stage: "repository_preparation",
+            phase,
+            code,
+            type:
+              error instanceof Error &&
+              ["Error", "TypeError", "RangeError", "ConvexError"].includes(
+                error.name,
+              )
+                ? error.name
+                : "UnknownError",
+          }),
+        );
         await ctx.runMutation(internal.repositorySelection.preparationState, {
           ...progress,
           state: "needs_attention",
