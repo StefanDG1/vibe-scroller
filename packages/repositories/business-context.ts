@@ -1,6 +1,6 @@
 import type { ManifestEntry } from "./snapshotCache";
 
-export const BUSINESS_CONTEXT_VERSION = "business-context-v2";
+export const BUSINESS_CONTEXT_VERSION = "business-context-v3";
 export const profileFields = {
   purpose: { label: "Purpose", limit: 400 },
   audience: { label: "Audiences and buyers", limit: 500 },
@@ -47,15 +47,25 @@ export function businessEvidenceFiles(entries: ManifestEntry[]) {
       ),
   );
   const result: ManifestEntry[] = [];
-  const add = (files: ManifestEntry[], count: number) => {
+  const add = (files: ManifestEntry[], count: number, access = false) => {
     const rank = (path: string) =>
-      /(?:^|\/)(?:schema|roles|permissions)\.ts$/.test(path)
-        ? 0
-        : /(?:^|\/)(?:dashboard|page|layout)\.(tsx|jsx)$/.test(path)
-          ? 1
-          : /\/research|research\.docx$/.test(path)
-            ? 2
-            : 3;
+      access
+        ? /(?:^|\/)(?:lib|server|security)\/(?:auth|permissions|roles)\.(?:tsx?|jsx?)$/.test(
+            path,
+          )
+          ? 0
+          : /^(?:convex|src|apps\/[^/]+)\/schema\.(?:tsx?|jsx?)$/.test(path)
+            ? 1
+            : /(?:auth|permissions|roles)\.(?:tsx?|jsx?)$/.test(path)
+              ? 2
+              : 3
+        : /(?:^|\/)(?:schema|roles|permissions)\.ts$/.test(path)
+          ? 0
+          : /(?:^|\/)(?:dashboard|page|layout)\.(tsx|jsx)$/.test(path)
+            ? 1
+            : /\/research|research\.docx$/.test(path)
+              ? 2
+              : 3;
     for (const file of files.sort(
       (a, b) =>
         rank(a.path) - rank(b.path) ||
@@ -86,6 +96,7 @@ export function businessEvidenceFiles(entries: ManifestEntry[]) {
   add(
     eligible.filter((e) => category(e.path) === "access"),
     3,
+    true,
   );
   for (const role of [
     "parent",
@@ -137,4 +148,47 @@ export function boundedDiscoveryIndex(entries: ManifestEntry[]) {
     bytes += next;
   }
   return selected;
+}
+
+// Prefer the actual role/consent guards over generic dashboard keyword density.
+export function businessEvidenceFocus(path: string) {
+  if (/(?:parent.*link|link.*parent)/i.test(path))
+    return (
+      "approve accept reject revoke consent respondRequest unlink requireParentAccess canUseFeatures child verified entitlement " +
+      path
+    );
+  if (/(?:auth|permissions|roles)\.(?:tsx?|jsx?)$/.test(path))
+    return (
+      "capabilities primaryRole self signup verified entitlement staff invitation schoolMembership dashboardModes parent student role " +
+      path
+    );
+  return (
+    "user role permission dashboard feature parent student teacher school director learning lesson assignment progress report analytics tutor notification verification billing trial navigation " +
+    path
+  );
+}
+export function businessEvidenceWeight(path: string) {
+  if (/(?:parent.*link|link.*parent)/i.test(path)) return 3;
+  return /(?:^|\/)(?:lib|server|security)\/(?:auth|permissions|roles)\.(?:tsx?|jsx?)$/i.test(
+    path,
+  )
+    ? 2
+    : 1;
+}
+
+export function businessEvidenceAnchor(path: string, text: string) {
+  const parent = /(?:parent.*link|link.*parent)/i.test(path);
+  const authority =
+    /(?:^|\/)(?:lib|server|security)\/(?:auth|permissions|roles)\.(?:tsx?|jsx?)$/.test(
+      path,
+    );
+  if (!parent && !authority) return undefined;
+  const pattern = parent
+    ? /^\s*export const (?:respond|accept|approve)\w*(?:Link|Request)\w*\s*=/i
+    : /^\s*(?:const|let) (?:activeGrants|capabilitySet|activeSchoolMemberships)\b/;
+  const lines = text.replaceAll("\r\n", "\n").split("\n");
+  const index = lines.findIndex((line) => pattern.test(line));
+  // focusedExcerpt starts ten lines before its center. Keep the complete guard
+  // declaration in a contiguous, honestly numbered window when one is found.
+  return index < 0 ? undefined : Math.min(index + 11, lines.length);
 }

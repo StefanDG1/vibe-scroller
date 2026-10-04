@@ -28,6 +28,9 @@ import { verifyLocalPatch } from "../runner/patch";
 import {
   boundedDiscoveryIndex,
   businessEvidenceFiles,
+  businessEvidenceFocus,
+  businessEvidenceWeight,
+  businessEvidenceAnchor,
 } from "../repositories/business-context";
 import { wordText } from "../repositories/word-text";
 export async function repositoryArchive(
@@ -272,7 +275,12 @@ export async function snapshot(
     if (remaining < 100) break;
     const perFile = Math.min(
       4000,
-      Math.floor(remaining / (businessFiles.length - index)),
+      Math.floor(
+        (remaining * businessEvidenceWeight(f.path)) /
+          businessFiles
+            .slice(index)
+            .reduce((sum, row) => sum + businessEvidenceWeight(row.path), 0),
+      ),
     );
     const cached =
       !f.path.endsWith(".docx") &&
@@ -316,9 +324,9 @@ export async function snapshot(
           : focusedExcerpt(
               entry,
               text,
-              "user role permission dashboard feature parent student teacher school director learning lesson assignment progress report analytics tutor notification verification billing trial navigation " +
-                f.path,
+              businessEvidenceFocus(f.path),
               perFile,
+              businessEvidenceAnchor(f.path, text),
             );
       if (!selected) continue;
       remaining -= selected.content.length + 1;

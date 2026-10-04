@@ -3,9 +3,13 @@ import { zipSync, strToU8 } from "fflate";
 import { createHash, generateKeyPairSync } from "node:crypto";
 import {
   businessEvidenceFiles,
+  businessEvidenceFocus,
+  businessEvidenceWeight,
+  businessEvidenceAnchor,
   boundedDiscoveryIndex,
   profileFields,
 } from "../packages/repositories/business-context";
+import { focusedExcerpt } from "../packages/repositories/retrieval";
 import { wordText } from "../packages/repositories/word-text";
 import { retrieveContext } from "../packages/providers/github";
 import { serializeBusinessProfile } from "../packages/repositories/business-profile";
@@ -191,4 +195,68 @@ it("retrieves relevant immutable whole-tree evidence outside the bounded discove
       "parent",
     ),
   ).rejects.toThrow("INVALID_EVIDENCE");
+});
+
+it("prioritizes authoritative role guards and consent evidence over incidental schemas and dashboard density", () => {
+  const paths = [
+    "convex/schema.ts",
+    "convex/auth.ts",
+    "convex/lib/auth.ts",
+    "src/lib/questions/interactive-graph/schema.ts",
+    "convex/parentLinks.ts",
+  ];
+  const selected = businessEvidenceFiles(paths.map(entry)).map((x) => x.path);
+  expect(selected).toContain("convex/lib/auth.ts");
+  expect(selected).not.toContain(
+    "src/lib/questions/interactive-graph/schema.ts",
+  );
+  const text = [
+    "const dashboard = 'parent student teacher school director dashboard feature progress report';",
+    ...Array.from({ length: 40 }, () => "// ordinary content"),
+    "const consent = 'approve accept reject revoke consent respondRequest unlink verified entitlement';",
+    "requireParentAccess();",
+  ].join("\n");
+  const inspected = focusedExcerpt(
+    entry("convex/parentLinks.ts"),
+    text,
+    businessEvidenceFocus("convex/parentLinks.ts"),
+    1200,
+  );
+  expect(inspected?.content).toContain("requireParentAccess");
+  expect(inspected?.content).not.toContain("const dashboard");
+  expect(businessEvidenceWeight("convex/lib/auth.ts")).toBe(2);
+  expect(businessEvidenceWeight("convex/parentLinks.ts")).toBe(3);
+  expect(businessEvidenceWeight("README.md")).toBe(1);
+});
+
+it("anchors consent and active authority grants without inventing ranges in unmatched files", () => {
+  const parent = [
+    "// ordinary",
+    "export const respondToLink = mutation({",
+    "  // child approves",
+    ...Array.from({ length: 30 }, () => "// guard content"),
+  ].join("\n");
+  const anchor = businessEvidenceAnchor("convex/parentLinks.ts", parent);
+  const result = focusedExcerpt(
+    entry("convex/parentLinks.ts"),
+    parent,
+    businessEvidenceFocus("convex/parentLinks.ts"),
+    1000,
+    anchor,
+  );
+  expect(result?.startLine).toBe(2);
+  expect(result?.content).toContain("child approves");
+  expect(result?.endLine).toBe(
+    (result?.startLine ?? 0) + (result?.content.split("\n").length ?? 0) - 1,
+  );
+  expect(
+    businessEvidenceAnchor(
+      "convex/lib/auth.ts",
+      "const activeGrants = [];\nconst activeSchoolMemberships = [];",
+    ),
+  ).toBe(2);
+  expect(businessEvidenceAnchor("README.md", parent)).toBeUndefined();
+  expect(
+    businessEvidenceAnchor("convex/parentLinks.ts", "// no known declaration"),
+  ).toBeUndefined();
 });
