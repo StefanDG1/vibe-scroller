@@ -337,6 +337,7 @@ export const productTables = {
     ...tenant,
     selectionVersion: v.optional(v.number()),
     snapshotPaths: v.optional(v.array(v.string())),
+    profileDraftProcessingVersion: v.optional(v.string()),
     preparationError: v.optional(v.string()),
     installationId: v.number(),
     providerId: v.number(),

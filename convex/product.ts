@@ -1,4 +1,5 @@
 import { validateInspectedContext } from "../packages/repositories/retrieval";
+import { inspectionManifestValidator } from "../packages/repositories/context";
 import { inspectedContextValidator } from "../packages/repositories/context";
 import {
   query,
@@ -1506,6 +1507,17 @@ export const repositories = query({
             includedFiles: r.snapshotSummary.eligibleFileCount,
             omittedFiles: r.snapshotSummary.omittedEligibleFileCount ?? 0,
             baseSha: r.snapshotSummary.baseSha,
+            indexedFiles: r.snapshotSummary.indexedFileCount,
+            inspectedFiles: r.snapshotSummary.inspectedPaths?.length ?? 0,
+            wholeRepository:
+              r.snapshotSummary.discoveryVersion === "whole-repository-v1",
+            wordDocuments: r.snapshotSummary.businessDocumentPaths?.length ?? 0,
+            evidence: (r.contextExcerpts ?? []).map((e) => ({
+              path: e.path,
+              startLine: e.startLine,
+              endLine: e.endLine,
+              wordDocument: e.path.endsWith(".docx"),
+            })),
           }
         : undefined,
       profileDraft: r.profileDraft,
@@ -1718,6 +1730,7 @@ export const addProposal = internalMutation({
     matchKey: v.optional(v.string()),
     sourceGeneration: v.optional(v.number()),
     inspectedContext: v.optional(inspectedContextValidator),
+    inspectionManifest: v.optional(inspectionManifestValidator),
   },
   handler: async (ctx, a) => {
     const s = await ctx.db.get(a.sourceId),
@@ -1751,7 +1764,10 @@ export const addProposal = internalMutation({
       "Matching context changed.",
     );
     if (a.inspectedContext)
-      validateInspectedContext(a.inspectedContext, r.manifestEntries ?? []);
+      validateInspectedContext(
+        a.inspectedContext,
+        a.inspectionManifest ?? r.manifestEntries ?? [],
+      );
     validateRepositoryEvidence(
       d.repositoryEvidence,
       a.inspectedContext ?? r.contextExcerpts ?? [],

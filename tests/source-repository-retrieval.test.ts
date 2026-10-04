@@ -73,10 +73,19 @@ it("prepares explicit scope in an oversized tree without reading omitted blobs o
       snapshot(1, 42, "owned/synthetic", null, [".env"]),
     ).rejects.toThrow("INVALID_INPUT");
     expect(calls).toHaveLength(0);
-    await expect(snapshot(1, 42, "owned/synthetic")).rejects.toThrow(
-      "REPO_TOO_LARGE",
-    );
-    expect(reads).toHaveLength(0);
+    const whole = await snapshot(1, 42, "owned/synthetic");
+    expect(whole.snapshotSummary).toMatchObject({
+      discoveryVersion: "whole-repository-v1",
+      eligibleFileCount: 5101,
+      omittedEligibleFileCount: 0,
+    });
+    expect(whole.manifestEntries.length).toBeLessThan(5001);
+    expect(
+      Buffer.byteLength(
+        JSON.stringify(whole.manifestEntries) + JSON.stringify(whole.manifest),
+      ),
+    ).toBeLessThanOrEqual(600000);
+    reads.length = 0;
     await expect(
       snapshot(1, 42, "owned/synthetic", null, ["src2"]),
     ).rejects.toThrow("CONTEXT_REQUIRED");

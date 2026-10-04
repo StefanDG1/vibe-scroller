@@ -5,6 +5,7 @@ import { ensure, containsSecret } from "../packages/policy";
 import { reserve, settle } from "./product";
 import { internal } from "./_generated/api";
 import { snapshotScopeCurrent } from "../packages/repositories/scope";
+import { BUSINESS_CONTEXT_VERSION } from "../packages/repositories/business-context";
 export const confirmDraft = mutation({
   args: {
     id: v.id("repositories"),
@@ -64,9 +65,10 @@ export const start = mutation({
     if (
       repo.profileDraft &&
       repo.profileDraftSha === repo.sha &&
-      repo.profileDraftVersion === repo.profileVersion
+      repo.profileDraftVersion === repo.profileVersion &&
+      repo.profileDraftProcessingVersion === BUSINESS_CONTEXT_VERSION
     )
-      return { repo, cached: true, key: "" };
+      return { repo, cached: true, key: "", reviewHistory: [] };
     ensure(
       !repo.profileDraftKey,
       "SOURCE_BUSY",
@@ -80,7 +82,23 @@ export const start = mutation({
       profileDraftSelectionVersion: repo.selectionVersion ?? 0,
       updatedAt: Date.now(),
     });
-    return { repo, cached: false, key };
+    const history = await ctx.db
+      .query("knowledgeEvaluations")
+      .withIndex("by_repo", (q) => q.eq("repositoryId", repo._id))
+      .order("desc")
+      .take(10);
+    const reviewHistory = history
+      .filter(
+        (e) =>
+          e.organizationId === repo.organizationId &&
+          ["rejected", "deferred"].includes(e.decision),
+      )
+      .map((e) => ({
+        decision: e.decision,
+        title: String(e.output?.title ?? "").slice(0, 160),
+        note: String(e.output?.rationale ?? "").slice(0, 400),
+      }));
+    return { repo, cached: false, key, reviewHistory };
   },
 });
 
@@ -151,6 +169,7 @@ export const finish = internalMutation({
             profileDraft: a.profile,
             profileDraftSha: a.sha,
             profileDraftVersion: a.version,
+            profileDraftProcessingVersion: BUSINESS_CONTEXT_VERSION,
           }
         : {}),
       updatedAt: Date.now(),

@@ -42,3 +42,7 @@ October 3, F008 live engineering: updated all four briefs together with source-p
 ## October 4: F009 bounded repository preparation
 
 Reviewed the four briefs against the real oversized-snapshot failure and owner correction. Ordinary setup/error copy now describes explicit path selection, preserved limits and omitted coverage. The shared update appended to each brief retains audience, funding and evidence requirements. Local engineering is separate from deployment, two real saved-video issue drafts and independent usefulness; no benefit or publication is inferred.
+
+## October 4: F010 whole repository and detailed audience context
+
+Owner steering supersedes mandatory-path remediation in F009. All four briefs distinguish full eligible-tree discovery, bounded inspected evidence and live product proof. Adopt automatic evidence selection, current Word persona documents, explicit roles/journeys/features, reviewable refresh and preserved manual authority; keep advanced scope optional. The existing developer/founder audience, prices, budgets and separate approval are unchanged. Tests require every role in large-tree discovery, immutable late-file retrieval, bounded Word extraction and preserved confirmed context. Draft usefulness and independent comprehension remain unverified. See [ADR 054](../adr/054-whole-repository-business-context.md).
