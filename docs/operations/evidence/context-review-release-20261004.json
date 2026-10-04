@@ -1,0 +1,135 @@
+{
+  "verifiedAt": "2026-10-04T07:37:04.737Z",
+  "commit": "b6e2a1be6d2992e0378a9d26e67f1b9421ced848",
+  "version": "0.1.0-alpha.20261004073433.gb6e2a1be6d29",
+  "domain": "https://scroll.companynerve.com",
+  "frontend": {
+    "deploymentId": "dpl_57GG1NLkLjBMxzuo4FBtzUZgLGEg",
+    "state": "READY",
+    "machine": "basic",
+    "selection": "fixed",
+    "cores": 2,
+    "memoryMiB": 8192,
+    "canonicalAliasPresent": true
+  },
+  "buildPolicy": {
+    "bothProjects": "fixed Basic; elasticConcurrencyEnabled=false",
+    "newMachineOrConcurrencyPurchase": false,
+    "documentationOnlyFollowUp": "may skip deployment under ADR 033"
+  },
+  "backend": {
+    "deployment": "bold-lemur-667",
+    "messageBoundCommit": "e36bfbf02fb18f564a4663d3428df44a078ecb95",
+    "dryRunExitCode": 0,
+    "deployExitCode": 0,
+    "compatibleWithFrontend": true,
+    "basis": "No Convex or shared-package changes between the deployed backend commit and final frontend commit; redundant backend deployment skipped."
+  },
+  "ci": {
+    "pullRequests": [29, 30],
+    "prVerify": [37184499903, 37185987812],
+    "mainVerify": 37186203869,
+    "version": 37186203878,
+    "prerelease": 37186258870,
+    "status": "passed"
+  },
+  "local": {
+    "appTestsPassed": 360,
+    "explicitExternalSkips": 3,
+    "authProxyFormTestsPassed": 16,
+    "mediaProxyTestsPassed": 12,
+    "buildPolicyTestsPassed": 5,
+    "bothProductionBuilds": "passed",
+    "lintTypesFormattingDocs": "passed",
+    "dependencyAudit": "zero unresolved; existing locally mitigated braces advisory remains",
+    "secretScans": {
+      "filesByChange": [9, 3],
+      "findings": 0
+    },
+    "initialTimeouts": "locked recovery and 500-row batch import; focused and complete reruns passed without weakening tests"
+  },
+  "nativeBrowser": {
+    "localWidths": [320, 390, 430, 768, 1024, 1440],
+    "previewWidths": [320, 390, 430, 768, 1024, 1440],
+    "productionWidths": [320, 390, 430, 768, 1024, 1440],
+    "horizontalOverflow": false,
+    "minimumSaveControlHeight": 44.2734375,
+    "earlierTouchFailureHeight": 25.59375,
+    "touchCorrection": "existing secondary-button style",
+    "reducedMotion": true,
+    "visibleKeyboardTransitions": 12,
+    "physicalAndroidAccepted": false
+  },
+  "context": {
+    "privateEligibleFilesDiscovered": 8736,
+    "privateRepresentativeCacheFiles": 1902,
+    "privateInspectedFiles": 40,
+    "privateWordDocuments": 16,
+    "intentionalScopeExclusions": 0,
+    "generatedCharacters": 6516,
+    "generationCredits": 2,
+    "generationCitationsMechanicallyChecked": 26,
+    "reviewedDraftCharacters": 7993,
+    "revisedCitationsMechanicallyChecked": 21,
+    "changedCitedBlobsReinspected": 2,
+    "nativeSavedWithoutConfirmation": true,
+    "saveCredits": 0,
+    "confirmedManualExactPreservation": true,
+    "ownerConfirmed": false,
+    "wholeFileSemanticReviewClaimed": false
+  },
+  "realSavedVideo": {
+    "evaluationCommit": "e36bfbf02fb18f564a4663d3428df44a078ecb95",
+    "state": "ready",
+    "disposition": "no_fit",
+    "coveredInsights": 1,
+    "omittedTopicEvidence": false,
+    "credits": 1,
+    "coverage": "caption_only; source link/original save date retained privately",
+    "additionalCandidate": "one real saved-video mobile-CTA insight isolated through the app without inference; not a project evaluation or issue"
+  },
+  "budgets": {
+    "trialMonth": "2026-10",
+    "explicitOwnerCeilingException": [200, 300],
+    "trial": {
+      "spent": 145,
+      "reserved": 50,
+      "ceiling": 300
+    },
+    "allProcessing": {
+      "spent": 215,
+      "reserved": 50,
+      "ceiling": 1000
+    },
+    "workspaceWallet": {
+      "spent": 86,
+      "reserved": 10,
+      "granted": 110,
+      "purchased": 0
+    },
+    "googlePilotMicroEur": {
+      "spent": 1117994,
+      "reserved": 265043,
+      "ceiling": 10000000
+    },
+    "unknownHoldsPreserved": true,
+    "invoiceVerificationClaimed": false
+  },
+  "liveSaveRefusals": {
+    "staleVersion": "HTTP 400 APPROVAL_STALE",
+    "concurrentDraft": "HTTP 400 APPROVAL_STALE",
+    "emptyText": "HTTP 400 POLICY_BLOCKED",
+    "overLimit": "HTTP 400 POLICY_BLOCKED",
+    "draftAuthorityWalletUnchanged": true
+  },
+  "remainingAcceptance": [
+    "Owner confirmation of private-project business context",
+    "Two useful app-created saved-video issues and exact publication review",
+    "Actual GitHub issue publication and lifecycle/downgrade/unknown-write acceptance",
+    "Restricted/multiple-installation/rename/transfer/revocation cases beyond current owned setup",
+    "Independent knowledge quality, held-out usefulness and fresh-user comprehension",
+    "Physical Android and privileged-role live journeys",
+    "Earlier numerical, invoice, full serving-recovery and cohort gates; no closure inferred"
+  ],
+  "privacy": "No private repository text, source URLs, workspace IDs, credentials, security codes, screenshots or signed assets are included in this public receipt; exact raw evidence remains ignored."
+}
