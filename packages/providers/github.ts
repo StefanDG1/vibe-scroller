@@ -25,6 +25,11 @@ import {
   snapshotScopeCurrent,
 } from "../repositories/scope";
 import { verifyLocalPatch } from "../runner/patch";
+import {
+  boundedDiscoveryIndex,
+  businessEvidenceFiles,
+} from "../repositories/business-context";
+import { wordText } from "../repositories/word-text";
 export async function repositoryArchive(
   fullName: string,
   baseSha: string,
@@ -236,13 +241,18 @@ export async function snapshot(
     "CONTEXT_REQUIRED",
     "Each selected path must contain an eligible file at the current commit.",
   );
-  const manifest = files.map((f: any) => f.path);
-  const manifestEntries = files.map((f: any) => ({
+  const allEntries = files.map((f: any) => ({
     path: f.path,
     blobSha: f.sha,
     mode: f.mode,
     size: f.size,
   }));
+  // Keep the storage/write payload bounded, without restricting discovery or
+  // later evidence retrieval to this representative cache.
+  const manifestEntries = paths.length
+    ? allEntries
+    : boundedDiscoveryIndex(allEntries);
+  const manifest = manifestEntries.map((f: ManifestEntry) => f.path);
   ensure(
     manifestEntries.length <= 5000 &&
       Buffer.byteLength(
@@ -256,24 +266,21 @@ export async function snapshot(
   const contextExcerpts: RepositoryExcerpt[] = [];
   let reusedExcerpts = 0;
   let remaining = 40000;
-  for (const f of files
-    .filter((f: any) => /README|package\.json|\.(tsx?|py|md)$/.test(f.path))
-    .sort((a: any, b: any) => {
-      const score = (path: string) =>
-        /^(README\.md|package\.json)$/.test(path)
-          ? 0
-          : /^(convex\/|apps\/starter\/components\/)/.test(path)
-            ? 1
-            : 2;
-      return score(a.path) - score(b.path) || a.path.localeCompare(b.path);
-    })
-    .slice(0, 40)) {
+  const businessFiles = businessEvidenceFiles(allEntries);
+  for (const [index, entry] of businessFiles.entries()) {
+    const f = { ...entry, sha: entry.blobSha };
     if (remaining < 100) break;
-    const cached = reuseExcerpt(
-      { path: f.path, blobSha: f.sha, mode: f.mode, size: f.size },
-      previous,
-      remaining,
+    const perFile = Math.min(
+      4000,
+      Math.floor(remaining / (businessFiles.length - index)),
     );
+    const cached =
+      !f.path.endsWith(".docx") &&
+      reuseExcerpt(
+        { path: f.path, blobSha: f.sha, mode: f.mode, size: f.size },
+        previous,
+        perFile,
+      );
     if (cached) {
       reusedExcerpts++;
       remaining -= cached.content.length + 1;
@@ -283,9 +290,36 @@ export async function snapshot(
       continue;
     }
     const b = await github(`/repos/${fullName}/git/blobs/${f.sha}`, token);
-    const text = Buffer.from(b.content, "base64").toString("utf8");
+    const bytes = Buffer.from(b.content, "base64");
+    let text: string;
+    try {
+      if (f.path.endsWith(".docx"))
+        ensure(
+          bytes.length === f.size &&
+            createHash("sha1")
+              .update(`blob ${bytes.length}\0`)
+              .update(bytes)
+              .digest("hex") === f.sha,
+          "INVALID_EVIDENCE",
+          "Word evidence differs from its immutable blob.",
+        );
+      text = f.path.endsWith(".docx")
+        ? wordText(bytes)
+        : bytes.toString("utf8");
+    } catch {
+      continue;
+    } // Unsupported documents are omitted, never invented.
     if (!text.includes("\0") && !containsSecret(text)) {
-      const selected = excerpt(f.path, text, f.sha, remaining);
+      const selected =
+        /\.(?:md|docx)$/.test(f.path) || f.path === "package.json"
+          ? excerpt(f.path, text, f.sha, perFile)
+          : focusedExcerpt(
+              entry,
+              text,
+              "user role permission dashboard feature parent student teacher school director learning lesson assignment progress report analytics tutor notification verification billing trial navigation " +
+                f.path,
+              perFile,
+            );
       if (!selected) continue;
       remaining -= selected.content.length + 1;
       contextExcerpts.push(selected);
@@ -328,12 +362,17 @@ export async function snapshot(
           }),
         )
         .digest("hex"),
-      eligibleFileCount: manifestEntries.length,
+      eligibleFileCount: files.length,
+      discoveryVersion: paths.length ? undefined : "whole-repository-v1",
+      indexedFileCount: manifestEntries.length,
+      businessDocumentPaths: contextFiles.filter((path) =>
+        path.endsWith(".docx"),
+      ),
       selectedPaths: paths,
       repositoryEligibleFileCount: eligible.length,
       omittedEligibleFileCount: eligible.length - files.length,
       inspectedPaths: contextFiles,
-      languageFileCounts: manifestEntries.reduce(
+      languageFileCounts: allEntries.reduce(
         (counts: Record<string, number>, entry: { path: string }) => {
           const suffix = entry.path.includes(".")
             ? entry.path.split(".").at(-1)!.toLowerCase()
@@ -363,7 +402,7 @@ export async function retrieveContext(
     sha: string;
     manifestEntries?: ManifestEntry[];
     snapshotPaths?: string[];
-    snapshotSummary?: { selectedPaths?: string[] };
+    snapshotSummary?: { selectedPaths?: string[]; discoveryVersion?: string };
   },
   focus: string,
   evidence: { path: string; startLine: number; endLine: number }[] = [],
@@ -384,18 +423,53 @@ export async function retrieveContext(
     "CONTEXT_REQUIRED",
     "Refresh the selected repository's immutable manifest before matching.",
   );
-  const files = retrievalFiles(
-    repo.manifestEntries,
-    focus,
-    [...new Set(evidence.map((row) => row.path))],
-    purpose === "planning",
-  );
   const token = await installationToken(repo.installationId);
   const current = await github(`/repos/${repo.fullName}`, token);
   ensure(
     current.id === repo.providerId,
     "FORBIDDEN",
     "Repository identity changed.",
+  );
+  let entries = repo.manifestEntries;
+  if (repo.snapshotSummary?.discoveryVersion === "whole-repository-v1") {
+    const tree = await github(
+      `/repos/${repo.fullName}/git/trees/${repo.sha}?recursive=1`,
+      token,
+    );
+    ensure(
+      !tree.truncated,
+      "REPO_TOO_LARGE",
+      "Whole-repository discovery is incomplete. No partial tree can establish complete coverage.",
+    );
+    const ignored = await inspectedIgnorePolicy(tree.tree, async (sha) => {
+      const blob = await github(
+        `/repos/${repo.fullName}/git/blobs/${sha}`,
+        token,
+      );
+      return Buffer.from(blob.content, "base64").toString("utf8");
+    });
+    entries = tree.tree
+      .filter(
+        (f: any) =>
+          f.type === "blob" &&
+          ["100644", "100755"].includes(f.mode) &&
+          !ignored(f.path) &&
+          Number.isSafeInteger(f.size) &&
+          f.size >= 0 &&
+          f.size <= RETRIEVAL_BLOB_LIMIT,
+      )
+      .map((f: any) => ({
+        path: f.path,
+        blobSha: f.sha,
+        mode: f.mode,
+        size: f.size,
+      }));
+  }
+  const files = retrievalFiles(
+    entries!,
+    focus,
+    [...new Set(evidence.map((row) => row.path))],
+    purpose === "planning",
   );
   // Blob identities come from the approved manifest, never from model-supplied refs.
   const excerpts: RepositoryExcerpt[] = [];
@@ -438,9 +512,9 @@ export async function retrieveContext(
     excerpts.push(selected);
     remaining -= selected.content.length;
   }
-  validateInspectedContext(excerpts, repo.manifestEntries);
+  validateInspectedContext(excerpts, entries!);
   validateRepositoryEvidence(evidence, excerpts);
-  return { excerpts, tree: preparedTree(excerpts) };
+  return { excerpts, tree: preparedTree(excerpts), manifestEntries: files };
 }
 export async function publish(input: {
   installationId: number;

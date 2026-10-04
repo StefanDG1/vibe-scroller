@@ -1,24 +1,10 @@
 "use client";
 import { useState } from "react";
 import { ChoiceSelect } from "./choice-select";
-const fields = [
-  "purpose",
-  "audience",
-  "stage",
-  "goals",
-  "businessModel",
-  "constraints",
-  "nonGoals",
-] as const;
-const labels = {
-  purpose: "Purpose",
-  audience: "Intended users",
-  stage: "Stage",
-  goals: "Goals",
-  businessModel: "Business model",
-  constraints: "Constraints",
-  nonGoals: "Non-goals",
-};
+import {
+  profileFields,
+  profileFieldNames as fields,
+} from "../../../packages/repositories/business-context";
 type Call = (operation: string, args: any) => Promise<any>;
 export function RepositoryChecklist({
   organizationId,
@@ -176,25 +162,40 @@ export function RepositoryChecklist({
             {r.fullName}
           </label>
           {checked.has(r.id) && (
-            <label>
-              Files or folders to inspect for {r.fullName} (optional)
-              <textarea
-                rows={3}
-                maxLength={4000}
-                value={paths[r.id] ?? ""}
-                disabled={readOnly || busy}
-                placeholder={"README.md\nsrc"}
-                onChange={(e) =>
-                  setPaths((old) => ({ ...old, [r.id]: e.target.value }))
-                }
-              />
-              <span>
-                Leave blank for the eligible repository tree. Enter up to twenty
-                literal paths, one per line. A folder includes its children.
-                Other files will be omitted from project evaluations. Existing
-                file, privacy and processing limits still apply.
-              </span>
-            </label>
+            <details>
+              <summary>
+                Advanced: limit repository coverage
+                {paths[r.id] ? " (a limit is active)" : ""}
+              </summary>
+              <label>
+                Optional coverage limit for {r.fullName}
+                <textarea
+                  rows={3}
+                  maxLength={4000}
+                  value={paths[r.id] ?? ""}
+                  disabled={readOnly || busy}
+                  placeholder={"README.md\nsrc"}
+                  onChange={(e) =>
+                    setPaths((old) => ({ ...old, [r.id]: e.target.value }))
+                  }
+                />
+                <span>
+                  Whole-repository discovery is the default. You do not need to
+                  choose files. Only use this limit when you intentionally want
+                  to exclude other areas. Enter literal paths, one per line;
+                  folders include their children. Secrets and generated files
+                  remain excluded in every mode.
+                </span>
+              </label>
+              {!!paths[r.id] && (
+                <button
+                  disabled={readOnly || busy}
+                  onClick={() => setPaths((old) => ({ ...old, [r.id]: "" }))}
+                >
+                  Use the whole repository
+                </button>
+              )}
+            </details>
           )}
         </div>
       ))}
@@ -232,7 +233,8 @@ export function RepositoryChecklist({
         Draft business context with AI for unconfirmed projects (default)
       </label>
       <p>
-        Snapshot preparation retrieves only selected repository content. Context
+        Preparation discovers the whole eligible repository and inspects a
+        bounded set of foundational documents, roles and feature files. Context
         drafting reserves up to {quote} processing credits in total (10 per
         unconfirmed project). Confirmed profiles are preserved. Manual context
         works without AI funding. Existing budgets can refuse or pause
@@ -312,7 +314,7 @@ export function RepositoryChecklist({
 }
 function preparationMessage(code?: string) {
   if (code === "REPO_TOO_LARGE")
-    return ". The snapshot exceeds the existing file or size limit. Choose fewer files or folders above, then save again. No context analysis started for this snapshot.";
+    return ". Discovery could not complete within the current safety bounds. An active coverage limit may also exceed its bounded manifest. No complete-repository understanding or paid analysis is claimed. Review current access and preparation status before retrying.";
   if (code === "CONTEXT_REQUIRED")
     return ". A selected path has no eligible files. Check the literal path and repository ignore rules, then save again.";
   if (
@@ -370,10 +372,17 @@ export function BusinessContext({
       )}
       {r.snapshotCoverage && (
         <p>
-          Snapshot at {r.snapshotCoverage.baseSha}:{" "}
-          {r.snapshotCoverage.includedFiles} eligible files included;{" "}
-          {r.snapshotCoverage.omittedFiles} eligible files omitted. Only bounded
-          excerpts are read.
+          {r.snapshotCoverage.wholeRepository
+            ? "Whole-repository discovery"
+            : "Selected coverage"}{" "}
+          at {r.snapshotCoverage.baseSha}: {r.snapshotCoverage.includedFiles}{" "}
+          eligible files discovered; {r.snapshotCoverage.omittedFiles} eligible
+          files excluded by your coverage limit.{" "}
+          {r.snapshotCoverage.inspectedFiles} files inspected for context,
+          including {r.snapshotCoverage.wordDocuments} Word documents. Discovery
+          is a file inventory, not a claim that every file or live screen was
+          reviewed. Issue evaluation retrieves additional relevant files from
+          the whole eligible tree.
         </p>
       )}
       <button
@@ -391,6 +400,23 @@ export function BusinessContext({
       >
         Draft or refresh context · up to 10 credits
       </button>
+      {!!r.snapshotCoverage?.evidence?.length && (
+        <details>
+          <summary>Files used for business context</summary>
+          <ul>
+            {r.snapshotCoverage.evidence.map((e: any) => (
+              <li key={e.path} style={{ overflowWrap: "anywhere" }}>
+                {e.path}: {e.wordDocument ? "extracted text" : "source"} lines{" "}
+                {e.startLine} to {e.endLine}
+              </li>
+            ))}
+          </ul>
+          <p>
+            Later evaluations inspect additional relevant files. A file
+            inventory does not verify every feature or live screen.
+          </p>
+        </details>
+      )}
       {r.profileDraftKey && (
         <p>
           Context request is pending or its usage needs reconciliation. A
@@ -442,10 +468,10 @@ export function BusinessContext({
       ) : (
         fields.map((f) => (
           <label key={f}>
-            {labels[f]}
+            {profileFields[f].label}
             <textarea
               rows={2}
-              maxLength={700}
+              maxLength={profileFields[f].limit}
               value={values[f]}
               onChange={(e) =>
                 setValues((old) => ({ ...old, [f]: e.target.value }))

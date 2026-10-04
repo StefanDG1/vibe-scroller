@@ -360,6 +360,33 @@ describe("VibeScroller product boundaries", () => {
     expect(publicRows[0]).not.toHaveProperty("context");
     expect(publicRows[0]).not.toHaveProperty("contextExcerpts");
     expect(publicRows[0]).not.toHaveProperty("manifestEntries");
+    // An older extractor's draft cannot masquerade as the detailed refresh.
+    await t.run((ctx) =>
+      ctx.db.patch(id, {
+        profileDraftProcessingVersion: undefined,
+        profile: "Confirmed parent and teacher context",
+        confirmed: true,
+      }),
+    );
+    const upgraded = await a.mutation(api.profiles.start, {
+      id,
+      key: "synthetic-key-004",
+      maxCredits: 10,
+    });
+    expect(upgraded.cached).toBe(false);
+    await t.mutation(internal.profiles.finish, {
+      id,
+      organizationId: org,
+      key: upgraded.key,
+      sha: upgraded.repo.sha,
+      version: upgraded.repo.profileVersion,
+      profile: "New detailed proposal",
+      credits: 0,
+    });
+    const preserved = await t.run((ctx) => ctx.db.get(id));
+    expect(preserved?.profile).toBe("Confirmed parent and teacher context");
+    expect(preserved?.confirmed).toBe(true);
+    expect(preserved?.profileDraft).toBe("New detailed proposal");
   });
   it("fences a local device lease and requires termination before another claim", async () => {
     const { t, org } = await setup();

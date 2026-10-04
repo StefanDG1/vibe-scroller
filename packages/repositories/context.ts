@@ -1,5 +1,13 @@
 import { ensure } from "../policy";
 import { v } from "convex/values";
+export const inspectionManifestValidator = v.array(
+  v.object({
+    path: v.string(),
+    blobSha: v.string(),
+    mode: v.string(),
+    size: v.number(),
+  }),
+);
 export const inspectedContextValidator = v.array(
   v.object({
     path: v.string(),

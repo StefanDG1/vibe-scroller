@@ -1,5 +1,8 @@
 import { validateInspectedContext } from "../packages/repositories/retrieval";
-import { inspectedContextValidator } from "../packages/repositories/context";
+import {
+  inspectedContextValidator,
+  inspectionManifestValidator,
+} from "../packages/repositories/context";
 import { mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import { writeAccess, fail } from "./lib";
@@ -73,6 +76,7 @@ export const finish = internalMutation({
     baseSha: v.string(),
     plan: v.optional(v.any()),
     inspectedContext: v.optional(inspectedContextValidator),
+    inspectionManifest: v.optional(inspectionManifestValidator),
     credits: v.number(),
     retainReservation: v.optional(v.boolean()),
   },
@@ -130,7 +134,7 @@ export const finish = internalMutation({
       if (a.inspectedContext)
         validateInspectedContext(
           a.inspectedContext,
-          repo.manifestEntries ?? [],
+          a.inspectionManifest ?? repo.manifestEntries ?? [],
         );
       plan = planInput.parse(a.plan);
       validateGeneratedPackageChecks(
