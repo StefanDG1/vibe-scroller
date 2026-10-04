@@ -1,0 +1,84 @@
+{
+  "verifiedAt": "2026-10-04T05:49:33.179734Z",
+  "commit": "bd4dd071226c194e9f0fe4e08f4a6a0be81bac55",
+  "version": "0.1.0-alpha.20261004054245.gbd4dd071226c",
+  "domain": "https://scroll.companynerve.com",
+  "frontend": {
+    "deploymentId": "dpl_3o6psR845fara15qLVaLFgEQSb2r",
+    "state": "READY",
+    "machine": "basic",
+    "selection": "fixed",
+    "cores": 2,
+    "memoryMiB": 8192
+  },
+  "backend": {
+    "deployment": "bold-lemur-667",
+    "exitCode": 0,
+    "dryRunExitCode": 0,
+    "messageBoundCommit": "bd4dd071226c194e9f0fe4e08f4a6a0be81bac55"
+  },
+  "ci": {
+    "pullRequest": 27,
+    "verify": 37180587710,
+    "mainVerify": 37180679570,
+    "version": 37180679582,
+    "prerelease": 37180719339,
+    "status": "passed; standard pnpm check and dependency audit"
+  },
+  "local": {
+    "appTests": 358,
+    "explicitExternalSkips": 3,
+    "authProxyFormTests": 16,
+    "completeChecks": "passed with application maxWorkers 2; default-worker timeout failures retained",
+    "docs": 169,
+    "skills": 12,
+    "secretScanFiles": 7,
+    "secretFindings": 0
+  },
+  "repositoryPreparation": {
+    "selectedRepositoriesReady": 2,
+    "privateEligibleFilesDiscovered": 8730,
+    "privateScopeExclusions": 0,
+    "privateRepresentativeCacheFiles": 1901,
+    "privateInspectedFiles": 40,
+    "privateWordDocuments": 16,
+    "wholeFileSemanticReview": false,
+    "inferenceCredits": 0
+  },
+  "contextDraft": {
+    "earlierSavedCharacters": 4392,
+    "earlierSavedDraftConfirmed": false,
+    "earlierSavedDraftCurrentSnapshot": false,
+    "earlierInvalidResponseCredits": 2,
+    "earlierSavedResponseCredits": 2,
+    "finalRefresh": "refused before inference by OPERATOR_BUDGET_REACHED",
+    "finalRefreshCredits": 0,
+    "finalReplacementSaved": false
+  },
+  "budget": {
+    "trialMonth": "2026-10",
+    "ceiling": 200,
+    "spent": 142,
+    "reserved": 50,
+    "requiredQuote": 10,
+    "ownerExceptionRequestedCeiling": 202,
+    "exceptionApproved": false,
+    "otherCeilingsChanged": false,
+    "unknownReservationsReleased": false
+  },
+  "nativeProduction": {
+    "widths": [320, 390, 430, 768, 1024, 1440],
+    "horizontalOverflow": false,
+    "contextFields": 12,
+    "advancedScopeClosed": true,
+    "budgetRefusalVisible": true,
+    "accountVersionObserved": true
+  },
+  "limitations": [
+    "Final detailed context refresh awaits approved budget exception or verified headroom.",
+    "Earlier saved draft is stale and must not be confirmed.",
+    "No source-grounded issue created or published for either target.",
+    "No privileged role journey, physical Android, independent human usefulness or full plan acceptance is inferred.",
+    "Private source, screenshots, credentials and detailed provider output remain ignored."
+  ]
+}
