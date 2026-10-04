@@ -8,6 +8,26 @@ import {
 } from "../packages/repositories/business-context";
 import { wordText } from "../packages/repositories/word-text";
 import { retrieveContext } from "../packages/providers/github";
+import { serializeBusinessProfile } from "../packages/repositories/business-profile";
+it("allows uneven section detail within the unchanged total bound and refuses invalid or oversized profiles", () => {
+  const output = Object.fromEntries(
+    Object.keys(profileFields).map((field) => [field, "unknown"]),
+  );
+  output.stage = "Current implementation evidence. ".repeat(20);
+  const serialized = serializeBusinessProfile(output);
+  expect(serialized).toContain(output.stage);
+  expect(serialized.length).toBeLessThan(8000);
+  expect(() =>
+    serializeBusinessProfile({ ...output, roles: "x".repeat(8000) }),
+  ).toThrow();
+  expect(() =>
+    serializeBusinessProfile({ ...output, unexpected: "injected" }),
+  ).toThrow();
+  expect(() => serializeBusinessProfile({ ...output, roles: [] })).toThrow();
+  const missing = { ...output };
+  delete missing.roles;
+  expect(() => serializeBusinessProfile(missing)).toThrow();
+});
 
 afterEach(() => {
   vi.unstubAllGlobals();

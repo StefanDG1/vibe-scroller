@@ -471,7 +471,7 @@ export function BusinessContext({
             {profileFields[f].label}
             <textarea
               rows={2}
-              maxLength={profileFields[f].limit}
+              maxLength={8000}
               value={values[f]}
               onChange={(e) =>
                 setValues((old) => ({ ...old, [f]: e.target.value }))
@@ -480,9 +480,17 @@ export function BusinessContext({
           </label>
         ))
       )}
+      <p>
+        {profile.length} of 8,000 context characters.{" "}
+        {profile.length > 8000
+          ? "Shorten the context before confirming; confirmed corrections have not changed."
+          : "You can use more detail in the sections your project needs."}
+      </p>
       <button
         className="primary"
-        disabled={readOnly || busy || !r.enabled || !r.sha}
+        disabled={
+          readOnly || busy || !r.enabled || !r.sha || profile.length > 8000
+        }
         onClick={async () => {
           setBusy(true);
           try {
