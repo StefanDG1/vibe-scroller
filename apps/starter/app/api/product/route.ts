@@ -20,6 +20,7 @@ const operations = {
   selectRepositories: ["action", api.integrations.selectRepositories],
   refreshGithubChoices: ["action", api.githubOAuth.refreshChoices],
   confirmProfile: ["mutation", api.profiles.confirmDraft],
+  saveProfileDraft: ["mutation", api.profiles.saveDraft],
   capture: ["mutation", api.product.capture],
   importLinks: ["mutation", api.imports.links],
   process: ["mutation", api.product.processSource],
