@@ -1,11 +1,66 @@
 import { mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
-import { writeAccess, fail } from "./lib";
+import { writeAccess, fail, audit } from "./lib";
 import { ensure, containsSecret } from "../packages/policy";
 import { reserve, settle } from "./product";
 import { internal } from "./_generated/api";
 import { snapshotScopeCurrent } from "../packages/repositories/scope";
 import { BUSINESS_CONTEXT_VERSION } from "../packages/repositories/business-context";
+export const saveDraft = mutation({
+  args: {
+    id: v.id("repositories"),
+    sha: v.string(),
+    version: v.number(),
+    selectionVersion: v.optional(v.number()),
+    previousDraft: v.string(),
+    profile: v.string(),
+  },
+  handler: async (ctx, a) => {
+    const r = await ctx.db.get(a.id);
+    ensure(r?.enabled, "FORBIDDEN", "Repository unavailable.");
+    const { actor } = await writeAccess(ctx, r.organizationId, [
+      "owner",
+      "admin",
+    ]);
+    ensure(
+      r.sha === a.sha &&
+        (r.selectionVersion ?? 0) === (a.selectionVersion ?? 0) &&
+        r.profileVersion === a.version &&
+        snapshotScopeCurrent(r) &&
+        (r.profileDraft ?? "") === a.previousDraft,
+      "APPROVAL_STALE",
+      "Review the current repository/context version and saved draft.",
+    );
+    ensure(
+      !r.profileDraftKey,
+      "SOURCE_BUSY",
+      "Reconcile the pending context request before editing its draft.",
+    );
+    ensure(
+      a.profile.trim().length > 0 &&
+        a.profile.length <= 8000 &&
+        !containsSecret(a.profile),
+      "POLICY_BLOCKED",
+      "Use a nonempty context draft within 8,000 characters, without secrets.",
+    );
+    await ctx.db.patch(r._id, {
+      profileDraft: a.profile,
+      profileDraftSha: a.sha,
+      profileDraftVersion: a.version,
+      profileDraftProcessingVersion: BUSINESS_CONTEXT_VERSION,
+      updatedAt: Date.now(),
+    });
+    await audit(
+      ctx,
+      r.organizationId,
+      actor._id,
+      "repository.context_draft_saved",
+      r._id,
+    );
+    return { saved: true };
+  },
+});
+
 export const confirmDraft = mutation({
   args: {
     id: v.id("repositories"),

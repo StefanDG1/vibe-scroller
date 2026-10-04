@@ -345,6 +345,7 @@ export function BusinessContext({
   );
   const [values, setValues] = useState<Record<string, string>>(parsed),
     [freeText, setFreeText] = useState(initial),
+    [previousDraft, setPreviousDraft] = useState(r.profileDraft ?? ""),
     [manual, setManual] = useState(
       !fields.some((f) => initial.includes(`${f}:`)),
     ),
@@ -425,11 +426,13 @@ export function BusinessContext({
       )}
       {r.profileDraft && (
         <details>
-          <summary>Inspect unconfirmed AI proposal and evidence basis</summary>
+          <summary>
+            Inspect unconfirmed context proposal and evidence basis
+          </summary>
           <p>
             Based on permitted repository excerpts at {r.profileDraftSha};
-            context version {r.profileDraftVersion}. This is an inference, not
-            verified business evidence.
+            context version {r.profileDraftVersion}. AI suggestions and review
+            edits remain unconfirmed until you approve the context.
           </p>
           <pre>{r.profileDraft}</pre>
           <button
@@ -441,6 +444,7 @@ export function BusinessContext({
             onClick={() => {
               setManual(true);
               setFreeText(r.profileDraft);
+              setPreviousDraft(r.profileDraft);
             }}
           >
             Review proposal in editor
@@ -483,13 +487,51 @@ export function BusinessContext({
       <p>
         {profile.length} of 8,000 context characters.{" "}
         {profile.length > 8000
-          ? "Shorten the context before confirming; confirmed corrections have not changed."
+          ? "Shorten the context before saving or confirming; confirmed corrections have not changed."
           : "You can use more detail in the sections your project needs."}
+      </p>
+      <button
+        disabled={
+          readOnly ||
+          busy ||
+          !r.enabled ||
+          !r.sha ||
+          !!r.profileDraftKey ||
+          !profile.trim() ||
+          profile.length > 8000
+        }
+        onClick={async () => {
+          setBusy(true);
+          try {
+            const result = await call("saveProfileDraft", {
+              id: r._id,
+              sha: r.sha,
+              version: r.profileVersion,
+              selectionVersion: r.selectionVersion ?? 0,
+              previousDraft,
+              profile,
+            });
+            if (result?.saved) setPreviousDraft(profile);
+          } finally {
+            setBusy(false);
+          }
+        }}
+      >
+        Save review edits · no credits
+      </button>
+      <p>
+        Saved edits remain a draft. Confirm context when you have reviewed the
+        business facts.
       </p>
       <button
         className="primary"
         disabled={
-          readOnly || busy || !r.enabled || !r.sha || profile.length > 8000
+          readOnly ||
+          busy ||
+          !r.enabled ||
+          !r.sha ||
+          !profile.trim() ||
+          profile.length > 8000
         }
         onClick={async () => {
           setBusy(true);
