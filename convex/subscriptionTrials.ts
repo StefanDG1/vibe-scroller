@@ -6,12 +6,13 @@ import { ensure, containsSecret } from "../packages/policy";
 import { personalAllowed } from "./lib/personalAccess";
 import { digest } from "./product";
 import { insightOutput } from "../packages/contracts";
+import { canonicalJson } from "../packages/contracts/canonical-json.mjs";
 import type { QueryCtx } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
 
 const fingerprint = (s: Doc<"sources">) =>
   digest(
-    JSON.stringify({
+    canonicalJson({
       generation: s.generation,
       text: s.text,
       analysis: s.analysis,
@@ -193,7 +194,7 @@ export const prepare = mutation({
     });
     await ctx.db.patch(id, {
       bundleHash: await digest(
-        JSON.stringify({ trialId: id, expiresAt, ...input }),
+        canonicalJson({ trialId: id, expiresAt, ...input }),
       ),
     });
     await ctx.scheduler.runAfter(86400000, internal.subscriptionTrials.expire, {

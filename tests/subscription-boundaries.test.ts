@@ -7,6 +7,7 @@ import {
   checkTrialResults,
 } from "../packages/runner/subscription-trial.mjs";
 import { purgeLocalPreparation } from "../packages/runner/local-media-retention.mjs";
+import { canonicalJson } from "../packages/contracts/canonical-json.mjs";
 
 function bundle() {
   const input = {
@@ -36,9 +37,7 @@ function bundle() {
   };
   return {
     ...input,
-    bundleHash: createHash("sha256")
-      .update(JSON.stringify(input))
-      .digest("hex"),
+    bundleHash: createHash("sha256").update(canonicalJson(input)).digest("hex"),
   };
 }
 it("binds the trial identity, deadline and exact evidence, preventing replay or edited export", () => {

@@ -3,6 +3,8 @@ import { convexTest } from "convex-test";
 import rateLimiterTest from "@convex-dev/rate-limiter/test";
 import schema from "../convex/schema";
 import { api, internal } from "../convex/_generated/api";
+import { checkTrialBundle } from "../packages/runner/subscription-trial.mjs";
+import { canonicalJson } from "../packages/contracts/canonical-json.mjs";
 const modules = import.meta.glob("../convex/**/*.ts");
 beforeEach(() => {
   vi.useFakeTimers();
@@ -87,6 +89,8 @@ it("returns bounded results without modifying original analysis or charging a wa
     bundle = await s.a.query(api.subscriptionTrials.bundle, { id });
   expect(bundle.model).toBe("gpt-6.1-sol");
   expect(bundle.effort).toBe("medium");
+  // Exercise the actual transport ordering before either subscription route runs.
+  expect(checkTrialBundle(JSON.parse(canonicalJson(bundle)))).toEqual(bundle);
   expect(
     await s.a.mutation(api.subscriptionTrials.finish, {
       id,
