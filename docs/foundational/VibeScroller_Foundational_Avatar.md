@@ -147,3 +147,7 @@ October 4, F010: the owner rejected mandatory folder selection and requested who
 ## Owner workflow, October 5
 
 F011 extends the same developer/founder audience to improving several owned projects without selecting folders or coding personally. The owner wants an AI agent to investigate evidence-rich issues later. Context must retain each project's actual audiences, including parents where evidenced, roles, features and manual corrections. This owner preference does not establish broader demand or new demographics. A full saved-link scan must disclose inaccessible links, current progress, funding and no-fit results.
+
+## F011 production evidence, October 5
+
+Bounded full-library controls and reviewed improvement history are deployed on the canonical app. Five selected project snapshots are connected, three new detailed context drafts await owner confirmation, and the verified personal account can select up to twenty repositories without changing commercial plan limits. This is actual operator engineering evidence, not a completed full-library batch or customer-benefit result. The 103-link inventory remains seven ready and 96 awaiting analysis; executing model access, explicit consent and available budget govern the next stage. See [the final release receipt](../operations/evidence/bulk-library-final-release-20261005.json). The audience, six beliefs, prices, permission/privacy limits and independent quality/usability gates remain unchanged.

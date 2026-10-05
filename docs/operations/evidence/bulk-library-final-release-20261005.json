@@ -1,0 +1,73 @@
+{
+  "observedAt": "2026-10-05T17:52:50.195065+00:00",
+  "applicationCommit": "17900edaa83b1a79b8408b862efcf161564e746e",
+  "version": "0.1.0-alpha.20261005174901.g17900edaa83b",
+  "domain": "https://scroll.companynerve.com",
+  "pullRequest": 33,
+  "prHead": "1caf2f57519aa9a04a81edf331b88dc5518a32e0",
+  "prVerify": 37351009994,
+  "mainVerify": 37351258286,
+  "versionRun": 37351258348,
+  "prereleaseRun": 37351415732,
+  "deployment": "dpl_2VjZbtXW5xcKk5cJbUx9PpBbS3sH",
+  "deploymentState": "READY",
+  "backend": "bold-lemur-667",
+  "backendCodeCommit": "203d3ba5e9543e652221688ffbfd8298a2c7ad63",
+  "buildPolicy": {
+    "observedThrough": "authenticated Vercel settings radio state",
+    "basicSelected": true,
+    "elasticSelected": false,
+    "onDemandConcurrencyDisabled": true,
+    "cores": 2,
+    "memoryGB": 8
+  },
+  "personalRepositoryLimit": 20,
+  "selectedProjects": 5,
+  "wholeEligibleRepositoryDiscovery": true,
+  "confirmedContextsPreserved": 2,
+  "newContextDraftsSaved": 3,
+  "newContextsConfirmed": false,
+  "savedUrlLinks": 103,
+  "readyUrlLinks": 7,
+  "awaitingAnalysisUrlLinks": 96,
+  "newLinksAnalyzedThisRelease": 0,
+  "wallet": {
+    "granted": 110,
+    "spent": 88,
+    "reserved": 10,
+    "available": 12
+  },
+  "fullScanCompleted": false,
+  "continuousActivation": "disabled: acceptance flag not set",
+  "localTests": {
+    "applicationPassed": 382,
+    "applicationSkipped": 3,
+    "authFormPassed": 16,
+    "targetedPassed": 22,
+    "sixWidths": [320, 360, 390, 412, 768, 1440],
+    "productionControlsWidths": [390, 1440],
+    "minimumScanButtonHeight": 44.2734375,
+    "secretScan": "no leaks",
+    "dependencyUnresolved": 0
+  },
+  "modelAccess": {
+    "officialCodexVersion": "0.160.0",
+    "officialModelListIncludesGpt61Sol": true,
+    "pairedResponsesCatalogIncludesGpt61Sol": false,
+    "restrictedWindowsProbe": "refused execution",
+    "dockerLinuxEngine": "unavailable; service start denied"
+  },
+  "limits": [
+    "No new scan funding/own-plan consent granted",
+    "New contexts require owner review",
+    "Twelve credits cannot establish complete-scan affordability",
+    "No full live scan, new issue batch or live routine-cycle acceptance",
+    "Independent user and quality/cost gates remain open"
+  ],
+  "availableGithubChoices": 19,
+  "newDraftIndependentReadback": "three exact matches, pinned snapshots, unconfirmed",
+  "existingProfileIndependentReadback": "both exact preserved matches",
+  "freshAuthentication": "existing Google SSO completed; recent-session check returned true",
+  "unauthenticatedScanRequests": "303 sign-in redirects without workspace results",
+  "scanContextRefusal": "400 CONTEXT_REQUIRED with specific Projects recovery and unchanged wallet"
+}
