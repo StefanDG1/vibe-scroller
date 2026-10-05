@@ -3,6 +3,7 @@ import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { writeAccess, limit } from "./lib";
 import { ensure } from "../packages/policy";
+import { repositoryAllowance } from "./lib/repositoryAllowance";
 import { wallet } from "./product";
 import { actorCurrent } from "./knowledge";
 import { snapshotPaths } from "../packages/repositories/scope";
@@ -27,7 +28,8 @@ export const save = mutation({
     await limit(ctx, `repo-selection:${a.organizationId}`, 10);
     const entitlement = await wallet(ctx, a.organizationId);
     ensure(
-      a.choices.length <= (entitlement.tier === "pro" ? 15 : 3) &&
+      a.choices.length <=
+        repositoryAllowance(entitlement.tier, actor.subject) &&
         new Set(a.choices.map((r) => r.providerId)).size === a.choices.length,
       "REPOSITORY_LIMIT",
       "Choose repositories within the existing allowance.",

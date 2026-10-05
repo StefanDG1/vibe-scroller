@@ -57,3 +57,7 @@ Company details come from CompanyNerve's published configuration. They require c
 ## Explicit nonclaims
 
 The product has not been built by this documentation task. Automatic imports have not been tested against the founder's account. Model accuracy, demand, production unit costs, and margins are not measured. Domain availability, trademark rights, provider commercial approval, tax registration, and legal clearance are not established.
+
+## October 5: bounded full-library scan and personal repository allowance
+
+Follow [ADR 058](adr/058-bounded-full-library-scans.md): full URL-link pagination with a saved cutoff, explicit funding/model/device/effort grant, conservative credit ceiling and current selected confirmed context. Analyze, gather, compare and draft through existing features; do not force no-fit issues or publish automatically. A verified personal-subject repository override may support twenty repositories while normal commercial limits remain unchanged. GPT-6.1 is offered only by a supported safely executing adapter that actually advertises it. Official Codex model/list access alone does not enable the separate paired Responses route. [ADR 057](adr/057-continuous-reviewed-improvements.md) permits an explicitly bounded reviewed routine cycle only after its production acceptance; all protected work and deployment provisioning retain separate approval.

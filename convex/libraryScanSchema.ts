@@ -1,0 +1,67 @@
+import { defineTable } from "convex/server";
+import { v } from "convex/values";
+export const libraryScanTables = {
+  libraryScans: defineTable({
+    organizationId: v.id("organizations"),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    actor: v.id("users"),
+    version: v.number(),
+    repositories: v.array(
+      v.object({
+        id: v.id("repositories"),
+        sha: v.string(),
+        profileVersion: v.number(),
+        selectionVersion: v.number(),
+      }),
+    ),
+    scope: v.optional(v.literal("saved_links")),
+    funding: v.optional(v.union(v.literal("managed"), v.literal("own_plan"))),
+    personal: v.optional(
+      v.object({
+        deviceId: v.id("devices"),
+        model: v.string(),
+        effort: v.union(
+          v.literal("low"),
+          v.literal("medium"),
+          v.literal("high"),
+        ),
+        profileBinding: v.string(),
+        expiresAt: v.number(),
+      }),
+    ),
+    asOf: v.number(),
+    phase: v.string(),
+    state: v.string(),
+    cursor: v.union(v.string(), v.null()),
+    nextCursor: v.union(v.string(), v.null()),
+    maximumCredits: v.number(),
+    committedCredits: v.number(),
+    sourceCount: v.number(),
+    readyCount: v.number(),
+    pendingCount: v.number(),
+    processedCount: v.number(),
+    skippedCount: v.number(),
+    topicCount: v.number(),
+    evaluatedCount: v.number(),
+    issueCount: v.number(),
+    noFitCount: v.number(),
+    pendingSource: v.optional(v.id("sources")),
+    pendingGeneration: v.optional(v.number()),
+    sourcePageDone: v.optional(v.boolean()),
+    pendingKnowledge: v.optional(v.id("knowledgeJobs")),
+    gatheredCount: v.optional(v.number()),
+    topicId: v.optional(v.id("knowledgeTopics")),
+    topicVersion: v.optional(v.number()),
+    topicCutoff: v.optional(v.number()),
+    repositoryIndex: v.number(),
+    evidenceCursor: v.optional(v.string()),
+    pendingEvaluation: v.optional(v.id("knowledgeEvaluations")),
+    nextEvidenceCursor: v.optional(v.string()),
+    reason: v.optional(v.string()),
+    nextAt: v.optional(v.number()),
+    lease: v.optional(v.string()),
+  })
+    .index("by_org", ["organizationId"])
+    .index("by_state", ["state"]),
+};

@@ -53,11 +53,10 @@ export function RepositoryChecklist({
     : 0;
   return (
     <section className="panel form-grid">
-      <h2>Select projects</h2>
+      <h2>Connect projects</h2>
       <p>
-        GitHub’s All repositories grant allows discovery. Only the checked
-        subset contributes code to VibeScroller. Future repositories appear
-        unchecked.
+        Choose which projects to improve. New repositories stay unselected until
+        you add them.
       </p>
       <div className="actions">
         <a
@@ -83,7 +82,7 @@ export function RepositoryChecklist({
             }
           }}
         >
-          Refresh authorized choices
+          Refresh GitHub repositories
         </button>
       </div>
       <label>
@@ -122,6 +121,13 @@ export function RepositoryChecklist({
         {checked.size} selected · {filtered.length} authorized choices match ·
         page {page + 1}
       </p>
+      <button
+        className="secondary"
+        disabled={readOnly || busy}
+        onClick={() => setChecked(new Set(choices.map((r) => r.id)))}
+      >
+        Select all authorized repositories ({choices.length})
+      </button>
       <button
         disabled={readOnly || busy}
         onClick={() =>

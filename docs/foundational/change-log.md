@@ -46,3 +46,7 @@ Reviewed the four briefs against the real oversized-snapshot failure and owner c
 ## October 4: F010 whole repository and detailed audience context
 
 Owner steering supersedes mandatory-path remediation in F009. All four briefs distinguish full eligible-tree discovery, bounded inspected evidence and live product proof. Adopt automatic evidence selection, current Word persona documents, explicit roles/journeys/features, reviewable refresh and preserved manual authority; keep advanced scope optional. The existing developer/founder audience, prices, budgets and separate approval are unchanged. Tests require every role in large-tree discovery, immutable late-file retrieval, bounded Word extraction and preserved confirmed context. Draft usefulness and independent comprehension remain unverified. See [ADR 054](../adr/054-whole-repository-business-context.md).
+
+## October 5: F011 bounded full-library improvements
+
+Updated Research, Avatar, Offer and Beliefs together for the owner's full-library/multi-project priority and reviewed AI-agent handoff. Recorded complete private inventory counts, distinct official-client/adapter model access, whole eligible scope, expanded personal allowance, evidence-rich drafts and separate coding/outcome authority. No new customer evidence, numerical quality, paid purchase, completed live scan or unrestricted execution is inferred. Existing commercial prices, budgets, V2 exclusions and fixed Basic hosting remain unchanged.

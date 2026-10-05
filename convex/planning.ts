@@ -15,6 +15,7 @@ import {
 import { planInput } from "../packages/contracts";
 import { reserve, settle } from "./product";
 import { validateGeneratedPackageChecks } from "../packages/plans/repository-checks";
+import { improvementCurrent } from "./lib/improvementContext";
 export const start = mutation({
   args: {
     id: v.id("proposals"),
@@ -26,6 +27,11 @@ export const start = mutation({
     const proposal = await ctx.db.get(a.id);
     if (!proposal) fail("Proposal unavailable.");
     const { actor } = await writeAccess(ctx, proposal.organizationId);
+    ensure(
+      await improvementCurrent(ctx, proposal),
+      "APPROVAL_STALE",
+      "Improvement evidence changed before planning.",
+    );
     const repo = await ctx.db.get(proposal.repositoryId),
       source = await ctx.db.get(proposal.sourceId);
     ensure(
@@ -114,6 +120,7 @@ export const finish = internalMutation({
         .unique());
     const organization = await ctx.db.get(proposal.organizationId);
     const valid =
+      (await improvementCurrent(ctx, proposal)) &&
       proposal.review === "accepted" &&
       proposal.version === a.version &&
       repo?.organizationId === proposal.organizationId &&

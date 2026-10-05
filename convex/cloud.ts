@@ -139,6 +139,7 @@ export const execute = internalAction({
         patch: checked.patch,
         changes: generated.changes,
         report: `${checked.report}\n\nLimitations: ${generated.limitations.join("; ")}`,
+        checksPassed: checked.checksPassed,
         credits: cost,
       });
     } catch (error) {

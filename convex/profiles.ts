@@ -153,7 +153,17 @@ export const start = mutation({
         title: String(e.output?.title ?? "").slice(0, 160),
         note: String(e.output?.rationale ?? "").slice(0, 400),
       }));
-    return { repo, cached: false, key, reviewHistory };
+    const preferences = await ctx.db
+      .query("improvementPreferences")
+      .withIndex("by_org", (q) => q.eq("organizationId", repo.organizationId))
+      .unique();
+    return {
+      repo,
+      cached: false,
+      key,
+      reviewHistory,
+      ownerPreferences: preferences?.note ?? "",
+    };
   },
 });
 

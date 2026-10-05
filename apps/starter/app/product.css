@@ -18,10 +18,327 @@
   --ring: #c4c4c4;
   --destructive: #b4233c;
   --soft: #262626;
+  --accent: #87dfc1;
+  --accent-ink: #10251e;
 }
 
 .error {
   color: #fca5a5;
+}
+
+.improvements {
+  display: grid;
+  gap: 24px;
+  min-width: 0;
+}
+.library-scan {
+  display: grid;
+  gap: 16px;
+  padding: 24px 0;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--line);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.scan-intro {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.scan-intro > svg {
+  color: var(--accent);
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+.scan-intro h2 {
+  margin-bottom: 8px;
+}
+.library-scan p {
+  margin-bottom: 0;
+}
+.library-scan .primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: var(--accent);
+}
+.library-scan summary,
+.library-scan button {
+  min-height: 44px;
+}
+.library-scan .check {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.scan-approval {
+  display: grid;
+  gap: 14px;
+}
+.scan-approval > label {
+  display: grid;
+  gap: 8px;
+  max-width: 320px;
+}
+.scan-progress {
+  display: grid;
+  gap: 14px;
+}
+.scan-progress > p:first-child {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink);
+}
+.improvement-toolbar,
+.improvement-row-heading,
+.improvement-links {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.improvement-toolbar p {
+  margin: 0;
+}
+.improvement-row {
+  padding: 24px 0;
+  border-bottom: 1px solid var(--line);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.improvement-row h2 {
+  font-size: 1.3rem;
+  margin: 14px 0 8px;
+}
+.improvement-project {
+  color: var(--subtle);
+  font-size: 0.85rem;
+}
+.improvement-status {
+  color: var(--ink);
+  font-size: 0.8rem;
+}
+.improvement-status.positive,
+.improvement-outcome > svg {
+  color: var(--accent);
+}
+.improvement-links {
+  justify-content: flex-start;
+  margin: 12px 0;
+}
+.improvement-links a {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  min-height: 44px;
+}
+.improvement-empty,
+.improvement-loading {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 32px 0;
+}
+.improvement-empty {
+  flex-direction: column;
+}
+.improvements .primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+.improvements label,
+.improvement-start label {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.improvements label.check {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+}
+.improvements input:not([type="checkbox"]),
+.improvements textarea,
+.improvements .choice-trigger {
+  width: 100%;
+  min-height: 44px;
+}
+.improvements summary,
+.improvement-start summary {
+  min-height: 44px;
+  padding: 10px 0;
+  cursor: pointer;
+}
+.improvement-settings > summary {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--subtle);
+}
+.improvement-settings[open] > summary {
+  color: var(--accent);
+}
+.improvement-settings form,
+.improvement-action,
+.improvement-start {
+  display: grid;
+  gap: 14px;
+  margin-top: 16px;
+}
+.improvement-policy {
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+  margin-top: 24px;
+}
+.improvement-policy summary span {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--subtle);
+}
+.improvement-limits,
+.measurement-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.measurement-fields > p,
+.measurement-fields > label:last-of-type {
+  grid-column: 1 / -1;
+}
+.improvements fieldset {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  min-width: 0;
+  padding: 16px;
+}
+.improvements legend {
+  color: var(--subtle);
+  font-size: 0.85rem;
+  padding: 0 6px;
+}
+.improvement-action > label {
+  max-width: 320px;
+}
+.improvement-action label span {
+  color: var(--subtle);
+  font-size: 0.8rem;
+}
+.improvement-feedback {
+  margin-top: 16px;
+}
+.improvement-outcome {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+.improvement-outcome > svg {
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+.toast-region {
+  position: fixed;
+  z-index: 80;
+  right: 24px;
+  bottom: 24px;
+  width: min(440px, calc(100vw - 32px));
+  pointer-events: none;
+}
+.notice-toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 12px 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  box-shadow: 0 8px 32px #0006;
+  pointer-events: auto;
+  animation: toast-enter 160ms ease-out;
+}
+.notice-toast > svg {
+  margin-top: 12px;
+  flex-shrink: 0;
+}
+.notice-toast > div {
+  flex: 1;
+  min-width: 0;
+}
+.notice-toast p {
+  margin: 8px 0;
+  color: var(--ink);
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+.notice-toast a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.notice-toast .icon-button {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+}
+.notice-toast-success > svg {
+  color: var(--accent);
+}
+.notice-toast-error > svg {
+  color: #fca5a5;
+}
+.console button,
+.console a {
+  transition:
+    color 140ms ease-out,
+    background-color 140ms ease-out,
+    border-color 140ms ease-out;
+}
+.sidebar .active,
+.mobile-nav .active {
+  color: var(--accent);
+}
+@keyframes toast-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (max-width: 640px) {
+  .toast-region {
+    right: 16px;
+    bottom: calc(82px + env(safe-area-inset-bottom));
+  }
+  .improvement-limits,
+  .measurement-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .improvement-row {
+    padding: 20px 0;
+  }
+  .improvements .actions {
+    flex-wrap: wrap;
+  }
+  .improvement-empty {
+    padding: 16px 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .notice-toast {
+    animation: none;
+  }
+  .console button,
+  .console a {
+    transition: none;
+  }
 }
 
 * {

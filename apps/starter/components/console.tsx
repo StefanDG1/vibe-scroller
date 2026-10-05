@@ -29,6 +29,9 @@ import {
 } from "lucide-react";
 import { AccountMenu } from "./account-menu";
 import { KnowledgeLibrary } from "./knowledge-library";
+import { LibraryScan } from "./library-scan";
+import { Improvements } from "./improvements";
+import { NoticeToast } from "./notice-toast";
 import { downloadText } from "@/lib/download";
 import { RepositoryChecklist, BusinessContext } from "./repository-checklist";
 import { PlanEditor } from "./plan-editor";
@@ -76,7 +79,12 @@ type Initial = {
   customerRoutes?: {
     status: string;
     models: { id: string; version: string; maxProviderUsdCents: number }[];
-    execution?: { localReady: boolean; cloudReady: boolean };
+    execution?: {
+      localReady: boolean;
+      cloudReady: boolean;
+      computeReservationCredits?: number;
+      creditsPerSecond?: number;
+    };
   };
 };
 const id = (o: any) => o._id ?? o.id;
@@ -207,6 +215,9 @@ export function Console({
     [category, setCategory] = useState(initialCategory),
     [sort, setSort] = useState(initialSort),
     [notice, setNotice] = useState(""),
+    [noticeKind, setNoticeKind] = useState<"info" | "success" | "error">(
+      "info",
+    ),
     [reauthNeeded, setReauthNeeded] = useState(false),
     [busy, setBusy] = useState(false),
     [libraryLoading, setLibraryLoading] = useState(
@@ -497,6 +508,7 @@ export function Console({
       return;
     }
     setBusy(true);
+    setNoticeKind("info");
     setNotice("");
     setReauthNeeded(false);
     try {
@@ -551,10 +563,43 @@ export function Console({
           ? "Source deleted."
           : operation === "suggestCategory"
             ? "Category name submitted for review."
-            : "Saved.",
+            : ((
+                {
+                  improvementStart: "Plan prepared. Review it in Improvements.",
+                  scanPrepare:
+                    "Counting your full library. Review the scan before analysis starts.",
+                  scanApprove:
+                    "Library scan started within your maximum spend.",
+                  scanPause:
+                    "Scan updated. Already approved work retains its existing limits.",
+                  improvementExecute:
+                    "AI coding queued within your maximum spend.",
+                  improvementOutcome: "Your feedback was recorded.",
+                  improvementPolicySave: "Project limits saved.",
+                  improvementPolicyPause: "Continuous operation paused.",
+                  improvementCategorize: "Plan added to the routine queue.",
+                  improvementPreferencesSave:
+                    "Preferences saved. Future ideas will use them.",
+                  improvementRefresh: "Progress refreshed.",
+                  issuePublish: "Issue published to GitHub.",
+                  issuePrepare: "GitHub access checked.",
+                  issueRefresh: "GitHub issue refreshed.",
+                  process: "Analysis queued.",
+                  knowledgeEvaluate: "Idea evaluation queued.",
+                  knowledgeCorrect: "Topic updated.",
+                  draftProfile:
+                    "Context draft prepared. Review it in Projects.",
+                  confirmProfile: "Business context confirmed.",
+                  publish: "Pull request publication completed.",
+                  approve: "Coding queued within your maximum spend.",
+                  cancel: "Stop requested.",
+                } as Record<string, string>
+              )[operation] ?? "Saved."),
       );
+      setNoticeKind("success");
       return body.result;
     } catch (e) {
+      setNoticeKind("error");
       setNotice(e instanceof Error ? e.message : "The action failed.");
     } finally {
       setBusy(false);
@@ -624,9 +669,10 @@ export function Console({
     ["home", "Home", Home],
     ["library", "Library", Library],
     ["projects", "Projects", GitBranch],
+    ["improvements", "Improvements", FileCheck2],
     ["inbox", "Inbox", Inbox],
-    ["proposals", "Proposals", FileCheck2],
     ["runs", "Runs & PRs", GitPullRequest],
+    ["proposals", "Proposals", FileCheck2],
     ["usage", "Usage", Gauge],
     ["connections", "Connections", Plug],
     ["runners", "Computers", Laptop],
@@ -753,19 +799,49 @@ export function Console({
               </Button>
             )}
           </div>
-          <output aria-live="polite" className={notice ? "notice" : "sr-only"}>
-            {notice}
-            {reauthNeeded && (
-              <>
-                {" "}
+          <NoticeToast
+            message={notice}
+            kind={noticeKind}
+            onDismiss={() => setNotice("")}
+            action={
+              reauthNeeded ? (
                 <a
                   href={`/sign-in?reauth=true&returnTo=${encodeURIComponent(`/app?workspace=${organizationId}`)}`}
                 >
                   Sign in again
                 </a>
-              </>
-            )}
-          </output>
+              ) : undefined
+            }
+          />
+          {view === "improvements" && (
+            <Improvements
+              organizationId={organizationId}
+              call={call}
+              readOnly={readOnly}
+              demo={demo}
+              executionReady={
+                data.customerRoutes?.execution?.cloudReady === true
+              }
+              availableCredits={
+                data.usage?.wallet
+                  ? Math.max(
+                      0,
+                      data.usage.wallet.granted -
+                        data.usage.wallet.spent -
+                        data.usage.wallet.reserved,
+                    )
+                  : 0
+              }
+              onOpenIssues={() => go("projects")}
+              onOpenRuns={() => go("runs")}
+              computeReservationCredits={
+                data.customerRoutes?.execution?.computeReservationCredits
+              }
+              creditsPerSecond={
+                data.customerRoutes?.execution?.creditsPerSecond
+              }
+            />
+          )}
           {view === "library" && (
             <KnowledgeLibrary
               key={organizationId}
@@ -774,6 +850,7 @@ export function Console({
               readOnly={readOnly}
               demo={demo}
               call={call}
+              onOpenImprovements={() => go("improvements")}
             />
           )}
           {(view === "home" || view === "library") && (
@@ -1148,10 +1225,21 @@ export function Console({
           )}
           {view === "projects" && (
             <>
-              <p>
-                Only explicitly selected GitHub App repositories are analyzed.
-                Confirm a profile before matching.
-              </p>
+              <p>Connect projects and review their context.</p>
+              <LibraryScan
+                key={`scan:${organizationId}`}
+                organizationId={organizationId}
+                repositories={data.repositories}
+                devices={data.devices ?? []}
+                call={call}
+                readOnly={readOnly}
+                demo={demo}
+                onOpenIssues={() =>
+                  document
+                    .querySelector('[aria-label="Reviewed issues"]')
+                    ?.scrollIntoView({ block: "start", behavior: "smooth" })
+                }
+              />
               <RepositoryChecklist
                 key={`selection:${organizationId}`}
                 organizationId={organizationId}
@@ -1176,6 +1264,7 @@ export function Console({
                 readOnly={readOnly}
                 demo={demo}
                 call={call}
+                onOpenImprovements={() => go("improvements")}
               />
               {demo && (
                 <div className="panel">

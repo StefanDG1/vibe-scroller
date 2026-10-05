@@ -390,6 +390,17 @@ export const productTables = {
     .index("by_github", ["installationId", "providerId"]),
   proposals: defineTable({
     ...tenant,
+    improvementId: v.optional(v.id("improvements")),
+    references: v.optional(
+      v.array(
+        v.object({
+          sourceId: v.id("sources"),
+          generation: v.number(),
+          revision: v.number(),
+          insightId: v.string(),
+        }),
+      ),
+    ),
     sourceId: v.id("sources"),
     repositoryId: v.id("repositories"),
     baseSha: v.string(),
@@ -419,6 +430,8 @@ export const productTables = {
     .index("by_source", ["sourceId"]),
   runs: defineTable({
     ...tenant,
+    automationPolicyId: v.optional(v.id("improvementPolicies")),
+    automationPolicyVersion: v.optional(v.number()),
     proposalId: v.id("proposals"),
     repositoryId: v.id("repositories"),
     approvedBy: v.id("users"),
@@ -446,11 +459,35 @@ export const productTables = {
     patch: v.optional(v.string()),
     changes: v.optional(v.any()),
     report: v.optional(v.string()),
+    checksPassed: v.optional(v.boolean()),
+    aiReview: v.optional(
+      v.object({
+        status: v.string(),
+        key: v.string(),
+        generation: v.number(),
+        patchDigest: v.string(),
+        policyVersion: v.number(),
+        note: v.string(),
+        credits: v.optional(v.number()),
+      }),
+    ),
     prNumber: v.optional(v.number()),
     prUrl: v.optional(v.string()),
     prState: v.optional(v.string()),
     mergedAt: v.optional(v.string()),
     mergeCommitSha: v.optional(v.string()),
+    deployment: v.optional(
+      v.object({
+        state: v.string(),
+        commit: v.string(),
+        url: v.string(),
+        environment: v.string(),
+        observedAt: v.number(),
+      }),
+    ),
+    mergeIntent: v.optional(
+      v.object({ head: v.string(), state: v.string(), at: v.number() }),
+    ),
     reverted: v.optional(revertEvidenceValidator),
     revertStatus: v.optional(revertStatusValidator),
     revertProbeHead: v.optional(v.string()),
@@ -461,6 +498,7 @@ export const productTables = {
     .index("by_org", ["organizationId"])
     .index("by_state", ["state"])
     .index("by_pr", ["repositoryId", "prNumber"])
+    .index("by_repository", ["repositoryId"])
     .index("by_proposal", ["proposalId"])
     .index("by_org_state", ["organizationId", "state"])
     .index("by_device_state", ["deviceId", "state"]),

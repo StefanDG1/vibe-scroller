@@ -11,6 +11,7 @@ type Props = {
   readOnly: boolean;
   demo: boolean;
   call: Call;
+  onOpenImprovements?: () => void;
 };
 async function read(operation: string, args: any) {
   const response = await fetch("/api/product", {
@@ -805,7 +806,9 @@ export function KnowledgeLibrary(p: Props) {
         )}
       </div>
       <div className="panel">
-        <h2>Issues</h2>
+        <h2 aria-label="Reviewed issues" tabIndex={-1}>
+          Issues
+        </h2>
         <p>
           An issue shares exactly its reviewed text with the target repository.
           Deleting library content does not delete an external GitHub issue.
@@ -825,6 +828,7 @@ export function KnowledgeLibrary(p: Props) {
             busy={busy}
             readOnly={p.readOnly}
             run={run}
+            onOpenImprovements={p.onOpenImprovements}
           />
         ))}
         {issueNext && (
@@ -873,12 +877,15 @@ function IssueReview({
   busy,
   readOnly,
   run,
+  onOpenImprovements,
 }: {
   draft: any;
   busy: boolean;
   readOnly: boolean;
   run: Call;
+  onOpenImprovements?: () => void;
 }) {
+  const [goal, setGoal] = useState("");
   const [title, setTitle] = useState(d.title),
     [body, setBody] = useState(d.body),
     [rights, setRights] = useState(false),
@@ -1030,6 +1037,39 @@ function IssueReview({
         Publish reviewed issue
       </button>
       <output aria-live="polite">{message}</output>
+      {d.current && !changed && ["draft", "published"].includes(d.state) && (
+        <details className="improvement-start">
+          <summary>Turn this issue into an improvement</summary>
+          <label>
+            What would a better result look like?
+            <textarea
+              value={goal}
+              onChange={(e) => setGoal(e.target.value)}
+              rows={2}
+              maxLength={1000}
+            />
+          </label>
+          <p>
+            AI prepares a plan for up to 10 credits. Coding has its own review
+            and maximum spend.
+          </p>
+          <button
+            type="button"
+            className="primary"
+            disabled={readOnly || busy || !goal.trim()}
+            onClick={async () => {
+              const id = await run("improvementStart", {
+                issueId: d._id,
+                goal,
+                maxCredits: 10,
+              });
+              if (typeof id === "string") onOpenImprovements?.();
+            }}
+          >
+            Prepare the plan
+          </button>
+        </details>
+      )}
       {d.attempts.map((a: any) => (
         <div key={a._id}>
           <p>

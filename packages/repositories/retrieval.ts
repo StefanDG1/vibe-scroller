@@ -2,7 +2,7 @@ import { containsSecret, ensure, excludedPath } from "../policy";
 import type { RepositoryExcerpt } from "./context";
 import type { ManifestEntry } from "./snapshotCache";
 
-export const RETRIEVAL_VERSION = "source-windows-v2";
+export const RETRIEVAL_VERSION = "source-windows-v3";
 // Read bounded windows from normal-sized components, not only small files.
 export const RETRIEVAL_BLOB_LIMIT = 250000;
 const stop = new Set(
@@ -41,6 +41,11 @@ export function retrievalFiles(
   const terms = retrievalTerms(focus);
   const interfaceFocus = terms.some((term) =>
     /^(?:interface|interfaces|readable|readability|button|buttons|contrast|spacing|mobile|touch)$/.test(
+      term,
+    ),
+  );
+  const marketingFocus = terms.some((term) =>
+    /^(?:cta|conversion|conversions|landing|launch|marketing|checkout|parent|parents|buyer|buyers)$/.test(
       term,
     ),
   );
@@ -97,6 +102,18 @@ export function retrievalFiles(
               ) *
                 10 +
               (interfaceFocus && /\.(?:css|tsx|jsx)$/.test(path) ? 30 : 0) +
+              (marketingFocus &&
+              /(?:^|\/)(?:app|pages)\/(?!api\/|admin\/).*?(?:page|index)\.(?:tsx|jsx)$/.test(
+                path,
+              )
+                ? 60
+                : 0) -
+              (marketingFocus &&
+              /(?:^|\/)(?:admin|content-studio|native)\//.test(path) &&
+              !terms.includes("admin") &&
+              !terms.includes("studio")
+                ? 60
+                : 0) +
               (/^(?:README\.md|package\.json)$/.test(path)
                 ? 5
                 : /^(?:convex\/|src\/|apps\/starter\/)/.test(path)
