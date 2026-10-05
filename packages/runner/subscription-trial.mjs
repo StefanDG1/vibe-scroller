@@ -5,6 +5,7 @@ import { trialPrompt } from "./trial-prompt.mjs";
 import { AppServer } from "./app-server.mjs";
 import { validator } from "../contracts/validator.mjs";
 import schema from "../../contracts/insight.schema.json" with { type: "json" };
+import { canonicalJson } from "../contracts/canonical-json.mjs";
 const execute = promisify(execFile);
 const hash = (value) => createHash("sha256").update(value).digest("hex");
 export const subscriptionConfig = [
@@ -54,7 +55,7 @@ export function checkTrialBundle(bundle) {
     bundle;
   if (
     hash(
-      JSON.stringify({
+      canonicalJson({
         trialId: bundle.trialId,
         expiresAt: bundle.expiresAt,
         schemaVersion,
