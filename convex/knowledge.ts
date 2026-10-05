@@ -106,9 +106,10 @@ export async function referencesCurrent(
   }
   return true;
 }
-async function memberEvidence(
+export async function memberEvidence(
   ctx: QueryCtx,
   members: Doc<"knowledgeMembers">[],
+  savedLinkCutoff?: number,
 ) {
   const result: {
     reference: Reference & { sourceId: Id<"sources"> };
@@ -125,6 +126,13 @@ async function memberEvidence(
     if (m.excluded || !(await referencesCurrent(ctx, m.organizationId, [ref])))
       continue;
     const source = (await ctx.db.get(m.sourceId))!;
+    if (
+      savedLinkCutoff !== undefined &&
+      (source.kind !== "url" ||
+        !source.url ||
+        source.createdAt > savedLinkCutoff)
+    )
+      continue;
     result.push({
       reference: ref,
       title: source.title,
@@ -816,6 +824,84 @@ export const enqueue = internalMutation({
     await ctx.scheduler.runAfter(0, internal.knowledgeActions.organize, { id });
   },
 });
+async function synthesisGrantCurrent(
+  ctx: QueryCtx,
+  j: Doc<"knowledgeJobs">,
+  p: Doc<"knowledgePolicies"> | null,
+) {
+  if (!j.libraryScanId) return !!p?.enabled && p.version === j.policyVersion;
+  const scan = await ctx.db.get(j.libraryScanId);
+  if (
+    !scan ||
+    scan.organizationId !== j.organizationId ||
+    scan.actor !== j.actor ||
+    scan.scope !== "saved_links" ||
+    !scan.funding ||
+    scan.maximumCredits < 10
+  )
+    return false;
+  for (const ref of j.references) {
+    const source = await ctx.db.get(ref.sourceId);
+    if (source?.kind !== "url" || !source.url || source.createdAt > scan.asOf)
+      return false;
+  }
+  return true;
+}
+export async function startScanSynthesis(
+  ctx: MutationCtx,
+  scan: Doc<"libraryScans">,
+  topic: Doc<"knowledgeTopics">,
+  members: Doc<"knowledgeMembers">[],
+  next: string | null,
+  cursor: string | null,
+) {
+  ensure(
+    workersEnabled() &&
+      scan.state === "running" &&
+      scan.maximumCredits >= scan.committedCredits + 10 &&
+      scan.scope === "saved_links" &&
+      topic.organizationId === scan.organizationId &&
+      (await actorCurrent(ctx, scan.organizationId, scan.actor, [
+        "owner",
+        "admin",
+      ])),
+    "APPROVAL_STALE",
+    "Review the current knowledge grant.",
+  );
+  const evidence = await memberEvidence(ctx, members, scan.asOf);
+  ensure(
+    evidence.length,
+    "CONTEXT_REQUIRED",
+    "No included saved-link evidence in this batch.",
+  );
+  const references = evidence.map((e) => e.reference),
+    key = `knowledge-scan:${processingVersion}:${topic._id}:${topic.version}:${await digest(JSON.stringify(references))}`;
+  const old = await ctx.db
+    .query("knowledgeJobs")
+    .withIndex("by_key", (q) => q.eq("key", key))
+    .unique();
+  if (old) return { id: old._id, cached: true };
+  await reserve(ctx, scan.organizationId, key, 10);
+  const id = await ctx.db.insert("knowledgeJobs", {
+    organizationId: scan.organizationId,
+    topicId: topic._id,
+    actor: scan.actor,
+    version: topic.version,
+    policyVersion: 0,
+    libraryScanId: scan._id,
+    cursor,
+    next,
+    done: !next,
+    key,
+    state: "queued",
+    references,
+    processingVersion,
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+  });
+  await ctx.scheduler.runAfter(0, internal.knowledgeActions.organize, { id });
+  return { id, cached: false };
+}
 export const claim = internalMutation({
   args: { id: v.id("knowledgeJobs") },
   handler: async (ctx, a) => {
@@ -831,8 +917,7 @@ export const claim = internalMutation({
     if (
       !t ||
       t.version !== j.version ||
-      !p?.enabled ||
-      p.version !== j.policyVersion ||
+      !(await synthesisGrantCurrent(ctx, j, p)) ||
       !(await actorCurrent(ctx, j.organizationId, j.actor, [
         "owner",
         "admin",
@@ -892,8 +977,7 @@ export const finish = internalMutation({
       workersEnabled() &&
       t?.version === j.version &&
       !t.redirect &&
-      p?.enabled &&
-      p.version === j.policyVersion &&
+      (await synthesisGrantCurrent(ctx, j, p)) &&
       (await actorCurrent(ctx, j.organizationId, j.actor, [
         "owner",
         "admin",
@@ -932,7 +1016,7 @@ export const finish = internalMutation({
         state: j.done ? "ready" : "updating",
         resumeCursor: j.next ?? undefined,
       });
-      if (j.next)
+      if (j.next && !j.libraryScanId)
         await ctx.scheduler.runAfter(0, internal.knowledgeActions.enqueueSafe, {
           topicId: j.topicId,
           cursor: j.next,
@@ -940,85 +1024,107 @@ export const finish = internalMutation({
     }
   },
 });
-export const startEvaluation = mutation({
-  args: {
-    id: v.id("knowledgeTopics"),
-    repositoryId: v.id("repositories"),
-    cursor: v.optional(v.string()),
-    maxCredits: v.number(),
+const evaluationArgs = {
+  savedLinkCutoff: v.optional(v.number()),
+  id: v.id("knowledgeTopics"),
+  repositoryId: v.id("repositories"),
+  cursor: v.optional(v.string()),
+  maxCredits: v.number(),
+};
+export async function startEvaluationCore(
+  ctx: MutationCtx,
+  a: import("convex/values").ObjectType<typeof evaluationArgs>,
+  authorizedActor?: Doc<"users">,
+  preparedPage?: {
+    page: Doc<"knowledgeMembers">[];
+    isDone: boolean;
+    continueCursor: string;
   },
-  handler: async (ctx, a) => {
-    ensure(
-      workersEnabled() && a.maxCredits === limits.credits,
-      "QUOTE_CHANGED",
-      "Review the 10-credit evaluation quote.",
-    );
-    const topic = await ctx.db.get(a.id),
-      repo = await ctx.db.get(a.repositoryId);
-    ensure(
-      topic &&
-        !topic.redirect &&
-        repo &&
-        repo.organizationId === topic.organizationId &&
-        repo.enabled &&
-        repo.confirmed &&
-        snapshotScopeCurrent(repo),
-      "CONTEXT_REQUIRED",
-      "Choose a selected repository with confirmed context.",
-    );
-    const { actor } = await writeAccess(ctx, topic.organizationId);
-    await limit(ctx, `knowledge-evaluation:${topic.organizationId}`, 10);
-    const page = await ctx.db
+) {
+  ensure(
+    workersEnabled() && a.maxCredits === limits.credits,
+    "QUOTE_CHANGED",
+    "Review the 10-credit evaluation quote.",
+  );
+  const topic = await ctx.db.get(a.id),
+    repo = await ctx.db.get(a.repositoryId);
+  ensure(
+    topic &&
+      !topic.redirect &&
+      repo &&
+      repo.organizationId === topic.organizationId &&
+      repo.enabled &&
+      repo.confirmed &&
+      snapshotScopeCurrent(repo),
+    "CONTEXT_REQUIRED",
+    "Choose a selected repository with confirmed context.",
+  );
+  const { actor } = authorizedActor
+    ? { actor: authorizedActor }
+    : await writeAccess(ctx, topic.organizationId);
+  await limit(ctx, `knowledge-evaluation:${topic.organizationId}`, 10);
+  const page =
+    preparedPage ??
+    (await ctx.db
       .query("knowledgeMembers")
       .withIndex("by_topic", (q) => q.eq("topicId", topic._id))
-      .paginate({ cursor: a.cursor ?? null, numItems: limits.evidence });
-    const evidence = await memberEvidence(ctx, page.page);
-    ensure(
-      evidence.length,
-      "CONTEXT_REQUIRED",
-      "No current evidence in this batch.",
-    );
-    const references = evidence.map((e) => e.reference),
-      sourceSetHash = await digest(JSON.stringify(references));
-    const key = `knowledge-evaluation:${topic._id}:${topic.version}:${repo._id}:${repo.sha}:${repo.profileVersion}:${repo.selectionVersion ?? 0}:${sourceSetHash}`;
-    const old = await ctx.db
-      .query("knowledgeEvaluations")
-      .withIndex("by_key", (q) => q.eq("key", key))
-      .unique();
-    if (old)
-      return {
-        id: old._id,
-        cached: true,
-        next: page.isDone ? null : page.continueCursor,
-      };
-    await reserve(ctx, topic.organizationId, key, limits.credits);
-    const id = await ctx.db.insert("knowledgeEvaluations", {
-      organizationId: topic.organizationId,
-      topicId: topic._id,
-      repositoryId: repo._id,
-      actor: actor._id,
-      topicVersion: topic.version,
-      baseSha: repo.sha,
-      profileVersion: repo.profileVersion,
-      selectionVersion: repo.selectionVersion ?? 0,
-      references,
-      sourceSetHash,
-      key,
-      state: "queued",
-      decision: "new",
-      covered: evidence.length,
-      omitted: !page.isDone || !!a.cursor,
-      processingVersion,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    });
-    await ctx.scheduler.runAfter(0, internal.knowledgeActions.evaluate, { id });
+      .paginate({ cursor: a.cursor ?? null, numItems: limits.evidence }));
+  const evidence = await memberEvidence(ctx, page.page, a.savedLinkCutoff);
+  ensure(
+    evidence.length,
+    "CONTEXT_REQUIRED",
+    "No current evidence in this batch.",
+  );
+  const references = evidence.map((e) => e.reference),
+    sourceSetHash = await digest(JSON.stringify(references));
+  const preference = await ctx.db
+    .query("improvementPreferences")
+    .withIndex("by_org", (q) => q.eq("organizationId", topic.organizationId))
+    .unique();
+  const preferenceVersion = preference?.version ?? 0;
+  const key = `knowledge-evaluation:${processingVersion}:${topic._id}:${topic.version}:${repo._id}:${repo.sha}:${repo.profileVersion}:${repo.selectionVersion ?? 0}:${sourceSetHash}:${preferenceVersion}`;
+  const old = await ctx.db
+    .query("knowledgeEvaluations")
+    .withIndex("by_key", (q) => q.eq("key", key))
+    .unique();
+  if (old)
     return {
-      id,
-      cached: false,
+      id: old._id,
+      cached: true,
       next: page.isDone ? null : page.continueCursor,
     };
-  },
+  await reserve(ctx, topic.organizationId, key, limits.credits);
+  const id = await ctx.db.insert("knowledgeEvaluations", {
+    organizationId: topic.organizationId,
+    topicId: topic._id,
+    repositoryId: repo._id,
+    actor: actor._id,
+    topicVersion: topic.version,
+    baseSha: repo.sha,
+    profileVersion: repo.profileVersion,
+    selectionVersion: repo.selectionVersion ?? 0,
+    references,
+    sourceSetHash,
+    preferenceVersion,
+    key,
+    state: "queued",
+    decision: "new",
+    covered: evidence.length,
+    omitted: !page.isDone || !!a.cursor,
+    processingVersion,
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+  });
+  await ctx.scheduler.runAfter(0, internal.knowledgeActions.evaluate, { id });
+  return {
+    id,
+    cached: false,
+    next: page.isDone ? null : page.continueCursor,
+  };
+}
+export const startEvaluation = mutation({
+  args: evaluationArgs,
+  handler: (ctx, a) => startEvaluationCore(ctx, a),
 });
 export const evaluationCurrent = async (
   ctx: QueryCtx,
@@ -1026,7 +1132,12 @@ export const evaluationCurrent = async (
 ) => {
   const t = await ctx.db.get(e.topicId),
     r = await ctx.db.get(e.repositoryId);
+  const preference = await ctx.db
+    .query("improvementPreferences")
+    .withIndex("by_org", (q) => q.eq("organizationId", e.organizationId))
+    .unique();
   return (
+    (e.preferenceVersion ?? 0) === (preference?.version ?? 0) &&
     !!r?.enabled &&
     r.confirmed &&
     snapshotScopeCurrent(r) &&
@@ -1066,8 +1177,43 @@ export const claimEvaluation = internalMutation({
         insight: s.analysis.insights.find((i: any) => i.id === r.insightId),
       });
     }
+    const previous = await ctx.db
+      .query("knowledgeEvaluations")
+      .withIndex("by_topic_repo", (q) =>
+        q.eq("topicId", e.topicId).eq("repositoryId", e.repositoryId),
+      )
+      .order("desc")
+      .take(20);
+    const reviewHistory = [];
+    for (const old of previous) {
+      if (
+        old._id !== e._id &&
+        old.state === "ready" &&
+        old.output &&
+        ["rejected", "deferred"].includes(old.decision) &&
+        (await referencesCurrent(ctx, e.organizationId, old.references))
+      )
+        reviewHistory.push({
+          decision: old.decision,
+          disposition: old.output.disposition,
+          rationale: old.output.rationale,
+          problem: old.output.problem,
+          baseSha: old.baseSha,
+        });
+      if (reviewHistory.length === 10) break;
+    }
     return {
       evaluation: e,
+      reviewHistory,
+      preference:
+        (
+          await ctx.db
+            .query("improvementPreferences")
+            .withIndex("by_org", (q) =>
+              q.eq("organizationId", e.organizationId),
+            )
+            .unique()
+        )?.note ?? "",
       repo: (await ctx.db.get(e.repositoryId))!,
       evidence,
     };
@@ -1204,6 +1350,8 @@ export const redactDerived = internalMutation({
       v.literal("knowledgeJobs"),
       v.literal("knowledgeEvaluations"),
       v.literal("issueDrafts"),
+      v.literal("improvements"),
+      v.literal("improvementOutcomes"),
     ),
     cursor: v.union(v.string(), v.null()),
   },
@@ -1225,9 +1373,13 @@ export const redactDerived = internalMutation({
           });
         else
           await ctx.db.patch(r._id, {
-            output: undefined,
+            ...("goal" in r
+              ? { title: "Unavailable improvement", goal: "" }
+              : "note" in r
+                ? { note: "", measurement: undefined, deployedUrl: undefined }
+                : { output: undefined }),
             references: [],
-            state: "deleted",
+            ...("state" in r ? { state: "deleted" } : {}),
             ...("inspected" in r ? { inspected: undefined } : {}),
             updatedAt: Date.now(),
           });
@@ -1237,13 +1389,17 @@ export const redactDerived = internalMutation({
         ...a,
         cursor: page.continueCursor,
       });
-    else if (a.section !== "issueDrafts")
+    else if (a.section !== "improvementOutcomes")
       await ctx.scheduler.runAfter(0, internal.knowledge.redactDerived, {
         ...a,
         section:
           a.section === "knowledgeJobs"
             ? "knowledgeEvaluations"
-            : "issueDrafts",
+            : a.section === "knowledgeEvaluations"
+              ? "issueDrafts"
+              : a.section === "issueDrafts"
+                ? "improvements"
+                : "improvementOutcomes",
         cursor: null,
       });
   },

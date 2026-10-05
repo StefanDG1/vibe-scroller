@@ -216,6 +216,7 @@ export async function checkPatch(
   // Installation must not rewrite manifests, lockfiles or any reviewed source.
   await sandbox.verifySnapshot([...expected.values()]);
   const report: string[] = [];
+  let checksPassed = tests.length > 0 && tests.length <= 10;
   for (const command of tests.slice(0, 10)) {
     ensure(
       command.length <= 1000,
@@ -241,9 +242,10 @@ export async function checkPatch(
       `Exit ${result.exitCode}: ${command}\n${result.stdout.slice(-1500)}\n${result.stderr.slice(-1500)}`,
     );
     // A check may create build outputs, but cannot rewrite the tested sources.
+    checksPassed &&= result.exitCode === 0;
     await sandbox.verifySnapshot([...expected.values()]);
   }
-  return { patch, report: report.join("\n\n") };
+  return { patch, report: report.join("\n\n"), checksPassed };
 }
 export async function killSandbox(sandboxId: string) {
   return stopJobSandbox(sandboxId);

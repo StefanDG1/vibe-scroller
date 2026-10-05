@@ -3,6 +3,21 @@ import { backend, api, configured } from "@/lib/backend";
 import { withAuth } from "@workos-inc/authkit-nextjs";
 import { allowedRequestOrigin } from "@/lib/request-origin";
 const operations = {
+  scanList: ["query", api.libraryScans.list],
+  scanPrepare: ["mutation", api.libraryScans.prepare],
+  scanApprove: ["mutation", api.libraryScans.approve],
+  scanPause: ["mutation", api.libraryScans.pause],
+  improvementRefresh: ["action", api.improvementActions.refresh],
+  improvementPolicies: ["query", api.improvementPolicies.list],
+  improvementPolicySave: ["mutation", api.improvementPolicies.save],
+  improvementPolicyPause: ["mutation", api.improvementPolicies.pause],
+  improvementCategorize: ["mutation", api.improvementPolicies.categorize],
+  improvementPreferences: ["query", api.improvements.preferences],
+  improvementPreferencesSave: ["mutation", api.improvements.savePreferences],
+  improvementList: ["query", api.improvements.list],
+  improvementStart: ["action", api.improvementActions.start],
+  improvementExecute: ["action", api.improvementActions.execute],
+  improvementOutcome: ["mutation", api.improvements.outcome],
   knowledgeList: ["query", api.knowledge.list],
   knowledgeDetail: ["query", api.knowledge.detail],
   knowledgePolicy: ["query", api.knowledge.policy],
@@ -110,50 +125,55 @@ export async function POST(req: NextRequest) {
     );
   } catch (error) {
     const messages: Record<string, string> = {
+      EVIDENCE_REQUIRED:
+        "Confirm the release you used before judging its outcome.",
+      CHECKS_PENDING: "Wait for the required GitHub checks and reviews.",
+      MERGE_UNKNOWN:
+        "GitHub needs to confirm the previous merge. Refresh progress.",
+      BUDGET_EXCEEDED: "This request exceeds the reviewed maximum spend.",
       ISSUES_PERMISSION_REQUIRED:
         "GitHub refused issue access. Ask the App and installation owner to approve Issues permission, then verify again. Your Markdown remains available; no issue was published.",
       PUBLICATION_UNKNOWN:
-        "GitHub may have created this issue. Refresh its stored attempt to reconcile; no blind retry is allowed.",
+        "GitHub may have created this issue. Refresh its status before trying again.",
       DUPLICATE_ISSUE:
         "This idea already has an issue draft. Review the existing draft or explicitly choose a follow-up.",
       POLICY_BLOCKED:
-        "This action is paused or its text failed privacy/security checks. Review the current setup and permitted text.",
+        "This action needs review. Check its permissions and the text you want to share.",
       REPOSITORY_LIMIT:
         "This selection exceeds the existing repository allowance. Choose fewer projects.",
       GITHUB_UNAVAILABLE:
         "GitHub access is unavailable or expired. Reconnect the selected GitHub account before continuing.",
       PROVIDER_ERROR:
-        "The selected provider failed or refused the request. Check its connection; no funding fallback was used.",
-      SETUP_REQUIRED:
-        "This provider or model needs verified setup before this action is available.",
+        "AI could not complete this request. Check the connection before trying again.",
+      SETUP_REQUIRED: "Finish the connection setup before using this action.",
       CONTEXT_REQUIRED:
         "This action needs a ready source, supported main point or refreshed repository evidence.",
       SOURCE_BUSY:
-        "This operation is already pending. Review its state before retrying; uncertain usage needs reconciliation.",
+        "This work is already in progress. Check its status before trying again.",
       QUOTE_CHANGED:
         "The model, price or scope changed. Review its current quote before approving.",
       COST_RECONCILIATION_REQUIRED:
-        "Provider usage is uncertain or exceeded its approved ceiling. No automatic retry was issued.",
+        "The cost of the previous attempt needs checking. Work is paused until that is resolved.",
       PROVIDER_LIMIT:
-        "The selected inference budget is reserved or exhausted. Review connection and usage before retrying; no funding fallback was used.",
+        "The current AI allowance cannot cover this work. Review Usage.",
       INSUFFICIENT_CREDITS:
-        "The available allowance cannot cover this reservation. Review usage and the maximum budget.",
+        "Your available allowance cannot cover this maximum. Review Usage.",
       OPERATOR_BUDGET_REACHED:
-        "The existing monthly processing ceiling cannot cover this reservation. Check pending work and usage; retry only after headroom is available. No budget was increased.",
+        "The current monthly ceiling cannot cover this work. Review Usage and pending work.",
       REPO_TOO_LARGE:
-        "This repository snapshot exceeds the existing file or size limit. Select fewer literal files or folders in Projects, then prepare it again.",
+        "This project exceeds the current inspection limit. Review its coverage in Projects.",
       QUOTA_EXCEEDED:
         "This workspace has reached its source or repository allowance.",
       BASE_CHANGED:
         "The repository changed. Refresh its snapshot and review a new plan.",
       APPROVAL_STALE:
-        "This plan or request is stale. Review its current version before continuing.",
+        "Something changed since the last review. Review the latest idea or plan.",
       MATCH_IN_PROGRESS:
         "Matching is already running for this source and repository.",
       RETRY_EXHAUSTED:
         "This matching job reached its retry limit. Review the source and provider setup before creating a new attempt.",
       ISOLATION_UNAVAILABLE:
-        "The selected executor has not passed the required isolation checks.",
+        "Coding setup has not passed its required safety checks.",
       FORBIDDEN:
         "This action is unavailable with your current workspace or repository access.",
       RIGHTS_REQUIRED:
@@ -202,7 +222,7 @@ export async function POST(req: NextRequest) {
       {
         error: category
           ? messages[category]
-          : "The operation could not be completed. Check the current source, plan, allowance, and connection status before retrying.",
+          : "This action could not be completed. Check its latest status before trying again.",
         code: category ?? "UNCLASSIFIED",
       },
       { status: 400, headers: { "Cache-Control": "no-store" } },

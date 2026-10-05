@@ -4,6 +4,7 @@ import { exportRecord } from "../packages/privacy/export";
 import { internal } from "./_generated/api";
 import { workflow } from "./workflows";
 import { actorCurrent, referencesCurrent } from "./knowledge";
+import { improvementCurrent, runPolicyCurrent } from "./lib/improvementContext";
 import {
   query,
   mutation,
@@ -19,6 +20,7 @@ import {
 } from "../packages/providers/customerAi";
 import { ensure, validatePaths, containsSecret } from "../packages/policy";
 import { reserve, settle, digest, wallet } from "./product";
+import { repositoryAllowance } from "./lib/repositoryAllowance";
 import { cloudExecutionAllowed } from "./lib/cloudAccess";
 import {
   revertEvidenceValidator,
@@ -46,6 +48,8 @@ async function approvalActive(
     repository?.organizationId === run.organizationId &&
     proposal?.organizationId === run.organizationId &&
     proposal.repositoryId === run.repositoryId &&
+    (await improvementCurrent(ctx, proposal)) &&
+    (await runPolicyCurrent(ctx, run)) &&
     !!membership &&
     ["owner", "admin", "member"].includes(membership.role)
   );
@@ -167,9 +171,13 @@ export const saveRepository = internalMutation({
       .query("repositories")
       .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
       .collect();
+    const organization = await ctx.db.get(a.organizationId);
+    const owner = organization
+      ? await ctx.db.get(organization.createdBy)
+      : null;
     ensure(
       connected.filter((repo) => repo.enabled).length <
-        (entitlement.tier === "pro" ? 15 : 3),
+        repositoryAllowance(entitlement.tier, owner?.subject ?? ""),
       "REPOSITORY_LIMIT",
       "Your repository allowance is full. Disconnect a repository before adding another.",
     );
@@ -533,198 +541,215 @@ export const finishMatch = internalMutation({
     }
   },
 });
-export const approve = mutation({
-  args: {
-    id: v.id("proposals"),
-    version: v.number(),
-    planHash: v.string(),
-    baseSha: v.string(),
-    executor: v.string(),
-    fundingRoute: v.string(),
-    maxCredits: v.number(),
-    allowedPaths: v.array(v.string()),
-    highRisk: v.boolean(),
-    modelId: v.optional(v.string()),
-    maxProviderUsdCents: v.optional(v.number()),
+const approvalArgs = {
+  id: v.id("proposals"),
+  version: v.number(),
+  planHash: v.string(),
+  baseSha: v.string(),
+  executor: v.string(),
+  fundingRoute: v.string(),
+  maxCredits: v.number(),
+  allowedPaths: v.array(v.string()),
+  highRisk: v.boolean(),
+  modelId: v.optional(v.string()),
+  maxProviderUsdCents: v.optional(v.number()),
+};
+export async function approveCore(
+  ctx: import("./_generated/server").MutationCtx,
+  a: import("convex/values").ObjectType<typeof approvalArgs>,
+  authorization: {
+    actor: import("./_generated/dataModel").Doc<"users">;
+    membership: { role: string };
   },
+) {
+  const p = await ctx.db.get(a.id);
+  if (!p) fail("Proposal unavailable.");
+  const actor = authorization;
+  ensure(
+    await improvementCurrent(ctx, p),
+    "APPROVAL_STALE",
+    "Improvement evidence changed before execution.",
+  );
+  const repo = await ctx.db.get(p.repositoryId);
+  ensure(
+    repo?.organizationId === p.organizationId,
+    "FORBIDDEN",
+    "Repository unavailable.",
+  );
+  ensure(
+    repo &&
+      repo.enabled &&
+      repo.confirmed &&
+      repo.sha === a.baseSha &&
+      p.baseSha === a.baseSha &&
+      repo.profileVersion === p.profileVersion,
+    "BASE_CHANGED",
+    "Refresh and review the repository context.",
+  );
+  ensure(
+    p.review === "accepted" &&
+      p.plan &&
+      p.version === a.version &&
+      p.planHash === a.planHash,
+    "APPROVAL_STALE",
+    "Review the current plan version.",
+  );
+  ensure(
+    ["local", "cloud"].includes(a.executor),
+    "INVALID_INPUT",
+    "Choose an executor.",
+  );
+  ensure(
+    a.executor === "local"
+      ? a.fundingRoute === "local_codex_subscription"
+      : ["managed_api", "customer_api_key"].includes(a.fundingRoute),
+    "FUNDING_REQUIRED",
+    "Choose an explicit funding route.",
+  );
+  ensure(
+    a.executor !== "cloud" || cloudExecutionAllowed(actor.actor.subject),
+    "ISOLATION_UNAVAILABLE",
+    "Cloud execution is waiting for its isolation and billing verification.",
+  );
+  ensure(
+    a.executor !== "local" || process.env.LOCAL_ISOLATION_VERIFIED === "true",
+    "ISOLATION_UNAVAILABLE",
+    "Local execution is waiting for its Windows isolation verification.",
+  );
+  ensure(
+    process.env[a.executor === "cloud" ? "DISABLE_CLOUD" : "DISABLE_LOCAL"] !==
+      "true",
+    "POLICY_BLOCKED",
+    "Execution is paused.",
+  );
+  const planPaths = p.plan.files.map((f: any) => f.path);
+  ensure(
+    JSON.stringify(planPaths) === JSON.stringify(a.allowedPaths),
+    "APPROVAL_STALE",
+    "Permitted files differ from the plan.",
+  );
+  validatePaths(a.allowedPaths, a.allowedPaths, a.highRisk);
+  ensure(
+    !a.highRisk || ["owner", "admin"].includes(actor.membership.role),
+    "FORBIDDEN",
+    "Protected changes require explicit owner or administrator review.",
+  );
+  ensure(
+    a.executor !== "local" || a.maxCredits === 0,
+    "QUOTE_CHANGED",
+    "Local subscription execution has no invented platform inference cost.",
+  );
+  const now = Date.now();
+  let customerModel, credentialRevision;
+  if (a.fundingRoute === "customer_api_key") {
+    customerModel = customerModels().find((m) => m.id === a.modelId);
+    const key = await ctx.db
+      .query("connections")
+      .withIndex("by_provider", (q) =>
+        q.eq("organizationId", p.organizationId).eq("provider", "openai"),
+      )
+      .unique();
+    ensure(
+      customerModel &&
+        key?.status === "verified" &&
+        key.revision &&
+        key.availableModels?.includes(customerModel.id),
+      "SETUP_REQUIRED",
+      "Verify the customer credential and model first.",
+    );
+    ensure(
+      a.maxProviderUsdCents === customerQuote(customerModel),
+      "QUOTE_CHANGED",
+      "Review the current separate provider quote.",
+    );
+    credentialRevision = key.revision;
+  } else {
+    ensure(
+      a.modelId === undefined && a.maxProviderUsdCents === undefined,
+      "INVALID_INPUT",
+      "Provider fields require the customer-key route.",
+    );
+  }
+  const priorRuns = await ctx.db
+    .query("runs")
+    .withIndex("by_proposal", (q) => q.eq("proposalId", p._id))
+    .collect();
+  const unresolved = priorRuns.find(
+    (run) => run.providerRequestState === "started",
+  );
+  ensure(
+    !unresolved,
+    "COST_RECONCILIATION_REQUIRED",
+    "A previous customer-provider request needs usage reconciliation before another execution approval.",
+  );
+  const previous = priorRuns.find(
+    (run) =>
+      !["failed", "canceled"].includes(run.state) &&
+      (run.state !== "completed" || run.planHash === a.planHash),
+  );
+  if (previous) {
+    ensure(
+      previous.planHash === a.planHash &&
+        previous.baseSha === a.baseSha &&
+        previous.version === a.version &&
+        previous.executor === a.executor &&
+        previous.fundingRoute === a.fundingRoute &&
+        previous.maxCredits === a.maxCredits &&
+        previous.highRisk === a.highRisk &&
+        JSON.stringify(previous.allowedPaths) ===
+          JSON.stringify(a.allowedPaths) &&
+        previous.customerModel?.id === a.modelId &&
+        previous.maxProviderUsdCents === a.maxProviderUsdCents,
+      "SOURCE_BUSY",
+      "An existing execution or publication must be reconciled before changing its scope or funding.",
+    );
+    return previous._id;
+  }
+  const runId = await ctx.db.insert("runs", {
+    organizationId: p.organizationId,
+    createdAt: now,
+    updatedAt: now,
+    proposalId: p._id,
+    repositoryId: p.repositoryId,
+    approvedBy: actor.actor._id,
+    planHash: a.planHash,
+    baseSha: a.baseSha,
+    version: a.version,
+    selectionVersion: repo.selectionVersion ?? 0,
+    executor: a.executor,
+    fundingRoute: a.fundingRoute,
+    customerModel,
+    credentialRevision,
+    maxProviderUsdCents: a.maxProviderUsdCents,
+    providerRequestState: customerModel ? "reserved" : undefined,
+    maxCredits: a.maxCredits,
+    allowedPaths: a.allowedPaths,
+    highRisk: a.highRisk,
+    state: a.executor === "local" ? "waiting_for_laptop" : "queued",
+    generation: 1,
+    expiresAt: now + 86400000,
+    leaseUntil: 0,
+    events: ["Exact plan and execution budget approved."],
+  });
+  await reserve(ctx, p.organizationId, `run:${runId}`, a.maxCredits);
+  if (a.executor === "cloud")
+    await workflow.start(
+      ctx,
+      internal.workflows.coding,
+      {
+        id: runId,
+        generation: 1,
+      },
+      { onComplete: internal.workflows.completed, context: null },
+    );
+  return runId;
+}
+export const approve = mutation({
+  args: approvalArgs,
   handler: async (ctx, a) => {
     const p = await ctx.db.get(a.id);
-    if (!p) fail("Proposal unavailable.");
-    const actor = await writeAccess(ctx, p.organizationId);
-    const repo = await ctx.db.get(p.repositoryId);
-    ensure(
-      repo?.organizationId === p.organizationId,
-      "FORBIDDEN",
-      "Repository unavailable.",
-    );
-    ensure(
-      repo &&
-        repo.enabled &&
-        repo.confirmed &&
-        repo.sha === a.baseSha &&
-        p.baseSha === a.baseSha &&
-        repo.profileVersion === p.profileVersion,
-      "BASE_CHANGED",
-      "Refresh and review the repository context.",
-    );
-    ensure(
-      p.review === "accepted" &&
-        p.plan &&
-        p.version === a.version &&
-        p.planHash === a.planHash,
-      "APPROVAL_STALE",
-      "Review the current plan version.",
-    );
-    ensure(
-      ["local", "cloud"].includes(a.executor),
-      "INVALID_INPUT",
-      "Choose an executor.",
-    );
-    ensure(
-      a.executor === "local"
-        ? a.fundingRoute === "local_codex_subscription"
-        : ["managed_api", "customer_api_key"].includes(a.fundingRoute),
-      "FUNDING_REQUIRED",
-      "Choose an explicit funding route.",
-    );
-    ensure(
-      a.executor !== "cloud" || cloudExecutionAllowed(actor.actor.subject),
-      "ISOLATION_UNAVAILABLE",
-      "Cloud execution is waiting for its isolation and billing verification.",
-    );
-    ensure(
-      a.executor !== "local" || process.env.LOCAL_ISOLATION_VERIFIED === "true",
-      "ISOLATION_UNAVAILABLE",
-      "Local execution is waiting for its Windows isolation verification.",
-    );
-    ensure(
-      process.env[
-        a.executor === "cloud" ? "DISABLE_CLOUD" : "DISABLE_LOCAL"
-      ] !== "true",
-      "POLICY_BLOCKED",
-      "Execution is paused.",
-    );
-    const planPaths = p.plan.files.map((f: any) => f.path);
-    ensure(
-      JSON.stringify(planPaths) === JSON.stringify(a.allowedPaths),
-      "APPROVAL_STALE",
-      "Permitted files differ from the plan.",
-    );
-    validatePaths(a.allowedPaths, a.allowedPaths, a.highRisk);
-    ensure(
-      !a.highRisk || ["owner", "admin"].includes(actor.membership.role),
-      "FORBIDDEN",
-      "Protected changes require explicit owner or administrator review.",
-    );
-    ensure(
-      a.executor !== "local" || a.maxCredits === 0,
-      "QUOTE_CHANGED",
-      "Local subscription execution has no invented platform inference cost.",
-    );
-    const now = Date.now();
-    let customerModel, credentialRevision;
-    if (a.fundingRoute === "customer_api_key") {
-      customerModel = customerModels().find((m) => m.id === a.modelId);
-      const key = await ctx.db
-        .query("connections")
-        .withIndex("by_provider", (q) =>
-          q.eq("organizationId", p.organizationId).eq("provider", "openai"),
-        )
-        .unique();
-      ensure(
-        customerModel &&
-          key?.status === "verified" &&
-          key.revision &&
-          key.availableModels?.includes(customerModel.id),
-        "SETUP_REQUIRED",
-        "Verify the customer credential and model first.",
-      );
-      ensure(
-        a.maxProviderUsdCents === customerQuote(customerModel),
-        "QUOTE_CHANGED",
-        "Review the current separate provider quote.",
-      );
-      credentialRevision = key.revision;
-    } else {
-      ensure(
-        a.modelId === undefined && a.maxProviderUsdCents === undefined,
-        "INVALID_INPUT",
-        "Provider fields require the customer-key route.",
-      );
-    }
-    const priorRuns = await ctx.db
-      .query("runs")
-      .withIndex("by_proposal", (q) => q.eq("proposalId", p._id))
-      .collect();
-    const unresolved = priorRuns.find(
-      (run) => run.providerRequestState === "started",
-    );
-    ensure(
-      !unresolved,
-      "COST_RECONCILIATION_REQUIRED",
-      "A previous customer-provider request needs usage reconciliation before another execution approval.",
-    );
-    const previous = priorRuns.find(
-      (run) =>
-        !["failed", "canceled"].includes(run.state) &&
-        (run.state !== "completed" || run.planHash === a.planHash),
-    );
-    if (previous) {
-      ensure(
-        previous.planHash === a.planHash &&
-          previous.baseSha === a.baseSha &&
-          previous.version === a.version &&
-          previous.executor === a.executor &&
-          previous.fundingRoute === a.fundingRoute &&
-          previous.maxCredits === a.maxCredits &&
-          previous.highRisk === a.highRisk &&
-          JSON.stringify(previous.allowedPaths) ===
-            JSON.stringify(a.allowedPaths) &&
-          previous.customerModel?.id === a.modelId &&
-          previous.maxProviderUsdCents === a.maxProviderUsdCents,
-        "SOURCE_BUSY",
-        "An existing execution or publication must be reconciled before changing its scope or funding.",
-      );
-      return previous._id;
-    }
-    const runId = await ctx.db.insert("runs", {
-      organizationId: p.organizationId,
-      createdAt: now,
-      updatedAt: now,
-      proposalId: p._id,
-      repositoryId: p.repositoryId,
-      approvedBy: actor.actor._id,
-      planHash: a.planHash,
-      baseSha: a.baseSha,
-      version: a.version,
-      selectionVersion: repo.selectionVersion ?? 0,
-      executor: a.executor,
-      fundingRoute: a.fundingRoute,
-      customerModel,
-      credentialRevision,
-      maxProviderUsdCents: a.maxProviderUsdCents,
-      providerRequestState: customerModel ? "reserved" : undefined,
-      maxCredits: a.maxCredits,
-      allowedPaths: a.allowedPaths,
-      highRisk: a.highRisk,
-      state: a.executor === "local" ? "waiting_for_laptop" : "queued",
-      generation: 1,
-      expiresAt: now + 86400000,
-      leaseUntil: 0,
-      events: ["Exact plan and execution budget approved."],
-    });
-    await reserve(ctx, p.organizationId, `run:${runId}`, a.maxCredits);
-    if (a.executor === "cloud")
-      await workflow.start(
-        ctx,
-        internal.workflows.coding,
-        {
-          id: runId,
-          generation: 1,
-        },
-        { onComplete: internal.workflows.completed, context: null },
-      );
-    return runId;
+    ensure(p, "FORBIDDEN", "Proposal unavailable.");
+    return approveCore(ctx, a, await writeAccess(ctx, p.organizationId));
   },
 });
 export const run = query({
@@ -773,96 +798,113 @@ export const cancel = mutation({
     }); /* Funding stays reserved until worker termination and usage are reconciled. */
   },
 });
+const publicationArgs = {
+  id: v.id("runs"),
+  generation: v.number(),
+  patchDigest: v.string(),
+  reviewNote: v.optional(v.string()),
+};
+export async function publicationCore(
+  ctx: import("./_generated/server").MutationCtx,
+  a: import("convex/values").ObjectType<typeof publicationArgs>,
+  automatic = false,
+) {
+  const r = await ctx.db.get(a.id);
+  if (!r) fail("Run unavailable.");
+  if (!automatic) await writeAccess(ctx, r.organizationId);
+  else
+    ensure(
+      r.aiReview?.status === "passed" &&
+        r.aiReview.generation === r.generation &&
+        r.aiReview.patchDigest === a.patchDigest &&
+        r.aiReview.policyVersion === r.automationPolicyVersion &&
+        r.checksPassed &&
+        !r.highRisk,
+      "POLICY_BLOCKED",
+      "Independent review and passing checks are required.",
+    );
+  ensure(
+    await approvalActive(ctx, r),
+    "FORBIDDEN",
+    "The original execution approval is no longer authorized. Review a new plan approval.",
+  );
+  ensure(
+    process.env.DISABLE_PUBLICATION !== "true",
+    "POLICY_BLOCKED",
+    "Publication is paused.",
+  );
+  ensure(
+    ["awaiting_review", "publishing"].includes(r.state) &&
+      r.generation === a.generation &&
+      r.patch &&
+      r.changes,
+    "APPROVAL_STALE",
+    "Review the current patch.",
+  );
+  ensure(
+    (await digest(r.patch)) === a.patchDigest,
+    "APPROVAL_STALE",
+    "Patch changed after review.",
+  );
+  const p = await ctx.db.get(r.proposalId),
+    repo = await ctx.db.get(r.repositoryId);
+  const actor = await ctx.db.get(r.approvedBy);
+  ensure(
+    r.executor !== "cloud" || (actor && cloudExecutionAllowed(actor.subject)),
+    "POLICY_BLOCKED",
+    "Cloud execution is unavailable for this account.",
+  );
+  ensure(
+    p &&
+      repo &&
+      p.organizationId === r.organizationId &&
+      repo.organizationId === r.organizationId &&
+      p.repositoryId === r.repositoryId &&
+      repo.enabled &&
+      p.planHash === r.planHash &&
+      (repo.selectionVersion ?? 0) === (r.selectionVersion ?? 0) &&
+      repo.sha === r.baseSha,
+    "BASE_CHANGED",
+    "Approval context changed.",
+  );
+  validatePaths(
+    r.changes.map((f: any) => f.path),
+    r.allowedPaths,
+    r.highRisk,
+  );
+  ensure(
+    !containsSecret(r.patch),
+    "POLICY_BLOCKED",
+    "Patch contains a credential.",
+  );
+  ensure(
+    !a.reviewNote ||
+      (a.reviewNote.length <= 2000 && !containsSecret(a.reviewNote)),
+    "POLICY_BLOCKED",
+    "Publication notes must be bounded and contain no credentials.",
+  );
+  const report = a.reviewNote
+    ? `${r.report ?? ""}\n\nReviewer publication note: ${a.reviewNote}`
+    : r.report;
+  await ctx.db.patch(r._id, {
+    state: "publishing",
+    publicationGeneration: r.generation,
+    report,
+    updatedAt: Date.now(),
+  });
+  return {
+    ...r,
+    repo,
+    title: p.plan?.scope?.startsWith("Synthetic staging")
+      ? `Synthetic staging: ${p.title}`.slice(0, 160)
+      : p.title,
+    report,
+    changes: r.changes as { path: string; content: string | null }[],
+  };
+}
 export const authorizePublication = mutation({
-  args: {
-    id: v.id("runs"),
-    generation: v.number(),
-    patchDigest: v.string(),
-    reviewNote: v.optional(v.string()),
-  },
-  handler: async (ctx, a) => {
-    const r = await ctx.db.get(a.id);
-    if (!r) fail("Run unavailable.");
-    await writeAccess(ctx, r.organizationId);
-    ensure(
-      await approvalActive(ctx, r),
-      "FORBIDDEN",
-      "The original execution approval is no longer authorized. Review a new plan approval.",
-    );
-    ensure(
-      process.env.DISABLE_PUBLICATION !== "true",
-      "POLICY_BLOCKED",
-      "Publication is paused.",
-    );
-    ensure(
-      ["awaiting_review", "publishing"].includes(r.state) &&
-        r.generation === a.generation &&
-        r.patch &&
-        r.changes,
-      "APPROVAL_STALE",
-      "Review the current patch.",
-    );
-    ensure(
-      (await digest(r.patch)) === a.patchDigest,
-      "APPROVAL_STALE",
-      "Patch changed after review.",
-    );
-    const p = await ctx.db.get(r.proposalId),
-      repo = await ctx.db.get(r.repositoryId);
-    const actor = await ctx.db.get(r.approvedBy);
-    ensure(
-      r.executor !== "cloud" || (actor && cloudExecutionAllowed(actor.subject)),
-      "POLICY_BLOCKED",
-      "Cloud execution is unavailable for this account.",
-    );
-    ensure(
-      p &&
-        repo &&
-        p.organizationId === r.organizationId &&
-        repo.organizationId === r.organizationId &&
-        p.repositoryId === r.repositoryId &&
-        repo.enabled &&
-        p.planHash === r.planHash &&
-        (repo.selectionVersion ?? 0) === (r.selectionVersion ?? 0) &&
-        repo.sha === r.baseSha,
-      "BASE_CHANGED",
-      "Approval context changed.",
-    );
-    validatePaths(
-      r.changes.map((f: any) => f.path),
-      r.allowedPaths,
-      r.highRisk,
-    );
-    ensure(
-      !containsSecret(r.patch),
-      "POLICY_BLOCKED",
-      "Patch contains a credential.",
-    );
-    ensure(
-      !a.reviewNote ||
-        (a.reviewNote.length <= 2000 && !containsSecret(a.reviewNote)),
-      "POLICY_BLOCKED",
-      "Publication notes must be bounded and contain no credentials.",
-    );
-    const report = a.reviewNote
-      ? `${r.report ?? ""}\n\nReviewer publication note: ${a.reviewNote}`
-      : r.report;
-    await ctx.db.patch(r._id, {
-      state: "publishing",
-      publicationGeneration: r.generation,
-      report,
-      updatedAt: Date.now(),
-    });
-    return {
-      ...r,
-      repo,
-      title: p.plan?.scope?.startsWith("Synthetic staging")
-        ? `Synthetic staging: ${p.title}`.slice(0, 160)
-        : p.title,
-      report,
-      changes: r.changes as { path: string; content: string | null }[],
-    };
-  },
+  args: publicationArgs,
+  handler: (ctx, a) => publicationCore(ctx, a),
 });
 export const recordPR = internalMutation({
   args: {
@@ -951,6 +993,9 @@ export const projectPR = internalMutation({
     await ctx.db.patch(a.id, {
       prState: a.state,
       mergedAt: a.mergedAt ?? r.mergedAt,
+      ...(a.mergedAt && r.mergeIntent
+        ? { mergeIntent: { ...r.mergeIntent, state: "confirmed" } }
+        : {}),
       mergeCommitSha: a.mergeCommitSha ?? r.mergeCommitSha,
       reverted: a.reverted ?? r.reverted,
       revertStatus: a.revertStatus ?? r.revertStatus,
@@ -1000,6 +1045,11 @@ export const exportPage = query({
   args: {
     ...org,
     section: v.union(
+      v.literal("improvements"),
+      v.literal("improvementOutcomes"),
+      v.literal("improvementPolicies"),
+      v.literal("improvementPreferences"),
+      v.literal("libraryScans"),
       v.literal("sources"),
       v.literal("proposals"),
       v.literal("feedback"),
@@ -1032,11 +1082,26 @@ export const exportPage = query({
     for (const row of rows.page) {
       if (
         "references" in row &&
+        row.references !== undefined &&
         !(await referencesCurrent(ctx, a.organizationId, row.references))
       ) {
         permitted.push({
           ...row,
           output: undefined,
+          ...("goal" in row
+            ? { title: "Unavailable improvement", goal: "" }
+            : {}),
+          ...("note" in row
+            ? { note: "", measurement: undefined, deployedUrl: undefined }
+            : {}),
+          ...("detail" in row
+            ? {
+                title: "Unavailable proposal",
+                detail: undefined,
+                plan: undefined,
+                planDraft: undefined,
+              }
+            : {}),
           ...("body" in row
             ? { title: "Unavailable private draft", body: "" }
             : {}),
@@ -1317,6 +1382,7 @@ export const completeCloud = internalMutation({
     patch: v.string(),
     changes: v.any(),
     report: v.string(),
+    checksPassed: v.optional(v.boolean()),
     credits: v.number(),
   },
   handler: async (ctx, a) => {
@@ -1353,6 +1419,7 @@ export const completeCloud = internalMutation({
       patch: a.patch,
       changes: a.changes,
       report: a.report,
+      checksPassed: a.checksPassed,
       state: "awaiting_review",
       updatedAt: Date.now(),
     });

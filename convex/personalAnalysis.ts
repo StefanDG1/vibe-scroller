@@ -6,7 +6,7 @@ import {
 } from "./_generated/server";
 import { internal } from "./_generated/api";
 import type { QueryCtx, MutationCtx } from "./_generated/server";
-import type { Id } from "./_generated/dataModel";
+import type { Doc, Id } from "./_generated/dataModel";
 import { v } from "convex/values";
 import { access, writeAccess, recentAuthentication, limit, audit } from "./lib";
 import { ensure, containsSecret } from "../packages/policy";
@@ -137,14 +137,52 @@ export const approveBatch = mutation({
   },
 });
 export async function approvePersonal(ctx: MutationCtx, a: PersonalApproval) {
+  return approvePersonalCore(ctx, a);
+}
+export async function approvePersonalCore(
+  ctx: MutationCtx,
+  a: PersonalApproval,
+  authorization?: { actor: Doc<"users">; scanId: Id<"libraryScans"> },
+) {
   const source = await ctx.db.get(a.id);
   ensure(
     source && source.state !== "deleted",
     "FORBIDDEN",
     "Source unavailable.",
   );
-  const { actor } = await writeAccess(ctx, source.organizationId);
-  await recentAuthentication(ctx);
+  const { actor } =
+    authorization ?? (await writeAccess(ctx, source.organizationId));
+  if (authorization) {
+    const scan = await ctx.db.get(authorization.scanId);
+    const membership = await ctx.db
+      .query("memberships")
+      .withIndex("by_pair", (q) =>
+        q.eq("organizationId", source.organizationId).eq("userId", actor._id),
+      )
+      .unique();
+    const organization = await ctx.db.get(source.organizationId);
+    ensure(
+      actor.status === "active" &&
+        organization?.status === "active" &&
+        membership &&
+        ["owner", "admin"].includes(membership.role) &&
+        process.env.RESTORE_LOCK !== "true" &&
+        scan?.organizationId === source.organizationId &&
+        scan.actor === actor._id &&
+        scan.state === "running" &&
+        scan.funding === "own_plan" &&
+        scan.personal &&
+        scan.personal.expiresAt > Date.now() &&
+        scan.personal.deviceId === a.deviceId &&
+        scan.personal.model === a.model &&
+        scan.personal.effort === a.effort &&
+        scan.scope === "saved_links" &&
+        source.kind === "url" &&
+        source.createdAt <= scan.asOf,
+      "APPROVAL_STALE",
+      "Review the current scan authorization.",
+    );
+  } else await recentAuthentication(ctx);
   await limit(ctx, `personal-approval:${actor._id}`, 6);
   const device = await ctx.db.get(a.deviceId);
   ensure(
@@ -179,6 +217,14 @@ export async function approvePersonal(ctx: MutationCtx, a: PersonalApproval) {
     "SETUP_REQUIRED",
     "Start the personal analysis runner and choose an available account model.",
   );
+  if (authorization) {
+    const scan = await ctx.db.get(authorization.scanId);
+    ensure(
+      device.personalProfileBinding === scan?.personal?.profileBinding,
+      "APPROVAL_STALE",
+      "The connected account changed.",
+    );
+  }
   const generation = source.generation + 1;
   const media = source.kind !== "text";
   if (source.kind === "url") acquisitionPolicy(source.url!);

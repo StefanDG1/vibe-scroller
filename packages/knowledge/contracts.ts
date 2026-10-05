@@ -88,4 +88,4 @@ export function assertReferences(
 }
 export const synthesisJson = z.toJSONSchema(synthesis);
 export const evaluationJson = z.toJSONSchema(evaluation);
-export const processingVersion = "knowledge-v1.1";
+export const processingVersion = "knowledge-v1.2";

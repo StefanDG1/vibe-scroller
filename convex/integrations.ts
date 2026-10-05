@@ -81,6 +81,7 @@ export const draftProfile = action({
             ? context.repo.profile
             : undefined,
           reviewHistory: context.reviewHistory,
+          ownerPreferences: context.ownerPreferences,
           processingVersion: BUSINESS_CONTEXT_VERSION,
           sectionLengthTargets: Object.fromEntries(
             fields.map((field) => [field, profileFields[field].limit]),
@@ -871,6 +872,12 @@ export const reconcilePRs = internalAction({
           ...observation,
           observedAt,
         });
+        if (observation.mergedAt)
+          await ctx.scheduler.runAfter(
+            0,
+            internal.improvementAutomation.deployment,
+            { id: r._id },
+          );
       } catch {
         await ctx.runMutation(internal.jobs.projectPR, {
           id: r._id,

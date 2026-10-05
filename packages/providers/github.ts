@@ -146,7 +146,14 @@ export async function installationToken(
   installationId: number,
   scope?: {
     repository_ids: number[];
-    permissions: { issues: "write" | "read"; contents: "read" };
+    permissions: {
+      issues?: "write" | "read";
+      contents: "read" | "write";
+      pull_requests?: "read" | "write";
+      checks?: "read";
+      statuses?: "read";
+      deployments?: "read";
+    };
   },
 ) {
   const id = process.env.GITHUB_APP_ID,
@@ -162,7 +169,7 @@ export async function installationToken(
     "POST",
     scope ?? {},
   );
-  if (scope)
+  if (scope?.permissions.issues)
     ensure(
       result.permissions?.issues === scope.permissions.issues ||
         (scope.permissions.issues === "read" &&

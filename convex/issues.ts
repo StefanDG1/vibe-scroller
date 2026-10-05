@@ -64,75 +64,92 @@ function safeDraft(
     "Code or media excerpts need a separate rights and inclusion choice.",
   );
 }
-export const create = mutation({
-  args: { id: v.id("knowledgeEvaluations"), followUp: v.boolean() },
-  handler: async (ctx, a) => {
-    const e = await ctx.db.get(a.id);
+export async function createIssueCore(
+  ctx: import("./_generated/server").MutationCtx,
+  a: {
+    id: import("./_generated/dataModel").Id<"knowledgeEvaluations">;
+    followUp: boolean;
+  },
+  authorizedActor?: Doc<"users">,
+) {
+  const e = await ctx.db.get(a.id);
+  ensure(
+    e && e.state === "ready" && e.output && (await evaluationCurrent(ctx, e)),
+    "APPROVAL_STALE",
+    "Evaluate current evidence before drafting an issue.",
+  );
+  if (!authorizedActor) await writeAccess(ctx, e.organizationId);
+  else
     ensure(
-      e && e.state === "ready" && e.output && (await evaluationCurrent(ctx, e)),
-      "APPROVAL_STALE",
-      "Evaluate current evidence before drafting an issue.",
+      await actorCurrent(ctx, e.organizationId, authorizedActor._id, [
+        "owner",
+        "admin",
+      ]),
+      "FORBIDDEN",
+      "Workspace access changed.",
     );
-    await writeAccess(ctx, e.organizationId);
-    await limit(ctx, `issue-draft:${e.organizationId}`, 20);
-    const prior = await ctx.db
-      .query("issueDrafts")
-      .withIndex("by_evaluation", (q) => q.eq("evaluationId", e._id))
-      .collect();
-    ensure(
-      !prior.length || a.followUp,
-      "DUPLICATE_ISSUE",
-      "This idea already has an issue draft. Open it, or explicitly review a follow-up.",
-    );
-    const repo = (await ctx.db.get(e.repositoryId))!,
-      output = e.output;
-    const marker = markerFor(crypto.randomUUID());
-    const bullets = (rows: string[]) =>
-      rows.length
-        ? rows.map((r) => `- ${r}`).join("\n")
-        : "- No additional item established.";
-    const origin = process.env.SITE_URL ?? "https://scroll.companynerve.com";
-    const refs = output.references
+  await limit(ctx, `issue-draft:${e.organizationId}`, 20);
+  const prior = await ctx.db
+    .query("issueDrafts")
+    .withIndex("by_evaluation", (q) => q.eq("evaluationId", e._id))
+    .collect();
+  ensure(
+    !prior.length || a.followUp,
+    "DUPLICATE_ISSUE",
+    "This idea already has an issue draft. Open it, or explicitly review a follow-up.",
+  );
+  const repo = (await ctx.db.get(e.repositoryId))!,
+    output = e.output;
+  const marker = markerFor(crypto.randomUUID());
+  const bullets = (rows: string[]) =>
+    rows.length
+      ? rows.map((r) => `- ${r}`).join("\n")
+      : "- No additional item established.";
+  const origin = process.env.SITE_URL ?? "https://scroll.companynerve.com";
+  const refs = output.references
+    .map(
+      (r: any) =>
+        `- [Private source evidence](${origin}/app/${e.organizationId}/library/${r.sourceId}), insight ${r.insightId}. Requires workspace membership.`,
+    )
+    .join("\n");
+  const repoEvidence =
+    output.repositoryEvidence
       .map(
         (r: any) =>
-          `- [Private source evidence](${origin}/app/${e.organizationId}/library/${r.sourceId}), insight ${r.insightId}. Requires workspace membership.`,
+          `- ${r.path}:${r.startLine}-${r.endLine} at ${e.baseSha}: ${r.explanation}`,
       )
-      .join("\n");
-    const repoEvidence =
-      output.repositoryEvidence
-        .map(
-          (r: any) =>
-            `- ${r.path}:${r.startLine}-${r.endLine} at ${e.baseSha}: ${r.explanation}`,
-        )
-        .join("\n") ||
-      "File locations are unknown or this is a manual/research task.";
-    const snapshotCoverage = repo.snapshotPaths?.length
-      ? ` Explicit snapshot selection: ${repo.snapshotPaths.length} file/folder paths; ${repo.snapshotSummary?.omittedEligibleFileCount ?? "unknown"} eligible repository files omitted. The whole repository was not reviewed.`
-      : " Only bounded repository excerpts were inspected.";
-    const body = `## Problem and context\n\n${output.problem}\n\n## Why this fits ${repo.fullName}\n\n${output.rationale}\n\n## Source insights\n\n${refs}\n\n## Repository evidence\n\n${repoEvidence}\n\n## Suggested approach\n\n${output.approach}\n\n## Acceptance criteria\n\n${bullets(output.acceptance)}\n\n## Tests\n\n${bullets(output.tests)}\n\n## Risks\n\n${bullets(output.risks)}\n\n## Alternatives\n\n${bullets(output.alternatives)}\n\n## Open questions\n\n${bullets(output.questions)}\n\nEvaluated commit: ${e.baseSha}. Confirmed business context version: ${e.profileVersion}. Evidence batch: ${e.covered} insights; ${e.omitted ? "additional library evidence was omitted" : "this topic evidence batch was inspected"}. ${snapshotCoverage} Benefit and effort remain hypotheses. No coding, branch, PR or merge is approved by this issue.\n\n${marker}`;
-    safeDraft(output.title, body, marker, false);
-    return ctx.db.insert("issueDrafts", {
-      organizationId: e.organizationId,
-      evaluationId: e._id,
-      repositoryId: e.repositoryId,
-      topicId: e.topicId,
-      topicVersion: e.topicVersion,
-      baseSha: e.baseSha,
-      profileVersion: e.profileVersion,
-      selectionVersion: e.selectionVersion ?? 0,
-      references: e.references,
-      title: output.title,
-      body,
-      hash: await digest(`${output.title}\n${body}`),
-      version: 1,
-      marker,
-      state: "draft",
-      sensitive: false,
-      followUp: a.followUp,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    });
-  },
+      .join("\n") ||
+    "File locations are unknown or this is a manual/research task.";
+  const snapshotCoverage = repo.snapshotPaths?.length
+    ? ` Explicit snapshot selection: ${repo.snapshotPaths.length} file/folder paths; ${repo.snapshotSummary?.omittedEligibleFileCount ?? "unknown"} eligible repository files omitted. The whole repository was not reviewed.`
+    : " Only bounded repository excerpts were inspected.";
+  const body = `## Problem and context\n\n${output.problem}\n\n## Why this fits ${repo.fullName}\n\n${output.rationale}\n\n## Source insights\n\n${refs}\n\n## Repository evidence\n\n${repoEvidence}\n\n## Suggested approach\n\n${output.approach}\n\n## Acceptance criteria\n\n${bullets(output.acceptance)}\n\n## Tests\n\n${bullets(output.tests)}\n\n## Risks\n\n${bullets(output.risks)}\n\n## Alternatives\n\n${bullets(output.alternatives)}\n\n## Open questions\n\n${bullets(output.questions)}\n\nEvaluated commit: ${e.baseSha}. Confirmed business context version: ${e.profileVersion}. Evidence batch: ${e.covered} insights; ${e.omitted ? "additional library evidence was omitted" : "this topic evidence batch was inspected"}. ${snapshotCoverage} Benefit and effort remain hypotheses. No coding, branch, PR or merge is approved by this issue.\n\n${marker}`;
+  safeDraft(output.title, body, marker, false);
+  return ctx.db.insert("issueDrafts", {
+    organizationId: e.organizationId,
+    evaluationId: e._id,
+    repositoryId: e.repositoryId,
+    topicId: e.topicId,
+    topicVersion: e.topicVersion,
+    baseSha: e.baseSha,
+    profileVersion: e.profileVersion,
+    selectionVersion: e.selectionVersion ?? 0,
+    references: e.references,
+    title: output.title,
+    body,
+    hash: await digest(`${output.title}\n${body}`),
+    version: 1,
+    marker,
+    state: "draft",
+    sensitive: false,
+    followUp: a.followUp,
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+  });
+}
+export const create = mutation({
+  args: { id: v.id("knowledgeEvaluations"), followUp: v.boolean() },
+  handler: (ctx, a) => createIssueCore(ctx, a),
 });
 export const edit = mutation({
   args: {

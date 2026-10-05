@@ -27,7 +27,7 @@ import {
   planInput,
 } from "../packages/contracts";
 import type { MutationCtx } from "./_generated/server";
-import type { Id } from "./_generated/dataModel";
+import type { Id, Doc } from "./_generated/dataModel";
 import { queueDeletion } from "./assets";
 import { mediaStagePayload } from "../packages/media/stages";
 import {
@@ -40,7 +40,8 @@ import {
   hostedSourceAllowed,
 } from "./lib/hostedMediaAccess";
 import { syncCategories } from "./categories";
-import { syncKnowledge } from "./knowledge";
+import { syncKnowledge, referencesCurrent } from "./knowledge";
+import { improvementCurrent } from "./lib/improvementContext";
 import {
   acquisitionManifest,
   acquisitionPolicy,
@@ -588,7 +589,17 @@ export const detail = query({
       )
         ? s.repositorySelection
         : undefined,
-      proposals: proposals.filter((p) => p.organizationId === s.organizationId),
+      proposals: (
+        await Promise.all(
+          proposals.map(async (p) =>
+            p.organizationId === s.organizationId &&
+            (!p.references ||
+              (await referencesCurrent(ctx, s.organizationId, p.references)))
+              ? p
+              : null,
+          ),
+        )
+      ).filter((p) => p !== null),
     };
   },
 });
@@ -886,17 +897,16 @@ export async function digest(text: string) {
     x.toString(16).padStart(2, "0"),
   ).join("");
 }
-async function startSource(
+export async function startSource(
   ctx: MutationCtx,
   a: { id: Id<"sources">; maxCredits: number },
+  authorizedActor?: Doc<"users">,
 ) {
   const s = await ctx.db.get(a.id);
   if (!s || s.state === "deleted") fail("Source unavailable.");
-  const { actor } = await writeAccess(ctx, s.organizationId, [
-    "owner",
-    "admin",
-    "member",
-  ]);
+  const { actor } = authorizedActor
+    ? { actor: authorizedActor }
+    : await writeAccess(ctx, s.organizationId, ["owner", "admin", "member"]);
   ensure(
     a.maxCredits === 10,
     "QUOTE_CHANGED",
@@ -962,7 +972,7 @@ async function startSource(
 }
 export const processSource = mutation({
   args: { id: v.id("sources"), maxCredits: v.number() },
-  handler: startSource,
+  handler: (ctx, a) => startSource(ctx, a),
 });
 export const processBatch = mutation({
   args: { ids: v.array(v.id("sources")), maxCredits: v.number() },
@@ -1573,11 +1583,21 @@ export const proposals = query({
   args: org,
   handler: async (ctx, a) => {
     await access(ctx, a.organizationId);
-    return ctx.db
+    const rows = await ctx.db
       .query("proposals")
       .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
       .order("desc")
       .take(100);
+    const permitted = [];
+    for (const p of rows) {
+      if (
+        p.references &&
+        !(await referencesCurrent(ctx, p.organizationId, p.references))
+      )
+        continue;
+      permitted.push(p);
+    }
+    return permitted;
   },
 });
 export const proposal = query({
@@ -1586,6 +1606,12 @@ export const proposal = query({
     const p = await ctx.db.get(a.id);
     if (!p) fail("Proposal unavailable.");
     await access(ctx, p.organizationId);
+    ensure(
+      !p.references ||
+        (await referencesCurrent(ctx, p.organizationId, p.references)),
+      "FORBIDDEN",
+      "Proposal evidence unavailable.",
+    );
     const repo = await ctx.db.get(p.repositoryId);
     if (!repo || repo.organizationId !== p.organizationId)
       fail("Proposal unavailable.");
@@ -1671,55 +1697,66 @@ export const decide = mutation({
     });
   },
 });
+export async function editPlanCore(
+  ctx: MutationCtx,
+  a: { id: Id<"proposals">; version: number; plan: unknown },
+) {
+  const p = await ctx.db.get(a.id);
+  if (!p) fail("Proposal unavailable.");
+  ensure(
+    await improvementCurrent(ctx, p),
+    "APPROVAL_STALE",
+    "Improvement evidence changed before plan review.",
+  );
+  ensure(
+    p.version === a.version && p.review === "accepted",
+    "APPROVAL_STALE",
+    "Accept and review the current proposal.",
+  );
+  const plan = planInput.parse(a.plan);
+  // Planning can describe protected work, but cannot admit forbidden paths or grant execution.
+  validatePaths(
+    plan.files.map((file) => file.path),
+    plan.files.map((file) => file.path),
+    true,
+  );
+  const repo = await ctx.db.get(p.repositoryId);
+  if (!repo || repo.organizationId !== p.organizationId)
+    fail("Repository unavailable.");
+  for (const f of plan.files)
+    ensure(
+      f.isNew || repo.manifest.includes(f.path),
+      "INVALID_EVIDENCE",
+      "Existing file is absent from the snapshot.",
+    );
+  await ctx.db.patch(p._id, {
+    plan,
+    planHash: await digest(JSON.stringify(plan)),
+    version: p.version + 1,
+    updatedAt: Date.now(),
+  });
+  for (const run of await ctx.db
+    .query("runs")
+    .withIndex("by_proposal", (q) => q.eq("proposalId", p._id))
+    .collect())
+    if (!["completed", "failed", "canceled", "publishing"].includes(run.state))
+      await ctx.db.patch(run._id, {
+        state: "canceled",
+        generation: run.generation + 1,
+        events: [
+          ...run.events,
+          "Plan edited; prior unpublished execution approval invalidated. Outstanding usage still requires reconciliation.",
+        ],
+        updatedAt: Date.now(),
+      });
+}
 export const editPlan = mutation({
   args: { id: v.id("proposals"), version: v.number(), plan: v.any() },
   handler: async (ctx, a) => {
     const p = await ctx.db.get(a.id);
-    if (!p) fail("Proposal unavailable.");
+    ensure(p, "FORBIDDEN", "Proposal unavailable.");
     await writeAccess(ctx, p.organizationId);
-    ensure(
-      p.version === a.version && p.review === "accepted",
-      "APPROVAL_STALE",
-      "Accept and review the current proposal.",
-    );
-    const plan = planInput.parse(a.plan);
-    // Planning can describe protected work, but cannot admit forbidden paths or grant execution.
-    validatePaths(
-      plan.files.map((file) => file.path),
-      plan.files.map((file) => file.path),
-      true,
-    );
-    const repo = await ctx.db.get(p.repositoryId);
-    if (!repo || repo.organizationId !== p.organizationId)
-      fail("Repository unavailable.");
-    for (const f of plan.files)
-      ensure(
-        f.isNew || repo.manifest.includes(f.path),
-        "INVALID_EVIDENCE",
-        "Existing file is absent from the snapshot.",
-      );
-    await ctx.db.patch(p._id, {
-      plan,
-      planHash: await digest(JSON.stringify(plan)),
-      version: p.version + 1,
-      updatedAt: Date.now(),
-    });
-    for (const run of await ctx.db
-      .query("runs")
-      .withIndex("by_proposal", (q) => q.eq("proposalId", p._id))
-      .collect())
-      if (
-        !["completed", "failed", "canceled", "publishing"].includes(run.state)
-      )
-        await ctx.db.patch(run._id, {
-          state: "canceled",
-          generation: run.generation + 1,
-          events: [
-            ...run.events,
-            "Plan edited; prior unpublished execution approval invalidated. Outstanding usage still requires reconciliation.",
-          ],
-          updatedAt: Date.now(),
-        });
+    return editPlanCore(ctx, a);
   },
 });
 export const addProposal = internalMutation({

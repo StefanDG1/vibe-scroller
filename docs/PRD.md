@@ -116,3 +116,7 @@ A new user can subscribe through tested billing, import a permitted sample, read
 The same journey must handle an unavailable source, insufficient credits, a disconnected provider, an offline laptop, a failed test, a closed-unmerged PR, and a workspace deletion without misleading states or cross-workspace exposure.
 
 The website must describe the actual enabled capabilities. Required legal and production gates must have recorded evidence. Passing a mock-only test suite is insufficient.
+
+## Bounded full-library and reviewed improvements extension
+
+[ADR 058](adr/058-bounded-full-library-scans.md) adds a metadata-only full saved-link inventory, then an explicitly funded bounded scan: available unanalyzed links, knowledge gathering, every topic evidence page for every selected confirmed repository, and useful app issue drafts. Reuse completed work; preserve corrections/exclusions and no-fit decisions. Source cutoff, exact repository/profile/selection versions, lease and current account/model authority fence dispatch. Publication remains separately reviewed. [ADR 057](adr/057-continuous-reviewed-improvements.md) adds issue-linked plans, separately approved isolated coding, independent review, opt-in routine policy, protected-work review, exact-head checked merge and distinct judgment/data outcomes. Routine activation remains disabled until its actual linked-cycle acceptance. No V2 business creation is added.

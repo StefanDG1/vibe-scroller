@@ -1,4 +1,9 @@
 export const contentExportSections = [
+  "improvements",
+  "improvementOutcomes",
+  "improvementPolicies",
+  "improvementPreferences",
+  "libraryScans",
   "sources",
   "proposals",
   "feedback",

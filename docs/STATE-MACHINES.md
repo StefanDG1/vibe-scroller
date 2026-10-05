@@ -71,3 +71,11 @@ Knowledge jobs move queued to running, then ready, failed, stale or unknown. Unk
 ## Snapshot preparation failures
 
 Repository selection persists preparing, drafting_context, connected or needs_attention under the current actor/selection-version fence. A safe preparationError distinguishes oversized snapshots, missing eligible paths and unavailable access; success clears it. Oversized snapshots require an explicit smaller scope, not a blind retry. Legacy connection uses the same bounded per-project flow. See [ADR 053](adr/053-explicit-bounded-repository-snapshots.md).
+
+## Full-library scan
+
+Prepare starts inventory/running without inference; complete pagination moves to ready. Explicit approval starts sources/running, then knowledge, then topics/repository comparisons, finally completed. Unavailable source acquisition advances only after confirming no reservation exists. Unknown cost, stale authority, revoked consent, insufficient credits or provider failure pauses rather than retries blindly. Owner pause/cancel invalidates the lease/version; approved in-flight work can settle normally. Resume requires current authority and the same funding route; a renewed own-plan grant needs fresh authentication. Useful unrejected results create app issue drafts; no-fit/already-implemented results remain evidence.
+
+## Reviewed improvement
+
+A current reviewed issue can create a bounded plan proposal. Plan acceptance and execution are separate. Passing job checks permit independent review; routine publication and merge additionally require current policy, exact reviewed patch/head and protected required GitHub checks. A durable pending merge intent prevents blind retry after an unknown write. Merge does not imply deployment or benefit. Append-only owner judgment/data requires a declared or verified deployed context, and measured data has completed nonoverlapping periods and real samples. Monthly renewal refuses unresolved work or active reservations before resetting a new period.

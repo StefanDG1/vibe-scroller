@@ -1,6 +1,18 @@
 import { cronJobs } from "convex/server";
 import { internal } from "./_generated/api";
 const crons = cronJobs();
+crons.interval(
+  "Recover full library scans",
+  { minutes: 5 },
+  internal.libraryScanWorker.recover,
+  {},
+);
+crons.interval(
+  "Advance reviewed improvements",
+  { minutes: 5 },
+  internal.improvementAutomation.recover,
+  {},
+);
 for (const kind of ["media", "coding"] as const) {
   crons.interval(
     `Renew clean ${kind} tool snapshot`,
