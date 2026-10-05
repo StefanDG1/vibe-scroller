@@ -54,3 +54,7 @@ Updated Research, Avatar, Offer and Beliefs together for the owner's full-librar
 ## October 5: F011 production receipt
 
 Reconciled all four foundations with the real canonical deployment, five connected snapshots, three unconfirmed context drafts and the personal twenty-repository allowance. Retained the distinction between deployed controls and uncompleted analysis, issue batches, quality and customer outcomes. Linked the exact public receipt; no private profile/source text or credentials were published.
+
+## October 5: personal local and cloud analysis experiments
+
+The owner requested local preparation and private Codex cloud comparisons using their own allowance before further managed processing fees. Keep this a personal experiment: prepared text, sampled video coverage, automatic transcription and returned results require honest warnings and owner review. Existing analyses/corrections, workspace privacy, account/provider restrictions and costs remain authoritative. This is not evidence of a completed full-library pipeline, autonomous issues or commercial hosted subscription access. See [ADR 059](../adr/059-personal-subscription-analysis-trials.md) and the [operator runbook](../operations/subscription-analysis-trials.md). No measured quality, time saving, customer demand or fee-free universal source access is inferred.

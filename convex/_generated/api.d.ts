@@ -87,6 +87,7 @@ import type * as sandboxSnapshots from "../sandboxSnapshots.js";
 import type * as settlementAccounting from "../settlementAccounting.js";
 import type * as sourcePreview from "../sourcePreview.js";
 import type * as sourcePreviewState from "../sourcePreviewState.js";
+import type * as subscriptionTrials from "../subscriptionTrials.js";
 import type * as toolMaintenance from "../toolMaintenance.js";
 import type * as workflows from "../workflows.js";
 
@@ -176,6 +177,7 @@ declare const fullApi: ApiFromModules<{
   settlementAccounting: typeof settlementAccounting;
   sourcePreview: typeof sourcePreview;
   sourcePreviewState: typeof sourcePreviewState;
+  subscriptionTrials: typeof subscriptionTrials;
   toolMaintenance: typeof toolMaintenance;
   workflows: typeof workflows;
 }>;

@@ -4,6 +4,7 @@ export const contentExportSections = [
   "improvementPolicies",
   "improvementPreferences",
   "libraryScans",
+  "subscriptionTrials",
   "sources",
   "proposals",
   "feedback",

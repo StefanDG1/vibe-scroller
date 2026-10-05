@@ -19,6 +19,7 @@ export const purgeOrganization = internalMutation({
       "improvementPolicies",
       "improvementPreferences",
       "libraryScans",
+      "subscriptionTrials",
       "knowledgePolicies",
       "knowledgeTopics",
       "knowledgeMembers",

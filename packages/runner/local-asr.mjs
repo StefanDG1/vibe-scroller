@@ -6,6 +6,8 @@ import {
   unlink,
   rmdir,
   mkdir,
+  realpath,
+  lstat,
 } from "node:fs/promises";
 import { resolve, join, sep, isAbsolute } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -14,7 +16,7 @@ import { fileURLToPath } from "node:url";
 // decoding, subprocess command from a source, API credential or funding fallback.
 export async function transcribeNormalizedAudio(
   audio,
-  { pythonPath, modelDirectory, signal, timeoutMs = 900000 },
+  { pythonPath, modelDirectory, signal, timeoutMs = 900000, privateDirectory },
 ) {
   signal?.throwIfAborted();
   if (
@@ -30,8 +32,22 @@ export async function transcribeNormalizedAudio(
     throw new Error("LOCAL_ASR_INVALID_INPUT");
   if (process.platform !== "win32" || !process.env.LOCALAPPDATA)
     throw new Error("LOCAL_ASR_UNSUPPORTED_PLATFORM");
-  const base = resolve(process.env.LOCALAPPDATA, "VibeScroller", "media");
+  const base = privateDirectory
+    ? resolve(privateDirectory)
+    : resolve(process.env.LOCALAPPDATA, "VibeScroller", "media");
+  if (
+    privateDirectory &&
+    !base.startsWith(resolve(process.cwd(), "private") + sep)
+  )
+    throw new Error("LOCAL_ASR_PRIVATE_PATH_INVALID");
   await mkdir(base, { recursive: true, mode: 0o700 });
+  if (
+    privateDirectory &&
+    ((await realpath(base)) !== base ||
+      (await lstat(base)).isSymbolicLink() ||
+      (await realpath(resolve("private"))) !== resolve("private"))
+  )
+    throw new Error("LOCAL_ASR_PRIVATE_PATH_INVALID");
   const directory = await mkdtemp(join(base, "asr-"));
   // Verify the absolute cleanup target before removing any task files.
   if (!resolve(directory).startsWith(base + sep))
