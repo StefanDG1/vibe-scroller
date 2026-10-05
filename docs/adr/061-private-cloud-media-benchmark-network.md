@@ -1,0 +1,15 @@
+# Allow bounded network destinations for the owner's private cloud media benchmark
+
+Mode: reference. Decision October 6, 2026. Status: owner-approved private experiment; runtime enforcement acceptance blocked.
+
+The owner approved a two-video comparison of local preparation with their own Codex session, managed media processing, and preparation plus analysis entirely inside their own native Codex cloud task. The benchmark uses private copies and preserves original source analyses and corrections. It does not authorize issue publication, coding, purchases, paid OpenAI API fallback, pooled subscriptions or a commercial hosted subscription service.
+
+The owner explicitly approved adding `instagram.com`, `*.instagram.com`, `*.cdninstagram.com`, `*.fbcdn.net`, `huggingface.co` and `us.aws.cdn.hf.co` to the private VibeScroller cloud environment's existing package-manager preset. The environment stays Only me with no production secrets. This narrowly supersedes ADR 059's initial no-additional-domains configuration for this personal experiment. It does not broaden app/provider permissions. A public HEAD request for the pinned Whisper model confirmed the last destination; no signed URL or credential is retained.
+
+The required CPU transcription baseline is faster-whisper 1.2.1 and `Systran/faster-whisper-small.en` revision `d1d751a5f8271d482d14ca55d9e2deeebbae577f`, with offline CPU/int8 transcription after setup. New download destinations require owner approval. Network configuration must use the native environment workflow; editing a worker policy file cannot authorize access.
+
+The environment was published and a fresh native task selected Cloud, VibeScroller and GPT-6.1 Sol Medium. Its startup policy included the approved destinations, but two current runtime observations reported network enforcement `unknown`. The cloud runtime skill requires `enforced`. Acquisition and analysis therefore remain blocked, with zero media requests in that task. The selected model/effort was observed in the native UI; the worker cannot independently attest provider execution or subscription consumption.
+
+The owner separately approved exactly four expiring operator quality-review credits under ADR 031 so the second managed comparison could reserve the current ten-credit maximum. The internal grant was idempotent and audited, and its temporary maintenance gate was restored. This is an operator-funded allowance, not a purchase or Stripe payment. Both managed runs charged six app credits. No existing reservation was released to fund the test.
+
+Affected acceptance: real local credential/network/file isolation, completed authenticated inference, source acquisition, timestamped frames and transcription, original-analysis preservation, reserved/settled budgets, private cloud configuration, current runtime enforcement and actual quality/cost/latency evidence. The completed and blocked stages are recorded in [the implementation ledger](../implementation-status.md). No original V1 or commercial provider gate is closed by this experiment.
