@@ -554,7 +554,14 @@ export function Console({
           });
         throw new Error(body.error);
       }
-      if (operation === "checkPersonalSession") return body.result;
+      if (
+        [
+          "checkPersonalSession",
+          "subscriptionTrialList",
+          "subscriptionTrialBundle",
+        ].includes(operation)
+      )
+        return body.result;
       const event = productAnalyticsEvent(operation, args, body.result);
       if (!demo && event) track(event.event, event.properties);
       await refreshData();
@@ -567,6 +574,11 @@ export function Console({
             : ((
                 {
                   improvementStart: "Plan prepared. Review it in Improvements.",
+                  subscriptionTrialPrepare:
+                    "Trial evidence prepared for your agent.",
+                  subscriptionTrialFinish:
+                    "Trial results added. Review them in Library.",
+                  subscriptionTrialCancel: "Trial evidence deleted.",
                   scanPrepare:
                     "Counting your full library. Review the scan before analysis starts.",
                   scanApprove:
