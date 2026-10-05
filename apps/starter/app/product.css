@@ -494,12 +494,10 @@ code,
 .brand-icon {
   display: inline-grid;
   place-items: center;
-  width: 33px;
-  height: 33px;
-  border-radius: 9px;
-  background: var(--teal);
-  color: white;
-  font-size: 1.7rem;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  color: inherit;
 }
 .site-header {
   max-width: 1260px;
@@ -1419,12 +1417,7 @@ button:disabled {
   font-size: 17px;
   font-weight: 650;
   letter-spacing: -0.025em;
-}
-.brand-icon {
-  background: transparent;
-  color: var(--ink);
-  width: 26px;
-  height: 32px;
+  color: var(--brand-ink);
 }
 .product-shell {
   min-height: 100dvh;

@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     siteName: "VibeScroller",
     images: [
       {
-        url: "/social-card.png",
+        url: "/social-card.png?v=sv14c",
         width: 1200,
         height: 630,
         alt: "VibeScroller: saved video, evidence, project match, reviewed plan, draft PR",
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "VibeScroller · Make scrolling productive",
     description: company.product.description,
-    images: ["/social-card.png"],
+    images: ["/social-card.png?v=sv14c"],
   },
 };
 export default async function Layout({

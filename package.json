@@ -9,6 +9,7 @@
     "node": "24.x"
   },
   "scripts": {
+    "brand:generate": "node scripts/generate-brand-assets.mjs",
     "dev": "pnpm --filter @companynerve/starter dev",
     "dev:marketing": "pnpm --filter @companynerve/marketing dev",
     "build": "pnpm --filter @companynerve/marketing build && pnpm --filter @companynerve/starter build",

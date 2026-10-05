@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { company } from "@companynerve/company-config";
+import { BrandMark } from "@companynerve/ui";
 export const alt = company.product.name;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
@@ -13,11 +14,14 @@ export default function Image() {
         padding: 75,
         width: "100%",
         height: "100%",
-        background: "#f7f9fc",
-        color: "#182331",
+        background: "#fff",
+        color: "#000",
       }}
     >
-      <div style={{ display: "flex", fontSize: 30, color: "#2456d8" }}>
+      <div
+        style={{ display: "flex", alignItems: "center", gap: 20, fontSize: 30 }}
+      >
+        <BrandMark size={48} color="#000" />
         {company.product.name}
       </div>
       <div

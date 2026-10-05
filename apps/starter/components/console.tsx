@@ -405,6 +405,8 @@ export function Console({
         new Notification("VibeScroller has an update", {
           body: "Open your private inbox to review it.",
           tag: id(notification),
+          icon: "/brand/icon-192.png",
+          badge: "/brand/notification-badge.png",
         });
       }
       seenNotifications.current.add(id(notification));

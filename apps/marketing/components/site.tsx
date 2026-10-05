@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { company } from "@companynerve/company-config";
-import { Button } from "@companynerve/ui";
+import { Button, BrandMark } from "@companynerve/ui";
 import { recipes, getRecipe } from "@companynerve/design-recipes";
 import {
   KeyRound,
@@ -12,14 +12,7 @@ import {
 } from "lucide-react";
 export const repository = "https://github.com/StefanDG1/companynerve";
 export function Mark() {
-  return (
-    <span className="mark" aria-hidden="true">
-      <i />
-      <i />
-      <i />
-      <i />
-    </span>
-  );
+  return <BrandMark />;
 }
 export function Header() {
   return (
@@ -48,7 +41,10 @@ export function Footer() {
   return (
     <footer className="footer">
       <p>
-        {company.product.name}
+        <Link href="/" className="wordmark">
+          <Mark />
+          {company.product.name}
+        </Link>
         {company.website.kind === "template"
           ? ". A foundation for your next product."
           : ""}

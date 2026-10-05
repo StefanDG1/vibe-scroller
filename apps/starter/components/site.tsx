@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { Waypoints } from "lucide-react";
+import { BrandMark } from "@companynerve/ui";
 import { CookieSettings } from "./consent";
 export function Brand() {
   return (
     <Link href="/" className="brand">
       <span className="brand-icon" aria-hidden="true">
-        <Waypoints size={21} strokeWidth={1.8} />
+        <BrandMark size={30} />
       </span>
       VibeScroller
     </Link>
