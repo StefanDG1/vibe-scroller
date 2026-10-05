@@ -1,0 +1,67 @@
+{
+  "observedAt": "2026-10-05T17:43:08.326474+00:00",
+  "applicationCommit": "203d3ba5e9543e652221688ffbfd8298a2c7ad63",
+  "version": "0.1.0-alpha.20261005172135.g203d3ba5e954",
+  "domain": "https://scroll.companynerve.com",
+  "pullRequest": 32,
+  "prHead": "d51ef21463dbad685034d6c406a476a60a712e91",
+  "prVerify": 37347677181,
+  "mainVerify": 37347829728,
+  "versionRun": 37347829819,
+  "prereleaseRun": 37347992123,
+  "deployment": "dpl_4rX37K9ATgQu2qcNPKENg1d4xQ3A",
+  "deploymentState": "READY",
+  "backend": "bold-lemur-667",
+  "backendCodeCommit": "203d3ba5e9543e652221688ffbfd8298a2c7ad63",
+  "buildPolicy": {
+    "observedThrough": "authenticated Vercel settings radio state",
+    "basicSelected": true,
+    "elasticSelected": false,
+    "onDemandConcurrencyDisabled": true,
+    "cores": 2,
+    "memoryGB": 8
+  },
+  "personalRepositoryLimit": 20,
+  "selectedProjects": 5,
+  "wholeEligibleRepositoryDiscovery": true,
+  "confirmedContextsPreserved": 2,
+  "newContextDraftsSaved": 3,
+  "newContextsConfirmed": false,
+  "savedUrlLinks": 103,
+  "readyUrlLinks": 7,
+  "awaitingAnalysisUrlLinks": 96,
+  "newLinksAnalyzedThisRelease": 0,
+  "wallet": {
+    "granted": 110,
+    "spent": 88,
+    "reserved": 10,
+    "available": 12
+  },
+  "fullScanCompleted": false,
+  "continuousActivation": "disabled: acceptance flag not set",
+  "localTests": {
+    "applicationPassed": 382,
+    "applicationSkipped": 3,
+    "authFormPassed": 16,
+    "targetedPassed": 22,
+    "sixWidths": [320, 360, 390, 412, 768, 1440],
+    "productionControlsWidths": [390, 1440],
+    "minimumScanButtonHeight": 44.2734375,
+    "secretScan": "no leaks",
+    "dependencyUnresolved": 0
+  },
+  "modelAccess": {
+    "officialCodexVersion": "0.160.0",
+    "officialModelListIncludesGpt61Sol": true,
+    "pairedResponsesCatalogIncludesGpt61Sol": false,
+    "restrictedWindowsProbe": "refused execution",
+    "dockerLinuxEngine": "unavailable; service start denied"
+  },
+  "limits": [
+    "No new scan funding/own-plan consent granted",
+    "New contexts require owner review",
+    "Twelve credits cannot establish complete-scan affordability",
+    "No full live scan, new issue batch or live routine-cycle acceptance",
+    "Independent user and quality/cost gates remain open"
+  ]
+}

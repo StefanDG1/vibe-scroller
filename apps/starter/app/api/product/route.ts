@@ -221,7 +221,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         error: category
-          ? messages[category]
+          ? category === "CONTEXT_REQUIRED" && operationName.startsWith("scan")
+            ? "Confirm the selected projects’ proposed context in Projects before starting this scan."
+            : messages[category]
           : "This action could not be completed. Check its latest status before trying again.",
         code: category ?? "UNCLASSIFIED",
       },
