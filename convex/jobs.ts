@@ -22,6 +22,7 @@ import { ensure, validatePaths, containsSecret } from "../packages/policy";
 import { reserve, settle, digest, wallet } from "./product";
 import { repositoryAllowance } from "./lib/repositoryAllowance";
 import { cloudExecutionAllowed } from "./lib/cloudAccess";
+import { trialCurrent } from "./subscriptionTrials";
 import {
   revertEvidenceValidator,
   revertStatusValidator,
@@ -1050,6 +1051,7 @@ export const exportPage = query({
       v.literal("improvementPolicies"),
       v.literal("improvementPreferences"),
       v.literal("libraryScans"),
+      v.literal("subscriptionTrials"),
       v.literal("sources"),
       v.literal("proposals"),
       v.literal("feedback"),
@@ -1068,7 +1070,7 @@ export const exportPage = query({
     asOf: v.number(),
   },
   handler: async (ctx, a) => {
-    await access(ctx, a.organizationId, ["owner"]);
+    const { actor } = await access(ctx, a.organizationId, ["owner"]);
     ensure(
       Number.isSafeInteger(a.asOf) && a.asOf <= Date.now(),
       "INVALID_INPUT",
@@ -1080,6 +1082,22 @@ export const exportPage = query({
       .paginate({ cursor: a.cursor, numItems: 5 });
     const permitted = [];
     for (const row of rows.page) {
+      if (
+        a.section === "subscriptionTrials" &&
+        "actor" in row &&
+        row.actor !== actor._id
+      )
+        continue;
+      if (
+        a.section === "subscriptionTrials" &&
+        !(await trialCurrent(
+          ctx,
+          row as import("./_generated/dataModel").Doc<"subscriptionTrials">,
+        ))
+      ) {
+        permitted.push({ ...row, input: { sources: [] }, results: undefined });
+        continue;
+      }
       if (
         "references" in row &&
         row.references !== undefined &&

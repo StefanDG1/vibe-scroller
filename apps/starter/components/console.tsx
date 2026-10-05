@@ -30,6 +30,7 @@ import {
 import { AccountMenu } from "./account-menu";
 import { KnowledgeLibrary } from "./knowledge-library";
 import { LibraryScan } from "./library-scan";
+import { SubscriptionTrials } from "./subscription-trials";
 import { Improvements } from "./improvements";
 import { NoticeToast } from "./notice-toast";
 import { downloadText } from "@/lib/download";
@@ -843,15 +844,24 @@ export function Console({
             />
           )}
           {view === "library" && (
-            <KnowledgeLibrary
-              key={organizationId}
-              organizationId={organizationId}
-              repositories={data.repositories}
-              readOnly={readOnly}
-              demo={demo}
-              call={call}
-              onOpenImprovements={() => go("improvements")}
-            />
+            <>
+              <SubscriptionTrials
+                key={`trials:${organizationId}`}
+                organizationId={organizationId}
+                call={call}
+                readOnly={readOnly}
+                enabled={!demo && !!data.aiPreference?.personalAlphaEnabled}
+              />
+              <KnowledgeLibrary
+                key={organizationId}
+                organizationId={organizationId}
+                repositories={data.repositories}
+                readOnly={readOnly}
+                demo={demo}
+                call={call}
+                onOpenImprovements={() => go("improvements")}
+              />
+            </>
           )}
           {(view === "home" || view === "library") && (
             <>

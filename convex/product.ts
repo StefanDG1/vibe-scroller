@@ -1388,6 +1388,13 @@ export const deleteSource = mutation({
   },
 });
 export async function redactSource(ctx: MutationCtx, id: Id<"sources">) {
+  const trialSource = await ctx.db.get(id);
+  if (trialSource)
+    await ctx.scheduler.runAfter(0, internal.subscriptionTrials.redact, {
+      organizationId: trialSource.organizationId,
+      sourceId: id,
+      cursor: null,
+    });
   const s = await ctx.db.get(id);
   if (!s) return;
   if (s.state !== "deleted") {

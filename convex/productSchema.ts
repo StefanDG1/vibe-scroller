@@ -21,6 +21,20 @@ const sourceState = v.union(
   ].map((s) => v.literal(s)),
 );
 export const productTables = {
+  subscriptionTrials: defineTable({
+    ...tenant,
+    actor: v.id("users"),
+    route: v.union(v.literal("local"), v.literal("codex_cloud")),
+    model: v.string(),
+    effort: v.string(),
+    state: v.string(),
+    input: v.any(),
+    bundleHash: v.string(),
+    expiresAt: v.number(),
+    results: v.optional(v.any()),
+  })
+    .index("by_org", ["organizationId"])
+    .index("by_actor", ["organizationId", "actor"]),
   sandboxToolSnapshots: defineTable({
     kind: v.union(v.literal("media"), v.literal("coding")),
     snapshotId: v.string(),

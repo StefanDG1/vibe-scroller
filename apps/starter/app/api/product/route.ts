@@ -3,6 +3,11 @@ import { backend, api, configured } from "@/lib/backend";
 import { withAuth } from "@workos-inc/authkit-nextjs";
 import { allowedRequestOrigin } from "@/lib/request-origin";
 const operations = {
+  subscriptionTrialList: ["query", api.subscriptionTrials.list],
+  subscriptionTrialPrepare: ["mutation", api.subscriptionTrials.prepare],
+  subscriptionTrialBundle: ["query", api.subscriptionTrials.bundle],
+  subscriptionTrialFinish: ["mutation", api.subscriptionTrials.finish],
+  subscriptionTrialCancel: ["mutation", api.subscriptionTrials.cancel],
   scanList: ["query", api.libraryScans.list],
   scanPrepare: ["mutation", api.libraryScans.prepare],
   scanApprove: ["mutation", api.libraryScans.approve],
