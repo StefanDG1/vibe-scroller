@@ -89,6 +89,7 @@ export function SubscriptionTrials({
       setTrials(
         (await call("subscriptionTrialList", { organizationId })) ?? [],
       );
+      setNotice("Trial evidence prepared for your agent.");
     } catch (e) {
       setError(
         e instanceof Error ? e.message : "The trial could not be prepared.",
@@ -120,6 +121,7 @@ export function SubscriptionTrials({
       setTrials(
         (await call("subscriptionTrialList", { organizationId })) ?? [],
       );
+      setNotice("Trial results added. Review them below.");
     } catch (e) {
       setError(
         e instanceof Error
@@ -321,6 +323,7 @@ export function SubscriptionTrials({
                     (await call("subscriptionTrialList", { organizationId })) ??
                       [],
                   );
+                  setNotice("Trial evidence deleted.");
                 } catch {
                   setError("The trial could not be deleted. Try again.");
                 } finally {
