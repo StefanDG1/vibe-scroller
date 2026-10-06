@@ -152,6 +152,17 @@ export async function createOrganization(_: FormState, d: FormData) {
     return { path: `/app/${id}` };
   });
 }
+export async function createPrivateLibrary(_: FormState, d: FormData) {
+  return run(async () => {
+    const id = await (
+      await backend()
+    ).mutation(api.organizations.createPrivate, {});
+    const draft = val(d, "draft").slice(0, 2048);
+    return {
+      path: `/app/${id}${draft ? `?draft=${encodeURIComponent(draft)}` : ""}`,
+    };
+  });
+}
 export async function saveProject(_: FormState, d: FormData) {
   return run(async () => {
     const c = await backend();

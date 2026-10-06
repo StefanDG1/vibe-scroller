@@ -1,3 +1,4 @@
+import { workspaceReadable } from "./lib/workspacePrivacy";
 import { mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import { ensure, containsSecret } from "../packages/policy";
@@ -185,7 +186,7 @@ export const finish = internalMutation({
     const valid =
       source.state === "ready" &&
       actor?.status === "active" &&
-      organization?.status === "active" &&
+      workspaceReadable(organization, actor._id) &&
       membership &&
       ["owner", "admin", "member"].includes(membership.role) &&
       selectionCurrent(selection, source, repositories);

@@ -24,7 +24,7 @@ it("creates one owned default across concurrent first visits without purchasing 
   expect(new Set(ids).size).toBe(1);
   const data = await owner.query(api.accounts.current, {});
   expect(data.organizations).toEqual([
-    { id: ids[0], name: "Personal workspace", role: "owner" },
+    { id: ids[0], name: "Personal workspace", role: "owner", private: true },
   ]);
   await t.run(async (ctx) => {
     expect((await ctx.db.get(userId))?.defaultWorkspaceId).toBe(ids[0]);

@@ -13,6 +13,7 @@ import {
 } from "./lib";
 import { internal } from "./_generated/api";
 import { rememberDeletion } from "./lib/deletionMarkers";
+import { workspaceReadable } from "./lib/workspacePrivacy";
 export const ensureDefault = mutation({
   args: { preferredId: v.optional(v.id("organizations")) },
   handler: async (ctx, { preferredId }) => {
@@ -30,7 +31,7 @@ export const ensureDefault = mutation({
       await Promise.all(
         memberships.map(async (m) => {
           const workspace = await ctx.db.get(m.organizationId);
-          return workspace?.status === "active"
+          return workspace && workspaceReadable(workspace, actor._id)
             ? { workspace, membership: m }
             : null;
         }),
@@ -56,6 +57,7 @@ export const ensureDefault = mutation({
       status: "active",
       createdBy: actor._id,
       createdAt: Date.now(),
+      privateOwnerId: actor._id,
     });
     await ctx.db.insert("memberships", {
       organizationId: id,
@@ -95,6 +97,45 @@ export const create = mutation({
     return id;
   },
 });
+// Existing accounts opt in explicitly. Never move existing shared content or
+// reinterpret a workspace name as an ownership restriction.
+export const createPrivate = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const actor = await user(ctx);
+    const existing = await ctx.db
+      .query("organizations")
+      .withIndex("by_private_owner", (q) => q.eq("privateOwnerId", actor._id))
+      .first();
+    if (existing) {
+      if (existing.status !== "active")
+        fail("Private library deletion is in progress.");
+      await access(ctx, existing._id, ["owner"]);
+      return existing._id;
+    }
+    await limit(ctx, `org:${actor._id}`, 5);
+    const memberships = await ctx.db
+      .query("memberships")
+      .withIndex("by_user", (q) => q.eq("userId", actor._id))
+      .take(10);
+    if (memberships.length >= 10)
+      fail("You can belong to at most 10 organizations.");
+    const id = await ctx.db.insert("organizations", {
+      name: "My private library",
+      status: "active",
+      createdBy: actor._id,
+      privateOwnerId: actor._id,
+      createdAt: Date.now(),
+    });
+    await ctx.db.insert("memberships", {
+      organizationId: id,
+      userId: actor._id,
+      role: "owner",
+    });
+    await audit(ctx, id, actor._id, "organization.private_created", id);
+    return id;
+  },
+});
 export const details = query({
   args: { organizationId: v.id("organizations") },
   handler: async (ctx, { organizationId }) => {
@@ -103,6 +144,7 @@ export const details = query({
     return {
       name: a.organization.name,
       role: a.membership.role,
+      private: Boolean(a.organization.privateOwnerId),
       billing: b
         ? { status: b.status, periodEnd: b.periodEnd, verifiedAt: b.verifiedAt }
         : null,
@@ -153,6 +195,10 @@ export const changeMember = mutation({
   },
   handler: async (ctx, args) => {
     const a = await writeAccess(ctx, args.organizationId, ["owner"]);
+    if (a.organization.privateOwnerId)
+      fail(
+        "Private library ownership cannot be transferred. Use a separate team workspace.",
+      );
     await limit(ctx, `member:${a.actor._id}`);
     const target = await ctx.db.get(args.membershipId);
     if (!target || target.organizationId !== args.organizationId)
@@ -185,6 +231,10 @@ export const invite = mutation({
   },
   handler: async (ctx, args) => {
     const a = await writeAccess(ctx, args.organizationId, ["owner", "admin"]);
+    if (a.organization.privateOwnerId)
+      fail(
+        "This library is private. Use a separate team workspace to invite people.",
+      );
     await limit(ctx, `invite:${a.actor._id}`, 10);
     if (a.membership.role === "admin" && args.role === "admin")
       fail("Only an owner can invite an admin.");
@@ -263,7 +313,8 @@ export const acceptInvite = mutation({
     if (!inv || inv.expiresAt <= Date.now() || inv.email !== actor.email)
       fail("Invitation unavailable for this account.");
     const org = await ctx.db.get(inv.organizationId);
-    if (!org || org.status !== "active") fail("Organization unavailable.");
+    if (!org || org.status !== "active" || org.privateOwnerId)
+      fail("Organization unavailable.");
     const existing = await ctx.db
       .query("memberships")
       .withIndex("by_pair", (q) =>

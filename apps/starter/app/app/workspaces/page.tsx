@@ -2,7 +2,7 @@ import Link from "next/link";
 import { backend, api } from "@/lib/backend";
 import { Header } from "@/components/header";
 import { ActionForm } from "@/components/action-form";
-import { createOrganization } from "@/app/actions";
+import { createOrganization, createPrivateLibrary } from "@/app/actions";
 import { Card, Input, Label, Badge } from "@companynerve/ui";
 export default async function Page({
   searchParams,
@@ -30,6 +30,9 @@ export default async function Page({
               key={o.id}
             >
               <h3>{o.name}</h3>
+              <Badge>
+                {o.private ? "Private library · only you" : "Team workspace"}
+              </Badge>{" "}
               <Badge>{o.role}</Badge>
             </Link>
           ))}
@@ -41,7 +44,21 @@ export default async function Page({
           </p>
         )}
         <Card style={{ marginTop: 32 }}>
-          <h2 style={{ marginTop: 0 }}>Create a workspace</h2>
+          <h2 style={{ marginTop: 0 }}>Your private library</h2>
+          <p>
+            Only you can read this library. Use a separate workspace for a team.
+            Existing workspace content stays where it is.
+          </p>
+          <ActionForm
+            action={createPrivateLibrary}
+            label="Open my private library"
+          >
+            <input type="hidden" name="draft" value={draft ?? ""} />
+          </ActionForm>
+        </Card>
+        <Card style={{ marginTop: 24 }}>
+          <h2 style={{ marginTop: 0 }}>Create a team workspace</h2>
+          <p>Workspace members can read its library according to their role.</p>
           <ActionForm action={createOrganization} label="Create workspace">
             <div>
               <Label htmlFor="name">Workspace name</Label>

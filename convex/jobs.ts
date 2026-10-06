@@ -1,3 +1,4 @@
+import { workspaceReadable } from "./lib/workspacePrivacy";
 import {
   repositoryContent,
   storeRepositoryContent,
@@ -49,7 +50,7 @@ async function approvalActive(
     )
     .unique();
   return (
-    organization?.status === "active" &&
+    workspaceReadable(organization, run.approvedBy) &&
     actor?.status === "active" &&
     repository?.organizationId === run.organizationId &&
     proposal?.organizationId === run.organizationId &&
@@ -303,7 +304,7 @@ export const storeSecret = internalMutation({
         .unique();
       ensure(
         actor?.status === "active" &&
-          organization?.status === "active" &&
+          workspaceReadable(organization, a.actorId!) &&
           membership?.role === "owner",
         "FORBIDDEN",
         "Credential owner access changed.",
@@ -369,7 +370,7 @@ export const verifiedCredential = internalMutation({
       organization = await ctx.db.get(a.organizationId);
     ensure(
       actor?.status === "active" &&
-        organization?.status === "active" &&
+        workspaceReadable(organization, a.actorId) &&
         membership?.role === "owner",
       "FORBIDDEN",
       "Connection owner access changed.",

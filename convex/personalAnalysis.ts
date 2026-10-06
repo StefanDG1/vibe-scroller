@@ -1,3 +1,4 @@
+import { workspaceReadable } from "./lib/workspacePrivacy";
 import {
   query,
   mutation,
@@ -67,7 +68,7 @@ async function authorizedDevice(ctx: QueryCtx, hash: string) {
   ensure(
     device?.state === "paired" &&
       actor?.status === "active" &&
-      organization?.status === "active" &&
+      workspaceReadable(organization, actor._id) &&
       membership &&
       ["owner", "admin", "member"].includes(membership.role) &&
       personalAllowed(actor.subject),
@@ -163,7 +164,7 @@ export async function approvePersonalCore(
     const organization = await ctx.db.get(source.organizationId);
     ensure(
       actor.status === "active" &&
-        organization?.status === "active" &&
+        workspaceReadable(organization, actor._id) &&
         membership &&
         ["owner", "admin"].includes(membership.role) &&
         process.env.RESTORE_LOCK !== "true" &&

@@ -1,3 +1,4 @@
+import { workspaceReadable } from "./lib/workspacePrivacy";
 import { Resend, type EmailId } from "@convex-dev/resend";
 import { components } from "./_generated/api";
 import { internalMutation, internalQuery } from "./_generated/server";
@@ -67,7 +68,12 @@ export const notify = internalMutation({
     const deliveryIds: string[] = [];
     for (const member of members.filter((m) => m.role === "owner")) {
       const user = await ctx.db.get(member.userId);
-      if (!user || user.status !== "active") continue;
+      if (
+        !user ||
+        user.status !== "active" ||
+        !workspaceReadable(org, user._id)
+      )
+        continue;
       // Generic notification only. Evidence, titles, code, and transcripts stay behind authenticated access.
       const id = await resend.sendEmail(ctx, {
         from: process.env.RESEND_FROM,

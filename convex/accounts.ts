@@ -3,6 +3,7 @@ import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { user, fail, limit } from "./lib";
 import { subjectHash, rememberDeletion } from "./lib/deletionMarkers";
+import { workspaceReadable } from "./lib/workspacePrivacy";
 export const syncUser = internalMutation({
   args: {
     subject: v.string(),
@@ -83,8 +84,13 @@ export const current = query({
         await Promise.all(
           rows.map(async (m) => {
             const org = await ctx.db.get(m.organizationId);
-            return org?.status === "active"
-              ? { id: org._id, name: org.name, role: m.role }
+            return org && workspaceReadable(org, actor._id)
+              ? {
+                  id: org._id,
+                  name: org.name,
+                  role: m.role,
+                  private: Boolean(org.privateOwnerId),
+                }
               : null;
           }),
         )
@@ -100,6 +106,15 @@ export const exportAccount = query({
       .query("memberships")
       .withIndex("by_user", (q) => q.eq("userId", actor._id))
       .collect();
+    const visibleMemberships = (
+      await Promise.all(
+        memberships.map(async (m) =>
+          workspaceReadable(await ctx.db.get(m.organizationId), actor._id)
+            ? m
+            : null,
+        ),
+      )
+    ).filter((m) => m !== null);
     return {
       schemaVersion: 1,
       exportedAt: new Date().toISOString(),
@@ -109,7 +124,7 @@ export const exportAccount = query({
         createdAt: actor.createdAt,
         preferChatGPTPlan: actor.preferChatGPTPlan ?? false,
       },
-      memberships: memberships.map((m) => ({
+      memberships: visibleMemberships.map((m) => ({
         organizationId: m.organizationId,
         role: m.role,
       })),
@@ -134,6 +149,9 @@ export const deleteAccount = mutation({
         // A confirmed workspace deletion already locks access and schedules
         // its purge. Finishing account deletion must not wait for that batch.
         if (!org || org.status === "deleting") continue;
+        if (org.privateOwnerId && org.privateOwnerId !== actor._id) continue;
+        if (org.privateOwnerId === actor._id)
+          fail("Delete your private library before deleting your account.");
         const others = await ctx.db
           .query("memberships")
           .withIndex("by_org", (q) => q.eq("organizationId", m.organizationId))

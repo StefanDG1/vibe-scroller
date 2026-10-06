@@ -1,0 +1,11 @@
+# Enforce an owner-private library before adding space labels
+
+Mode: reference. Decision October 7, 2026. Status: implemented locally; deployment and real-account acceptance pending.
+
+The evolution plan separates authorization from Personal/Business filing. An organization named Personal workspace historically permitted invited members, so its name cannot establish privacy. Preserve that shared behavior and its existing content. New first-entry libraries have an explicit `privateOwnerId`; existing accounts create a separate private library deliberately. Creation is transactional and idempotent. It does not copy content, purchase an entitlement, reset trial claims or reanalyze sources.
+
+Private access requires the exact owner and an active membership. A mistakenly inserted membership cannot expose the private library through reads, writes, exports, counts, default selection or account listings. Invitations and ownership transfer are unavailable for these libraries. Account deletion requires the owner to delete the private library first; a spurious second owner cannot orphan it. Existing deletion and recovery locks remain effective. Queued knowledge, media, profile, planning and coding workers recheck the same boundary. Generic email delivery excludes unauthorized memberships.
+
+The workspace picker offers the private library separately from team creation. Personal and Business filing, connect-my-spaces preferences and separate assistant/team grants remain subsequent implementation. Do not interpret this first boundary as those features being complete. Sources and derived knowledge remain in their existing authorization domain; no sharing-by-label or cross-tenant deduplication is introduced.
+
+Tests: `tests/workspace-privacy.test.ts` covers concurrent creation, preserved legacy shared access, accidental owner memberships, listing/export rejection, invitations, ownership transfer, recovery/deletion and queued-worker authorization. Existing default-workspace and backend lifecycle tests remain relevant. Production migration is additive; it adds an optional ownership field and index and does not rewrite old rows. Older servers that ignore this field are unsafe after private libraries exist; keep the boundary in a compatible rollback.
