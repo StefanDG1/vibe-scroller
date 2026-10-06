@@ -15,3 +15,7 @@ FORM: Typography uses the established system/Inter UI stack, normal reading weig
 QUALITY BAR: The supplied dark ElevenLabs home and split settings show the expected quiet borders, legible type and limited text density. The supplied Codex sidebar/account menu show navigation and compact menu behavior. Light ElevenLabs is composition reference only; the committed product is dark. Personal screenshots remain local references, never bundled assets or published captures.
 
 October 3 refinement: all selectors use dark Radix radio menus instead of native phone sheets. Whole-post selection is the default, with optional Advanced exclusion checkboxes. Evidence images stay in an accessible dismissible gallery; the original source card still opens its post. Library collections sit above specific topics, and capture/save/publication dates remain distinct. The owner's Android picker screenshot is retained only in ignored private/design-references.
+
+## October 6 library reading refinement
+
+Use four explicit Library views: Knowledge, Posts, Ideas and Issues. Topics open a cited map rather than extending a long page. Disclose filters, coverage and editing controls, retain private source links beside claims, and expand idea/issue review from compact titles. The labeled demo has direct `view=library&map=1` entry. Keep the owner-authorized mint accent; this request refines the existing dark world. See [ADR 073](../adr/073-reading-first-library-navigation.md).

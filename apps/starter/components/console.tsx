@@ -28,7 +28,7 @@ import {
   Check,
 } from "lucide-react";
 import { AccountMenu } from "./account-menu";
-import { KnowledgeLibrary } from "./knowledge-library";
+import { KnowledgeLibrary, LibrarySections } from "./knowledge-library";
 import { LibraryScan } from "./library-scan";
 import { SubscriptionTrials } from "./subscription-trials";
 import { Improvements } from "./improvements";
@@ -209,6 +209,15 @@ export function Console({
     [data, setData] = useState(initial),
     [view, setView] = useState(
       initialView === "plans" ? "proposals" : initialView,
+    ),
+    [librarySection, setLibrarySection] = useState<
+      "topics" | "posts" | "ideas" | "issues"
+    >(
+      demoState !== "ready" && demo
+        ? "posts"
+        : initialSearch || initialFilter || initialCategory
+          ? "posts"
+          : "topics",
     ),
     [selected, setSelected] = useState<any>(initialSource),
     [search, setSearch] = useState(initialSearch),
@@ -795,7 +804,7 @@ export function Console({
             className={`page-heading ${view === "source" ? "source-heading" : ""}`}
           >
             <div>
-              <h1>
+              <h1 className={view === "library" ? "sr-only" : undefined}>
                 {view === "source"
                   ? (selected?.title ?? "Source unavailable")
                   : view === "proposal"
@@ -859,25 +868,45 @@ export function Console({
           )}
           {view === "library" && (
             <>
-              <SubscriptionTrials
-                key={`trials:${organizationId}`}
-                organizationId={organizationId}
-                call={call}
-                readOnly={readOnly}
-                enabled={!demo && !!data.aiPreference?.personalAlphaEnabled}
+              <LibrarySections
+                active={librarySection}
+                onSelect={setLibrarySection}
+                posts
               />
-              <KnowledgeLibrary
-                key={organizationId}
-                organizationId={organizationId}
-                repositories={data.repositories}
-                readOnly={readOnly}
-                demo={demo}
-                call={call}
-                onOpenImprovements={() => go("improvements")}
-              />
+              <details
+                className="library-analysis-settings"
+                hidden={librarySection !== "posts"}
+              >
+                <summary>Analyze saved posts</summary>
+                <SubscriptionTrials
+                  key={`trials:${organizationId}`}
+                  organizationId={organizationId}
+                  call={call}
+                  readOnly={readOnly}
+                  enabled={!demo && !!data.aiPreference?.personalAlphaEnabled}
+                />
+              </details>
+              <div
+                className="library-knowledge-container"
+                hidden={librarySection === "posts"}
+              >
+                <KnowledgeLibrary
+                  section={
+                    librarySection === "posts" ? "topics" : librarySection
+                  }
+                  key={organizationId}
+                  organizationId={organizationId}
+                  repositories={data.repositories}
+                  readOnly={readOnly}
+                  demo={demo}
+                  call={call}
+                  onOpenImprovements={() => go("improvements")}
+                />
+              </div>
             </>
           )}
-          {(view === "home" || view === "library") && (
+          {(view === "home" ||
+            (view === "library" && librarySection === "posts")) && (
             <>
               {view === "home" && (
                 <section className="home-capture" aria-label="Capture a source">

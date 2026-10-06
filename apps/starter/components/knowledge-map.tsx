@@ -72,12 +72,14 @@ export function KnowledgeMap({
     <section className="knowledge-map" aria-label="Topic connection map">
       <div className="knowledge-map-root">
         <GitBranch size={22} aria-hidden="true" />
-        <strong>{detail.topic.name}</strong>
-        <span>{graph.insights.length} ideas on this page</span>
+        <strong>{graph.insights.length} ideas</strong>
+        <span>
+          {graph.relations.length}{" "}
+          {graph.relations.length === 1 ? "connection" : "connections"}
+        </span>
       </div>
       <p className="knowledge-map-caption">
-        Branches group ideas in this topic. Named connections explain how the
-        cited ideas relate. Select a node to inspect it.
+        Select a connection or idea to see its evidence.
       </p>
       {graph.insights.length === 0 ? (
         <p>

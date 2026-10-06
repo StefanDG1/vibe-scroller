@@ -159,3 +159,7 @@ The owner requested local preparation and private Codex cloud comparisons using 
 ## October 6: cited topic map
 
 The owner requested a visual node or tree view of existing knowledge connections. The implemented topic map groups cited ideas under saved connection nodes, distinguishes topic membership from explained relationships, and retains the text alternative and private evidence. This is an interface addition, not a new quality finding, customer study or spending authority. Coverage remains bounded to the selected evidence page. Local browser acceptance is recorded separately from production availability and independent comprehension. See [ADR 072](../adr/072-cited-topic-connection-map.md).
+
+## F013: simplify library reading, October 6
+
+The owner reported that the map was difficult to find and the interface was confusing and excessive. This is direct qualitative operator feedback, not an independent customer study. Separate Knowledge, Posts, Ideas and Issues; prioritize source-backed reading and reveal correction, coverage and funded actions only when requested. Preserve exact rights/budget/publication disclosures at their decision points. This supports the existing traceability and review beliefs without changing the audience, prices or six beliefs. Production availability and independent comprehension remain separate from local UI checks. See [ADR 073](../adr/073-reading-first-library-navigation.md).
