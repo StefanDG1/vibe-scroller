@@ -65,6 +65,7 @@ export function KnowledgeLibrary(p: Props) {
     [detail, setDetail] = useState<any>(),
     [cursor, setCursor] = useState<string>(),
     [policy, setPolicy] = useState<any>(),
+    [localRuns, setLocalRuns] = useState<any[]>([]),
     [ideas, setIdeas] = useState<any[]>([]),
     [ideaNext, setIdeaNext] = useState<string | null>(null),
     [issues, setIssues] = useState<any[]>([]),
@@ -103,6 +104,7 @@ export function KnowledgeLibrary(p: Props) {
         setIdeas([]);
         setIssues([]);
         setPolicy(undefined);
+        setLocalRuns([]);
         setSelected(undefined);
         setDetail(undefined);
         setNext(null);
@@ -119,7 +121,7 @@ export function KnowledgeLibrary(p: Props) {
     const generation = ++refreshGeneration.current;
     const detailAtStart = detailGeneration.current;
     try {
-      const [list, policy, ideas, drafts] = await Promise.all([
+      const [list, policy, ideas, drafts, localRuns] = await Promise.all([
         scopedRead("knowledgeList", {
           organizationId: p.organizationId,
           search: searchScope === "topic" ? search || undefined : undefined,
@@ -138,6 +140,7 @@ export function KnowledgeLibrary(p: Props) {
           repositoryId: project || undefined,
         }),
         scopedRead("issueList", { organizationId: p.organizationId }),
+        scopedRead("localLibraryList", { organizationId: p.organizationId }),
       ]);
       if (generation !== refreshGeneration.current) return;
       setTopics((old) =>
@@ -151,6 +154,7 @@ export function KnowledgeLibrary(p: Props) {
       );
       setNext(list.next);
       setPolicy(policy);
+      setLocalRuns(localRuns);
       setIdeas(ideas.items);
       setIdeaNext(ideas.next);
       setIssues(drafts.items);
@@ -263,6 +267,28 @@ export function KnowledgeLibrary(p: Props) {
           Connect saved ideas, inspect where they agree or disagree, and decide
           what fits a project. Your workspace keeps its own library.
         </p>
+        {localRuns.slice(0, 1).map((r) => (
+          <div className="notice" key={r._id} aria-live="polite">
+            <p>
+              {r.completed} of {r.sources.length} posts analyzed · GPT-6.1 Sol ·
+              Medium · Your Codex subscription · 0 app credits
+            </p>
+            <p>
+              {r.state === "active"
+                ? "Your laptop is building the library. Previously saved knowledge remains available."
+                : `Local run ${r.state.replaceAll("_", " ")}. Saved knowledge remains available.`}
+            </p>
+            {r.state === "active" && !p.readOnly && (
+              <button
+                className="secondary"
+                disabled={busy}
+                onClick={() => void run("localLibraryCancel", { runId: r._id })}
+              >
+                Stop this run
+              </button>
+            )}
+          </div>
+        ))}
         <details>
           <summary>Automatic organization and its budget</summary>
           <p>

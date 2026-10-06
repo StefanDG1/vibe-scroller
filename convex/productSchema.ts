@@ -238,6 +238,7 @@ export const productTables = {
     .index("by_expiry", ["expiresAt"]),
   sources: defineTable({
     ...tenant,
+    localAnalysisReceipt: v.optional(v.any()),
     processingStartedAt: v.optional(v.number()),
     processingReceipt: v.optional(v.any()),
     speechProvenance: v.optional(v.any()),

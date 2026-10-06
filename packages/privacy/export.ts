@@ -5,6 +5,8 @@ export const contentExportSections = [
   "improvementPreferences",
   "libraryScans",
   "subscriptionTrials",
+  "localLibraryRuns",
+  "localSourceImports",
   "sources",
   "proposals",
   "feedback",
@@ -62,6 +64,11 @@ export function exportRecord(
                 root &&
                 section === "repositories" &&
                 repositoryContext.has(key)
+              ) &&
+              !(
+                root &&
+                section === "localSourceImports" &&
+                ["transcript", "frames"].includes(key)
               ),
           )
           .map(([key, entry]) => [key, redact(entry)]),

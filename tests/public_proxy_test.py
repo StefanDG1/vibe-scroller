@@ -11,6 +11,15 @@ module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 
 class PublicProxyTests(unittest.IsolatedAsyncioTestCase):
+    def test_explicit_library_limits_keep_ordinary_limits_small(self):
+        ordinary = module.Broker(["example.com"])
+        self.assertEqual((ordinary.max_requests, ordinary.max_bytes), (64, 300_000_000))
+        library = module.Broker(["auth.openai.com"], max_requests=2048, max_bytes=2_000_000_000)
+        self.assertEqual((library.max_requests, library.max_bytes), (2048, 2_000_000_000))
+        for kwargs in [dict(max_requests=2049), dict(max_bytes=2_000_000_001), dict(max_requests=0), dict(max_bytes=0)]:
+            with self.assertRaises(AssertionError):
+                module.Broker(["example.com"], **kwargs)
+
     async def tunnel(self, *, idle=.04, cap=.5, delays=(.02, .02, .02, .02)):
         class Writer:
             def __init__(self):

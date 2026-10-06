@@ -13,6 +13,11 @@ const exec = promisify(execFile),
   worker = prefix + "-codex",
   proxy = prefix + "-proxy",
   socket = prefix + "-socket";
+const library = process.argv.slice(2).join(" ") === "--personal-library";
+if (process.argv.length > 2 && !library)
+  throw Error("SUBSCRIPTION_SESSION_OPTIONS_INVALID");
+const sessionMs = library ? 4 * 3600000 : 1800000;
+const lifetimeSeconds = sessionMs / 1000 + 900;
 const run = async (args) =>
   (
     await exec("docker", args, {
@@ -79,7 +84,7 @@ try {
     image,
     "python3",
     "-c",
-    "import pathlib,time,runpy,threading,os,sys;threading.Timer(2700,lambda:os._exit(0)).start();\nwhile not pathlib.Path('/root/ready').exists(): time.sleep(.1)\nsys.argv=['public_proxy.py','--subscription'];runpy.run_path('/opt/vibe/public_proxy.py',run_name='__main__')",
+    `import pathlib,time,runpy,threading,os,sys;threading.Timer(${lifetimeSeconds},lambda:os._exit(0)).start();\nwhile not pathlib.Path('/root/ready').exists(): time.sleep(.1)\nsys.argv=['public_proxy.py','${library ? "--subscription-library" : "--subscription"}'];runpy.run_path('/opt/vibe/public_proxy.py',run_name='__main__')`,
   ]);
   await run([
     "exec",
@@ -129,7 +134,7 @@ try {
     image,
     "node",
     "-e",
-    "setTimeout(()=>process.exit(0),2700000)",
+    `setTimeout(()=>process.exit(0),${sessionMs + 900000})`,
   ]);
   await run([
     "exec",
@@ -173,7 +178,8 @@ try {
       proxy,
       socket,
       image,
-      expiresAt: Date.now() + 1800000,
+      expiresAt: Date.now() + sessionMs,
+      purpose: library ? "personal_library" : "comparison",
     }),
     { mode: 0o600 },
   );
@@ -202,13 +208,14 @@ try {
       socket,
       image,
       profileBinding,
-      expiresAt: Date.now() + 1800000,
+      expiresAt: Date.now() + sessionMs,
+      purpose: library ? "personal_library" : "comparison",
     }),
     { mode: 0o600 },
   );
   console.log(JSON.stringify({ status: "own_account_connected", worker }));
   // Keep only this ephemeral official-client session for the bounded trial.
-  await Promise.race([delay(1800000), stopped]);
+  await Promise.race([delay(sessionMs), stopped]);
 } catch (e) {
   console.log(
     JSON.stringify({

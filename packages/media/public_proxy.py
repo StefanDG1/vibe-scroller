@@ -30,13 +30,16 @@ def public_address(raw):
 
 
 class Broker:
-    def __init__(self, patterns, *, connection_seconds=90, idle_seconds=15):
+    def __init__(self, patterns, *, connection_seconds=90, idle_seconds=15, max_requests=64, max_bytes=300_000_000):
         self.patterns = patterns
         self.connection_seconds = connection_seconds
         self.idle_seconds = idle_seconds
         self.active = 0
         self.requests = 0
         self.bytes = 0
+        assert 0 < max_requests <= 2048 and 0 < max_bytes <= 2_000_000_000
+        self.max_requests = max_requests
+        self.max_bytes = max_bytes
 
     async def relay(self, reader, writer, activity):
         while True:
@@ -45,7 +48,7 @@ class Broker:
                 break
             activity[0] = asyncio.get_running_loop().time()
             self.bytes += len(data)
-            if self.bytes > 300_000_000:
+            if self.bytes > self.max_bytes:
                 raise ValueError('transfer bound')
             writer.write(data)
             await asyncio.wait_for(writer.drain(), 5)
@@ -60,7 +63,7 @@ class Broker:
             await asyncio.sleep(remaining)
 
     async def handle(self, reader, writer):
-        if self.active >= 4 or self.requests >= 64:
+        if self.active >= 4 or self.requests >= self.max_requests:
             writer.close()
             return
         self.active += 1
@@ -115,10 +118,14 @@ async def main():
     assert path.stat().st_size <= 2048
     policy = json.loads(path.read_text())
     assert set(policy) == {'domains'} and 0 < len(policy['domains']) <= 16
-    assert sys.argv[1:] in ([], ['--subscription'])
+    assert sys.argv[1:] in ([], ['--subscription'], ['--subscription-library'])
     # Selected only by the trusted launcher. Media acquisition keeps its 90s/15s
     # bounds; the official-client session supports its bounded 180s model turn.
-    broker = Broker(policy['domains'], connection_seconds=300, idle_seconds=180) if sys.argv[1:] else Broker(policy['domains'])
+    if sys.argv[1:] == ['--subscription-library']:
+        assert set(policy['domains']) == {'auth.openai.com', 'chatgpt.com', 'api.openai.com'}
+        broker = Broker(policy['domains'], connection_seconds=300, idle_seconds=180, max_requests=2048, max_bytes=2_000_000_000)
+    else:
+        broker = Broker(policy['domains'], connection_seconds=300, idle_seconds=180) if sys.argv[1:] else Broker(policy['domains'])
     endpoint = '/run/vibe-public.sock'
     server = await asyncio.start_unix_server(broker.handle, path=endpoint, limit=4096, backlog=8)
     os.chown(endpoint, 0, 1001)

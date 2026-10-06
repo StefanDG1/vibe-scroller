@@ -173,7 +173,11 @@ async function updateCounts(
     insightCount: Math.max(0, (t.insightCount ?? 0) + after - before),
   });
 }
-async function touch(ctx: MutationCtx, topicId: Id<"knowledgeTopics">) {
+async function touch(
+  ctx: MutationCtx,
+  topicId: Id<"knowledgeTopics">,
+  enqueue = true,
+) {
   const topic = await ctx.db.get(topicId);
   if (!topic || topic.redirect) return;
   await ctx.db.patch(topicId, {
@@ -182,9 +186,10 @@ async function touch(ctx: MutationCtx, topicId: Id<"knowledgeTopics">) {
     resumeCursor: undefined,
     updatedAt: Date.now(),
   });
-  await ctx.scheduler.runAfter(0, internal.knowledgeActions.enqueueSafe, {
-    topicId,
-  });
+  if (enqueue)
+    await ctx.scheduler.runAfter(0, internal.knowledgeActions.enqueueSafe, {
+      topicId,
+    });
 }
 // Classification reuses approved analysis. No new media processing or charge occurs here.
 function topicNames(source: Doc<"sources">, point: any): string[] {
@@ -201,7 +206,11 @@ function topicNames(source: Doc<"sources">, point: any): string[] {
   });
   return names.length ? names : ["Unsorted ideas"];
 }
-export async function syncKnowledge(ctx: MutationCtx, source: Doc<"sources">) {
+export async function syncKnowledge(
+  ctx: MutationCtx,
+  source: Doc<"sources">,
+  options: { enqueue?: boolean } = {},
+) {
   if (process.env.RESTORE_LOCK === "true") return;
   const old = await ctx.db
     .query("knowledgeMembers")
@@ -309,7 +318,7 @@ export async function syncKnowledge(ctx: MutationCtx, source: Doc<"sources">) {
   }
   for (const topicId of touched) {
     await updateCounts(ctx, topicId, source._id, before.get(topicId) ?? 0);
-    await touch(ctx, topicId);
+    await touch(ctx, topicId, options.enqueue !== false);
   }
 }
 export const policy = query({
@@ -1136,6 +1145,15 @@ export const evaluationCurrent = async (
     .query("improvementPreferences")
     .withIndex("by_org", (q) => q.eq("organizationId", e.organizationId))
     .unique();
+  for (const binding of e.topicBindings ?? []) {
+    const topic = await ctx.db.get(binding.id);
+    if (
+      topic?.organizationId !== e.organizationId ||
+      topic.redirect ||
+      topic.version !== binding.version
+    )
+      return false;
+  }
   return (
     (e.preferenceVersion ?? 0) === (preference?.version ?? 0) &&
     !!r?.enabled &&
