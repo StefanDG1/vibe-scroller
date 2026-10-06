@@ -4,6 +4,8 @@ The current primary working avatar is an adult project owner who saves useful co
 
 Earlier dated findings below describe the September technical-audience brief. F014 and [ADR 075](../adr/075-vibescroll-product-direction.md) control the current direction. Personal knowledge can be useful without GitHub; no user is required to adopt a coding workflow simply to use the library.
 
+F015 and [ADR 076](../adr/076-persuasive-design-and-analysis-references.md) refine persuasion and copy: users can see a genuine recommended plan, a subtle highlighted next action and unfinished work they can resume. These are hypotheses to test with this audience, not verified preferences of every project owner.
+
 This completes the original Mark Builds Brands Avatar Sheet Template using the [research document](VibeScroller_Foundational_Research.md). Product means a recorded product decision. Observation means a cited public account. Interpretation means a proposed explanation. Unknown means there is no evidence to fill the field. The observed public users are not VibeScroller customers.
 
 ## Demographic and general information
@@ -171,3 +173,9 @@ The owner reported that the map was difficult to find and the interface was conf
 The intended buyer can judge goals and useful outcomes without understanding implementation internals. Show the saved idea, why it fits, what needs their decision and what happened later. Scroll is an original soft illustrated guide, not a source of authority or a guilt mechanism. A clear dashboard, contextual evidence and a short useful quiz address the owner's observed confusion; improved conversion or affection remains unmeasured.
 
 Personal interests and business audiences must stay distinct. A saved cooking/MMA/motivation post does not establish sensitive facts, a fixed identity or willingness to share with teammates. Roles such as parent, educator, student and administrator belong to confirmed project context when relevant; they are not inferred demographics of every buyer. Validate this broader targeting with recent-save and project-review tasks, including rejected suggestions, optional connections and cost comprehension. See [the complete insight review](../VIBESCROLL-INSIGHT-REVIEW.md).
+
+## F015: make the next useful action attractive, October 7
+
+The owner wants beauty, personality and persuasive guidance. Scroll can celebrate a real activation or useful result. A restrained CTA shimmer can highlight one next step; a genuine open loop can invite review or an outcome check. Keep user comprehension central: a visible next action, an easy Later option, a real recommended plan and complete pricing information. Motion sensitivity, distraction, alternative-plan discovery and unfinished-work fatigue belong in observed tasks.
+
+Copy should sound like a useful friendly product: "Save something worth keeping", "Your ideas are ready" or "Did this help?" Each phrase needs the actual state to support it. One title and a useful action usually suffice; do not stack decorative subtitles or repeat Scroll's message elsewhere. Existing privacy, goals, roles and correction controls remain intact. Persuasive design does not infer consent or overwrite the person's stated needs.

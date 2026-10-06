@@ -2,6 +2,8 @@
 
 October 7 current brief: [F014](idea-backlog.md#f014-vibescroll-scroll-and-useful-connected-knowledge-october-7) updates all four foundations for VibeScroll and its owner-confirmed project-owner, dashboard and Scroll direction. [ADR 075](../adr/075-vibescroll-product-direction.md) records the planning boundary. Current copy uses that direction; older dated evidence and filenames remain for traceability. The complete insight review is design input, not new customer validation or production acceptance.
 
+[F015](idea-backlog.md#f015-persuasive-design-and-analysis-references-october-7) and [ADR 076](../adr/076-persuasive-design-and-analysis-references.md) refine the current brief with owner-approved persuasive design and authenticated analysis references. They supersede broad rejection labels. The earlier-payment experiment remains future work outside this plan; no implementation or measured conversion is claimed.
+
 The four deliverables follow the supplied Mark Builds Brands sequence and original templates. They recommend a narrow initial audience and an evidence-led offer while keeping demand, performance, provider access, and legal status unresolved where evidence is absent.
 
 - [Research](VibeScroller_Foundational_Research.md)

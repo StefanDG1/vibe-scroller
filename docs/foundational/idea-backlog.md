@@ -1,5 +1,17 @@
 # Foundational idea backlog
 
+## F015: persuasive design and analysis references, October 7
+
+Source: explicit owner refinement after reviewing the rejection explanation. Status: pricing anchors, restrained CTA shimmer, genuine unfinished loops and the conditional techniques are adopted for planning. Conversion/retention effects remain unvalidated. See [ADR 076](../adr/076-persuasive-design-and-analysis-references.md), [the revised plan](../VIBESCROLL-EVOLUTION-PLAN.md) and [the reassessment](../VIBESCROLL-INSIGHT-REVIEW.md#owner-refinement).
+
+Use real tiers/value and recommended emphasis, local bounded shimmer, resumable actual work, honest head starts, meaningful completion delight, authentic founder effort, substantiated value, original AI demos and appropriately authorized useful outreach. Keep full charges/intervals, explicit checkout, visible alternatives, permission boundaries and reduced-motion/hidden controls. Do not add new prices, paid offers or expensive inference to make ordinary UI persuasive. Public proof, deadlines, balances/refunds and uniqueness claims require factual support.
+
+Research: saved analysis verification notes qualify claimed effects; retain the first ledger and record each reassessment. Avatar: observe discovery, distraction, comprehension and useful return with real project owners, including non-coders. Offer: current catalog/free allowance and real result before payment remain. Beliefs: persuasion supports a useful choice without substituting for evidence or authority. Copy uses one functional title and only necessary supporting text; Scroll provides personality without repeating the same message in multiple places.
+
+Deferred hypothesis: payment before the first useful result may be A/B tested later, outside this plan. No variants or experiment infrastructure are implemented in P0–P8. A separately approved future test defines cohorts, sample/duration, real terms and conversion, activation, retained use, confusion/refunds and actual cost. The later review decides dismissal and offer details. All current funding/privacy/provider/build limits remain.
+
+Saved-post citations now open the owner's authenticated VibeScroll analysis rather than Instagram. Actual source/workspace IDs and route construction are checked locally; current app pages are not immutable insight-version links, and live availability is not claimed. No full analysis, private transcripts, signed asset URLs or credentials enter public documents. No implementation, campaign, outreach or new inference is authorized by this planning entry.
+
 ## F014: VibeScroll, Scroll and useful connected knowledge, October 7
 
 Source: explicit owner choices and the complete captured saved-insight review. Status: direction adopted for planning; design hypotheses and implementation remain unverified. [ADR 075](../adr/075-vibescroll-product-direction.md), [evolution plan](../VIBESCROLL-EVOLUTION-PLAN.md) and [review record](../VIBESCROLL-INSIGHT-REVIEW.md) contain the decisions and dependencies.

@@ -4,6 +4,8 @@ VibeScroll's proposed offer is a mobile browser library that helps adults turn s
 
 F014, October 7, updates the planning brief. [ADR 075](../adr/075-vibescroll-product-direction.md) and [the evolution plan](../VIBESCROLL-EVOLUTION-PLAN.md) define future behavior; current implementation evidence still controls availability claims. Earlier dated observations are preserved. This document does not execute the rename or enable the proposed redesign.
 
+F015 and [ADR 076](../adr/076-persuasive-design-and-analysis-references.md) adopt legitimate pricing anchors, restrained CTA shimmer, genuine unfinished loops and conditional persuasive techniques. They supersede broad rejection labels, without changing the catalog or the one-real-result-before-payment decision. An earlier-payment A/B investigation is future work outside this plan.
+
 This completes the original Mark Builds Brands Offer Brief Template after the [research](VibeScroller_Foundational_Research.md) and [avatar](VibeScroller_Foundational_Avatar.md). Product specifications define the intended package; they do not certify that every integration is enabled. The [implementation status](../implementation-status.md) controls claims about tested behavior. Latest owner funding steering and known gates are recorded in the [ledger](README.md).
 
 ## Potential product name ideas
@@ -222,3 +224,11 @@ The owner chose one eligible real post within the stated free allowance before a
 The dashboard shows useful next work and what helped. Topic trees and focused connections reveal existing permitted evidence; source claims and interpretations remain distinct. Official scoped assistant search/fetch and explicit link intake are planned supporting interfaces, not unrestricted chat-history access or hosted subscription-funded inference. Personal recommendations use stated goals, with no general calendar/email/health service in V1.
 
 Show real features, honest limitations, full recurring charges and cancellation/export behavior. Measure first-result cost and recurring usefulness before expanding free access or referral rewards. The AI-era founder story stays a conditional belief. The [complete insight review](../VIBESCROLL-INSIGHT-REVIEW.md) rejects shame, fake proof, deceptive urgency and unverified performance claims. Prices and existing permissions are unchanged.
+
+## F015: real anchors and an appealing next step, October 7
+
+Compare genuine Starter/Pro capacity and the same plan's monthly/annual commitments using the current catalog. A real recommended plan or visible initial selection can simplify the decision; selecting it does not authorize a purchase. Keep other options discoverable, full recurring charges and intervals legible, and exact checkout confirmation explicit. Substantiated comparable or itemized value and an authentic founder story can support the offer. Do not add a fake tier, invented standalone valuation, unsupported popularity label or unapproved price change.
+
+A soft bounded shimmer may highlight one primary action. Real unfinished setup, a ready review or a due outcome check can invite return. Genuine completed setup can count as a head start. Brief completion delight follows a confirmed result or activation, with reduced-motion and hidden-view controls. Original AI-assisted demonstrations are useful when simulation is clear; genuine customer proof still needs evidence and permission. Useful licensed resources can support separately authorized respectful outreach. Actual offer deadlines, service balances or refunds must match the underlying terms and operation; this plan enables none of those new billing offers.
+
+The current onboarding remains one eligible real post before asking for payment. Record the future payment-before-result hypothesis, with later experimental approval and measured conversion/completion/retention/cost, rather than building it now. The plan's copy and visual examples remain proposals until implemented and verified. Public references to selected app analyses require existing authorization and export no transcripts or full private analyses.

@@ -93,3 +93,5 @@ Follow [ADR 058](adr/058-bounded-full-library-scans.md): full URL-link paginatio
 ## October 7: VibeScroll direction and complete insight review
 
 [ADR 075](adr/075-vibescroll-product-direction.md) records the owner-selected VibeScroll name, original always-present Scroll character, dashboard, Personal/Business knowledge views, useful first-post onboarding and scoped assistant connection. The [evolution plan](VIBESCROLL-EVOLUTION-PLAN.md) now incorporates the complete captured insight review and retains original V1 acceptance. This is a planning/documentation update only. Rename, implementation, public campaigns, new funding or broader permissions are not executed or implied.
+
+[ADR 076](adr/076-persuasive-design-and-analysis-references.md) refines that plan with owner-approved pricing anchors, restrained CTA shimmer, genuine unfinished loops and conditional persuasive techniques. Saved-post citations open authenticated VibeScroll analyses. Current onboarding keeps one real result before payment; the earlier-payment A/B investigation is future work outside this plan. Prices, permissions, funding and production behavior remain unchanged.

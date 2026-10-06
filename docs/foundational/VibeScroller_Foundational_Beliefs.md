@@ -2,6 +2,8 @@
 
 Current direction, October 7, F014: VibeScroll targets adult project owners using AI agents, including non-coders, with useful Personal/Business knowledge and an original always-present Scroll character. The six purchase conditions remain evidence, context, a useful decision, continuity, control and personally demonstrated value. Earlier dated findings below retain their original scope; [ADR 075](../adr/075-vibescroll-product-direction.md) controls the new planning direction.
 
+F015 and [ADR 076](../adr/076-persuasive-design-and-analysis-references.md) allow real pricing anchors, restrained shimmer, genuine unfinished loops and conditional persuasive techniques. Attractive guidance and evidence/control can coexist. The prior broad rejection labels are superseded; the six beliefs remain intact.
+
 A prospect should be able to justify trying VibeScroller from an inspectable workflow and a personally relevant need. The six statements below complete the SOP's necessary-beliefs stage using the [research](VibeScroller_Foundational_Research.md), [avatar](VibeScroller_Foundational_Avatar.md), and [offer](VibeScroller_Foundational_Offer.md). They are proposed purchase conditions, not findings that every prospect already holds.
 
 The Agora transcript argues for building a persuasive logical and emotional argument before selecting impressive words. Applied here, that means showing the source-to-project decision and the limits of the offer. It does not justify forcing a conclusion, hiding objections, inventing a proprietary mechanism, or treating certainty as evidence.
@@ -87,3 +89,9 @@ The owner reported that the map was difficult to find and the interface was conf
 The character supports comprehension and a useful first experience; it cannot establish truth, grant permission or claim that an idea helped. A connection explains cited support rather than proving cause. Personal memberships do not grant team access. Quiz answers and confirmed goals have user provenance; source advice is not a fact about the person. Manual corrections, scoped sharing and exact funding/publication/execution authority remain enforceable outside the model.
 
 A user can dismiss a prompt, defer an idea, reject unsafe advice, cancel or leave without pressure. Celebrate a sound decision as well as implementation. No fabricated progress, guilt streak, distressed mascot, selective public-rating funnel or invented success guarantee is needed. A real capped first result, understandable scope and separate judgment/measurement can support the price argument. Customer value and improved conversion still require actual evidence. See [the complete insight review](../VIBESCROLL-INSIGHT-REVIEW.md).
+
+## F015: persuasive guidance with real state, October 7
+
+Price anchors can help explain relative value. CTA shimmer can reveal the useful next action. A real unfinished task can invite completion, and a genuine activation can merit celebration. These are compatible with the six beliefs when the actual offer/state is clear and the user can inspect, choose, finish or defer. A selected default is not spending permission. An animation or open loop is not a model-derived fact or a reason to resume stale approval.
+
+The retained exclusions concern fabricated evidence, unsupported threats, shame/ego pressure, selectively filtered public ratings, privacy leakage and unauthorized actions. Accurate value comparisons, authentic founder investment, original AI-assisted demo content and authorized useful outreach remain conditional uses. Future paywall timing is explicitly outside the current implementation plan. Neither owner preference nor a saved creator claim proves conversion; observe real usefulness and comprehension after implementation.
