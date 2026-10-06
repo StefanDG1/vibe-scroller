@@ -13,6 +13,7 @@ import { ensure, containsSecret } from "../packages/policy";
 import { reserve, settle, digest } from "./product";
 import { categoryKey, categoryName } from "../packages/categories";
 import { snapshotScopeCurrent } from "../packages/repositories/scope";
+import { knowledgeReadContext } from "./lib/knowledgeReadContext";
 import {
   assertReferences,
   limits,
@@ -1309,6 +1310,7 @@ export const evaluations = query({
     cursor: v.optional(v.string()),
   },
   handler: async (ctx, a) => {
+    ctx = knowledgeReadContext(ctx);
     await access(ctx, a.organizationId);
     if (a.repositoryId) {
       const r = await ctx.db.get(a.repositoryId);
