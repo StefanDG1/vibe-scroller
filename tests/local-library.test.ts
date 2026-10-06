@@ -349,7 +349,7 @@ it("keeps corrected source text and manual topic memberships through a new analy
   expect(manual.find((m) => m.manual)?.excluded).toBe(true);
 });
 it("never restores a deleted source and removes pending derived source content", async () => {
-  const s = await setup();
+  const s = await setup({ acquisition: captionManifest });
   await s.a.mutation(api.product.deleteSource, { id: s.source });
   await expect(s.finish()).rejects.toThrow("APPROVAL_STALE");
   await s.t.mutation(internal.localLibrary.redactSource, {
@@ -360,10 +360,11 @@ it("never restores a deleted source and removes pending derived source content",
   expect(j?.state).toBe("deleted");
   expect(j?.frames).toEqual([]);
   expect(j?.transcript.segments).toEqual([]);
+  expect(j?.acquisition).toBeUndefined();
   expect((await s.t.run((ctx) => ctx.db.get(s.source)))?.state).toBe("deleted");
 });
 it("expires pending private inputs and retires unused frames without altering canonical knowledge", async () => {
-  const s = await setup();
+  const s = await setup({ acquisition: captionManifest });
   vi.advanceTimersByTime(4 * 3600000 + 1);
   await s.t.mutation(internal.localLibrary.expire, { runId: s.run });
   await s.t.mutation(internal.localLibrary.cleanPending, {
@@ -373,6 +374,7 @@ it("expires pending private inputs and retires unused frames without altering ca
   const job = await s.t.run((ctx) => ctx.db.get(s.job));
   expect(job?.transcript.segments).toEqual([]);
   expect(job?.frames).toEqual([]);
+  expect(job?.acquisition).toBeUndefined();
   expect((await s.t.run((ctx) => ctx.db.get(s.asset)))?.state).toBe("deleting");
   expect((await s.t.run((ctx) => ctx.db.get(s.source)))?.state).not.toBe(
     "ready",
