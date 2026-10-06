@@ -66,6 +66,10 @@ Follow [ADR 058](adr/058-bounded-full-library-scans.md): full URL-link paginatio
 
 [ADR 063](adr/063-personal-local-library-imports.md) extends the allowlisted operator's isolated own-account session to the explicitly approved four-hour saved-library run. Local preparation/offline transcription and official-client GPT-6.1 Sol Medium outputs may enter canonical private sources, topic summaries and current-code repository evaluations after independent validation. No paid fallback, subscription pooling, reset-credit use or automatic issue publication is authorized. Current source/rights/membership/version fences, corrections, exclusions, deletion and exact external review remain mandatory.
 
+## October 6: useful topic discovery
+
+[ADR 065](adr/065-populated-topic-ordering.md) orders the default paginated workspace library by owner pins and included insight count. Empty and legacy topics remain accessible; inferred volume is not evidence quality. Search, filtering, access, corrections and processing limits remain unchanged.
+
 ## October 6: recovered caption evidence
 
 [ADR 064](adr/064-local-caption-evidence.md) corrects a real omitted-caption input path. Reuse the bounded pinned acquisition manifest for personal source imports, cite recovered captions, preserve titles/corrections, and clear temporary metadata under existing privacy boundaries. Source-only metadata or truncated titles cannot establish missing media claims.

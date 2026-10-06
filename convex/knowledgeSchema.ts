@@ -35,6 +35,7 @@ export const knowledgeTables = {
     redirect: v.optional(v.id("knowledgeTopics")),
   })
     .index("by_org", ["organizationId"])
+    .index("by_org_priority", ["organizationId", "pinned", "insightCount"])
     .index("by_key", ["organizationId", "key"])
     .searchIndex("search_name", {
       searchField: "name",

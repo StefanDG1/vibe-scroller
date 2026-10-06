@@ -24,6 +24,72 @@ vi.mock("../convex/lib/githubAuthorization", () => ({
   authorizeRepository: vi.fn(),
 }));
 const modules = import.meta.glob("../convex/**/*.ts");
+it("puts owner pins and populated topics before empty history without losing pages or foreign isolation", async () => {
+  const s = await setup();
+  await s.t.run(async (ctx) => {
+    const base = {
+      organizationId: s.org,
+      pinned: false,
+      version: 1,
+      state: "pending",
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+    for (let n = 0; n < 40; n++)
+      await ctx.db.insert("knowledgeTopics", {
+        ...base,
+        key: `empty_${n}`,
+        name: `Empty history ${n}`,
+        insightCount: 0,
+      });
+    for (const [key, pinned, insightCount] of [
+      ["owner_pin", true, 0],
+      ["populated", false, 100],
+      ["smaller", false, 1],
+    ] as const)
+      await ctx.db.insert("knowledgeTopics", {
+        ...base,
+        key,
+        name: key,
+        pinned,
+        insightCount,
+      });
+    await ctx.db.insert("knowledgeTopics", {
+      ...base,
+      organizationId: s.foreign,
+      key: "foreign",
+      name: "Foreign populated",
+      pinned: true,
+      insightCount: 1000,
+    });
+    await ctx.db.insert("knowledgeTopics", {
+      ...base,
+      key: "legacy",
+      name: "Legacy topic without counts",
+    });
+  });
+  const first = await s.a.query(api.knowledge.list, {
+    organizationId: s.org,
+  });
+  expect(first.items.slice(0, 3).map((t) => t.key)).toEqual([
+    "owner_pin",
+    "populated",
+    "smaller",
+  ]);
+  expect(first.next).not.toBeNull();
+  const second = await s.a.query(api.knowledge.list, {
+    organizationId: s.org,
+    cursor: first.next!,
+  });
+  const keys = [...first.items, ...second.items].map((t) => t.key);
+  expect(new Set(keys).size).toBe(44);
+  expect(keys).toContain("legacy");
+  expect(keys).not.toContain("foreign");
+  expect(second.next).toBeNull();
+  await expect(
+    s.b.query(api.knowledge.list, { organizationId: s.org }),
+  ).rejects.toThrow();
+});
 it("finds a late topic by title on the first search page while enforcing workspace and readiness in the index", async () => {
   const s = await setup();
   await s.t.run(async (ctx) => {

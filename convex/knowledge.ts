@@ -461,9 +461,10 @@ export const list = query({
             .paginate(pagination)
         : await ctx.db
             .query("knowledgeTopics")
-            .withIndex("by_org", (q) =>
+            .withIndex("by_org_priority", (q) =>
               q.eq("organizationId", a.organizationId),
             )
+            .order("desc")
             .paginate(pagination);
     const items = [];
     const seen = new Set<string>();
