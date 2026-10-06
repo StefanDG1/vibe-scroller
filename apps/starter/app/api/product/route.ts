@@ -3,6 +3,16 @@ import { backend, api, configured } from "@/lib/backend";
 import { withAuth } from "@workos-inc/authkit-nextjs";
 import { allowedRequestOrigin } from "@/lib/request-origin";
 const operations = {
+  localLibraryPrepare: ["mutation", api.localLibrary.prepare],
+  localLibraryList: ["query", api.localLibrary.list],
+  localLibraryCancel: ["mutation", api.localLibrary.cancel],
+  localSourcePrepare: ["mutation", api.localLibrary.sourcePrepare],
+  localSourceFrame: ["action", api.localLibraryActions.frame],
+  localSourceFinish: ["mutation", api.localLibrary.sourceFinish],
+  localSummaryPrepare: ["mutation", api.localLibrary.summaryPrepare],
+  localSummaryFinish: ["mutation", api.localLibrary.summaryFinish],
+  localEvaluationBundle: ["action", api.localLibraryActions.evaluationBundle],
+  localEvaluationFinish: ["mutation", api.localLibrary.evaluationFinish],
   subscriptionTrialList: ["query", api.subscriptionTrials.list],
   subscriptionTrialPrepare: ["mutation", api.subscriptionTrials.prepare],
   subscriptionTrialBundle: ["query", api.subscriptionTrials.bundle],
@@ -94,7 +104,7 @@ export async function POST(req: NextRequest) {
       { error: "Sign in to continue." },
       { status: 401 },
     );
-  if (Number(req.headers.get("content-length") ?? 0) > 150000)
+  if (Number(req.headers.get("content-length") ?? 0) > 810000)
     return NextResponse.json({ error: "Request too large." }, { status: 413 });
   let operationName = "unvalidated";
   let stage = "read_body";
@@ -102,13 +112,18 @@ export async function POST(req: NextRequest) {
   try {
     const raw = await req.text();
     bodyBytes = new TextEncoder().encode(raw).length;
-    if (new TextEncoder().encode(raw).length > 150000)
+    if (new TextEncoder().encode(raw).length > 810000)
       return NextResponse.json(
         { error: "Request too large." },
         { status: 413 },
       );
     stage = "parse_body";
     const { operation, args } = JSON.parse(raw);
+    if (bodyBytes > 150000 && operation !== "localSourceFrame")
+      return NextResponse.json(
+        { error: "Request too large." },
+        { status: 413 },
+      );
     const entry = operations[operation as keyof typeof operations];
     if (!entry)
       return NextResponse.json(
@@ -191,6 +206,8 @@ export async function POST(req: NextRequest) {
         "The isolated media worker is unavailable. Your source is saved; no alternative provider was used.",
       INVALID_INPUT:
         "Some submitted fields are invalid. Review the source and try again.",
+      INVALID_EVIDENCE:
+        "The cited evidence changed or could not be verified. Check the source and prepare its evidence again.",
       REAUTH_REQUIRED:
         "Sign in again before changing a sensitive connection. Your library has been kept.",
     };

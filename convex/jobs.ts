@@ -1052,6 +1052,8 @@ export const exportPage = query({
       v.literal("improvementPreferences"),
       v.literal("libraryScans"),
       v.literal("subscriptionTrials"),
+      v.literal("localLibraryRuns"),
+      v.literal("localSourceImports"),
       v.literal("sources"),
       v.literal("proposals"),
       v.literal("feedback"),

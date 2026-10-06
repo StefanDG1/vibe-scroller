@@ -95,6 +95,8 @@ export async function prepareLocalUrl({
     join(dir, "retention.json"),
     JSON.stringify({
       owner: "vibescroller-local-preparation",
+      sourceId,
+      image,
       expiresAt: retentionUntil,
     }),
     { flag: "wx", mode: 0o600 },

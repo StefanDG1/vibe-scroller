@@ -61,6 +61,7 @@ export const knowledgeTables = {
     }),
   knowledgeJobs: defineTable({
     ...tenant,
+    localRunId: v.optional(v.id("localLibraryRuns")),
     topicId: v.id("knowledgeTopics"),
     actor: v.id("users"),
     version: v.number(),
@@ -84,6 +85,10 @@ export const knowledgeTables = {
     .index("by_key", ["key"]),
   knowledgeEvaluations: defineTable({
     ...tenant,
+    topicBindings: v.optional(
+      v.array(v.object({ id: v.id("knowledgeTopics"), version: v.number() })),
+    ),
+    localRunId: v.optional(v.id("localLibraryRuns")),
     topicId: v.id("knowledgeTopics"),
     repositoryId: v.id("repositories"),
     actor: v.id("users"),

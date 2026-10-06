@@ -3494,7 +3494,14 @@ function SourceDetail({
       </section>
       <div className="panel">
         <h2>Processing and retention</h2>
-        {detail.processingReceipt && (
+        {detail.localAnalysisReceipt && (
+          <p>
+            GPT-6.1 Sol · Medium · Your Codex subscription · 0 app credits.{" "}
+            {detail.localAnalysisReceipt.frames} sampled frames; video coverage
+            is sampled.
+          </p>
+        )}
+        {!detail.localAnalysisReceipt && detail.processingReceipt && (
           <details>
             <summary>
               Cloud · {detail.processingReceipt.chargedCredits} credits ·{" "}

@@ -71,5 +71,9 @@ if video:
     for i, (ms, reason) in enumerate(sorted(selected.items())):
         name=f'frame-{i:03}.jpg'
         run(['ffmpeg','-nostdin','-threads','2','-ss',str(ms/1000),'-i',str(source),'-frames:v','1','-vf','scale=960:-2,format=yuvj420p','-threads','2','-q:v','4',str(root/name)],15)
+        if not (root/name).is_file() or (root/name).stat().st_size == 0:
+            continue
         manifest['frames'].append({'id':name,'timestampMs':ms,'selectionReason':reason})
+assert manifest['frames'] or manifest.get('audio')
+manifest['coverage'] = 'full_sampled' if manifest['frames'] and manifest.get('audio') else 'audio_only' if manifest.get('audio') else 'visual_only'
 (root/'manifest.json').write_text(json.dumps(manifest))
