@@ -3,6 +3,7 @@ import { useEffect, useState, useEffectEvent, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import { ChoiceSelect } from "./choice-select";
 import { downloadText } from "@/lib/download";
+import { KnowledgeMap } from "./knowledge-map";
 
 type Call = (operation: string, args: any) => Promise<any>;
 type Props = {
@@ -63,6 +64,7 @@ export function KnowledgeLibrary(p: Props) {
     [readiness, setReadiness] = useState(""),
     [selected, setSelected] = useState<any>(),
     [detail, setDetail] = useState<any>(),
+    [detailView, setDetailView] = useState<"map" | "text">("map"),
     [cursor, setCursor] = useState<string>(),
     [policy, setPolicy] = useState<any>(),
     [localRuns, setLocalRuns] = useState<any[]>([]),
@@ -210,7 +212,40 @@ export function KnowledgeLibrary(p: Props) {
     if (p.demo) {
       setDetail({
         topic,
-        members: [],
+        members: [
+          {
+            _id: "demo-a",
+            evidence: {
+              title: "Synthetic populated example",
+              reference: {
+                sourceId: "demo-a",
+                generation: 1,
+                revision: 1,
+                insightId: "first",
+              },
+              insight: {
+                claim:
+                  "Show a populated example before asking a person to configure a project.",
+              },
+            },
+          },
+          {
+            _id: "demo-b",
+            evidence: {
+              title: "Synthetic next action",
+              reference: {
+                sourceId: "demo-b",
+                generation: 1,
+                revision: 1,
+                insightId: "next",
+              },
+              insight: {
+                claim:
+                  "Offer one clear next decision after the first useful result.",
+              },
+            },
+          },
+        ],
         summaries: [
           {
             id: "demo",
@@ -222,7 +257,20 @@ export function KnowledgeLibrary(p: Props) {
                   kind: "complementary",
                   explanation:
                     "Show an example before asking the person to configure their project, then offer the next decision.",
-                  references: [],
+                  references: [
+                    {
+                      sourceId: "demo-a",
+                      generation: 1,
+                      revision: 1,
+                      insightId: "first",
+                    },
+                    {
+                      sourceId: "demo-b",
+                      generation: 1,
+                      revision: 1,
+                      insightId: "next",
+                    },
+                  ],
                 },
               ],
               uncertainty:
@@ -492,6 +540,30 @@ export function KnowledgeLibrary(p: Props) {
             {detail.topic.name}
           </h2>
           <p>{detail.coverage}</p>
+          <fieldset className="knowledge-map-toggle" aria-label="Topic view">
+            <button
+              type="button"
+              aria-pressed={detailView === "map"}
+              onClick={() => setDetailView("map")}
+            >
+              Map
+            </button>
+            <button
+              type="button"
+              aria-pressed={detailView === "text"}
+              onClick={() => setDetailView("text")}
+            >
+              Text
+            </button>
+          </fieldset>
+          {detailView === "map" && (
+            <KnowledgeMap
+              key={`${detail.topic._id}:${cursor ?? "first"}:${detail.topic.version}`}
+              detail={detail}
+              organizationId={p.organizationId}
+              demo={p.demo}
+            />
+          )}
           {detail.jobState === "unknown" && (
             <p>
               Provider usage is uncertain. The cost hold remains; automatic
@@ -524,18 +596,19 @@ export function KnowledgeLibrary(p: Props) {
                   />
                 </p>
               ))}
-              {s.output.relations.map((r: any, i: number) => (
-                <div key={i}>
-                  <strong>{r.kind.replaceAll("_", " ")}</strong>
-                  <p>
-                    {r.explanation}{" "}
-                    <EvidenceLinks
-                      references={r.references}
-                      organizationId={p.organizationId}
-                    />
-                  </p>
-                </div>
-              ))}
+              {detailView === "text" &&
+                s.output.relations.map((r: any, i: number) => (
+                  <div key={i}>
+                    <strong>{r.kind.replaceAll("_", " ")}</strong>
+                    <p>
+                      {r.explanation}{" "}
+                      <EvidenceLinks
+                        references={r.references}
+                        organizationId={p.organizationId}
+                      />
+                    </p>
+                  </div>
+                ))}
               <p>{s.output.uncertainty}</p>
             </article>
           ))}
@@ -885,6 +958,12 @@ function EvidenceLinks({
   references: any[];
   organizationId: string;
 }) {
+  if (
+    references.some((r) => r.sourceId === "demo-a" || r.sourceId === "demo-b")
+  )
+    return (
+      <span className="knowledge-evidence">Synthetic example evidence</span>
+    );
   return (
     <span className="knowledge-evidence">
       {references.map((r, i) => (

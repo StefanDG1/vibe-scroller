@@ -204,3 +204,7 @@ Bounded full-library controls and reviewed improvement history are deployed on t
 ## October 5: personal local and cloud analysis experiments
 
 The owner requested local preparation and private Codex cloud comparisons using their own allowance before further managed processing fees. Keep this a personal experiment: prepared text, sampled video coverage, automatic transcription and returned results require honest warnings and owner review. Existing analyses/corrections, workspace privacy, account/provider restrictions and costs remain authoritative. This is not evidence of a completed full-library pipeline, autonomous issues or commercial hosted subscription access. See [ADR 059](../adr/059-personal-subscription-analysis-trials.md) and the [operator runbook](../operations/subscription-analysis-trials.md). No measured quality, time saving, customer demand or fee-free universal source access is inferred.
+
+## October 6: cited topic map
+
+The owner requested a visual node or tree view of existing knowledge connections. The implemented topic map groups cited ideas under saved connection nodes, distinguishes topic membership from explained relationships, and retains the text alternative and private evidence. This is an interface addition, not a new quality finding, customer study or spending authority. Coverage remains bounded to the selected evidence page. Local browser acceptance is recorded separately from production availability and independent comprehension. See [ADR 072](../adr/072-cited-topic-connection-map.md).
