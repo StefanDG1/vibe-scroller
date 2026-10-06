@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef, useEffectEvent } from "react";
 import { useRouter } from "next/navigation";
+import { usePolling } from "@/lib/use-polling";
 import Link from "next/link";
 import Image from "next/image";
 import { Brand } from "./site";
@@ -28,7 +29,7 @@ import {
   Check,
 } from "lucide-react";
 import { AccountMenu } from "./account-menu";
-import { KnowledgeLibrary } from "./knowledge-library";
+import { KnowledgeLibrary, LibrarySections } from "./knowledge-library";
 import { LibraryScan } from "./library-scan";
 import { SubscriptionTrials } from "./subscription-trials";
 import { Improvements } from "./improvements";
@@ -209,6 +210,15 @@ export function Console({
     [data, setData] = useState(initial),
     [view, setView] = useState(
       initialView === "plans" ? "proposals" : initialView,
+    ),
+    [librarySection, setLibrarySection] = useState<
+      "topics" | "posts" | "ideas" | "issues"
+    >(
+      demoState !== "ready" && demo
+        ? "posts"
+        : initialSearch || initialFilter || initialCategory
+          ? "posts"
+          : "topics",
     ),
     [selected, setSelected] = useState<any>(initialSource),
     [search, setSearch] = useState(initialSearch),
@@ -458,7 +468,6 @@ export function Console({
       });
     }
   }
-  const refreshFromEffect = useEffectEvent(() => refreshData());
   const processing =
     (view === "source" &&
       selected &&
@@ -470,21 +479,7 @@ export function Console({
     data.runs.some((r) =>
       ["queued", "running", "publishing"].includes(r.state),
     );
-  useEffect(() => {
-    if (demo) return;
-    const refreshVisible = () => {
-      if (document.visibilityState !== "visible" || !navigator.onLine) return;
-      refreshFromEffect().catch(() => {});
-    };
-    const timer = setInterval(refreshVisible, processing ? 15000 : 60000);
-    document.addEventListener("visibilitychange", refreshVisible);
-    window.addEventListener("online", refreshVisible);
-    return () => {
-      clearInterval(timer);
-      document.removeEventListener("visibilitychange", refreshVisible);
-      window.removeEventListener("online", refreshVisible);
-    };
-  }, [demo, organizationId, processing]);
+  usePolling(refreshData, processing ? 15000 : 60000, !demo, organizationId);
   const planIdentity = selected
     ? `${id(selected)}:${selected.planHash ?? (selected.planDraftVersion === selected.version ? (selected.planDraftKey ?? JSON.stringify(selected.planDraft ?? null)) : "")}`
     : "";
@@ -795,7 +790,7 @@ export function Console({
             className={`page-heading ${view === "source" ? "source-heading" : ""}`}
           >
             <div>
-              <h1>
+              <h1 className={view === "library" ? "sr-only" : undefined}>
                 {view === "source"
                   ? (selected?.title ?? "Source unavailable")
                   : view === "proposal"
@@ -859,25 +854,46 @@ export function Console({
           )}
           {view === "library" && (
             <>
-              <SubscriptionTrials
-                key={`trials:${organizationId}`}
-                organizationId={organizationId}
-                call={call}
-                readOnly={readOnly}
-                enabled={!demo && !!data.aiPreference?.personalAlphaEnabled}
+              <LibrarySections
+                active={librarySection}
+                onSelect={setLibrarySection}
+                posts
               />
-              <KnowledgeLibrary
-                key={organizationId}
-                organizationId={organizationId}
-                repositories={data.repositories}
-                readOnly={readOnly}
-                demo={demo}
-                call={call}
-                onOpenImprovements={() => go("improvements")}
-              />
+              <details
+                className="library-analysis-settings"
+                hidden={librarySection !== "posts"}
+              >
+                <summary>Analyze saved posts</summary>
+                <SubscriptionTrials
+                  key={`trials:${organizationId}`}
+                  organizationId={organizationId}
+                  call={call}
+                  readOnly={readOnly}
+                  enabled={!demo && !!data.aiPreference?.personalAlphaEnabled}
+                />
+              </details>
+              <div
+                className="library-knowledge-container"
+                hidden={librarySection === "posts"}
+              >
+                <KnowledgeLibrary
+                  enabled={librarySection !== "posts"}
+                  section={
+                    librarySection === "posts" ? "topics" : librarySection
+                  }
+                  key={organizationId}
+                  organizationId={organizationId}
+                  repositories={data.repositories}
+                  readOnly={readOnly}
+                  demo={demo}
+                  call={call}
+                  onOpenImprovements={() => go("improvements")}
+                />
+              </div>
             </>
           )}
-          {(view === "home" || view === "library") && (
+          {(view === "home" ||
+            (view === "library" && librarySection === "posts")) && (
             <>
               {view === "home" && (
                 <section className="home-capture" aria-label="Capture a source">

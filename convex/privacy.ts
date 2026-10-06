@@ -1,3 +1,4 @@
+import { clearRepositoryContent } from "./lib/repositoryContent";
 import { internalMutation } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
@@ -121,15 +122,17 @@ export const retentionPage = internalMutation({
           await redactSource(ctx, id);
       } else if ("context" in row) {
         if (
-          row.context &&
+          (row.context || row.contentStored) &&
           (row.snapshotAt ?? row.updatedAt) < Date.now() - 86400000
-        )
+        ) {
+          await clearRepositoryContent(ctx, row._id);
           await ctx.db.patch(row._id, {
             context: "",
             contextTree: "",
             contextFiles: [],
             contextExcerpts: [],
           });
+        }
       } else if (
         row.updatedAt < Date.now() - 14 * 86400000 &&
         ["completed", "failed", "canceled"].includes(row.state)

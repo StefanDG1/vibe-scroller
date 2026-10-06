@@ -1,3 +1,4 @@
+import { storageUsage, insertAsset } from "./lib/storageUsage";
 import { internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import { syncCategories } from "./categories";
@@ -85,17 +86,10 @@ export const finish = internalMutation({
       .withIndex("by_key", (q) => q.eq("key", a.key!))
       .unique();
     const entitlement = await wallet(ctx, s.organizationId);
-    const assets = await ctx.db
-      .query("assets")
-      .withIndex("by_org", (q) => q.eq("organizationId", s.organizationId))
-      .collect();
+    const bytes = (await storageUsage(ctx, s.organizationId)).bytes;
     if (
       tombstone ||
-      assets
-        .filter((x) => x.state !== "deleted")
-        .reduce((n, x) => n + x.size, 0) +
-        a.size >
-        (entitlement.tier === "pro" ? 5 : 1) * 1000000000
+      bytes + a.size > (entitlement.tier === "pro" ? 5 : 1) * 1000000000
     ) {
       await queueDeletion(ctx, a.key);
       await ctx.db.patch(s._id, {
@@ -103,7 +97,7 @@ export const finish = internalMutation({
       });
       return false;
     }
-    const assetId = await ctx.db.insert("assets", {
+    const assetId = await insertAsset(ctx, {
       organizationId: s.organizationId,
       sourceId: s._id,
       key: a.key,

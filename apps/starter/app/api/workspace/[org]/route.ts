@@ -31,7 +31,7 @@ export async function GET(
       }),
       c.query(api.product.repositories, { organizationId }),
       c.query(api.product.proposals, { organizationId }),
-      c.query(api.product.overview, { organizationId }),
+      c.query(api.product.overview, { organizationId, includeCounts: false }),
       c.query(api.product.usage, { organizationId }),
       c.query(api.devices.list, { organizationId }),
       c.query(api.githubLinks.choices, { organizationId }),

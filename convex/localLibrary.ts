@@ -1,3 +1,4 @@
+import { repositoryContent } from "./lib/repositoryContent";
 import {
   mutation,
   query,
@@ -785,7 +786,7 @@ export const evaluationPrepare = mutation({
   handler: async (ctx, a) => {
     const run = await activeRun(ctx, a.runId),
       topic = await ctx.db.get(a.topicId),
-      repo = await ctx.db.get(a.repositoryId);
+      repo = await repositoryContent(ctx, await ctx.db.get(a.repositoryId));
     ensure(
       topic?.organizationId === run.organizationId &&
         !topic.redirect &&

@@ -1,8 +1,10 @@
 "use client";
 import { useEffect, useState, useEffectEvent, useRef } from "react";
+import { usePolling } from "@/lib/use-polling";
 import ReactMarkdown from "react-markdown";
 import { ChoiceSelect } from "./choice-select";
 import { downloadText } from "@/lib/download";
+import { KnowledgeMap } from "./knowledge-map";
 
 type Call = (operation: string, args: any) => Promise<any>;
 type Props = {
@@ -12,6 +14,8 @@ type Props = {
   demo: boolean;
   call: Call;
   onOpenImprovements?: () => void;
+  section?: "topics" | "ideas" | "issues";
+  enabled?: boolean;
 };
 async function read(operation: string, args: any) {
   const response = await fetch("/api/product", {
@@ -55,6 +59,11 @@ const synthetic = {
   updatedAt: 0,
 };
 export function KnowledgeLibrary(p: Props) {
+  const [localSection, setLocalSection] = useState<
+    "topics" | "ideas" | "issues"
+  >("topics");
+  const activeSection = p.section ?? localSection;
+  const returnToTopic = useRef(false);
   const [topics, setTopics] = useState<any[]>(p.demo ? [synthetic] : []),
     [next, setNext] = useState<string | null>(null),
     [search, setSearch] = useState(""),
@@ -63,6 +72,7 @@ export function KnowledgeLibrary(p: Props) {
     [readiness, setReadiness] = useState(""),
     [selected, setSelected] = useState<any>(),
     [detail, setDetail] = useState<any>(),
+    [detailView, setDetailView] = useState<"map" | "text">("map"),
     [cursor, setCursor] = useState<string>(),
     [policy, setPolicy] = useState<any>(),
     [localRuns, setLocalRuns] = useState<any[]>([]),
@@ -78,6 +88,7 @@ export function KnowledgeLibrary(p: Props) {
   const refreshGeneration = useRef(0),
     detailGeneration = useRef(0);
   const detailPanel = useRef<HTMLDivElement>(null),
+    topicOverview = useRef<HTMLDivElement>(null),
     detailHeading = useRef<HTMLHeadingElement>(null),
     topicTrigger = useRef<HTMLElement | null>(null);
   useEffect(() => {
@@ -88,6 +99,26 @@ export function KnowledgeLibrary(p: Props) {
       behavior: "instant",
     });
   }, [detail?.topic?._id]);
+  useEffect(() => {
+    if (!selected && returnToTopic.current) {
+      returnToTopic.current = false;
+      const trigger = topicTrigger.current?.classList.contains(
+        "knowledge-topic",
+      )
+        ? topicTrigger.current
+        : topicOverview.current?.querySelector<HTMLButtonElement>(
+            ".knowledge-topic",
+          );
+      trigger?.focus();
+    }
+  }, [selected]);
+  const openDemoMap = useEffectEvent(() => {
+    void open(synthetic);
+  });
+  useEffect(() => {
+    if (p.demo && new URLSearchParams(location.search).get("map") === "1")
+      openDemoMap();
+  }, [p.demo]);
   async function scopedRead(operation: string, args: any) {
     try {
       return await read(operation, args);
@@ -122,75 +153,94 @@ export function KnowledgeLibrary(p: Props) {
     const detailAtStart = detailGeneration.current;
     try {
       const [list, policy, ideas, drafts, localRuns] = await Promise.all([
-        scopedRead("knowledgeList", {
-          organizationId: p.organizationId,
-          search: searchScope === "topic" ? search || undefined : undefined,
-          sourceSearch:
-            searchScope === "source" ? search || undefined : undefined,
-          updatedSince: recent
-            ? Date.now() - Number(recent) * 86400000
-            : undefined,
-          readiness: readiness || undefined,
-          cursor: topicCursor,
-          repositoryId: project || undefined,
-        }),
-        scopedRead("knowledgePolicy", { organizationId: p.organizationId }),
-        scopedRead("knowledgeIdeas", {
-          organizationId: p.organizationId,
-          repositoryId: project || undefined,
-        }),
-        scopedRead("issueList", { organizationId: p.organizationId }),
-        scopedRead("localLibraryList", { organizationId: p.organizationId }),
+        activeSection === "topics"
+          ? scopedRead("knowledgeList", {
+              organizationId: p.organizationId,
+              search: searchScope === "topic" ? search || undefined : undefined,
+              sourceSearch:
+                searchScope === "source" ? search || undefined : undefined,
+              updatedSince: recent
+                ? Date.now() - Number(recent) * 86400000
+                : undefined,
+              readiness: readiness || undefined,
+              cursor: topicCursor,
+              repositoryId: project || undefined,
+            })
+          : Promise.resolve(null),
+        activeSection === "topics"
+          ? scopedRead("knowledgePolicy", { organizationId: p.organizationId })
+          : Promise.resolve(null),
+        activeSection === "ideas"
+          ? scopedRead("knowledgeIdeas", {
+              organizationId: p.organizationId,
+              repositoryId: project || undefined,
+            })
+          : Promise.resolve(null),
+        activeSection === "issues"
+          ? scopedRead("issueList", { organizationId: p.organizationId })
+          : Promise.resolve(null),
+        activeSection === "topics"
+          ? scopedRead("localLibraryList", { organizationId: p.organizationId })
+          : Promise.resolve(null),
       ]);
       if (generation !== refreshGeneration.current) return;
-      setTopics((old) =>
-        append
-          ? [
-              ...new Map(
-                [...old, ...list.items].map((t) => [t._id, t]),
-              ).values(),
-            ]
-          : list.items,
-      );
-      setNext(list.next);
-      setPolicy(policy);
-      setLocalRuns(localRuns);
-      setIdeas(ideas.items);
-      setIdeaNext(ideas.next);
-      setIssues(drafts.items);
-      setIssueNext(drafts.next);
+      if (list) {
+        setTopics((old) =>
+          append
+            ? [
+                ...new Map(
+                  [...old, ...list.items].map((t) => [t._id, t]),
+                ).values(),
+              ]
+            : list.items,
+        );
+        setNext(list.next);
+      }
+      if (policy) setPolicy(policy);
+      if (localRuns) setLocalRuns(localRuns);
+      if (ideas) {
+        setIdeas(ideas.items);
+        setIdeaNext(ideas.next);
+      }
+      if (drafts) {
+        setIssues(drafts.items);
+        setIssueNext(drafts.next);
+      }
       setMessage("");
-      if (selected && detailAtStart === detailGeneration.current)
+      if (
+        activeSection === "topics" &&
+        selected &&
+        detailAtStart === detailGeneration.current
+      )
         await loadDetail(selected, cursor);
     } catch (e) {
       if (generation !== refreshGeneration.current) return;
       setMessage(e instanceof Error ? e.message : "Knowledge is unavailable.");
+      return false;
     } finally {
       if (generation === refreshGeneration.current) setLoading(false);
     }
   }
-  const poll = useEffectEvent(() => refresh());
-  useEffect(() => {
-    const initialTimer = setTimeout(() => {
-      if (!browsingLaterPages) void poll();
-    }, 0);
-    const timer = setInterval(() => {
-      if (document.visibilityState === "visible" && !browsingLaterPages)
-        void poll();
-    }, 15000);
-    return () => {
-      clearTimeout(initialTimer);
-      clearInterval(timer);
-    };
-  }, [
-    p.organizationId,
-    search,
-    searchScope,
-    recent,
-    readiness,
-    project,
-    browsingLaterPages,
-  ]);
+  const processing =
+    (activeSection === "topics" &&
+      (topics.some((t) => ["pending", "updating"].includes(t.state)) ||
+        localRuns.some((r) => ["queued", "running"].includes(r.state)))) ||
+    (activeSection === "ideas" &&
+      ideas.some((e) => ["queued", "running"].includes(e.state)));
+  usePolling(
+    () => refresh(),
+    processing ? 15000 : 60000,
+    !p.demo && p.enabled !== false && !browsingLaterPages,
+    JSON.stringify([
+      p.organizationId,
+      activeSection,
+      search,
+      searchScope,
+      recent,
+      readiness,
+      project,
+    ]),
+  );
   async function run(operation: string, args: any) {
     setBusy(true);
     try {
@@ -210,7 +260,40 @@ export function KnowledgeLibrary(p: Props) {
     if (p.demo) {
       setDetail({
         topic,
-        members: [],
+        members: [
+          {
+            _id: "demo-a",
+            evidence: {
+              title: "Synthetic populated example",
+              reference: {
+                sourceId: "demo-a",
+                generation: 1,
+                revision: 1,
+                insightId: "first",
+              },
+              insight: {
+                claim:
+                  "Show a populated example before asking a person to configure a project.",
+              },
+            },
+          },
+          {
+            _id: "demo-b",
+            evidence: {
+              title: "Synthetic next action",
+              reference: {
+                sourceId: "demo-b",
+                generation: 1,
+                revision: 1,
+                insightId: "next",
+              },
+              insight: {
+                claim:
+                  "Offer one clear next decision after the first useful result.",
+              },
+            },
+          },
+        ],
         summaries: [
           {
             id: "demo",
@@ -222,7 +305,20 @@ export function KnowledgeLibrary(p: Props) {
                   kind: "complementary",
                   explanation:
                     "Show an example before asking the person to configure their project, then offer the next decision.",
-                  references: [],
+                  references: [
+                    {
+                      sourceId: "demo-a",
+                      generation: 1,
+                      revision: 1,
+                      insightId: "first",
+                    },
+                    {
+                      sourceId: "demo-b",
+                      generation: 1,
+                      revision: 1,
+                      insightId: "next",
+                    },
+                  ],
                 },
               ],
               uncertainty:
@@ -261,237 +357,298 @@ export function KnowledgeLibrary(p: Props) {
   }
   return (
     <section className="knowledge-library" aria-label="Connected knowledge">
-      <div className="panel">
-        <h2>Topics</h2>
-        <p>
-          Connect saved ideas, inspect where they agree or disagree, and decide
-          what fits a project. Your workspace keeps its own library.
-        </p>
-        {localRuns.slice(0, 1).map((r) => (
-          <div className="notice" key={r._id} aria-live="polite">
-            <p>
-              {r.completed} of {r.sources.length} posts analyzed · GPT-6.1 Sol ·
-              Medium · Your Codex subscription · 0 app credits
-            </p>
-            <p>
-              {r.state === "active"
-                ? "Your laptop is building the library. Previously saved knowledge remains available."
-                : `Local run ${r.state.replaceAll("_", " ")}. Saved knowledge remains available.`}
-            </p>
-            {r.state === "active" && !p.readOnly && (
-              <button
-                className="secondary"
-                disabled={busy}
-                onClick={() => void run("localLibraryCancel", { runId: r._id })}
-              >
-                Stop this run
-              </button>
-            )}
-          </div>
-        ))}
-        <details>
-          <summary>Automatic organization and its budget</summary>
-          <p>
-            Each explanation reserves up to 10 processing credits for at most 12
-            insights. Existing provider and service limits still apply. You can
-            pause updates; saved sources and previous explanations remain
-            available. Permission to organize does not approve publication or
-            coding.
-          </p>
-          <p>
-            {policy
-              ? `${policy.state.replaceAll("_", " ")} · ${policy.used} of ${policy.ceiling} credits in approved batch ceilings this month`
-              : "Choose a ceiling before enabling funded automatic explanations. Existing analyses can be grouped without new media processing."}
-          </p>
-          <form
-            key={`${policy?._id ?? "new"}:${policy?.version ?? 0}`}
-            className="form-grid"
-            onSubmit={(e) => {
-              e.preventDefault();
-              const f = new FormData(e.currentTarget);
-              void run("knowledgeConfigure", {
-                organizationId: p.organizationId,
-                enabled: f.get("enabled") === "on",
-                ceiling: Number(f.get("ceiling")),
-              });
-            }}
-          >
-            <label>
-              Monthly organization ceiling
-              <input
-                type="number"
-                name="ceiling"
-                min={10}
-                max={200}
-                step={10}
-                defaultValue={policy?.ceiling ?? 50}
-              />
-            </label>
-            <label className="check">
-              <input
-                type="checkbox"
-                name="enabled"
-                defaultChecked={policy?.enabled ?? true}
-              />
-              I approve automatic organization within this ceiling
-            </label>
-            <button disabled={p.readOnly || busy || loading || p.demo}>
-              Save organization policy
-            </button>
-          </form>
-        </details>
-        <div className="form-grid">
-          <label>
-            Search {searchScope === "source" ? "source titles" : "topic titles"}
-            <input
-              value={search}
-              onChange={(e) => (
-                setBrowsingLaterPages(false),
-                setSearch(e.target.value)
-              )}
-            />
-          </label>
-          <label htmlFor="knowledge-search-scope">
-            Search in
-            <ChoiceSelect
-              id="knowledge-search-scope"
-              value={searchScope}
-              onValueChange={(value) => {
-                setBrowsingLaterPages(false);
-                setSearchScope(value);
-              }}
-            >
-              <option value="topic">Topic titles</option>
-              <option value="source">Source titles</option>
-            </ChoiceSelect>
-          </label>
-          <label htmlFor="knowledge-recent">
-            Recent updates
-            <ChoiceSelect
-              id="knowledge-recent"
-              value={recent}
-              onValueChange={(value) => {
-                setBrowsingLaterPages(false);
-                setRecent(value);
-              }}
-            >
-              <option value="">All dates</option>
-              <option value="7">Last 7 days</option>
-              <option value="30">Last 30 days</option>
-            </ChoiceSelect>
-          </label>
-          <label htmlFor="knowledge-readiness">
-            Readiness
-            <ChoiceSelect
-              id="knowledge-readiness"
-              value={readiness}
-              onValueChange={(value) => {
-                setBrowsingLaterPages(false);
-                setReadiness(value);
-              }}
-            >
-              <option value="">All update states</option>
-              <option value="ready">Ready</option>
-              <option value="pending">Pending</option>
-              <option value="updating">Updating</option>
-              <option value="budget_paused">Budget paused</option>
-              <option value="failed">Failed</option>
-              <option value="unknown">Usage uncertain</option>
-            </ChoiceSelect>
-          </label>
-          <label>
-            Project applicability
-            <ChoiceSelect
-              value={project}
-              onValueChange={(value) => {
-                setBrowsingLaterPages(false);
-                setProject(value);
-              }}
-            >
-              <option value="">All projects</option>
-              {p.repositories
-                .filter((r) => r.enabled)
-                .map((r) => (
-                  <option key={r._id} value={r._id}>
-                    {r.fullName}
-                  </option>
-                ))}
-            </ChoiceSelect>
-          </label>
-        </div>
-        <output aria-live="polite">
-          {message ||
-            (loading
-              ? "Loading connected knowledge…"
-              : `${topics.length} topics on loaded pages. Continue for more topics.`)}
+      {message && (
+        <output className="error" aria-live="polite">
+          {message}
         </output>
-        {!loading && !topics.length && (
-          <p>
-            No topics on this page. Keep saving permitted sources, complete
-            analysis, or clear filters. Your individual posts remain below.
-          </p>
-        )}
-        <div className="knowledge-cards">
-          {[...topics]
-            .sort((a, b) => Number(b.pinned) - Number(a.pinned))
-            .map((t) => (
-              <article className="panel" key={t._id}>
-                <h3>
-                  {t.name}
-                  {t.pinned ? " · Pinned" : ""}
-                </h3>
-                <p>{t.explanation}</p>
-                <p className="status">
-                  {t.state.replaceAll("_", " ")} · {t.sourceCount ?? 0} sources
-                  · {t.insightCount ?? t.covered} saved insights · {t.covered}{" "}
-                  cited insights summarized
-                </p>
-                {!!t.conflicts && (
-                  <p>
-                    {t.conflicts} conflicting recommendations in the latest
-                    cited explanation. Inspect the evidence before choosing an
-                    approach.
-                  </p>
-                )}
+      )}
+      {!p.section && (
+        <LibrarySections
+          active={activeSection}
+          onSelect={(section) =>
+            setLocalSection(section as "topics" | "ideas" | "issues")
+          }
+        />
+      )}
+      {activeSection === "topics" && selected && loading && !detail && (
+        <output aria-live="polite">Opening topic…</output>
+      )}
+      {activeSection === "topics" && (
+        <div
+          className="knowledge-overview"
+          hidden={!!selected}
+          ref={topicOverview}
+        >
+          <h2>Connected ideas</h2>
+          <p>Explore what your saved posts have in common.</p>
+          {localRuns
+            .filter((r) => r.state === "active")
+            .slice(0, 1)
+            .map((r) => (
+              <div className="notice" key={r._id} aria-live="polite">
                 <p>
-                  {t.updatedAt
-                    ? `Updated ${new Date(t.updatedAt).toLocaleString()}`
-                    : "Synthetic example"}
+                  {r.completed} of {r.sources.length} posts analyzed · GPT-6.1
+                  Sol · Medium · Your Codex subscription · 0 app credits
                 </p>
-                <button onClick={() => void open(t)}>
-                  Inspect topic and evidence
-                </button>
-              </article>
+                <p>
+                  {r.state === "active"
+                    ? "Your laptop is building the library. Previously saved knowledge remains available."
+                    : `Local run ${r.state.replaceAll("_", " ")}. Saved knowledge remains available.`}
+                </p>
+                {r.state === "active" && !p.readOnly && (
+                  <button
+                    className="secondary"
+                    disabled={busy}
+                    onClick={() =>
+                      void run("localLibraryCancel", { runId: r._id })
+                    }
+                  >
+                    Stop this run
+                  </button>
+                )}
+              </div>
             ))}
+          <details>
+            <summary>Analysis settings</summary>
+            <p>
+              Each explanation reserves up to 10 processing credits for at most
+              12 insights. Existing provider and service limits still apply. You
+              can pause updates; saved sources and previous explanations remain
+              available. Permission to organize does not approve publication or
+              coding.
+            </p>
+            <p>
+              {policy
+                ? `${policy.state.replaceAll("_", " ")} · ${policy.used} of ${policy.ceiling} credits in approved batch ceilings this month`
+                : "Choose a ceiling before enabling funded automatic explanations. Existing analyses can be grouped without new media processing."}
+            </p>
+            <form
+              key={`${policy?._id ?? "new"}:${policy?.version ?? 0}`}
+              className="form-grid"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const f = new FormData(e.currentTarget);
+                void run("knowledgeConfigure", {
+                  organizationId: p.organizationId,
+                  enabled: f.get("enabled") === "on",
+                  ceiling: Number(f.get("ceiling")),
+                });
+              }}
+            >
+              <label>
+                Monthly organization ceiling
+                <input
+                  type="number"
+                  name="ceiling"
+                  min={10}
+                  max={200}
+                  step={10}
+                  defaultValue={policy?.ceiling ?? 50}
+                />
+              </label>
+              <label className="check">
+                <input
+                  type="checkbox"
+                  name="enabled"
+                  defaultChecked={policy?.enabled ?? true}
+                />
+                I approve automatic organization within this ceiling
+              </label>
+              <button disabled={p.readOnly || busy || loading || p.demo}>
+                Save organization policy
+              </button>
+            </form>
+          </details>
+          <div className="knowledge-search">
+            <label>
+              <span className="sr-only">
+                Search{" "}
+                {searchScope === "source" ? "source titles" : "topic titles"}
+              </span>
+              <input
+                value={search}
+                placeholder={
+                  searchScope === "source"
+                    ? "Find a saved post"
+                    : "Find a topic"
+                }
+                onChange={(e) => (
+                  setBrowsingLaterPages(false),
+                  setSearch(e.target.value)
+                )}
+              />
+            </label>
+            <details className="knowledge-filters">
+              <summary>Filters</summary>
+              <div className="form-grid">
+                <label htmlFor="knowledge-search-scope">
+                  Search in
+                  <ChoiceSelect
+                    id="knowledge-search-scope"
+                    value={searchScope}
+                    onValueChange={(value) => {
+                      setBrowsingLaterPages(false);
+                      setSearchScope(value);
+                    }}
+                  >
+                    <option value="topic">Topic titles</option>
+                    <option value="source">Source titles</option>
+                  </ChoiceSelect>
+                </label>
+                <label htmlFor="knowledge-recent">
+                  Recent updates
+                  <ChoiceSelect
+                    id="knowledge-recent"
+                    value={recent}
+                    onValueChange={(value) => {
+                      setBrowsingLaterPages(false);
+                      setRecent(value);
+                    }}
+                  >
+                    <option value="">All dates</option>
+                    <option value="7">Last 7 days</option>
+                    <option value="30">Last 30 days</option>
+                  </ChoiceSelect>
+                </label>
+                <label htmlFor="knowledge-readiness">
+                  Readiness
+                  <ChoiceSelect
+                    id="knowledge-readiness"
+                    value={readiness}
+                    onValueChange={(value) => {
+                      setBrowsingLaterPages(false);
+                      setReadiness(value);
+                    }}
+                  >
+                    <option value="">All update states</option>
+                    <option value="ready">Ready</option>
+                    <option value="pending">Pending</option>
+                    <option value="updating">Updating</option>
+                    <option value="budget_paused">Budget paused</option>
+                    <option value="failed">Failed</option>
+                    <option value="unknown">Usage uncertain</option>
+                  </ChoiceSelect>
+                </label>
+                <label>
+                  Project applicability
+                  <ChoiceSelect
+                    value={project}
+                    onValueChange={(value) => {
+                      setBrowsingLaterPages(false);
+                      setProject(value);
+                    }}
+                  >
+                    <option value="">All projects</option>
+                    {p.repositories
+                      .filter((r) => r.enabled)
+                      .map((r) => (
+                        <option key={r._id} value={r._id}>
+                          {r.fullName}
+                        </option>
+                      ))}
+                  </ChoiceSelect>
+                </label>
+              </div>
+            </details>
+          </div>
+          <output aria-live="polite" className="knowledge-count">
+            {loading
+              ? "Loading connected knowledge…"
+              : `${topics.length} ${topics.length === 1 ? "topic" : "topics"}${next ? " · more available" : ""}`}
+          </output>
+          {!loading && !topics.length && (
+            <p>
+              No topics on this page. Keep saving permitted sources, complete
+              analysis, or clear filters. Your individual posts remain below.
+            </p>
+          )}
+          <div className="knowledge-cards">
+            {[...topics]
+              .sort((a, b) => Number(b.pinned) - Number(a.pinned))
+              .map((t) => (
+                <article key={t._id}>
+                  <button
+                    className="knowledge-topic"
+                    aria-label={`Open map for ${t.name}`}
+                    onClick={() => void open(t)}
+                  >
+                    <span className="knowledge-topic-name">
+                      {t.name}
+                      {t.pinned ? " · Pinned" : ""}
+                    </span>
+                    <span className="knowledge-topic-preview">
+                      {t.explanation}
+                    </span>
+                    <span className="knowledge-topic-meta">
+                      {t.sourceCount ?? 0} posts · {t.insightCount ?? t.covered}{" "}
+                      ideas
+                      {t.conflicts ? ` · ${t.conflicts} disagreements` : ""}
+                      {t.state !== "ready"
+                        ? ` · ${t.state.replaceAll("_", " ")}`
+                        : ""}
+                    </span>
+                    <span className="knowledge-topic-action">Open map</span>
+                  </button>
+                </article>
+              ))}
+          </div>
+          {next && (
+            <button
+              disabled={loading}
+              onClick={() => {
+                setBrowsingLaterPages(true);
+                void refresh(true, next);
+              }}
+            >
+              More topics
+            </button>
+          )}
         </div>
-        {next && (
-          <button
-            disabled={loading}
-            onClick={() => {
-              setBrowsingLaterPages(true);
-              void refresh(true, next);
-            }}
-          >
-            More topics
-          </button>
-        )}
-      </div>
-      {selected && detail && (
-        <div className="panel" aria-label="Topic detail" ref={detailPanel}>
+      )}
+      {activeSection === "topics" && selected && detail && (
+        <div
+          className="knowledge-detail"
+          aria-label="Topic detail"
+          ref={detailPanel}
+        >
           <button
             onClick={() => {
               detailGeneration.current++;
               setSelected(undefined);
               setDetail(undefined);
-              topicTrigger.current?.focus();
+              returnToTopic.current = true;
             }}
           >
-            Close topic
+            Back to topics
           </button>
           <h2 ref={detailHeading} tabIndex={-1}>
             {detail.topic.name}
           </h2>
-          <p>{detail.coverage}</p>
+
+          <fieldset className="knowledge-map-toggle" aria-label="Topic view">
+            <button
+              type="button"
+              aria-pressed={detailView === "map"}
+              onClick={() => setDetailView("map")}
+            >
+              Map
+            </button>
+            <button
+              type="button"
+              aria-pressed={detailView === "text"}
+              onClick={() => setDetailView("text")}
+            >
+              Text
+            </button>
+          </fieldset>
+          {detailView === "map" && (
+            <KnowledgeMap
+              key={`${detail.topic._id}:${cursor ?? "first"}:${detail.topic.version}`}
+              detail={detail}
+              organizationId={p.organizationId}
+              demo={p.demo}
+            />
+          )}
           {detail.jobState === "unknown" && (
             <p>
               Provider usage is uncertain. The cost hold remains; automatic
@@ -512,33 +669,38 @@ export function KnowledgeLibrary(p: Props) {
               surviving evidence below. No exhaustive review is claimed.
             </p>
           )}
-          {detail.summaries.map((s: any) => (
-            <article key={s.id}>
-              <p>{s.output.explanation}</p>
-              {s.output.claims.map((c: any, i: number) => (
-                <p key={i}>
-                  {c.text}{" "}
-                  <EvidenceLinks
-                    references={c.references}
-                    organizationId={p.organizationId}
-                  />
-                </p>
-              ))}
-              {s.output.relations.map((r: any, i: number) => (
-                <div key={i}>
-                  <strong>{r.kind.replaceAll("_", " ")}</strong>
-                  <p>
-                    {r.explanation}{" "}
+          <details open={detailView === "text"}>
+            <summary>Explanation and coverage</summary>
+            <p>{detail.coverage}</p>
+            {detail.summaries.map((s: any) => (
+              <article key={s.id}>
+                <p>{s.output.explanation}</p>
+                {s.output.claims.map((c: any, i: number) => (
+                  <p key={i}>
+                    {c.text}{" "}
                     <EvidenceLinks
-                      references={r.references}
+                      references={c.references}
                       organizationId={p.organizationId}
                     />
                   </p>
-                </div>
-              ))}
-              <p>{s.output.uncertainty}</p>
-            </article>
-          ))}
+                ))}
+                {detailView === "text" &&
+                  s.output.relations.map((r: any, i: number) => (
+                    <div key={i}>
+                      <strong>{r.kind.replaceAll("_", " ")}</strong>
+                      <p>
+                        {r.explanation}{" "}
+                        <EvidenceLinks
+                          references={r.references}
+                          organizationId={p.organizationId}
+                        />
+                      </p>
+                    </div>
+                  ))}
+                <p>{s.output.uncertainty}</p>
+              </article>
+            ))}
+          </details>
           {detail.summaryNext && (
             <button
               onClick={() => void open(selected, cursor, detail.summaryNext)}
@@ -546,105 +708,43 @@ export function KnowledgeLibrary(p: Props) {
               More explanation batches
             </button>
           )}
-          <form
-            className="form-grid"
-            onSubmit={(e) => {
-              e.preventDefault();
-              const f = new FormData(e.currentTarget);
-              void run("knowledgeCorrect", {
-                id: selected._id,
-                version: detail.topic.version,
-                name: String(f.get("name")),
-                pinned: f.get("pinned") === "on",
-              });
-            }}
-          >
-            <label>
-              Topic name
-              <input
-                name="name"
-                defaultValue={detail.topic.name}
-                maxLength={48}
-              />
-            </label>
-            <label className="check">
-              <input
-                type="checkbox"
-                name="pinned"
-                defaultChecked={detail.topic.pinned}
-              />
-              Pin this topic
-            </label>
-            <button disabled={p.readOnly || busy || p.demo}>
-              Save correction
-            </button>
-          </form>
-          <details>
-            <summary>Merge this topic</summary>
+          <details className="knowledge-edit">
+            <summary>Edit topic</summary>
             <form
+              className="form-grid"
               onSubmit={(e) => {
                 e.preventDefault();
                 const f = new FormData(e.currentTarget);
                 void run("knowledgeCorrect", {
                   id: selected._id,
                   version: detail.topic.version,
-                  mergeInto: String(f.get("destination")),
+                  name: String(f.get("name")),
+                  pinned: f.get("pinned") === "on",
                 });
               }}
             >
               <label>
-                Destination topic
-                <ChoiceSelect name="destination" required defaultValue="">
-                  <option value="" disabled>
-                    Choose a loaded topic
-                  </option>
-                  {topics
-                    .filter((t) => t._id !== selected._id)
-                    .map((t) => (
-                      <option key={t._id} value={t._id}>
-                        {t.name}
-                      </option>
-                    ))}
-                </ChoiceSelect>
+                Topic name
+                <input
+                  name="name"
+                  defaultValue={detail.topic.name}
+                  maxLength={48}
+                />
               </label>
-              <p>
-                Manual exclusions remain in force. Later classification follows
-                the merged topic.
-              </p>
+              <label className="check">
+                <input
+                  type="checkbox"
+                  name="pinned"
+                  defaultChecked={detail.topic.pinned}
+                />
+                Pin this topic
+              </label>
               <button disabled={p.readOnly || busy || p.demo}>
-                Merge topics
+                Save correction
               </button>
             </form>
-          </details>
-          <h3>Supporting posts and main points</h3>
-          {detail.members.map((m: any) => (
-            <article className="panel" key={m._id}>
-              <h4>{m.evidence?.title ?? "Unavailable or excluded evidence"}</h4>
-              <p>
-                {m.evidence?.insight?.claim ??
-                  "This insight is excluded, stale, deleted or not analyzed."}
-              </p>
-              {m.evidence && (
-                <EvidenceLinks
-                  references={[m.evidence.reference]}
-                  organizationId={p.organizationId}
-                />
-              )}
-              <button
-                disabled={p.readOnly || busy || p.demo}
-                onClick={() =>
-                  void run("knowledgeCorrect", {
-                    id: selected._id,
-                    version: detail.topic.version,
-                    memberId: m._id,
-                    excluded: !m.excluded,
-                  })
-                }
-              >
-                {m.excluded
-                  ? "Include this insight"
-                  : "Exclude this connection"}
-              </button>
+            <details>
+              <summary>Merge this topic</summary>
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -652,36 +752,15 @@ export function KnowledgeLibrary(p: Props) {
                   void run("knowledgeCorrect", {
                     id: selected._id,
                     version: detail.topic.version,
-                    memberId: m._id,
-                    splitName: String(f.get("name")),
+                    mergeInto: String(f.get("destination")),
                   });
                 }}
               >
                 <label>
-                  Split into a new topic
-                  <input name="name" maxLength={48} required />
-                </label>
-                <button disabled={p.readOnly || busy || p.demo}>
-                  Split and keep this decision
-                </button>
-              </form>
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const f = new FormData(e.currentTarget);
-                  void run("knowledgeCorrect", {
-                    id: selected._id,
-                    version: detail.topic.version,
-                    memberId: m._id,
-                    destination: String(f.get("destination")),
-                  });
-                }}
-              >
-                <label>
-                  Move to a loaded topic
+                  Destination topic
                   <ChoiceSelect name="destination" required defaultValue="">
                     <option value="" disabled>
-                      Choose topic
+                      Choose a loaded topic
                     </option>
                     {topics
                       .filter((t) => t._id !== selected._id)
@@ -692,12 +771,102 @@ export function KnowledgeLibrary(p: Props) {
                       ))}
                   </ChoiceSelect>
                 </label>
+                <p>
+                  Manual exclusions remain in force. Later classification
+                  follows the merged topic.
+                </p>
                 <button disabled={p.readOnly || busy || p.demo}>
-                  Move insight
+                  Merge topics
                 </button>
               </form>
-            </article>
-          ))}
+            </details>
+            <details className="knowledge-edit">
+              <summary>Sources and organization</summary>
+              {detail.members.map((m: any) => (
+                <article className="panel" key={m._id}>
+                  <h4>
+                    {m.evidence?.title ?? "Unavailable or excluded evidence"}
+                  </h4>
+                  <p>
+                    {m.evidence?.insight?.claim ??
+                      "This insight is excluded, stale, deleted or not analyzed."}
+                  </p>
+                  {m.evidence && (
+                    <EvidenceLinks
+                      references={[m.evidence.reference]}
+                      organizationId={p.organizationId}
+                    />
+                  )}
+                  <button
+                    disabled={p.readOnly || busy || p.demo}
+                    onClick={() =>
+                      void run("knowledgeCorrect", {
+                        id: selected._id,
+                        version: detail.topic.version,
+                        memberId: m._id,
+                        excluded: !m.excluded,
+                      })
+                    }
+                  >
+                    {m.excluded
+                      ? "Include this insight"
+                      : "Exclude this connection"}
+                  </button>
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const f = new FormData(e.currentTarget);
+                      void run("knowledgeCorrect", {
+                        id: selected._id,
+                        version: detail.topic.version,
+                        memberId: m._id,
+                        splitName: String(f.get("name")),
+                      });
+                    }}
+                  >
+                    <label>
+                      Split into a new topic
+                      <input name="name" maxLength={48} required />
+                    </label>
+                    <button disabled={p.readOnly || busy || p.demo}>
+                      Split and keep this decision
+                    </button>
+                  </form>
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const f = new FormData(e.currentTarget);
+                      void run("knowledgeCorrect", {
+                        id: selected._id,
+                        version: detail.topic.version,
+                        memberId: m._id,
+                        destination: String(f.get("destination")),
+                      });
+                    }}
+                  >
+                    <label>
+                      Move to a loaded topic
+                      <ChoiceSelect name="destination" required defaultValue="">
+                        <option value="" disabled>
+                          Choose topic
+                        </option>
+                        {topics
+                          .filter((t) => t._id !== selected._id)
+                          .map((t) => (
+                            <option key={t._id} value={t._id}>
+                              {t.name}
+                            </option>
+                          ))}
+                      </ChoiceSelect>
+                    </label>
+                    <button disabled={p.readOnly || busy || p.demo}>
+                      Move insight
+                    </button>
+                  </form>
+                </article>
+              ))}
+            </details>
+          </details>
           {detail.next && (
             <button onClick={() => void open(selected, detail.next)}>
               Next evidence batch
@@ -708,130 +877,149 @@ export function KnowledgeLibrary(p: Props) {
               First evidence batch
             </button>
           )}
-          <form
-            className="form-grid"
-            onSubmit={async (e) => {
-              e.preventDefault();
-              const f = new FormData(e.currentTarget);
-              for (const repositoryId of f.getAll("repository"))
-                await run("knowledgeEvaluate", {
-                  id: selected._id,
-                  repositoryId,
-                  cursor,
-                  maxCredits: 10,
-                });
-            }}
-          >
-            <h3>Apply this evidence batch to projects</h3>
-            <p>
-              Each selected project reserves up to 10 credits and gets its own
-              evaluation. Other evidence batches remain omitted until you review
-              them. This does not approve publication or coding.
-            </p>
-            {p.repositories
-              .filter((r) => r.enabled && r.confirmed)
-              .map((r) => (
-                <label className="check" key={r._id}>
-                  <input type="checkbox" name="repository" value={r._id} />
-                  {r.fullName}
-                </label>
-              ))}
-            {!p.repositories.some((r) => r.enabled && r.confirmed) && (
-              <p>Select a project and confirm its business context first.</p>
-            )}
-            <button disabled={p.readOnly || busy || p.demo}>
-              Evaluate selected projects · up to 10 credits each
-            </button>
-          </form>
+          <details>
+            <summary>Find ideas for a project</summary>
+            <form
+              className="form-grid"
+              onSubmit={async (e) => {
+                e.preventDefault();
+                const f = new FormData(e.currentTarget);
+                for (const repositoryId of f.getAll("repository"))
+                  await run("knowledgeEvaluate", {
+                    id: selected._id,
+                    repositoryId,
+                    cursor,
+                    maxCredits: 10,
+                  });
+              }}
+            >
+              <h3>Apply this evidence batch to projects</h3>
+              <p>
+                Each selected project reserves up to 10 credits and gets its own
+                evaluation. Other evidence batches remain omitted until you
+                review them. This does not approve publication or coding.
+              </p>
+              {p.repositories
+                .filter((r) => r.enabled && r.confirmed)
+                .map((r) => (
+                  <label className="check" key={r._id}>
+                    <input type="checkbox" name="repository" value={r._id} />
+                    {r.fullName}
+                  </label>
+                ))}
+              {!p.repositories.some((r) => r.enabled && r.confirmed) && (
+                <p>Select a project and confirm its business context first.</p>
+              )}
+              <button disabled={p.readOnly || busy || p.demo}>
+                Evaluate selected projects · up to 10 credits each
+              </button>
+            </form>
+          </details>
         </div>
       )}
-      <div className="panel">
-        <h2>Ideas for your projects</h2>
-        <p>
-          These are repository-specific decisions from the loaded workspace
-          knowledge. No fit and already implemented remain useful results.
-        </p>
-        {!ideas.length && (
+      {activeSection === "ideas" && (
+        <div className="knowledge-overview">
+          <h2>Ideas for your projects</h2>
           <p>
-            Inspect a topic, then evaluate a current evidence batch for a
-            selected project.
+            These are repository-specific decisions from the loaded workspace
+            knowledge. No fit and already implemented remain useful results.
           </p>
-        )}
-        {ideas.map((e) => (
-          <article className="panel" key={e._id}>
-            <h3>{e.output?.title ?? "Evaluation pending"}</h3>
+          {!ideas.length && (
             <p>
-              {p.repositories.find((r) => r._id === e.repositoryId)?.fullName ??
-                "Unavailable project"}{" "}
-              · {e.state} · {e.output?.disposition?.replaceAll("_", " ")} ·{" "}
-              {e.decision}
+              Inspect a topic, then evaluate a current evidence batch for a
+              selected project.
             </p>
-            <p>{e.output?.rationale}</p>
-            <p>
-              {e.covered} insights in this batch.{" "}
-              {e.omitted
-                ? "Other evidence was omitted."
-                : "Only cited evidence was evaluated."}
-            </p>
-            <EvidenceLinks
-              references={e.output?.references ?? []}
-              organizationId={p.organizationId}
-            />
-            <div className="actions">
-              {["rejected", "deferred", "accepted"].map((decision) => (
-                <button
-                  key={decision}
-                  disabled={p.readOnly || busy || p.demo}
-                  onClick={() =>
-                    void run("knowledgeDecide", { id: e._id, decision })
-                  }
-                >
-                  {decision === "rejected"
-                    ? "Reject"
-                    : decision === "deferred"
-                      ? "Defer"
-                      : "Keep idea"}
-                </button>
-              ))}
-              <button
-                disabled={p.readOnly || busy || p.demo || e.state !== "ready"}
-                onClick={() =>
-                  void run("issueCreate", { id: e._id, followUp: false })
-                }
-              >
-                Draft an issue
-              </button>
-              <button
-                disabled={p.readOnly || busy || p.demo || e.state !== "ready"}
-                onClick={() =>
-                  void run("issueCreate", { id: e._id, followUp: true })
-                }
-              >
-                Review a follow-up issue
-              </button>
-            </div>
-          </article>
-        ))}
-        {ideaNext && (
-          <button
-            onClick={async () => {
-              const generation = refreshGeneration.current;
-              const r = await scopedRead("knowledgeIdeas", {
-                organizationId: p.organizationId,
-                repositoryId: project || undefined,
-                cursor: ideaNext,
-              }).catch(() => null);
-              if (!r || generation !== refreshGeneration.current) return;
-              setBrowsingLaterPages(true);
-              setIdeas((old) => [...old, ...r.items]);
-              setIdeaNext(r.next);
-            }}
-          >
-            More project ideas
-          </button>
-        )}
-      </div>
-      <div className="panel">
+          )}
+          {ideas.map((e) => (
+            <details className="knowledge-result" key={e._id}>
+              <summary>
+                <span>{e.output?.title ?? "Evaluation pending"}</span>
+                <span className="knowledge-result-meta">
+                  {p.repositories.find((r) => r._id === e.repositoryId)
+                    ?.fullName ?? "Unavailable project"}{" "}
+                  · {e.output?.disposition?.replaceAll("_", " ") ?? e.state}
+                </span>
+              </summary>
+              <article className="panel">
+                <h3>{e.output?.title ?? "Evaluation pending"}</h3>
+                <p>
+                  {p.repositories.find((r) => r._id === e.repositoryId)
+                    ?.fullName ?? "Unavailable project"}{" "}
+                  · {e.state} · {e.output?.disposition?.replaceAll("_", " ")} ·{" "}
+                  {e.decision}
+                </p>
+                <p>{e.output?.rationale}</p>
+                <p>
+                  {e.covered} insights in this batch.{" "}
+                  {e.omitted
+                    ? "Other evidence was omitted."
+                    : "Only cited evidence was evaluated."}
+                </p>
+                <EvidenceLinks
+                  references={e.output?.references ?? []}
+                  organizationId={p.organizationId}
+                />
+                <div className="actions">
+                  {["rejected", "deferred", "accepted"].map((decision) => (
+                    <button
+                      key={decision}
+                      disabled={p.readOnly || busy || p.demo}
+                      onClick={() =>
+                        void run("knowledgeDecide", { id: e._id, decision })
+                      }
+                    >
+                      {decision === "rejected"
+                        ? "Reject"
+                        : decision === "deferred"
+                          ? "Defer"
+                          : "Keep idea"}
+                    </button>
+                  ))}
+                  <button
+                    disabled={
+                      p.readOnly || busy || p.demo || e.state !== "ready"
+                    }
+                    onClick={() =>
+                      void run("issueCreate", { id: e._id, followUp: false })
+                    }
+                  >
+                    Draft an issue
+                  </button>
+                  <button
+                    disabled={
+                      p.readOnly || busy || p.demo || e.state !== "ready"
+                    }
+                    onClick={() =>
+                      void run("issueCreate", { id: e._id, followUp: true })
+                    }
+                  >
+                    Review a follow-up issue
+                  </button>
+                </div>
+              </article>
+            </details>
+          ))}
+          {ideaNext && (
+            <button
+              onClick={async () => {
+                const generation = refreshGeneration.current;
+                const r = await scopedRead("knowledgeIdeas", {
+                  organizationId: p.organizationId,
+                  repositoryId: project || undefined,
+                  cursor: ideaNext,
+                }).catch(() => null);
+                if (!r || generation !== refreshGeneration.current) return;
+                setBrowsingLaterPages(true);
+                setIdeas((old) => [...old, ...r.items]);
+                setIdeaNext(r.next);
+              }}
+            >
+              More project ideas
+            </button>
+          )}
+        </div>
+      )}
+      <div className="knowledge-overview" hidden={activeSection !== "issues"}>
         <h2 aria-label="Reviewed issues" tabIndex={-1}>
           Issues
         </h2>
@@ -848,14 +1036,27 @@ export function KnowledgeLibrary(p: Props) {
           </p>
         )}
         {issues.map((d) => (
-          <IssueReview
-            key={`${d._id}:${d.version}:${d.visibility ?? "unchecked"}`}
-            draft={d}
-            busy={busy}
-            readOnly={p.readOnly}
-            run={run}
-            onOpenImprovements={p.onOpenImprovements}
-          />
+          <details
+            className="knowledge-result"
+            key={`${d._id}:${d.version}:${d.visibility ?? "unchecked"}:${d.body ? "text" : "redacted"}`}
+          >
+            <summary>
+              <span>{d.title}</span>
+              <span className="knowledge-result-meta">
+                {d.repository} · {d.state} ·{" "}
+                {d.visibility ?? "Visibility unchecked"}
+                {d.current ? "" : " · Needs review"}
+              </span>
+            </summary>
+            <IssueReview
+              key={`${d._id}:${d.version}:${d.visibility ?? "unchecked"}:${d.body ? "text" : "redacted"}`}
+              draft={d}
+              busy={busy}
+              readOnly={p.readOnly}
+              run={run}
+              onOpenImprovements={p.onOpenImprovements}
+            />
+          </details>
         ))}
         {issueNext && (
           <button
@@ -878,6 +1079,35 @@ export function KnowledgeLibrary(p: Props) {
     </section>
   );
 }
+export function LibrarySections({
+  active,
+  onSelect,
+  posts = false,
+}: {
+  active: string;
+  onSelect: (section: "topics" | "posts" | "ideas" | "issues") => void;
+  posts?: boolean;
+}) {
+  const choices: ("topics" | "posts" | "ideas" | "issues")[] = posts
+    ? ["topics", "posts", "ideas", "issues"]
+    : ["topics", "ideas", "issues"];
+  return (
+    <nav className="library-sections" aria-label="Library views">
+      {choices.map((section) => (
+        <button
+          type="button"
+          key={section}
+          aria-current={active === section ? "page" : undefined}
+          onClick={() => onSelect(section)}
+        >
+          {section === "topics"
+            ? "Knowledge"
+            : section.charAt(0).toUpperCase() + section.slice(1)}
+        </button>
+      ))}
+    </nav>
+  );
+}
 function EvidenceLinks({
   references,
   organizationId,
@@ -885,6 +1115,12 @@ function EvidenceLinks({
   references: any[];
   organizationId: string;
 }) {
+  if (
+    references.some((r) => r.sourceId === "demo-a" || r.sourceId === "demo-b")
+  )
+    return (
+      <span className="knowledge-evidence">Synthetic example evidence</span>
+    );
   return (
     <span className="knowledge-evidence">
       {references.map((r, i) => (

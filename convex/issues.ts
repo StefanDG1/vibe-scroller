@@ -12,6 +12,7 @@ import { ensure, containsSecret } from "../packages/policy";
 import { digest } from "./product";
 import { internal } from "./_generated/api";
 import { issueApproval } from "../packages/knowledge/contracts";
+import { knowledgeReadContext } from "./lib/knowledgeReadContext";
 import {
   evaluationCurrent,
   actorCurrent,
@@ -187,6 +188,7 @@ export const list = query({
     cursor: v.optional(v.string()),
   },
   handler: async (ctx, a) => {
+    ctx = knowledgeReadContext(ctx);
     await access(ctx, a.organizationId);
     const page = await ctx.db
       .query("issueDrafts")

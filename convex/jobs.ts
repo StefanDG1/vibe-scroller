@@ -1,3 +1,8 @@
+import {
+  repositoryContent,
+  storeRepositoryContent,
+  clearRepositoryContent,
+} from "./lib/repositoryContent";
 import { RETRIEVAL_VERSION } from "../packages/repositories/retrieval";
 import { selectedInsights } from "../packages/insights/scope";
 import { exportRecord } from "../packages/privacy/export";
@@ -158,12 +163,23 @@ export const saveRepository = internalMutation({
           "APPROVAL_STALE",
           "Repository selection or access changed while preparing its snapshot.",
         );
-      const { snapshotActor: _actor, ...fields } = a;
+      const {
+        snapshotActor: _actor,
+        context: _context,
+        contextTree: _tree,
+        contextExcerpts: _excerpts,
+        ...fields
+      } = a;
       await ctx.db.patch(old._id, {
         ...fields,
         status: "connected",
         snapshotAt: Date.now(),
         updatedAt: Date.now(),
+      });
+      await storeRepositoryContent(ctx, (await ctx.db.get(old._id))!, {
+        context: a.context,
+        contextTree: a.contextTree,
+        contextExcerpts: a.contextExcerpts,
       });
       return old._id;
     }
@@ -182,10 +198,19 @@ export const saveRepository = internalMutation({
       "REPOSITORY_LIMIT",
       "Your repository allowance is full. Disconnect a repository before adding another.",
     );
-    return ctx.db.insert("repositories", {
+    const id = await ctx.db.insert("repositories", {
       ...(Object.fromEntries(
-        Object.entries(a).filter(([key]) => key !== "snapshotActor"),
+        Object.entries(a).filter(
+          ([key]) =>
+            ![
+              "snapshotActor",
+              "context",
+              "contextTree",
+              "contextExcerpts",
+            ].includes(key),
+        ),
       ) as Omit<typeof a, "snapshotActor">),
+      context: "",
       createdAt: Date.now(),
       updatedAt: Date.now(),
       enabled: true,
@@ -196,6 +221,12 @@ export const saveRepository = internalMutation({
       status: "connected",
       snapshotAt: Date.now(),
     });
+    await storeRepositoryContent(ctx, (await ctx.db.get(id))!, {
+      context: a.context,
+      contextTree: a.contextTree,
+      contextExcerpts: a.contextExcerpts,
+    });
+    return id;
   },
 });
 export const secret = internalQuery({
@@ -217,12 +248,13 @@ export const previousSnapshot = internalQuery({
         q.eq("organizationId", a.organizationId).eq("providerId", a.providerId),
       )
       .unique();
+    const content = await repositoryContent(ctx, repo);
     return repo?.enabled
       ? {
           updatedAt: repo.snapshotAt ?? repo.updatedAt,
           extractionVersion: repo.extractionVersion,
           profileVersion: repo.profileVersion,
-          contextExcerpts: repo.contextExcerpts,
+          contextExcerpts: content?.contextExcerpts,
           manifestEntries: repo.manifestEntries,
         }
       : null;
@@ -410,7 +442,8 @@ export const revoke = mutation({
         .query("repositories")
         .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
         .collect();
-      for (const repo of repos)
+      for (const repo of repos) {
+        await clearRepositoryContent(ctx, repo._id);
         await ctx.db.patch(repo._id, {
           enabled: false,
           status: "revoked",
@@ -423,6 +456,7 @@ export const revoke = mutation({
           snapshotSummary: undefined,
           snapshotDelta: undefined,
         });
+      }
     }
   },
 });
@@ -435,7 +469,7 @@ export const reserveMatch = mutation({
   },
   handler: async (ctx, a) => {
     const source = await ctx.db.get(a.id),
-      repo = await ctx.db.get(a.repositoryId);
+      repo = await repositoryContent(ctx, await ctx.db.get(a.repositoryId));
     if (
       !source ||
       source.state !== "ready" ||

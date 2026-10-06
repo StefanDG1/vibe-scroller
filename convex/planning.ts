@@ -1,3 +1,4 @@
+import { repositoryContent } from "./lib/repositoryContent";
 import { validateInspectedContext } from "../packages/repositories/retrieval";
 import {
   inspectedContextValidator,
@@ -32,7 +33,10 @@ export const start = mutation({
       "APPROVAL_STALE",
       "Improvement evidence changed before planning.",
     );
-    const repo = await ctx.db.get(proposal.repositoryId),
+    const repo = await repositoryContent(
+        ctx,
+        await ctx.db.get(proposal.repositoryId),
+      ),
       source = await ctx.db.get(proposal.sourceId);
     ensure(
       repo?.organizationId === proposal.organizationId &&
@@ -104,7 +108,10 @@ export const finish = internalMutation({
       "BUDGET_EXCEEDED",
       "Plan usage exceeds its quote.",
     );
-    const repo = await ctx.db.get(proposal.repositoryId),
+    const repo = await repositoryContent(
+        ctx,
+        await ctx.db.get(proposal.repositoryId),
+      ),
       source = await ctx.db.get(proposal.sourceId);
     const actor =
       proposal.planDraftActor && (await ctx.db.get(proposal.planDraftActor));

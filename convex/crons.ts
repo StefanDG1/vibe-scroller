@@ -29,19 +29,13 @@ crons.daily(
 crons.interval(
   "Reconcile subscriptions",
   { hours: 1 },
-  internal.payments.reconcile,
+  internal.usageMaintenance.reconcileBilling,
   {},
 );
 crons.interval(
   "Reconcile draft PRs",
   { minutes: 15 },
-  internal.integrations.reconcilePRs,
-  {},
-);
-crons.interval(
-  "Reconcile VibeScroller entitlements",
-  { hours: 1 },
-  internal.reconciliation.allBilling,
+  internal.usageMaintenance.reconcilePRs,
   {},
 );
 crons.interval(

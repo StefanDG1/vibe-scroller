@@ -1,3 +1,4 @@
+import { repositoryContent } from "./lib/repositoryContent";
 import {
   internalMutation,
   mutation,
@@ -13,6 +14,7 @@ import { ensure, containsSecret } from "../packages/policy";
 import { reserve, settle, digest } from "./product";
 import { categoryKey, categoryName } from "../packages/categories";
 import { snapshotScopeCurrent } from "../packages/repositories/scope";
+import { knowledgeReadContext } from "./lib/knowledgeReadContext";
 import {
   assertReferences,
   limits,
@@ -427,6 +429,7 @@ export const list = query({
     updatedSince: v.optional(v.number()),
   },
   handler: async (ctx, a) => {
+    ctx = knowledgeReadContext(ctx);
     await access(ctx, a.organizationId);
     const selectedRepo = a.repositoryId
       ? await ctx.db.get(a.repositoryId)
@@ -554,6 +557,7 @@ export const detail = query({
     summaryCursor: v.optional(v.string()),
   },
   handler: async (ctx, a) => {
+    ctx = knowledgeReadContext(ctx);
     const topic = await ctx.db.get(a.id);
     ensure(topic, "FORBIDDEN", "Topic unavailable.");
     await access(ctx, topic.organizationId);
@@ -1233,7 +1237,7 @@ export const claimEvaluation = internalMutation({
             )
             .unique()
         )?.note ?? "",
-      repo: (await ctx.db.get(e.repositoryId))!,
+      repo: (await repositoryContent(ctx, await ctx.db.get(e.repositoryId)))!,
       evidence,
     };
   },
@@ -1309,6 +1313,7 @@ export const evaluations = query({
     cursor: v.optional(v.string()),
   },
   handler: async (ctx, a) => {
+    ctx = knowledgeReadContext(ctx);
     await access(ctx, a.organizationId);
     if (a.repositoryId) {
       const r = await ctx.db.get(a.repositoryId);

@@ -1,3 +1,4 @@
+import { repositoryContent } from "./lib/repositoryContent";
 import { mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import { writeAccess, fail, audit } from "./lib";
@@ -99,7 +100,7 @@ export const confirmDraft = mutation({
 export const start = mutation({
   args: { id: v.id("repositories"), key: v.string(), maxCredits: v.number() },
   handler: async (ctx, a) => {
-    const repo = await ctx.db.get(a.id);
+    const repo = await repositoryContent(ctx, await ctx.db.get(a.id));
     if (!repo) fail("Repository unavailable.");
     const { actor } = await writeAccess(ctx, repo.organizationId, [
       "owner",
@@ -180,7 +181,7 @@ export const finish = internalMutation({
     retainReservation: v.optional(v.boolean()),
   },
   handler: async (ctx, a) => {
-    const repo = await ctx.db.get(a.id);
+    const repo = await repositoryContent(ctx, await ctx.db.get(a.id));
     if (
       !repo ||
       repo.organizationId !== a.organizationId ||

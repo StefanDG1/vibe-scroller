@@ -1,3 +1,4 @@
+import { clearRepositoryContent } from "./lib/repositoryContent";
 import { internalMutation, internalQuery } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
@@ -316,7 +317,8 @@ export const quarantinePage = internalMutation({
               "Backup recovery canceled unpublished execution. Reconcile outstanding usage before a new approval.",
             ],
           });
-      } else if ("fullName" in row)
+      } else if ("fullName" in row) {
+        await clearRepositoryContent(ctx, row._id);
         await ctx.db.patch(row._id, {
           enabled: false,
           status: "reconnect_required",
@@ -328,7 +330,7 @@ export const quarantinePage = internalMutation({
           snapshotSummary: undefined,
           snapshotDelta: undefined,
         });
-      else await ctx.db.delete(row._id);
+      } else await ctx.db.delete(row._id);
     }
     return {
       isDone: page.isDone,

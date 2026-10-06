@@ -54,9 +54,12 @@ import type * as lib_hostedMediaAccess from "../lib/hostedMediaAccess.js";
 import type * as lib_improvementContext from "../lib/improvementContext.js";
 import type * as lib_inference from "../lib/inference.js";
 import type * as lib_invoiceOperator from "../lib/invoiceOperator.js";
+import type * as lib_knowledgeReadContext from "../lib/knowledgeReadContext.js";
 import type * as lib_personalAccess from "../lib/personalAccess.js";
 import type * as lib_prObservation from "../lib/prObservation.js";
 import type * as lib_repositoryAllowance from "../lib/repositoryAllowance.js";
+import type * as lib_repositoryContent from "../lib/repositoryContent.js";
+import type * as lib_storageUsage from "../lib/storageUsage.js";
 import type * as libraryScanSchema from "../libraryScanSchema.js";
 import type * as libraryScanWorker from "../libraryScanWorker.js";
 import type * as libraryScans from "../libraryScans.js";
@@ -92,6 +95,7 @@ import type * as sourcePreview from "../sourcePreview.js";
 import type * as sourcePreviewState from "../sourcePreviewState.js";
 import type * as subscriptionTrials from "../subscriptionTrials.js";
 import type * as toolMaintenance from "../toolMaintenance.js";
+import type * as usageMaintenance from "../usageMaintenance.js";
 import type * as workflows from "../workflows.js";
 
 import type {
@@ -147,9 +151,12 @@ declare const fullApi: ApiFromModules<{
   "lib/improvementContext": typeof lib_improvementContext;
   "lib/inference": typeof lib_inference;
   "lib/invoiceOperator": typeof lib_invoiceOperator;
+  "lib/knowledgeReadContext": typeof lib_knowledgeReadContext;
   "lib/personalAccess": typeof lib_personalAccess;
   "lib/prObservation": typeof lib_prObservation;
   "lib/repositoryAllowance": typeof lib_repositoryAllowance;
+  "lib/repositoryContent": typeof lib_repositoryContent;
+  "lib/storageUsage": typeof lib_storageUsage;
   libraryScanSchema: typeof libraryScanSchema;
   libraryScanWorker: typeof libraryScanWorker;
   libraryScans: typeof libraryScans;
@@ -185,6 +192,7 @@ declare const fullApi: ApiFromModules<{
   sourcePreviewState: typeof sourcePreviewState;
   subscriptionTrials: typeof subscriptionTrials;
   toolMaintenance: typeof toolMaintenance;
+  usageMaintenance: typeof usageMaintenance;
   workflows: typeof workflows;
 }>;
 

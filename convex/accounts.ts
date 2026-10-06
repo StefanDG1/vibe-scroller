@@ -4,8 +4,14 @@ import { v } from "convex/values";
 import { user, fail, limit } from "./lib";
 import { subjectHash, rememberDeletion } from "./lib/deletionMarkers";
 export const syncUser = internalMutation({
-  args: { subject: v.string(), email: v.string(), name: v.string() },
+  args: {
+    subject: v.string(),
+    email: v.string(),
+    name: v.string(),
+    verified: v.optional(v.boolean()),
+  },
   handler: async (ctx, args) => {
+    const { verified, ...profile } = args;
     if (process.env.RESTORE_LOCK === "true") fail("Recovery is in progress.");
     const hash = await subjectHash(args.subject);
     if (
@@ -24,14 +30,43 @@ export const syncUser = internalMutation({
     if (existing) {
       if (existing.status !== "active")
         fail("Account deletion is in progress.");
-      await ctx.db.patch(existing._id, args);
+      if (
+        verified ||
+        existing.email !== profile.email ||
+        existing.name !== profile.name
+      )
+        await ctx.db.patch(existing._id, {
+          ...profile,
+          ...(verified ? { profileVerifiedAt: Date.now() } : {}),
+        });
       return existing._id;
     }
     return ctx.db.insert("users", {
-      ...args,
+      ...profile,
+      ...(verified ? { profileVerifiedAt: Date.now() } : {}),
       status: "active",
       createdAt: Date.now(),
     });
+  },
+});
+// A verified JWT still authenticates every request. Refresh provider profile
+// fields separately, rather than making each private read a provider action.
+export const bootstrapRequired = query({
+  args: {},
+  handler: async (ctx) => {
+    if (process.env.RESTORE_LOCK === "true") fail("Recovery is in progress.");
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) fail("Sign in to continue.");
+    const actor = await ctx.db
+      .query("users")
+      .withIndex("by_subject", (q) => q.eq("subject", identity.subject))
+      .unique();
+    if (actor && actor.status !== "active")
+      fail("Account deletion is in progress.");
+    return (
+      !actor?.profileVerifiedAt ||
+      actor.profileVerifiedAt < Date.now() - 15 * 60000
+    );
   },
 });
 export const current = query({

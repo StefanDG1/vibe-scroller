@@ -7,9 +7,10 @@ export const metadata = {
 export default async function Demo({
   searchParams,
 }: {
-  searchParams: Promise<{ uiState?: string }>;
+  searchParams: Promise<{ uiState?: string; view?: string }>;
 }) {
-  const state = (await searchParams).uiState;
+  const params = await searchParams;
+  const state = params.uiState;
   const demoState =
     state === "loading" || state === "error" || state === "empty"
       ? state
@@ -18,7 +19,9 @@ export default async function Demo({
     <Console
       demo
       demoState={demoState}
-      initialView={demoState === "ready" ? "home" : "library"}
+      initialView={
+        params.view === "library" || demoState !== "ready" ? "library" : "home"
+      }
       initialSearch={demoState === "empty" ? "Synthetic absent source" : ""}
       initial={{
         sources:

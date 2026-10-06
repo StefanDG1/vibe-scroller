@@ -478,6 +478,62 @@ it("grounds multi-source evaluations, reuses completed requests and refuses chan
     s.a.mutation(api.issues.create, { id: s.evaluationId, followUp: false }),
   ).rejects.toThrow("APPROVAL_STALE");
 });
+it("keeps full issue and idea pages current across repository changes and evidence removal", async () => {
+  const s = await preparedIdea();
+  const id = await s.a.mutation(api.issues.create, {
+    id: s.evaluationId,
+    followUp: false,
+  });
+  await s.t.run(async (ctx) => {
+    const idea = (await ctx.db.get(s.evaluationId))!;
+    const draft = (await ctx.db.get(id))!;
+    const { _id: ideaId, _creationTime: ideaTime, ...ideaFields } = idea;
+    const { _id: draftId, _creationTime: draftTime, ...draftFields } = draft;
+    void [ideaId, ideaTime, draftId, draftTime];
+    await ctx.db.patch(s.repositoryId, {
+      context: "Repository evidence ".repeat(20000),
+    });
+    for (let n = 0; n < 30; n++) {
+      const evaluationId = await ctx.db.insert("knowledgeEvaluations", {
+        ...ideaFields,
+      });
+      await ctx.db.insert("issueDrafts", { ...draftFields, evaluationId });
+    }
+  });
+  const args = { organizationId: s.org };
+  const drafts = await s.a.query(api.issues.list, args);
+  const ideas = await s.a.query(api.knowledge.evaluations, args);
+  expect(drafts.items).toHaveLength(30);
+  expect(ideas.items).toHaveLength(30);
+  expect(drafts.items.every((d) => d.current && d.body)).toBe(true);
+  expect(ideas.items.every((e) => e.state === "ready" && e.output)).toBe(true);
+  expect(
+    (await s.a.query(api.issues.list, { ...args, cursor: drafts.next! })).items,
+  ).toHaveLength(1);
+  await expect(s.b.query(api.issues.list, args)).rejects.toThrow();
+  await expect(s.b.query(api.knowledge.evaluations, args)).rejects.toThrow();
+  await s.t.run((ctx) => ctx.db.patch(s.repositoryId, { profileVersion: 2 }));
+  expect(
+    (await s.a.query(api.issues.list, args)).items.every((d) => !d.current),
+  ).toBe(true);
+  expect(
+    (await s.a.query(api.knowledge.evaluations, args)).items.every(
+      (e) => e.state === "stale",
+    ),
+  ).toBe(true);
+  await s.t.run(async (ctx) => {
+    const idea = (await ctx.db.get(s.evaluationId))!;
+    await ctx.db.delete(idea.references[0].sourceId);
+  });
+  expect(
+    (await s.a.query(api.issues.list, args)).items.every((d) => d.body === ""),
+  ).toBe(true);
+  expect(
+    (await s.a.query(api.knowledge.evaluations, args)).items.every(
+      (e) => !e.output && !e.inspected,
+    ),
+  ).toBe(true);
+});
 it("requires separate exact-content issue approval and prevents blind retries", async () => {
   const s = await preparedIdea();
   const id = await s.a.mutation(api.issues.create, {

@@ -94,3 +94,11 @@ Date: October 5. Owner-authorized priority: inventory all current URL links, ana
 ## October 5: personal local and cloud analysis experiments
 
 The owner requested local preparation and private Codex cloud comparisons using their own allowance before further managed processing fees. Keep this a personal experiment: prepared text, sampled video coverage, automatic transcription and returned results require honest warnings and owner review. Existing analyses/corrections, workspace privacy, account/provider restrictions and costs remain authoritative. This is not evidence of a completed full-library pipeline, autonomous issues or commercial hosted subscription access. See [ADR 059](../adr/059-personal-subscription-analysis-trials.md) and the [operator runbook](../operations/subscription-analysis-trials.md). No measured quality, time saving, customer demand or fee-free universal source access is inferred.
+
+## F012: cited topic map, October 6
+
+The owner requested a visual node or tree view of existing knowledge connections. The implemented topic map groups cited ideas under saved connection nodes, distinguishes topic membership from explained relationships, and retains the text alternative and private evidence. This is an interface addition, not a new quality finding, customer study or spending authority. Coverage remains bounded to the selected evidence page. Local browser acceptance is recorded separately from production availability and independent comprehension. See [ADR 072](../adr/072-cited-topic-connection-map.md).
+
+## F013: simplify library reading, October 6
+
+The owner reported that the map was difficult to find and the interface was confusing and excessive. This is direct qualitative operator feedback, not an independent customer study. Separate Knowledge, Posts, Ideas and Issues; prioritize source-backed reading and reveal correction, coverage and funded actions only when requested. Preserve exact rights/budget/publication disclosures at their decision points. This supports the existing traceability and review beliefs without changing the audience, prices or six beliefs. Production availability and independent comprehension remain separate from local UI checks. See [ADR 073](../adr/073-reading-first-library-navigation.md).
