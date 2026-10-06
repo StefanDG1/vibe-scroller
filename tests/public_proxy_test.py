@@ -11,7 +11,7 @@ module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 
 class PublicProxyTests(unittest.IsolatedAsyncioTestCase):
-    def test_library_limits_are_explicit_and_ordinary_limits_stay_small(self):
+    def test_explicit_library_limits_keep_ordinary_limits_small(self):
         ordinary = module.Broker(["example.com"])
         self.assertEqual((ordinary.max_requests, ordinary.max_bytes), (64, 300_000_000))
         library = module.Broker(["auth.openai.com"], max_requests=2048, max_bytes=2_000_000_000)
