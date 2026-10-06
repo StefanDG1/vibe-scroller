@@ -102,6 +102,7 @@ try {
     "--rm",
     "--name",
     worker,
+    "--init",
     "--network",
     "none",
     "--read-only",
@@ -148,6 +149,8 @@ try {
   server = new AppServer("docker", [
     "exec",
     "-i",
+    "-e",
+    "TOKIO_WORKER_THREADS=2",
     worker,
     "codex",
     "app-server",
@@ -219,6 +222,9 @@ try {
     { mode: 0o600 },
   );
   console.log(JSON.stringify({ status: "own_account_connected", worker }));
+  // Login is complete; release this client's threads before analysis starts.
+  server.close();
+  server = undefined;
   // Keep only this ephemeral official-client session for the bounded trial.
   await waitForSessionExpiry(expiresAt, stopped);
 } catch (e) {
