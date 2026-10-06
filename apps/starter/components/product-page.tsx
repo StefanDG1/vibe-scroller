@@ -79,6 +79,7 @@ export async function ProductPage({
       readOnly={organization.role === "viewer"}
       canSuggestCategories={["owner", "admin"].includes(organization.role)}
       initial={{
+        workspaceName: organization.name,
         sources: library.items,
         categories,
         libraryNext: library.next,

@@ -41,10 +41,10 @@ export function defineCompany(value: z.input<typeof companySchema>) {
 export const company = defineCompany({
   schemaVersion: 1,
   product: {
-    slug: "vibe-scroller",
-    name: "VibeScroller",
+    slug: "vibescroll",
+    name: "VibeScroll",
     description:
-      "Make scrolling productive. Turn saved ideas into changes worth building.",
+      "Make scrolling useful. Give your saved ideas somewhere to go.",
   },
   brandRecipe: "cobalt",
   website: {

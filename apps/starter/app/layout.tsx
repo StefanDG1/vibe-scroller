@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { company } from "@companynerve/company-config";
 import { ConsentProvider } from "@/components/consent";
+import { MotionPreference } from "@/components/motion-preference";
 import "vanilla-cookieconsent/dist/cookieconsent.css";
 import "./globals.css";
 import "./product.css";
+import "./studio.css";
 export const metadata: Metadata = {
   title: {
     default: company.product.name,
@@ -13,23 +15,23 @@ export const metadata: Metadata = {
   robots: { index: process.env.SEO_PUBLIC_INDEXING === "true", follow: true },
   metadataBase: new URL("https://scroll.companynerve.com"),
   openGraph: {
-    title: "VibeScroller · Make scrolling productive",
+    title: "VibeScroll · Make scrolling useful",
     description: company.product.description,
     type: "website",
     locale: "en_US",
-    siteName: "VibeScroller",
+    siteName: "VibeScroll",
     images: [
       {
         url: "/social-card.png?v=sv14c",
         width: 1200,
         height: 630,
-        alt: "VibeScroller: saved video, evidence, project match, reviewed plan, draft PR",
+        alt: "VibeScroll: saved video, evidence, project match, reviewed plan, draft PR",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "VibeScroller · Make scrolling productive",
+    title: "VibeScroll · Make scrolling useful",
     description: company.product.description,
     images: ["/social-card.png?v=sv14c"],
   },
@@ -45,6 +47,7 @@ export default async function Layout({
     <html lang="en" className="dark" style={{ colorScheme: "dark" }}>
       <body>
         <ConsentProvider />
+        <MotionPreference />
         <a className="skip" href="#main">
           Skip to content
         </a>

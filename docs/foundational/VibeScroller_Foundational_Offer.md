@@ -2,6 +2,8 @@
 
 VibeScroll's proposed offer is a mobile browser library that helps adults turn saved ideas into retrievable knowledge and considered project decisions, including owners whose AI agent does the coding. Personal/Business views, a useful dashboard and Scroll, an original soft illustrated creature, support that workflow. Lead with project relevance and source-to-outcome evidence. A video summary or coding agent alone is already available elsewhere.
 
+October 7 implementation evidence: the first local studio slice implements the VibeScroll display name, original Scroll artwork, bounded next actions and compact navigation. Personal/Business privacy, onboarding and assistant OAuth remain pending. Local synthetic browser checks and automated tests do not establish customer demand, comprehension, production availability or whole-plan acceptance. See [implementation status](../implementation-status.md).
+
 F014, October 7, updates the planning brief. [ADR 075](../adr/075-vibescroll-product-direction.md) and [the evolution plan](../VIBESCROLL-EVOLUTION-PLAN.md) define future behavior; current implementation evidence still controls availability claims. Earlier dated observations are preserved. This document does not execute the rename or enable the proposed redesign.
 
 F015 and [ADR 076](../adr/076-persuasive-design-and-analysis-references.md) adopt legitimate pricing anchors, restrained CTA shimmer, genuine unfinished loops and conditional persuasive techniques. They supersede broad rejection labels, without changing the catalog or the one-real-result-before-payment decision. An earlier-payment A/B investigation is future work outside this plan.

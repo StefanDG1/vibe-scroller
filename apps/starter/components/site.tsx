@@ -1,13 +1,18 @@
 import Link from "next/link";
-import { BrandMark } from "@companynerve/ui";
+import Image from "next/image";
 import { CookieSettings } from "./consent";
 export function Brand() {
   return (
     <Link href="/" className="brand">
       <span className="brand-icon" aria-hidden="true">
-        <BrandMark size={30} />
+        <Image
+          src="/scroll/scroll-welcome.webp"
+          alt=""
+          width={30}
+          height={36}
+        />
       </span>
-      VibeScroller
+      VibeScroll
     </Link>
   );
 }
@@ -30,7 +35,7 @@ export function SiteFooter() {
   return (
     <footer className="site-footer">
       <Brand />
-      <p>Make scrolling productive.</p>
+      <p>Make scrolling useful.</p>
       <nav aria-label="Footer">
         {[
           "about",
@@ -54,8 +59,8 @@ export function SiteFooter() {
         <CookieSettings />
       </nav>
       <small>
-        EXPONENTIAL EDUCATION S.R.L. · Development preview. Live checkout is
-        disabled.
+        EXPONENTIAL EDUCATION S.R.L. · Processing availability and checkout
+        follow the current account and release settings.
       </small>
     </footer>
   );

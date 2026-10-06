@@ -1,9 +1,9 @@
 import type { MetadataRoute } from "next";
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "VibeScroller",
-    short_name: "VibeScroller",
-    description: "Make scrolling productive",
+    name: "VibeScroll",
+    short_name: "VibeScroll",
+    description: "Make scrolling useful",
     start_url: "/app",
     display: "standalone",
     background_color: "#101010",

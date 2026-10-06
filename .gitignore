@@ -21,3 +21,6 @@ __pycache__/
 
 # Private operator records must never be published
 private/
+
+# Browser captures can contain private account and source information.
+.impeccable/review/
