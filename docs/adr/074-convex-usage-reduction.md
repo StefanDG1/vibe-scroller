@@ -1,6 +1,6 @@
 # ADR 074: Reduce repeated Convex reads and provider work
 
-Mode: reference. Status: implemented locally, deployment pending. Date: October 6, 2026.
+Mode: reference. Status: deployed to production; savings measurement pending. Date: October 6, 2026.
 
 ## Evidence
 

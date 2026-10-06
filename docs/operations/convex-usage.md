@@ -1,6 +1,6 @@
 # Convex usage investigation and rollout
 
-Mode: reference. Observed October 6, 2026. Changes are local and undeployed.
+Mode: reference. Observed October 6, 2026. Production changes and data migration deployed; comparable savings measurement pending.
 
 ## What the dashboard showed
 
@@ -76,3 +76,13 @@ After compaction, keep a backend that understands `repositoryContent`. Rolling b
 The first new evidence test omitted the required fixture `coverage` field, causing one failure and a type error. Corrected the fixture; the final suite passed. Failed/intermediate outputs are preserved separately. Before publication, the redacted Gitleaks scan of the staged 91,078-byte patch found no leaks (`outputs/convex-usage-secret-scan.json`); formatting and the production Convex dry run passed. Dependency audit passed the repository policy with one existing locally mitigated high `braces` advisory and no unresolved finding; see `outputs/convex-usage-audit.json`.
 
 The local production build at localhost port 3101 rendered the labeled synthetic topic map, switched to Issues through native browser clicks, and had no horizontal overflow at 320, 390, 768 and 1440 pixels. This verifies layout/navigation only. Timer behavior is covered by the scheduler tests; real authenticated staging traffic, physical Android and production savings remain unverified.
+
+## October 6 production release
+
+The owner explicitly authorized deployment and merge. [PR 49](https://github.com/StefanDG1/vibe-scroller/pull/49) merged at 20:34:37 UTC to `f22c1b266c4b749673a94a7424c0bfd4b7c48e2e`. Required PR [CI](https://github.com/StefanDG1/vibe-scroller/actions/runs/37527169335) and exact main [CI](https://github.com/StefanDG1/vibe-scroller/actions/runs/37527496940) passed. The immutable [alpha release](https://github.com/StefanDG1/vibe-scroller/releases/tag/v0.1.0-alpha.20261006203437.gf22c1b266c4b) published after main verification.
+
+The Convex CLI selected `stefan-gheorghiu:vibe-scroller:production`, `bold-lemur-667`. Deployment succeeded with three new indexes and no deleted indexes. `usageMaintenance:initializeStorage` initialized the current workspace to 330,073,374 bytes; an independent transactional query matched the total across 3,139 asset records. Bounded `compactRepositories` completed all five repositories. Before/after checks matched SHA, profile/selection versions, timestamps and stored context/tree/excerpt sizes; inline context is empty and matching side content remains available. Evidence files are `outputs/convex-usage-production-deploy.log`, `outputs/convex-storage-migration.json` and the private before/after metadata reports.
+
+The existing Git integration built production with the Basic queued policy. [Vercel deployment](https://vercel.com/stefandg1s-projects/vibe-scroller/HoeooaRLdvtU8QBmVbFNkoPrHmxx) was READY, target production, exact main SHA, Frankfurt, with `scroll.companynerve.com` assigned. At 20:35:25 UTC the public health endpoint reported that SHA and `0.1.0-alpha.20261006203437.gf22c1b266c4b`, with `Cache-Control: no-store`. No production credentials, billing cap or provider feature gates changed. No separate issue draft was published.
+
+Authenticated browser reads of Issues, Knowledge and real topic detail succeeded with HTTP 200 and private no-store responses. The actual cited topic map and its linked real source detail rendered without error or horizontal overflow at the inspected mobile viewport. An observed seventy-second Ideas window made one Ideas refresh and no topic/policy/local-run/issue reads; workspace-shell refreshes remained independent. No personal runner process was active locally; its new cadence takes effect on next start. Production paid plan generation, physical evidence upload/deletion, permission changes and physical Android were not exercised; their relevant regression checks remain local/CI evidence. Billing-period usage accumulated before deployment will not fall. Compare subsequent daily breakdowns under similar workloads before claiming savings.
