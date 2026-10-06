@@ -14,6 +14,7 @@ export const bootstrap = action({
       throw new Error("Verify your email address before continuing.");
     await ctx.runMutation(internal.accounts.syncUser, {
       subject: identity.subject,
+      verified: true,
       email: profile.email.toLowerCase(),
       name:
         [profile.firstName, profile.lastName].filter(Boolean).join(" ") ||

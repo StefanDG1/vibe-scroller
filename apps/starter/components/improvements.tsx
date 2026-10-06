@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useEffectEvent, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
   ArrowUpRight,
   Check,
@@ -9,6 +9,7 @@ import {
   RefreshCw,
   Sparkles,
 } from "lucide-react";
+import { usePolling } from "@/lib/use-polling";
 import { ChoiceSelect } from "./choice-select";
 import { ImprovementControls } from "./improvement-controls";
 import { cloudExecutionEstimate } from "../../../packages/plans/execution-quote";
@@ -60,9 +61,6 @@ export function Improvements({
     [error, setError] = useState("");
   const generation = useRef({ value: 0 }),
     browsing = useRef(false);
-  const invalidate = useEffectEvent(() => {
-    generation.current.value++;
-  });
   async function refresh(cursor?: string) {
     if (demo) return;
     const g = ++generation.current.value;
@@ -94,30 +92,22 @@ export function Improvements({
         );
         setItems([]);
       }
+      return false;
     } finally {
       if (g === generation.current.value) setLoading(false);
     }
   }
-  const refreshRef = useRef(refresh);
-  useEffect(() => {
-    refreshRef.current = refresh;
-  });
-  useEffect(() => {
-    const initial = setTimeout(() => void refreshRef.current(), 0);
-    const timer = setInterval(() => {
-      if (
-        !browsing.current &&
-        document.visibilityState === "visible" &&
-        navigator.onLine
-      )
-        void refreshRef.current();
-    }, 15000);
-    return () => {
-      invalidate();
-      clearTimeout(initial);
-      clearInterval(timer);
-    };
-  }, [organizationId, demo]);
+  const processing = items.some((i) =>
+    ["planning", "queued", "running", "publishing"].includes(i.stage),
+  );
+  usePolling(
+    async () => {
+      if (!browsing.current) return refresh();
+    },
+    processing ? 15000 : 60000,
+    !demo,
+    organizationId,
+  );
   return (
     <section className="improvements" aria-label="Improvements">
       <ImprovementControls
@@ -173,7 +163,9 @@ export function Improvements({
           onOpenRuns={onOpenRuns}
           computeReservationCredits={computeReservationCredits}
           creditsPerSecond={creditsPerSecond}
-          refresh={() => refresh()}
+          refresh={async () => {
+            await refresh();
+          }}
         />
       ))}
       {next && (

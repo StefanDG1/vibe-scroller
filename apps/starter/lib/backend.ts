@@ -22,7 +22,8 @@ export const backend = cache(
       throw new Error("Convex is not configured.");
     const client = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL);
     client.setAuth(auth.accessToken);
-    await client.action(api.identity.bootstrap, {});
+    if (await client.query(api.accounts.bootstrapRequired, {}))
+      await client.action(api.identity.bootstrap, {});
     return client;
   },
 );

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, useEffectEvent, useRef } from "react";
+import { usePolling } from "@/lib/use-polling";
 import ReactMarkdown from "react-markdown";
 import { ChoiceSelect } from "./choice-select";
 import { downloadText } from "@/lib/download";
@@ -14,6 +15,7 @@ type Props = {
   call: Call;
   onOpenImprovements?: () => void;
   section?: "topics" | "ideas" | "issues";
+  enabled?: boolean;
 };
 async function read(operation: string, args: any) {
   const response = await fetch("/api/product", {
@@ -151,75 +153,94 @@ export function KnowledgeLibrary(p: Props) {
     const detailAtStart = detailGeneration.current;
     try {
       const [list, policy, ideas, drafts, localRuns] = await Promise.all([
-        scopedRead("knowledgeList", {
-          organizationId: p.organizationId,
-          search: searchScope === "topic" ? search || undefined : undefined,
-          sourceSearch:
-            searchScope === "source" ? search || undefined : undefined,
-          updatedSince: recent
-            ? Date.now() - Number(recent) * 86400000
-            : undefined,
-          readiness: readiness || undefined,
-          cursor: topicCursor,
-          repositoryId: project || undefined,
-        }),
-        scopedRead("knowledgePolicy", { organizationId: p.organizationId }),
-        scopedRead("knowledgeIdeas", {
-          organizationId: p.organizationId,
-          repositoryId: project || undefined,
-        }),
-        scopedRead("issueList", { organizationId: p.organizationId }),
-        scopedRead("localLibraryList", { organizationId: p.organizationId }),
+        activeSection === "topics"
+          ? scopedRead("knowledgeList", {
+              organizationId: p.organizationId,
+              search: searchScope === "topic" ? search || undefined : undefined,
+              sourceSearch:
+                searchScope === "source" ? search || undefined : undefined,
+              updatedSince: recent
+                ? Date.now() - Number(recent) * 86400000
+                : undefined,
+              readiness: readiness || undefined,
+              cursor: topicCursor,
+              repositoryId: project || undefined,
+            })
+          : Promise.resolve(null),
+        activeSection === "topics"
+          ? scopedRead("knowledgePolicy", { organizationId: p.organizationId })
+          : Promise.resolve(null),
+        activeSection === "ideas"
+          ? scopedRead("knowledgeIdeas", {
+              organizationId: p.organizationId,
+              repositoryId: project || undefined,
+            })
+          : Promise.resolve(null),
+        activeSection === "issues"
+          ? scopedRead("issueList", { organizationId: p.organizationId })
+          : Promise.resolve(null),
+        activeSection === "topics"
+          ? scopedRead("localLibraryList", { organizationId: p.organizationId })
+          : Promise.resolve(null),
       ]);
       if (generation !== refreshGeneration.current) return;
-      setTopics((old) =>
-        append
-          ? [
-              ...new Map(
-                [...old, ...list.items].map((t) => [t._id, t]),
-              ).values(),
-            ]
-          : list.items,
-      );
-      setNext(list.next);
-      setPolicy(policy);
-      setLocalRuns(localRuns);
-      setIdeas(ideas.items);
-      setIdeaNext(ideas.next);
-      setIssues(drafts.items);
-      setIssueNext(drafts.next);
+      if (list) {
+        setTopics((old) =>
+          append
+            ? [
+                ...new Map(
+                  [...old, ...list.items].map((t) => [t._id, t]),
+                ).values(),
+              ]
+            : list.items,
+        );
+        setNext(list.next);
+      }
+      if (policy) setPolicy(policy);
+      if (localRuns) setLocalRuns(localRuns);
+      if (ideas) {
+        setIdeas(ideas.items);
+        setIdeaNext(ideas.next);
+      }
+      if (drafts) {
+        setIssues(drafts.items);
+        setIssueNext(drafts.next);
+      }
       setMessage("");
-      if (selected && detailAtStart === detailGeneration.current)
+      if (
+        activeSection === "topics" &&
+        selected &&
+        detailAtStart === detailGeneration.current
+      )
         await loadDetail(selected, cursor);
     } catch (e) {
       if (generation !== refreshGeneration.current) return;
       setMessage(e instanceof Error ? e.message : "Knowledge is unavailable.");
+      return false;
     } finally {
       if (generation === refreshGeneration.current) setLoading(false);
     }
   }
-  const poll = useEffectEvent(() => refresh());
-  useEffect(() => {
-    const initialTimer = setTimeout(() => {
-      if (!browsingLaterPages) void poll();
-    }, 0);
-    const timer = setInterval(() => {
-      if (document.visibilityState === "visible" && !browsingLaterPages)
-        void poll();
-    }, 15000);
-    return () => {
-      clearTimeout(initialTimer);
-      clearInterval(timer);
-    };
-  }, [
-    p.organizationId,
-    search,
-    searchScope,
-    recent,
-    readiness,
-    project,
-    browsingLaterPages,
-  ]);
+  const processing =
+    (activeSection === "topics" &&
+      (topics.some((t) => ["pending", "updating"].includes(t.state)) ||
+        localRuns.some((r) => ["queued", "running"].includes(r.state)))) ||
+    (activeSection === "ideas" &&
+      ideas.some((e) => ["queued", "running"].includes(e.state)));
+  usePolling(
+    () => refresh(),
+    processing ? 15000 : 60000,
+    !p.demo && p.enabled !== false && !browsingLaterPages,
+    JSON.stringify([
+      p.organizationId,
+      activeSection,
+      search,
+      searchScope,
+      recent,
+      readiness,
+      project,
+    ]),
+  );
   async function run(operation: string, args: any) {
     setBusy(true);
     try {

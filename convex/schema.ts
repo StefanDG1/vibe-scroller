@@ -23,6 +23,7 @@ export default defineSchema({
     name: v.string(),
     status: v.union(v.literal("active"), v.literal("deleting")),
     createdAt: v.number(),
+    profileVerifiedAt: v.optional(v.number()),
     preferChatGPTPlan: v.optional(v.boolean()),
     defaultWorkspaceId: v.optional(v.id("organizations")),
   }).index("by_subject", ["subject"]),

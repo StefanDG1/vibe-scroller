@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useEffectEvent, useRef, useState } from "react";
+import { useRef, useState } from "react";
+import { usePolling } from "@/lib/use-polling";
 import { ChoiceSelect } from "./choice-select";
 import { Layers3, Loader2, Pause, ScanSearch } from "lucide-react";
 type Call = (operation: string, args: any) => Promise<any>;
@@ -74,9 +75,6 @@ export function LibraryScan({
     ready =
       selectedRepos.length > 0 &&
       selectedRepos.every((r) => r.confirmed && r.status === "connected");
-  const invalidate = useEffectEvent(() => {
-    generation.current.value++;
-  });
   async function refresh() {
     if (demo) return;
     const g = ++generation.current.value;
@@ -109,24 +107,15 @@ export function LibraryScan({
           e instanceof Error ? e.message : "Scan status is unavailable.",
         );
       }
+      return false;
     }
   }
-  const refreshRef = useRef(refresh);
-  useEffect(() => {
-    refreshRef.current = refresh;
-  });
-  useEffect(() => {
-    const initial = setTimeout(() => void refreshRef.current(), 0);
-    const timer = setInterval(() => {
-      if (document.visibilityState === "visible" && navigator.onLine)
-        void refreshRef.current();
-    }, 10000);
-    return () => {
-      invalidate();
-      clearTimeout(initial);
-      clearInterval(timer);
-    };
-  }, [organizationId, demo]);
+  usePolling(
+    refresh,
+    jobs.some((j) => j.state === "running") ? 10000 : 60000,
+    !demo,
+    organizationId,
+  );
   async function run(operation: string, args: any) {
     setBusy(true);
     try {

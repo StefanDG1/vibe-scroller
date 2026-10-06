@@ -5,6 +5,7 @@ vi.mock("server-only", () => ({}));
 const session = vi.hoisted(() => ({
   read: vi.fn(),
   action: vi.fn(),
+  query: vi.fn(),
   token: vi.fn(),
 }));
 vi.mock("@workos-inc/authkit-nextjs", async (original) => ({
@@ -15,6 +16,7 @@ vi.mock("convex/browser", () => ({
   ConvexHttpClient: class {
     setAuth = session.token;
     action = session.action;
+    query = session.query;
   },
 }));
 let proxy: typeof import("./proxy").default;
@@ -133,4 +135,19 @@ describe("private-page authentication redirects", () => {
     }
     expect(session.action).not.toHaveBeenCalled();
   });
+  it.each([false, true])(
+    "bootstraps a signed-in provider profile only when freshness requires it: %s",
+    async (required) => {
+      session.action.mockClear();
+      session.query.mockResolvedValue(required);
+      session.read.mockResolvedValue({
+        user: { id: "user_synthetic" },
+        accessToken: "synthetic-jwt",
+      });
+      const { backend } = await import("./lib/backend");
+      await backend();
+      expect(session.action).toHaveBeenCalledTimes(required ? 1 : 0);
+      expect(session.token).toHaveBeenCalledWith("synthetic-jwt");
+    },
+  );
 });

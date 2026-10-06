@@ -78,7 +78,7 @@ try {
     process.once(name, () => shutdown.abort());
   let announcedAt = 0;
   while (!shutdown.signal.aborted) {
-    if (Date.now() - announcedAt > 30000) {
+    if (Date.now() - announcedAt > 5 * 60000) {
       const profile = await client.status();
       if (!profile.activeProfileId)
         throw new Error("PERSONAL_PROFILE_UNAVAILABLE");
@@ -132,7 +132,9 @@ try {
         );
       }
     }
-    await delay(10000, undefined, { signal: shutdown.signal }).catch(() => {});
+    await delay(response.job || response.reconcile ? 1000 : 30000, undefined, {
+      signal: shutdown.signal,
+    }).catch(() => {});
   }
 } catch {
   console.error(

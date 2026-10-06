@@ -1,3 +1,4 @@
+import { storageUsage, insertAsset, deleteAsset } from "./lib/storageUsage";
 import { query, mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import { access, limit, fail, writeAccess } from "./lib";
@@ -57,17 +58,7 @@ export const grant = mutation({
     const u = await writeAccess(ctx, a.organizationId);
     await limit(ctx, `upload:${u.actor._id}`, 10);
     const entitlement = await wallet(ctx, a.organizationId);
-    const retained = await ctx.db
-      .query("assets")
-      .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
-      .collect();
-    const retainedBytes = retained
-      .filter(
-        (asset) =>
-          asset.state !== "deleted" &&
-          (asset.expiresAt === undefined || asset.expiresAt > Date.now()),
-      )
-      .reduce((sum, asset) => sum + asset.size, 0);
+    const retainedBytes = (await storageUsage(ctx, a.organizationId)).bytes;
     ensure(
       Number.isSafeInteger(a.size) &&
         retainedBytes + a.size <=
@@ -103,7 +94,7 @@ export const grant = mutation({
       "UPLOAD_INVALID",
       "Upload keys cannot be reused.",
     );
-    const id = await ctx.db.insert("assets", {
+    const id = await insertAsset(ctx, {
       ...a,
       state: "pending",
       createdAt: Date.now(),
@@ -151,7 +142,7 @@ export const deleteReceipt = internalMutation({
       .query("assets")
       .withIndex("by_key", (q) => q.eq("key", a.key))
       .unique();
-    if (asset) await ctx.db.delete(asset._id);
+    if (asset) await deleteAsset(ctx, asset);
     const job = await ctx.db
       .query("objectDeletions")
       .withIndex("by_key", (q) => q.eq("key", a.key))
@@ -233,19 +224,28 @@ export const registerEvidence = internalMutation({
       await queueDeletion(ctx, a.key);
       return null;
     }
-    const entitlement = await wallet(ctx, source.organizationId);
-    const retained = await ctx.db
+    const existing = await ctx.db
       .query("assets")
-      .withIndex("by_org", (q) => q.eq("organizationId", source.organizationId))
-      .collect();
-    const bytes = retained
-      .filter((asset) => asset.state !== "deleted")
-      .reduce((sum, asset) => sum + asset.size, 0);
+      .withIndex("by_key", (q) => q.eq("key", a.key))
+      .unique();
+    if (existing) {
+      ensure(
+        existing.sourceId === source._id &&
+          existing.size === a.size &&
+          existing.etag === a.etag &&
+          existing.state === "complete",
+        "INVALID_EVIDENCE",
+        "Evidence key is already bound to different bytes.",
+      );
+      return existing._id;
+    }
+    const entitlement = await wallet(ctx, source.organizationId);
+    const bytes = (await storageUsage(ctx, source.organizationId)).bytes;
     if (bytes + a.size > (entitlement.tier === "pro" ? 5 : 1) * 1000000000) {
       await queueDeletion(ctx, a.key);
       return null;
     }
-    return ctx.db.insert("assets", {
+    return insertAsset(ctx, {
       organizationId: source.organizationId,
       sourceId: source._id,
       key: a.key,
@@ -294,22 +294,28 @@ export const registerNormalized = internalMutation({
       await queueDeletion(ctx, a.key);
       return null;
     }
-    const entitlement = await wallet(ctx, source.organizationId);
-    const retained = await ctx.db
+    const existing = await ctx.db
       .query("assets")
-      .withIndex("by_org", (q) => q.eq("organizationId", source.organizationId))
-      .collect();
-    if (
-      retained
-        .filter((b) => b.state !== "deleted")
-        .reduce((n, b) => n + b.size, 0) +
-        a.size >
-      (entitlement.tier === "pro" ? 5 : 1) * 1000000000
-    ) {
+      .withIndex("by_key", (q) => q.eq("key", a.key))
+      .unique();
+    if (existing) {
+      ensure(
+        existing.sourceId === source._id &&
+          existing.size === a.size &&
+          existing.etag === a.etag &&
+          existing.state === "complete",
+        "INVALID_EVIDENCE",
+        "Evidence key is already bound to different bytes.",
+      );
+      return existing._id;
+    }
+    const entitlement = await wallet(ctx, source.organizationId);
+    const bytes = (await storageUsage(ctx, source.organizationId)).bytes;
+    if (bytes + a.size > (entitlement.tier === "pro" ? 5 : 1) * 1000000000) {
       await queueDeletion(ctx, a.key);
       return null;
     }
-    const id = await ctx.db.insert("assets", {
+    const id = await insertAsset(ctx, {
       organizationId: source.organizationId,
       sourceId: source._id,
       key: a.key,

@@ -222,6 +222,10 @@ export const productTables = {
     invoiceCreatedAt: v.number(),
     status: v.string(),
   }).index("by_org", ["organizationId"]),
+  storageUsage: defineTable({
+    organizationId: v.id("organizations"),
+    bytes: v.number(),
+  }).index("by_org", ["organizationId"]),
   assets: defineTable({
     ...tenant,
     key: v.string(),
@@ -348,8 +352,38 @@ export const productTables = {
       searchField: "searchable",
       filterFields: ["organizationId", "state"],
     }),
+  repositoryContent: defineTable({
+    organizationId: v.id("organizations"),
+    repositoryId: v.id("repositories"),
+    sha: v.string(),
+    context: v.string(),
+    contextTree: v.optional(v.string()),
+    contextExcerpts: v.optional(
+      v.array(
+        v.object({
+          path: v.string(),
+          startLine: v.number(),
+          endLine: v.number(),
+          content: v.string(),
+          blobSha: v.string(),
+        }),
+      ),
+    ),
+  })
+    .index("by_org", ["organizationId"])
+    .index("by_repository", ["repositoryId"]),
   repositories: defineTable({
     ...tenant,
+    contentStored: v.optional(v.boolean()),
+    contextEvidence: v.optional(
+      v.array(
+        v.object({
+          path: v.string(),
+          startLine: v.number(),
+          endLine: v.number(),
+        }),
+      ),
+    ),
     selectionVersion: v.optional(v.number()),
     snapshotPaths: v.optional(v.array(v.string())),
     profileDraftProcessingVersion: v.optional(v.string()),

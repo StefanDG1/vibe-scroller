@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef, useEffectEvent } from "react";
 import { useRouter } from "next/navigation";
+import { usePolling } from "@/lib/use-polling";
 import Link from "next/link";
 import Image from "next/image";
 import { Brand } from "./site";
@@ -467,7 +468,6 @@ export function Console({
       });
     }
   }
-  const refreshFromEffect = useEffectEvent(() => refreshData());
   const processing =
     (view === "source" &&
       selected &&
@@ -479,21 +479,7 @@ export function Console({
     data.runs.some((r) =>
       ["queued", "running", "publishing"].includes(r.state),
     );
-  useEffect(() => {
-    if (demo) return;
-    const refreshVisible = () => {
-      if (document.visibilityState !== "visible" || !navigator.onLine) return;
-      refreshFromEffect().catch(() => {});
-    };
-    const timer = setInterval(refreshVisible, processing ? 15000 : 60000);
-    document.addEventListener("visibilitychange", refreshVisible);
-    window.addEventListener("online", refreshVisible);
-    return () => {
-      clearInterval(timer);
-      document.removeEventListener("visibilitychange", refreshVisible);
-      window.removeEventListener("online", refreshVisible);
-    };
-  }, [demo, organizationId, processing]);
+  usePolling(refreshData, processing ? 15000 : 60000, !demo, organizationId);
   const planIdentity = selected
     ? `${id(selected)}:${selected.planHash ?? (selected.planDraftVersion === selected.version ? (selected.planDraftKey ?? JSON.stringify(selected.planDraft ?? null)) : "")}`
     : "";
@@ -891,6 +877,7 @@ export function Console({
                 hidden={librarySection === "posts"}
               >
                 <KnowledgeLibrary
+                  enabled={librarySection !== "posts"}
                   section={
                     librarySection === "posts" ? "topics" : librarySection
                   }

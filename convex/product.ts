@@ -1,3 +1,4 @@
+import { repositoryContent } from "./lib/repositoryContent";
 import { validateInspectedContext } from "../packages/repositories/retrieval";
 import { inspectionManifestValidator } from "../packages/repositories/context";
 import { inspectedContextValidator } from "../packages/repositories/context";
@@ -604,19 +605,27 @@ export const detail = query({
   },
 });
 export const overview = query({
-  args: org,
+  args: { ...org, includeCounts: v.optional(v.boolean()) },
   handler: async (ctx, a) => {
     await access(ctx, a.organizationId);
     const [sources, proposals, runs, feedback, notifications, w] =
       await Promise.all([
-        ctx.db
-          .query("sources")
-          .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
-          .take(1000),
-        ctx.db
-          .query("proposals")
-          .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
-          .take(1000),
+        a.includeCounts === false
+          ? Promise.resolve([])
+          : ctx.db
+              .query("sources")
+              .withIndex("by_org", (q) =>
+                q.eq("organizationId", a.organizationId),
+              )
+              .take(1000),
+        a.includeCounts === false
+          ? Promise.resolve([])
+          : ctx.db
+              .query("proposals")
+              .withIndex("by_org", (q) =>
+                q.eq("organizationId", a.organizationId),
+              )
+              .take(1000),
         ctx.db
           .query("runs")
           .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
@@ -636,11 +645,15 @@ export const overview = query({
           .unique(),
       ]);
     return {
-      processed: sources.filter((s) => s.state === "ready").length,
-      accepted: proposals.filter((p) => p.review === "accepted").length,
+      ...(a.includeCounts === false
+        ? {}
+        : {
+            processed: sources.filter((s) => s.state === "ready").length,
+            accepted: proposals.filter((p) => p.review === "accepted").length,
+            pending: proposals.filter((p) => p.review === "unreviewed").length,
+          }),
       merged: new Set(runs.filter((r) => r.mergedAt).map((r) => r.prUrl)).size,
       measured: feedback.filter((f) => f.benefit !== "not_measured").length,
-      pending: proposals.filter((p) => p.review === "unreviewed").length,
       runs,
       notifications,
       wallet: w,
@@ -1535,12 +1548,14 @@ export const repositories = query({
             wholeRepository:
               r.snapshotSummary.discoveryVersion === "whole-repository-v1",
             wordDocuments: r.snapshotSummary.businessDocumentPaths?.length ?? 0,
-            evidence: (r.contextExcerpts ?? []).map((e) => ({
-              path: e.path,
-              startLine: e.startLine,
-              endLine: e.endLine,
-              wordDocument: e.path.endsWith(".docx"),
-            })),
+            evidence: (r.contextEvidence ?? r.contextExcerpts ?? []).map(
+              (e) => ({
+                path: e.path,
+                startLine: e.startLine,
+                endLine: e.endLine,
+                wordDocument: e.path.endsWith(".docx"),
+              }),
+            ),
           }
         : undefined,
       profileDraft: r.profileDraft,
@@ -1784,7 +1799,7 @@ export const addProposal = internalMutation({
   },
   handler: async (ctx, a) => {
     const s = await ctx.db.get(a.sourceId),
-      r = await ctx.db.get(a.repositoryId);
+      r = await repositoryContent(ctx, await ctx.db.get(a.repositoryId));
     const matchingJob = a.matchKey
       ? await ctx.db
           .query("matchingJobs")
