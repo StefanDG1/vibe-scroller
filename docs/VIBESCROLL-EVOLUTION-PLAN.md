@@ -2,6 +2,8 @@
 
 Mode: proposal and implementation plan. Prepared October 7, 2026. Application changes, rename execution, migrations and deployment are not performed by this document.
 
+Reviewed October 7 against all 744 unique insight titles and full claims from the captured 108-post library. Selected interpretations and verification needs received a second pass. [The review record](VIBESCROLL-INSIGHT-REVIEW.md) explains coverage, sources, rejected advice and remaining uncertainty. This is a review of existing results, not a new production scan or model analysis.
+
 ## 1. Direction and decisions
 
 VibeScroll helps people turn the useful things they find while scrolling into knowledge they can retrieve, connect to their goals and apply to their projects. Scroll, an original soft illustrated character, makes that process approachable. The main screen is a useful dashboard. ChatGPT and Codex become additional ways to save and use the same knowledge.
@@ -67,9 +69,11 @@ Do not write that all technology leaders agree, that scrolling is the only activ
 
 Scroll is the friendly guide associated with that promise. Avoid shame about scrolling, guaranteed income, exaggerated hours saved, fabricated testimonials or gamification that rewards spending more time in the feed. Celebrate using an idea, making a considered decision and finding a relevant source.
 
-### Foundation changes to make during implementation
+### Foundation changes and implementation follow-through
 
 Read and update [Research](foundational/VibeScroller_Foundational_Research.md), [Avatar](foundational/VibeScroller_Foundational_Avatar.md), [Offer](foundational/VibeScroller_Foundational_Offer.md) and [Beliefs](foundational/VibeScroller_Foundational_Beliefs.md) together under the [copy and idea process](foundational/COPY-AND-IDEAS.md). Preserve cited dissent and unresolved evidence.
+
+F014 now records this direction in all four briefs and their change log. Their earlier dated observations remain historical evidence. Implementation must reconcile enabled customer-facing copy with the new brief; recording the direction does not enable a feature or execute the rename.
 
 | Existing brief                                | Update required                                                                                               |
 | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
@@ -88,11 +92,17 @@ Lead with demonstrations: a real permitted post becomes cited insights, a releva
 
 Test a practical saved-ideas message against the conditional AI-era story. Judge activation, retained use, willingness to pay and understood value; click-through rate alone cannot establish product demand. Use consented, minimal funnel events. Content, transcripts, repository files and quiz answers must stay out of analytics payloads and session recordings.
 
+Use one public landing structure: benefit and real demonstration, who it fits, how the source becomes a useful decision, limitations and privacy, disclosed price/allowance, and relevant questions. Include a no-fit example. Customer proof requires real permission and evidence. Avoid generated testimonials, fabricated scarcity, invented standalone valuations and disguised advertising. Founder updates can follow a real saved idea through investigation and outcome, with Scroll providing visual continuity.
+
+Publish useful answer-first help and use-case pages around validated customer questions. Honest comparisons acknowledge existing tools. Index public marketing/help pages only; exclude authenticated library, profile, evidence and project URLs from sitemaps and search indexing, while enforcing access independently of robots rules. Public share previews contain only explicitly approved material. Default public messaging stays stable. Audience variants are a later measured experiment with consent where applicable, unchanged prices/claims and a generic fallback.
+
+Start customer validation with project owners who already save useful material and use an AI agent. Observe their existing workflow, a recent save, a rejected suggestion and willingness to pay. Record disinterest as well as enthusiasm. VibeScroll must be useful to one person without a public network, leaderboard or referral scheme. Do not replace interviews with an AI market score or promise that a creator's acquisition numbers transfer to this app.
+
 ## 3. Existing saved insights and reusable tools
 
 ### Evidence found in the owner's library
 
-The first inspected export was older and contained titles/captions without analyses for several relevant posts. The newer completed local analysis artifacts contain sampled-video interpretations for the following sources. These were read without new inference or production batch processing. They are source-backed inspiration, not independent tests of the creators' numerical claims.
+The initial planning pass inspected a subset. The complete review now uses the captured current library's 1,574 topic memberships, deduplicated to 744 exact insight references across 108 genuine sources. Every title and full claim was read. The following examples and the wider [review record](VIBESCROLL-INSIGHT-REVIEW.md) inform the plan. Existing local records were reused without new inference or production batch processing. They are source-backed inspiration, not independent tests of the creators' numerical claims.
 
 | Saved source                                                                          | Lesson for VibeScroll                                                                          | Qualification                                                                                              |
 | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
@@ -109,9 +119,13 @@ The first inspected export was older and contained titles/captions without analy
 
 Adapty's own 2026 report commentary supports investigating early monetization and onboarding, but does not establish that a GitHub connection causes conversion or that a longer quiz helps this product. [Adapty's discussion](https://adapty.io/blog/subscription-app-success-2026/). The owner selected a real first result before the payment request; implement that decision and measure it.
 
+The complete pass also contributes badge semantics, resumable interactions, error recovery, input normalization, source-linked profile changes, contextual detail drawers, work-in-progress capacity and conservative outcome measurement. Personal and career material stays in the library; its presence does not authorize adding job applications, invoicing, signing, shopping or life surveillance to V1.
+
 ### Recommended frontend stack
 
 Keep the existing Next.js, React, TypeScript, Tailwind, Lucide, Radix, WorkOS and Convex foundation. Existing `@companynerve/ui` already exports Button, Input, Label, Textarea, Select, Card and Badge and uses Radix. Extend that shared layer rather than building a parallel kit beside it.
+
+An optional illustration experiment can use [Drawably](https://github.com/danielwh2/drawably) for a few fixed-seed arrows or highlights, with [MIT notices](https://github.com/danielwh2/drawably/blob/main/LICENSE), motion disabled where appropriate and ordinary semantic controls underneath. Its current README differs from the saved post's size claim; measure the selected bundle. Do not restyle the whole app with continuously animated sketches. [Rare UI's registry terms](https://www.rareui.com/terms) include Commons Clause and visible attribution, despite the saved post's broad open-source description. Exclude it from the default stack. Individual 21st.dev/Uiverse examples and illustration/music assets need their own exact license, dependency and accessibility review before reuse; a catalog-wide free claim is insufficient.
 
 | Tool                                                                                                     | Use                                                                                               | Decision                                                                                                                                                                    |
 | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -173,6 +187,26 @@ Alternative design exercises considered a field notebook, a project cockpit, a l
 | Idle/background    | Static or very infrequent local blink   | No model calls, sound or server heartbeat for animation             |
 
 Scroll stays in the shared shell; on focused reading/review screens it becomes a compact anchor rather than a large hero. Full-screen evidence viewers can prioritize the evidence and native close control without turning that into a hide-character setting. Character speech repeats concise real state, never gives authority or substitutes for mandatory disclosures.
+
+### Design brief and interaction states
+
+Before screen implementation, produce a small shared design brief with tokens, typography roles, accessible palette pairings, spacing, icon meanings, Scroll expressions, motion limits and examples of what to avoid. Refine a capture control, evidence/detail view and review row on phone and desktop first. Carry general corrections into the brief, then check later screens against it. Use existing frontend-design, shadcn and browser review guidance; Impeccable can support critique in the available agent environment. Optional mascot skills require a pinned, reviewed snapshot and notices in P3, not an unreviewed remote command during generation.
+
+Map complete flows before choosing screens: new Personal user to a real result; Business user to confirmed context and a reviewed issue; returning user to evidence and a correction; interrupted or budget-paused work to a safe resume; and cancellation/disconnect/deletion to their documented outcome. Each flow names entry/deep link, scope, required grant, loading/empty/error state and the next useful destination. Keep optional branches out of the shortest first-result route.
+
+| Situation              | Required behavior                                                                                                                                                                                                                                            |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Tap or submit          | Acknowledge promptly, with an initial prototype target below 400 ms; measure feedback separately from completion. Never mark work complete before its receipt.                                                                                               |
+| Slow load              | Preserve layout with suitable static skeletons, accessible loading state and truthful stale labels. No false zero counts or endless shimmer.                                                                                                                 |
+| Detail/reorder         | Open a contextual drawer or sheet, retain filters/scroll, support browser Back and restore focus on close. Reordering has buttons/keyboard alternatives to dragging.                                                                                         |
+| Notifications          | A count means unresolved actions or unseen updates, with each meaning labeled separately. Viewing can clear unseen status; it cannot resolve an approval. Cap visual counts, retain accessible exact counts and avoid redundant dots for the same condition. |
+| Toast                  | Confirm server-accepted reversible changes; deduplicate repeated events. Persistent failures, analysis completion, payment and approvals also have a durable task/receipt location. Use appropriate live-region urgency without stealing focus.              |
+| Error                  | Name the correctable problem in plain language and offer the actual next action. Preserve safe edits. Put technical diagnostics behind a support reference; never reveal secrets or raw provider payloads.                                                   |
+| Optimistic change      | Limit to reversible organization/preferences with rollback and conflict handling. Publishing, charging, coding, merging and deleting evidence require authoritative receipts.                                                                                |
+| Offline or interrupted | Preserve explicitly recoverable drafts/intake with account-scoped limits. Revalidate identity, rights, current versions and grants before retry; never replay stale publication or spending approval automatically.                                          |
+| Completion             | Show the real result and one useful next step. Celebrate a useful decision, including a justified rejection, rather than payment alone.                                                                                                                      |
+
+Prefer deliberate tap feedback and occasional task-completion delight. No recurring CTA pulse, fabricated head start, shame streak, guilt-driven Scroll or continuous decorative scene. Hover effects need equivalent focus/touch behavior. Animation must stop when hidden and honor reduced motion; verify actual browser power behavior without assuming a portable low-power API exists.
 
 ## 5. Navigation and dashboard
 
@@ -239,6 +273,10 @@ For multi-source changes, show contributed-to outcomes or use a clearly labeled 
 
 Initially collect outcomes through the existing owner judgment/measurement workflow. Add read-only analytics integrations only when an actual project needs them and its user connects them. Do not connect every possible analytics provider in onboarding.
 
+Show the current reviewed-work capacity and an understandable queued/waiting state. Reuse actual concurrency and funding limits, with pause/cancel/retry controls where supported; do not create a second limit system. Multiple project views reference the same work identity. A project timeline and a review queue must not duplicate its tasks or invent completion from a moving character.
+
+Keep decision feedback distinct: useful, not relevant, already implemented, unsafe/unsupported and later are different meanings. Dismissal can hide a dashboard module without rejecting its evidence. Capture a reason optionally and scope it to the project or preference version. Clicks, time spent, saves and a deferred issue are not approval or a dislike. Suggested preference changes remain editable, with their source and a way to undo them.
+
 ## 6. Onboarding that produces a useful first result
 
 ### Sequence
@@ -258,6 +296,8 @@ Use a short branching quiz with a visible setup preview, back navigation and sav
 The shortest Personal route skips GitHub and reaches the real result quickly. Business setup can continue while analysis runs, but must not delay showing a completed result. Processing duration is honest; do not promise instant retrieval/transcription for every social link. If the source is unavailable, preserve the link and offer a permitted upload or useful sample; do not pretend the sample is the user's video.
 
 Use the existing verified-account preview policy of at most three sources and 30 credits with its global trial-spend ceiling; the onboarding promise is one eligible real post within that allowance. Reserve cost before starting. If a video exceeds the allowance, explain the estimate and offer an eligible smaller source or approved alternative before spending. No automatic conversion to a paid plan. Any change to allowance or trial funding requires an explicit billing decision and a validated cost model. [Billing and tax](BILLING-AND-TAX.md).
+
+P5 must first reconcile the per-account promise with the actual shared trial funding ceiling and available route. A credit allowance is not proof that money or a worker is available. Quote supported duration/size and real route availability; if no free processing capacity exists, say so before asking for unnecessary connections. Keep previously saved work usable under the existing entitlement policy. A sample is a transparent fallback, not fulfillment of the real-post promise. Measure transcription, inference, sandbox, storage, support and failed-attempt cost per first result before expanding the trial.
 
 Proposed wording: "Tell Scroll what you want to use your ideas for" and "Your answers shape your library." The interface must actually use the answers in visible setup. Avoid promises about life transformation or automatic improvement.
 
@@ -294,6 +334,8 @@ Connecting an account during onboarding is not inherently prohibited. Design it 
 When consent is the legal basis, GDPR requires a real, specific, informed choice and easy withdrawal. Unnecessary data processing cannot simply be bundled into access to the service. Determine the correct basis for each purpose rather than calling all processing consent. [EDPB guidance](https://www.edpb.europa.eu/sme/be-compliant/process-personal-data-lawfully_en), [consent conditionality](https://www.edpb.europa.eu/sites/default/files/files/file1/edpb_guidelines_202005_consent_en.pdf).
 
 Use an honest price preview, allowance, renewal interval and cancellation path. Do not imply that connecting GitHub commits the user to payment or use a distressed Scroll to discourage cancellation. EU enforcement covers hidden subscription terms, misleading hierarchy and false urgency. [Commission dark-pattern enforcement](https://commission.europa.eu/topics/consumers/consumer-rights-and-complaints/enforcement-consumer-protection/sweeps_en), [recurring subscription traps](https://commission.europa.eu/topics/consumers/consumer-rights-and-complaints/enforcement-consumer-protection/coordinated-actions/consumer-frequent-traps-and-scams_en).
+
+Show the full recurring charge, interval and actual renewal date where available, even when showing a monthly annual-price equivalent. Terms, checkout, entitlement and receipts must agree. Failed payment, renewal, cancellation, expiry, purchased-credit treatment and deletion use the current documented policy; specify recoverable access and export instead of inventing grace periods. Trial reminders are relevant to a real timed subscription, not an invented expiry for the non-converting free allowance. Transactional completion/expiry messages and marketing consent remain separate. Native purchase restoration is a later store-specific requirement.
 
 Future native apps need a storefront-specific purchasing design. Apple generally requires in-app purchase for digital functionality, with storefront/program exceptions; its login rule concerns third-party authentication of the primary account, not every optional GitHub connection. Account deletion must be available. Do not assume a web checkout embedded in a wrapper qualifies. [Apple guidelines](https://developer.apple.com/app-store/review/guidelines/), [deletion guidance](https://developer.apple.com/support/offering-account-deletion-in-your-app/).
 
@@ -405,6 +447,16 @@ No all-pairs corpus comparison, full-transcript loading for a chart or complete 
 
 Whole-repository context means inventorying the permitted repository and explaining inspection coverage. The user selects a repository, not mandatory folders. The system chooses relevant files under budgets, skips secrets/binaries/generated files and reports omitted coverage. It does not claim every file was read by the model. Business-profile confirmation remains explicit.
 
+### Capture, retrieval and evidence quality
+
+Define a support matrix by source type and actual capability: link saved, metadata obtained, permitted media retrieved, speech prepared, frames sampled and analysis validated. Instagram, TikTok, other links, text and uploads may have different limits. Keep unavailable/deleted/login-required sources readable as saved links with precise options; do not bypass access restrictions. Safe URL normalization accepts equivalent permitted forms but preserves the original reference and rejects ambiguous or unsafe targets. Existing test records must be identified by explicit fixture provenance, never merely a title such as "test".
+
+Search starts with titles/text, topic aliases and accessible scope filters, then supports question-led discovery where useful. Filters include space, topic, project, readiness, source type and usefulness; distinguish save time, source publication time and analysis time. Explain a match with a cited idea rather than a model percentage presented as truth. Preserve search/filter state when opening a source and show an honest no-result route. Evaluate keyword/alias search on real paraphrased recall tasks before funding embeddings or another index.
+
+Expose whether an insight relies on speech, caption or sampled frames, the relevant timestamps and important coverage gaps. Auto-transcription can misname tools; visual evidence can correct it. Show source claim, interpretation and verification need distinctly. Repeated posts and copies are not independent corroboration. Conflicting claims keep both evidence trails; disputed advice need not produce a project task. Source freshness and project-fit freshness are separate. Never infer diagnoses, dietary requirements or stable identity from saved personal advice.
+
+Scope, delete, correction and rights changes need bounded reverse-dependency invalidation with resumable cursors. Deny access immediately while background cleanup runs; fence late jobs, cached search results, thumbnails, graph counts and assistant citations. Additive rollout must handle concurrent user edits and interrupted migration without resurrecting data. Export includes permitted insights, memberships, decisions and provenance in a documented usable format, without credentials or private signed asset URLs.
+
 ## 8. Visualizing knowledge and outcomes
 
 Use one Library Explore destination with a few purpose-driven views. Every view opens the same authorized details and evidence. Switching representation does not analyze anything.
@@ -493,6 +545,8 @@ Supported Dots can use installed/enabled plugins, subject to the connected accou
 Offer "Tell me when this is ready" using an explicit subscription. Official MCP Events currently requires MCP 2.0 protocol `2026-07-28`, persistent subscriptions and verified webhook delivery in supported Work/cloud/Dots surfaces. Pin and test an actually compatible implementation; SDK presence alone is insufficient. Ordinary polling is not a substitute for that host's documented Events integration. [Events contract](https://developers.openai.com/plugins/build/mcp-events).
 
 Store only the necessary scoped subscription state, validate callback destinations, sign deliveries and deduplicate retries. Recheck authorization before delivery and retrieval; a small completion event can link to the ready item without exposing full private content. Revocation and deletion cancel future deliveries. Events do not grant instructions to publish or code.
+
+Assistant intake must enforce URL/network restrictions outside the model, including redirect checks and refusal of private-network targets. Transcripts, captions and repository text cannot change tool scopes or authorize writes. Minimize excerpts and retain scoped, user-openable citation links; never issue permanent public asset URLs as citations. Disconnect invalidates grants, subscription delivery and cached responses at the app boundary. Document tool limits, unsupported hosts and rate-limit recovery. Plain search/fetch remains useful when Events or widgets are unavailable. No new general conversation-history capture is part of this release.
 
 Later use optional MCP Apps UI for a compact source/result card, category selector or approval link. Tools must also work as plain structured responses. The dedicated app remains the full dashboard and explorer. Public plugin distribution needs the actual submission/review path; private testing is a separate milestone. [Plugin UI](https://developers.openai.com/plugins/build/chatgpt-ui), [submission](https://developers.openai.com/plugins/deploy/submission).
 
@@ -586,6 +640,22 @@ P2 and P3 can be prepared independently; no concurrent mutations of shared files
 
 The first reviewable implementation should include the shared character/control direction and a small dashboard slice over existing safe data, before migrating the whole corpus. Test/approve usability while the existing library remains intact. Additional paid jobs or full-library analysis are not needed to prove layout.
 
+### Preserve the original V1 commitments
+
+[ADR 075](adr/075-vibescroll-product-direction.md) records the accepted owner direction and the planning-only boundary. The redesign supplements [the V1 knowledge plan](V1-KNOWLEDGE-LIBRARY-PLAN.md) and [ADR 052](adr/052-workspace-knowledge-and-reviewed-issues.md). P0 creates an exact acceptance crosswalk from the latest [V1 execution ledger](V1-KNOWLEDGE-EXECUTION.md); do not reset completed evidence or hide unfinished gates behind the new visuals.
+
+| Original package            | Redesign package | Evidence to carry forward or complete                                                                                                                      |
+| --------------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| W01 contracts/compatibility | P2, P8           | Existing identities, scope checks, corrections and bounded jobs; interrupted serving recovery remains a real gate.                                         |
+| W02 repositories/context    | P4, P5, P8       | Whole eligible-tree discovery and confirmed profiles; restricted/multiple installations, revocation and mobile confirmation still need their own evidence. |
+| W03 organization            | P2, P6, P8       | Existing cited summary pages and persistent decisions; independent relation judgments remain unverified.                                                   |
+| W04 library UX              | P3–P6, P8        | Preserve real viewport/keyboard evidence, then verify changed screens. Physical phone and fresh-user comprehension are separate unfinished checks.         |
+| W05 project fit             | P4, P6, P8       | Current-code evaluations, no-fit and already-implemented cases; independent held-out usefulness judgments remain unverified.                               |
+| W06 reviewed issues         | P4, P8           | Preserve current app drafts and prior real receipts. The 125-draft batch still requires exact publication review; this plan publishes none.                |
+| W07 release                 | P8               | Exact changed-commit CI, migrations, real serving recovery, provider/account journeys and earlier commercial/invoice/quality gates.                        |
+
+Prefer P3 plus a safe P4 dashboard slice for the first visible improvement. Compatible data work follows demonstrated access needs. P7 read-only search/fetch can be an independent bounded integration milestone after scope enforcement. P1's external rename waits for verified backup and callback compatibility. Feature flags and a frontend rollback let each slice ship without a complete data/provider migration. No phase requires all saved posts to be analyzed again.
+
 ## 13. Acceptance and evidence
 
 All following checks are future acceptance requirements, not passes claimed by this plan.
@@ -610,6 +680,16 @@ Define usability tasks in plain language: save a video; find its useful idea and
 For implementation PRs, run required formatting, lint, types, unit/relevant integration tests, dependency/secret checks and builds under repository policy. Add targeted tests for changed behavior/security boundaries; do not write tests merely to mirror harmless style edits. Batch mobile/desktop visual verification and avoid repeating complete suites after documentation-only edits. Exact-head CI remains required for merge/release.
 
 Every receipt records commit, command or actual browser actions, environment, timestamp, result and limitations. Real integration evidence is separate from synthetic fixtures, mocked webhooks, viewport emulation and static screenshots. Physical phone acceptance is separate from mobile emulation. Backend savings, conversion improvement and customer value remain unmeasured until actual comparable data exists.
+
+Additional acceptance from the complete insight review:
+
+- Interrupted save, duplicate delivery and lost response recover without duplicate records, charges or external publication. Switching accounts/workspaces cannot replay another scope's drafts or cache.
+- Badges clear according to their stated meaning; toasts match accepted operations; failures remain findable. Static loading, stale values, actual zero and unavailable counts are distinguishable.
+- Search preserves context and returns permitted, current evidence; source removal, rights changes and corrected interpretations invalidate dependent graph/search/assistant results even beyond one page.
+- Test original URL, normalized equivalent, unsafe redirect, denied/login-required source, unavailable media, caption-only and visual-only evidence. Saved link and fully analyzed source remain different states.
+- Actual free-route capacity, quote/reservation and entitlement agree with onboarding, checkout and receipts. Failed payment and cancellation preserve the documented access/export behavior.
+- Record cohorts, denominators, first-result timing, later use, correction effort and judgments separately. Do not claim uplift from a tiny cohort, introduce sensitive session replay by default, or solicit public ratings only from satisfied users.
+- Review the original W01–W07 crosswalk and every retained blocker before saying the redesign or V1 is complete. Clear screenshots and passing style checks cannot substitute for these gates.
 
 ## 14. Decisions still open and recommended defaults
 
@@ -636,3 +716,5 @@ The next stage is a small set of design mockups and the recorded architecture co
 - Checked current primary documentation for the proposed component tools, Convex, GitHub rename, OpenAI MCP/Dots and EU/mobile-platform requirements.
 - Inspected the public 000h site in the existing authorized Chrome browser. Local reference screenshot is in ignored outputs; it is not a new product mockup or production UX test.
 - No application code, dependency installation, repository rename, backup execution, model session, issue publication, commit/push or deployment occurred during planning. Required implementation acceptance remains future work.
+
+October 7 complete insight review: read all 744 titles/full claims after deduplicating 1,574 memberships across the captured 108 genuine posts, then selected interpretation/verification notes. Wrote an ignored private disposition ledger and public review summary, strengthened this plan and reconciled the foundational brief through F014. Checked current primary Drawably/Rare UI documentation, including the restrictive Rare UI license. No application implementation, skill installation, model processing or production scan was performed. Documentation publication and document QA are reported separately from product acceptance.

@@ -1,4 +1,6 @@
-# VibeScroller foundational beliefs
+# VibeScroll foundational beliefs
+
+Current direction, October 7, F014: VibeScroll targets adult project owners using AI agents, including non-coders, with useful Personal/Business knowledge and an original always-present Scroll character. The six purchase conditions remain evidence, context, a useful decision, continuity, control and personally demonstrated value. Earlier dated findings below retain their original scope; [ADR 075](../adr/075-vibescroll-product-direction.md) controls the new planning direction.
 
 A prospect should be able to justify trying VibeScroller from an inspectable workflow and a personally relevant need. The six statements below complete the SOP's necessary-beliefs stage using the [research](VibeScroller_Foundational_Research.md), [avatar](VibeScroller_Foundational_Avatar.md), and [offer](VibeScroller_Foundational_Offer.md). They are proposed purchase conditions, not findings that every prospect already holds.
 
@@ -79,3 +81,9 @@ The owner requested a visual node or tree view of existing knowledge connections
 ## F013: simplify library reading, October 6
 
 The owner reported that the map was difficult to find and the interface was confusing and excessive. This is direct qualitative operator feedback, not an independent customer study. Separate Knowledge, Posts, Ideas and Issues; prioritize source-backed reading and reveal correction, coverage and funded actions only when requested. Preserve exact rights/budget/publication disclosures at their decision points. This supports the existing traceability and review beliefs without changing the audience, prices or six beliefs. Production availability and independent comprehension remain separate from local UI checks. See [ADR 073](../adr/073-reading-first-library-navigation.md).
+
+## F014: supportive character and inspectable value, October 7
+
+The character supports comprehension and a useful first experience; it cannot establish truth, grant permission or claim that an idea helped. A connection explains cited support rather than proving cause. Personal memberships do not grant team access. Quiz answers and confirmed goals have user provenance; source advice is not a fact about the person. Manual corrections, scoped sharing and exact funding/publication/execution authority remain enforceable outside the model.
+
+A user can dismiss a prompt, defer an idea, reject unsafe advice, cancel or leave without pressure. Celebrate a sound decision as well as implementation. No fabricated progress, guilt streak, distressed mascot, selective public-rating funnel or invented success guarantee is needed. A real capped first result, understandable scope and separate judgment/measurement can support the price argument. Customer value and improved conversion still require actual evidence. See [the complete insight review](../VIBESCROLL-INSIGHT-REVIEW.md).

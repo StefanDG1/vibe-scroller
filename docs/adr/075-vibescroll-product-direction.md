@@ -1,0 +1,15 @@
+# Plan VibeScroll around saved knowledge, a character and useful outcomes
+
+Mode: reference. Decision October 7, 2026. Status: owner-confirmed direction; application implementation deferred by the owner's current request.
+
+The owner selected VibeScroll as the display name, vibescroll as the future GitHub slug and the existing https://scroll.companynerve.com domain. Scroll is an original soft illustrated creature, present in the normal product shell and onboarding, without a hide-character setting. Reduced motion keeps a static character. Home is a useful dashboard; Personal and Business organize permitted knowledge, with editable categories and optional cross-space connections. ChatGPT/Dots/Codex are additional intake/retrieval interfaces, subject to their actual contracts, rather than the primary app layout.
+
+The initial audience includes adult project owners who use an AI agent and do not code themselves. Personal material supports knowledge use without making V1 a general life assistant. Onboarding is a short useful quiz with a visible setup preview and one eligible real post within a stated free allowance before a payment request. Most helpful in-app behavior can default on. Sharing, provider consent, funding, publication and execution retain their separate enforced authority. Existing users' privacy choices do not silently change.
+
+The owner requested review of all saved insights and changes to the plan, explicitly without implementation. [The evolution plan](../VIBESCROLL-EVOLUTION-PLAN.md) and [the review record](../VIBESCROLL-INSIGHT-REVIEW.md) specify the proposed work. F014 reconciles all four foundational briefs. Creator advice remains attributed inspiration, not measured app benefit or provider permission. The conditional AI/free-time founder story is a belief, not a forecast or endorsement.
+
+Reuse the existing shared UI, source evidence, knowledge memberships, project context, reviewed issues and outcome tracking. Keep Convex and the owner's indexed/projection/visible-query optimizations. New graph views cannot require full-corpus reads, all-pairs inference or analysis merely for navigation. Preserve manual corrections, stable versioned references, deletion, scope isolation, budgets, provider restrictions and fixed Basic Vercel builds. No V2 expansion follows.
+
+The newer direction supersedes old developer-only targeting and VibeScroller naming guidance for future copy, optional-character recommendations and chat-first/neutral-console proposals. Historical release records and stable provider identities remain intact. Executing the rename requires verified backup and compatibility; neither is performed here.
+
+Affected future checks include original W01–W07 acceptance, private scope/mixed-input access, bounded migrations, search/evidence invalidation, interrupted/offline jobs, funding and billing, assistant authentication, mobile/desktop accessibility, fresh-user comprehension, exact issue/agent/PR approval and comparable backend usage. Existing uncompleted external/commercial gates remain open. This ADR changes no runtime permission, allowance, schema, feature, deployment or release status.

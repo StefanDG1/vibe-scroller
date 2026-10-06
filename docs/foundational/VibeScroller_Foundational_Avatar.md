@@ -1,6 +1,8 @@
-# VibeScroller foundational avatar
+# VibeScroll foundational avatar
 
-The primary working avatar is an adult independent developer or technical founder who saves useful content on a phone, has an active GitHub project, and wants help deciding what to apply. This is a behavioral targeting hypothesis. It is not a verified demographic segment or a fictional customer biography.
+The current primary working avatar is an adult project owner who saves useful content on a phone and uses an AI agent to help decide and implement what to apply. They may never write code themselves. Developers and technical founders remain a segment. This October 7 owner-selected behavioral target supersedes developer-only targeting; it is not a verified demographic segment or a fictional customer biography.
+
+Earlier dated findings below describe the September technical-audience brief. F014 and [ADR 075](../adr/075-vibescroll-product-direction.md) control the current direction. Personal knowledge can be useful without GitHub; no user is required to adopt a coding workflow simply to use the library.
 
 This completes the original Mark Builds Brands Avatar Sheet Template using the [research document](VibeScroller_Foundational_Research.md). Product means a recorded product decision. Observation means a cited public account. Interpretation means a proposed explanation. Unknown means there is no evidence to fill the field. The observed public users are not VibeScroller customers.
 
@@ -12,7 +14,7 @@ This completes the original Mark Builds Brands Avatar Sheet Template using the [
 | Gender                   | No verified distribution; do not gender the copy                                                                 | Unknown                                       |
 | Location                 | English interface; individual and business checkout in verified Managed Payments markets once release gates pass | Owner decision October 2; not measured demand |
 | Monthly revenue          | Not known; personal salary and project revenue must not be conflated                                             | Unknown                                       |
-| Professional backgrounds | Independent development and technical product founding are the intended focus                                    | Product and hypothesis                        |
+| Professional backgrounds | Project owners using AI agents, including non-coders; developers/founders remain a segment                       | Owner direction October 7; hypothesis         |
 | Typical identities       | Person with permission to change a selected repository and responsibility for reviewing the change               | Behavioral hypothesis                         |
 
 The first-person identity used for copy exploration is "I build a project and keep finding ideas I might use." This is drafted language, not a customer quote. Do not infer that the buyer runs a profitable SaaS, works full time, has a particular education, or is already subscribed to ChatGPT. Business enquiries are possible, but enterprise administration and team governance cannot be invented to broaden this avatar.
@@ -163,3 +165,9 @@ The owner requested a visual node or tree view of existing knowledge connections
 ## F013: simplify library reading, October 6
 
 The owner reported that the map was difficult to find and the interface was confusing and excessive. This is direct qualitative operator feedback, not an independent customer study. Separate Knowledge, Posts, Ideas and Issues; prioritize source-backed reading and reveal correction, coverage and funded actions only when requested. Preserve exact rights/budget/publication disclosures at their decision points. This supports the existing traceability and review beliefs without changing the audience, prices or six beliefs. Production availability and independent comprehension remain separate from local UI checks. See [ADR 073](../adr/073-reading-first-library-navigation.md).
+
+## F014: project owners and a friendly guide, October 7
+
+The intended buyer can judge goals and useful outcomes without understanding implementation internals. Show the saved idea, why it fits, what needs their decision and what happened later. Scroll is an original soft illustrated guide, not a source of authority or a guilt mechanism. A clear dashboard, contextual evidence and a short useful quiz address the owner's observed confusion; improved conversion or affection remains unmeasured.
+
+Personal interests and business audiences must stay distinct. A saved cooking/MMA/motivation post does not establish sensitive facts, a fixed identity or willingness to share with teammates. Roles such as parent, educator, student and administrator belong to confirmed project context when relevant; they are not inferred demographics of every buyer. Validate this broader targeting with recent-save and project-review tasks, including rejected suggestions, optional connections and cost comprehension. See [the complete insight review](../VIBESCROLL-INSIGHT-REVIEW.md).

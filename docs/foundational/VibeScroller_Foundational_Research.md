@@ -1,4 +1,6 @@
-# VibeScroller foundational research
+# VibeScroll foundational research
+
+Current direction, October 7, F014: the owner selected VibeScroll, an original always-present Scroll character and a dashboard for adults who own projects and use AI agents, including non-coders. Personal/Business organization and scoped assistant retrieval support the saved-idea-to-outcome workflow. [ADR 075](../adr/075-vibescroll-product-direction.md) and [the evolution plan](../VIBESCROLL-EVOLUTION-PLAN.md) govern future copy and implementation. The September research and dated release observations below remain historical; this direction is not new demand evidence.
 
 Research date 30 September 2026. This document recommends an initial audience and sales argument for VibeScroller. The strongest candidate is an adult independent developer or technical founder who saves practical videos on a phone and owns an active GitHub project. The proposed value is a reviewable connection between a source, the current project, an implementation plan, and an approved draft pull request. Demand for that complete workflow remains unvalidated.
 
@@ -22,7 +24,7 @@ The complete hosted product requires a metered isolated cloud execution option. 
 
 Latest owner steering prefers official user ChatGPT-plan funding when eligibility and consent permit it. That preference is conditional. Personal-plan text and image Responses access for eligible open-source or local applications does not establish approved access for a paid remotely hosted application. Hosted access remains subject to the official interest or waitlist process, which has not been granted for this product. Raw audio, video, and transcription cannot be marketed as included under that route. A paid transcription or cloud route needs its own disclosed budget. See the ledger for the distinction between current steering and older provider specifications.
 
-The chosen product name and motto are VibeScroller and "Make scrolling productive." The selected origin is `scroll.companynerve.com`. That does not certify DNS, trademark, company particulars, legal review, or tax treatment. Exponential Education is the intended operator; official identity records are now held and reviewed privately, while applicable tax and legal publication checks remain outstanding. Public-source V1 authored code is intended to use MIT with upstream notices preserved. Supported independent self-hosting is deferred.
+The current selected display name is VibeScroll and proposed brand line is "Make scrolling useful." These supersede the September VibeScroller name and motto for future copy. The selected origin stays `scroll.companynerve.com`; the repository rename has not been executed. Name selection does not certify trademark, company particulars, legal review or tax treatment. Exponential Education is the intended operator; official identity records are held privately, while applicable tax and legal publication checks remain outstanding. Public-source V1 authored code retains its MIT intent with upstream notices preserved.
 
 ## Customer and demographic findings
 
@@ -218,3 +220,9 @@ The owner requested a visual node or tree view of existing knowledge connections
 ## F013: simplify library reading, October 6
 
 The owner reported that the map was difficult to find and the interface was confusing and excessive. This is direct qualitative operator feedback, not an independent customer study. Separate Knowledge, Posts, Ideas and Issues; prioritize source-backed reading and reveal correction, coverage and funded actions only when requested. Preserve exact rights/budget/publication disclosures at their decision points. This supports the existing traceability and review beliefs without changing the audience, prices or six beliefs. Production availability and independent comprehension remain separate from local UI checks. See [ADR 073](../adr/073-reading-first-library-navigation.md).
+
+## F014: VibeScroll direction and complete insight review, October 7
+
+The owner-approved targeting hypothesis now includes non-coding project owners who use an AI agent. Personal retrieval is useful supporting value, not proof of a new validated assistant market. All 744 unique insight titles/full claims across 108 captured genuine posts were reviewed, with 90 selected interpretation/verification notes checked again. The [review record](../VIBESCROLL-INSIGHT-REVIEW.md) separates reusable guidance, constraints and rejected tactics. This is review of source claims, not interviews, a controlled design study or a fresh production query.
+
+Useful research priorities are recent-save friction, source-to-project usefulness versus the current stack, reasons to decline, correction burden, understood privacy/funding and willingness to pay. First-result cohorts need denominators and observation windows. Creator claims about five-minute purchase windows, conversion uplifts, low tool cost and successful revenues do not establish VibeScroll results. The conditional AI/free-time/scroller founder thesis can be tested as a message; steady annual growth in personal scrolling and universal basic income are not established facts. Preserve contrary evidence and validate the project-owner segment with real people before widening acquisition.

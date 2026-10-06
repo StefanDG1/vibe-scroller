@@ -1,12 +1,14 @@
-# VibeScroller foundational offer
+# VibeScroll foundational offer
 
-VibeScroller's proposed offer is a mobile browser library that helps a developer review saved ideas against selected projects, prepare an editable plan, and authorize a bounded draft-PR workflow. Lead with project relevance and evidence. A video summary or coding agent alone is already available elsewhere.
+VibeScroll's proposed offer is a mobile browser library that helps adults turn saved ideas into retrievable knowledge and considered project decisions, including owners whose AI agent does the coding. Personal/Business views, a useful dashboard and Scroll, an original soft illustrated creature, support that workflow. Lead with project relevance and source-to-outcome evidence. A video summary or coding agent alone is already available elsewhere.
+
+F014, October 7, updates the planning brief. [ADR 075](../adr/075-vibescroll-product-direction.md) and [the evolution plan](../VIBESCROLL-EVOLUTION-PLAN.md) define future behavior; current implementation evidence still controls availability claims. Earlier dated observations are preserved. This document does not execute the rename or enable the proposed redesign.
 
 This completes the original Mark Builds Brands Offer Brief Template after the [research](VibeScroller_Foundational_Research.md) and [avatar](VibeScroller_Foundational_Avatar.md). Product specifications define the intended package; they do not certify that every integration is enabled. The [implementation status](../implementation-status.md) controls claims about tested behavior. Latest owner funding steering and known gates are recorded in the [ledger](README.md).
 
 ## Potential product name ideas
 
-The name is already chosen: VibeScroller. Use the selected motto "Make scrolling productive." Do not spend this stage inventing a replacement name. A descriptive line can be "Review saved ideas against your projects." The product should not borrow the Mark Builds Brands identity, claim endorsement, or rename the framework's advice as a proprietary invention.
+The name is chosen: VibeScroll. The future GitHub slug is vibescroll, with the existing production domain unchanged. Proposed brand language is "Make scrolling useful" and "Give your saved ideas somewhere to go." This supersedes the older name/motto without claiming a trademark or an executed repository rename. The product should not borrow the Mark Builds Brands identity, claim endorsement or present the framework's advice as a proprietary invention.
 
 ## Level of consciousness
 
@@ -212,3 +214,11 @@ The owner requested a visual node or tree view of existing knowledge connections
 ## F013: simplify library reading, October 6
 
 The owner reported that the map was difficult to find and the interface was confusing and excessive. This is direct qualitative operator feedback, not an independent customer study. Separate Knowledge, Posts, Ideas and Issues; prioritize source-backed reading and reveal correction, coverage and funded actions only when requested. Preserve exact rights/budget/publication disclosures at their decision points. This supports the existing traceability and review beliefs without changing the audience, prices or six beliefs. Production availability and independent comprehension remain separate from local UI checks. See [ADR 073](../adr/073-reading-first-library-navigation.md).
+
+## F014: one real result and portable knowledge, October 7
+
+The owner chose one eligible real post within the stated free allowance before asking for payment, with a short branching quiz whose answers visibly improve setup. GitHub and assistant connection remain optional and useful for their stated purpose. The existing allowance, funding caps, entitlement and provider rules still apply; verify real route capacity before making the promise. No automatic paid conversion, forced annual trial, borrowed guarantee or invented savings follows.
+
+The dashboard shows useful next work and what helped. Topic trees and focused connections reveal existing permitted evidence; source claims and interpretations remain distinct. Official scoped assistant search/fetch and explicit link intake are planned supporting interfaces, not unrestricted chat-history access or hosted subscription-funded inference. Personal recommendations use stated goals, with no general calendar/email/health service in V1.
+
+Show real features, honest limitations, full recurring charges and cancellation/export behavior. Measure first-result cost and recurring usefulness before expanding free access or referral rewards. The AI-era founder story stays a conditional belief. The [complete insight review](../VIBESCROLL-INSIGHT-REVIEW.md) rejects shame, fake proof, deceptive urgency and unverified performance claims. Prices and existing permissions are unchanged.

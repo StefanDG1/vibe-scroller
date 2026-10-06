@@ -1,5 +1,17 @@
 # Foundational idea backlog
 
+## F014: VibeScroll, Scroll and useful connected knowledge, October 7
+
+Source: explicit owner choices and the complete captured saved-insight review. Status: direction adopted for planning; design hypotheses and implementation remain unverified. [ADR 075](../adr/075-vibescroll-product-direction.md), [evolution plan](../VIBESCROLL-EVOLUTION-PLAN.md) and [review record](../VIBESCROLL-INSIGHT-REVIEW.md) contain the decisions and dependencies.
+
+Adopt VibeScroll naming, future vibescroll repository slug, unchanged production domain, original always-present soft illustrated Scroll, dashboard home, Personal/Business views with controlled connections, a short useful quiz and one eligible real post before payment. Initial targeting includes project owners whose AI agent codes. Preserve scoped assistant retrieval and the source-to-outcome project workflow; no general life-management/V2 expansion.
+
+Research: 744 titles/full claims reviewed across 108 captured genuine sources, with 90 deeper interpretation/verification reads. These supply design guidance, contrary examples and hypotheses, not market validation. Avatar: non-coding owners are included by owner instruction, not measured adoption. Offer: first-result capacity, provider eligibility, recurring terms and outcome tracking must work in reality. Beliefs: evidence, agency, reviewable action and bounded cost stay authoritative.
+
+Validate a real first result, understood setup/privacy/cost, recalled source retrieval, a related idea, one corrected category, a justified no-fit decision and a reviewed project next step with fresh users. Measure completion, elapsed time, correction burden, later use and payment intent with denominators. Compare the full workflow to the user's current tools. Failure includes confusion, unnecessary permission, unapproved spend, privacy leakage and suggestions that create work without value. Do not declare conversion uplift from a small cohort or borrowing creator figures.
+
+The founder's AI/free-time/scrolling thesis is accepted for a clearly attributed conditional message experiment. No universal-basic-income forecast, uninterrupted annual scrolling-time growth or celebrity endorsement is established. Additional referral rewards, native expansion, audience-adaptive marketing and optional new mascot skills stay deferred to a measured need and their applicable gates. No campaign, deployment, issue publication or new funding is authorized by this record.
+
 Mode: reference. Review ideas through [the process](COPY-AND-IDEAS.md). An entry does not authorize activation or unsupported claims.
 
 | ID   | Date       | Idea                                                            | Status                                                       |

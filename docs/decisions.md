@@ -89,3 +89,7 @@ Follow [ADR 058](adr/058-bounded-full-library-scans.md): full URL-link paginatio
 [ADR 069](adr/069-release-completed-subscription-client.md) releases the completed sign-in client's threads and uses an init process to reap orphaned children within the unchanged isolated worker limits. Connection failures and bounded recovery attempts remain recorded.
 
 [ADR 070](adr/070-untimed-image-evidence-labels.md) labels demonstrated untimed carousel evidence as numbered images rather than implying a video timeline. Source references, corrections and asset access remain unchanged.
+
+## October 7: VibeScroll direction and complete insight review
+
+[ADR 075](adr/075-vibescroll-product-direction.md) records the owner-selected VibeScroll name, original always-present Scroll character, dashboard, Personal/Business knowledge views, useful first-post onboarding and scoped assistant connection. The [evolution plan](VIBESCROLL-EVOLUTION-PLAN.md) now incorporates the complete captured insight review and retains original V1 acceptance. This is a planning/documentation update only. Rename, implementation, public campaigns, new funding or broader permissions are not executed or implied.
