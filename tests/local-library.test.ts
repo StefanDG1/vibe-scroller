@@ -498,7 +498,7 @@ it("binds repository evaluation to inspected lines, confirmed context, feedback 
     repositoryId: repo,
   });
   expect((await s.t.run((ctx) => ctx.db.get(p.id)))!.key).toContain(
-    "confirmed-project-context-v2",
+    "insight-first-project-context-v3",
   );
   await s.a.mutation(internal.localLibrary.recordInspection, {
     id: p.id,

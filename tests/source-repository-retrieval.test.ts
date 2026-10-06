@@ -3,6 +3,7 @@ import {
   focusedExcerpt,
   retrievalFiles,
   projectContextPaths,
+  knowledgeRetrievalFocus,
   validateInspectedContext,
 } from "../packages/repositories/retrieval";
 import { validateRepositoryEvidence } from "../packages/repositories/context";
@@ -15,6 +16,47 @@ const file = {
   mode: "100644",
   size: 5000,
 };
+it("retains candidate navigation evidence despite a detailed unrelated business profile", () => {
+  const profile = Array.from({ length: 90 }, (_, n) => `foundation${n}`).join(
+    " ",
+  );
+  const insights = [
+    {
+      title: "Question navigation",
+      claim: "Offer reading paths",
+      interpretation: "Inspect library discovery",
+    },
+  ];
+  const target = {
+    ...file,
+    path: "apps/marketing/components/library/navigation.tsx",
+  };
+  const entries = [
+    target,
+    ...Array.from({ length: 35 }, (_, n) => ({
+      ...file,
+      path: `apps/starter/foundation${n}.tsx`,
+    })),
+  ];
+  expect(
+    retrievalFiles(
+      entries,
+      JSON.stringify({ confirmedBusinessContext: profile, insights }),
+    ),
+  ).not.toContain(target);
+  const focus = knowledgeRetrievalFocus(profile, insights);
+  expect(retrievalFiles(entries, focus)).toContain(target);
+  const text = [
+    ...Array.from(
+      { length: 80 },
+      () => "// foundation0 foundation1 foundation2",
+    ),
+    "export const navigation = 'question library reading paths discovery';",
+  ].join("\n");
+  expect(focusedExcerpt(target, text, focus, 1000)?.content).toContain(
+    "export const navigation",
+  );
+});
 it("anchors project knowledge in confirmed current paths while retaining safe inspection bounds", () => {
   const code = {
     ...file,
