@@ -70,6 +70,10 @@ Follow [ADR 058](adr/058-bounded-full-library-scans.md): full URL-link paginatio
 
 [ADR 065](adr/065-populated-topic-ordering.md) orders the default paginated workspace library by owner pins and included insight count. Empty and legacy topics remain accessible; inferred volume is not evidence quality. Search, filtering, access, corrections and processing limits remain unchanged.
 
+## October 6: confirmed project evidence
+
+[ADR 066](adr/066-confirmed-project-evidence.md) prioritizes safe current implementation paths named in confirmed context during personal knowledge evaluation. The immutable manifest, current authorization and all inspection limits remain enforced. A new local inspection key preserves earlier incomplete-context results without reusing them as corrected evidence.
+
 ## October 6: recovered caption evidence
 
 [ADR 064](adr/064-local-caption-evidence.md) corrects a real omitted-caption input path. Reuse the bounded pinned acquisition manifest for personal source imports, cite recovered captions, preserve titles/corrections, and clear temporary metadata under existing privacy boundaries. Source-only metadata or truncated titles cannot establish missing media claims.

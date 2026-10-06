@@ -5,6 +5,35 @@ import type { ManifestEntry } from "./snapshotCache";
 export const RETRIEVAL_VERSION = "source-windows-v3";
 // Read bounded windows from normal-sized components, not only small files.
 export const RETRIEVAL_BLOB_LIMIT = 250000;
+export function projectContextPaths(entries: ManifestEntry[], profile: string) {
+  const suffixCounts = new Map<string, number>();
+  for (const file of entries) {
+    const suffix = file.path.split("/").slice(-2).join("/");
+    suffixCounts.set(suffix, (suffixCounts.get(suffix) ?? 0) + 1);
+  }
+  return entries
+    .filter(
+      (file) =>
+        (profile.includes(file.path) ||
+          (file.path.includes("/") &&
+            suffixCounts.get(file.path.split("/").slice(-2).join("/")) === 1 &&
+            profile.includes(file.path.split("/").slice(-2).join("/")))) &&
+        !excludedPath(file.path) &&
+        ["100644", "100755"].includes(file.mode) &&
+        file.size <= RETRIEVAL_BLOB_LIMIT &&
+        /(?:README|\.(?:tsx?|jsx?|mjs|py|md|json|css|go|rs|java|rb|ya?ml))$/i.test(
+          file.path,
+        ),
+    )
+    .sort(
+      (a, b) =>
+        Number(/(?:README|\.md)$/i.test(a.path)) -
+          Number(/(?:README|\.md)$/i.test(b.path)) ||
+        a.path.localeCompare(b.path),
+    )
+    .slice(0, 6)
+    .map((file) => file.path);
+}
 const stop = new Set(
   "about after already also application before between change could evidence example file files from have implementation improve insight into more need only point should source synthetic test that their them there these this through useful using video when where which with would".split(
     " ",
@@ -54,7 +83,7 @@ export function retrievalFiles(
       !excludedPath(file.path) &&
       ["100644", "100755"].includes(file.mode) &&
       file.size <= RETRIEVAL_BLOB_LIMIT &&
-      /(?:README|package\.json|\.(?:tsx?|jsx?|mjs|py|md|json|css|go|rs|java|rb))$/i.test(
+      /(?:README|package\.json|\.(?:tsx?|jsx?|mjs|py|md|json|css|go|rs|java|rb|ya?ml))$/i.test(
         file.path,
       ),
   );

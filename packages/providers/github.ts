@@ -15,6 +15,7 @@ import {
   focusedExcerpt,
   RETRIEVAL_BLOB_LIMIT,
   retrievalFiles,
+  projectContextPaths,
   validateInspectedContext,
 } from "../repositories/retrieval";
 import { validateRepositoryEvidence } from "../repositories/context";
@@ -418,10 +419,11 @@ export async function retrieveContext(
     manifestEntries?: ManifestEntry[];
     snapshotPaths?: string[];
     snapshotSummary?: { selectedPaths?: string[]; discoveryVersion?: string };
+    profile?: string;
   },
   focus: string,
   evidence: { path: string; startLine: number; endLine: number }[] = [],
-  purpose: "matching" | "planning" = "matching",
+  purpose: "matching" | "planning" | "knowledge" = "matching",
 ) {
   ensure(
     snapshotScopeCurrent(repo),
@@ -480,10 +482,20 @@ export async function retrieveContext(
         size: f.size,
       }));
   }
+  const requiredPaths = [...new Set(evidence.map((row) => row.path))];
+  const projectPaths =
+    purpose === "knowledge"
+      ? projectContextPaths(entries!, repo.profile ?? "").filter(
+          (path) => !requiredPaths.includes(path),
+        )
+      : [];
   const files = retrievalFiles(
     entries!,
     focus,
-    [...new Set(evidence.map((row) => row.path))],
+    [
+      ...requiredPaths,
+      ...projectPaths.slice(0, Math.max(0, 12 - requiredPaths.length)),
+    ],
     purpose === "planning",
   );
   // Blob identities come from the approved manifest, never from model-supplied refs.
