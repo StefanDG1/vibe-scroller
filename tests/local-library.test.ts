@@ -6,7 +6,18 @@ import { api, internal } from "../convex/_generated/api";
 import { sourceFingerprint } from "../convex/localLibrary";
 import { createHash } from "node:crypto";
 import { canonicalJson } from "../packages/contracts/canonical-json.mjs";
+import { downloaderRelease } from "../packages/media/acquisition";
+import { exportRecord } from "../packages/privacy/export";
 const modules = import.meta.glob("../convex/**/*.ts");
+const captionManifest = {
+  schemaVersion: "1.0.0",
+  status: "downloaded",
+  title: "Saved video",
+  description: "A caption contains a distinct useful idea missing from speech.",
+  extractor: "youtube",
+  downloaderVersion: downloaderRelease.version,
+  byteLength: 100,
+};
 const hash = (s: string) => createHash("sha256").update(s).digest("hex");
 beforeEach(() => {
   vi.useFakeTimers();
@@ -17,7 +28,7 @@ afterEach(() => {
   vi.useRealTimers();
   vi.unstubAllEnvs();
 });
-async function setup() {
+async function setup(extra: Record<string, unknown> = {}) {
   const t = convexTest(schema, modules);
   rateLimiterTest.register(t);
   for (const subject of ["owner", "other"])
@@ -55,6 +66,7 @@ async function setup() {
   const run = await prepare();
   const s = (await t.run((ctx) => ctx.db.get(source)))!;
   const sourceArgs = {
+    ...extra,
     runId: run,
     sourceId: source,
     generation: s.generation,
@@ -151,6 +163,57 @@ async function setup() {
     finish,
   };
 }
+it("imports bounded fetched captions as cited evidence and clears the staging copy", async () => {
+  const s = await setup({ acquisition: captionManifest });
+  const output = structuredClone(s.output);
+  output.insights[0].evidence.push({
+    kind: "caption",
+    id: "post_caption",
+    startMs: null,
+    endMs: null,
+  } as any);
+  await s.finish(output);
+  const source = await s.t.run((ctx) => ctx.db.get(s.source));
+  expect(source?.acquisition?.description).toBe(captionManifest.description);
+  expect(source?.acquisition?.downloaderVersion).toBe(
+    downloaderRelease.version,
+  );
+  expect(source?.title).toBe("Owned test video");
+  expect(
+    (await s.t.run((ctx) => ctx.db.get(s.job)))?.acquisition,
+  ).toBeUndefined();
+  expect(
+    exportRecord("localSourceImports", {
+      acquisition: captionManifest,
+      transcript: {},
+      frames: [],
+      state: "prepared",
+    }),
+  ).toEqual({ state: "prepared" });
+});
+it("refuses invented captions and changed or out-of-bounds fetch metadata", async () => {
+  const s = await setup();
+  const output = structuredClone(s.output);
+  output.insights[0].evidence.push({
+    kind: "caption",
+    id: "post_caption",
+    startMs: null,
+    endMs: null,
+  } as any);
+  await expect(s.finish(output)).rejects.toThrow("INVALID_EVIDENCE");
+  await expect(
+    s.a.mutation(api.localLibrary.sourcePrepare, {
+      ...s.sourceArgs,
+      acquisition: captionManifest,
+    }),
+  ).rejects.toThrow("APPROVAL_STALE");
+  await expect(
+    s.a.mutation(api.localLibrary.sourcePrepare, {
+      ...s.sourceArgs,
+      acquisition: { ...captionManifest, description: "x".repeat(6001) },
+    }),
+  ).rejects.toThrow();
+});
 it("imports exact owned evidence into the canonical library without touching credits or paid dispatch", async () => {
   const s = await setup(),
     walletsBefore = await s.t.run((ctx) => ctx.db.query("wallets").collect()),

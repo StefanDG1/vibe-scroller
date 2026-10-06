@@ -68,7 +68,7 @@ export function exportRecord(
               !(
                 root &&
                 section === "localSourceImports" &&
-                ["transcript", "frames"].includes(key)
+                ["transcript", "frames", "acquisition"].includes(key)
               ),
           )
           .map(([key, entry]) => [key, redact(entry)]),
