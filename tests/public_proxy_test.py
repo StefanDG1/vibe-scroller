@@ -11,6 +11,48 @@ module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 
 class PublicProxyTests(unittest.IsolatedAsyncioTestCase):
+    async def tunnel(self, *, idle=.04, cap=.5, delays=(.02, .02, .02, .02)):
+        class Writer:
+            def __init__(self):
+                self.data = bytearray()
+                self.closed = False
+            def write(self, data):
+                self.data.extend(data)
+            async def drain(self):
+                pass
+            def close(self):
+                self.closed = True
+        client, remote = asyncio.StreamReader(), asyncio.StreamReader()
+        client.feed_data(b"CONNECT example.com:443 HTTP/1.1\r\n\r\n")
+        output, upstream = Writer(), Writer()
+        async def response():
+            for delay in delays:
+                await asyncio.sleep(delay)
+                remote.feed_data(b"response")
+            remote.feed_eof()
+        producer = asyncio.create_task(response())
+        addresses = [(socket.AF_INET, socket.SOCK_STREAM, 6, "", ("8.8.8.8", 443))]
+        try:
+            with patch.object(asyncio.get_running_loop(), "getaddrinfo", new=AsyncMock(return_value=addresses)), patch.object(asyncio, "open_connection", new=AsyncMock(return_value=(remote, upstream))):
+                await module.Broker(["example.com"], idle_seconds=idle, connection_seconds=cap).handle(client, output)
+            return output
+        finally:
+            producer.cancel()
+            await asyncio.gather(producer, return_exceptions=True)
+
+    async def test_server_stream_keeps_connection_alive_when_client_direction_is_silent(self):
+        output = await self.tunnel()
+        self.assertEqual(output.data.count(b"response"), 4)
+        self.assertTrue(output.closed)
+
+    async def test_subscription_wait_supports_delayed_first_response_but_is_bounded(self):
+        output = await self.tunnel(idle=.15, delays=(.08,))
+        self.assertIn(b"response", output.data)
+        idle = await self.tunnel(idle=.01, delays=(.08,))
+        self.assertNotIn(b"response", idle.data)
+        capped = await self.tunnel(idle=.15, cap=.01, delays=(.08,))
+        self.assertNotIn(b"response", capped.data)
+
     def test_host_and_address_boundaries(self):
         self.assertTrue(module.allowed_host("static.cdninstagram.com", ["*.cdninstagram.com"]))
         for host in ["cdninstagram.com", "cdninstagram.com.attacker.com", "169.254.169.254", "localhost", "a/cdninstagram.com", "static.cdninstagram.com:80"]:

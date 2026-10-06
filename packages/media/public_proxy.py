@@ -6,6 +6,7 @@ import os
 import pathlib
 import re
 import socket
+import sys
 
 
 def allowed_host(host, patterns):
@@ -29,22 +30,34 @@ def public_address(raw):
 
 
 class Broker:
-    def __init__(self, patterns):
+    def __init__(self, patterns, *, connection_seconds=90, idle_seconds=15):
         self.patterns = patterns
+        self.connection_seconds = connection_seconds
+        self.idle_seconds = idle_seconds
         self.active = 0
         self.requests = 0
         self.bytes = 0
 
-    async def relay(self, reader, writer):
+    async def relay(self, reader, writer, activity):
         while True:
-            data = await asyncio.wait_for(reader.read(65536), 15)
+            data = await reader.read(65536)
             if not data:
                 break
+            activity[0] = asyncio.get_running_loop().time()
             self.bytes += len(data)
             if self.bytes > 300_000_000:
                 raise ValueError('transfer bound')
             writer.write(data)
             await asyncio.wait_for(writer.drain(), 5)
+
+    async def lifetime(self, activity):
+        loop = asyncio.get_running_loop()
+        deadline = loop.time() + self.connection_seconds
+        while True:
+            remaining = min(deadline - loop.time(), activity[0] + self.idle_seconds - loop.time())
+            if remaining <= 0:
+                return
+            await asyncio.sleep(remaining)
 
     async def handle(self, reader, writer):
         if self.active >= 4 or self.requests >= 64:
@@ -71,9 +84,14 @@ class Broker:
             remote, upstream = await asyncio.wait_for(asyncio.open_connection(address[0], 443, family=family), 8)
             writer.write(b'HTTP/1.1 200 Connection established\r\n\r\n')
             await writer.drain()
-            pumps = [asyncio.create_task(self.relay(reader, upstream)), asyncio.create_task(self.relay(remote, writer))]
+            # HTTP uploads and model streams can be silent in one direction.
+            # Inactivity is shared by both directions; the absolute cap remains.
+            activity = [asyncio.get_running_loop().time()]
+            pumps = [asyncio.create_task(self.relay(reader, upstream, activity)),
+                     asyncio.create_task(self.relay(remote, writer, activity)),
+                     asyncio.create_task(self.lifetime(activity))]
             try:
-                await asyncio.wait(pumps, timeout=90, return_when=asyncio.FIRST_COMPLETED)
+                await asyncio.wait(pumps, return_when=asyncio.FIRST_COMPLETED)
             finally:
                 for task in pumps:
                     task.cancel()
@@ -97,7 +115,10 @@ async def main():
     assert path.stat().st_size <= 2048
     policy = json.loads(path.read_text())
     assert set(policy) == {'domains'} and 0 < len(policy['domains']) <= 16
-    broker = Broker(policy['domains'])
+    assert sys.argv[1:] in ([], ['--subscription'])
+    # Selected only by the trusted launcher. Media acquisition keeps its 90s/15s
+    # bounds; the official-client session supports its bounded 180s model turn.
+    broker = Broker(policy['domains'], connection_seconds=300, idle_seconds=180) if sys.argv[1:] else Broker(policy['domains'])
     endpoint = '/run/vibe-public.sock'
     server = await asyncio.start_unix_server(broker.handle, path=endpoint, limit=4096, backlog=8)
     os.chown(endpoint, 0, 1001)

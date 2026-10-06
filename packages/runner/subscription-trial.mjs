@@ -12,8 +12,8 @@ export const subscriptionConfig = [
   'default_permissions="trial"',
   'cli_auth_credentials_store="file"',
   "features.unbounded_connection_retries=false",
-  "model_providers.openai.request_max_retries=0",
-  "model_providers.openai.stream_max_retries=0",
+  // Built-in provider IDs cannot be overridden by the current official client.
+  // Its bounded transport retries remain inside our one-turn/deadline policy.
   'permissions.trial.filesystem={":root"="read","/home/node/auth/auth.json"="deny","/home/node/auth/outside"="deny","/run"="deny"}',
   "permissions.trial.network.enabled=false",
   'web_search="disabled"',
@@ -35,6 +35,38 @@ export const subscriptionConfig = [
   ].map((f) => `features.${f}=false`),
 ];
 export { trialPrompt } from "./trial-prompt.mjs";
+export function trialOutputSchema(bundle, source) {
+  const output = structuredClone(schema);
+  delete output.$schema;
+  delete output.$id;
+  delete output.title;
+  output.properties.sourceId = { type: "string", enum: [source.id] };
+  output.properties.processingRunId = {
+    type: "string",
+    enum: [`${bundle.trialId}:${source.id}`],
+  };
+  output.properties.coverage = { type: "string", enum: [source.coverage] };
+  // The provider's strict format requires explicit types and every property in
+  // required. This adapts the output format without changing the stored contract.
+  const normalize = (node) => {
+    if (!node || typeof node !== "object") return;
+    if (node.enum && !node.type) node.type = typeof node.enum[0];
+    if (node.const !== undefined) {
+      node.type ??= typeof node.const;
+      node.enum = [node.const];
+      delete node.const;
+    }
+    if (node.type === "object" && node.properties)
+      node.required = Object.keys(node.properties);
+    for (const value of Object.values(node))
+      if (value && typeof value === "object") {
+        if (Array.isArray(value)) value.forEach(normalize);
+        else normalize(value);
+      }
+  };
+  normalize(output);
+  return output;
+}
 export function checkTrialBundle(bundle) {
   if (
     !bundle ||
@@ -287,6 +319,10 @@ export async function analyzeSubscriptionTrial(
       const unsubscribe = server.onEvent((m) => {
         if (m.params?.threadId && m.params.threadId !== thread.thread.id)
           return;
+        if (m.method === "connection/closed") {
+          failed(Error("SUBSCRIPTION_CONNECTION_CLOSED"));
+          return;
+        }
         if (
           m.method === "model/rerouted" ||
           (m.method === "item/started" &&
@@ -327,7 +363,7 @@ export async function analyzeSubscriptionTrial(
               text: trialPrompt({ ...bundle, sources: [source] }, true),
             },
           ],
-          outputSchema: schema,
+          outputSchema: trialOutputSchema(bundle, source),
         });
         turnId = turn.turn.id;
         await done;

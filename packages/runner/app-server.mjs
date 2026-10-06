@@ -9,6 +9,7 @@ export class AppServer {
     this.next = 1;
     this.pending = new Map();
     this.listeners = new Set();
+    this.closed = false;
     this.proc = spawn(binary, args, {
       stdio: ["pipe", "pipe", "pipe"],
       shell: false,
@@ -33,7 +34,10 @@ export class AppServer {
         ),
     });
     createInterface({ input: this.proc.stdout }).on("line", (line) => {
-      if (line.length > 1000000) return;
+      if (Buffer.byteLength(line) > 16000000) {
+        this.close();
+        return;
+      }
       let m;
       try {
         m = JSON.parse(line);
@@ -51,16 +55,13 @@ export class AppServer {
       } else for (const listener of this.listeners) listener(m);
     });
     this.proc.stderr.resume();
+    this.proc.stdin.on("error", () => this.close());
     this.proc.on("error", () => this.close());
-    this.proc.on("exit", () => {
-      for (const p of this.pending.values()) {
-        clearTimeout(p.timer);
-        p.reject(new Error("Official app-server exited."));
-      }
-      this.pending.clear();
-    });
+    this.proc.on("exit", () => this.finish());
   }
   request(method, params = {}) {
+    if (this.closed)
+      return Promise.reject(new Error("Official app-server exited."));
     return new Promise((resolve, reject) => {
       const id = this.next++,
         timer = setTimeout(() => {
@@ -134,7 +135,19 @@ export class AppServer {
     }
   }
   close() {
+    this.finish();
     this.proc.stdin.end();
     this.proc.kill();
+  }
+  finish() {
+    if (this.closed) return;
+    this.closed = true;
+    for (const p of this.pending.values()) {
+      clearTimeout(p.timer);
+      p.reject(new Error("Official app-server exited."));
+    }
+    this.pending.clear();
+    for (const listener of this.listeners)
+      listener({ method: "connection/closed", params: {} });
   }
 }

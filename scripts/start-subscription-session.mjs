@@ -24,6 +24,19 @@ const run = async (args) =>
 if (!/^sha256:[a-f0-9]{64}$/.test(image))
   throw Error("SUBSCRIPTION_IMAGE_INVALID");
 let server;
+let stopResolve;
+const stopped = new Promise((r) => (stopResolve = r));
+const stop = () => {
+  stopResolve(false);
+  server?.close();
+};
+process.once("SIGINT", stop);
+process.once("SIGTERM", stop);
+const delay = (ms, value) =>
+  new Promise((r) => {
+    const timer = setTimeout(() => r(value), ms);
+    timer.unref();
+  });
 try {
   await run([
     "volume",
@@ -66,7 +79,7 @@ try {
     image,
     "python3",
     "-c",
-    "import pathlib,time,runpy,threading,os;threading.Timer(2700,lambda:os._exit(0)).start();\nwhile not pathlib.Path('/root/ready').exists(): time.sleep(.1)\nrunpy.run_path('/opt/vibe/public_proxy.py',run_name='__main__')",
+    "import pathlib,time,runpy,threading,os,sys;threading.Timer(2700,lambda:os._exit(0)).start();\nwhile not pathlib.Path('/root/ready').exists(): time.sleep(.1)\nsys.argv=['public_proxy.py','--subscription'];runpy.run_path('/opt/vibe/public_proxy.py',run_name='__main__')",
   ]);
   await run([
     "exec",
@@ -173,10 +186,7 @@ try {
       userCode: login.userCode,
     }),
   );
-  const success = await Promise.race([
-    loggedIn,
-    new Promise((r) => setTimeout(() => r(false), 900000)),
-  ]);
+  const success = await Promise.race([loggedIn, delay(900000, false), stopped]);
   if (!success) throw Error("LOGIN_NOT_COMPLETED");
   const account = await server.account();
   if (account.account?.type !== "chatgpt" || !account.account.email)
@@ -198,7 +208,7 @@ try {
   );
   console.log(JSON.stringify({ status: "own_account_connected", worker }));
   // Keep only this ephemeral official-client session for the bounded trial.
-  await new Promise((r) => setTimeout(r, 1800000));
+  await Promise.race([delay(1800000), stopped]);
 } catch (e) {
   console.log(
     JSON.stringify({
@@ -214,4 +224,6 @@ try {
   for (const name of [worker, proxy])
     await run(["rm", "-f", name]).catch(() => {});
   await run(["volume", "rm", socket]).catch(() => {});
+  process.removeListener("SIGINT", stop);
+  process.removeListener("SIGTERM", stop);
 }
