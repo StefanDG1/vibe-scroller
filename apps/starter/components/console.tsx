@@ -2833,6 +2833,16 @@ function SourceDetail({
     detail.mediaEvidence ??
     []
   ).filter((e: any) => e.kind === "frame");
+  const untimedImages =
+    detail.coverage === "visual_only" &&
+    savedFrames.length > 1 &&
+    savedFrames.every((frame: any) => frame.startMs === 0);
+  const imageLabel = (frameId: string) => {
+    const position = savedFrames.findIndex(
+      (frame: any) => frame.id === frameId,
+    );
+    return position < 0 ? "Image" : `Image ${position + 1}`;
+  };
   const insightIds = (detail.analysis?.insights ?? [])
     .map((i: any) => i.id)
     .filter((key: string) => !excludedInsights.includes(key));
@@ -2937,6 +2947,7 @@ function SourceDetail({
                 ]
           }
           initialId={viewFrame}
+          untimed={untimedImages}
           onClose={() => setViewFrame(undefined)}
         />
       )}
@@ -3078,7 +3089,9 @@ function SourceDetail({
                               setViewFrame(e.id);
                             }}
                           >
-                            Frame · {(e.startMs / 1000).toFixed(1)}s
+                            {untimedImages
+                              ? imageLabel(e.id)
+                              : `Frame · ${(e.startMs / 1000).toFixed(1)}s`}
                           </button>
                         )}
                         {e.kind === "transcript" && (
@@ -3178,8 +3191,11 @@ function SourceDetail({
         </details>
       )}
       {!demo && savedFrames.length > 0 && (
-        <section className="panel" aria-label="Video evidence">
-          <h2>Video evidence</h2>
+        <section
+          className="panel"
+          aria-label={untimedImages ? "Image evidence" : "Video evidence"}
+        >
+          <h2>{untimedImages ? "Image evidence" : "Video evidence"}</h2>
           <div className="evidence-grid">
             {visibleFrames.map((frame: any) => (
               <figure key={frame.id}>
@@ -3193,7 +3209,11 @@ function SourceDetail({
                 >
                   <Image
                     src={`/api/evidence/${encodeURIComponent(frame.id)}?inline=true`}
-                    alt={`Private sampled video frame at ${(frame.startMs / 1000).toFixed(1)} seconds`}
+                    alt={
+                      untimedImages
+                        ? `Private source ${imageLabel(frame.id).toLowerCase()}`
+                        : `Private sampled video frame at ${(frame.startMs / 1000).toFixed(1)} seconds`
+                    }
                     width={960}
                     height={540}
                     unoptimized
@@ -3201,20 +3221,25 @@ function SourceDetail({
                     decoding="async"
                   />
                 </button>
-                <figcaption>{(frame.startMs / 1000).toFixed(1)}s</figcaption>
+                <figcaption>
+                  {untimedImages
+                    ? imageLabel(frame.id)
+                    : `${(frame.startMs / 1000).toFixed(1)}s`}
+                </figcaption>
               </figure>
             ))}
           </div>
           {savedFrames.length > visibleFrames.length || allFrames ? (
             <Button onClick={() => setAllFrames(!allFrames)}>
               {allFrames
-                ? "Show fewer frames"
-                : `View all ${savedFrames.length} frames`}
+                ? `Show fewer ${untimedImages ? "images" : "frames"}`
+                : `View all ${savedFrames.length} ${untimedImages ? "images" : "frames"}`}
             </Button>
           ) : null}
           <p className="fine">
-            Selected frames support the analysis. Sampling can miss short
-            scenes.
+            {untimedImages
+              ? "Images support the analysis. Open one to inspect the evidence."
+              : "Selected frames support the analysis. Sampling can miss short scenes."}
           </p>
         </section>
       )}

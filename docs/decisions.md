@@ -87,3 +87,5 @@ Follow [ADR 058](adr/058-bounded-full-library-scans.md): full URL-link paginatio
 [ADR 068](adr/068-subscription-session-expiry-cleanup.md) keeps controller cleanup alive after the sign-in client closes and stops the worker and proxy at one fixed approved deadline. The observed expired-container failure remains recorded. No credential retention, expiry extension or paid fallback is authorized.
 
 [ADR 069](adr/069-release-completed-subscription-client.md) releases the completed sign-in client's threads and uses an init process to reap orphaned children within the unchanged isolated worker limits. Connection failures and bounded recovery attempts remain recorded.
+
+[ADR 070](adr/070-untimed-image-evidence-labels.md) labels demonstrated untimed carousel evidence as numbered images rather than implying a video timeline. Source references, corrections and asset access remain unchanged.

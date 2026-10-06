@@ -7,10 +7,12 @@ export function EvidenceViewer({
   frames,
   initialId,
   onClose,
+  untimed = false,
 }: {
   frames: Frame[];
   initialId: string;
   onClose: () => void;
+  untimed?: boolean;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [index, setIndex] = useState(
@@ -85,7 +87,8 @@ export function EvidenceViewer({
       <div className="evidence-viewer-content">
         <header>
           <span>
-            {(frame.startMs / 1000).toFixed(1)}s · {index + 1} / {frames.length}
+            {untimed ? "Image" : `${(frame.startMs / 1000).toFixed(1)}s`} ·{" "}
+            {index + 1} / {frames.length}
           </span>
           <button type="button" onClick={onClose} aria-label="Close image">
             <X size={22} />
@@ -102,7 +105,11 @@ export function EvidenceViewer({
               <Image
                 key={frame.id}
                 src={`/api/evidence/${encodeURIComponent(frame.id)}?inline=true`}
-                alt={`Video frame at ${(frame.startMs / 1000).toFixed(1)} seconds`}
+                alt={
+                  untimed
+                    ? `Source image ${index + 1}`
+                    : `Video frame at ${(frame.startMs / 1000).toFixed(1)} seconds`
+                }
                 width={1280}
                 height={960}
                 unoptimized
@@ -118,7 +125,7 @@ export function EvidenceViewer({
               type="button"
               disabled={index === 0}
               onClick={() => setIndex((i) => i - 1)}
-              aria-label="Previous frame"
+              aria-label={untimed ? "Previous image" : "Previous frame"}
             >
               <ChevronLeft size={22} />
             </button>
@@ -126,7 +133,7 @@ export function EvidenceViewer({
               type="button"
               disabled={index === frames.length - 1}
               onClick={() => setIndex((i) => i + 1)}
-              aria-label="Next frame"
+              aria-label={untimed ? "Next image" : "Next frame"}
             >
               <ChevronRight size={22} />
             </button>
