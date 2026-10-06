@@ -78,7 +78,7 @@ export function EvidenceViewer({
     <dialog
       ref={dialog}
       className="evidence-viewer"
-      aria-label="Video frame"
+      aria-label={untimed ? "Source image" : "Video frame"}
       onCancel={(e) => {
         e.preventDefault();
         onClose();
