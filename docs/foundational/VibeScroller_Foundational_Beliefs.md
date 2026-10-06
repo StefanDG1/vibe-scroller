@@ -2,6 +2,8 @@
 
 Current direction, October 7, F014: VibeScroll targets adult project owners using AI agents, including non-coders, with useful Personal/Business knowledge and an original always-present Scroll character. The six purchase conditions remain evidence, context, a useful decision, continuity, control and personally demonstrated value. Earlier dated findings below retain their original scope; [ADR 075](../adr/075-vibescroll-product-direction.md) controls the new planning direction.
 
+October 7 implementation evidence: the first local studio slice implements the VibeScroll display name, original Scroll artwork, bounded next actions and compact navigation. Personal/Business privacy, onboarding and assistant OAuth remain pending. Local synthetic browser checks and automated tests do not establish customer demand, comprehension, production availability or whole-plan acceptance. See [implementation status](../implementation-status.md).
+
 F015 and [ADR 076](../adr/076-persuasive-design-and-analysis-references.md) allow real pricing anchors, restrained shimmer, genuine unfinished loops and conditional persuasive techniques. Attractive guidance and evidence/control can coexist. The prior broad rejection labels are superseded; the six beliefs remain intact.
 
 A prospect should be able to justify trying VibeScroller from an inspectable workflow and a personally relevant need. The six statements below complete the SOP's necessary-beliefs stage using the [research](VibeScroller_Foundational_Research.md), [avatar](VibeScroller_Foundational_Avatar.md), and [offer](VibeScroller_Foundational_Offer.md). They are proposed purchase conditions, not findings that every prospect already holds.

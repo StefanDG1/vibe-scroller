@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { PublicPage } from "@/components/site";
 export const metadata = {
-  title: "Make scrolling productive",
+  title: "Make scrolling useful",
   description: "Review saved ideas and approve changes worth building.",
   alternates: { canonical: "https://scroll.companynerve.com" },
 };
@@ -10,16 +10,14 @@ export default function Home() {
     <PublicPage>
       <section className="hero">
         <div>
-          <p className="release-note">Your approval stays in the loop</p>
-          <h1>Turn saved videos into changes worth building.</h1>
+          <h1>Make scrolling useful.</h1>
           <p className="hero-copy">
-            You save useful videos faster than you can use them. Give those
-            ideas a place to go: a clear summary, an honest project match, and a
-            plan you can review.
+            Save a post. Keep the idea. Put it to use. Find cited insights in
+            your library and review what fits the projects you care about.
           </p>
           <div className="row">
             <Link className="primary" href="/app">
-              Start your library
+              Try one post
             </Link>
             <Link className="secondary" href="/demo">
               Explore the labeled demo
@@ -152,7 +150,7 @@ export default function Home() {
           ],
           [
             "Can I use my ChatGPT subscription?",
-            "Eligible local open-source tools can request your permission to use your ChatGPT plan. Hosted VibeScroller support is awaiting commercial access. API funding remains separate; your ChatGPT allowance is not unlimited and does not cover transcription or cloud compute.",
+            "Eligible local open-source tools can request your permission to use your ChatGPT plan. Hosted VibeScroll support is awaiting commercial access. API funding remains separate; your ChatGPT allowance is not unlimited and does not cover transcription or cloud compute.",
           ],
           [
             "Does merging mean the idea helped?",

@@ -70,3 +70,7 @@ The owner requested a visual node or tree view of existing knowledge connections
 ## F013: simplify library reading, October 6
 
 The owner reported that the map was difficult to find and the interface was confusing and excessive. This is direct qualitative operator feedback, not an independent customer study. Separate Knowledge, Posts, Ideas and Issues; prioritize source-backed reading and reveal correction, coverage and funded actions only when requested. Preserve exact rights/budget/publication disclosures at their decision points. This supports the existing traceability and review beliefs without changing the audience, prices or six beliefs. Production availability and independent comprehension remain separate from local UI checks. See [ADR 073](../adr/073-reading-first-library-navigation.md).
+
+## F014/F015: first studio implementation evidence, October 7
+
+Updated all four current briefs with the limited local slice: VibeScroll display copy, original Scroll, bounded next actions and compact navigation. Automated and labeled synthetic layout evidence supports those implementation facts only. Personal privacy, onboarding and assistant OAuth remain pending. No demand, conversion, customer comprehension, new price, provider permission or production completion is claimed. Historical observations and dissent remain intact. See the October 7 implementation-status entry.

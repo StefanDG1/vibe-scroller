@@ -1,11 +1,11 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-01T04:05:17.8929000Z",
-  "title": "Design System: VibeScroller",
+  "generatedAt": "2026-10-06T23:30:47.326776Z",
+  "title": "Design System: VibeScroll",
   "extensions": {
     "colorMeta": {
       "ink": {
-        "role": "primary",
+        "role": "neutral",
         "tonalRamp": [
           "oklch(15% 0 0)",
           "oklch(26% 0 0)",
@@ -20,59 +20,19 @@
       },
       "canvas": {
         "role": "neutral",
-        "tonalRamp": [
-          "oklch(15% 0 0)",
-          "oklch(26% 0 0)",
-          "oklch(37% 0 0)",
-          "oklch(49% 0 0)",
-          "oklch(60% 0 0)",
-          "oklch(72% 0 0)",
-          "oklch(83% 0 0)",
-          "oklch(95% 0 0)"
-        ],
-        "displayName": "canvas"
+        "displayName": "Studio charcoal"
       },
       "panel": {
         "role": "neutral",
-        "tonalRamp": [
-          "oklch(15% 0 0)",
-          "oklch(26% 0 0)",
-          "oklch(37% 0 0)",
-          "oklch(49% 0 0)",
-          "oklch(60% 0 0)",
-          "oklch(72% 0 0)",
-          "oklch(83% 0 0)",
-          "oklch(95% 0 0)"
-        ],
-        "displayName": "panel"
+        "displayName": "Green-gray panel"
       },
       "line": {
         "role": "neutral",
-        "tonalRamp": [
-          "oklch(15% 0 0)",
-          "oklch(26% 0 0)",
-          "oklch(37% 0 0)",
-          "oklch(49% 0 0)",
-          "oklch(60% 0 0)",
-          "oklch(72% 0 0)",
-          "oklch(83% 0 0)",
-          "oklch(95% 0 0)"
-        ],
-        "displayName": "line"
+        "displayName": "Green-gray separator"
       },
       "muted": {
         "role": "neutral",
-        "tonalRamp": [
-          "oklch(15% 0 0)",
-          "oklch(26% 0 0)",
-          "oklch(37% 0 0)",
-          "oklch(49% 0 0)",
-          "oklch(60% 0 0)",
-          "oklch(72% 0 0)",
-          "oklch(83% 0 0)",
-          "oklch(95% 0 0)"
-        ],
-        "displayName": "muted"
+        "displayName": "Quiet green-gray text"
       },
       "soft": {
         "role": "neutral",
@@ -241,6 +201,18 @@
           "oklch(95% 0 0)"
         ],
         "displayName": "focus"
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "Mint action"
+      },
+      "accent-ink": {
+        "role": "neutral",
+        "displayName": "Mint action text"
+      },
+      "amber": {
+        "role": "secondary",
+        "displayName": "Scroll amber"
       }
     },
     "typographyMeta": {
@@ -267,6 +239,14 @@
       "metadata": {
         "displayName": "Metadata",
         "purpose": "Secondary details and frame captions."
+      },
+      "studio-headline": {
+        "displayName": "Studio next action",
+        "purpose": "Balanced next-action headline; 23â€“30px responsive clamp on phones."
+      },
+      "studio-body": {
+        "displayName": "Studio reading",
+        "purpose": "16px studio body; next-action explanation reduces to 14px on phones."
       }
     },
     "shadows": [
@@ -301,6 +281,16 @@
         "name": "reduced-motion",
         "value": "prefers-reduced-motion: reduce",
         "purpose": "Disable animation and transition; remove thumbnail movement."
+      },
+      {
+        "name": "scroll-greeting",
+        "value": "650ms cubic-bezier(0.16, 1, 0.3, 1) 1",
+        "purpose": "Requested local greeting; rotates -5deg then 4deg and returns to still."
+      },
+      {
+        "name": "studio-cta-sweep",
+        "value": "750ms ease-out 1800ms 1",
+        "purpose": "Single eligible save CTA sweep; stops on interaction, focus, completion, disabled state, page hiding or motion off."
       }
     ],
     "breakpoints": [
@@ -311,6 +301,10 @@
       {
         "name": "mobile",
         "value": "720px"
+      },
+      {
+        "name": "studio-stacked",
+        "value": "768px"
       }
     ]
   },
@@ -329,7 +323,7 @@
       "refersTo": "button-secondary",
       "description": "Supporting action with a quiet outline.",
       "html": "<button class=\"ds-secondary\">Cancel</button>",
-      "css": ".ds-secondary{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 17px;border:1px solid var(--line,#333333);border-radius:10px;background:transparent;color:var(--ink,#f4f4f4);font:550 .87rem/1.6 Inter,system-ui,sans-serif;cursor:pointer;transition:background-color 140ms ease-out,border-color 140ms ease-out}.ds-secondary:hover:not(:disabled){background:var(--soft,#262626);border-color:#4a4a4a}.ds-secondary:focus-visible{outline:2px solid #d4d4d4;outline-offset:3px}.ds-secondary:disabled{opacity:.45;cursor:not-allowed}@media(prefers-reduced-motion:reduce){.ds-secondary{transition:none}}"
+      "css": ".ds-secondary{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 17px;border:1px solid var(--line,#39453f);border-radius:10px;background:transparent;color:var(--ink,#f4f4f4);font:550 .87rem/1.6 Inter,system-ui,sans-serif;cursor:pointer;transition:background-color 140ms ease-out,border-color 140ms ease-out}.ds-secondary:hover:not(:disabled){background:var(--soft,#262626);border-color:#4a4a4a}.ds-secondary:focus-visible{outline:2px solid #d4d4d4;outline-offset:3px}.ds-secondary:disabled{opacity:.45;cursor:not-allowed}@media(prefers-reduced-motion:reduce){.ds-secondary{transition:none}}"
     },
     {
       "name": "Text field",
@@ -361,7 +355,7 @@
       "refersTo": "panel",
       "description": "Contained settings or evidence, without a decorative shadow.",
       "html": "<section class=\"ds-panel\"><h2 class=\"ds-panel-title\">Evidence</h2><p class=\"ds-panel-copy\">Sampled evidence is not exhaustive analysis.</p></section>",
-      "css": ".ds-panel{padding:24px;border:1px solid #303030;border-radius:14px;background:var(--panel,#191919);color:var(--ink,#f4f4f4);font:14px/1.6 Inter,system-ui,sans-serif}.ds-panel-title{margin:0 0 12px;font-size:18px;line-height:1.35;font-weight:550;letter-spacing:-.025em}.ds-panel-copy{margin:0;color:var(--muted,#a8a8a8);max-width:72ch}@media(max-width:720px){.ds-panel{padding:18px}}"
+      "css": ".ds-panel{padding:24px;border:1px solid var(--line,#39453f);border-radius:14px;background:var(--panel,#1d2421);color:var(--ink,#f4f4f4);font:14px/1.6 Inter,system-ui,sans-serif}.ds-panel-title{margin:0 0 12px;font-size:18px;line-height:1.35;font-weight:550;letter-spacing:-.025em}.ds-panel-copy{margin:0;color:var(--subtle,#b3bdb7);max-width:72ch}@media(max-width:720px){.ds-panel{padding:18px}}"
     },
     {
       "name": "Account menu",
@@ -374,17 +368,25 @@
     {
       "kind": "custom",
       "name": "Source overview and analysis notes",
-      "css": ".ds-source-detail{padding:24px;border:1px solid #303030;border-radius:14px;background:var(--panel,#191919);color:var(--ink,#f4f4f4);font:16px/1.6 Inter,system-ui,sans-serif}.ds-source-heading{margin:0 0 12px;font-size:18px;line-height:1.35;font-weight:550;letter-spacing:-.025em}.ds-source-copy{margin:0 0 16px;color:var(--muted,#a8a8a8);max-width:72ch}.ds-source-fine{margin:0 0 16px;color:var(--muted,#a8a8a8);font-size:.8rem;max-width:72ch}.ds-source-notes>summary{min-height:44px;padding:12px 0;cursor:pointer;color:var(--console-ink,#f4f4f4)}.ds-source-notes>summary:focus-visible{outline:2px solid #d4d4d4;outline-offset:3px}.ds-source-notes[open]>summary{margin-bottom:8px}.ds-source-subheading{margin:0 0 12px;font-size:1.05rem;font-weight:550}@media(max-width:720px){.ds-source-detail{padding:18px}}",
+      "css": ".ds-source-detail{padding:24px;border:1px solid var(--line,#39453f);border-radius:14px;background:var(--panel,#1d2421);color:var(--ink,#f4f4f4);font:16px/1.6 Inter,system-ui,sans-serif}.ds-source-heading{margin:0 0 12px;font-size:18px;line-height:1.35;font-weight:550;letter-spacing:-.025em}.ds-source-copy{margin:0 0 16px;color:var(--subtle,#b3bdb7);max-width:72ch}.ds-source-fine{margin:0 0 16px;color:var(--subtle,#b3bdb7);font-size:.8rem;max-width:72ch}.ds-source-notes>summary{min-height:44px;padding:12px 0;cursor:pointer;color:var(--console-ink,#f4f4f4)}.ds-source-notes>summary:focus-visible{outline:2px solid #d4d4d4;outline-offset:3px}.ds-source-notes[open]>summary{margin-bottom:8px}.ds-source-subheading{margin:0 0 12px;font-size:1.05rem;font-weight:550}@media(max-width:720px){.ds-source-detail{padding:18px}}",
       "refersTo": "source-notes",
       "description": "Native disclosure keeps detailed notes available while the sampled-coverage caution stays visible.",
       "html": "<section class=\"ds-source-detail\"><h2 class=\"ds-source-heading\">AI summary</h2><p class=\"ds-source-copy\">Sampled evidence is not exhaustive analysis.</p><p class=\"ds-source-fine\">Frames are sampled. Automatic transcripts can contain errors.</p><details class=\"ds-source-notes\"><summary>Full summary and analysis notes</summary><section aria-label=\"Analysis limitations\"><h3 class=\"ds-source-subheading\">Limitations and uncertainty</h3><p class=\"ds-source-copy\">Sampled evidence is not exhaustive analysis.</p></section></details></section>"
+    },
+    {
+      "name": "Studio action",
+      "kind": "button",
+      "refersTo": "studio-action",
+      "description": "Permitted next action beside Scroll; mint fill does not certify success.",
+      "html": "<button class=\"ds-studio-action\">Review project context <span aria-hidden=\"true\">â†’</span></button>",
+      "css": ".ds-studio-action{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;min-width:44px;padding:8px 16px;background:var(--primary,#87dfc1);color:var(--primary-foreground,#10251e);border:0;border-radius:10px;font:500 14px/1.6 Inter,system-ui,sans-serif;white-space:normal;text-align:center;cursor:pointer;transition:color 150ms ease,background-color 150ms ease,opacity 150ms ease}.ds-studio-action:hover:not(:disabled){opacity:.9}.ds-studio-action:focus-visible{outline:2px solid var(--ring,#87dfc1);outline-offset:4px}.ds-studio-action:disabled{opacity:.5;pointer-events:none}@media(prefers-reduced-motion:reduce){.ds-studio-action{transition:none}}"
     }
   ],
   "narrative": {
     "rules": [
       {
-        "body": "Use white for the main action and selected reading hierarchy; reserve color for an actual error.",
-        "name": "The Neutral Action Rule",
+        "body": "Use mint for permitted studio actions and connections, amber for Scroll's warmth, and preserve retained neutral reading controls. Neither color proves success or benefit.",
+        "name": "The Meaningful Accent Rule",
         "section": "colors"
       },
       {
@@ -409,25 +411,24 @@
       }
     ],
     "donts": [
-      "**Don't** add a light-mode switch, decorative gradients or fabricated thumbnails.",
-      "**Don't** add ornamental eyebrows, zero-count hero metrics or a recurring explanatory motto.",
-      "**Don't** convert a supplied-text result into a claim of complete audiovisual analysis.",
-      "**Don't** publish private reference screenshots or promote an unverified outcome into success."
+      "Don't turn a bounded CTA sweep into a looping attention effect.",
+      "Don't fabricate thumbnails, totals, analysis completeness or customer outcomes.",
+      "Don't publish private reference screenshots or promote the local slice into full V1 acceptance."
     ],
     "dos": [
-      "**Do** use the dark neutral palette and concise sentence case interface copy.",
-      "**Do** keep loading, empty, ready, success and error feedback tied to actual state.",
-      "**Do** preserve visible keyboard focus, 44px controls and reduced-motion behavior.",
-      "**Do** keep permissions and private evidence access explicit."
+      "Do use charcoal, meaningful mint and warm original Scroll artwork.",
+      "Do keep Scroll present while allowing motion to stop.",
+      "Do keep workspace scope visible on phones.",
+      "Do preserve actual-state feedback, keyboard focus, 44px controls and explicit private-evidence permissions."
     ],
     "keyCharacteristics": [
-      "Dark-only neutral surfaces.",
-      "Compact text hierarchy and quiet borders.",
-      "Readable source rows rather than nested decorative cards.",
-      "Accessible menus, visible focus and generous touch targets.",
-      "Short motion tied to state changes and evidence arrival."
+      "Dark charcoal and green-gray surfaces with mint actions and amber artwork.",
+      "Original Scroll remains present in the normal shell and onboarding.",
+      "Readable rows, quiet borders and familiar controls.",
+      "Visible workspace scope on phones; accessible focus and generous targets.",
+      "Bounded local motion with a still alternative."
     ],
-    "northStar": "The Quiet Console",
-    "overview": "VibeScroller uses a neutral charcoal world, compact navigation and restrained white controls. Its visual character follows the owner's settled modern ChatGPT/Codex and ElevenLabs references: calm density, readable source content, small line icons and direct interactions. The system describes the implemented app shell; the surface composition remains in [the console brief](docs/design/console-brief.md).\n\nContent, actual state and permitted actions establish hierarchy. Source icons identify media without inventing thumbnails. Panels remain subdued so titles, evidence and the next action carry attention. [PRODUCT.md](PRODUCT.md) records the product constraints; the four foundational documents remain the copy brief. This document does not change copy, establish benefit, or approve legal publication."
+    "northStar": "Scroll's studio",
+    "overview": "VibeScroll uses green charcoal surfaces, meaningful mint actions and warm amber original artwork. Scroll is the owner's always-present guide: a soft folded-paper creature with expressive dark eyes, a curled tuft and mint bookmark. Familiar controls, readable rows and restrained framing keep the artwork approachable without competing with evidence. The owner pinned this world in the October 7 evolution request; no direction roll, seeded round or QUALITY BAR card is claimed. The first surface's composition stays in [the studio direction contract](docs/design/vibescroll-studio.md).\n\nContent, actual state and permitted actions establish hierarchy. Source icons identify media without inventing thumbnails. Panels remain subdued so titles, evidence and the next action carry attention. [PRODUCT.md](PRODUCT.md) records the product constraints; the four foundational documents remain the copy brief. This document does not change copy, establish benefit, or approve legal publication."
   }
 }

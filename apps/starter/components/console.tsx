@@ -34,6 +34,9 @@ import { LibraryScan } from "./library-scan";
 import { SubscriptionTrials } from "./subscription-trials";
 import { Improvements } from "./improvements";
 import { NoticeToast } from "./notice-toast";
+import { StudioHome } from "./studio-home";
+import { ScrollCharacter } from "./scroll-character";
+import { MotionPreference } from "./motion-preference";
 import { downloadText } from "@/lib/download";
 import { RepositoryChecklist, BusinessContext } from "./repository-checklist";
 import { PlanEditor } from "./plan-editor";
@@ -51,6 +54,7 @@ import { track } from "@/lib/analytics";
 import { productAnalyticsEvent } from "@/lib/analytics-events";
 import type { ImportPreview } from "../../../packages/instagram-import";
 type Initial = {
+  workspaceName?: string;
   aiPreference?: {
     preferChatGPTPlan: boolean;
     hostedStatus: string;
@@ -309,7 +313,7 @@ export function Console({
   }
   const loadLibraryFromEffect = useEffectEvent(() => loadLibrary());
   useEffect(() => {
-    if (demo || !["library", "home"].includes(view)) return;
+    if (demo || view !== "library" || librarySection !== "posts") return;
     const timeout = setTimeout(() => {
       loadLibraryFromEffect().catch(() =>
         setNotice("Library search is unavailable. Try again."),
@@ -321,7 +325,16 @@ export function Console({
       // oxlint-disable-next-line react-hooks/exhaustive-deps -- Invalidate this asynchronous request generation on cleanup.
       libraryRequest.current++;
     };
-  }, [demo, organizationId, view, search, filter, category, sort]);
+  }, [
+    demo,
+    organizationId,
+    view,
+    librarySection,
+    search,
+    filter,
+    category,
+    sort,
+  ]);
   useEffect(() => {
     const currentUrl = new URL(window.location.href);
     const github = currentUrl.searchParams.get("github");
@@ -390,7 +403,7 @@ export function Console({
             coverage: source.coverage,
           });
       }
-    setData(next);
+    setData((current) => ({ ...next, workspaceName: current.workspaceName }));
     setSelected((current: any) => {
       if (!current) return null;
       // A request started for a different selection cannot overwrite a source
@@ -710,7 +723,7 @@ export function Console({
         </div>
         {demo && <p className="workspace-label">Demo workspace</p>}
         <nav aria-label="Application">
-          {nav.slice(0, 6).map(([key, title, Icon]) => (
+          {nav.slice(0, 3).map(([key, title, Icon]) => (
             <button
               type="button"
               key={key}
@@ -747,15 +760,28 @@ export function Console({
             >
               <PanelLeftOpen size={19} />
             </button>
-            <span className="top-view">
-              {view === "source"
-                ? "Library"
-                : view === "proposal"
-                  ? "Proposals"
-                  : view === "menu"
-                    ? "More"
-                    : (nav.find((n) => n[0] === view)?.[1] ?? "Review plan")}
-            </span>
+            <ScrollCharacter compact />
+            <div className="studio-scope">
+              <span className="top-view">
+                {view === "source"
+                  ? "Library"
+                  : view === "proposal"
+                    ? "Proposals"
+                    : view === "menu"
+                      ? "More"
+                      : (nav.find((n) => n[0] === view)?.[1] ?? "Review plan")}
+              </span>
+              <Link
+                href={demo ? "/demo" : "/app/workspaces"}
+                title={
+                  data.workspaceName ??
+                  (demo ? "Demo workspace" : "Current workspace")
+                }
+              >
+                {data.workspaceName ??
+                  (demo ? "Demo workspace" : "Current workspace")}
+              </Link>
+            </div>
             {demo && <span className="status">Synthetic demo</span>}
           </div>
           <div className="row">
@@ -766,7 +792,7 @@ export function Console({
               onClick={() => setCaptureOpen(true)}
             >
               <Plus size={17} />
-              Add source
+              Save
             </Button>
             <div className="mobile-account">
               <AccountMenu go={go} demo={demo} />
@@ -892,56 +918,29 @@ export function Console({
               </div>
             </>
           )}
-          {(view === "home" ||
-            (view === "library" && librarySection === "posts")) && (
+          {view === "home" && (
+            <StudioHome
+              key={organizationId}
+              sources={data.sources}
+              proposals={data.proposals}
+              repositories={data.repositories}
+              runs={data.runs}
+              libraryNext={data.libraryNext}
+              draft={sharedDraft}
+              onDraft={setSharedDraft}
+              onSave={() => setCaptureOpen(true)}
+              onOpenSource={findSource}
+              onOpenProposal={(proposal) => {
+                setSelected(proposal);
+                setView("proposal");
+              }}
+              go={go}
+              readOnly={readOnly}
+              busy={busy}
+            />
+          )}
+          {view === "library" && librarySection === "posts" && (
             <>
-              {view === "home" && (
-                <section className="home-capture" aria-label="Capture a source">
-                  <h2>What did you save?</h2>
-                  <form
-                    className="capture-composer"
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      setCaptureOpen(true);
-                    }}
-                  >
-                    <Link2 size={21} aria-hidden="true" />
-                    <input
-                      aria-label="Video URL"
-                      value={sharedDraft}
-                      onChange={(e) => setSharedDraft(e.target.value)}
-                      placeholder="Paste a video link"
-                      type="url"
-                      disabled={readOnly}
-                    />
-                    <button
-                      type="submit"
-                      className="composer-send"
-                      disabled={readOnly}
-                      aria-label="Add video link"
-                    >
-                      <ArrowRight size={20} />
-                    </button>
-                  </form>
-                  <div className="capture-shortcuts">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSharedDraft("");
-                        setCaptureOpen(true);
-                      }}
-                      disabled={readOnly}
-                    >
-                      <Plus size={16} />
-                      Upload or import
-                    </button>
-                    <button type="button" onClick={() => go("connections")}>
-                      <Plug size={16} />
-                      Connect AI
-                    </button>
-                  </div>
-                </section>
-              )}
               {pendingProposals > 0 && (
                 <div className="attention">
                   <h2>
@@ -2000,6 +1999,7 @@ export function Console({
           )}
           {view === "privacy" && (
             <>
+              <MotionPreference control />
               <div className="panel">
                 <h2>Your content and preferences</h2>
                 <p>
@@ -2076,7 +2076,7 @@ export function Console({
             <section className="panel" aria-label="All application pages">
               <h2>More pages</h2>
               <nav aria-label="All mobile pages" className="form-grid">
-                {nav.slice(4).map(([key, title]) => (
+                {nav.slice(3).map(([key, title]) => (
                   <button key={key} onClick={() => go(key)}>
                     {title}
                   </button>
@@ -2086,7 +2086,7 @@ export function Console({
           )}
         </main>
         <nav className="mobile-nav" aria-label="Mobile navigation">
-          {nav.slice(0, 4).map(([key, title, Icon]) => (
+          {nav.slice(0, 3).map(([key, title, Icon]) => (
             <button
               className={view === key ? "active" : ""}
               aria-current={view === key ? "page" : undefined}
@@ -2097,6 +2097,15 @@ export function Console({
               {title}
             </button>
           ))}
+          <button
+            type="button"
+            className="mobile-save"
+            disabled={readOnly || busy}
+            onClick={() => setCaptureOpen(true)}
+          >
+            <Plus size={20} aria-hidden="true" />
+            Save
+          </button>
           <button aria-expanded={view === "menu"} onClick={() => go("menu")}>
             <MoreHorizontal size={20} aria-hidden="true" />
             More
