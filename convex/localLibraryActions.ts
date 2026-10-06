@@ -7,6 +7,7 @@ import { signedObject, objectMetadata } from "../packages/providers/storage";
 import { exactArrayBuffer } from "../packages/providers/binary";
 import { authorizeRepository } from "./lib/githubAuthorization";
 import { retrieveContext } from "../packages/providers/github";
+import { knowledgeRetrievalFocus } from "../packages/repositories/retrieval";
 import { ensure } from "../packages/policy";
 export const frame = action({
   args: {
@@ -91,14 +92,14 @@ export const evaluationBundle = action({
     await authorizeRepository(ctx, c.repo, c.repo.sha);
     const inspected = await retrieveContext(
       c.repo,
-      JSON.stringify({
-        confirmedBusinessContext: c.repo.profile,
-        insights: c.evidence.map((e: any) => ({
+      knowledgeRetrievalFocus(
+        c.repo.profile,
+        c.evidence.map((e: any) => ({
           title: e.insight.title,
           claim: e.insight.claim,
           interpretation: e.insight.interpretation,
         })),
-      }),
+      ),
       [],
       "knowledge",
     );
@@ -125,7 +126,7 @@ export const evaluationBundle = action({
       tree: inspected.tree,
       coverage:
         "Only these bounded pinned excerpts were inspected; omitted files are not claimed as reviewed.",
-      inspectionVersion: "confirmed-project-context-v2",
+      inspectionVersion: "insight-first-project-context-v3",
     };
   },
 });

@@ -5,6 +5,14 @@ import type { ManifestEntry } from "./snapshotCache";
 export const RETRIEVAL_VERSION = "source-windows-v3";
 // Read bounded windows from normal-sized components, not only small files.
 export const RETRIEVAL_BLOB_LIMIT = 250000;
+export function knowledgeRetrievalFocus(
+  profile: string,
+  insights: { title: string; claim: string; interpretation: string }[],
+) {
+  // Candidate evidence must reach the bounded term/window selector before a
+  // detailed profile consumes its character or term limit.
+  return JSON.stringify({ insights, confirmedBusinessContext: profile });
+}
 export function projectContextPaths(entries: ManifestEntry[], profile: string) {
   const suffixCounts = new Map<string, number>();
   for (const file of entries) {

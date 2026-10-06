@@ -77,3 +77,7 @@ Follow [ADR 058](adr/058-bounded-full-library-scans.md): full URL-link paginatio
 ## October 6: recovered caption evidence
 
 [ADR 064](adr/064-local-caption-evidence.md) corrects a real omitted-caption input path. Reuse the bounded pinned acquisition manifest for personal source imports, cite recovered captions, preserve titles/corrections, and clear temporary metadata under existing privacy boundaries. Source-only metadata or truncated titles cannot establish missing media claims.
+
+## October 6: insight-first repository retrieval
+
+[ADR 067](adr/067-insight-first-knowledge-retrieval.md) preserves saved-idea terms before a detailed confirmed profile fills bounded file/window ranking. Personal and managed evaluations share the builder and existing knowledge inspection limits. Historical outcomes remain recorded; actual gaps and useful research proposals require separate current evidence.

@@ -6,6 +6,7 @@ import { infer } from "./lib/inference";
 import { failedInferenceSettlement } from "./lib/googleInference";
 import { authorizeRepository } from "./lib/githubAuthorization";
 import { retrieveContext } from "../packages/providers/github";
+import { knowledgeRetrievalFocus } from "../packages/repositories/retrieval";
 import {
   synthesis,
   synthesisJson,
@@ -80,13 +81,16 @@ export const evaluate = internalAction({
       await authorizeRepository(ctx, c.repo, c.evaluation.baseSha);
       const inspected = await retrieveContext(
         c.repo,
-        JSON.stringify(
+        knowledgeRetrievalFocus(
+          c.repo.profile,
           c.evidence.map((e) => ({
-            title: e.title,
+            title: e.insight.title,
             claim: e.insight.claim,
             interpretation: e.insight.interpretation,
           })),
         ),
+        [],
+        "knowledge",
       );
       started = true;
       const result = await infer(
