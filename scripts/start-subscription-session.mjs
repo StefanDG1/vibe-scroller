@@ -5,6 +5,11 @@ import { writeFile, readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { subscriptionConfig } from "../packages/runner/subscription-trial.mjs";
 import { AppServer } from "../packages/runner/app-server.mjs";
+import {
+  sessionDeadline,
+  waitForSessionExpiry,
+  workerExpiryScript,
+} from "../packages/runner/session-lifetime.mjs";
 const exec = promisify(execFile),
   image = JSON.parse(
     await readFile(resolve("private/subscription-images.json"), "utf8"),
@@ -17,7 +22,7 @@ const library = process.argv.slice(2).join(" ") === "--personal-library";
 if (process.argv.length > 2 && !library)
   throw Error("SUBSCRIPTION_SESSION_OPTIONS_INVALID");
 const sessionMs = library ? 4 * 3600000 : 1800000;
-const lifetimeSeconds = sessionMs / 1000 + 900;
+const expiresAt = sessionDeadline(sessionMs);
 const run = async (args) =>
   (
     await exec("docker", args, {
@@ -37,11 +42,6 @@ const stop = () => {
 };
 process.once("SIGINT", stop);
 process.once("SIGTERM", stop);
-const delay = (ms, value) =>
-  new Promise((r) => {
-    const timer = setTimeout(() => r(value), ms);
-    timer.unref();
-  });
 try {
   await run([
     "volume",
@@ -84,7 +84,7 @@ try {
     image,
     "python3",
     "-c",
-    `import pathlib,time,runpy,threading,os,sys;threading.Timer(${lifetimeSeconds},lambda:os._exit(0)).start();\nwhile not pathlib.Path('/root/ready').exists(): time.sleep(.1)\nsys.argv=['public_proxy.py','${library ? "--subscription-library" : "--subscription"}'];runpy.run_path('/opt/vibe/public_proxy.py',run_name='__main__')`,
+    `import pathlib,time,runpy,threading,os,sys;threading.Timer(max(0,${expiresAt}/1000-time.time()),lambda:os._exit(0)).start();\nwhile not pathlib.Path('/root/ready').exists(): time.sleep(.1)\nsys.argv=['public_proxy.py','${library ? "--subscription-library" : "--subscription"}'];runpy.run_path('/opt/vibe/public_proxy.py',run_name='__main__')`,
   ]);
   await run([
     "exec",
@@ -134,7 +134,7 @@ try {
     image,
     "node",
     "-e",
-    `setTimeout(()=>process.exit(0),${sessionMs + 900000})`,
+    workerExpiryScript(expiresAt),
   ]);
   await run([
     "exec",
@@ -178,7 +178,7 @@ try {
       proxy,
       socket,
       image,
-      expiresAt: Date.now() + sessionMs,
+      expiresAt,
       purpose: library ? "personal_library" : "comparison",
     }),
     { mode: 0o600 },
@@ -192,8 +192,13 @@ try {
       userCode: login.userCode,
     }),
   );
-  const success = await Promise.race([loggedIn, delay(900000, false), stopped]);
+  const success = await waitForSessionExpiry(
+    Math.min(expiresAt, Date.now() + 900000),
+    Promise.race([loggedIn, stopped]),
+    false,
+  );
   if (!success) throw Error("LOGIN_NOT_COMPLETED");
+  if (Date.now() >= expiresAt) throw Error("LOGIN_SESSION_EXPIRED");
   const account = await server.account();
   if (account.account?.type !== "chatgpt" || !account.account.email)
     throw Error("LOGIN_NOT_COMPLETED");
@@ -208,14 +213,14 @@ try {
       socket,
       image,
       profileBinding,
-      expiresAt: Date.now() + sessionMs,
+      expiresAt,
       purpose: library ? "personal_library" : "comparison",
     }),
     { mode: 0o600 },
   );
   console.log(JSON.stringify({ status: "own_account_connected", worker }));
   // Keep only this ephemeral official-client session for the bounded trial.
-  await Promise.race([delay(sessionMs), stopped]);
+  await waitForSessionExpiry(expiresAt, stopped);
 } catch (e) {
   console.log(
     JSON.stringify({

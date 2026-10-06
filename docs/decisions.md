@@ -81,3 +81,7 @@ Follow [ADR 058](adr/058-bounded-full-library-scans.md): full URL-link paginatio
 ## October 6: insight-first repository retrieval
 
 [ADR 067](adr/067-insight-first-knowledge-retrieval.md) preserves saved-idea terms before a detailed confirmed profile fills bounded file/window ranking. Personal and managed evaluations share the builder and existing knowledge inspection limits. Historical outcomes remain recorded; actual gaps and useful research proposals require separate current evidence.
+
+## October 6: temporary subscription session cleanup
+
+[ADR 068](adr/068-subscription-session-expiry-cleanup.md) keeps controller cleanup alive after the sign-in client closes and stops the worker and proxy at one fixed approved deadline. The observed expired-container failure remains recorded. No credential retention, expiry extension or paid fallback is authorized.

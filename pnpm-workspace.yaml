@@ -18,3 +18,4 @@ patchedDependencies:
 
 overrides:
   source-map-js: 1.2.2
+  sharp: 0.35.5
