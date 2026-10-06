@@ -5,7 +5,9 @@ import { resolve, join } from "node:path";
 import {
   checkTrialBundle,
   checkTrialResults,
+  trialOutputSchema,
 } from "../packages/runner/subscription-trial.mjs";
+import { validator } from "../packages/contracts/validator.mjs";
 import { purgeLocalPreparation } from "../packages/runner/local-media-retention.mjs";
 import { canonicalJson } from "../packages/contracts/canonical-json.mjs";
 
@@ -40,6 +42,39 @@ function bundle() {
     bundleHash: createHash("sha256").update(canonicalJson(input)).digest("hex"),
   };
 }
+it("constrains provider output to the approved source and coverage with a typed strict schema", () => {
+  const b = bundle();
+  const output = trialOutputSchema(b, b.sources[0]);
+  const parse = validator(output).parse;
+  const valid = {
+    schemaVersion: "1.0.0",
+    sourceId: "source-one",
+    processingRunId: "trial-one:source-one",
+    coverage: "caption_only",
+    summary: "Review evidence.",
+    warnings: [],
+    insights: [],
+  };
+  expect(parse(valid)).toEqual(valid);
+  for (const changed of [
+    { sourceId: "another-source" },
+    { processingRunId: "trial-two:source-one" },
+    { coverage: "full_sampled" },
+    { schemaVersion: "2.0.0" },
+  ])
+    expect(() => parse({ ...valid, ...changed })).toThrow();
+  const check = (node: any) => {
+    if (!node || typeof node !== "object") return;
+    if (node.enum) expect(node.type).toBeDefined();
+    expect(node.const).toBeUndefined();
+    if (node.type === "object")
+      expect(node.required).toEqual(Object.keys(node.properties));
+    for (const value of Object.values(node))
+      if (Array.isArray(value)) value.forEach(check);
+      else check(value);
+  };
+  check(output);
+});
 it("binds the trial identity, deadline and exact evidence, preventing replay or edited export", () => {
   const b = bundle();
   expect(checkTrialBundle(b)).toEqual(b);

@@ -1,4 +1,8 @@
 export const subscriptionConfig: string[];
+export function trialOutputSchema(
+  bundle: { trialId: string },
+  source: { id: string; coverage: string },
+): Record<string, unknown>;
 export function checkTrialBundle<T>(bundle: T): T;
 export function checkTrialResults(
   bundle: unknown,
