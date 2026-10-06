@@ -1,3 +1,4 @@
+import { workspaceReadable } from "./lib/workspacePrivacy";
 import { repositoryContent } from "./lib/repositoryContent";
 import {
   internalMutation,
@@ -82,7 +83,7 @@ export async function actorCurrent(
     )
     .unique();
   return (
-    organization?.status === "active" &&
+    workspaceReadable(organization, actorId) &&
     actor?.status === "active" &&
     !!membership &&
     roles.includes(membership.role)

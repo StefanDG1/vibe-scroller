@@ -1,3 +1,4 @@
+import { workspaceReadable } from "./lib/workspacePrivacy";
 import { internalQuery, internalMutation } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
@@ -37,7 +38,7 @@ async function current(
   if (
     actor?.status !== "active" ||
     !personalAllowed(actor.subject) ||
-    org?.status !== "active" ||
+    !workspaceReadable(org, j.actor) ||
     !membership ||
     !["owner", "admin", "member"].includes(membership.role) ||
     device?.state !== "paired" ||

@@ -1,3 +1,4 @@
+import { workspaceReadable } from "./lib/workspacePrivacy";
 import { internalMutation, internalQuery } from "./_generated/server";
 import type { QueryCtx } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
@@ -21,7 +22,7 @@ async function permitted(
     )
     .unique();
   return (
-    organization?.status === "active" &&
+    workspaceReadable(organization, userId) &&
     actor?.status === "active" &&
     !!member &&
     ["owner", "admin", "member"].includes(member.role)

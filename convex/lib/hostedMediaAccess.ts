@@ -1,3 +1,4 @@
+import { workspaceReadable } from "./workspacePrivacy";
 import type { QueryCtx } from "../_generated/server";
 import type { Doc } from "../_generated/dataModel";
 
@@ -51,7 +52,7 @@ export async function hostedSourceAllowed(
     .unique();
   return (
     actor?.status === "active" &&
-    organization?.status === "active" &&
+    workspaceReadable(organization, source.managedAnalysisActor) &&
     !!membership &&
     ["owner", "admin", "member"].includes(membership.role) &&
     hostedMediaAllowed(actor.subject)

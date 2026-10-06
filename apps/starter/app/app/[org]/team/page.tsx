@@ -3,6 +3,7 @@ import type { Id } from "../../../../../../convex/_generated/dataModel";
 import { ActionForm } from "@/components/action-form";
 import { inviteMember, changeMember, revokeInvite } from "@/app/actions";
 import { Card, Input, Label, Select, Badge } from "@companynerve/ui";
+import Link from "next/link";
 export default async function Page({
   params,
 }: {
@@ -11,9 +12,22 @@ export default async function Page({
   const { org } = await params;
   const c = await backend(),
     organizationId = org as Id<"organizations">;
-  const [members, info, invitations] = await Promise.all([
+  const info = await c.query(api.organizations.details, { organizationId });
+  if (info.private)
+    return (
+      <>
+        <h1>Your private library</h1>
+        <Card>
+          <p>
+            Only you can access this library. Invitations and ownership transfer
+            are unavailable here.
+          </p>
+          <Link href="/app/workspaces">Choose or create a team workspace</Link>
+        </Card>
+      </>
+    );
+  const [members, invitations] = await Promise.all([
     c.query(api.organizations.members, { organizationId }),
-    c.query(api.organizations.details, { organizationId }),
     c.query(api.organizations.invitations, { organizationId }),
   ]);
   return (

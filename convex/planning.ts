@@ -1,3 +1,4 @@
+import { workspaceReadable } from "./lib/workspacePrivacy";
 import { repositoryContent } from "./lib/repositoryContent";
 import { validateInspectedContext } from "../packages/repositories/retrieval";
 import {
@@ -140,7 +141,7 @@ export const finish = internalMutation({
       source &&
       source.state !== "deleted" &&
       actor?.status === "active" &&
-      organization?.status === "active" &&
+      workspaceReadable(organization, actor._id) &&
       membership &&
       ["owner", "admin", "member"].includes(membership.role);
     let plan;

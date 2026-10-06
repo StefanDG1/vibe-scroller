@@ -1,3 +1,4 @@
+import { workspaceReadable } from "./lib/workspacePrivacy";
 import { repositoryContent } from "./lib/repositoryContent";
 import { mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
@@ -217,7 +218,7 @@ export const finish = internalMutation({
       (repo.selectionVersion ?? 0) === (a.selectionVersion ?? 0) &&
       repo.profileVersion === a.version &&
       actor?.status === "active" &&
-      organization?.status === "active" &&
+      workspaceReadable(organization, actor._id) &&
       membership &&
       ["owner", "admin"].includes(membership.role);
     if (!a.retainReservation)

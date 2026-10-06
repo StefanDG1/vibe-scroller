@@ -2,6 +2,7 @@ import { ConvexError } from "convex/values";
 import type { QueryCtx, MutationCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 import { isPaid } from "../packages/company-config";
+import { workspaceReadable } from "./lib/workspacePrivacy";
 export function fail(message: string): never {
   throw new ConvexError(message);
 }
@@ -42,7 +43,11 @@ export async function access(
     )
     .unique();
   const organization = await ctx.db.get(organizationId);
-  if (!membership || !organization || organization.status !== "active")
+  if (
+    !membership ||
+    !organization ||
+    !workspaceReadable(organization, actor._id)
+  )
     return fail("Organization unavailable.");
   if (roles && !roles.includes(membership.role))
     return fail("You do not have permission for this action.");

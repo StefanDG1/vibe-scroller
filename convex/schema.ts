@@ -32,7 +32,10 @@ export default defineSchema({
     status: v.union(v.literal("active"), v.literal("deleting")),
     createdBy: v.id("users"),
     createdAt: v.number(),
-  }).index("by_creator", ["createdBy"]),
+    privateOwnerId: v.optional(v.id("users")),
+  })
+    .index("by_creator", ["createdBy"])
+    .index("by_private_owner", ["privateOwnerId"]),
   memberships: defineTable({
     organizationId: v.id("organizations"),
     userId: v.id("users"),

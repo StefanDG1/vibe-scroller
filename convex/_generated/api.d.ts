@@ -60,6 +60,7 @@ import type * as lib_prObservation from "../lib/prObservation.js";
 import type * as lib_repositoryAllowance from "../lib/repositoryAllowance.js";
 import type * as lib_repositoryContent from "../lib/repositoryContent.js";
 import type * as lib_storageUsage from "../lib/storageUsage.js";
+import type * as lib_workspacePrivacy from "../lib/workspacePrivacy.js";
 import type * as libraryScanSchema from "../libraryScanSchema.js";
 import type * as libraryScanWorker from "../libraryScanWorker.js";
 import type * as libraryScans from "../libraryScans.js";
@@ -157,6 +158,7 @@ declare const fullApi: ApiFromModules<{
   "lib/repositoryAllowance": typeof lib_repositoryAllowance;
   "lib/repositoryContent": typeof lib_repositoryContent;
   "lib/storageUsage": typeof lib_storageUsage;
+  "lib/workspacePrivacy": typeof lib_workspacePrivacy;
   libraryScanSchema: typeof libraryScanSchema;
   libraryScanWorker: typeof libraryScanWorker;
   libraryScans: typeof libraryScans;
