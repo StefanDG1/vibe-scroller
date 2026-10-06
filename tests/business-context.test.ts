@@ -197,6 +197,68 @@ it("retrieves relevant immutable whole-tree evidence outside the bounded discove
   ).rejects.toThrow("INVALID_EVIDENCE");
 });
 
+it("inspects confirmed project code outside the cache before generic starter marketing pages", async () => {
+  const { privateKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
+  vi.stubEnv("GITHUB_APP_ID", "synthetic");
+  vi.stubEnv(
+    "GITHUB_APP_PRIVATE_KEY",
+    privateKey.export({ type: "pkcs8", format: "pem" }).toString(),
+  );
+  const bytes = Buffer.from(
+    "export const publication = 'Current reader library';",
+  );
+  const sha = createHash("sha1")
+    .update(`blob ${bytes.length}\0`)
+    .update(bytes)
+    .digest("hex");
+  const actualPath = "apps/marketing/components/publication/shell.tsx";
+  const tree = [
+    ...Array.from(
+      { length: 35 },
+      (_, n) => `apps/starter/app/marketing-${n}/page.tsx`,
+    ),
+    actualPath,
+  ].map((path) => ({
+    path,
+    sha,
+    type: "blob",
+    mode: "100644",
+    size: bytes.length,
+  }));
+  let reads = 0;
+  vi.stubGlobal("fetch", async (url: string) => {
+    const p = new URL(url).pathname;
+    if (p.includes("/git/blobs/")) reads++;
+    return Response.json(
+      p.endsWith("/access_tokens")
+        ? { token: "synthetic" }
+        : p.includes("/git/trees/")
+          ? { truncated: false, tree }
+          : p.includes("/git/blobs/")
+            ? { encoding: "base64", content: bytes.toString("base64") }
+            : { id: 42 },
+    );
+  });
+  const result = await retrieveContext(
+    {
+      installationId: 1,
+      providerId: 42,
+      fullName: "owned/synthetic",
+      sha: "b".repeat(40),
+      manifestEntries: [entry("README.md")],
+      snapshotSummary: { discoveryVersion: "whole-repository-v1" },
+      profile: `Confirmed publication implementation: ${actualPath}.`,
+    },
+    "marketing conversion mobile",
+    [],
+    "knowledge",
+  );
+  expect(result.excerpts[0].path).toBe(actualPath);
+  expect(result.excerpts[0].blobSha).toBe(sha);
+  expect(result.excerpts).toHaveLength(24);
+  expect(reads).toBe(24);
+});
+
 it("prioritizes authoritative role guards and consent evidence over incidental schemas and dashboard density", () => {
   const paths = [
     "convex/schema.ts",

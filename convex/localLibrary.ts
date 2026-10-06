@@ -875,7 +875,7 @@ export const evaluationPrepare = mutation({
         .withIndex("by_org", (q) => q.eq("organizationId", run.organizationId))
         .unique(),
       preferenceVersion = preferences?.version ?? 0,
-      key = `knowledge-evaluation:${processingVersion}:${topic._id}:${topic.version}:${repo._id}:${repo.sha}:${repo.profileVersion}:${repo.selectionVersion ?? 0}:${sourceSetHash}:${preferenceVersion}`;
+      key = `knowledge-evaluation:${processingVersion}:confirmed-project-context-v2:${topic._id}:${topic.version}:${repo._id}:${repo.sha}:${repo.profileVersion}:${repo.selectionVersion ?? 0}:${sourceSetHash}:${preferenceVersion}`;
     const previous = await ctx.db
       .query("knowledgeEvaluations")
       .withIndex("by_topic_repo", (q) =>

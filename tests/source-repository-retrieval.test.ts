@@ -2,6 +2,7 @@ import { expect, it, vi } from "vitest";
 import {
   focusedExcerpt,
   retrievalFiles,
+  projectContextPaths,
   validateInspectedContext,
 } from "../packages/repositories/retrieval";
 import { validateRepositoryEvidence } from "../packages/repositories/context";
@@ -14,6 +15,62 @@ const file = {
   mode: "100644",
   size: 5000,
 };
+it("anchors project knowledge in confirmed current paths while retaining safe inspection bounds", () => {
+  const code = {
+    ...file,
+    path: "apps/marketing/components/publication/shell.tsx",
+  };
+  const facts = { ...file, path: "data/current-applications.yaml" };
+  const entries = [
+    ...Array.from({ length: 35 }, (_, n) => ({
+      ...file,
+      path: `apps/starter/app/marketing-${n}/page.tsx`,
+    })),
+    code,
+    facts,
+    { ...file, path: ".env" },
+    { ...file, path: "src/link.ts", mode: "120000" },
+    { ...file, path: "src/oversized.ts", size: 250001 },
+  ];
+  const profile = `${code.path} ${facts.path} .env src/link.ts src/oversized.ts foreign/private.ts`;
+  const preferred = projectContextPaths(entries, profile);
+  expect(preferred).toEqual([code.path, facts.path]);
+  const selected = retrievalFiles(
+    entries,
+    "marketing conversion mobile",
+    preferred,
+  );
+  expect(selected.slice(0, 2)).toEqual([code, facts]);
+  expect(selected).toHaveLength(24);
+  expect(projectContextPaths(entries, "Unknown future implementation")).toEqual(
+    [],
+  );
+  const calculator = {
+    ...file,
+    path: "apps/marketing/components/calculator/calculator.tsx",
+  };
+  expect(
+    projectContextPaths([calculator], "Current calculator/calculator.tsx"),
+  ).toEqual([calculator.path]);
+  expect(
+    projectContextPaths(
+      [
+        { ...file, path: "apps/starter/app/page.tsx" },
+        { ...file, path: "apps/marketing/app/page.tsx" },
+      ],
+      "Inspect app/page.tsx",
+    ),
+  ).toEqual([]);
+  expect(
+    projectContextPaths(
+      Array.from({ length: 20 }, (_, n) => ({
+        ...file,
+        path: `src/current-${n}.ts`,
+      })),
+      Array.from({ length: 20 }, (_, n) => `src/current-${n}.ts`).join(" "),
+    ),
+  ).toHaveLength(6);
+});
 it("prepares explicit scope in an oversized tree without reading omitted blobs or relaxing bounds", async () => {
   const { privateKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
   vi.stubEnv("GITHUB_APP_ID", "123");
