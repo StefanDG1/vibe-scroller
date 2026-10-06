@@ -26,6 +26,7 @@ export const localLibraryTables = {
     revision: v.number(),
     inputHash: v.string(),
     transcript: v.any(),
+    acquisition: v.optional(v.any()),
     coverage: v.string(),
     frames: v.array(
       v.object({

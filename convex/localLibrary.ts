@@ -31,6 +31,15 @@ import { snapshotScopeCurrent } from "../packages/repositories/scope";
 import { z } from "zod";
 import { canonicalJson } from "../packages/contracts/canonical-json.mjs";
 import { queueDeletion } from "./assets";
+import {
+  acquisitionManifest,
+  acquisitionPolicy,
+} from "../packages/media/acquisition";
+function importedAcquisition(raw: unknown, acquiredAt: number) {
+  const { schemaVersion: _schemaVersion, ...metadata } =
+    acquisitionManifest.parse(raw);
+  return { ...metadata, basis: "permitted_public_fetch" as const, acquiredAt };
+}
 const runArgs = { runId: v.id("localLibraryRuns") };
 const transcriptSchema = z
   .object({
@@ -227,6 +236,7 @@ export const cleanPending = internalMutation({
       await ctx.db.patch(j._id, {
         state: "expired",
         transcript: { durationMs: 0, segments: [] },
+        acquisition: undefined,
         frames: [],
         inputHash: "expired",
         updatedAt: Date.now(),
@@ -247,6 +257,7 @@ export const sourcePrepare = mutation({
     revision: v.number(),
     inputHash: v.string(),
     transcript: v.any(),
+    acquisition: v.optional(v.any()),
     frames: v.array(
       v.object({
         id: v.string(),
@@ -272,6 +283,18 @@ export const sourcePrepare = mutation({
       "APPROVAL_STALE",
       "A saved post changed. Prepare its current evidence again.",
     );
+    const acquisition =
+      a.acquisition === undefined
+        ? undefined
+        : acquisitionManifest.parse(a.acquisition);
+    if (acquisition) {
+      ensure(
+        s.url && ["acquired", "downloaded"].includes(acquisition.status),
+        "INVALID_EVIDENCE",
+        "Use metadata from the permitted source fetch.",
+      );
+      acquisitionPolicy(s.url);
+    }
     const old = await ctx.db
       .query("localSourceImports")
       .withIndex("by_run_source", (q) =>
@@ -280,7 +303,9 @@ export const sourcePrepare = mutation({
       .unique();
     if (old) {
       ensure(
-        old.inputHash === a.inputHash,
+        old.inputHash === a.inputHash &&
+          canonicalJson(old.acquisition ?? null) ===
+            canonicalJson(acquisition ?? null),
         "APPROVAL_STALE",
         "Import input changed.",
       );
@@ -328,6 +353,7 @@ export const sourcePrepare = mutation({
       revision: s.updatedAt,
       inputHash: a.inputHash,
       transcript,
+      ...(acquisition ? { acquisition } : {}),
       frames: a.frames,
       coverage: a.frames.length
         ? transcript.segments.length
@@ -470,7 +496,7 @@ export const sourceFinish = mutation({
         startMs: f.timestampMs,
         endMs: f.timestampMs,
       })),
-      ...(s.acquisition?.description
+      ...((j.acquisition?.description ?? s.acquisition?.description)
         ? [{ kind: "caption", id: "post_caption", startMs: null, endMs: null }]
         : []),
       ...(s.correctionAuthor
@@ -528,6 +554,9 @@ export const sourceFinish = mutation({
       );
     const now = Math.max(Date.now(), s.updatedAt + 1);
     await ctx.db.patch(s._id, {
+      ...(j.acquisition
+        ? { acquisition: importedAcquisition(j.acquisition, now) }
+        : {}),
       state: "ready",
       analysis: output,
       summary: output.summary,
@@ -580,6 +609,7 @@ export const sourceFinish = mutation({
     await ctx.db.patch(j._id, {
       state: "ready",
       transcript: { durationMs: j.transcript.durationMs, segments: [] },
+      acquisition: undefined,
       updatedAt: now,
     });
     await ctx.db.patch(run._id, {
@@ -608,6 +638,7 @@ export const redactSource = internalMutation({
     for (const job of page.page)
       await ctx.db.patch(job._id, {
         transcript: { durationMs: 0, segments: [] },
+        acquisition: undefined,
         frames: [],
         inputHash: "deleted",
         state: "deleted",
