@@ -14,6 +14,8 @@ export async function GET(
       sort: q.get("sort") ?? "newest",
       sourceId: q.get("sourceId") ?? undefined,
       proposalId: q.get("proposalId") ?? undefined,
+      sharedSourceId: q.get("sharedSourceId") ?? undefined,
+      sharedGrantId: q.get("sharedGrantId") ?? undefined,
       compactHome: q.get("homeMode") === "compact",
     });
     return Response.json(data, {

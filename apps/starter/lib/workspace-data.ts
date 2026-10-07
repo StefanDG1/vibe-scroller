@@ -12,6 +12,8 @@ export async function workspaceData({
   sourceId,
   proposalId,
   compactHome = false,
+  sharedSourceId,
+  sharedGrantId,
 }: {
   org: string;
   view?: string;
@@ -22,9 +24,49 @@ export async function workspaceData({
   sourceId?: string;
   proposalId?: string;
   compactHome?: boolean;
+  sharedSourceId?: string;
+  sharedGrantId?: string;
 }) {
   const c = await backend(),
     organizationId = org as Id<"organizations">;
+  if (view === "shared") {
+    const [organization, sharedKnowledge] = await Promise.all([
+      c.query(api.organizations.details, { organizationId }),
+      c.query(api.knowledgeGrants.shared, { organizationId }),
+    ]);
+    let selectedSharedKnowledge;
+    let sharedKnowledgeError;
+    if (sharedSourceId && sharedGrantId) {
+      try {
+        selectedSharedKnowledge = await c.query(
+          api.knowledgeGrants.fetchShared,
+          {
+            organizationId,
+            sourceId: sharedSourceId as Id<"sources">,
+            grantId: sharedGrantId as Id<"teamKnowledgeGrants">,
+          },
+        );
+      } catch {
+        sharedKnowledgeError =
+          "This shared source is unavailable or changed. Check the current sharing list.";
+      }
+    }
+    return {
+      selectedSharedKnowledge,
+      sharedKnowledgeError,
+      role: organization.role,
+      workspaceName: organization.name,
+      privateLibrary: organization.private,
+      compact: false,
+      sources: [],
+      repositories: [],
+      proposals: [],
+      runs: [],
+      notifications: [],
+      usage: null,
+      sharedKnowledge,
+    };
+  }
   if (!view || view === "home") {
     const home = await c.query(api.dashboard.home, {
       organizationId,

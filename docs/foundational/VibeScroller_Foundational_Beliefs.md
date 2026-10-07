@@ -1,5 +1,9 @@
 # VibeScroll foundational beliefs
 
+## F018: deployed filing and explicit sharing candidate, October 7
+
+Private filing, combined browsing and team disclosure have separate authority. The sharing candidate invalidates access when an exact source version changes, expires or loses permission. It honestly discloses that recipients may retain previously received material. Local negative tests support these mechanisms; real two-account acceptance and independent understanding remain open. See [implementation status](../implementation-status.md) and [ADR 082](../adr/082-exact-version-team-knowledge-grants.md).
+
 F017 implementation candidate, October 7: Personal/Business filing and saved user-stated setup now have bounded owner-private handlers and a reviewed local synthetic UI. No source is copied or analyzed through filing; confirmed combined browsing grants no external sharing or spending. Real two-account acceptance, first-result processing, assistant grants and production filing are still pending. Retain F016's verified release facts and earlier research limits.
 
 Current direction, October 7, F014: VibeScroll targets adult project owners using AI agents, including non-coders, with useful Personal/Business knowledge and an original always-present Scroll character. The six purchase conditions remain evidence, context, a useful decision, continuity, control and personally demonstrated value. Earlier dated findings below retain their original scope; [ADR 075](../adr/075-vibescroll-product-direction.md) controls the new planning direction.

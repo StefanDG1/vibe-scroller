@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-07T01:16:14.130959Z",
+  "generatedAt": "2026-10-07T01:47:03Z",
   "title": "Design System: VibeScroll",
   "extensions": {
     "colorMeta": {
@@ -400,10 +400,22 @@
       "description": "Scoped error feedback in owner-private setup; never render failed browsing as a successful empty list.",
       "html": "<p class=\"ds-private-recovery\" role=\"alert\">Your private library is unavailable. Check your session and reload.</p>",
       "css": ".ds-private-recovery{padding:12px 16px;background:#3e242e;color:#ffdae2;border:1px solid #764153;border-radius:var(--radius,.625rem);font:14px/1.6 Inter,system-ui,sans-serif;overflow-wrap:anywhere}"
+    },
+    {
+      "name": "Saved workspace grants section",
+      "kind": "custom",
+      "description": "Scoped separation between the new sharing action and saved recipient grants. Static synthetic specimen; controls do not create or revoke real grants.",
+      "html": "<section class=\"ds-grants\" aria-label=\"Synthetic saved grants specimen\"><button class=\"ds-grant-button\" disabled>Share reviewed version</button><h3 class=\"ds-grants-heading\">Your workspace grants</h3><ul class=\"ds-grants-list\"><li><span><strong>Synthetic workspace</strong><span class=\"ds-grant-meta\"> Expires in seven days / 1 selected source version. Changed versions require review.</span></span><button class=\"ds-grant-button ds-grant-secondary\">Revoke grant</button></li></ul></section>",
+      "css": ".ds-grants{color:var(--ink,#f4f4f4);font:14px/1.6 Inter,system-ui,sans-serif}.ds-grants-heading{margin:28px 0 12px;font-size:1.05rem;font-weight:550}.ds-grants-list{list-style:none;padding:0;margin-block:1rem;min-width:0}.ds-grants-list li{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;padding-block:.75rem;border-bottom:1px solid var(--border,#39453f)}.ds-grant-meta{color:var(--subtle,#b3bdb7);font-size:.8rem}.ds-grant-button{min-height:44px;min-width:44px;padding:10px 17px;border:1px solid var(--ink,#f4f4f4);border-radius:10px;background:var(--ink,#f4f4f4);color:#141414;font:550 14px/1.6 Inter,system-ui,sans-serif;white-space:nowrap;cursor:pointer;transition:background-color 140ms ease-out}.ds-grant-secondary{background:transparent;color:var(--ink,#f4f4f4);border-color:var(--line,#39453f)}.ds-grant-secondary:hover:not(:disabled){background:var(--soft,#262626)}.ds-grant-button:focus-visible{outline:2px solid #d4d4d4;outline-offset:3px}.ds-grant-button:disabled{opacity:.45;cursor:not-allowed}@media(max-width:480px){.ds-grants-list li{flex-direction:column;gap:.25rem}}@media(prefers-reduced-motion:reduce){.ds-grant-button{transition:none}}"
     }
   ],
   "narrative": {
     "rules": [
+      {
+        "name": "Selected knowledge sharing",
+        "body": "Keep sharing in a native disclosure after private filing, with the shared Radix workspace choice, exact source version and seven-day duration visible before acknowledgment. Target, source version, saved grant version and replacement changes invalidate acknowledgment; closing clears loaded choices, grants and acknowledgment. Separate the action from saved grants with the scoped heading margin (28px above, 12px below). Recipient reading retains bounded rows, coverage and exact insight/revision citations. Local labeled synthetic captures fix-mobile-active-controls.png (390px), fix-desktop-active.png (1440px) and mobile-recipient-reading.png (390px) in .impeccable/review/knowledge-grants/ support a ship disposition for that spacing correction only; they do not establish real grants, second-account consent, provider/auth acceptance or production deployment.",
+        "section": "components"
+      },
       {
         "body": "Use mint for permitted studio actions and connections, amber for Scroll's warmth, and preserve retained neutral reading controls. Neither color proves success or benefit.",
         "name": "The Meaningful Accent Rule",

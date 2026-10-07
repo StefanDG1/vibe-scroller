@@ -246,6 +246,16 @@ Setup rows wrap on narrow screens while action labels stay on one line. Space re
 
 Local evidence comprises six handler tests and the labeled synthetic native packet in `.impeccable/review/private-library/proof.json`, including 320/390/768/1440px checks, saved-step resumption, combined-view confirmation, source filing, empty/error feedback and bounded export. The finish reviewer cleared the scored corrections within that candidate scope. Fixture routes were removed from the application before final builds; real-account, production, second-account and genuine analysis acceptance remain pending.
 
+### Selected knowledge sharing and recipient reading
+
+Owner-private source detail keeps sharing in a native disclosure after the separate Personal/Business filing controls. The disclosure uses the existing quiet panel, readable explanation and full-size controls. Its workspace choice uses the shared Radix choice control. Show the selected recipient, source generation/revision and seven-day duration before the explicit version acknowledgment; changing the target, source version, saved grant version or replacement choice invalidates that acknowledgment. Closing the disclosure clears loaded choices, grants and acknowledgment.
+
+Keep the new sharing action visually separate from saved grants. The saved-grants heading has a clear section break (28px above, 12px below); this scoped spacing correction does not change other panel headings. Rows name the recipient and show expiry/revoked state and the count of selected versions, with a separate Revoke grant control. Rows retain the existing quiet separators and stack at 480px and below; action labels stay on one line and controls keep the existing 44px targets.
+
+Recipient reading uses a separate panel and bounded source list. Detail retains the title, source generation, grant version, coverage and exact insight/revision citations in the existing reading hierarchy. Loading, unavailable, empty and no-analysis states remain explicit. Read access does not visually imply permission to operate on the owner's library or inspect transcripts, frames, profile answers or credentials.
+
+October 7 finish disposition is ship for the scoped saved-grants spacing correction only. `.impeccable/review/knowledge-grants/fix-mobile-active-controls.png` (390px), `fix-desktop-active.png` (1440px) and `mobile-recipient-reading.png` (390px) capture labeled synthetic local controls and reading. They do not establish real grants, second-account consent, provider/auth acceptance or production deployment. This merge preserves Scroll's studio and the existing token primitives.
+
 ### Inputs / Fields
 
 Fields have a dark fill, restrained outline and readable placeholder. The link composer groups input and circular submit into one containing field; focus brightens its containing border instead of drawing an inner outline. Checkbox labels provide a full control target and keep permissions explicit.

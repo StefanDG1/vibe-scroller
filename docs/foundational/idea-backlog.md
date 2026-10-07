@@ -1,5 +1,9 @@
 # Foundational idea backlog
 
+## F018: deployed filing and explicit sharing candidate, October 7
+
+Source: owner-authorized evolution implementation and PR 57 production receipt. Adopt the deployed setup/filing facts; retain team sharing as a candidate until exact release checks. The permission distinction addresses project owners who may want selected knowledge in a shared workspace while keeping their own interests private. Counterargument: a recipient can retain material already disclosed, and an expiration cannot erase it. Tests cover every-read scope, exact corrections/deletion, expiry, role loss, revocation and acknowledgment invalidation; real two-account comprehension and official fresh authentication remain acceptance gates. No assistant grant, mixed summary, additional spend or public issue publication follows. All four briefs and the change log are updated together.
+
 ## F016: compatible brand and deployed boundary evidence, October 7
 
 Owner-authorized implementation and repository rename carry F014/F015 into engineering. The audience remains adult project owners using AI, including non-coders. Current display copy uses VibeScroll and Make scrolling useful. Reuse the original Scroll and selected mark; preserve private configuration, stable provider identities and historical releases. Published legal policy bytes, terms and acceptance versions remain unchanged, with the rename explained beside those originals.

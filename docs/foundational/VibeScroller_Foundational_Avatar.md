@@ -1,5 +1,9 @@
 # VibeScroll foundational avatar
 
+## F018: deployed filing and explicit sharing candidate, October 7
+
+Private Personal/Business filing is now available in the deployed owner-private library. A person may choose to browse both views together after confirmation. Team disclosure is a separate exact-version action with an explicit target and expiry; neither a category nor a quiz answer establishes willingness to share. Independent users must still demonstrate that they understand the distinction. See [implementation status](../implementation-status.md) and [ADR 082](../adr/082-exact-version-team-knowledge-grants.md).
+
 F017 implementation candidate, October 7: Personal/Business filing and saved user-stated setup now have bounded owner-private handlers and a reviewed local synthetic UI. No source is copied or analyzed through filing; confirmed combined browsing grants no external sharing or spending. Real two-account acceptance, first-result processing, assistant grants and production filing are still pending. Retain F016's verified release facts and earlier research limits.
 
 The current primary working avatar is an adult project owner who saves useful content on a phone and uses an AI agent to help decide and implement what to apply. They may never write code themselves. Developers and technical founders remain a segment. This October 7 owner-selected behavioral target supersedes developer-only targeting; it is not a verified demographic segment or a fictional customer biography.

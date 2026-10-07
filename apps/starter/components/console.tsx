@@ -34,6 +34,8 @@ import { LibraryScan } from "./library-scan";
 import { SubscriptionTrials } from "./subscription-trials";
 import { Improvements } from "./improvements";
 import { NoticeToast } from "./notice-toast";
+import { TeamKnowledgeSharing } from "./team-knowledge-sharing";
+import { SharedKnowledge } from "./shared-knowledge";
 import { PrivateLibrary } from "./private-library";
 import { StudioHome } from "./studio-home";
 import { ScrollCharacter } from "./scroll-character";
@@ -57,6 +59,9 @@ import type { ImportPreview } from "../../../packages/instagram-import";
 type Initial = {
   compact?: boolean;
   privateLibrary?: boolean;
+  sharedKnowledge?: { items: any[]; next: string | null };
+  selectedSharedKnowledge?: any;
+  sharedKnowledgeError?: string;
   workspaceName?: string;
   aiPreference?: {
     preferChatGPTPlan: boolean;
@@ -498,6 +503,15 @@ export function Console({
     if (view === "source" && selected) query.set("sourceId", id(selected));
     if (homePreview.current) query.set("homeMode", "compact");
     if (view === "proposal" && selected) query.set("proposalId", id(selected));
+    if (requestView === "shared") {
+      const selectedSharing = new URLSearchParams(window.location.search);
+      const sharedGrantId = selectedSharing.get("grant");
+      const sharedSourceId = selectedSharing.get("source");
+      if (sharedGrantId && sharedSourceId) {
+        query.set("sharedGrantId", sharedGrantId);
+        query.set("sharedSourceId", sharedSourceId);
+      }
+    }
     const response = await fetch(`/api/workspace/${organizationId}?${query}`, {
       cache: "no-store",
     });
@@ -976,6 +990,15 @@ export function Console({
             </section>
           ) : (
             <>
+              {view === "shared" && (
+                <SharedKnowledge
+                  key={`${organizationId}:${JSON.stringify([data.sharedKnowledge, data.selectedSharedKnowledge, data.sharedKnowledgeError])}`}
+                  organizationId={organizationId}
+                  initial={data.sharedKnowledge}
+                  initialDetail={data.selectedSharedKnowledge}
+                  initialError={data.sharedKnowledgeError}
+                />
+              )}
               {view === "improvements" && (
                 <Improvements
                   organizationId={organizationId}
@@ -1007,6 +1030,14 @@ export function Console({
               )}
               {view === "library" && (
                 <>
+                  {!data.privateLibrary && !demo && (
+                    <a
+                      className="button secondary"
+                      href={`/app/${organizationId}/shared`}
+                    >
+                      Knowledge shared with this workspace
+                    </a>
+                  )}
                   <LibrarySections
                     active={librarySection}
                     onSelect={setLibrarySection}
@@ -3489,6 +3520,15 @@ function SourceDetail({
             ))}
           </div>
         </section>
+      )}
+      {detail.privateLibrary && !demo && !detailLoading && (
+        <TeamKnowledgeSharing
+          key={sourceId}
+          organizationId={org}
+          source={detail}
+          call={call}
+          readOnly={readOnly}
+        />
       )}
       <details
         className="panel source-notes"

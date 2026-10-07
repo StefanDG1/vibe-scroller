@@ -1,6 +1,6 @@
 # Private filing and confirmed setup
 
-Mode: reference. Decision October 7, 2026. Status: implemented candidate, production acceptance pending.
+Mode: reference. Decision October 7, 2026. Status: deployed in PR 57; actual-owner synthetic filing verified, independent and first-analysis acceptance remain pending.
 
 Ownership and filing remain distinct. ADR 078's owner-private organization is the only scope accepted by Personal/Business filing and setup. Existing shared workspaces and memberships do not become private through a name or category. No existing source is moved or automatically classified.
 

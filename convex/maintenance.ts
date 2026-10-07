@@ -14,7 +14,21 @@ export const purgeOrganization = internalMutation({
     const org = await ctx.db.get(organizationId);
     if (!org || org.status !== "deleting") return;
     await rememberDeletion(ctx, "workspace", organizationId);
+    const received = await ctx.db
+      .query("teamKnowledgeGrants")
+      .withIndex("by_recipient", (q) =>
+        q.eq("recipientOrganizationId", organizationId),
+      )
+      .take(100);
+    for (const grant of received) await ctx.db.delete(grant._id);
+    if (received.length === 100) {
+      await ctx.scheduler.runAfter(0, internal.maintenance.purgeOrganization, {
+        organizationId,
+      });
+      return;
+    }
     for (const table of [
+      "teamKnowledgeGrants",
       "librarySetup",
       "sourceSpaces",
       "dashboardCards",
