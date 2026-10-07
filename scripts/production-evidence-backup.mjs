@@ -1,14 +1,31 @@
 import { ConvexHttpClient } from "convex/browser";
 import { makeFunctionReference } from "convex/server";
-import { mkdirSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  statSync,
+  renameSync,
+  unlinkSync,
+  writeFileSync,
+} from "node:fs";
+import { randomUUID } from "node:crypto";
 import { resolve, join } from "node:path";
 import { isVibeScrollRepository } from "./repository-identity.mjs";
+import { readEvidenceBytes } from "../packages/recovery/evidence-batch.mjs";
+import { verifyEvidenceBackup } from "../packages/recovery/evidence-backup.mjs";
 import {
-  backupEvidenceBatch,
-  readEvidenceBytes,
-} from "../packages/recovery/evidence-batch.mjs";
+  backupEvidencePart,
+  createEvidenceCheckpoint,
+  openEvidenceCheckpoint,
+} from "../packages/recovery/evidence-parts.mjs";
+import { buildVersion } from "./version.mjs";
 
 const deployment = "bold-lemur-667";
+function readArchive(path, maximumBytes = 2000000) {
+  if (statSync(path).size > maximumBytes) throw Error();
+  return JSON.parse(readFileSync(path, "utf8"));
+}
 let stage = "authorization";
 try {
   const key = Buffer.from(process.env.BACKUP_ENCRYPTION_KEY ?? "", "base64");
@@ -47,11 +64,50 @@ try {
     throw Error();
   const output = resolve("outputs/production-backup");
   mkdirSync(output, { recursive: true, mode: 0o700 });
-  const { asOf } = await call("recovery:evidenceCheckpoint", {});
+  stage = "code_identity";
+  const commit = buildVersion().commit;
+  stage = "evidence_checkpoint";
+  const resume = process.env.VIBE_EVIDENCE_RESUME_AS_OF;
+  if (resume !== undefined && !/^[1-9][0-9]{12}$/.test(resume)) throw Error();
+  const { asOf } = resume
+    ? { asOf: Number(resume) }
+    : await call("recovery:evidenceCheckpoint", {});
+  const checkpointPath = join(
+    output,
+    `${asOf}.evidence-checkpoint.sealed.json`,
+  );
+  stage = "checkpoint_initialization";
+  const state = resume
+    ? openEvidenceCheckpoint(readArchive(checkpointPath, 6000000), key, {
+        deployment,
+        commit,
+      })
+    : createEvidenceCheckpoint({ deployment, commit, asOf });
+  if (!resume && existsSync(checkpointPath)) throw Error();
+  const started = Date.now();
+  const archivePath = (index) =>
+    join(output, `${asOf}.${index}.evidence.sealed.json`);
+  const checkpoint = async (archive) => {
+    const temporary = join(output, `${asOf}.${randomUUID()}.checkpoint.tmp`);
+    try {
+      writeFileSync(temporary, JSON.stringify(archive), {
+        flag: "wx",
+        mode: 0o600,
+      });
+      renameSync(temporary, checkpointPath);
+    } finally {
+      if (existsSync(temporary)) unlinkSync(temporary);
+    }
+    if (Date.now() - started > 20 * 60000) {
+      stage = "checkpoint_paused";
+      throw Error();
+    }
+  };
   stage = "retained_evidence";
-  const proof = await backupEvidenceBatch({
+  const callbacks = {
     key,
-    now: asOf,
+    state,
+    checkpoint,
     page: (cursor) => call("recovery:evidencePage", { cursor, asOf }),
     current: (entry) =>
       call("recovery:evidenceCurrent", { key: entry.key, asOf }),
@@ -69,17 +125,45 @@ try {
         entry.size,
       );
     },
-    save: (index, archive) =>
-      writeFileSync(
-        join(output, `${asOf}.${index}.evidence.sealed.json`),
-        JSON.stringify(archive),
-        { flag: "wx", mode: 0o600 },
-      ),
-  });
+    existing: async (index) =>
+      existsSync(archivePath(index)) ? readArchive(archivePath(index)) : null,
+    save: async (index, archive) => {
+      const path = archivePath(index);
+      if (existsSync(path)) {
+        const retained = readArchive(path);
+        const proof = verifyEvidenceBackup(
+          retained,
+          key,
+          archive.metadata.evidence,
+        );
+        if (proof.sha256 !== archive.metadata.sha256) throw Error();
+      } else
+        writeFileSync(path, JSON.stringify(archive), {
+          flag: "wx",
+          mode: 0o600,
+        });
+    },
+  };
+  let proof;
+  do {
+    proof = await backupEvidencePart(callbacks);
+  } while (!proof.complete);
+  for (let i = 0; i < state.saved; i++)
+    if (!existsSync(archivePath(i))) throw Error();
   console.log(
     JSON.stringify({
       deployment,
-      ...proof,
+      asOf,
+      complete: state.complete,
+      saved: state.saved,
+      skipped: state.skipped,
+      bytes: state.bytes,
+      parts: state.parts.map((p) => ({
+        index: p.index,
+        saved: p.saved,
+        bytes: p.bytes,
+      })),
+      encrypted: true,
       temporaryMediaIncluded: false,
       storageCredentialsExported: false,
       maximumRetentionDays: 7,
@@ -90,6 +174,7 @@ try {
     JSON.stringify({
       evidenceBackupPassed: false,
       stage,
+      resumableCheckpointPreserved: stage === "checkpoint_paused",
       diagnosticsSuppressed: true,
     }),
   );

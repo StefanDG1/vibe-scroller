@@ -87,7 +87,7 @@ export function sealEvidence(evidence, bytes, backupKey, now = Date.now()) {
 
 // These latest records must come from the locked recovery deployment and current
 // authoritative deletion manifest, never from the archive's own older snapshot.
-export function openEvidence(archive, backupKey, current, now = Date.now()) {
+function checkedArchive(archive, now) {
   if (
     !archive?.metadata ||
     archive.metadata.version !== 1 ||
@@ -105,6 +105,44 @@ export function openEvidence(archive, backupKey, current, now = Date.now()) {
     reject();
   const e = archive.metadata.evidence;
   validateEvidence(e);
+  if (
+    e.restoreUntil <= now ||
+    e.restoreUntil > archive.metadata.capturedAt + 7 * 86400000 ||
+    (e.expiresAt !== undefined && e.expiresAt <= now)
+  )
+    reject();
+  return e;
+}
+
+// Backup resumption verifies a surviving archive against a freshly authorized
+// read-only inventory entry. This proof grants no restoration or object writes.
+export function verifyEvidenceBackup(
+  archive,
+  backupKey,
+  current,
+  now = Date.now(),
+) {
+  const e = checkedArchive(archive, now);
+  if (
+    !current ||
+    ![
+      "organizationId",
+      "sourceId",
+      "generation",
+      "key",
+      "type",
+      "size",
+      "expiresAt",
+      "restoreUntil",
+    ].every((field) => current[field] === e[field])
+  )
+    reject();
+  decryptArchive(archive, backupKey, e);
+  return { sha256: archive.metadata.sha256, size: e.size };
+}
+
+export function openEvidence(archive, backupKey, current, now = Date.now()) {
+  const e = checkedArchive(archive, now);
   if (
     !current?.locked ||
     !current.latestMarkersApplied ||
@@ -132,6 +170,10 @@ export function openEvidence(archive, backupKey, current, now = Date.now()) {
     current.deletedWorkspaces.includes(e.organizationId)
   )
     reject();
+  return decryptArchive(archive, backupKey, e);
+}
+
+function decryptArchive(archive, backupKey, e) {
   const decipher = createDecipheriv(
     "aes-256-gcm",
     checkedKey(backupKey),
