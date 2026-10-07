@@ -1,5 +1,13 @@
 # Implementation status
 
+## October 7, 2026: private personal-alpha capture correction
+
+Based on main `a82d75c98ec2cc379c259f54989ea2149d8d98fa`, capture incorrectly required a positive trial grant even for ADR 012's existing subject-gated operator storage allowance. A new private workspace after the account's original trial claim has a zero-grant wallet. The regression reproduced that failure before the one-condition correction (`outputs/vibescroll-private-source-allowance-regression.log`, one failed, two passed). The corrected path permits saved text within the already accepted 1,000-active-source ceiling, without granting, renewing, reserving or spending inference credits. Wrong subjects, disabled personal access and the ceiling remain blocked. No provider route, general trial entitlement or quality-credit flag changed.
+
+Windows/Node 24/pnpm 12.3.4 focused tests passed 3/3. `pnpm check` completed successfully in `outputs/vibescroll-private-source-allowance-check.log`: 444 unit tests, three external skips, 21 auth tests, Python 6/6/3, five Basic-build tests, lint, types and both builds. Dependency review at `2026-10-07T00:32:33.361Z` passed with no unresolved findings and the existing locally mitigated braces advisory. This is synthetic local allowance evidence, not a fresh-user first-result or real two-account privacy acceptance.
+
+PR 52 merged as `a82d75c98ec2cc379c259f54989ea2149d8d98fa`. Exact main Verify `37552118493`, version `37552118470` and verified alpha `37552204241` passed. Production Vercel `dpl_CPTjNcuPP6eLP8soCtQNF4ogutDe` is READY for that commit. The canonical health endpoint returned HTTP 200 and that exact commit/version `0.1.0-alpha.20261007002809.ga82d75c98ec2`; ignored `private/vibescroll-directory-production-health.json` retains the timestamp. Authenticated Convex deployment succeeded after a read-only backup credential correctly denied a prior deploy attempt. Production metadata backfill completed at `1791332877862`; its enabled flag remains unset, so ordinary Home continues using the compatible full path. The compact-flow review remains incomplete.
+
 ## October 7, 2026: compact Home metadata candidate
 
 PR 52 candidate `72702511694e12058fee285967867532ca6b8e17` passed exact Verify `37550994689`; preview `dpl_D1LbHTrBteRgrjLbGjdqTACaZPuf` is READY. The preview shows the actual setup screen because application environment is not configured there, so it supplies no authenticated acceptance. Subsequent rollout code keeps compact Home disabled until operator enable, with an explicit canonical authenticated opt-in for the reviewer's requested packet. Required real behavior captures remain open. The enabled flag neither bypasses access nor authorizes inference.
