@@ -118,3 +118,7 @@ Updated all four current briefs together for actual bounded ChatGPT/Codex owner-
 ## F026: readable allowance and bounded Usage evidence, October 7
 
 Updated Research, Avatar, Offer and Beliefs together with actual production allowance/refusal and bounded response-transfer evidence. Preserve prior failures, six beliefs, prices, audience, unknown holds and separate action authority. Current Usage is verified at its scope; no database billing, customer outcome, comprehension or full V1 acceptance is inferred. Retain the existing external gates and owner's lack of an independent tester.
+
+## F027: cited sharing and honest evidence labels, October 8
+
+Updated all four briefs together with bounded two-owner-account technical evidence and ADR 092. Preserve the failed role-removal observation, pending invoice settlement and independent acceptance gates. No measured benefit, price or expanded permission is inferred.
