@@ -1,0 +1,78 @@
+{
+  "recordedAt": "2026-10-07T06:52:28.778494+00:00",
+  "scope": "evolution engineering release; full V1 external acceptance incomplete",
+  "applicationCommit": "6362fe75e0d2097c81409889bfecf1691fe9c946",
+  "backendCommit": "0cc913a8df1bb21210a739762602bb842b76ea3c",
+  "applicationVersion": "0.1.0-alpha.20261007063712.g6362fe75e0d2",
+  "productionDomain": "https://scroll.companynerve.com",
+  "frontend": {
+    "deployment": "dpl_DZdm3Z1AgxiNHvFH5JSWHBUg7HaN",
+    "state": "READY",
+    "buildMachine": "basic",
+    "selection": "fixed",
+    "assignedCores": 2,
+    "memoryMiB": 8192
+  },
+  "checks": {
+    "command": "pnpm check",
+    "environment": "Windows/Node24.12.0/pnpm12.3.4",
+    "unitPassed": 523,
+    "externalExplicitSkips": 3,
+    "authenticationPassed": 24,
+    "pythonSuitesPassed": [6, 6, 3],
+    "basicBuildPolicyPassed": 5,
+    "bothProductionBuilds": "passed",
+    "prVerifyRun": 37582337376,
+    "mainVerifyRun": 37582518046,
+    "alphaReleaseRun": 37582609166,
+    "dependencyAudit": "passed, known locally mitigated braces high, zero unresolved",
+    "redactedSecretScan": "passed"
+  },
+  "boundedTraffic": {
+    "control": "authenticated same workspace, explicit visibility/viewport emulation",
+    "homeWorkspaceDecodedBytes": {
+      "full": 433170,
+      "compact": 9040
+    },
+    "libraryWorkspaceDecodedBytes": 11837,
+    "postsPageDecodedBytes": 249048,
+    "libraryTopicsWindowSeconds": 30,
+    "noReadySourceOrTrialRequestsInTopicsWindow": true,
+    "limits": "response observations; no causal request-total/database-IO/cost/CoreWebVitals/physical-device/human claim"
+  },
+  "recovery": {
+    "independentBackupRun": 37563618400,
+    "allObjects": 3354,
+    "bytes": 326974878,
+    "fullHashesVerified": true,
+    "actualStopAndResume": true,
+    "finalMarkerReconciliation": true,
+    "isolatedDatabaseRollback": true,
+    "protectedServing": "unverified, dedicated staging sign-in unanswered",
+    "temporaryObjectsDeletedAndHeadVerified": 3354,
+    "temporaryBucketTokenPreviewKeyAndPreviewRemoved": true,
+    "productionIdentityAfterCleanup": "bold-lemur-667",
+    "originalEncryptedArchivesAndChosenStatePreserved": true,
+    "cliLimitation": "deleted preview reference rejected with Windows libuv assertion; not clean provider404"
+  },
+  "features": {
+    "compactHomeEnabled": true,
+    "libraryVisibleContextDeployed": true,
+    "McpEnabled": false,
+    "EventsEnabled": false,
+    "eightScopesPrepared": true,
+    "realHostConsentAccepted": false,
+    "realProviderRevocationAccepted": false
+  },
+  "remaining": [
+    "dedicated real protected serving recovery",
+    "concrete ChatGPT risk/OAuth consent and fresh app grant; actual tools/revocation/Events host lifecycle",
+    "real eligible new-user first analysis with capacity/settled cost",
+    "second-account sharing/revocation and restricted/multiple GitHub installations",
+    "independent held-out retrieval/relation/project usefulness and human/device/core-browser accessibility",
+    "whole approved supported isolated job-to-draft-PR journey",
+    "professional legal/provider/commercial/invoice gates",
+    "separate exact publication review for125draft batch"
+  ],
+  "authority": "no new paid inference, expired-session extension, live charge, public issue batch or V2 experiment authorized by this receipt"
+}
