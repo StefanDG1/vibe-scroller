@@ -14,6 +14,7 @@ export const dashboardTables = {
     table: v.number(),
     cursor: v.union(v.string(), v.null()),
     complete: v.boolean(),
+    enabled: v.optional(v.boolean()),
     updatedAt: v.number(),
   }).index("by_name", ["name"]),
   dashboardCards: defineTable({

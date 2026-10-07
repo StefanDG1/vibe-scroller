@@ -184,6 +184,7 @@ function SourceThumbnail({ source, demo }: { source: any; demo: boolean }) {
 }
 
 export function Console({
+  compactHomePreview = false,
   demo = false,
   readOnly = false,
   canSuggestCategories = false,
@@ -198,6 +199,7 @@ export function Console({
   initialSource = null,
   demoState = "ready",
 }: {
+  compactHomePreview?: boolean;
   demo?: boolean;
   readOnly?: boolean;
   canSuggestCategories?: boolean;
@@ -260,6 +262,7 @@ export function Console({
     initial.compact ? initial : null,
   );
   const viewGeneration = useRef(0);
+  const homePreview = useRef(compactHomePreview);
   const firstView = useRef(true);
   const seenNotifications = useRef(new Set(initial.notifications.map(id)));
   const captureDialog = useRef<HTMLDialogElement>(null);
@@ -404,6 +407,7 @@ export function Console({
       notify(next.notifications);
       return;
     }
+    if (view === "home") setHomeData(null);
     if (!demo)
       for (const source of next.sources) {
         const old = data.sources.find((s) => id(s) === id(source));
@@ -489,6 +493,7 @@ export function Console({
       sort,
     });
     if (view === "source" && selected) query.set("sourceId", id(selected));
+    if (homePreview.current) query.set("homeMode", "compact");
     if (view === "proposal" && selected) query.set("proposalId", id(selected));
     const response = await fetch(`/api/workspace/${organizationId}?${query}`, {
       cache: "no-store",
@@ -745,7 +750,7 @@ export function Console({
       history.replaceState(
         null,
         "",
-        `/app/${organizationId}/${v === "home" ? "" : v}`,
+        `/app/${organizationId}/${v === "home" ? "" : v}${v === "home" && homePreview.current ? "?homeMode=compact" : ""}`,
       );
   };
   const filtered = !demo

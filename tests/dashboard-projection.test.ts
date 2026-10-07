@@ -113,6 +113,7 @@ async function setup(count = 1) {
   async function migrate() {
     await t.mutation(internal.dashboard.backfill, {});
     await t.finishAllScheduledFunctions(vi.runAllTimers);
+    await t.mutation(internal.dashboard.setEnabled, { enabled: true });
   }
   return {
     t,
@@ -138,6 +139,17 @@ it("backfills ten original records per transaction, resumes and returns bounded 
     await s.t.run((ctx) => ctx.db.query("dashboardCards").collect()),
   ).toHaveLength(10);
   await s.t.finishAllScheduledFunctions(vi.runAllTimers);
+  expect(
+    await s.owner.query(api.dashboard.home, {
+      organizationId: s.organizationId,
+    }),
+  ).toEqual({ ready: false });
+  const preview = await s.owner.query(api.dashboard.home, {
+    organizationId: s.organizationId,
+    preview: true,
+  });
+  expect(preview.ready).toBe(true);
+  await s.t.mutation(internal.dashboard.setEnabled, { enabled: true });
   const home = await s.owner.query(api.dashboard.home, {
     organizationId: s.organizationId,
   });
@@ -158,6 +170,20 @@ it("backfills ten original records per transaction, resumes and returns bounded 
   expect(await s.t.mutation(internal.dashboard.backfill, {})).toEqual({
     complete: true,
   });
+  await s.t.mutation(internal.dashboard.setEnabled, { enabled: false });
+  expect(
+    await s.owner.query(api.dashboard.home, {
+      organizationId: s.organizationId,
+    }),
+  ).toEqual({ ready: false });
+  expect(
+    (
+      await s.owner.query(api.dashboard.home, {
+        organizationId: s.organizationId,
+        preview: true,
+      })
+    ).ready,
+  ).toBe(true);
 });
 it("atomically fences a proposal when an existing source mutation changes its revision and deletes its card on redaction", async () => {
   const s = await setup();

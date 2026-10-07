@@ -11,6 +11,7 @@ export async function workspaceData({
   sort = "newest",
   sourceId,
   proposalId,
+  compactHome = false,
 }: {
   org: string;
   view?: string;
@@ -20,11 +21,15 @@ export async function workspaceData({
   sort?: string;
   sourceId?: string;
   proposalId?: string;
+  compactHome?: boolean;
 }) {
   const c = await backend(),
     organizationId = org as Id<"organizations">;
   if (!view || view === "home") {
-    const home = await c.query(api.dashboard.home, { organizationId });
+    const home = await c.query(api.dashboard.home, {
+      organizationId,
+      preview: compactHome,
+    });
     if (home.ready) return home;
   }
   const [

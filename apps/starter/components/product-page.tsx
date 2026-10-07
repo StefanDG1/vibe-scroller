@@ -10,6 +10,7 @@ export async function ProductPage({
   category = "",
   sort = "newest",
   sourceId,
+  compactHome = false,
 }: {
   org: string;
   view: string;
@@ -19,6 +20,7 @@ export async function ProductPage({
   category?: string;
   sort?: string;
   sourceId?: string;
+  compactHome?: boolean;
 }) {
   const initial = await workspaceData({
     org,
@@ -28,11 +30,13 @@ export async function ProductPage({
     category,
     sort,
     sourceId,
+    compactHome,
   });
   if (sourceId && !("selectedSource" in initial && initial.selectedSource))
     notFound();
   return (
     <Console
+      compactHomePreview={compactHome}
       key={`${org}:${sourceId ?? "workspace"}`}
       initialSource={
         "selectedSource" in initial ? initial.selectedSource : null

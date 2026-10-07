@@ -50,14 +50,18 @@ export const backfill = internalMutation({
 });
 
 export const home = query({
-  args: { organizationId: v.id("organizations") },
-  handler: async (ctx, { organizationId }) => {
+  args: {
+    organizationId: v.id("organizations"),
+    preview: v.optional(v.boolean()),
+  },
+  handler: async (ctx, { organizationId, preview }) => {
     const { organization, membership } = await access(ctx, organizationId);
     const migration = await ctx.db
       .query("dashboardMigrations")
       .withIndex("by_name", (q) => q.eq("name", migrationName))
       .unique();
-    if (!migration?.complete) return { ready: false as const };
+    if (!migration?.complete || (!migration.enabled && !preview))
+      return { ready: false as const };
     const pages = await Promise.all(
       (["source", "repository", "proposal", "run"] as const).map((kind) =>
         ctx.db
@@ -156,5 +160,19 @@ export const home = query({
       usage: null,
       libraryNext: pages[0].length > 30 ? "more" : null,
     };
+  },
+});
+
+export const setEnabled = internalMutation({
+  args: { enabled: v.boolean() },
+  handler: async (ctx, { enabled }) => {
+    if (process.env.RESTORE_LOCK === "true") fail("Recovery is locked.");
+    const checkpoint = await ctx.db
+      .query("dashboardMigrations")
+      .withIndex("by_name", (q) => q.eq("name", migrationName))
+      .unique();
+    if (!checkpoint?.complete) fail("Finish the metadata backfill first.");
+    await ctx.db.patch(checkpoint._id, { enabled, updatedAt: Date.now() });
+    return { enabled };
   },
 });
