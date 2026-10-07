@@ -139,3 +139,7 @@ Follow [ADR 058](adr/058-bounded-full-library-scans.md): full URL-link paginatio
 ## October 7: readable bounded Usage
 
 [ADR 091](adr/091-readable-bounded-usage.md) replaces raw Usage JSON with actual allowance, retained holds and bounded settled credit entries. The existing authorized two-query slice omits unrelated private records. Revoked and expired allowance cannot contribute to availability; unknown holds, funding and approval boundaries remain unchanged. Request/transfer evidence is separate from database billing and production acceptance.
+
+## October 8: honest shared evidence labels
+
+[ADR 092](adr/092-honest-shared-evidence-labels.md) preserves untimed shared citations without inventing a video timestamp and labels the shared route correctly. Permissions, exact-version grants, pagination and budgets remain unchanged.

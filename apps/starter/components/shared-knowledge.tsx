@@ -1,5 +1,6 @@
 "use client";
 import { useRef, useState } from "react";
+import { sharedEvidenceLabel } from "../lib/shared-evidence-label";
 export function SharedKnowledge({
   organizationId,
   initial,
@@ -119,13 +120,7 @@ export function SharedKnowledge({
                   <p className="fine">
                     Exact insight {insight.id}. Source revision{" "}
                     {insight.reference.revision}.{" "}
-                    {insight.evidence
-                      .map((e: any) =>
-                        e.startMs !== undefined
-                          ? `${e.kind}: ${(e.startMs / 1000).toFixed(1)}s`
-                          : e.kind,
-                      )
-                      .join("; ")}
+                    {insight.evidence.map(sharedEvidenceLabel).join("; ")}
                   </p>
                 </li>
               ))}

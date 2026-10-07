@@ -1,0 +1,63 @@
+{
+  "mode": "coarse engineering evidence",
+  "dateLocal": "2026-10-08 Europe/Berlin",
+  "servingCommit": "d8407a951a3e16688d73af38315a4d8d5d2eb367",
+  "servingVersion": "0.1.0-alpha.20261007195127.gd8407a951a3e",
+  "backendCommit": "1db35d26d357990a0b81cad7170b8f6b011e1efe",
+  "accounts": "two owner-controlled accounts, not independent testers",
+  "source": "existing explicitly labeled synthetic owner-private text fixture; title/text retained; normal analysis intentionally advanced generation/revision",
+  "observations": {
+    "before": "2026-10-07T22:21:49.794440+00:00",
+    "active": "2026-10-07T22:23:17.931388+00:00",
+    "revoked": "2026-10-07T22:23:52.061004+00:00",
+    "cleanup": "2026-10-07T22:25:04.423605+00:00"
+  },
+  "before": {
+    "privateSource": 404,
+    "sharedList": 200,
+    "items": 0,
+    "terminal": true
+  },
+  "active": {
+    "sharedList": 200,
+    "sharedDetail": 200,
+    "privateSource": 404,
+    "evidence": "one untimed user_note citation",
+    "grantVersion": 1,
+    "scope": "one exact source version for seven days"
+  },
+  "revoked": {
+    "oldSharedDetail": 400,
+    "code": "FORBIDDEN",
+    "pageItems": 0,
+    "nonterminalCursorRetained": true,
+    "remountedUi": "old claim cleared; source unavailable"
+  },
+  "cleanup": {
+    "workspaceOwner": 404,
+    "workspaceSecondAccount": 404,
+    "temporaryWorkspaceDeleted": true,
+    "focusOverridesRestored": true,
+    "secondContextRetainedBlank": true
+  },
+  "cache": "all listed ordinary API responses no-store",
+  "limitations": [
+    "One attempted role-removal check still returned 200; this run does not claim role-loss acceptance. Prior recorded role-loss evidence is separate.",
+    "Natural expiry, mixed evidence, source correction invalidation and independent human/device comprehension remain separate.",
+    "Two bounded Google operations total 4755 EUR micro under existing conservative policy; this is not a cash invoice. Infrastructure provision and historical unknown holds remain reserved.",
+    "The disposable repository assessment returned needs_context; no plan, coding or PR was forced from it."
+  ],
+  "candidate": {
+    "applicationCommit": "7a9918ffbb55eb3d8fe8bca76913c22682088d44",
+    "checkObservedAt": "2026-10-07T22:31:18.872847+00:00",
+    "command": "pnpm check",
+    "unitPassed": 534,
+    "externalSkipped": 3,
+    "authPassed": 28,
+    "pythonPassed": [6, 6, 3],
+    "basicPolicyPassed": 5,
+    "productionBuildsPassed": 2,
+    "browserScope": "static actual-component SSR; synthetic untimed user-note; 390/1440 no overflow; unhydrated controls",
+    "productionNewFrontend": "pending exact PR checks/deployment"
+  }
+}
