@@ -1,4 +1,4 @@
-import { internalMutation, mutation } from "./_generated/server";
+import { internalMutation, mutation } from "./lib/projectedMutations";
 import { v } from "convex/values";
 import { ensure } from "../packages/policy";
 import { googleConfigured } from "../packages/providers/google-inference";

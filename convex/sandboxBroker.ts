@@ -1,4 +1,4 @@
-import { mutation, internalMutation } from "./_generated/server";
+import { mutation, internalMutation } from "./lib/projectedMutations";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { verifySandboxRequest } from "../packages/policy/sandbox-broker";

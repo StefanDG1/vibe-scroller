@@ -2,6 +2,7 @@ import { productTables } from "./productSchema";
 import { knowledgeTables } from "./knowledgeSchema";
 import { improvementTables } from "./improvementSchema";
 import { libraryScanTables } from "./libraryScanSchema";
+import { dashboardTables } from "./dashboardSchema";
 import { localLibraryTables } from "./localLibrarySchema";
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
@@ -16,6 +17,7 @@ export default defineSchema({
   ...knowledgeTables,
   ...improvementTables,
   ...libraryScanTables,
+  ...dashboardTables,
   ...localLibraryTables,
   users: defineTable({
     subject: v.string(),

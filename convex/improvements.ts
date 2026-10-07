@@ -1,4 +1,5 @@
-import { mutation, query } from "./_generated/server";
+import { query } from "./_generated/server";
+import { mutation } from "./lib/projectedMutations";
 import { v } from "convex/values";
 import { access, writeAccess, audit, limit } from "./lib";
 import { containsSecret, ensure, sensitivePath } from "../packages/policy";

@@ -2,6 +2,10 @@
 
 Mode: reference. These decisions supersede earlier alternatives in the discussion.
 
+## October 7: bounded Home metadata
+
+[ADR 079](adr/079-atomic-home-metadata.md) uses atomic metadata triggers and a resumable ten-record backfill for bounded authorized Home reads. Full-content checks, privacy, budgets and approvals remain authoritative. Manual source/category corrections advance timestamp revisions monotonically so same-millisecond edits cannot leave old references current. Actual compact browser and serving recovery acceptance remain separate from local checks.
+
 | ID  | Decision                                                                                                                                                | Basis                                               |
 | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
 | D01 | Product name VibeScroller, motto Make scrolling productive, proposed `scroll.companynerve.com`                                                          | Owner choice                                        |

@@ -1,4 +1,5 @@
-import { internalMutation, internalQuery } from "./_generated/server";
+import { internalQuery } from "./_generated/server";
+import { internalMutation } from "./lib/projectedMutations";
 import { v } from "convex/values";
 import { ensure } from "../packages/policy";
 import { toolSnapshot } from "../packages/policy/tool-snapshots";

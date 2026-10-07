@@ -54,6 +54,7 @@ import { track } from "@/lib/analytics";
 import { productAnalyticsEvent } from "@/lib/analytics-events";
 import type { ImportPreview } from "../../../packages/instagram-import";
 type Initial = {
+  compact?: boolean;
   workspaceName?: string;
   aiPreference?: {
     preferChatGPTPlan: boolean;
@@ -65,6 +66,7 @@ type Initial = {
   };
   sources: any[];
   selectedSource?: any;
+  selectedProposal?: any;
   categories?: {
     key: string;
     name: string;
@@ -182,6 +184,7 @@ function SourceThumbnail({ source, demo }: { source: any; demo: boolean }) {
 }
 
 export function Console({
+  compactHomePreview = false,
   demo = false,
   readOnly = false,
   canSuggestCategories = false,
@@ -196,6 +199,7 @@ export function Console({
   initialSource = null,
   demoState = "ready",
 }: {
+  compactHomePreview?: boolean;
   demo?: boolean;
   readOnly?: boolean;
   canSuggestCategories?: boolean;
@@ -254,12 +258,18 @@ export function Console({
       credentialHash: string;
       name: string;
     } | null>(null);
+  const [homeData, setHomeData] = useState<Initial | null>(
+    initial.compact ? initial : null,
+  );
+  const viewGeneration = useRef(0);
+  const homePreview = useRef(compactHomePreview);
+  const firstView = useRef(true);
   const seenNotifications = useRef(new Set(initial.notifications.map(id)));
   const captureDialog = useRef<HTMLDialogElement>(null);
   const [sharedDraft, setSharedDraft] = useState(initialSharedDraft);
   const libraryRequest = useRef(0);
   const libraryAbort = useRef<AbortController | null>(null);
-  const refreshFlight = useRef<Promise<void> | null>(null);
+  const refreshFlight = useRef<Promise<Initial | undefined> | null>(null);
   async function loadLibrary(append = false) {
     if (demo) {
       setLibraryError("");
@@ -391,6 +401,13 @@ export function Console({
     };
   }, [captureOpen]);
   function applyData(next: Initial) {
+    if (next.compact) {
+      setHomeData(next);
+      setData((current) => ({ ...current, notifications: next.notifications }));
+      notify(next.notifications);
+      return;
+    }
+    if (view === "home") setHomeData(null);
     if (!demo)
       for (const source of next.sources) {
         const old = data.sources.find((s) => id(s) === id(source));
@@ -414,18 +431,24 @@ export function Console({
           ? next.selectedSource
           : null;
       return (
+        (next.selectedProposal && id(next.selectedProposal) === id(current)
+          ? next.selectedProposal
+          : null) ??
         next.proposals.find((p) => id(p) === id(current)) ??
         next.sources.find((s) => id(s) === id(current)) ??
         null
       );
     });
-    for (const notification of next.notifications) {
+    notify(next.notifications);
+  }
+  function notify(notifications: Initial["notifications"]) {
+    for (const notification of notifications) {
       if (
         !seenNotifications.current.has(id(notification)) &&
         "Notification" in window &&
         Notification.permission === "granted"
       ) {
-        new Notification("VibeScroller has an update", {
+        new Notification("VibeScroll has an update", {
           body: "Open your private inbox to review it.",
           tag: id(notification),
           icon: "/brand/icon-192.png",
@@ -434,6 +457,19 @@ export function Console({
       }
       seenNotifications.current.add(id(notification));
     }
+  }
+  function clearAccess() {
+    viewGeneration.current++;
+    setHomeData(null);
+    setSelected(null);
+    setData({
+      sources: [],
+      repositories: [],
+      proposals: [],
+      runs: [],
+      notifications: [],
+      usage: null,
+    });
   }
 
   async function refreshData() {
@@ -447,14 +483,18 @@ export function Console({
       refreshFlight.current = null;
     }
   }
-  async function refreshWorkspace() {
+  async function refreshWorkspace(requestView = view) {
+    const generation = viewGeneration.current;
     const query = new URLSearchParams({
+      view: requestView,
       q: search,
       state: filter,
       category,
       sort,
     });
     if (view === "source" && selected) query.set("sourceId", id(selected));
+    if (homePreview.current) query.set("homeMode", "compact");
+    if (view === "proposal" && selected) query.set("proposalId", id(selected));
     const response = await fetch(`/api/workspace/${organizationId}?${query}`, {
       cache: "no-store",
     });
@@ -462,25 +502,101 @@ export function Console({
       response.ok &&
       !response.redirected &&
       response.headers.get("content-type")?.includes("application/json")
-    )
-      applyData(await response.json());
-    else if (
+    ) {
+      const next = await response.json();
+      if (generation !== viewGeneration.current) return;
+      applyData(next);
+      return next as Initial;
+    } else if (
       response.redirected ||
       response.status === 401 ||
       response.status === 403 ||
       response.status === 404
     ) {
-      setSelected(null);
-      setData({
-        sources: [],
-        repositories: [],
-        proposals: [],
-        runs: [],
-        notifications: [],
-        usage: null,
-      });
+      if (generation !== viewGeneration.current) return;
+      clearAccess();
     }
   }
+  const refreshView = useEffectEvent(async () => {
+    if (refreshFlight.current) await refreshFlight.current;
+    await refreshData();
+  });
+  useEffect(() => {
+    viewGeneration.current++;
+    if (firstView.current) {
+      firstView.current = false;
+      return;
+    }
+    if (!demo)
+      refreshView().catch(() =>
+        setNotice("This view could not be loaded. Try again."),
+      );
+  }, [view, demo]);
+  async function openCapture() {
+    if (data.compact && !demo) {
+      setBusy(true);
+      try {
+        if (refreshFlight.current) await refreshFlight.current;
+        const next = await refreshWorkspace("full");
+        if (!next || next.compact)
+          throw new Error("Capture options could not be loaded. Try again.");
+        setCaptureOpen(true);
+      } catch (error) {
+        setNoticeKind("error");
+        setNotice(
+          error instanceof Error
+            ? error.message
+            : "Capture options could not be loaded.",
+        );
+      } finally {
+        setBusy(false);
+      }
+    } else setCaptureOpen(true);
+  }
+  async function openProposal(proposalId: string) {
+    if (demo) {
+      setSelected(data.proposals.find((p) => id(p) === proposalId));
+      setView("proposal");
+      return;
+    }
+    const generation = viewGeneration.current;
+    setBusy(true);
+    try {
+      const response = await fetch(
+        `/api/workspace/${organizationId}?view=full&proposalId=${encodeURIComponent(proposalId)}`,
+        { cache: "no-store" },
+      );
+      if ([401, 403, 404].includes(response.status) || response.redirected)
+        clearAccess();
+      if (
+        !response.ok ||
+        response.redirected ||
+        !response.headers.get("content-type")?.includes("application/json")
+      )
+        throw new Error(
+          "This idea is unavailable. Open the current review list.",
+        );
+      const next: Initial = await response.json();
+      if (generation !== viewGeneration.current) return;
+      if (!next.selectedProposal)
+        throw new Error(
+          "This idea is unavailable. Its evidence may have changed.",
+        );
+      applyData(next);
+      setSelected(next.selectedProposal);
+      setView("proposal");
+    } catch (error) {
+      setNoticeKind("error");
+      setNotice(
+        error instanceof Error
+          ? error.message
+          : "This idea could not be loaded.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+  const home = homeData ?? data;
   const processing =
     (view === "source" &&
       selected &&
@@ -536,16 +652,8 @@ export function Console({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ operation, args }),
       });
-      if (res.redirected || res.status === 401) {
-        setSelected(null);
-        setData({
-          sources: [],
-          repositories: [],
-          proposals: [],
-          runs: [],
-          notifications: [],
-          usage: null,
-        });
+      if (res.redirected || res.status === 401 || res.status === 403) {
+        clearAccess();
         throw new Error(
           "Your session or access changed. Sign in again to continue.",
         );
@@ -574,6 +682,7 @@ export function Console({
         return body.result;
       const event = productAnalyticsEvent(operation, args, body.result);
       if (!demo && event) track(event.event, event.properties);
+      setHomeData(null);
       await refreshData();
       if (operation === "deleteSource") go("library");
       setNotice(
@@ -641,7 +750,7 @@ export function Console({
       history.replaceState(
         null,
         "",
-        `/app/${organizationId}/${v === "home" ? "" : v}`,
+        `/app/${organizationId}/${v === "home" ? "" : v}${v === "home" && homePreview.current ? "?homeMode=compact" : ""}`,
       );
   };
   const filtered = !demo
@@ -789,7 +898,9 @@ export function Console({
               busy={busy}
               disabled={readOnly}
               primary
-              onClick={() => setCaptureOpen(true)}
+              onClick={() => {
+                void openCapture();
+              }}
             >
               <Plus size={17} />
               Save
@@ -849,1240 +960,1290 @@ export function Console({
               ) : undefined
             }
           />
-          {view === "improvements" && (
-            <Improvements
-              organizationId={organizationId}
-              call={call}
-              readOnly={readOnly}
-              demo={demo}
-              executionReady={
-                data.customerRoutes?.execution?.cloudReady === true
-              }
-              availableCredits={
-                data.usage?.wallet
-                  ? Math.max(
-                      0,
-                      data.usage.wallet.granted -
-                        data.usage.wallet.spent -
-                        data.usage.wallet.reserved,
-                    )
-                  : 0
-              }
-              onOpenIssues={() => go("projects")}
-              onOpenRuns={() => go("runs")}
-              computeReservationCredits={
-                data.customerRoutes?.execution?.computeReservationCredits
-              }
-              creditsPerSecond={
-                data.customerRoutes?.execution?.creditsPerSecond
-              }
-            />
-          )}
-          {view === "library" && (
-            <>
-              <LibrarySections
-                active={librarySection}
-                onSelect={setLibrarySection}
-                posts
-              />
-              <details
-                className="library-analysis-settings"
-                hidden={librarySection !== "posts"}
+          {data.compact && view !== "home" && view !== "menu" ? (
+            <section aria-busy="true" className="studio-empty">
+              <output>Loading this workspace view...</output>
+              <Button
+                onClick={() => {
+                  void refreshData();
+                }}
               >
-                <summary>Analyze saved posts</summary>
-                <SubscriptionTrials
-                  key={`trials:${organizationId}`}
+                Try again
+              </Button>
+            </section>
+          ) : (
+            <>
+              {view === "improvements" && (
+                <Improvements
                   organizationId={organizationId}
                   call={call}
-                  readOnly={readOnly}
-                  enabled={!demo && !!data.aiPreference?.personalAlphaEnabled}
-                />
-              </details>
-              <div
-                className="library-knowledge-container"
-                hidden={librarySection === "posts"}
-              >
-                <KnowledgeLibrary
-                  enabled={librarySection !== "posts"}
-                  section={
-                    librarySection === "posts" ? "topics" : librarySection
-                  }
-                  key={organizationId}
-                  organizationId={organizationId}
-                  repositories={data.repositories}
                   readOnly={readOnly}
                   demo={demo}
-                  call={call}
-                  onOpenImprovements={() => go("improvements")}
-                />
-              </div>
-            </>
-          )}
-          {view === "home" && (
-            <StudioHome
-              key={organizationId}
-              sources={data.sources}
-              proposals={data.proposals}
-              repositories={data.repositories}
-              runs={data.runs}
-              libraryNext={data.libraryNext}
-              draft={sharedDraft}
-              onDraft={setSharedDraft}
-              onSave={() => setCaptureOpen(true)}
-              onOpenSource={findSource}
-              onOpenProposal={(proposal) => {
-                setSelected(proposal);
-                setView("proposal");
-              }}
-              go={go}
-              readOnly={readOnly}
-              busy={busy}
-            />
-          )}
-          {view === "library" && librarySection === "posts" && (
-            <>
-              {pendingProposals > 0 && (
-                <div className="attention">
-                  <h2>
-                    {pendingProposals}{" "}
-                    {pendingProposals === 1 ? "proposal" : "proposals"} to
-                    review
-                  </h2>
-                  <Button busy={busy} onClick={() => go("proposals")}>
-                    Review <ArrowRight size={16} />
-                  </Button>
-                </div>
-              )}
-              <div className="library-tools">
-                <label>
-                  <span className="sr-only">Search your library</span>
-                  <input
-                    value={search}
-                    placeholder="Search your library"
-                    onChange={(e) => {
-                      setSearch(e.target.value);
-                      const u = new URL(location.href);
-                      u.searchParams.set("q", e.target.value);
-                      history.replaceState(null, "", u);
-                    }}
-                  />
-                </label>
-                <label>
-                  <span className="sr-only">Filter sources</span>
-                  <ChoiceSelect
-                    aria-label="Filter sources"
-                    value={filter}
-                    onValueChange={(value) => {
-                      setFilter(value);
-                      const u = new URL(location.href);
-                      u.searchParams.set("state", value);
-                      history.replaceState(null, "", u);
-                    }}
-                  >
-                    <option value="">All posts</option>
-                    <option value="ready">Analyzed</option>
-                    <option value="not_analyzed">Not analyzed</option>
-                    <option value="in_progress">Processing</option>
-                    {[
-                      "failed",
-                      "needs_upload",
-                      "no_fit",
-                      "already_implemented",
-                      "unsupported_claim",
-                      "needs_context",
-                    ].map((s) => (
-                      <option key={s} value={s}>
-                        {label(s)}
-                      </option>
-                    ))}
-                  </ChoiceSelect>
-                </label>
-                <label>
-                  <span className="sr-only">Category</span>
-                  <ChoiceSelect
-                    aria-label="Category"
-                    value={category}
-                    onValueChange={(value) => {
-                      setCategory(value);
-                      const u = new URL(location.href);
-                      u.searchParams.set("category", value);
-                      history.replaceState(null, "", u);
-                    }}
-                  >
-                    <option value="">All categories</option>
-                    {(data.categories ?? [])
-                      .filter((c) => c.count > 0)
-                      .sort(
-                        (a, b) =>
-                          Number(b.level === "collection") -
-                            Number(a.level === "collection") ||
-                          a.name.localeCompare(b.name),
-                      )
-                      .map((c) => (
-                        <option
-                          key={c.key}
-                          value={c.key}
-                          data-group={
-                            c.level === "collection" ? "Collections" : "Topics"
-                          }
-                        >
-                          {c.name} ({c.count})
-                        </option>
-                      ))}
-                  </ChoiceSelect>
-                </label>
-                <label>
-                  <span className="sr-only">Sort sources</span>
-                  <ChoiceSelect
-                    aria-label="Sort sources"
-                    value={search ? "relevance" : sort}
-                    disabled={Boolean(search)}
-                    onValueChange={(value) => {
-                      setSort(value);
-                      const u = new URL(location.href);
-                      u.searchParams.set("sort", value);
-                      history.replaceState(null, "", u);
-                    }}
-                  >
-                    {search && <option value="relevance">Most relevant</option>}
-                    <option value="newest">Added to app · newest</option>
-                    <option value="oldest">Added to app · oldest</option>
-                    <option value="saved">Saved on platform · newest</option>
-                    <option value="published">Post published · newest</option>
-                    <option value="updated">Recently updated</option>
-                    <option value="title">Title A-Z</option>
-                  </ChoiceSelect>
-                </label>
-                {(search || filter || category || sort !== "newest") && (
-                  <Button
-                    busy={busy}
-                    onClick={() => {
-                      setSearch("");
-                      setFilter("");
-                      setCategory("");
-                      setSort("newest");
-                      const u = new URL(location.href);
-                      for (const key of ["q", "state", "category", "sort"])
-                        u.searchParams.delete(key);
-                      history.replaceState(null, "", u);
-                    }}
-                  >
-                    Clear filters
-                  </Button>
-                )}
-              </div>
-              {sort === "published" && !search && (
-                <p className="fine">
-                  Posts with an unavailable publication date appear last.
-                </p>
-              )}
-              {libraryError && (
-                <div className="panel error" role="alert">
-                  {libraryError}
-                  <Button busy={libraryLoading} onClick={() => loadLibrary()}>
-                    Retry
-                  </Button>
-                </div>
-              )}
-              <div className="source-list" aria-busy={libraryLoading}>
-                {libraryLoading && !filtered.length ? (
-                  <output className="empty">
-                    <Loader2 className="spinner" size={24} />
-                    <p>Loading your library...</p>
-                  </output>
-                ) : filtered.length ? (
-                  filtered.map((s) => (
-                    <article key={id(s)} className="source-card">
-                      <button
-                        type="button"
-                        className="source-hitarea"
-                        onClick={() => findSource(s)}
-                        aria-label={`Open ${s.title}`}
-                      />
-                      <SourceThumbnail source={s} demo={demo} />
-                      <div className="source-card-body">
-                        <h2>{s.title}</h2>
-                        <div className="row spread">
-                          <span className="coverage">
-                            {coverageLabel(s.coverage)}
-                          </span>
-                        </div>
-                        {!demo && s.state !== "ready" && (
-                          <span className="muted source-state">
-                            {label(s.state ?? "ready")}
-                          </span>
-                        )}
-                        <p>
-                          {s.summary ??
-                            (s.state === "needs_upload"
-                              ? "Add the video or transcript to analyze it."
-                              : ["processing", "queued"].includes(s.state)
-                                ? "Transcribing and analyzing your source..."
-                                : s.state === "failed"
-                                  ? "Analysis stopped. Open for details."
-                                  : "Ready for analysis.")}
-                        </p>
-                        <ul className="point-preview">
-                          {s.mainPoints?.slice(0, 3).map((p: string) => (
-                            <li key={p}>{p}</li>
-                          ))}
-                        </ul>
-                        <div className="row wrap">
-                          {s.createdAt && (
-                            <span className="fine">
-                              Added {new Date(s.createdAt).toLocaleDateString()}
-                            </span>
-                          )}
-                          {sort === "published" && (
-                            <span className="fine">
-                              {s.publishedAt
-                                ? `Published ${new Date(s.publishedAt).toLocaleDateString()}`
-                                : "Publication date unavailable"}
-                            </span>
-                          )}
-                          {sort === "saved" && (
-                            <span className="fine">
-                              {s.originalSavedAt
-                                ? `Saved ${new Date(s.originalSavedAt).toLocaleDateString()}`
-                                : "Save date unavailable"}
-                            </span>
-                          )}
-                          {s.insightCount > 0 && (
-                            <span className="tag">
-                              {s.insightCount} insights
-                            </span>
-                          )}
-                          {s.matches?.map((m: any) => (
-                            <span className="status" key={m.repositoryId}>
-                              {label(m.disposition)}
-                            </span>
-                          ))}
-                          {(s.categoryNames ?? s.tags)
-                            ?.slice(0, 4)
-                            .map((t: string) => (
-                              <span className="tag" key={t}>
-                                {label(t)}
-                              </span>
-                            ))}
-                          {s.pullRequests?.length > 0 && (
-                            <span className="tag">
-                              {
-                                s.pullRequests.filter((p: any) => p.mergedAt)
-                                  .length
-                              }{" "}
-                              merged PR ·{" "}
-                              {
-                                s.pullRequests.filter(
-                                  (p: any) => p.state === "open",
-                                ).length
-                              }{" "}
-                              open
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <span
-                        className="icon-button source-open"
-                        aria-hidden="true"
-                      >
-                        <ArrowRight size={18} />
-                      </span>
-                    </article>
-                  ))
-                ) : (
-                  <div className="empty">
-                    <h2>
-                      {search || filter || category
-                        ? "No matches on this page"
-                        : "Your library starts here."}
-                    </h2>
-                    <p>
-                      {search || filter || category
-                        ? data.libraryNext
-                          ? "Continue loading to check more sources, or clear the filters."
-                          : "Clear the filters to see your saved sources."
-                        : "Add a supported link, upload permitted content, or supply a transcript."}
-                    </p>
-                    <Button
-                      busy={busy}
-                      primary
-                      onClick={() =>
-                        search || filter || category
-                          ? (setSearch(""), setFilter(""), setCategory(""))
-                          : setCaptureOpen(true)
-                      }
-                    >
-                      {search || filter || category
-                        ? "Clear filters"
-                        : "Add source"}
-                    </Button>
-                  </div>
-                )}
-              </div>
-              {!demo && data.libraryNext && (
-                <Button
-                  busy={busy}
-                  onClick={() =>
-                    loadLibrary(true).catch(() =>
-                      setNotice("Could not load the next page."),
-                    )
+                  executionReady={
+                    data.customerRoutes?.execution?.cloudReady === true
                   }
-                >
-                  Load more sources
-                </Button>
-              )}
-            </>
-          )}
-          {view === "source" && selected && (
-            <SourceDetail
-              key={id(selected)}
-              source={selected}
-              readOnly={readOnly}
-              busy={busy}
-              canSuggestCategories={canSuggestCategories}
-              demo={demo}
-              org={organizationId}
-              repos={data.repositories}
-              devices={data.devices ?? []}
-              personalEnabled={
-                !demo && data.aiPreference?.personalAlphaEnabled === true
-              }
-              linkAnalysisEnabled={data.aiPreference?.linkAnalysisEnabled}
-              cloudEnabled={data.aiPreference?.cloudAnalysisEnabled}
-              call={call}
-              onProposal={(p: any) => {
-                setSelected(p);
-                setView("proposal");
-              }}
-            />
-          )}
-          {view === "source" && !selected && (
-            <div className="panel empty-state">
-              <p>This source is no longer available in this workspace.</p>
-              <Button onClick={() => go("library")}>Open library</Button>
-            </div>
-          )}
-          {view === "projects" && (
-            <>
-              <p>Connect projects and review their context.</p>
-              <LibraryScan
-                key={`scan:${organizationId}`}
-                organizationId={organizationId}
-                repositories={data.repositories}
-                devices={data.devices ?? []}
-                call={call}
-                readOnly={readOnly}
-                demo={demo}
-                onOpenIssues={() =>
-                  document
-                    .querySelector('[aria-label="Reviewed issues"]')
-                    ?.scrollIntoView({ block: "start", behavior: "smooth" })
-                }
-              />
-              <RepositoryChecklist
-                key={`selection:${organizationId}`}
-                organizationId={organizationId}
-                repositories={data.repositories}
-                choices={data.githubChoices ?? []}
-                call={call}
-                readOnly={readOnly}
-                demo={demo}
-              />
-              {data.repositories.map((r) => (
-                <BusinessContext
-                  key={`${id(r)}:${r.profileVersion}:${r.selectionVersion ?? 0}:${r.profileDraftSha ?? ""}`}
-                  repo={r}
-                  call={call}
-                  readOnly={readOnly || demo}
-                />
-              ))}
-              <KnowledgeLibrary
-                key={`project-knowledge:${organizationId}`}
-                organizationId={organizationId}
-                repositories={data.repositories}
-                readOnly={readOnly}
-                demo={demo}
-                call={call}
-                onOpenImprovements={() => go("improvements")}
-              />
-              {demo && (
-                <div className="panel">
-                  <h2>Demo Planner</h2>
-                  <p>
-                    Purpose: help people organize a small project. Audience:
-                    first-time planners. Goal: a clear first useful result.
-                    Non-goal: changing account or payment logic.
-                  </p>
-                  <span className="status">Synthetic confirmed profile</span>
-                </div>
-              )}
-            </>
-          )}
-          {view === "proposals" && (
-            <>
-              {data.proposals.length ? (
-                data.proposals.map((p) => (
-                  <article className="panel" key={id(p)}>
-                    <span className="status">{label(p.disposition)}</span>
-                    <h2>{p.title}</h2>
-                    <p>{p.detail?.currentProblem}</p>
-                    <p>{label(p.review)}</p>
-                    <Button
-                      busy={busy}
-                      onClick={() => {
-                        setSelected(p);
-                        setView("proposal");
-                      }}
-                    >
-                      Review proposal
-                    </Button>
-                  </article>
-                ))
-              ) : (
-                <div className="empty">
-                  <h2>No proposals to review.</h2>
-                  <p>
-                    Analyze a source and match it to a confirmed repository. No
-                    useful match is a valid result.
-                  </p>
-                  {demo && (
-                    <Button
-                      busy={busy}
-                      onClick={() => {
-                        setSelected({
-                          id: "demo-proposal",
-                          title: "Preview a useful result before setup",
-                          disposition: "relevant",
-                          review: "unreviewed",
-                          version: 1,
-                          detail: {
-                            currentProblem:
-                              "Demo Planner opens with an empty view.",
-                            proposedChange:
-                              "Offer a reversible populated example.",
-                            benefitHypothesis:
-                              "A first-time visitor may understand the product sooner.",
-                            risks: [
-                              "Sample data could be mistaken for a saved project.",
-                            ],
-                            acceptanceCriteria: [
-                              "Sample remains labeled",
-                              "Start fresh removes the example",
-                            ],
-                          },
-                        });
-                        setView("proposal");
-                      }}
-                    >
-                      Open synthetic proposal
-                    </Button>
-                  )}
-                </div>
-              )}
-            </>
-          )}
-          {view === "proposal" && selected && (
-            <>
-              <span className="status">{label(selected.disposition)}</span>
-              {selected.reviewerCorrection && (
-                <p className="notice">
-                  Reviewer correction: {label(selected.reviewerCorrection.to)}.
-                  Original model assessment:{" "}
-                  {label(selected.reviewerCorrection.from)}. Reason:{" "}
-                  {selected.reviewerCorrection.reason}
-                </p>
-              )}
-              {!demo && (
-                <form
-                  className="panel form-grid"
-                  onSubmit={async (event) => {
-                    event.preventDefault();
-                    const form = new FormData(event.currentTarget);
-                    await call("decide", {
-                      id: id(selected),
-                      version: selected.version,
-                      decision: "accepted",
-                      disposition: form.get("disposition"),
-                      note: form.get("reason"),
-                    });
-                  }}
-                >
-                  <h2>Review the assessment</h2>
-                  <label>
-                    Reviewer assessment
-                    <ChoiceSelect
-                      name="disposition"
-                      defaultValue={selected.disposition}
-                    >
-                      {[
-                        "relevant",
-                        "no_fit",
-                        "already_implemented",
-                        "unsupported_claim",
-                        "needs_context",
-                        "defer",
-                      ].map((value) => (
-                        <option key={value} value={value}>
-                          {label(value)}
-                        </option>
-                      ))}
-                    </ChoiceSelect>
-                  </label>
-                  <label>
-                    Evidence and reason for any correction
-                    <textarea
-                      name="reason"
-                      maxLength={2000}
-                      placeholder="Explain the source and repository evidence. Changing an assessment requires a reason."
-                    />
-                  </label>
-                  <button className="primary" disabled={busy} type="submit">
-                    Accept reviewed relevant proposal
-                  </button>
-                </form>
-              )}
-
-              <section className="panel">
-                <h2>Why this project?</h2>
-                <p>{selected.detail?.currentProblem}</p>
-                <h3>Proposed change</h3>
-                <p>
-                  {selected.detail?.proposedChange ??
-                    "No code change recommended."}
-                </p>
-                <h3>Expected benefit, as a hypothesis</h3>
-                <p>
-                  {selected.detail?.benefitHypothesis ?? "No benefit claim."}
-                </p>
-                <h3>Risks and reasons to reject</h3>
-                <ul>
-                  {selected.detail?.risks?.map((s: string) => (
-                    <li key={s}>{s}</li>
-                  ))}
-                </ul>
-                <h3>Acceptance criteria</h3>
-                <ul>
-                  {selected.detail?.acceptanceCriteria?.map((s: string) => (
-                    <li key={s}>{s}</li>
-                  ))}
-                </ul>
-                <details>
-                  <summary>Source and repository evidence</summary>
-                  <pre>
-                    {JSON.stringify(
-                      {
-                        source: selected.detail?.sourceEvidence,
-                        repository: selected.detail?.repositoryEvidence,
-                      },
-                      null,
-                      2,
-                    )}
-                  </pre>
-                </details>
-                <div className="row wrap">
-                  {["rejected", "deferred", "accepted"].map((d) => (
-                    <Button
-                      busy={busy}
-                      key={d}
-                      primary={d === "accepted"}
-                      disabled={
-                        d === "accepted" && selected.disposition !== "relevant"
-                      }
-                      onClick={async () => {
-                        await call("decide", {
-                          id: id(selected),
-                          version: selected.version,
-                          decision: d,
-                          note: "",
-                        });
-                        if (demo) setSelected({ ...selected, review: d });
-                      }}
-                    >
-                      {d === "accepted"
-                        ? "Accept proposal"
-                        : d === "rejected"
-                          ? "Reject"
-                          : "Defer"}
-                    </Button>
-                  ))}
-                </div>
-              </section>
-              <section className="panel">
-                <h2>Review and edit the plan</h2>
-                <Button
-                  busy={busy}
-                  disabled={selected.review !== "accepted"}
-                  onClick={() =>
-                    call("draftPlan", {
-                      id: id(selected),
-                      version: selected.version,
-                      maxCredits: 10,
-                    })
-                  }
-                >
-                  Draft an editable plan, maximum 10 credits
-                </Button>
-                {selected.planDraft &&
-                  selected.planDraftVersion === selected.version && (
-                    <details>
-                      <summary>Unconfirmed AI plan draft</summary>
-                      <pre>{JSON.stringify(selected.planDraft, null, 2)}</pre>
-                      <Button
-                        busy={busy}
-                        onClick={() =>
-                          setPlanText(
-                            JSON.stringify(selected.planDraft, null, 2),
-                          )
-                        }
-                      >
-                        Copy draft into the editable plan
-                      </Button>
-                      <p>
-                        Review and save a new version before execution. This
-                        draft grants no coding permission.
-                      </p>
-                    </details>
-                  )}
-                <p>
-                  Acceptance does not authorize execution. Files marked existing
-                  must appear in the repository snapshot. Saving creates a new
-                  immutable plan hash.
-                </p>
-                <PlanEditor
-                  value={planText}
-                  onChange={setPlanText}
-                  disabled={busy || readOnly}
-                />
-                <Button
-                  busy={busy}
-                  disabled={selected.review !== "accepted"}
-                  onClick={async () => {
-                    try {
-                      await call("editPlan", {
-                        id: id(selected),
-                        version: selected.version,
-                        plan: reviewedPlan(planText),
-                      });
-                    } catch {
-                      setNotice(
-                        "Add a scope, at least one file, implementation step and check. Keep all required sections and valid JSON.",
-                      );
-                    }
-                  }}
-                >
-                  Save new plan version
-                </Button>
-                <Button
-                  busy={busy}
-                  onClick={() => {
-                    downloadText(
-                      "vibescroller-plan.json",
-                      planText,
-                      "application/json",
-                    );
-                  }}
-                >
-                  Export plan
-                </Button>
-              </section>
-              <ExecutionApproval
-                proposal={selected}
-                call={call}
-                routes={data.customerRoutes}
-                usage={data.usage}
-                busy={busy}
-              />
-            </>
-          )}
-          {view === "runs" && (
-            <>
-              {data.runs.length ? (
-                data.runs.map((r) => (
-                  <RunCard
-                    key={id(r)}
-                    run={r}
-                    title={
-                      data.proposals.find(
-                        (proposal) => id(proposal) === r.proposalId,
-                      )?.title
-                    }
-                    call={call}
-                    busy={busy}
-                    readOnly={readOnly}
-                  />
-                ))
-              ) : (
-                <div className="empty">
-                  <h2>No authorized runs yet.</h2>
-                  <p>
-                    Approve a reviewed plan with a specific executor and funding
-                    route. An offline laptop never triggers a cloud charge.
-                  </p>
-                </div>
-              )}
-            </>
-          )}
-          {view === "inbox" && (
-            <>
-              <p>
-                Notifications use safe previews. Telegram is planned for later.
-                Messages never approve execution.
-              </p>
-              {data.notifications.length ? (
-                data.notifications.map((n) => (
-                  <article className="panel" key={id(n)}>
-                    <p>{n.message}</p>
-                    <small>{new Date(n.createdAt).toLocaleString()}</small>
-                  </article>
-                ))
-              ) : (
-                <div className="empty">
-                  <h2>You're caught up.</h2>
-                  <p>Processing and review notifications will appear here.</p>
-                </div>
-              )}
-              <Button
-                busy={busy}
-                onClick={async () => {
-                  if (!("Notification" in window)) {
-                    setNotice(
-                      "This browser does not support desktop notifications. Use the inbox.",
-                    );
-                    return;
-                  }
-                  const result = await Notification.requestPermission();
-                  setNotice(
-                    result === "granted"
-                      ? "Browser notifications allowed. Delivery still requires an open application or a configured push service."
-                      : "Browser notifications remain off. The inbox is available.",
-                  );
-                }}
-              >
-                Enable browser notification permission
-              </Button>
-              <CookieSettings className="secondary" />
-              <Button
-                busy={busy}
-                onClick={() =>
-                  call("preferences", {
-                    organizationId,
-                    email: true,
-                    telegram: false,
-                    analytics: false,
-                    legalVersion: policyRelease.id,
-                  })
-                }
-              >
-                Request email notifications
-              </Button>
-              <p>
-                Email stays unavailable until a verified sender is connected.
-              </p>
-            </>
-          )}
-          {view === "usage" && (
-            <>
-              <div className="panel">
-                <h2>Your allowance</h2>
-                <p>
-                  Trial: 30 credits and up to 3 sources. No automatic paid
-                  conversion.
-                </p>
-                <pre>
-                  {JSON.stringify(
-                    data.usage ?? { granted: 30, reserved: 0, spent: 0 },
-                    null,
-                    2,
-                  )}
-                </pre>
-              </div>
-              <p>
-                Reservations reduce available credits before work starts. Unused
-                reservations release after reconciled settlement. API and cloud
-                costs need an explicit quote.
-              </p>
-            </>
-          )}
-          {view === "connections" && (
-            <>
-              <section className="panel">
-                <h2>Your ChatGPT plan</h2>
-                <p>
-                  Prefer your own allowance for eligible AI requests and keep
-                  VibeScroller inference credits for other work. ChatGPT limits
-                  still apply; transcription, storage and cloud execution have
-                  separate costs.
-                </p>
-                <label
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: ".65rem",
-                    minHeight: 44,
-                  }}
-                >
-                  <input
-                    type="checkbox"
-                    style={{ width: 18, height: 18, flexShrink: 0 }}
-                    checked={data.aiPreference?.preferChatGPTPlan ?? false}
-                    disabled={demo || busy}
-                    onChange={async (event) => {
-                      const preferChatGPTPlan = event.target.checked;
-                      const result = await call("aiPreference", {
-                        organizationId,
-                        preferChatGPTPlan,
-                      });
-                      if (result)
-                        setData((current) => ({
-                          ...current,
-                          aiPreference: {
-                            ...current.aiPreference,
-                            preferChatGPTPlan,
-                            hostedStatus: "awaiting_commercial_access",
-                            active: false,
-                          },
-                        }));
-                    }}
-                  />
-                  Prefer my ChatGPT plan when available
-                </label>
-                <p className="notice" style={{ textAlign: "left" }}>
-                  Hosted connection is awaiting OpenAI commercial access. Saving
-                  this preference does not connect an account, grant consent, or
-                  change the funding route of a current task.
-                </p>
-                <p>
-                  Personal alpha accounts can pair a laptop and approve text and
-                  video analysis from the source screen. Audio is transcribed on
-                  that laptop; sampled frames and text use your connected
-                  ChatGPT account. Coding requires verified isolation and
-                  separate approval.
-                </p>
-                <a
-                  href="https://chatgpt.com/settings/usage"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Manage ChatGPT app access and usage
-                </a>
-              </section>
-              <div className="panel">
-                <h2>GitHub</h2>
-                <p>
-                  Install the VibeScroller GitHub App on selected repositories.
-                  Administration and workflow write are not requested by
-                  default.
-                </p>
-                <Button busy={busy} onClick={() => go("projects")}>
-                  Manage selected repositories
-                </Button>
-                {data.connections?.some(
-                  (connection) =>
-                    connection.provider === "github" &&
-                    connection.status === "connected",
-                ) ? (
-                  <Button
-                    busy={busy}
-                    onClick={() =>
-                      call("revoke", { organizationId, provider: "github" })
-                    }
-                  >
-                    Disconnect GitHub
-                  </Button>
-                ) : (
-                  <a
-                    className="secondary"
-                    href={`/api/github/connect?org=${organizationId}`}
-                  >
-                    Link GitHub account
-                  </a>
-                )}
-              </div>
-              <form
-                className="panel"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const f = new FormData(e.currentTarget);
-                  call("saveKey", { organizationId, secret: f.get("secret") });
-                  e.currentTarget.reset();
-                }}
-              >
-                <h2>Your OpenAI API credential</h2>
-                <p>
-                  Provider charges are separate. The server encrypts this
-                  credential; the browser does not retain it. Saving does not
-                  activate execution. Sign in again before saving or testing.
-                </p>
-                <p>
-                  Status: {label(data.customerRoutes?.status ?? "disconnected")}
-                  . {data.customerRoutes?.models.length ?? 0} reviewed models
-                  available.
-                </p>
-                <label>
-                  API key
-                  <input
-                    name="secret"
-                    type="password"
-                    autoComplete="off"
-                    required
-                  />
-                </label>
-                <button className="primary" disabled={busy}>
-                  Encrypt and save credential
-                </button>
-                <Button
-                  busy={busy}
-                  onClick={() => call("testKey", { organizationId })}
-                >
-                  Verify credential with a model-list request
-                </Button>
-                <p className="fine">
-                  Verification sends no inference request. Coding requires a
-                  separate USD provider ceiling and platform compute allowance.
-                  No reviewed available model means this route stays
-                  unavailable.
-                </p>
-                <Button
-                  busy={busy}
-                  onClick={() =>
-                    call("revoke", { organizationId, provider: "openai" })
-                  }
-                >
-                  Revoke credential
-                </Button>
-              </form>
-              <div className="panel">
-                <h2>Telegram</h2>
-                <p>
-                  Planned for later. Use the web inbox now. Setup needs a
-                  BotFather bot, secret webhook, numeric-user pairing and replay
-                  tests.
-                </p>
-              </div>
-            </>
-          )}
-          {view === "runners" && (
-            <>
-              <div className="panel">
-                <h2>Optional laptop execution</h2>
-                <p>
-                  Pair a named computer, confirm its fingerprint, map
-                  repositories, and verify Windows isolation. Official Codex
-                  app-server keeps authentication on the computer. No inbound
-                  port is required.
-                </p>
-                <p className="notice">
-                  Execution is blocked until its isolation tests pass. A
-                  worktree alone is not a sandbox.
-                </p>
-                <Link href="/docs">Read runner setup</Link>
-              </div>
-              {!readOnly && (
-                <section className="panel">
-                  <h2>Pair this computer</h2>
-                  <p>
-                    Run the documented local pairing command, then paste its
-                    public request here. Check its fingerprint against the
-                    terminal before confirming. A fresh sign-in is required.
-                  </p>
-                  <form
-                    className="form-grid"
-                    onSubmit={async (e) => {
-                      e.preventDefault();
-                      try {
-                        const value = JSON.parse(
-                          String(
-                            new FormData(e.currentTarget).get("request") ?? "",
-                          ),
-                        );
-                        if (
-                          Object.keys(value).sort().join(",") !==
-                            "codeHash,credentialHash,fingerprint,name,workspaceId" ||
-                          typeof value.name !== "string" ||
-                          value.workspaceId !== organizationId ||
-                          ![
-                            value.codeHash,
-                            value.credentialHash,
-                            value.fingerprint,
-                          ].every(
-                            (v) =>
-                              typeof v === "string" && /^[a-f0-9]{64}$/.test(v),
-                          )
+                  availableCredits={
+                    data.usage?.wallet
+                      ? Math.max(
+                          0,
+                          data.usage.wallet.granted -
+                            data.usage.wallet.spent -
+                            data.usage.wallet.reserved,
                         )
-                          throw new Error("Invalid public pairing request.");
-                        const existing = data.devices?.find(
-                          (d) =>
-                            d.personalOwned &&
-                            d.pairingActive &&
-                            d.fingerprint === value.fingerprint &&
-                            d.name === value.name,
-                        );
-                        const deviceId = existing
-                          ? id(existing)
-                          : await call("startDevice", {
-                              organizationId,
-                              name: value.name,
-                              fingerprint: value.fingerprint,
-                              codeHash: value.codeHash,
-                            });
-                        if (deviceId)
-                          setPairing({
-                            id: deviceId,
-                            name: value.name,
-                            fingerprint: value.fingerprint,
-                            credentialHash: value.credentialHash,
-                          });
-                      } catch {
-                        setNotice(
-                          "Paste the public request generated by your runner. Do not paste keys or login tokens.",
-                        );
-                      }
-                    }}
+                      : 0
+                  }
+                  onOpenIssues={() => go("projects")}
+                  onOpenRuns={() => go("runs")}
+                  computeReservationCredits={
+                    data.customerRoutes?.execution?.computeReservationCredits
+                  }
+                  creditsPerSecond={
+                    data.customerRoutes?.execution?.creditsPerSecond
+                  }
+                />
+              )}
+              {view === "library" && (
+                <>
+                  <LibrarySections
+                    active={librarySection}
+                    onSelect={setLibrarySection}
+                    posts
+                  />
+                  <details
+                    className="library-analysis-settings"
+                    hidden={librarySection !== "posts"}
                   >
-                    <label>
-                      Public pairing request
-                      <textarea
-                        name="request"
-                        required
-                        maxLength={1200}
-                        rows={5}
-                      />
-                    </label>
-                    <button className="secondary" disabled={busy}>
-                      Review device request
-                    </button>
-                  </form>
-                  {pairing && (
-                    <div>
-                      <h3>Confirm {pairing.name}</h3>
-                      <p className="code-label">
-                        Fingerprint {pairing.fingerprint}
-                      </p>
-                      <p>
-                        Confirm only if this fingerprint matches the computer
-                        you control. Pairing enables communication. Coding still
-                        requires separately verified isolation and an approved
-                        plan.
-                      </p>
-                      <Button
-                        busy={busy}
-                        onClick={async () => {
-                          const result = await call("approveDevice", {
-                            id: pairing.id,
-                            fingerprint: pairing.fingerprint,
-                            credentialHash: pairing.credentialHash,
-                          });
-                          if (result !== undefined) setPairing(null);
-                        }}
-                      >
-                        Confirm matching computer
+                    <summary>Analyze saved posts</summary>
+                    <SubscriptionTrials
+                      key={`trials:${organizationId}`}
+                      organizationId={organizationId}
+                      call={call}
+                      readOnly={readOnly}
+                      enabled={
+                        !demo && !!data.aiPreference?.personalAlphaEnabled
+                      }
+                    />
+                  </details>
+                  <div
+                    className="library-knowledge-container"
+                    hidden={librarySection === "posts"}
+                  >
+                    <KnowledgeLibrary
+                      enabled={librarySection !== "posts"}
+                      section={
+                        librarySection === "posts" ? "topics" : librarySection
+                      }
+                      key={organizationId}
+                      organizationId={organizationId}
+                      repositories={data.repositories}
+                      readOnly={readOnly}
+                      demo={demo}
+                      call={call}
+                      onOpenImprovements={() => go("improvements")}
+                    />
+                  </div>
+                </>
+              )}
+              {view === "home" && (
+                <StudioHome
+                  key={organizationId}
+                  sources={home.sources}
+                  proposals={home.proposals}
+                  repositories={home.repositories}
+                  runs={home.runs}
+                  libraryNext={home.libraryNext}
+                  draft={sharedDraft}
+                  onDraft={setSharedDraft}
+                  onSave={() => {
+                    void openCapture();
+                  }}
+                  onOpenSource={findSource}
+                  onOpenProposal={(proposal) => {
+                    void openProposal(id(proposal));
+                  }}
+                  go={go}
+                  readOnly={readOnly}
+                  busy={busy}
+                />
+              )}
+              {view === "library" && librarySection === "posts" && (
+                <>
+                  {pendingProposals > 0 && (
+                    <div className="attention">
+                      <h2>
+                        {pendingProposals}{" "}
+                        {pendingProposals === 1 ? "proposal" : "proposals"} to
+                        review
+                      </h2>
+                      <Button busy={busy} onClick={() => go("proposals")}>
+                        Review <ArrowRight size={16} />
                       </Button>
                     </div>
                   )}
-                </section>
+                  <div className="library-tools">
+                    <label>
+                      <span className="sr-only">Search your library</span>
+                      <input
+                        value={search}
+                        placeholder="Search your library"
+                        onChange={(e) => {
+                          setSearch(e.target.value);
+                          const u = new URL(location.href);
+                          u.searchParams.set("q", e.target.value);
+                          history.replaceState(null, "", u);
+                        }}
+                      />
+                    </label>
+                    <label>
+                      <span className="sr-only">Filter sources</span>
+                      <ChoiceSelect
+                        aria-label="Filter sources"
+                        value={filter}
+                        onValueChange={(value) => {
+                          setFilter(value);
+                          const u = new URL(location.href);
+                          u.searchParams.set("state", value);
+                          history.replaceState(null, "", u);
+                        }}
+                      >
+                        <option value="">All posts</option>
+                        <option value="ready">Analyzed</option>
+                        <option value="not_analyzed">Not analyzed</option>
+                        <option value="in_progress">Processing</option>
+                        {[
+                          "failed",
+                          "needs_upload",
+                          "no_fit",
+                          "already_implemented",
+                          "unsupported_claim",
+                          "needs_context",
+                        ].map((s) => (
+                          <option key={s} value={s}>
+                            {label(s)}
+                          </option>
+                        ))}
+                      </ChoiceSelect>
+                    </label>
+                    <label>
+                      <span className="sr-only">Category</span>
+                      <ChoiceSelect
+                        aria-label="Category"
+                        value={category}
+                        onValueChange={(value) => {
+                          setCategory(value);
+                          const u = new URL(location.href);
+                          u.searchParams.set("category", value);
+                          history.replaceState(null, "", u);
+                        }}
+                      >
+                        <option value="">All categories</option>
+                        {(data.categories ?? [])
+                          .filter((c) => c.count > 0)
+                          .sort(
+                            (a, b) =>
+                              Number(b.level === "collection") -
+                                Number(a.level === "collection") ||
+                              a.name.localeCompare(b.name),
+                          )
+                          .map((c) => (
+                            <option
+                              key={c.key}
+                              value={c.key}
+                              data-group={
+                                c.level === "collection"
+                                  ? "Collections"
+                                  : "Topics"
+                              }
+                            >
+                              {c.name} ({c.count})
+                            </option>
+                          ))}
+                      </ChoiceSelect>
+                    </label>
+                    <label>
+                      <span className="sr-only">Sort sources</span>
+                      <ChoiceSelect
+                        aria-label="Sort sources"
+                        value={search ? "relevance" : sort}
+                        disabled={Boolean(search)}
+                        onValueChange={(value) => {
+                          setSort(value);
+                          const u = new URL(location.href);
+                          u.searchParams.set("sort", value);
+                          history.replaceState(null, "", u);
+                        }}
+                      >
+                        {search && (
+                          <option value="relevance">Most relevant</option>
+                        )}
+                        <option value="newest">Added to app · newest</option>
+                        <option value="oldest">Added to app · oldest</option>
+                        <option value="saved">
+                          Saved on platform · newest
+                        </option>
+                        <option value="published">
+                          Post published · newest
+                        </option>
+                        <option value="updated">Recently updated</option>
+                        <option value="title">Title A-Z</option>
+                      </ChoiceSelect>
+                    </label>
+                    {(search || filter || category || sort !== "newest") && (
+                      <Button
+                        busy={busy}
+                        onClick={() => {
+                          setSearch("");
+                          setFilter("");
+                          setCategory("");
+                          setSort("newest");
+                          const u = new URL(location.href);
+                          for (const key of ["q", "state", "category", "sort"])
+                            u.searchParams.delete(key);
+                          history.replaceState(null, "", u);
+                        }}
+                      >
+                        Clear filters
+                      </Button>
+                    )}
+                  </div>
+                  {sort === "published" && !search && (
+                    <p className="fine">
+                      Posts with an unavailable publication date appear last.
+                    </p>
+                  )}
+                  {libraryError && (
+                    <div className="panel error" role="alert">
+                      {libraryError}
+                      <Button
+                        busy={libraryLoading}
+                        onClick={() => loadLibrary()}
+                      >
+                        Retry
+                      </Button>
+                    </div>
+                  )}
+                  <div className="source-list" aria-busy={libraryLoading}>
+                    {libraryLoading && !filtered.length ? (
+                      <output className="empty">
+                        <Loader2 className="spinner" size={24} />
+                        <p>Loading your library...</p>
+                      </output>
+                    ) : filtered.length ? (
+                      filtered.map((s) => (
+                        <article key={id(s)} className="source-card">
+                          <button
+                            type="button"
+                            className="source-hitarea"
+                            onClick={() => findSource(s)}
+                            aria-label={`Open ${s.title}`}
+                          />
+                          <SourceThumbnail source={s} demo={demo} />
+                          <div className="source-card-body">
+                            <h2>{s.title}</h2>
+                            <div className="row spread">
+                              <span className="coverage">
+                                {coverageLabel(s.coverage)}
+                              </span>
+                            </div>
+                            {!demo && s.state !== "ready" && (
+                              <span className="muted source-state">
+                                {label(s.state ?? "ready")}
+                              </span>
+                            )}
+                            <p>
+                              {s.summary ??
+                                (s.state === "needs_upload"
+                                  ? "Add the video or transcript to analyze it."
+                                  : ["processing", "queued"].includes(s.state)
+                                    ? "Transcribing and analyzing your source..."
+                                    : s.state === "failed"
+                                      ? "Analysis stopped. Open for details."
+                                      : "Ready for analysis.")}
+                            </p>
+                            <ul className="point-preview">
+                              {s.mainPoints?.slice(0, 3).map((p: string) => (
+                                <li key={p}>{p}</li>
+                              ))}
+                            </ul>
+                            <div className="row wrap">
+                              {s.createdAt && (
+                                <span className="fine">
+                                  Added{" "}
+                                  {new Date(s.createdAt).toLocaleDateString()}
+                                </span>
+                              )}
+                              {sort === "published" && (
+                                <span className="fine">
+                                  {s.publishedAt
+                                    ? `Published ${new Date(s.publishedAt).toLocaleDateString()}`
+                                    : "Publication date unavailable"}
+                                </span>
+                              )}
+                              {sort === "saved" && (
+                                <span className="fine">
+                                  {s.originalSavedAt
+                                    ? `Saved ${new Date(s.originalSavedAt).toLocaleDateString()}`
+                                    : "Save date unavailable"}
+                                </span>
+                              )}
+                              {s.insightCount > 0 && (
+                                <span className="tag">
+                                  {s.insightCount} insights
+                                </span>
+                              )}
+                              {s.matches?.map((m: any) => (
+                                <span className="status" key={m.repositoryId}>
+                                  {label(m.disposition)}
+                                </span>
+                              ))}
+                              {(s.categoryNames ?? s.tags)
+                                ?.slice(0, 4)
+                                .map((t: string) => (
+                                  <span className="tag" key={t}>
+                                    {label(t)}
+                                  </span>
+                                ))}
+                              {s.pullRequests?.length > 0 && (
+                                <span className="tag">
+                                  {
+                                    s.pullRequests.filter(
+                                      (p: any) => p.mergedAt,
+                                    ).length
+                                  }{" "}
+                                  merged PR ·{" "}
+                                  {
+                                    s.pullRequests.filter(
+                                      (p: any) => p.state === "open",
+                                    ).length
+                                  }{" "}
+                                  open
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <span
+                            className="icon-button source-open"
+                            aria-hidden="true"
+                          >
+                            <ArrowRight size={18} />
+                          </span>
+                        </article>
+                      ))
+                    ) : (
+                      <div className="empty">
+                        <h2>
+                          {search || filter || category
+                            ? "No matches on this page"
+                            : "Your library starts here."}
+                        </h2>
+                        <p>
+                          {search || filter || category
+                            ? data.libraryNext
+                              ? "Continue loading to check more sources, or clear the filters."
+                              : "Clear the filters to see your saved sources."
+                            : "Add a supported link, upload permitted content, or supply a transcript."}
+                        </p>
+                        <Button
+                          busy={busy}
+                          primary
+                          onClick={() =>
+                            search || filter || category
+                              ? (setSearch(""), setFilter(""), setCategory(""))
+                              : void openCapture()
+                          }
+                        >
+                          {search || filter || category
+                            ? "Clear filters"
+                            : "Add source"}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                  {!demo && data.libraryNext && (
+                    <Button
+                      busy={busy}
+                      onClick={() =>
+                        loadLibrary(true).catch(() =>
+                          setNotice("Could not load the next page."),
+                        )
+                      }
+                    >
+                      Load more sources
+                    </Button>
+                  )}
+                </>
               )}
-              {data.devices?.map((d) => (
-                <article className="panel" key={id(d)}>
-                  <h3>{d.name}</h3>
+              {view === "source" && selected && (
+                <SourceDetail
+                  key={id(selected)}
+                  source={selected}
+                  readOnly={readOnly}
+                  busy={busy}
+                  canSuggestCategories={canSuggestCategories}
+                  demo={demo}
+                  org={organizationId}
+                  repos={data.repositories}
+                  devices={data.devices ?? []}
+                  personalEnabled={
+                    !demo && data.aiPreference?.personalAlphaEnabled === true
+                  }
+                  linkAnalysisEnabled={data.aiPreference?.linkAnalysisEnabled}
+                  cloudEnabled={data.aiPreference?.cloudAnalysisEnabled}
+                  call={call}
+                  onProposal={(p: any) => {
+                    setSelected(p);
+                    setView("proposal");
+                  }}
+                />
+              )}
+              {view === "source" && !selected && (
+                <div className="panel empty-state">
+                  <p>This source is no longer available in this workspace.</p>
+                  <Button onClick={() => go("library")}>Open library</Button>
+                </div>
+              )}
+              {view === "projects" && (
+                <>
+                  <p>Connect projects and review their context.</p>
+                  <LibraryScan
+                    key={`scan:${organizationId}`}
+                    organizationId={organizationId}
+                    repositories={data.repositories}
+                    devices={data.devices ?? []}
+                    call={call}
+                    readOnly={readOnly}
+                    demo={demo}
+                    onOpenIssues={() =>
+                      document
+                        .querySelector('[aria-label="Reviewed issues"]')
+                        ?.scrollIntoView({ block: "start", behavior: "smooth" })
+                    }
+                  />
+                  <RepositoryChecklist
+                    key={`selection:${organizationId}`}
+                    organizationId={organizationId}
+                    repositories={data.repositories}
+                    choices={data.githubChoices ?? []}
+                    call={call}
+                    readOnly={readOnly}
+                    demo={demo}
+                  />
+                  {data.repositories.map((r) => (
+                    <BusinessContext
+                      key={`${id(r)}:${r.profileVersion}:${r.selectionVersion ?? 0}:${r.profileDraftSha ?? ""}`}
+                      repo={r}
+                      call={call}
+                      readOnly={readOnly || demo}
+                    />
+                  ))}
+                  <KnowledgeLibrary
+                    key={`project-knowledge:${organizationId}`}
+                    organizationId={organizationId}
+                    repositories={data.repositories}
+                    readOnly={readOnly}
+                    demo={demo}
+                    call={call}
+                    onOpenImprovements={() => go("improvements")}
+                  />
+                  {demo && (
+                    <div className="panel">
+                      <h2>Demo Planner</h2>
+                      <p>
+                        Purpose: help people organize a small project. Audience:
+                        first-time planners. Goal: a clear first useful result.
+                        Non-goal: changing account or payment logic.
+                      </p>
+                      <span className="status">
+                        Synthetic confirmed profile
+                      </span>
+                    </div>
+                  )}
+                </>
+              )}
+              {view === "proposals" && (
+                <>
+                  {data.proposals.length ? (
+                    data.proposals.map((p) => (
+                      <article className="panel" key={id(p)}>
+                        <span className="status">{label(p.disposition)}</span>
+                        <h2>{p.title}</h2>
+                        <p>{p.detail?.currentProblem}</p>
+                        <p>{label(p.review)}</p>
+                        <Button
+                          busy={busy}
+                          onClick={() => {
+                            setSelected(p);
+                            setView("proposal");
+                          }}
+                        >
+                          Review proposal
+                        </Button>
+                      </article>
+                    ))
+                  ) : (
+                    <div className="empty">
+                      <h2>No proposals to review.</h2>
+                      <p>
+                        Analyze a source and match it to a confirmed repository.
+                        No useful match is a valid result.
+                      </p>
+                      {demo && (
+                        <Button
+                          busy={busy}
+                          onClick={() => {
+                            setSelected({
+                              id: "demo-proposal",
+                              title: "Preview a useful result before setup",
+                              disposition: "relevant",
+                              review: "unreviewed",
+                              version: 1,
+                              detail: {
+                                currentProblem:
+                                  "Demo Planner opens with an empty view.",
+                                proposedChange:
+                                  "Offer a reversible populated example.",
+                                benefitHypothesis:
+                                  "A first-time visitor may understand the product sooner.",
+                                risks: [
+                                  "Sample data could be mistaken for a saved project.",
+                                ],
+                                acceptanceCriteria: [
+                                  "Sample remains labeled",
+                                  "Start fresh removes the example",
+                                ],
+                              },
+                            });
+                            setView("proposal");
+                          }}
+                        >
+                          Open synthetic proposal
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+              {view === "proposal" && selected && (
+                <>
+                  <span className="status">{label(selected.disposition)}</span>
+                  {selected.reviewerCorrection && (
+                    <p className="notice">
+                      Reviewer correction:{" "}
+                      {label(selected.reviewerCorrection.to)}. Original model
+                      assessment: {label(selected.reviewerCorrection.from)}.
+                      Reason: {selected.reviewerCorrection.reason}
+                    </p>
+                  )}
+                  {!demo && (
+                    <form
+                      className="panel form-grid"
+                      onSubmit={async (event) => {
+                        event.preventDefault();
+                        const form = new FormData(event.currentTarget);
+                        await call("decide", {
+                          id: id(selected),
+                          version: selected.version,
+                          decision: "accepted",
+                          disposition: form.get("disposition"),
+                          note: form.get("reason"),
+                        });
+                      }}
+                    >
+                      <h2>Review the assessment</h2>
+                      <label>
+                        Reviewer assessment
+                        <ChoiceSelect
+                          name="disposition"
+                          defaultValue={selected.disposition}
+                        >
+                          {[
+                            "relevant",
+                            "no_fit",
+                            "already_implemented",
+                            "unsupported_claim",
+                            "needs_context",
+                            "defer",
+                          ].map((value) => (
+                            <option key={value} value={value}>
+                              {label(value)}
+                            </option>
+                          ))}
+                        </ChoiceSelect>
+                      </label>
+                      <label>
+                        Evidence and reason for any correction
+                        <textarea
+                          name="reason"
+                          maxLength={2000}
+                          placeholder="Explain the source and repository evidence. Changing an assessment requires a reason."
+                        />
+                      </label>
+                      <button className="primary" disabled={busy} type="submit">
+                        Accept reviewed relevant proposal
+                      </button>
+                    </form>
+                  )}
+
+                  <section className="panel">
+                    <h2>Why this project?</h2>
+                    <p>{selected.detail?.currentProblem}</p>
+                    <h3>Proposed change</h3>
+                    <p>
+                      {selected.detail?.proposedChange ??
+                        "No code change recommended."}
+                    </p>
+                    <h3>Expected benefit, as a hypothesis</h3>
+                    <p>
+                      {selected.detail?.benefitHypothesis ??
+                        "No benefit claim."}
+                    </p>
+                    <h3>Risks and reasons to reject</h3>
+                    <ul>
+                      {selected.detail?.risks?.map((s: string) => (
+                        <li key={s}>{s}</li>
+                      ))}
+                    </ul>
+                    <h3>Acceptance criteria</h3>
+                    <ul>
+                      {selected.detail?.acceptanceCriteria?.map((s: string) => (
+                        <li key={s}>{s}</li>
+                      ))}
+                    </ul>
+                    <details>
+                      <summary>Source and repository evidence</summary>
+                      <pre>
+                        {JSON.stringify(
+                          {
+                            source: selected.detail?.sourceEvidence,
+                            repository: selected.detail?.repositoryEvidence,
+                          },
+                          null,
+                          2,
+                        )}
+                      </pre>
+                    </details>
+                    <div className="row wrap">
+                      {["rejected", "deferred", "accepted"].map((d) => (
+                        <Button
+                          busy={busy}
+                          key={d}
+                          primary={d === "accepted"}
+                          disabled={
+                            d === "accepted" &&
+                            selected.disposition !== "relevant"
+                          }
+                          onClick={async () => {
+                            await call("decide", {
+                              id: id(selected),
+                              version: selected.version,
+                              decision: d,
+                              note: "",
+                            });
+                            if (demo) setSelected({ ...selected, review: d });
+                          }}
+                        >
+                          {d === "accepted"
+                            ? "Accept proposal"
+                            : d === "rejected"
+                              ? "Reject"
+                              : "Defer"}
+                        </Button>
+                      ))}
+                    </div>
+                  </section>
+                  <section className="panel">
+                    <h2>Review and edit the plan</h2>
+                    <Button
+                      busy={busy}
+                      disabled={selected.review !== "accepted"}
+                      onClick={() =>
+                        call("draftPlan", {
+                          id: id(selected),
+                          version: selected.version,
+                          maxCredits: 10,
+                        })
+                      }
+                    >
+                      Draft an editable plan, maximum 10 credits
+                    </Button>
+                    {selected.planDraft &&
+                      selected.planDraftVersion === selected.version && (
+                        <details>
+                          <summary>Unconfirmed AI plan draft</summary>
+                          <pre>
+                            {JSON.stringify(selected.planDraft, null, 2)}
+                          </pre>
+                          <Button
+                            busy={busy}
+                            onClick={() =>
+                              setPlanText(
+                                JSON.stringify(selected.planDraft, null, 2),
+                              )
+                            }
+                          >
+                            Copy draft into the editable plan
+                          </Button>
+                          <p>
+                            Review and save a new version before execution. This
+                            draft grants no coding permission.
+                          </p>
+                        </details>
+                      )}
+                    <p>
+                      Acceptance does not authorize execution. Files marked
+                      existing must appear in the repository snapshot. Saving
+                      creates a new immutable plan hash.
+                    </p>
+                    <PlanEditor
+                      value={planText}
+                      onChange={setPlanText}
+                      disabled={busy || readOnly}
+                    />
+                    <Button
+                      busy={busy}
+                      disabled={selected.review !== "accepted"}
+                      onClick={async () => {
+                        try {
+                          await call("editPlan", {
+                            id: id(selected),
+                            version: selected.version,
+                            plan: reviewedPlan(planText),
+                          });
+                        } catch {
+                          setNotice(
+                            "Add a scope, at least one file, implementation step and check. Keep all required sections and valid JSON.",
+                          );
+                        }
+                      }}
+                    >
+                      Save new plan version
+                    </Button>
+                    <Button
+                      busy={busy}
+                      onClick={() => {
+                        downloadText(
+                          "vibescroller-plan.json",
+                          planText,
+                          "application/json",
+                        );
+                      }}
+                    >
+                      Export plan
+                    </Button>
+                  </section>
+                  <ExecutionApproval
+                    proposal={selected}
+                    call={call}
+                    routes={data.customerRoutes}
+                    usage={data.usage}
+                    busy={busy}
+                  />
+                </>
+              )}
+              {view === "runs" && (
+                <>
+                  {data.runs.length ? (
+                    data.runs.map((r) => (
+                      <RunCard
+                        key={id(r)}
+                        run={r}
+                        title={
+                          data.proposals.find(
+                            (proposal) => id(proposal) === r.proposalId,
+                          )?.title
+                        }
+                        call={call}
+                        busy={busy}
+                        readOnly={readOnly}
+                      />
+                    ))
+                  ) : (
+                    <div className="empty">
+                      <h2>No authorized runs yet.</h2>
+                      <p>
+                        Approve a reviewed plan with a specific executor and
+                        funding route. An offline laptop never triggers a cloud
+                        charge.
+                      </p>
+                    </div>
+                  )}
+                </>
+              )}
+              {view === "inbox" && (
+                <>
                   <p>
-                    {d.state} · Fingerprint {d.fingerprint}
+                    Notifications use safe previews. Telegram is planned for
+                    later. Messages never approve execution.
                   </p>
+                  {data.notifications.length ? (
+                    data.notifications.map((n) => (
+                      <article className="panel" key={id(n)}>
+                        <p>{n.message}</p>
+                        <small>{new Date(n.createdAt).toLocaleString()}</small>
+                      </article>
+                    ))
+                  ) : (
+                    <div className="empty">
+                      <h2>You're caught up.</h2>
+                      <p>
+                        Processing and review notifications will appear here.
+                      </p>
+                    </div>
+                  )}
                   <Button
                     busy={busy}
-                    onClick={() => call("revokeDevice", { id: id(d) })}
+                    onClick={async () => {
+                      if (!("Notification" in window)) {
+                        setNotice(
+                          "This browser does not support desktop notifications. Use the inbox.",
+                        );
+                        return;
+                      }
+                      const result = await Notification.requestPermission();
+                      setNotice(
+                        result === "granted"
+                          ? "Browser notifications allowed. Delivery still requires an open application or a configured push service."
+                          : "Browser notifications remain off. The inbox is available.",
+                      );
+                    }}
                   >
-                    Revoke computer
+                    Enable browser notification permission
                   </Button>
-                </article>
-              ))}
+                  <CookieSettings className="secondary" />
+                  <Button
+                    busy={busy}
+                    onClick={() =>
+                      call("preferences", {
+                        organizationId,
+                        email: true,
+                        telegram: false,
+                        analytics: false,
+                        legalVersion: policyRelease.id,
+                      })
+                    }
+                  >
+                    Request email notifications
+                  </Button>
+                  <p>
+                    Email stays unavailable until a verified sender is
+                    connected.
+                  </p>
+                </>
+              )}
+              {view === "usage" && (
+                <>
+                  <div className="panel">
+                    <h2>Your allowance</h2>
+                    <p>
+                      Trial: 30 credits and up to 3 sources. No automatic paid
+                      conversion.
+                    </p>
+                    <pre>
+                      {JSON.stringify(
+                        data.usage ?? { granted: 30, reserved: 0, spent: 0 },
+                        null,
+                        2,
+                      )}
+                    </pre>
+                  </div>
+                  <p>
+                    Reservations reduce available credits before work starts.
+                    Unused reservations release after reconciled settlement. API
+                    and cloud costs need an explicit quote.
+                  </p>
+                </>
+              )}
+              {view === "connections" && (
+                <>
+                  <section className="panel">
+                    <h2>Your ChatGPT plan</h2>
+                    <p>
+                      Prefer your own allowance for eligible AI requests and
+                      keep VibeScroller inference credits for other work.
+                      ChatGPT limits still apply; transcription, storage and
+                      cloud execution have separate costs.
+                    </p>
+                    <label
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: ".65rem",
+                        minHeight: 44,
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        style={{ width: 18, height: 18, flexShrink: 0 }}
+                        checked={data.aiPreference?.preferChatGPTPlan ?? false}
+                        disabled={demo || busy}
+                        onChange={async (event) => {
+                          const preferChatGPTPlan = event.target.checked;
+                          const result = await call("aiPreference", {
+                            organizationId,
+                            preferChatGPTPlan,
+                          });
+                          if (result)
+                            setData((current) => ({
+                              ...current,
+                              aiPreference: {
+                                ...current.aiPreference,
+                                preferChatGPTPlan,
+                                hostedStatus: "awaiting_commercial_access",
+                                active: false,
+                              },
+                            }));
+                        }}
+                      />
+                      Prefer my ChatGPT plan when available
+                    </label>
+                    <p className="notice" style={{ textAlign: "left" }}>
+                      Hosted connection is awaiting OpenAI commercial access.
+                      Saving this preference does not connect an account, grant
+                      consent, or change the funding route of a current task.
+                    </p>
+                    <p>
+                      Personal alpha accounts can pair a laptop and approve text
+                      and video analysis from the source screen. Audio is
+                      transcribed on that laptop; sampled frames and text use
+                      your connected ChatGPT account. Coding requires verified
+                      isolation and separate approval.
+                    </p>
+                    <a
+                      href="https://chatgpt.com/settings/usage"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Manage ChatGPT app access and usage
+                    </a>
+                  </section>
+                  <div className="panel">
+                    <h2>GitHub</h2>
+                    <p>
+                      Install the VibeScroller GitHub App on selected
+                      repositories. Administration and workflow write are not
+                      requested by default.
+                    </p>
+                    <Button busy={busy} onClick={() => go("projects")}>
+                      Manage selected repositories
+                    </Button>
+                    {data.connections?.some(
+                      (connection) =>
+                        connection.provider === "github" &&
+                        connection.status === "connected",
+                    ) ? (
+                      <Button
+                        busy={busy}
+                        onClick={() =>
+                          call("revoke", { organizationId, provider: "github" })
+                        }
+                      >
+                        Disconnect GitHub
+                      </Button>
+                    ) : (
+                      <a
+                        className="secondary"
+                        href={`/api/github/connect?org=${organizationId}`}
+                      >
+                        Link GitHub account
+                      </a>
+                    )}
+                  </div>
+                  <form
+                    className="panel"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const f = new FormData(e.currentTarget);
+                      call("saveKey", {
+                        organizationId,
+                        secret: f.get("secret"),
+                      });
+                      e.currentTarget.reset();
+                    }}
+                  >
+                    <h2>Your OpenAI API credential</h2>
+                    <p>
+                      Provider charges are separate. The server encrypts this
+                      credential; the browser does not retain it. Saving does
+                      not activate execution. Sign in again before saving or
+                      testing.
+                    </p>
+                    <p>
+                      Status:{" "}
+                      {label(data.customerRoutes?.status ?? "disconnected")}.{" "}
+                      {data.customerRoutes?.models.length ?? 0} reviewed models
+                      available.
+                    </p>
+                    <label>
+                      API key
+                      <input
+                        name="secret"
+                        type="password"
+                        autoComplete="off"
+                        required
+                      />
+                    </label>
+                    <button className="primary" disabled={busy}>
+                      Encrypt and save credential
+                    </button>
+                    <Button
+                      busy={busy}
+                      onClick={() => call("testKey", { organizationId })}
+                    >
+                      Verify credential with a model-list request
+                    </Button>
+                    <p className="fine">
+                      Verification sends no inference request. Coding requires a
+                      separate USD provider ceiling and platform compute
+                      allowance. No reviewed available model means this route
+                      stays unavailable.
+                    </p>
+                    <Button
+                      busy={busy}
+                      onClick={() =>
+                        call("revoke", { organizationId, provider: "openai" })
+                      }
+                    >
+                      Revoke credential
+                    </Button>
+                  </form>
+                  <div className="panel">
+                    <h2>Telegram</h2>
+                    <p>
+                      Planned for later. Use the web inbox now. Setup needs a
+                      BotFather bot, secret webhook, numeric-user pairing and
+                      replay tests.
+                    </p>
+                  </div>
+                </>
+              )}
+              {view === "runners" && (
+                <>
+                  <div className="panel">
+                    <h2>Optional laptop execution</h2>
+                    <p>
+                      Pair a named computer, confirm its fingerprint, map
+                      repositories, and verify Windows isolation. Official Codex
+                      app-server keeps authentication on the computer. No
+                      inbound port is required.
+                    </p>
+                    <p className="notice">
+                      Execution is blocked until its isolation tests pass. A
+                      worktree alone is not a sandbox.
+                    </p>
+                    <Link href="/docs">Read runner setup</Link>
+                  </div>
+                  {!readOnly && (
+                    <section className="panel">
+                      <h2>Pair this computer</h2>
+                      <p>
+                        Run the documented local pairing command, then paste its
+                        public request here. Check its fingerprint against the
+                        terminal before confirming. A fresh sign-in is required.
+                      </p>
+                      <form
+                        className="form-grid"
+                        onSubmit={async (e) => {
+                          e.preventDefault();
+                          try {
+                            const value = JSON.parse(
+                              String(
+                                new FormData(e.currentTarget).get("request") ??
+                                  "",
+                              ),
+                            );
+                            if (
+                              Object.keys(value).sort().join(",") !==
+                                "codeHash,credentialHash,fingerprint,name,workspaceId" ||
+                              typeof value.name !== "string" ||
+                              value.workspaceId !== organizationId ||
+                              ![
+                                value.codeHash,
+                                value.credentialHash,
+                                value.fingerprint,
+                              ].every(
+                                (v) =>
+                                  typeof v === "string" &&
+                                  /^[a-f0-9]{64}$/.test(v),
+                              )
+                            )
+                              throw new Error(
+                                "Invalid public pairing request.",
+                              );
+                            const existing = data.devices?.find(
+                              (d) =>
+                                d.personalOwned &&
+                                d.pairingActive &&
+                                d.fingerprint === value.fingerprint &&
+                                d.name === value.name,
+                            );
+                            const deviceId = existing
+                              ? id(existing)
+                              : await call("startDevice", {
+                                  organizationId,
+                                  name: value.name,
+                                  fingerprint: value.fingerprint,
+                                  codeHash: value.codeHash,
+                                });
+                            if (deviceId)
+                              setPairing({
+                                id: deviceId,
+                                name: value.name,
+                                fingerprint: value.fingerprint,
+                                credentialHash: value.credentialHash,
+                              });
+                          } catch {
+                            setNotice(
+                              "Paste the public request generated by your runner. Do not paste keys or login tokens.",
+                            );
+                          }
+                        }}
+                      >
+                        <label>
+                          Public pairing request
+                          <textarea
+                            name="request"
+                            required
+                            maxLength={1200}
+                            rows={5}
+                          />
+                        </label>
+                        <button className="secondary" disabled={busy}>
+                          Review device request
+                        </button>
+                      </form>
+                      {pairing && (
+                        <div>
+                          <h3>Confirm {pairing.name}</h3>
+                          <p className="code-label">
+                            Fingerprint {pairing.fingerprint}
+                          </p>
+                          <p>
+                            Confirm only if this fingerprint matches the
+                            computer you control. Pairing enables communication.
+                            Coding still requires separately verified isolation
+                            and an approved plan.
+                          </p>
+                          <Button
+                            busy={busy}
+                            onClick={async () => {
+                              const result = await call("approveDevice", {
+                                id: pairing.id,
+                                fingerprint: pairing.fingerprint,
+                                credentialHash: pairing.credentialHash,
+                              });
+                              if (result !== undefined) setPairing(null);
+                            }}
+                          >
+                            Confirm matching computer
+                          </Button>
+                        </div>
+                      )}
+                    </section>
+                  )}
+                  {data.devices?.map((d) => (
+                    <article className="panel" key={id(d)}>
+                      <h3>{d.name}</h3>
+                      <p>
+                        {d.state} · Fingerprint {d.fingerprint}
+                      </p>
+                      <Button
+                        busy={busy}
+                        onClick={() => call("revokeDevice", { id: id(d) })}
+                      >
+                        Revoke computer
+                      </Button>
+                    </article>
+                  ))}
+                </>
+              )}
+              {view === "privacy" && (
+                <>
+                  <MotionPreference control />
+                  <div className="panel">
+                    <h2>Your content and preferences</h2>
+                    <p>
+                      Sources, summaries and project context belong to your
+                      workspace. Original media expires within the configured
+                      retention window. Source deletion blocks access
+                      immediately and schedules cleanup.
+                    </p>
+                    <a
+                      className="secondary"
+                      href={`/app/${organizationId}/content-export`}
+                    >
+                      Export workspace content
+                    </a>
+                    <Link
+                      className="secondary"
+                      href={`/app/${organizationId}/settings`}
+                    >
+                      Delete workspace
+                    </Link>
+                    <Link className="secondary" href="/account">
+                      Account export & deletion
+                    </Link>
+                  </div>
+                  <CookieSettings className="secondary" />
+                  <Button
+                    busy={busy}
+                    onClick={() =>
+                      call("preferences", {
+                        organizationId,
+                        email: false,
+                        telegram: false,
+                        analytics: false,
+                        legalVersion: policyRelease.id,
+                      })
+                    }
+                  >
+                    Turn off optional notifications and analytics
+                  </Button>
+                  <p>
+                    No private service-worker cache or cross-workspace content
+                    reuse.
+                  </p>
+                </>
+              )}
+              {view === "billing" && (
+                <>
+                  <div className="panel">
+                    <h2>Live checkout is disabled</h2>
+                    <p>
+                      Tax mode: pending evidence. The intended exemption
+                      strategy is not a claim about the company's registration.
+                      Ordinary VAT, special registration and destination
+                      treatment need matching official records.
+                    </p>
+                    <Link className="secondary" href="/pricing">
+                      View six catalogue prices and allowances
+                    </Link>
+                    <Link
+                      className="secondary"
+                      href={`/app/${organizationId}/billing`}
+                    >
+                      Billing portal and subscription status
+                    </Link>
+                  </div>
+                  <p>
+                    Cancellation, refunds and invoice compliance remain
+                    server-authorized workflows. A checkout return does not
+                    grant credits.
+                  </p>
+                </>
+              )}
+              {view === "menu" && (
+                <section className="panel" aria-label="All application pages">
+                  <h2>More pages</h2>
+                  <nav aria-label="All mobile pages" className="form-grid">
+                    {nav.slice(3).map(([key, title]) => (
+                      <button key={key} onClick={() => go(key)}>
+                        {title}
+                      </button>
+                    ))}
+                  </nav>
+                </section>
+              )}
             </>
-          )}
-          {view === "privacy" && (
-            <>
-              <MotionPreference control />
-              <div className="panel">
-                <h2>Your content and preferences</h2>
-                <p>
-                  Sources, summaries and project context belong to your
-                  workspace. Original media expires within the configured
-                  retention window. Source deletion blocks access immediately
-                  and schedules cleanup.
-                </p>
-                <a
-                  className="secondary"
-                  href={`/app/${organizationId}/content-export`}
-                >
-                  Export workspace content
-                </a>
-                <Link
-                  className="secondary"
-                  href={`/app/${organizationId}/settings`}
-                >
-                  Delete workspace
-                </Link>
-                <Link className="secondary" href="/account">
-                  Account export & deletion
-                </Link>
-              </div>
-              <CookieSettings className="secondary" />
-              <Button
-                busy={busy}
-                onClick={() =>
-                  call("preferences", {
-                    organizationId,
-                    email: false,
-                    telegram: false,
-                    analytics: false,
-                    legalVersion: policyRelease.id,
-                  })
-                }
-              >
-                Turn off optional notifications and analytics
-              </Button>
-              <p>
-                No private service-worker cache or cross-workspace content
-                reuse.
-              </p>
-            </>
-          )}
-          {view === "billing" && (
-            <>
-              <div className="panel">
-                <h2>Live checkout is disabled</h2>
-                <p>
-                  Tax mode: pending evidence. The intended exemption strategy is
-                  not a claim about the company's registration. Ordinary VAT,
-                  special registration and destination treatment need matching
-                  official records.
-                </p>
-                <Link className="secondary" href="/pricing">
-                  View six catalogue prices and allowances
-                </Link>
-                <Link
-                  className="secondary"
-                  href={`/app/${organizationId}/billing`}
-                >
-                  Billing portal and subscription status
-                </Link>
-              </div>
-              <p>
-                Cancellation, refunds and invoice compliance remain
-                server-authorized workflows. A checkout return does not grant
-                credits.
-              </p>
-            </>
-          )}
-          {view === "menu" && (
-            <section className="panel" aria-label="All application pages">
-              <h2>More pages</h2>
-              <nav aria-label="All mobile pages" className="form-grid">
-                {nav.slice(3).map(([key, title]) => (
-                  <button key={key} onClick={() => go(key)}>
-                    {title}
-                  </button>
-                ))}
-              </nav>
-            </section>
           )}
         </main>
         <nav className="mobile-nav" aria-label="Mobile navigation">
@@ -2101,7 +2262,9 @@ export function Console({
             type="button"
             className="mobile-save"
             disabled={readOnly || busy}
-            onClick={() => setCaptureOpen(true)}
+            onClick={() => {
+              void openCapture();
+            }}
           >
             <Plus size={20} aria-hidden="true" />
             Save

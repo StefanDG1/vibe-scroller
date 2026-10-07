@@ -1,7 +1,8 @@
 import { workspaceReadable } from "./lib/workspacePrivacy";
 import { Resend, type EmailId } from "@convex-dev/resend";
 import { components } from "./_generated/api";
-import { internalMutation, internalQuery } from "./_generated/server";
+import { internalQuery } from "./_generated/server";
+import { internalMutation } from "./lib/projectedMutations";
 import { v } from "convex/values";
 export const resend: Resend = new Resend(components.resend, {
   testMode: process.env.EMAIL_REAL_DELIVERY_ENABLED !== "true",

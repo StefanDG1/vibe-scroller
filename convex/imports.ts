@@ -1,4 +1,4 @@
-import { mutation } from "./_generated/server";
+import { mutation } from "./lib/projectedMutations";
 import { v } from "convex/values";
 import { limit, audit, writeAccess } from "./lib";
 import { ensure } from "../packages/policy";

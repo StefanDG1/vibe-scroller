@@ -1,10 +1,5 @@
-import {
-  mutation,
-  query,
-  internalMutation,
-  internalQuery,
-  type QueryCtx,
-} from "./_generated/server";
+import { query, internalQuery, type QueryCtx } from "./_generated/server";
+import { mutation, internalMutation } from "./lib/projectedMutations";
 import { v } from "convex/values";
 import type { Doc } from "./_generated/dataModel";
 import { access, writeAccess, audit, limit } from "./lib";

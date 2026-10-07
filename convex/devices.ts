@@ -1,5 +1,6 @@
 import { releaseUnstarted } from "./personalMediaState";
-import { query, mutation } from "./_generated/server";
+import { query } from "./_generated/server";
+import { mutation } from "./lib/projectedMutations";
 import { v } from "convex/values";
 import { access, fail, limit, recentAuthentication, writeAccess } from "./lib";
 import { ensure } from "../packages/policy";

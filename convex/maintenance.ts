@@ -1,4 +1,5 @@
-import { internalMutation, internalQuery } from "./_generated/server";
+import { internalQuery } from "./_generated/server";
+import { internalMutation } from "./lib/projectedMutations";
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import { queueDeletion } from "./assets";
@@ -14,6 +15,7 @@ export const purgeOrganization = internalMutation({
     if (!org || org.status !== "deleting") return;
     await rememberDeletion(ctx, "workspace", organizationId);
     for (const table of [
+      "dashboardCards",
       "improvements",
       "improvementOutcomes",
       "improvementPolicies",
