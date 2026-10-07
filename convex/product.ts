@@ -785,7 +785,7 @@ export async function captureOne(
     personalAllowed(actor.actor.subject) &&
     actor.organization.createdBy === actor.actor._id;
   ensure(
-    (w.tier !== "trial" || w.granted > 0) &&
+    (personalLibrary || w.tier !== "trial" || w.granted > 0) &&
       (w.tier === "trial" && !personalLibrary
         ? counts.lifetime
         : counts.active) <
