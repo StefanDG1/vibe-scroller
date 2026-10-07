@@ -645,6 +645,13 @@ export const productTables = {
     action: v.string(),
     note: v.string(),
     benefit: v.string(),
+    assistantClientId: v.optional(v.string()),
+    assistantKey: v.optional(v.string()),
+    assistantVersion: v.optional(v.number()),
+    assistantInputHash: v.optional(v.string()),
+    assistantGrantId: v.optional(v.id("assistantGrants")),
+    assistantGrantVersion: v.optional(v.number()),
+    sourceRevision: v.optional(v.number()),
     sourceGeneration: v.optional(v.number()),
     analysisHash: v.optional(v.string()),
     qualityVerdict: v.optional(
@@ -657,6 +664,12 @@ export const productTables = {
     ),
   })
     .index("by_org", ["organizationId"])
+    .index("by_assistant_key", [
+      "organizationId",
+      "actor",
+      "assistantClientId",
+      "assistantKey",
+    ])
     .index("by_target_actor", [
       "organizationId",
       "target",

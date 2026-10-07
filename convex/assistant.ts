@@ -4,7 +4,7 @@ import { v } from "convex/values";
 import type { QueryCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 import { assistantGrant, assistantPrincipal } from "./lib/assistantPrincipal";
-import { limit } from "./lib";
+import { audit, limit } from "./lib";
 import { ensure, containsSecret, safeSourceUrl } from "../packages/policy";
 import { captureAuthorized, digest } from "./product";
 import { workspaceReadable } from "./lib/workspacePrivacy";
@@ -322,6 +322,129 @@ async function sourceFor(
     ? source
     : null;
 }
+export const recordFeedback = internalMutation({
+  args: {
+    ...profile,
+    sourceId: v.id("sources"),
+    generation: v.number(),
+    revision: v.number(),
+    grantVersion: v.number(),
+    key: v.string(),
+    expectedVersion: v.number(),
+    explicitlyRequested: v.literal(true),
+    action: v.union(
+      v.literal("useful"),
+      v.literal("not_relevant"),
+      v.literal("already_implemented"),
+      v.literal("unsafe_unsupported"),
+      v.literal("later"),
+    ),
+    note: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const a = await assistantGrant(
+      ctx,
+      await selectedProfile(ctx, args.profileId),
+      "feedback:write",
+    );
+    const source = await sourceFor(ctx, a, args.sourceId);
+    ensure(
+      source &&
+        source.generation === args.generation &&
+        source.updatedAt === args.revision &&
+        a.grant.version === args.grantVersion,
+      "APPROVAL_STALE",
+      "Review current selected evidence and assistant access before recording a judgment.",
+    );
+    ensure(
+      /^[a-zA-Z0-9_-]{8,64}$/.test(args.key) &&
+        Number.isSafeInteger(args.expectedVersion) &&
+        args.expectedVersion >= 0 &&
+        args.note.length <= 2000 &&
+        !containsSecret(args.note),
+      "INVALID_INPUT",
+      "Use a bounded correction version and note without credentials.",
+    );
+    const note = args.note.trim();
+    const inputHash = await digest(
+      JSON.stringify({
+        sourceId: source._id,
+        generation: args.generation,
+        revision: args.revision,
+        grantVersion: args.grantVersion,
+        action: args.action,
+        note,
+      }),
+    );
+    const previous = await ctx.db
+      .query("feedback")
+      .withIndex("by_assistant_key", (q) =>
+        q
+          .eq("organizationId", a.organization._id)
+          .eq("actor", a.actor._id)
+          .eq("assistantClientId", a.client.id)
+          .eq("assistantKey", args.key),
+      )
+      .order("desc")
+      .first();
+    const version = previous?.assistantVersion ?? 0;
+    ensure(
+      !previous || previous.target === source._id,
+      "INVALID_INPUT",
+      "Keep a feedback key bound to its original selected post.",
+    );
+    if (
+      previous?.assistantInputHash === inputHash &&
+      (args.expectedVersion === version || args.expectedVersion === version - 1)
+    )
+      return {
+        feedback_id: previous._id,
+        version,
+        status: "recorded",
+        benefit: "not_measured",
+      };
+    ensure(
+      args.expectedVersion === version,
+      "APPROVAL_STALE",
+      "The feedback changed. Review its current version before correcting it.",
+    );
+    await limit(ctx, `assistant-feedback:${a.actor._id}:${a.client.id}`, 20);
+    const now = Date.now();
+    const id = await ctx.db.insert("feedback", {
+      organizationId: a.organization._id,
+      actor: a.actor._id,
+      target: source._id,
+      action: args.action,
+      note,
+      benefit: "not_measured",
+      sourceGeneration: source.generation,
+      sourceRevision: source.updatedAt,
+      assistantClientId: a.client.id,
+      assistantKey: args.key,
+      assistantVersion: version + 1,
+      assistantInputHash: inputHash,
+      assistantGrantId: a.grant._id,
+      assistantGrantVersion: a.grant.version,
+      createdAt: now,
+      updatedAt: now,
+    });
+    await audit(
+      ctx,
+      a.organization._id,
+      a.actor._id,
+      "assistant.feedback_recorded",
+      id,
+    );
+    return {
+      feedback_id: id,
+      version: version + 1,
+      status: "recorded",
+      benefit: "not_measured",
+      url: `https://scroll.companynerve.com/app/${a.organization._id}/library/${source._id}`,
+      note: "Recorded your judgment. It does not change source evidence, manual quality reviews, preferences, funding or publication authority.",
+    };
+  },
+});
 export const search = internalQuery({
   args: { ...profile, query: v.string(), offset: v.optional(v.number()) },
   handler: async (ctx, args) => {
