@@ -98,3 +98,7 @@ Updated all four briefs together for F020. The candidate separates assistant OAu
 ## F021: exact project context and private assistant drafts, October 7
 
 Updated all four briefs together for F021 and ADR 087. Exact project bindings, separately selected library context and private draft reuse are candidate implementation facts. Local handler tests and scoped synthetic contrast verdict remain separate from real OAuth, human comprehension, two-account integration and measured benefit. Preserve prior research, prices, hypotheses and dissent.
+
+## F022: finite scoped completion Events, October 7
+
+Updated all four briefs and the backlog together for F022. The deployed adapter has local security/protocol checks and exact release evidence while production access stays off. Finite authority, transport receipt, host processing and benefit remain distinct. Preserve the audience, prior evidence, prices, six beliefs, hypotheses and dissent. Real consent/revocation/host acceptance and comprehension are still required.

@@ -254,3 +254,7 @@ F020 adds a scoped assistant implementation candidate. Local security and protoc
 ## F021: exact project context and private assistant drafts, October 7
 
 F021 adds local engineering evidence for exact project-context selection and private suggestions reused from current canonical evaluations. The actual handler tests preserve manual edits, distinct non-fit outcomes and current authorization. A fresh finish reviewer resolved one contrast correction in synthetic captures. This is not demand, comprehension, recall or measured-outcome evidence. Actual host consent, provider revocation, two-account isolation and comparative usefulness remain missing.
+
+## F022: finite scoped completion Events, October 7
+
+F022 adds local engineering and exact deployed-release evidence for finite scoped completion webhooks. It does not establish demand, saved time, measured usefulness or actual ChatGPT processing. Provider/callback test responses are synthetic; real consent, provider revocation and supported-host completion after UI closes remain open.

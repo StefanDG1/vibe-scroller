@@ -235,3 +235,21 @@ it("checks current authority after DNS and bounds a stalled last-minute authoriz
   await rejection;
   expect(https).not.toHaveBeenCalled();
 });
+
+it("records delivery receipt from HTTP status without retaining an unnecessary oversized response body", async () => {
+  dns.mockResolvedValue([{ address: "1.1.1.1", family: 4 }]);
+  response(204, Buffer.alloc(50000), { "content-length": "50000" });
+  const result = await sendWebhook(
+    "https://receiver.example/event",
+    "{}",
+    {},
+    async () => true,
+    true,
+  );
+  expect(result.status).toBe(204);
+  expect(result.body.byteLength).toBe(0);
+  response(200, Buffer.alloc(50000), { "content-length": "50000" });
+  await expect(
+    sendWebhook("https://receiver.example/verify", "{}", {}),
+  ).rejects.toThrow("CALLBACK_RESPONSE_DENIED");
+});
