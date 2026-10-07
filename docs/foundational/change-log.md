@@ -1,5 +1,9 @@
 # Foundational document change log
 
+## F025: bounded live paging, sharing and review recovery, October 7
+
+Updated all four current briefs together after exact PR 74 release, actual bounded cursor delivery through both hosts, actual owner-controlled saved-title sharing and production sign-in recovery. Preserved F024 and earlier failed/pending receipts as history. The new scope does not establish independent prospect validation, cited-ready/mixed-derived sharing, Events or usefulness/cost claims; no audience, prices, allowances, provider authority or six-belief changes follow.
+
 ## F018: deployed filing and explicit sharing candidate, October 7
 
 Updated all four briefs together using PR 57's exact release and actual-owner synthetic receipt. Distinguish deployed private setup/filing from the next team-sharing candidate. Explicit target, versions, expiry, fresh sign-in and current authorization preserve the privacy objection without promising retraction of material already received. Local synthetic UI and negative handler checks are separate from real account/client acceptance, customer research, first analysis, legal review and physical phones. No audience, price, budget, provider entitlement or measured customer benefit changed.

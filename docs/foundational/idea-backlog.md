@@ -1,5 +1,9 @@
 # Foundational idea backlog
 
+## F025: bounded live paging, sharing and review recovery, October 7
+
+Source: actual engineering acceptance under the owner's full implementation request. Adopt precise availability language: bounded live cursor delivery, owner-controlled saved-title sharing/revocation and exact review recovery. Counterargument: two founder accounts and passing navigation do not establish new-user comprehension, cited-ready/mixed-derived sharing, helpfulness or billing savings. Retain independent evaluation and provider/funding gates; no marketing publication follows.
+
 ## F018: deployed filing and explicit sharing candidate, October 7
 
 Source: owner-authorized evolution implementation and PR 57 production receipt. Adopt the deployed setup/filing facts; retain team sharing as a candidate until exact release checks. The permission distinction addresses project owners who may want selected knowledge in a shared workspace while keeping their own interests private. Counterargument: a recipient can retain material already disclosed, and an expiration cannot erase it. Tests cover every-read scope, exact corrections/deletion, expiry, role loss, revocation and acknowledgment invalidation; real two-account comprehension and official fresh authentication remain acceptance gates. No assistant grant, mixed summary, additional spend or public issue publication follows. All four briefs and the change log are updated together.
