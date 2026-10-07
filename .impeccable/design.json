@@ -3,6 +3,26 @@
   "generatedAt": "2026-10-07T12:14:16.248127+00:00",
   "title": "Design System: VibeScroll",
   "extensions": {
+    "usageAllowanceReview": {
+      "mode": "Operate",
+      "recordedDate": "2026-10-07",
+      "identity": "Incumbent Scroll charcoal studio, Inter, quiet panels, mint native meter and existing secondary Billing review link; no new world, token, artwork or motion.",
+      "sources": [
+        "apps/starter/components/usage-summary.tsx",
+        "apps/starter/app/globals.css",
+        "packages/billing/usage-overview.ts"
+      ],
+      "balanceConvention": "Labeled available and reserved tabular numerals lead together in a wrapping group. A supplementary labeled native meter retains a visible zero-to-unexpired-allowance range and accessible value text; its shape follows the existing radius.",
+      "recentUseConvention": "Flat separated rows retain activity, UTC date and actual credit amount, including zero. Visible coverage is bounded to ten recent entries and distinguishes credit records from provider invoices.",
+      "stateConvention": "Dated expiry and unresolved holds remain explicit; unavailable allowance and empty recent use are separate states. Billing opens review and does not grant purchase or spending authority.",
+      "finishDisposition": "Ship at the narrow changed Usage surface and sampled projection/advisory-helper scope; no material fixes.",
+      "captures": [
+        ".impeccable/review/usage-20261007/mobile.png",
+        ".impeccable/review/usage-20261007/desktop.png",
+        ".impeccable/review/usage-20261007/user-1567.png"
+      ],
+      "evidenceBoundary": "Supplied populated genuine-staging captures and browser-proof.json at emulated 390, 1440 and 1567 CSS pixels, plus final candidate code and reviewer.md. No new browser or detector pass. This is not every dynamic state, physical-device, production candidate, provider-invoice or full V1 acceptance. Actual balances and dates are session evidence, not tokens or defaults."
+    },
     "visibleLibraryContextReview": {
       "mode": "Operate",
       "identity": "Incumbent Scroll charcoal studio, mint selection, warm original artwork, familiar Library controls and responsive navigation; no visual-world, asset, token or appearance change.",
@@ -576,6 +596,11 @@
   ],
   "narrative": {
     "rules": [
+      {
+        "name": "The Allowance Reading Rule",
+        "body": "Keep available and reserved numbers primary, the labeled native meter supplementary, unresolved holds explicit and recent-use coverage bounded.",
+        "section": "components"
+      },
       {
         "name": "The Review Return Rule",
         "body": "When an operation requires fresh sign-in, retain the current application pathname and query in the existing error toast's recovery link. Keep the app-only server return-path guard. Recovery returns to the review location; it does not retry the failed operation or grant approval, access or spending authority.",

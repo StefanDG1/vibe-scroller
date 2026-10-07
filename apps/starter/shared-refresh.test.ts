@@ -10,6 +10,63 @@ import { GET } from "./app/api/workspace/[org]/route";
 afterEach(() => {
   vi.resetAllMocks();
 });
+it("loads Usage through two required queries and strips raw private ledger and workspace content", async () => {
+  const names: string[] = [];
+  state.query.mockImplementation(async (reference) => {
+    const name = getFunctionName(reference);
+    names.push(name);
+    if (name === "organizations:details")
+      return { name: "Synthetic", private: true, role: "owner" };
+    if (name === "product:usage")
+      return {
+        wallet: { tier: "trial", _id: "private-wallet" },
+        pools: [{ granted: 30, spent: 16, reserved: 10 }],
+        reservations: [
+          { key: "private-reservation", state: "active", max: 10 },
+        ],
+        entries: [
+          {
+            unitType: "service_credits",
+            credits: 6,
+            key: "source:private-source",
+            createdAt: 100,
+          },
+        ],
+      };
+    throw Error("Hidden workspace content requested");
+  });
+  const response = await GET(
+    new Request(
+      "https://synthetic.example.test/api/workspace/owner?view=usage",
+    ),
+    { params: Promise.resolve({ org: "owner" }) },
+  );
+  expect(response.status).toBe(200);
+  expect(response.headers.get("cache-control")).toBe("no-store");
+  expect(names.sort()).toEqual(["organizations:details", "product:usage"]);
+  const body = await response.json();
+  expect(body).toMatchObject({
+    workspaceSlice: "usage",
+    sources: [],
+    repositories: [],
+    proposals: [],
+    runs: [],
+    usage: { available: 4, reserved: 10 },
+  });
+  expect(JSON.stringify(body)).not.toContain("private-");
+});
+it("denies Usage on loader authorization failure without disclosing private records", async () => {
+  state.query.mockRejectedValue(Error("Private permission diagnostic"));
+  const response = await GET(
+    new Request(
+      "https://synthetic.example.test/api/workspace/foreign?view=usage",
+    ),
+    { params: Promise.resolve({ org: "foreign" }) },
+  );
+  expect(response.status).toBe(404);
+  expect(response.headers.get("cache-control")).toBe("no-store");
+  expect(await response.json()).toEqual({ error: "Workspace unavailable." });
+});
 it("refreshes an explicitly opened source beyond the first grant page and clears it after access loss", async () => {
   let available = true;
   state.query.mockImplementation(async (reference, args) => {

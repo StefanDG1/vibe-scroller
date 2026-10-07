@@ -1,3 +1,82 @@
 @import "tailwindcss";
 @import "@companynerve/design-recipes/styles.css";
 @source "../**/*.{ts,tsx}";
+
+.usage-summary {
+  display: grid;
+  gap: 24px;
+  max-width: 860px;
+}
+.usage-balances {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px 56px;
+  margin: 24px 0;
+  font-variant-numeric: tabular-nums;
+}
+.usage-balances dt {
+  color: var(--muted-foreground);
+}
+.usage-balances dd {
+  margin: 4px 0 0;
+  font-size: 2rem;
+  line-height: 1.25;
+}
+.usage-meter-label {
+  display: block;
+  margin-bottom: 8px;
+}
+.usage-meter {
+  display: block;
+  width: 100%;
+  height: 16px;
+  accent-color: var(--primary);
+}
+.usage-meter::-webkit-meter-bar {
+  background: var(--muted);
+  border: 0;
+  border-radius: var(--radius);
+}
+.usage-meter::-webkit-meter-optimum-value {
+  background: var(--primary);
+  border-radius: var(--radius);
+}
+.usage-meter::-moz-meter-bar {
+  background: var(--primary);
+}
+.usage-meter-range {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+.usage-allowance > p {
+  max-width: 65ch;
+}
+.usage-entries {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-variant-numeric: tabular-nums;
+}
+.usage-entries li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+}
+.usage-entries li:last-child {
+  border-bottom: 0;
+}
+.usage-entries li > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.usage-entries li > span {
+  flex-shrink: 0;
+}

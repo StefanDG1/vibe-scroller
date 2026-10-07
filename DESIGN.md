@@ -298,6 +298,16 @@ Coverage, state and tags share a small neutral badge. They supplement source tex
 
 Library items are rows with thin bottom separators, a quiet media icon and a readable linked title. Settings, plans and evidence use bordered panels. Empty views keep a plain background, a short explanation and a relevant action. Notices use a neutral raised fill and live output for action feedback; errors also use the error color and precise explanation.
 
+### Usage allowance and recent credit use
+
+Usage keeps the existing quiet settings panels and Inter reading hierarchy. Available and reserved credits lead together as labeled, tabular numerals; the balance group wraps within the panel on narrow screens. A supplementary native meter uses the existing mint and neutral tokens, with a readable label, visible zero-to-allowance range and accessible value text. The meter describes availability from unexpired allowances, not completed work, benefit or invoice settlement. Its corners follow the incumbent radius rather than introducing another shape token.
+
+Keep dated UTC expiry and unresolved-reservation explanations next to the balances. Recent credit use uses flat separated rows: activity and UTC date on the left, actual credit amount on the right, including zero-credit entries. The visible coverage note bounds the list to ten recent entries and distinguishes credits from provider invoices. Missing or invalid allowance data remains unavailable; empty recent use has its own explanation. The existing secondary Billing link opens review and grants no purchase or spending authority.
+
+**The Allowance Reading Rule.** Keep available and reserved numbers primary, the labeled native meter supplementary, unresolved holds explicit and recent-use coverage bounded.
+
+The October 7 reviewer cleared this narrow Usage refinement with no material fixes. Populated genuine-staging captures in `.impeccable/review/usage-20261007/` cover 390, 1440 and 1567 CSS pixels with no horizontal page overflow. These are viewport emulations; they do not establish every dynamic state, physical-device, production candidate, provider-invoice or full V1 acceptance. No new palette, artwork, type or motion convention follows from this addition.
+
 ### Reauthentication recovery
 
 **The Review Return Rule.** When an operation requires fresh sign-in, retain the current application pathname and query in the existing error toast's recovery link. Keep the app-only server return-path guard. Recovery returns to the review location; it does not retry the failed operation or grant approval, access or spending authority.

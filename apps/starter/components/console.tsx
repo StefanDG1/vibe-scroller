@@ -3,6 +3,8 @@ import { useState, useEffect, useRef, useEffectEvent } from "react";
 import { useRouter } from "next/navigation";
 import { usePolling } from "@/lib/use-polling";
 import { AssistantConnections } from "./assistant-connections";
+import { UsageSummary } from "./usage-summary";
+import { usageOverview } from "../../../packages/billing/usage-overview";
 import Link from "next/link";
 import Image from "next/image";
 import { Brand } from "./site";
@@ -58,7 +60,7 @@ import { track } from "@/lib/analytics";
 import { productAnalyticsEvent } from "@/lib/analytics-events";
 import type { ImportPreview } from "../../../packages/instagram-import";
 type Initial = {
-  workspaceSlice?: "library" | "connections";
+  workspaceSlice?: "library" | "connections" | "usage";
   compact?: boolean;
   privateLibrary?: boolean;
   sharedKnowledge?: { items: any[]; next: string | null };
@@ -1924,27 +1926,14 @@ export function Console({
                 </>
               )}
               {view === "usage" && (
-                <>
-                  <div className="panel">
-                    <h2>Your allowance</h2>
-                    <p>
-                      Trial: 30 credits and up to 3 sources. No automatic paid
-                      conversion.
-                    </p>
-                    <pre>
-                      {JSON.stringify(
-                        data.usage ?? { granted: 30, reserved: 0, spent: 0 },
-                        null,
-                        2,
-                      )}
-                    </pre>
-                  </div>
-                  <p>
-                    Reservations reduce available credits before work starts.
-                    Unused reservations release after reconciled settlement. API
-                    and cloud costs need an explicit quote.
-                  </p>
-                </>
+                <UsageSummary
+                  usage={
+                    data.workspaceSlice === "usage"
+                      ? data.usage
+                      : usageOverview(data.usage)
+                  }
+                  organizationId={organizationId}
+                />
               )}
               {view === "connections" && (
                 <>
