@@ -211,3 +211,7 @@ F022 retains the same project-owner audience. A person needs to distinguish a sa
 ## F023: simpler live assistant scope, October 7
 
 Keep the existing project-owner and library-only audiences. The owner finds individual-post assistant selection burdensome and requests Off, Personal, Business or Both, including future posts. This is owner preference evidence, not a new interview cohort. Explain the live scope plainly and retain an immediate revocation action.
+
+## F026: understand allowance before preparing work, October 7
+
+Keep the same project-owner audience. A person reviewing an idea needs to distinguish permission to prepare work, available credits and reserved work whose cost is unresolved. Actual Usage now presents those facts directly rather than raw ledger JSON. One owner's refusal and viewport review are not observations of a new audience or proof that new users understand the distinction. Validate that understanding with independent people when available; do not remove explicit funding review to reduce friction.

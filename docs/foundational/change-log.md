@@ -114,3 +114,7 @@ Updated Research, Avatar, Offer and Beliefs together for the owner-requested Off
 ## F024: private-pilot and recovery evidence, October 7
 
 Updated all four current briefs together for actual bounded ChatGPT/Codex owner-pilot tools, separately granted current/future scope and isolated ordinary owner/foreign serving. Preserve earlier dated pending/failure observations and all six beliefs, audience, prices, provider restrictions and exact action authority. Native search pagination metadata, Events/provider lifecycle, independent human/device/quality and commercial/legal acceptance remain open. No customer outcome, savings, public availability or campaign is inferred.
+
+## F026: readable allowance and bounded Usage evidence, October 7
+
+Updated Research, Avatar, Offer and Beliefs together with actual production allowance/refusal and bounded response-transfer evidence. Preserve prior failures, six beliefs, prices, audience, unknown holds and separate action authority. Current Usage is verified at its scope; no database billing, customer outcome, comprehension or full V1 acceptance is inferred. Retain the existing external gates and owner's lack of an independent tester.

@@ -266,3 +266,7 @@ F022 adds local engineering and exact deployed-release evidence for finite scope
 ## F023: simpler live assistant scope, October 7
 
 The owner requested current and future eligible posts through one explicit library scope. Official ChatGPT connected UI is verified; this establishes connection status only. Bounded handler tests and synthetic mobile/desktop review support implementation, not independent comprehension, recall, time saved or lower Convex charges. Preserve unresolved real tool and provider revocation acceptance.
+
+## F026: readable allowance and bounded Usage evidence, October 7
+
+Actual production Usage under ADR 091 now distinguishes available allowance, reserved unknown holds and recent settled credits. A matched response changed from 436,367 to 1,014 decoded bytes through a safe projection. This is engineering transfer evidence, not lower Convex billing, faster completion, saved time, invoice settlement or observed comprehension. An owner-authorized ten-credit preparation attempt refused before inference with four available credits; no retry or paid fallback occurred. Preserve that negative evidence and the need for independent cost-comprehension and usefulness tasks.

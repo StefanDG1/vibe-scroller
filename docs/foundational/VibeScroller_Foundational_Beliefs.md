@@ -127,3 +127,7 @@ F022 reinforces inspectable authority and separate outcome evidence. A ready sou
 ## F023: simpler live assistant scope, October 7
 
 Reduce repeated selection while keeping authority legible: name future inclusion before saving and enforce current rights, filing, expiry and revocation outside the model. A connected assistant, a permitted read and an improved outcome remain different evidence. Keep the six beliefs, provider limits and unresolved usefulness judgments unchanged.
+
+## F026: legible funding and truthful limits, October 7
+
+Retain the six beliefs. Readable allowance supports inspectable action authority: permission, capacity, processing, settlement and benefit are separate facts. Show actual holds and coverage limits rather than claiming completion or hiding an insufficient-allowance refusal. Neither a successful build nor a smaller response proves comprehension, useful outcomes or lower provider charges. No testimonial, guarantee or new funding authority follows.
