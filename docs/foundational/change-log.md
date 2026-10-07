@@ -102,3 +102,7 @@ Updated all four briefs together for F021 and ADR 087. Exact project bindings, s
 ## F022: finite scoped completion Events, October 7
 
 Updated all four briefs and the backlog together for F022. The deployed adapter has local security/protocol checks and exact release evidence while production access stays off. Finite authority, transport receipt, host processing and benefit remain distinct. Preserve the audience, prior evidence, prices, six beliefs, hypotheses and dissent. Real consent/revocation/host acceptance and comprehension are still required.
+
+## F023: simpler live assistant scope, October 7
+
+Updated Research, Avatar, Offer and Beliefs together for the owner-requested Off/Personal/Business/Both choice with current and future eligible posts. ADR 090 replaces individual-post selection for new assistant grants without expanding legacy grants or team sharing. Official ChatGPT connected UI is actual evidence; live-scope handler tests and synthetic screens are engineering evidence. Real host tools, provider revocation, comprehension and measured benefit remain separate. Prices, audience, provider restrictions and publication authority are unchanged.

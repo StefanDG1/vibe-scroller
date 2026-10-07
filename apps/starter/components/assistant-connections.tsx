@@ -1,13 +1,6 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
-import { usePolling } from "@/lib/use-polling";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ChoiceSelect } from "./choice-select";
-type Source = {
-  sourceId: string;
-  title: string;
-  generation: number;
-  revision: number;
-};
 type Project = {
   repositoryId: string;
   name: string;
@@ -20,18 +13,19 @@ type Grant = {
   clientId: string;
   scopes: string[];
   repositories?: Omit<Project, "name">[];
-  sources: Omit<Source, "title">[];
+  sources: { sourceId: string; generation: number; revision: number }[];
+  libraryScope?: "all" | "personal" | "business";
   version: number;
   state: string;
   expiresAt: number;
 };
 type Setup = {
-  nextCursor: string | null;
   repositoryNextCursor: string | null;
   repositories: Project[];
   enabled: boolean;
+  privateLibrary: boolean;
+  eventsEnabled?: boolean;
   clients: { id: string; name: string; scopes: string[] }[];
-  sources: Source[];
   grants: Grant[];
   context: {
     version: number;
@@ -39,36 +33,38 @@ type Setup = {
     role: string;
     interests: string[];
   } | null;
-  coverage: string;
 };
 const scopeNames: Record<string, string> = {
-  "knowledge:read": "Read selected saved ideas",
+  "knowledge:read": "Read ideas in my chosen library scope",
   "context:read": "Read the confirmed context I select",
   "links:save": "Save links I explicitly request",
-  "jobs:read": "Read status of selected work",
+  "jobs:read": "Read status of work in my chosen scope",
   "analysis:request": "Prepare analysis for my review",
   "feedback:write": "Record feedback I explicitly state",
   "suggestions:draft": "Prepare private project suggestions",
-  "events:subscribe": "Notify me about selected completed work",
+  "events:subscribe": "Notify me about completed work in my chosen scope",
 };
-export function AssistantConnections({
-  organizationId,
-  call,
-  readOnly,
-  demo,
-}: {
+type AssistantConnectionsProps = {
   organizationId: string;
   call: (op: string, args: unknown) => Promise<unknown>;
   readOnly: boolean;
   demo: boolean;
-}) {
+};
+export function AssistantConnections(props: AssistantConnectionsProps) {
+  return <AssistantAccessEditor key={props.organizationId} {...props} />;
+}
+function AssistantAccessEditor({
+  organizationId,
+  call,
+  readOnly,
+  demo,
+}: AssistantConnectionsProps) {
   const [data, setData] = useState<Setup | null>(null);
   const [clientId, setClientId] = useState("");
-  const [selected, setSelected] = useState<Source[]>([]);
+  const [libraryScope, setLibraryScope] = useState("");
   const [selectedProjects, setSelectedProjects] = useState<Project[]>([]);
   const [repositoryCursor, setRepositoryCursor] = useState<string | null>(null);
   const [includeLibraryContext, setIncludeLibraryContext] = useState(false);
-  const [pageCursor, setPageCursor] = useState<string | null>(null);
   const [scopes, setScopes] = useState<string[]>([]);
   const [intakeSpace, setIntakeSpace] = useState("");
   const [ack, setAck] = useState("");
@@ -78,13 +74,14 @@ export function AssistantConnections({
   const [pageLoading, setPageLoading] = useState(false);
   const [checkedAt, setCheckedAt] = useState(0);
   const generation = useRef(0);
-  useEffect(
-    () => () => {
-      generation.current++;
-    },
-    [],
-  );
-  async function load() {
+  const needsContext = scopes.includes("context:read");
+  useEffect(() => {
+    const epoch = generation;
+    return () => {
+      epoch.current++;
+    };
+  }, []);
+  const load = useCallback(async () => {
     const current = ++generation.current;
     try {
       const read = async (operation: string, args: unknown) => {
@@ -103,11 +100,13 @@ export function AssistantConnections({
         return (await response.json()).result;
       };
       const [access, projects] = await Promise.all([
-        read("assistantSetup", { organizationId, cursor: pageCursor }),
-        read("assistantProjectChoices", {
-          organizationId,
-          cursor: repositoryCursor,
-        }),
+        read("assistantSetup", { organizationId }),
+        needsContext
+          ? read("assistantProjectChoices", {
+              organizationId,
+              cursor: repositoryCursor,
+            })
+          : Promise.resolve({ repositories: [], repositoryNextCursor: null }),
       ]);
       const next = { ...access, ...projects } as Setup;
       if (current === generation.current) {
@@ -119,6 +118,10 @@ export function AssistantConnections({
     } catch {
       if (current === generation.current) {
         setData(null);
+        setLibraryScope("");
+        setScopes([]);
+        setSelectedProjects([]);
+        setIncludeLibraryContext(false);
         setPageLoading(false);
         setAck("");
         setError(
@@ -126,18 +129,21 @@ export function AssistantConnections({
         );
       }
     }
-  }
-  usePolling(
-    load,
-    60000,
-    !demo && !busy,
-    `${organizationId}:${pageCursor ?? "first"}:${repositoryCursor ?? "first"}`,
-  );
-  const client = data?.clients.find((c) => c.id === clientId);
-  const existing = data?.grants.find((g) => g.clientId === clientId);
-  const sources = selected.map(
-    (ref) => data?.sources.find((s) => s.sourceId === ref.sourceId) ?? ref,
-  );
+  }, [organizationId, repositoryCursor, needsContext]);
+  useEffect(() => {
+    let active = true;
+    if (!demo)
+      queueMicrotask(() => {
+        if (active) void load();
+      });
+    return () => {
+      active = false;
+    };
+  }, [load, demo]);
+  const activeClientId =
+    clientId || (data?.clients.length === 1 ? data.clients[0].id : "");
+  const client = data?.clients.find((c) => c.id === activeClientId);
+  const existing = data?.grants.find((g) => g.clientId === activeClientId);
   const projects = selectedProjects.map(
     (ref) =>
       data?.repositories?.find((r) => r.repositoryId === ref.repositoryId) ??
@@ -145,17 +151,15 @@ export function AssistantConnections({
   );
   const projectDraftValid =
     !scopes.includes("suggestions:draft") ||
-    (scopes.includes("context:read") &&
-      projects.length > 0 &&
-      sources.length > 0);
+    (scopes.includes("context:read") && projects.length > 0 && !!libraryScope);
   const contextValid =
     !scopes.includes("context:read") ||
     projects.length > 0 ||
     (includeLibraryContext && !!data?.context);
   const binding = JSON.stringify([
     organizationId,
-    clientId,
-    sources,
+    activeClientId,
+    libraryScope,
     projects,
     includeLibraryContext,
     scopes,
@@ -164,20 +168,15 @@ export function AssistantConnections({
     existing?.version,
   ]);
   const disabled = busy || pageLoading || readOnly || demo || !data?.enabled;
-  function changePage(cursor: string | null) {
-    generation.current++;
-    setPageLoading(true);
-    setAck("");
-    setPageCursor(cursor);
-  }
   async function save(expiresAt: number) {
     setPending("save");
     setError("");
     try {
       const result = await call("saveAssistantGrant", {
         organizationId,
-        clientId,
-        sources: sources.map(({ title: _title, ...r }) => r),
+        clientId: activeClientId,
+        sources: [],
+        libraryScope,
         scopes,
         repositories: scopes.includes("context:read")
           ? projects.map(({ name: _name, ...r }) => r)
@@ -261,9 +260,8 @@ export function AssistantConnections({
     >
       <h2 id="assistant-access-title">Use saved ideas in your assistant</h2>
       <p>
-        Choose exactly what a connected assistant can retrieve. This access
-        lasts seven days. ChatGPT or Codex may retain ideas already disclosed in
-        a conversation.
+        Choose a library scope once. Current and future eligible posts in that
+        scope are available for seven days, or until you turn access off.
       </p>
       {error && (
         <p role="alert" className="error">
@@ -296,8 +294,13 @@ export function AssistantConnections({
                     {grant.state === "active" && grant.expiresAt > checkedAt
                       ? `Active until ${new Date(grant.expiresAt).toLocaleString()}`
                       : "Access ended"}
-                    . {grant.sources.length} selected posts.{" "}
-                    {grant.repositories?.length ?? 0} selected projects.
+                    .{" "}
+                    {grant.libraryScope
+                      ? grant.libraryScope === "all"
+                        ? "All current and future posts"
+                        : `Current and future ${grant.libraryScope === "personal" ? "Personal" : "Business"} posts`
+                      : `${grant.sources.length} previously selected posts`}
+                    . {grant.repositories?.length ?? 0} selected projects.
                   </p>
                 </div>
                 {grant.state === "active" && (
@@ -308,216 +311,311 @@ export function AssistantConnections({
                     onClick={() => void revoke(grant)}
                   >
                     {pending === grant.id
-                      ? "Revoking access..."
-                      : "Revoke access"}
+                      ? "Turning access off..."
+                      : "Turn off access"}
                   </button>
                 )}
               </div>
             ))}
           </div>
           <details className="assistant-grant-editor">
-            <summary>Review a seven-day grant</summary>
-            <label htmlFor="assistant-client-choice">
-              Assistant
-              <ChoiceSelect
-                id="assistant-client-choice"
-                value={clientId}
-                onValueChange={(value) => {
-                  setClientId(value);
-                  setScopes([]);
-                  setSelected([]);
-                  setSelectedProjects([]);
-                  setIncludeLibraryContext(false);
-                  setAck("");
-                }}
-                disabled={disabled}
-                aria-label="Assistant client"
+            <summary>Choose assistant access</summary>
+            <p className="fine">
+              Connect VibeScroll in{" "}
+              <a
+                href="https://chatgpt.com/plugins"
+                target="_blank"
+                rel="noreferrer"
               >
-                <option value="">Choose an assistant</option>
-                {data.clients.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </ChoiceSelect>
-            </label>
+                ChatGPT plugins
+              </a>
+              , then save access here. Connecting alone does not share your
+              library.
+            </p>
+            {data.clients.length > 1 ? (
+              <label htmlFor="assistant-client-choice">
+                Assistant
+                <ChoiceSelect
+                  id="assistant-client-choice"
+                  value={activeClientId}
+                  onValueChange={(value) => {
+                    setClientId(value);
+                    setScopes([]);
+                    setLibraryScope("");
+                    setSelectedProjects([]);
+                    setIncludeLibraryContext(false);
+                    setAck("");
+                  }}
+                  disabled={disabled}
+                  aria-label="Assistant client"
+                >
+                  <option value="">Choose an assistant</option>
+                  {data.clients.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </ChoiceSelect>
+              </label>
+            ) : (
+              <p className="fine">{client?.name}</p>
+            )}
             {client && (
               <>
                 <fieldset>
+                  <legend>Library access</legend>
+                  <ChoiceSelect
+                    value={libraryScope}
+                    onValueChange={(value) => {
+                      setLibraryScope(value);
+                      setAck("");
+                    }}
+                    disabled={disabled}
+                    aria-label="Library access"
+                  >
+                    <option value="">Off</option>
+                    {data.privateLibrary && (
+                      <option value="personal">Personal</option>
+                    )}
+                    {data.privateLibrary && (
+                      <option value="business">Business</option>
+                    )}
+                    <option value="all">
+                      {data.privateLibrary
+                        ? "Both (all posts)"
+                        : "All posts in this workspace"}
+                    </option>
+                  </ChoiceSelect>
+                  <p className="fine">
+                    {libraryScope === "all"
+                      ? "Includes all current and future eligible posts in this library, including unfiled posts."
+                      : libraryScope
+                        ? `Includes current and future posts filed in ${libraryScope === "personal" ? "Personal" : "Business"}. Moving a post out removes access.`
+                        : "No library access will be saved. Use Turn off access above to end an existing grant."}{" "}
+                    Deleted posts and posts without access rights are never
+                    included.
+                  </p>
+                </fieldset>
+                <fieldset>
                   <legend>Allowed actions</legend>
-                  {client.scopes.map((scope) => (
-                    <label key={scope} className="check">
-                      <input
-                        type="checkbox"
-                        disabled={disabled}
-                        checked={scopes.includes(scope)}
-                        onChange={(e) => {
-                          setScopes((old) =>
-                            e.target.checked
-                              ? [...old, scope]
-                              : old.filter((s) => s !== scope),
-                          );
-                          setAck("");
-                        }}
-                      />
-                      {scopeNames[scope] ?? scope}
-                    </label>
-                  ))}
+                  <button
+                    type="button"
+                    className="secondary"
+                    disabled={disabled}
+                    onClick={() => {
+                      setScopes([...client.scopes]);
+                      setAck("");
+                    }}
+                  >
+                    Select all actions
+                  </button>
+                  <details className="assistant-selected-review">
+                    <summary>
+                      Customize actions ({scopes.length} selected)
+                    </summary>
+                    {client.scopes.map((scope) => (
+                      <label key={scope} className="check">
+                        <input
+                          type="checkbox"
+                          disabled={disabled}
+                          checked={scopes.includes(scope)}
+                          onChange={(e) => {
+                            setScopes((old) =>
+                              e.target.checked
+                                ? [...old, scope]
+                                : old.filter((s) => s !== scope),
+                            );
+                            setAck("");
+                          }}
+                        />
+                        {scopeNames[scope] ?? scope}
+                      </label>
+                    ))}
+                  </details>
+                  {client.scopes.includes("events:subscribe") &&
+                    !data.eventsEnabled && (
+                      <p className="fine">
+                        Completion notifications are not available yet. Their
+                        permission does not activate them.
+                      </p>
+                    )}
                 </fieldset>
                 {scopes.includes("context:read") && (
                   <fieldset>
-                    <legend>Selected context</legend>
-                    <p className="fine">
-                      Choose your confirmed library context, up to five
-                      projects, or both. Project changes require a new review.
-                      Repository code and chat history are not included.
-                    </p>
-                    {data.context && (
-                      <div className="assistant-context">
-                        <label className="check">
-                          <input
-                            type="checkbox"
-                            checked={includeLibraryContext}
-                            disabled={disabled}
-                            onChange={(e) => {
-                              setIncludeLibraryContext(e.target.checked);
-                              setAck("");
-                            }}
-                          />
-                          Include my confirmed library context
-                        </label>
-                        <p>{data.context.goal || "No stated goal"}</p>
-                        <p className="fine">
-                          {data.context.role}.{" "}
-                          {data.context.interests.join(", ")}
-                        </p>
-                        <a href={`/app/${organizationId}/library`}>
-                          Review my stated context
-                        </a>
-                      </div>
-                    )}
-                    <div className="assistant-source-choices">
-                      {(data.repositories ?? []).map((project) => (
-                        <label key={project.repositoryId} className="check">
-                          <input
-                            type="checkbox"
-                            checked={selectedProjects.some(
-                              (r) => r.repositoryId === project.repositoryId,
-                            )}
-                            disabled={
-                              disabled ||
-                              (!selectedProjects.some(
-                                (r) => r.repositoryId === project.repositoryId,
-                              ) &&
-                                selectedProjects.length >= 5)
-                            }
-                            onChange={(e) => {
-                              setSelectedProjects((old) =>
-                                e.target.checked
-                                  ? [...old, project]
-                                  : old.filter(
-                                      (r) =>
-                                        r.repositoryId !== project.repositoryId,
-                                    ),
-                              );
-                              setAck("");
-                            }}
-                          />
-                          <span>
-                            {project.name}
-                            <small>
-                              Context version {project.profileVersion}; commit{" "}
-                              {project.baseSha.slice(0, 12)}
-                            </small>
-                            <a
-                              href={`/app/${organizationId}/projects#repository-${project.repositoryId}`}
-                            >
-                              Review project context
-                            </a>
-                          </span>
-                        </label>
-                      ))}
-                    </div>
-                    <p className="fine">
-                      {selectedProjects.length} of 5 projects selected. Only
-                      confirmed current projects appear; other projects may be
-                      on later pages.
-                    </p>
-                    <div className="row">
-                      {repositoryCursor && (
-                        <button
-                          type="button"
-                          className="secondary"
-                          disabled={busy || pageLoading}
-                          onClick={() => {
-                            generation.current++;
-                            setPageLoading(true);
-                            setAck("");
-                            setRepositoryCursor(null);
-                          }}
-                        >
-                          First projects
-                        </button>
-                      )}
-                      {data.repositoryNextCursor && (
-                        <button
-                          type="button"
-                          className="secondary"
-                          disabled={busy || pageLoading}
-                          onClick={() => {
-                            generation.current++;
-                            setPageLoading(true);
-                            setAck("");
-                            setRepositoryCursor(data.repositoryNextCursor);
-                          }}
-                        >
-                          More projects
-                        </button>
-                      )}
-                      {!!selectedProjects.length && (
+                    <legend>Confirmed context</legend>
+                    <details
+                      className="assistant-selected-review"
+                      open={!contextValid || !projectDraftValid}
+                    >
+                      <summary>Choose library and project context</summary>
+                      {(data.context || data.repositories.length > 0) && (
                         <button
                           type="button"
                           className="secondary"
                           disabled={disabled}
                           onClick={() => {
-                            setSelectedProjects([]);
+                            setIncludeLibraryContext(!!data.context);
+                            setSelectedProjects(data.repositories.slice(0, 5));
                             setAck("");
                           }}
                         >
-                          Clear projects
+                          Select confirmed context on this page
                         </button>
                       )}
-                    </div>
-                    {!!projects.length && (
-                      <details className="assistant-selected-review">
-                        <summary>
-                          Review {projects.length} selected projects
-                        </summary>
-                        <ul>
-                          {projects.map((r) => (
-                            <li key={r.repositoryId}>
-                              <a
-                                href={`/app/${organizationId}/projects#repository-${r.repositoryId}`}
-                              >
-                                {r.name}
-                              </a>
-                              <span className="fine">
-                                {" "}
-                                Context {r.profileVersion}, snapshot{" "}
-                                {r.selectionVersion}, commit{" "}
-                                {r.baseSha.slice(0, 12)}
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      </details>
-                    )}
-                    {!contextValid && (
                       <p className="fine">
-                        Select confirmed context before saving this read
-                        permission.
+                        Choose your confirmed library context, up to five
+                        projects, or both. Project changes require a new review.
+                        Repository code and chat history are not included.
                       </p>
-                    )}
+                      {data.context && (
+                        <div className="assistant-context">
+                          <label className="check">
+                            <input
+                              type="checkbox"
+                              checked={includeLibraryContext}
+                              disabled={disabled}
+                              onChange={(e) => {
+                                setIncludeLibraryContext(e.target.checked);
+                                setAck("");
+                              }}
+                            />
+                            Include my confirmed library context
+                          </label>
+                          <p>{data.context.goal || "No stated goal"}</p>
+                          <p className="fine">
+                            {data.context.role}.{" "}
+                            {data.context.interests.join(", ")}
+                          </p>
+                          <a href={`/app/${organizationId}/library`}>
+                            Review my stated context
+                          </a>
+                        </div>
+                      )}
+                      <div className="assistant-source-choices">
+                        {(data.repositories ?? []).map((project) => (
+                          <label key={project.repositoryId} className="check">
+                            <input
+                              type="checkbox"
+                              checked={selectedProjects.some(
+                                (r) => r.repositoryId === project.repositoryId,
+                              )}
+                              disabled={
+                                disabled ||
+                                (!selectedProjects.some(
+                                  (r) =>
+                                    r.repositoryId === project.repositoryId,
+                                ) &&
+                                  selectedProjects.length >= 5)
+                              }
+                              onChange={(e) => {
+                                setSelectedProjects((old) =>
+                                  e.target.checked
+                                    ? [...old, project]
+                                    : old.filter(
+                                        (r) =>
+                                          r.repositoryId !==
+                                          project.repositoryId,
+                                      ),
+                                );
+                                setAck("");
+                              }}
+                            />
+                            <span>
+                              {project.name}
+                              <small>
+                                Context version {project.profileVersion}; commit{" "}
+                                {project.baseSha.slice(0, 12)}
+                              </small>
+                              <a
+                                href={`/app/${organizationId}/projects#repository-${project.repositoryId}`}
+                              >
+                                Review project context
+                              </a>
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                      <p className="fine">
+                        {selectedProjects.length} of 5 projects selected. Only
+                        confirmed current projects appear; other projects may be
+                        on later pages.
+                      </p>
+                      <div className="row">
+                        {repositoryCursor && (
+                          <button
+                            type="button"
+                            className="secondary"
+                            disabled={busy || pageLoading}
+                            onClick={() => {
+                              generation.current++;
+                              setPageLoading(true);
+                              setAck("");
+                              setRepositoryCursor(null);
+                            }}
+                          >
+                            First projects
+                          </button>
+                        )}
+                        {data.repositoryNextCursor && (
+                          <button
+                            type="button"
+                            className="secondary"
+                            disabled={busy || pageLoading}
+                            onClick={() => {
+                              generation.current++;
+                              setPageLoading(true);
+                              setAck("");
+                              setRepositoryCursor(data.repositoryNextCursor);
+                            }}
+                          >
+                            More projects
+                          </button>
+                        )}
+                        {!!selectedProjects.length && (
+                          <button
+                            type="button"
+                            className="secondary"
+                            disabled={disabled}
+                            onClick={() => {
+                              setSelectedProjects([]);
+                              setAck("");
+                            }}
+                          >
+                            Clear projects
+                          </button>
+                        )}
+                      </div>
+                      {!!projects.length && (
+                        <details className="assistant-selected-review">
+                          <summary>
+                            Review {projects.length} selected projects
+                          </summary>
+                          <ul>
+                            {projects.map((r) => (
+                              <li key={r.repositoryId}>
+                                <a
+                                  href={`/app/${organizationId}/projects#repository-${r.repositoryId}`}
+                                >
+                                  {r.name}
+                                </a>
+                                <span className="fine">
+                                  {" "}
+                                  Context {r.profileVersion}, snapshot{" "}
+                                  {r.selectionVersion}, commit{" "}
+                                  {r.baseSha.slice(0, 12)}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </details>
+                      )}
+                      {!contextValid && (
+                        <p className="fine">
+                          Select confirmed context before saving this read
+                          permission.
+                        </p>
+                      )}
+                    </details>
                   </fieldset>
                 )}
                 {scopes.includes("links:save") && (
@@ -541,114 +639,26 @@ export function AssistantConnections({
                     </ChoiceSelect>
                   </label>
                 )}
-                <fieldset>
-                  <legend>Selected posts</legend>
-                  <p className="fine">
-                    {data.coverage} Corrections or rights changes require a new
-                    review.
+                <div className="assistant-access-summary" aria-live="polite">
+                  <h3>Review access for seven days</h3>
+                  <p>
+                    {libraryScope === "all"
+                      ? "All current and future eligible posts"
+                      : libraryScope
+                        ? `${libraryScope === "personal" ? "Personal" : "Business"} current and future posts`
+                        : "Library access off"}
+                    . {scopes.length} actions and {projects.length} project
+                    contexts selected.
+                    {includeLibraryContext
+                      ? " Includes your confirmed library context."
+                      : ""}
                   </p>
-                  <div className="assistant-source-choices">
-                    {pageLoading && <output>Loading post page...</output>}
-                    {data.sources.map((source) => (
-                      <label key={source.sourceId} className="check">
-                        <input
-                          type="checkbox"
-                          disabled={
-                            disabled ||
-                            (!selected.some(
-                              (s) => s.sourceId === source.sourceId,
-                            ) &&
-                              selected.length >= 50)
-                          }
-                          checked={selected.some(
-                            (s) => s.sourceId === source.sourceId,
-                          )}
-                          onChange={(e) => {
-                            setSelected((old) =>
-                              e.target.checked
-                                ? [...old, source]
-                                : old.filter(
-                                    (s) => s.sourceId !== source.sourceId,
-                                  ),
-                            );
-                            setAck("");
-                          }}
-                        />
-                        <span>
-                          {source.title}
-                          <a
-                            href={`/app/${organizationId}/library/${source.sourceId}`}
-                          >
-                            Review evidence
-                          </a>
-                        </span>
-                      </label>
-                    ))}
-                  </div>
                   <p className="fine">
-                    {selected.length} of 50 selected. Your selection stays while
-                    you browse pages.
+                    No spending, coding, publication, repository code or chat
+                    history. Your assistant may retain content already shared in
+                    a conversation.
                   </p>
-                  <div className="row">
-                    {pageCursor && (
-                      <button
-                        type="button"
-                        className="secondary"
-                        disabled={busy || pageLoading}
-                        onClick={() => changePage(null)}
-                      >
-                        Newest posts
-                      </button>
-                    )}
-                    {data.nextCursor && (
-                      <button
-                        type="button"
-                        className="secondary"
-                        disabled={busy || pageLoading}
-                        onClick={() => changePage(data.nextCursor)}
-                      >
-                        Older posts
-                      </button>
-                    )}
-                    {selected.length > 0 && (
-                      <button
-                        type="button"
-                        className="secondary"
-                        disabled={disabled}
-                        onClick={() => {
-                          setSelected([]);
-                          setAck("");
-                        }}
-                      >
-                        Clear selection
-                      </button>
-                    )}
-                  </div>
-                  {sources.length > 0 && (
-                    <details className="assistant-selected-review">
-                      <summary>
-                        Review {sources.length} selected{" "}
-                        {sources.length === 1 ? "post" : "posts"}
-                      </summary>
-                      <ul>
-                        {sources.map((source) => (
-                          <li key={source.sourceId}>
-                            <a
-                              href={`/app/${organizationId}/library/${source.sourceId}`}
-                            >
-                              {source.title}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    </details>
-                  )}
-                  {!data.sources.length && (
-                    <p>
-                      Save a post in your Library to grant access to its ideas.
-                    </p>
-                  )}
-                </fieldset>
+                </div>
                 <label className="check">
                   <input
                     type="checkbox"
@@ -656,18 +666,24 @@ export function AssistantConnections({
                     disabled={disabled}
                     onChange={(e) => setAck(e.target.checked ? binding : "")}
                   />
-                  I approve these exact posts, selected context and actions for
-                  seven days. A replacement removes any previously selected
-                  access.
+                  I approve this library scope, including future posts, and the
+                  selected context and actions for seven days. This replaces
+                  previous access.
                 </label>
                 <p className="fine">
-                  Fresh app sign-in is required within five minutes. This grant
-                  does not authorize spending, coding, publication, or access to
-                  chat history.
+                  Saving needs a sign-in within five minutes.{" "}
+                  <a
+                    href={`/sign-in?reauth=true&returnTo=${encodeURIComponent(`/app/${organizationId}/connections`)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Sign in again
+                  </a>
+                  , then return to this tab. Your selection stays here.
                 </p>
                 {!projectDraftValid && (
                   <p className="fine">
-                    Private project suggestions require selected posts, selected
+                    Private project suggestions require library access, selected
                     project context and its read permission. An owner or admin
                     can prepare these drafts.
                   </p>
@@ -681,9 +697,7 @@ export function AssistantConnections({
                     !scopes.length ||
                     !projectDraftValid ||
                     !contextValid ||
-                    (!sources.length &&
-                      !scopes.includes("context:read") &&
-                      !scopes.includes("links:save"))
+                    !libraryScope
                   }
                   onClick={() => void save(Date.now() + 7 * 86400000)}
                 >

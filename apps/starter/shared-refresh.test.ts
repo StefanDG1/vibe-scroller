@@ -118,3 +118,51 @@ it("clears Library context on actual access failure without returning cached pay
   expect(response.headers.get("cache-control")).toBe("no-store");
   expect(await response.json()).toEqual({ error: "Workspace unavailable." });
 });
+it("loads Connections through exactly four required queries and omits library, trial, repository and wallet reads", async () => {
+  const names: string[] = [];
+  state.query.mockImplementation(async (reference) => {
+    const name = getFunctionName(reference);
+    names.push(name);
+    if (name === "organizations:details")
+      return { name: "Synthetic", private: true, role: "owner" };
+    if (name === "jobs:customerRoutes")
+      return { status: "disconnected", models: [] };
+    if (name === "jobs:connections") return [];
+    if (name === "aiPreferences:read") return { personalAlphaEnabled: true };
+    throw Error("Hidden workspace content requested");
+  });
+  const response = await GET(
+    new Request(
+      "https://synthetic.example.test/api/workspace/owner?view=connections",
+    ),
+    { params: Promise.resolve({ org: "owner" }) },
+  );
+  expect(response.status).toBe(200);
+  expect(response.headers.get("cache-control")).toBe("no-store");
+  expect(names.sort()).toEqual([
+    "aiPreferences:read",
+    "jobs:connections",
+    "jobs:customerRoutes",
+    "organizations:details",
+  ]);
+  expect(await response.json()).toMatchObject({
+    workspaceSlice: "connections",
+    sources: [],
+    repositories: [],
+    proposals: [],
+    runs: [],
+    usage: null,
+  });
+});
+it("denies Connections on real loader authorization failure without private diagnostics", async () => {
+  state.query.mockRejectedValue(Error("Private permission diagnostic"));
+  const response = await GET(
+    new Request(
+      "https://synthetic.example.test/api/workspace/foreign?view=connections",
+    ),
+    { params: Promise.resolve({ org: "foreign" }) },
+  );
+  expect(response.status).toBe(404);
+  expect(response.headers.get("cache-control")).toBe("no-store");
+  expect(await response.json()).toEqual({ error: "Workspace unavailable." });
+});

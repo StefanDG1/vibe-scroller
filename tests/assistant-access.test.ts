@@ -4,6 +4,7 @@ import { convexTest } from "convex-test";
 import schema from "../convex/schema";
 import { api, internal } from "../convex/_generated/api";
 import { syncDashboardCard } from "../convex/lib/dashboardProjection";
+import { setup as setupQuery } from "../convex/assistantGrants";
 const modules = import.meta.glob("../convex/**/*.ts");
 const issuer = "https://synthetic-test.authkit.app";
 const clientId = "client_01234567890123456789012345";
@@ -173,6 +174,32 @@ it("records explicit source judgments with replay-safe corrections while preserv
   ).toEqual([]);
   expect(await s.t.run((ctx) => ctx.db.query("outbox").collect())).toEqual([]);
 });
+it("does not read source or card tables to prepare a scope grant", async () => {
+  const s = await setup();
+  const tables: string[] = [];
+  await s.owner.run(async (ctx) => {
+    const db = new Proxy(ctx.db, {
+      get(target, property) {
+        if (property === "query")
+          return (table: string) => {
+            tables.push(table);
+            return target.query(table as never);
+          };
+        const value = Reflect.get(target, property);
+        return typeof value === "function" ? value.bind(target) : value;
+      },
+    });
+    await (
+      setupQuery as unknown as {
+        _handler: (ctx: unknown, args: unknown) => Promise<unknown>;
+      }
+    )._handler({ ...ctx, db }, { organizationId: s.organizationId });
+  });
+  expect(tables).not.toContain("sources");
+  expect(tables).not.toContain("dashboardCards");
+  expect(tables).not.toContain("sourceSpaces");
+  expect(tables).toContain("assistantGrants");
+});
 it("keeps Connect identities out of ordinary app queries, captures and account bootstrap", async () => {
   const s = await setup();
   await expect(
@@ -264,6 +291,192 @@ it("retrieves only selected current metadata/citations and immediately denies re
       id: s.sourceId,
     }),
   ).rejects.toThrow("FORBIDDEN");
+});
+it("includes future posts in the chosen space and fences moving, corrections, rights, deletion and revocation", async () => {
+  const s = await setup();
+  await s.owner.mutation(api.librarySpaces.fileSource, {
+    organizationId: s.organizationId,
+    sourceId: s.sourceId,
+    spaces: ["personal"],
+  });
+  const grant = await s.owner.mutation(api.assistantGrants.save, {
+    ...s.args,
+    sources: [],
+    libraryScope: "personal",
+    scopes: ["knowledge:read", "jobs:read", "feedback:write"],
+  });
+  const future = await s.owner.mutation(api.product.capture, {
+    organizationId: s.organizationId,
+    key: "future-personal-post",
+    kind: "text",
+    title: "Future selected source",
+    text: "PRIVATE future transcript",
+    rightsAttested: true,
+  });
+  await expect(
+    s.assistant.query(internal.assistant.fetch, {
+      profileId: s.organizationId,
+      id: future,
+    }),
+  ).rejects.toThrow("FORBIDDEN");
+  await s.owner.mutation(api.librarySpaces.fileSource, {
+    organizationId: s.organizationId,
+    sourceId: future,
+    spaces: ["personal"],
+  });
+  const result = await s.assistant.query(internal.assistant.fetch, {
+    profileId: s.organizationId,
+    id: future,
+  });
+  expect(JSON.stringify(result)).not.toContain("PRIVATE future transcript");
+  expect(result.id).toBe(future);
+  await s.owner.mutation(api.librarySpaces.fileSource, {
+    organizationId: s.organizationId,
+    sourceId: future,
+    spaces: ["business"],
+  });
+  await expect(
+    s.assistant.query(internal.assistant.fetch, {
+      profileId: s.organizationId,
+      id: future,
+    }),
+  ).rejects.toThrow("FORBIDDEN");
+  await expect(
+    s.assistant.query(internal.assistant.getJobStatus, {
+      profileId: s.organizationId,
+      sourceId: future,
+    }),
+  ).rejects.toThrow("FORBIDDEN");
+  await s.t.run((ctx) =>
+    ctx.db.patch(s.sourceId, { updatedAt: s.args.sources[0].revision + 1 }),
+  );
+  await expect(
+    s.assistant.mutation(internal.assistant.recordFeedback, {
+      profileId: s.organizationId,
+      sourceId: s.sourceId,
+      generation: s.args.sources[0].generation,
+      revision: s.args.sources[0].revision,
+      grantVersion: 1,
+      key: "stale-space-feedback",
+      expectedVersion: 0,
+      explicitlyRequested: true,
+      action: "useful",
+      note: "Old evidence",
+    }),
+  ).rejects.toThrow("APPROVAL_STALE");
+  await s.t.run((ctx) => ctx.db.patch(s.sourceId, { rightsAttested: false }));
+  await expect(
+    s.assistant.query(internal.assistant.fetch, {
+      profileId: s.organizationId,
+      id: s.sourceId,
+    }),
+  ).rejects.toThrow("FORBIDDEN");
+  await s.t.run((ctx) =>
+    ctx.db.patch(s.sourceId, { rightsAttested: true, state: "deleted" }),
+  );
+  await expect(
+    s.assistant.query(internal.assistant.fetch, {
+      profileId: s.organizationId,
+      id: s.sourceId,
+    }),
+  ).rejects.toThrow("FORBIDDEN");
+  await s.owner.mutation(api.assistantGrants.revoke, {
+    id: grant.id,
+    expectedVersion: 1,
+  });
+  await expect(
+    s.assistant.query(internal.assistant.search, {
+      profileId: s.organizationId,
+      query: "Future",
+    }),
+  ).rejects.toThrow("FORBIDDEN");
+  expect(
+    await s.t.run((ctx) => ctx.db.query("reservations").collect()),
+  ).toEqual([]);
+});
+it("pages live all-library search five posts at a time, binds cursors and rejects foreign workspace or changed grants", async () => {
+  const s = await setup();
+  const grant = await s.owner.mutation(api.assistantGrants.save, {
+    ...s.args,
+    sources: [],
+    libraryScope: "all",
+  });
+  await s.t.run(async (ctx) => {
+    const {
+      _id: _unusedId,
+      _creationTime: _time,
+      ...original
+    } = (await ctx.db.get(s.sourceId))!;
+    for (let i = 0; i < 12; i++) {
+      const id = await ctx.db.insert("sources", {
+        ...original,
+        key: `future-all-${i}`,
+        canonical: `text:future-all-${i}`,
+        title: `Future source ${i}`,
+        updatedAt: original.updatedAt + i + 1,
+      });
+      await syncDashboardCard(ctx, "sources", id, await ctx.db.get(id));
+    }
+  });
+  const first = await s.assistant.query(internal.assistant.search, {
+    profileId: s.organizationId,
+    query: "Future",
+  });
+  expect(first.results.length).toBeLessThanOrEqual(5);
+  expect(first.next_cursor).toBeTruthy();
+  const second = await s.assistant.query(internal.assistant.search, {
+    profileId: s.organizationId,
+    query: "Future",
+    cursor: first.next_cursor!,
+  });
+  expect(second.results.length).toBeLessThanOrEqual(5);
+  expect(
+    second.results.some((r) => first.results.some((f) => f.id === r.id)),
+  ).toBe(false);
+  await expect(
+    s.assistant.query(internal.assistant.search, {
+      profileId: s.organizationId,
+      query: "Changed",
+      cursor: first.next_cursor!,
+    }),
+  ).rejects.toThrow("STALE_APPROVAL");
+  const foreignOrg = await s.owner.mutation(api.organizations.create, {
+    name: "Separate workspace",
+  });
+  const foreign = await s.t.run(async (ctx) => {
+    const {
+      _id: _unusedId,
+      _creationTime: _time,
+      ...original
+    } = (await ctx.db.get(s.sourceId))!;
+    return await ctx.db.insert("sources", {
+      ...original,
+      organizationId: foreignOrg,
+      key: "foreign-space-source",
+      canonical: "text:foreign-space-source",
+      title: "Foreign source",
+    });
+  });
+  await expect(
+    s.assistant.query(internal.assistant.fetch, {
+      profileId: s.organizationId,
+      id: foreign,
+    }),
+  ).rejects.toThrow("FORBIDDEN");
+  await s.owner.mutation(api.assistantGrants.save, {
+    ...s.args,
+    sources: [],
+    libraryScope: "all",
+    expectedVersion: 1,
+  });
+  await expect(
+    s.assistant.query(internal.assistant.search, {
+      profileId: s.organizationId,
+      query: "Future",
+      cursor: first.next_cursor!,
+    }),
+  ).rejects.toThrow("STALE_APPROVAL");
+  expect((await s.t.run((ctx) => ctx.db.get(grant.id)))?.sources).toEqual([]);
 });
 it("rejects wrong client, OAuth scope, machine subject, consent and private owner", async () => {
   const s = await setup();
@@ -463,7 +676,7 @@ it("inherits verified identity into HTTP internal calls, checks provider revocat
   expect((await s.owner.fetch("/assistant-tools", request)).status).toBe(403);
   expect(provider).toHaveBeenCalledTimes(4);
 });
-it("pages all grant choices with bounded metadata and refuses stale context without overwriting the owner's setup", async () => {
+it("checks scope setup without returning post choices and refuses stale context without overwriting the owner's setup", async () => {
   const s = await setup();
   await s.t.run(async (ctx) => {
     const original = (await ctx.db.get(s.sourceId))!;
@@ -479,26 +692,13 @@ it("pages all grant choices with bounded metadata and refuses stale context with
       await syncDashboardCard(ctx, "sources", id, await ctx.db.get(id));
     }
   });
-  const seen = new Set<string>();
-  let cursor: string | null = null;
-  for (let page = 0; page < 3; page++) {
-    const result: {
-      sources: { sourceId: string }[];
-      nextCursor: string | null;
-    } = await s.owner.query(api.assistantGrants.setup, {
-      organizationId: s.organizationId,
-      cursor,
-    });
-    expect(result.sources.length).toBeLessThanOrEqual(20);
-    expect(JSON.stringify(result.sources)).not.toContain("PRIVATE transcript");
-    for (const source of result.sources) {
-      expect(seen.has(source.sourceId)).toBe(false);
-      seen.add(source.sourceId);
-    }
-    cursor = result.nextCursor;
-  }
-  expect(cursor).toBeNull();
-  expect(seen.size).toBe(41);
+  const result = await s.owner.query(api.assistantGrants.setup, {
+    organizationId: s.organizationId,
+  });
+  expect(result.sources).toEqual([]);
+  expect(result.nextCursor).toBeNull();
+  expect(result.privateLibrary).toBe(true);
+  expect(JSON.stringify(result)).not.toContain("PRIVATE transcript");
   const context = await s.owner.mutation(api.librarySpaces.saveSetup, {
     organizationId: s.organizationId,
     expectedVersion: 0,

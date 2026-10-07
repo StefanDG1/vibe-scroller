@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-07T04:58:24Z",
+  "generatedAt": "2026-10-07T12:14:16.248127+00:00",
   "title": "Design System: VibeScroll",
   "extensions": {
     "visibleLibraryContextReview": {
@@ -50,35 +50,6 @@
       "payloadObservation": "The supplied authenticated workspace response measured 9,040 decoded HTTP bytes against a 433,170-byte baseline. This bounded response observation does not establish cost savings or usability improvement.",
       "evidenceBoundary": "Four authenticated production-preview first views at 320, 390, 768 and 1440 CSS pixels plus sampled component/cache code. Controlled focus emulation is not human keyboard or physical-device acceptance. Empty detector.txt supplies no readable detector findings or detector-pass claim. Whole-page journeys, dynamic states, second-account isolation, operator activation and full evolution-plan acceptance remain outside this disposition. Private record titles and details stay out of public documentation."
     },
-    "assistantAccessReview": {
-      "mode": "Operate",
-      "identity": "Incumbent Scroll/14C charcoal, mint and amber studio; no durable-world change.",
-      "source": "apps/starter/components/assistant-connections.tsx and scoped appended apps/starter/app/product.css rules",
-      "metadataEntriesPerPage": 20,
-      "maximumSelectedPosts": 50,
-      "grantDurationDays": 7,
-      "pollIntervalMs": 60000,
-      "pollScope": "Workspace, source-page cursor and project-page cursor; visible/online pages only; suspended during pending mutation; generation-fenced responses.",
-      "finishDisposition": "All three requested corrections resolved at fix-list scope only: wrapping intrinsic pagination controls, independent 44px review-link targets and operation-specific save/revoke pending labels.",
-      "stateReviewDisposition": "Separate ship disposition for two resolved state fixes only: readable scoped error material and accurate new-grant preparation notice. Original three corrections remain resolved.",
-      "preparedState": "New grants unavailable until official OAuth is configured and verified; existing access records and revoke controls remain visible.",
-      "recoveryPalette": {
-        "textToken": "private-recovery-text",
-        "surfaceToken": "private-recovery-surface",
-        "borderToken": "private-recovery-border",
-        "sourceRule": "Scoped assistant-connections error rule overrides inherited pale error background.",
-        "evidence": "Synthetic state capture and computed DOM confirmation of #ffdae2 text, #3e242e surface and #764153 border."
-      },
-      "captures": [
-        ".impeccable/review/assistant-access/review-320.png",
-        ".impeccable/review/assistant-access/review-390.png",
-        ".impeccable/review/assistant-access/review-768.png",
-        ".impeccable/review/assistant-access/review-1440.png",
-        ".impeccable/review/assistant-access/disabled-390.png",
-        ".impeccable/review/assistant-access/error-390.png"
-      ],
-      "evidenceBoundary": "Local synthetic captures with emulated focus. No real OAuth, human keyboard acceptance, privacy-integration acceptance or production acceptance."
-    },
     "assistantProjectContextReview": {
       "mode": "Operate",
       "identity": "Completed extension of incumbent Scroll studio assistant access; existing palette, typography, flat fieldsets, controls and artwork preserved.",
@@ -107,7 +78,9 @@
         ".impeccable/review/project-grants/browser-proof.json",
         ".impeccable/review/project-grants/interaction-proof.json"
       ],
-      "evidenceBoundary": "Supplied local synthetic screenshots and computed/interaction proofs only. No new world, seed, approved comp, raster asset, detector or render run. No real OAuth, fresh-login, two-account privacy, physical/mobile provider or production acceptance."
+      "evidenceBoundary": "Supplied local synthetic screenshots and computed/interaction proofs only. No new world, seed, approved comp, raster asset, detector or render run. No real OAuth, fresh-login, two-account privacy, physical/mobile provider or production acceptance.",
+      "recordedDate": "2026-10-07",
+      "status": "Historical project-context review and contrast correction. Retained context patterns remain current; exact-post acknowledgment and suggestion dependencies are superseded by assistantScopeReview."
     },
     "colorMeta": {
       "ink": {
@@ -424,7 +397,72 @@
         "name": "studio-stacked",
         "value": "768px"
       }
-    ]
+    ],
+    "assistantAccessHistoricalReview": {
+      "mode": "Operate",
+      "identity": "Incumbent Scroll/14C charcoal, mint and amber studio; no durable-world change.",
+      "source": "apps/starter/components/assistant-connections.tsx and scoped appended apps/starter/app/product.css rules",
+      "metadataEntriesPerPage": 20,
+      "maximumSelectedPosts": 50,
+      "grantDurationDays": 7,
+      "pollIntervalMs": 60000,
+      "pollScope": "Workspace, source-page cursor and project-page cursor; visible/online pages only; suspended during pending mutation; generation-fenced responses.",
+      "finishDisposition": "All three requested corrections resolved at fix-list scope only: wrapping intrinsic pagination controls, independent 44px review-link targets and operation-specific save/revoke pending labels.",
+      "stateReviewDisposition": "Separate ship disposition for two resolved state fixes only: readable scoped error material and accurate new-grant preparation notice. Original three corrections remain resolved.",
+      "preparedState": "New grants unavailable until official OAuth is configured and verified; existing access records and revoke controls remain visible.",
+      "recoveryPalette": {
+        "textToken": "private-recovery-text",
+        "surfaceToken": "private-recovery-surface",
+        "borderToken": "private-recovery-border",
+        "sourceRule": "Scoped assistant-connections error rule overrides inherited pale error background.",
+        "evidence": "Synthetic state capture and computed DOM confirmation of #ffdae2 text, #3e242e surface and #764153 border."
+      },
+      "captures": [
+        ".impeccable/review/assistant-access/review-320.png",
+        ".impeccable/review/assistant-access/review-390.png",
+        ".impeccable/review/assistant-access/review-768.png",
+        ".impeccable/review/assistant-access/review-1440.png",
+        ".impeccable/review/assistant-access/disabled-390.png",
+        ".impeccable/review/assistant-access/error-390.png"
+      ],
+      "evidenceBoundary": "Local synthetic captures with emulated focus. No real OAuth, human keyboard acceptance, privacy-integration acceptance or production acceptance.",
+      "recordedDate": "2026-10-07",
+      "status": "Historical exact-post implementation evidence; the post picker and recurring polling are superseded by assistantScopeReview. Its scoped recovery palette remains current."
+    },
+    "assistantScopeReview": {
+      "recordedDate": "2026-10-07",
+      "mode": "Operate",
+      "identity": "Incumbent Scroll charcoal studio, quiet neutral panels, restrained borders, compact readable typography and white Save action; no new visual world, approved comp or token change.",
+      "sources": [
+        "apps/starter/components/assistant-connections.tsx",
+        "apps/starter/app/product.css: existing assistant styles"
+      ],
+      "libraryScope": "Owner-private libraries offer Off, Personal, Business and Both. Personal/Business cover current and future eligible filed posts; moving a post out removes that scope access. Both includes eligible unfiled posts. Shared workspaces offer all eligible workspace posts. Deleted posts and posts without access rights are excluded.",
+      "offConvention": "Off disables saving and points to the current grant row Turn off access control. Existing legacy exact-post grants remain exact until explicitly replaced.",
+      "disclosureConvention": "Choose assistant access contains the scope selector, Select all actions and Customize actions disclosure. Confirmed-context choices appear only with context-read permission; invalid context or private-suggestion dependencies open the context disclosure. Review selected projects exposes exact context/snapshot/commit references and 44px links.",
+      "contextConvention": "Twenty confirmed project choices per page, at most five retained project selections, separate confirmed-library context checkbox, and explicit selection of confirmed context on the visible page. Private suggestions require library access, selected project context, context-read permission and owner/admin access.",
+      "acknowledgment": "The seven-day acknowledgment binds workspace, assistant, library scope including future posts, selected actions, intake destination, confirmed context/project references and saved-grant version. Relevant changes require renewed acknowledgment; saving replaces prior access.",
+      "reviewLimits": "Review explicitly excludes spending, coding, publication, repository code and chat history; assistant retention of already shared conversation content remains disclosed. Events permission alone does not activate completion notifications.",
+      "signInConvention": "Fresh sign-in opens in a separate tab so the original selections remain available. Save/revoke labels describe their actual pending operation and duplicate mutations are disabled.",
+      "refreshConvention": "Dedicated Connections workspace slice with no recurring polling. Setup reads on mount, explicit refresh and after mutations; context-read selection and project pagination refresh bounded choices. Generation fencing rejects stale responses, workspace change remounts the editor, failed checks clear reviewed selections.",
+      "responsiveConvention": "Grant rows and controls wrap inside the quiet panel. Native disclosures and independent review links retain 44px targets. Scoped rose recovery tokens remain unchanged.",
+      "grantDurationDays": 7,
+      "maximumSelectedProjects": 5,
+      "projectEntriesPerPage": 20,
+      "finishDisposition": "Ship for the persistence correction only; supplied visual matrix matched. This is not whole-surface or production acceptance.",
+      "captures": [
+        ".impeccable/review/assistant-scope/user-320.png",
+        ".impeccable/review/assistant-scope/user-320-review.png",
+        ".impeccable/review/assistant-scope/mobile.png",
+        ".impeccable/review/assistant-scope/mobile-review.png",
+        ".impeccable/review/assistant-scope/tablet.png",
+        ".impeccable/review/assistant-scope/tablet-review.png",
+        ".impeccable/review/assistant-scope/desktop.png",
+        ".impeccable/review/assistant-scope/desktop-review.png"
+      ],
+      "proof": ".impeccable/review/assistant-scope/proof.json",
+      "evidenceBoundary": "Eight labeled synthetic actual-component captures at 320/390/768/1440 CSS pixels with emulated metrics/focus, plus native synthetic checkbox/Space, save and revocation fixture checks. Historical assistant-access and project-grants captures retain their dated original scopes. No production grant/tool, real OAuth/provider, independent comprehension, human keyboard or physical-device acceptance follows; provider/OAuth acceptance is separate."
+    }
   },
   "components": [
     {
@@ -515,11 +553,11 @@
       "css": ".ds-grants{color:var(--ink,#f4f4f4);font:14px/1.6 Inter,system-ui,sans-serif}.ds-grants-heading{margin:28px 0 12px;font-size:1.05rem;font-weight:550}.ds-grants-list{list-style:none;padding:0;margin-block:1rem;min-width:0}.ds-grants-list li{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;padding-block:.75rem;border-bottom:1px solid var(--border,#39453f)}.ds-grant-meta{color:var(--subtle,#b3bdb7);font-size:.8rem}.ds-grant-button{min-height:44px;min-width:44px;padding:10px 17px;border:1px solid var(--ink,#f4f4f4);border-radius:10px;background:var(--ink,#f4f4f4);color:#141414;font:550 14px/1.6 Inter,system-ui,sans-serif;white-space:nowrap;cursor:pointer;transition:background-color 140ms ease-out}.ds-grant-secondary{background:transparent;color:var(--ink,#f4f4f4);border-color:var(--line,#39453f)}.ds-grant-secondary:hover:not(:disabled){background:var(--soft,#262626)}.ds-grant-button:focus-visible{outline:2px solid #d4d4d4;outline-offset:3px}.ds-grant-button:disabled{opacity:.45;cursor:not-allowed}@media(max-width:480px){.ds-grants-list li{flex-direction:column;gap:.25rem}}@media(prefers-reduced-motion:reduce){.ds-grant-button{transition:none}}"
     },
     {
-      "name": "Assistant retained-selection review",
+      "name": "Assistant library-scope review",
       "kind": "custom",
-      "description": "Native retained-selection disclosure before exact-access acknowledgment. Static synthetic specimen; no real access grant.",
-      "html": "<section class=\"ds-assistant-review\" aria-label=\"Synthetic assistant review specimen\"><p>2 of 50 selected. Your selection stays while you browse pages.</p><div class=\"ds-assistant-actions\"><button type=\"button\">Newest posts</button><button type=\"button\">Older posts</button><button type=\"button\">Clear selection</button></div><details open><summary>Review 2 selected posts</summary><ul><li><a href=\"#synthetic-post-one\">Synthetic selected evidence 1</a></li><li><a href=\"#synthetic-post-two\">Synthetic selected evidence 2</a></li></ul></details><label class=\"ds-assistant-check\"><input type=\"checkbox\" disabled><span>I approve these exact posts and actions for seven days. A replacement removes any previously selected access.</span></label><button class=\"ds-assistant-save\" type=\"button\" disabled>Save reviewed access</button></section>",
-      "css": ".ds-assistant-review{color:var(--foreground,#f4f4f4);font:14px/1.6 Inter,system-ui,sans-serif;overflow-wrap:anywhere}.ds-assistant-review>p{font-size:12px;color:var(--muted-foreground,#b3bdb7)}.ds-assistant-actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center}.ds-assistant-actions button,.ds-assistant-save{min-height:44px;max-width:100%;padding:10px 17px;border:1px solid var(--border,#39453f);border-radius:10px;font:500 14px/1.6 Inter,system-ui,sans-serif;cursor:pointer}.ds-assistant-actions button{flex:0 0 auto;background:transparent;color:inherit;word-break:normal;overflow-wrap:normal;white-space:normal}.ds-assistant-review summary{min-height:44px;padding:10px 0;cursor:pointer}.ds-assistant-review a{display:flex;align-items:center;min-height:44px;width:fit-content;max-width:100%;color:inherit}.ds-assistant-check{display:flex;align-items:flex-start;gap:12px;min-height:44px;padding:10px 0;font-size:13px}.ds-assistant-check input{width:18px;height:18px;flex-shrink:0;margin-top:3px}.ds-assistant-save{background:var(--foreground,#f4f4f4);color:#141414}.ds-assistant-review button:disabled{opacity:.5;cursor:not-allowed}.ds-assistant-actions button:hover:not(:disabled){background:var(--muted,#262626)}.ds-assistant-review a:hover{color:var(--primary,#87dfc1)}.ds-assistant-review button:focus-visible,.ds-assistant-review summary:focus-visible,.ds-assistant-review a:focus-visible{outline:2px solid var(--ring,#87dfc1);outline-offset:3px}"
+      "description": "Current/future library scope with native disclosures, exact context review and separate revocation. Static synthetic specimen of the existing material; selector does not reproduce the application Radix runtime and controls do not grant access.",
+      "html": "<section class=\"ds-assistant-review\" aria-label=\"Synthetic assistant scope specimen\"><div class=\"ds-assistant-grant\"><div><strong>Synthetic assistant</strong><p class=\"ds-assistant-fine\">Active for seven days. Current and future Personal posts.</p></div><button class=\"ds-assistant-secondary\" type=\"button\">Turn off access</button></div><details class=\"ds-assistant-editor\" open><summary>Choose assistant access</summary><fieldset><legend>Library access</legend><select aria-label=\"Library access\"><option>Off</option><option>Personal</option><option>Business</option><option selected>Both (all posts)</option></select><p class=\"ds-assistant-fine\">Includes all current and future eligible posts in this library, including unfiled posts. Deleted posts and posts without access rights are never included.</p></fieldset><fieldset><legend>Allowed actions</legend><button class=\"ds-assistant-secondary\" type=\"button\">Select all actions</button><details><summary>Customize actions (1 selected)</summary><label class=\"ds-assistant-check\"><input type=\"checkbox\" checked><span>Read ideas in my chosen library scope</span></label></details></fieldset><h3>Review access for seven days</h3><p>All current and future eligible posts. 1 action and 0 project contexts selected.</p><p class=\"ds-assistant-fine\">No spending, coding, publication, repository code or chat history. Your assistant may retain content already shared in a conversation.</p><label class=\"ds-assistant-check\"><input type=\"checkbox\"><span>I approve this library scope, including future posts, and the selected context and actions for seven days. This replaces previous access.</span></label><button class=\"ds-assistant-save\" type=\"button\" disabled>Save reviewed access</button></details></section>",
+      "css": ".ds-assistant-review{color:var(--ink,#f4f4f4);font:14px/1.6 Inter,system-ui,sans-serif;overflow-wrap:anywhere}.ds-assistant-review p{color:var(--subtle,#b3bdb7);max-width:72ch}.ds-assistant-fine{font-size:.8rem}.ds-assistant-grant{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:16px 0;border-bottom:1px solid var(--line,#39453f)}.ds-assistant-editor{margin:20px 0}.ds-assistant-review fieldset{min-width:0;border:0;padding:0;margin:24px 0}.ds-assistant-review legend{font-weight:600;margin-bottom:12px}.ds-assistant-review summary{min-height:44px;padding:10px 0;cursor:pointer}.ds-assistant-review h3{font-size:1.05rem}.ds-assistant-secondary,.ds-assistant-save{min-height:44px;max-width:100%;padding:10px 17px;border:1px solid var(--line,#39453f);border-radius:10px;font:550 .87rem/1.6 Inter,system-ui,sans-serif;cursor:pointer;transition:background-color 140ms ease-out,border-color 140ms ease-out,color 140ms ease-out}.ds-assistant-secondary{background:transparent;color:inherit}.ds-assistant-secondary:hover:not(:disabled){background:var(--soft,#262626);border-color:#4a4a4a}.ds-assistant-save{background:#f4f4f4;color:#141414;border-color:#f4f4f4}.ds-assistant-save:hover:not(:disabled){background:#d8d8d8;border-color:#d8d8d8}.ds-assistant-review button:disabled{opacity:.45;cursor:not-allowed}.ds-assistant-review select{width:100%;min-height:44px;padding:10px 12px;border:1px solid #3d3d3d;border-radius:9px;background:#202020;color:inherit;font:14px/1.6 Inter,system-ui,sans-serif}.ds-assistant-check{display:flex;align-items:flex-start;gap:12px;min-height:44px;padding:10px 0;overflow-wrap:anywhere}.ds-assistant-check input{width:18px;height:18px;flex-shrink:0;margin-top:3px}.ds-assistant-review button:focus-visible,.ds-assistant-review summary:focus-visible,.ds-assistant-review select:focus-visible,.ds-assistant-review input:focus-visible{outline:2px solid #d4d4d4;outline-offset:3px}@media(prefers-reduced-motion:reduce){.ds-assistant-review button{transition:none}}"
     },
     {
       "name": "Explore topic disclosure",
@@ -540,7 +578,7 @@
     "rules": [
       {
         "name": "The Reviewed Access Rule",
-        "body": "Keep retained selections and exact allowed actions reviewable before acknowledgment; show pending feedback for the operation that is actually running.",
+        "body": "Keep the library scope, future inclusion, exact context and allowed actions reviewable before acknowledgment, with immediate revocation and operation-specific feedback.",
         "section": "components"
       },
       {

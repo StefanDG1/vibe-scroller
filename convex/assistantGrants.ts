@@ -21,18 +21,13 @@ export const setup = query({
     cursor: v.optional(v.union(v.string(), v.null())),
   },
   handler: async (ctx, a) => {
-    const { actor } = await access(ctx, a.organizationId);
+    const { actor, organization } = await access(ctx, a.organizationId);
     const grants = await ctx.db
       .query("assistantGrants")
-      .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
-      .take(51);
-    const sources = await ctx.db
-      .query("dashboardCards")
-      .withIndex("by_org_kind_updated", (q) =>
-        q.eq("organizationId", a.organizationId).eq("kind", "source"),
+      .withIndex("by_actor_org", (q) =>
+        q.eq("actor", actor._id).eq("organizationId", a.organizationId),
       )
-      .order("desc")
-      .paginate({ cursor: a.cursor ?? null, numItems: 20 });
+      .take(51);
     const context = await ctx.db
       .query("librarySetup")
       .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
@@ -41,6 +36,12 @@ export const setup = query({
       enabled:
         process.env.MCP_ENABLED === "true" &&
         !!assistantIssuer(process.env.MCP_AUTH_ISSUER),
+      privateLibrary: organization.privateOwnerId === actor._id,
+      eventsEnabled: process.env.MCP_EVENTS_ENABLED === "true",
+      sources: [],
+      nextCursor: null,
+      coverage:
+        "Choose all posts or a private library space. No per-post selection is needed.",
       clients: assistantClients(),
       grants: grants
         .filter((g) => g.actor === actor._id)
@@ -49,21 +50,13 @@ export const setup = query({
           clientId: g.clientId,
           sources: g.sources,
           scopes: g.scopes,
+          libraryScope: g.libraryScope,
           contextVersion: g.contextVersion,
           repositories: g.repositories ?? [],
           intakeSpace: g.intakeSpace,
           version: g.version,
           state: g.state,
           expiresAt: g.expiresAt,
-        })),
-      nextCursor: sources.isDone ? null : sources.continueCursor,
-      sources: sources.page
-        .filter((s) => s.rightsAttested && s.state !== "deleted")
-        .map((s) => ({
-          sourceId: s.entityId,
-          title: s.title,
-          generation: s.generation,
-          revision: s.updatedAt,
         })),
       context: context?.confirmed
         ? {
@@ -73,8 +66,6 @@ export const setup = query({
             role: context.role,
           }
         : null,
-      coverage:
-        "20 current metadata entries per page; select at most 50 posts across pages. Review evidence before selecting it.",
     };
   },
 });
@@ -117,6 +108,9 @@ export const save = mutation({
     organizationId: v.id("organizations"),
     clientId: v.string(),
     sources: v.array(binding),
+    libraryScope: v.optional(
+      v.union(v.literal("all"), v.literal("personal"), v.literal("business")),
+    ),
     repositories: v.optional(v.array(assistantRepositoryBinding)),
     scopes: v.array(v.string()),
     contextVersion: v.optional(v.number()),
@@ -152,9 +146,18 @@ export const save = mutation({
       "Choose supported explicit scopes.",
     );
     ensure(
+      !a.libraryScope ||
+        (!a.sources.length &&
+          (a.libraryScope === "all" ||
+            organization.privateOwnerId === actor._id)),
+      "INVALID_INPUT",
+      "Personal and Business access require your private library; scope grants do not copy posts.",
+    );
+    ensure(
       a.sources.length <= 50 &&
         new Set(a.sources.map((s) => s.sourceId)).size === a.sources.length &&
         (a.sources.length > 0 ||
+          a.libraryScope ||
           a.scopes.includes("links:save") ||
           a.scopes.includes("context:read")),
       "INVALID_INPUT",
@@ -234,7 +237,7 @@ export const save = mutation({
       !a.scopes.includes("suggestions:draft") ||
         (a.scopes.includes("context:read") &&
           repositories.length > 0 &&
-          a.sources.length > 0 &&
+          (a.sources.length > 0 || !!a.libraryScope) &&
           ["owner", "admin"].includes(
             (
               await ctx.db
@@ -287,6 +290,7 @@ export const save = mutation({
       actor: actor._id,
       clientId: a.clientId,
       sources: a.sources,
+      libraryScope: a.libraryScope,
       repositories,
       scopes: a.scopes,
       contextVersion: a.contextVersion,

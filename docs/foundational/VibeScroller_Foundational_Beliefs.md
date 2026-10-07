@@ -119,3 +119,7 @@ F021 reinforces inspectable selected context, evidence-backed fit and separate a
 ## F022: finite scoped completion Events, October 7
 
 F022 reinforces inspectable authority and separate outcome evidence. A ready source and HTTP receipt are facts about processing and transport; neither proves that the host acted or that the work helped. Expiring leases, current grants, corrections and provider revocation must fence delivery. No new belief or customer testimonial follows.
+
+## F023: simpler live assistant scope, October 7
+
+Reduce repeated selection while keeping authority legible: name future inclusion before saving and enforce current rights, filing, expiry and revocation outside the model. A connected assistant, a permitted read and an improved outcome remain different evidence. Keep the six beliefs, provider limits and unresolved usefulness judgments unchanged.

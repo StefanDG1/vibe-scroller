@@ -58,7 +58,7 @@ import { track } from "@/lib/analytics";
 import { productAnalyticsEvent } from "@/lib/analytics-events";
 import type { ImportPreview } from "../../../packages/instagram-import";
 type Initial = {
-  workspaceSlice?: "library";
+  workspaceSlice?: "library" | "connections";
   compact?: boolean;
   privateLibrary?: boolean;
   sharedKnowledge?: { items: any[]; next: string | null };
@@ -579,7 +579,7 @@ export function Console({
       );
   }, [view, demo]);
   async function openCapture() {
-    if ((data.compact || data.workspaceSlice === "library") && !demo) {
+    if ((data.compact || data.workspaceSlice) && !demo) {
       setBusy(true);
       try {
         if (refreshFlight.current) await refreshFlight.current;
@@ -654,7 +654,12 @@ export function Console({
     data.runs.some((r) =>
       ["queued", "running", "publishing"].includes(r.state),
     );
-  usePolling(refreshData, processing ? 15000 : 60000, !demo, organizationId);
+  usePolling(
+    refreshData,
+    processing ? 15000 : 60000,
+    !demo && view !== "connections",
+    organizationId,
+  );
   const planIdentity = selected
     ? `${id(selected)}:${selected.planHash ?? (selected.planDraftVersion === selected.version ? (selected.planDraftKey ?? JSON.stringify(selected.planDraft ?? null)) : "")}`
     : "";
@@ -1947,7 +1952,7 @@ export function Console({
                     demo={demo}
                   />
                   <section className="panel">
-                    <h2>Your ChatGPT plan</h2>
+                    <h2>Use your plan for local analysis</h2>
                     <p>
                       Prefer your own allowance for eligible AI requests and
                       keep VibeScroll inference credits for other work. ChatGPT
@@ -1988,9 +1993,11 @@ export function Console({
                       Prefer my ChatGPT plan when available
                     </label>
                     <p className="notice" style={{ textAlign: "left" }}>
-                      Hosted connection is awaiting OpenAI commercial access.
-                      Saving this preference does not connect an account, grant
-                      consent, or change the funding route of a current task.
+                      Hosted subscription-funded analysis is awaiting OpenAI
+                      commercial access. This is separate from assistant library
+                      access. Saving this preference does not connect an
+                      account, grant consent, or change the funding route of a
+                      current task.
                     </p>
                     <p>
                       Personal alpha accounts can pair a laptop and approve text
