@@ -1,5 +1,7 @@
 # VibeScroll foundational avatar
 
+F024 evidence update, October 7: the intended project-owner and library-only audiences remain unchanged. Actual private-pilot tools and two owner-controlled staging accounts can establish functional access behavior; they cannot stand in for prospective users or independent first-use comprehension. No new consenting tester is available. Keep the permission, future-post inclusion and first-result tasks in the research protocol; no new demographic or testimonial follows. See [the current execution ledger](../VIBESCROLL-EXECUTION.md).
+
 ## F019: bounded exploration candidate, October 7
 
 The current implementation candidate reuses permitted topic evidence and recorded project/outcome facts in Topic tree, Connections, Idea journey, Topic overview and What helped. Personal/Business filters and every cited input are checked on the server; combined browsing requires current confirmation. Structural aliases/parents do not rerun analysis or grant sharing. Page counts describe current bounded evidence, and a PR merge is distinct from a benefit. Local synthetic screens and handler tests establish neither real source recall, independent comprehension nor measured value. Exact deployment and held-out quality evidence remain pending. See [ADR 084](../adr/084-bounded-library-explore.md) and [implementation status](../implementation-status.md). Existing audience, prices, six beliefs, provider restrictions and earlier research limits remain authoritative.

@@ -1,5 +1,7 @@
 # VibeScroll foundational beliefs
 
+F024 evidence update, October 7: actual private-pilot cited retrieval, no-spend replay/review and isolated owner/foreign serving checks support the inspectability and control argument at their tested scope. They do not validate the six beliefs with prospects, settle unknown financial holds, prove exhaustive retrieval or establish customer benefit. Keep source, consent, review, implementation and measured outcome distinct. Events, independent judgments and commercial/provider gates remain explicit. See [the current execution ledger](../VIBESCROLL-EXECUTION.md).
+
 ## F019: bounded exploration candidate, October 7
 
 The current implementation candidate reuses permitted topic evidence and recorded project/outcome facts in Topic tree, Connections, Idea journey, Topic overview and What helped. Personal/Business filters and every cited input are checked on the server; combined browsing requires current confirmation. Structural aliases/parents do not rerun analysis or grant sharing. Page counts describe current bounded evidence, and a PR merge is distinct from a benefit. Local synthetic screens and handler tests establish neither real source recall, independent comprehension nor measured value. Exact deployment and held-out quality evidence remain pending. See [ADR 084](../adr/084-bounded-library-explore.md) and [implementation status](../implementation-status.md). Existing audience, prices, six beliefs, provider restrictions and earlier research limits remain authoritative.
