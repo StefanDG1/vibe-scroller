@@ -135,3 +135,7 @@ Follow [ADR 058](adr/058-bounded-full-library-scans.md): full URL-link paginatio
 ## October 7: current and future assistant library scopes
 
 [ADR 090](adr/090-current-and-future-assistant-library-scopes.md) implements the owner-requested Off, Personal, Business or Both choice, including future eligible posts. Legacy exact-post grants are not expanded automatically. Current rights, filing, tenancy, expiry and revocation remain enforced; exact team/coding approvals are unchanged. Bounded indexed retrieval and a dedicated Connections slice avoid whole-library setup reads and background polling. Actual host acceptance remains separate.
+
+## October 7: readable bounded Usage
+
+[ADR 091](adr/091-readable-bounded-usage.md) replaces raw Usage JSON with actual allowance, retained holds and bounded settled credit entries. The existing authorized two-query slice omits unrelated private records. Revoked and expired allowance cannot contribute to availability; unknown holds, funding and approval boundaries remain unchanged. Request/transfer evidence is separate from database billing and production acceptance.
