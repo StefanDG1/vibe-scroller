@@ -126,3 +126,7 @@ Updated all four briefs together with bounded two-owner-account technical eviden
 ## F028: separate manual review and exact private draft, October 8
 
 Updated all four briefs together for the owner-authorized synthetic documentation journey and bounded cost evidence. Retain the original needs_context assessment, unresolved independent/provider/commercial gates and invoice limits.
+
+## F029: current shared version and role loss, October 8
+
+Updated all four briefs together for actual post-release citation rendering, correction invalidation and exact role removal. Original fixture content was restored, revision history remained advanced and temporary sharing was removed. Earlier failures and independent/provider/commercial limits remain explicit.
