@@ -2792,3 +2792,88 @@ dialog.capture-modal::backdrop {
 .library-analysis-settings[hidden] {
   display: none;
 }
+
+.assistant-connections fieldset {
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  margin: 24px 0;
+}
+.assistant-connections legend {
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.assistant-grant-editor {
+  margin: 20px 0;
+}
+.assistant-grant-editor summary {
+  min-height: 44px;
+  cursor: pointer;
+  padding: 10px 0;
+}
+.assistant-grant-editor > label {
+  display: block;
+  margin: 16px 0;
+}
+.assistant-connections .check {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-height: 44px;
+  padding: 10px 0;
+  overflow-wrap: anywhere;
+}
+.assistant-connections .check input {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+.assistant-source-choices {
+  max-height: 360px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+.assistant-source-choices a {
+  display: block;
+  font-size: 13px;
+  padding-top: 6px;
+}
+.assistant-grant-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+}
+.assistant-context {
+  padding-left: 16px;
+  border-left: 1px solid var(--line);
+}
+
+.assistant-connections .row {
+  flex-wrap: wrap;
+}
+.assistant-connections .row button {
+  flex: 0 0 auto;
+  word-break: normal;
+  overflow-wrap: normal;
+  max-width: 100%;
+}
+.assistant-source-choices a,
+.assistant-context a,
+.assistant-selected-review a {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.assistant-connections .error {
+  color: #ffdae2;
+  background: #3e242e;
+  border-color: #764153;
+}

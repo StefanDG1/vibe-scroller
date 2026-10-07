@@ -693,6 +693,22 @@ export async function captureOne(
     "admin",
     "member",
   ]);
+  return captureAuthorized(ctx, a, actor, bulk);
+}
+// Trusted callers must obtain current server authorization before invoking this
+// shared capture implementation. No actor or capability is accepted from a client.
+export async function captureAuthorized(
+  ctx: MutationCtx,
+  a: Parameters<typeof captureOne>[1],
+  actor: Awaited<ReturnType<typeof access>>,
+  bulk = false,
+  suppressPreview = false,
+) {
+  ensure(
+    actor.organization._id === a.organizationId,
+    "FORBIDDEN",
+    "Capture scope mismatch.",
+  );
   ensure(
     process.env.DISABLE_CAPTURE !== "true",
     "POLICY_BLOCKED",
@@ -815,7 +831,9 @@ export async function captureOne(
     generation: 0,
     createdAt: now,
     updatedAt: now,
-    ...(a.kind === "url" && process.env.LINK_PREVIEWS_ENABLED === "true"
+    ...(a.kind === "url" &&
+    !suppressPreview &&
+    process.env.LINK_PREVIEWS_ENABLED === "true"
       ? { linkPreview: { state: "queued" as const, updatedAt: now } }
       : {}),
   });
@@ -831,7 +849,11 @@ export async function captureOne(
     if (asset) await ctx.db.patch(asset._id, { sourceId: id, updatedAt: now });
   }
   await audit(ctx, a.organizationId, actor.actor._id, "source.captured", id);
-  if (a.kind === "url" && process.env.LINK_PREVIEWS_ENABLED === "true")
+  if (
+    a.kind === "url" &&
+    !suppressPreview &&
+    process.env.LINK_PREVIEWS_ENABLED === "true"
+  )
     await workflow.start(
       ctx,
       internal.workflows.linkPreview,
@@ -1506,6 +1528,9 @@ export async function redactSource(ctx: MutationCtx, id: Id<"sources">) {
   });
   await syncCategories(ctx, (await ctx.db.get(id))!);
   await syncKnowledge(ctx, (await ctx.db.get(id))!);
+  await ctx.scheduler.runAfter(0, internal.assistant.redactIntakes, {
+    sourceId: id,
+  });
   await ctx.scheduler.runAfter(0, internal.knowledge.redactDerived, {
     organizationId: s.organizationId,
     sourceId: id,

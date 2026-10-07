@@ -9,6 +9,9 @@
  */
 
 import type * as accounts from "../accounts.js";
+import type * as assistant from "../assistant.js";
+import type * as assistantGrants from "../assistantGrants.js";
+import type * as assistantHttp from "../assistantHttp.js";
 import type * as aiPreferences from "../aiPreferences.js";
 import type * as assets from "../assets.js";
 import type * as billing from "../billing.js";
@@ -115,6 +118,9 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   accounts: typeof accounts;
+  assistant: typeof assistant;
+  assistantGrants: typeof assistantGrants;
+  assistantHttp: typeof assistantHttp;
   aiPreferences: typeof aiPreferences;
   assets: typeof assets;
   billing: typeof billing;

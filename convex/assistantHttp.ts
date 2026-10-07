@@ -1,0 +1,147 @@
+import { httpAction } from "./_generated/server";
+import { internal } from "./_generated/api";
+import type { Id } from "./_generated/dataModel";
+import { z } from "zod";
+import { assistantIssuer } from "../packages/policy/assistant";
+import {
+  readAssistantBody,
+  validateAssistantUserinfo,
+} from "../packages/policy/assistant-http";
+const profileId = z.string().max(100).optional();
+const operations = z.discriminatedUnion("operation", [
+  z
+    .object({
+      operation: z.literal("save_link"),
+      args: z
+        .object({
+          profileId,
+          url: z.string().url().max(2048),
+          title: z.string().min(1).max(160),
+          key: z.string().min(8).max(64),
+          rightsAttested: z.literal(true),
+          explicitlyRequested: z.literal(true),
+        })
+        .strict(),
+    })
+    .strict(),
+  z
+    .object({
+      operation: z.literal("get_job_status"),
+      args: z
+        .object({ profileId, sourceId: z.string().min(1).max(100) })
+        .strict(),
+    })
+    .strict(),
+  z
+    .object({
+      operation: z.literal("request_analysis"),
+      args: z
+        .object({ profileId, sourceId: z.string().min(1).max(100) })
+        .strict(),
+    })
+    .strict(),
+  z
+    .object({
+      operation: z.literal("search"),
+      args: z
+        .object({
+          query: z.string().min(1).max(200),
+          offset: z.number().int().min(0).max(49).optional(),
+          profileId,
+        })
+        .strict(),
+    })
+    .strict(),
+  z
+    .object({
+      operation: z.literal("fetch"),
+      args: z.object({ id: z.string().min(1).max(300), profileId }).strict(),
+    })
+    .strict(),
+  z
+    .object({
+      operation: z.literal("get_profile"),
+      args: z.object({}).strict(),
+    })
+    .strict(),
+]);
+export const tools = httpAction(async (ctx, request) => {
+  const deny = (status = 403) =>
+    Response.json(
+      {
+        error:
+          "Assistant access is unavailable. Review the current app grant or reconnect through official OAuth.",
+      },
+      { status, headers: { "Cache-Control": "no-store" } },
+    );
+  try {
+    const bearer = request.headers
+      .get("authorization")
+      ?.match(/^Bearer ([A-Za-z0-9._~-]{20,16384})$/)?.[1];
+    if (!bearer || process.env.MCP_ENABLED !== "true") return deny(401);
+    const input = operations.parse(await readAssistantBody(request, 8192));
+    const expected = await ctx.runMutation(internal.assistant.throttle, {});
+    const issuer = assistantIssuer(process.env.MCP_AUTH_ISSUER);
+    if (!issuer || issuer !== expected.issuer) return deny(401);
+    // Public PKCE clients cannot hold a client secret. The official bearer-authenticated
+    // userinfo endpoint supplies a live provider check; JWT audience/client/scope/consent
+    // verification remains enforced independently by Convex and assistantPrincipal.
+    const result = await fetch(`${issuer}/oauth2/userinfo`, {
+      method: "POST",
+      redirect: "error",
+      signal: AbortSignal.timeout(10000),
+      headers: { Authorization: `Bearer ${bearer}` },
+    });
+    if (!result.ok) return deny(401);
+    if (
+      !validateAssistantUserinfo(
+        await readAssistantBody(result, 16384),
+        expected.subject,
+      )
+    )
+      return deny(401);
+    const selectedProfile =
+      "profileId" in input.args
+        ? (input.args.profileId as Id<"organizations"> | undefined)
+        : undefined;
+    let value: unknown;
+    switch (input.operation) {
+      case "get_profile":
+        value = await ctx.runQuery(internal.assistant.getProfile, {});
+        break;
+      case "search":
+        value = await ctx.runQuery(internal.assistant.search, {
+          ...input.args,
+          profileId: selectedProfile,
+        });
+        break;
+      case "fetch":
+        value = await ctx.runQuery(internal.assistant.fetch, {
+          ...input.args,
+          profileId: selectedProfile,
+        });
+        break;
+      case "save_link":
+        value = await ctx.runMutation(internal.assistant.saveLink, {
+          ...input.args,
+          profileId: selectedProfile,
+        });
+        break;
+      case "get_job_status":
+        value = await ctx.runQuery(internal.assistant.getJobStatus, {
+          sourceId: input.args.sourceId as Id<"sources">,
+          profileId: selectedProfile,
+        });
+        break;
+      case "request_analysis":
+        value = await ctx.runQuery(internal.assistant.requestAnalysis, {
+          sourceId: input.args.sourceId as Id<"sources">,
+          profileId: selectedProfile,
+        });
+        break;
+    }
+    return Response.json(value, { headers: { "Cache-Control": "no-store" } });
+  } catch {
+    return deny();
+  }
+});

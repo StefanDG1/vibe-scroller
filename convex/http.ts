@@ -1,7 +1,13 @@
+import { tools as assistantTools } from "./assistantHttp";
 import { httpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
 import { internal } from "./_generated/api";
 const http = httpRouter();
+http.route({
+  path: "/assistant-tools",
+  method: "POST",
+  handler: assistantTools,
+});
 http.route({
   path: "/stripe/webhook",
   method: "POST",

@@ -1,3 +1,4 @@
+import { isAssistantIdentity } from "../packages/policy/assistant";
 import { ConvexError } from "convex/values";
 import type { QueryCtx, MutationCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
@@ -21,7 +22,8 @@ export async function user(ctx: QueryCtx) {
   if (process.env.RESTORE_LOCK === "true")
     return fail("Recovery is in progress. Private access is paused.");
   const identity = await ctx.auth.getUserIdentity();
-  if (!identity) return fail("Sign in to continue.");
+  if (!identity || isAssistantIdentity(identity))
+    return fail("Sign in to continue.");
   const row = await ctx.db
     .query("users")
     .withIndex("by_subject", (q) => q.eq("subject", identity.subject))

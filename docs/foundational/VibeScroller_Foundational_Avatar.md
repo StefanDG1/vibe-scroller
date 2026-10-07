@@ -191,3 +191,7 @@ Personal interests and business audiences must stay distinct. A saved cooking/MM
 The owner wants beauty, personality and persuasive guidance. Scroll can celebrate a real activation or useful result. A restrained CTA shimmer can highlight one next step; a genuine open loop can invite review or an outcome check. Keep user comprehension central: a visible next action, an easy Later option, a real recommended plan and complete pricing information. Motion sensitivity, distraction, alternative-plan discovery and unfinished-work fatigue belong in observed tasks.
 
 Copy should sound like a useful friendly product: "Save something worth keeping", "Your ideas are ready" or "Did this help?" Each phrase needs the actual state to support it. One title and a useful action usually suffice; do not stack decorative subtitles or repeat Scroll's message elsewhere. Existing privacy, goals, roles and correction controls remain intact. Persuasive design does not infer consent or overwrite the person's stated needs.
+
+## F020: scoped assistant candidate, October 7
+
+F020 preserves the project-owner audience and its need to understand what an assistant can access. The candidate offers explicit selected posts, separate confirmed context, a seven-day default and revocation. Local synthetic checks are not new customer observations or proof that people understand these controls. Previously disclosed conversation content may remain with the host.

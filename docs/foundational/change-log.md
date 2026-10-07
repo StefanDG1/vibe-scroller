@@ -90,3 +90,7 @@ Reconciled Research, Avatar, Offer and Beliefs together for the actual candidate
 ## F019, October 7: exploration candidate
 
 Updated Research, Avatar, Offer and Beliefs together for bounded evidence reuse, server-enforced private space filtering, manual hierarchy/aliases, recorded journeys and judgment/comparison distinction. Native fixtures and local tests are engineering evidence. Exact serving release and independent recall/quality/outcome acceptance remain pending. No customer result, provider permission, pricing change or campaign is claimed.
+
+## F020: scoped assistant candidate, October 7
+
+Updated all four briefs together for F020. The candidate separates assistant OAuth from app authority, uses current explicit grants and reuses capture without media fetch or spending. Local access/HTTP/MCP checks are recorded separately from real provider/client acceptance. The execution ledger also records the merged Explore release and independently authenticated backup without claiming human usefulness or serving recovery.

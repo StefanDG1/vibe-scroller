@@ -1,3 +1,4 @@
+import { isAssistantIdentity } from "../packages/policy/assistant";
 import { query } from "./_generated/server";
 import { mutation, internalMutation } from "./lib/projectedMutations";
 import { internal } from "./_generated/api";
@@ -58,7 +59,8 @@ export const bootstrapRequired = query({
   handler: async (ctx) => {
     if (process.env.RESTORE_LOCK === "true") fail("Recovery is in progress.");
     const identity = await ctx.auth.getUserIdentity();
-    if (!identity) fail("Sign in to continue.");
+    if (!identity || isAssistantIdentity(identity))
+      fail("Sign in to continue.");
     const actor = await ctx.db
       .query("users")
       .withIndex("by_subject", (q) => q.eq("subject", identity.subject))
@@ -186,6 +188,22 @@ export const finishDelete = internalMutation({
   handler: async (ctx, { jobId }) => {
     const job = await ctx.db.get(jobId);
     if (!job) return;
+    const intakes = await ctx.db
+      .query("assistantIntakes")
+      .withIndex("by_actor", (q) => q.eq("actor", job.userId))
+      .take(100);
+    for (const intake of intakes) await ctx.db.delete(intake._id);
+    const grants = await ctx.db
+      .query("assistantGrants")
+      .withIndex("by_actor_client", (q) => q.eq("actor", job.userId))
+      .take(100);
+    for (const grant of grants) await ctx.db.delete(grant._id);
+    if (grants.length === 100 || intakes.length === 100) {
+      await ctx.scheduler.runAfter(0, internal.accounts.finishDelete, {
+        jobId,
+      });
+      return;
+    }
     await ctx.db.delete(job.userId);
     await ctx.db.delete(jobId);
   },
