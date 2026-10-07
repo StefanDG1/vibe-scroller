@@ -84,7 +84,8 @@ export async function assistantGrant(
   if (
     required !== "knowledge:read" &&
     required !== "context:read" &&
-    required !== "jobs:read"
+    required !== "jobs:read" &&
+    required !== "events:subscribe"
   )
     ensure(
       ["owner", "admin", "member"].includes(membership.role),

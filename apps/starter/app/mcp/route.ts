@@ -8,6 +8,12 @@ import {
   assistantRequestAllowed,
   readAssistantBody,
 } from "../../../../packages/policy/assistant-http";
+import { sealEventCredentials } from "../../../../packages/mcp/credentials";
+import {
+  eventSubscribe,
+  eventUnsubscribe,
+  eventSubscriptionId,
+} from "../../../../packages/mcp/events";
 import { createKnowledgeHandler } from "../../../../packages/mcp/server";
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -106,7 +112,41 @@ export async function POST(request: Request) {
     const site = `https://${backend.hostname.replace(/\.cloud$/, ".site")}/assistant-tools`;
     phase = "dispatch";
     const handler = createKnowledgeHandler(async (operation, args) => {
-      const response = await fetch(site, {
+      let target = site;
+      let input = args;
+      if (operation.startsWith("events/")) {
+        target = site.replace("/assistant-tools", "/assistant-events");
+        const principal = {
+          subject: payload.sub!,
+          clientId: client.id,
+          consentId: payload.sid as string,
+        };
+        if (operation === "events/subscribe") {
+          const selected = eventSubscribe.parse(args);
+          input = {
+            ...selected.arguments,
+            ...sealEventCredentials(
+              {
+                token,
+                callback: selected.delivery.url,
+                secret: selected.delivery.secret,
+              },
+              principal,
+            ),
+            ttlMs: selected.ttlMs,
+          };
+        } else if (operation === "events/unsubscribe") {
+          const selected = eventUnsubscribe.parse(args);
+          input = {
+            subscriptionId: eventSubscriptionId(
+              principal,
+              selected.delivery.url,
+              selected.arguments,
+            ),
+          };
+        }
+      }
+      const response = await fetch(target, {
         method: "POST",
         redirect: "error",
         signal: AbortSignal.timeout(20000),
@@ -114,11 +154,11 @@ export async function POST(request: Request) {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ operation, args }),
+        body: JSON.stringify({ operation, args: input }),
       });
       const value = await readAssistantBody(response, 100000);
       return { ok: response.ok, status: response.status, value };
-    });
+    }, process.env.MCP_EVENTS_ENABLED === "true");
     const input = new Request(request.url, {
       method: "POST",
       headers: request.headers,

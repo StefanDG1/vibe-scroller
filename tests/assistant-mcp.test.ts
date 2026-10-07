@@ -255,3 +255,112 @@ it("requires the project draft scope and exact review bindings through actual MC
   expect(good.status).toBe(200);
   expect(invoke).toHaveBeenCalledWith("draft_project_suggestion", input);
 });
+
+it("serves scoped Events through the actual modern SDK and excludes legacy/disabled catalogs", async () => {
+  const operation = vi.fn(async (op: string) => ({
+    ok: true,
+    status: 200,
+    value:
+      op === "events/subscribe"
+        ? {
+            id: "sub_synthetic",
+            refreshBefore: "2026-10-07T06:00:00Z",
+            cursor: null,
+            truncated: false,
+          }
+        : {},
+  }));
+  const run = async (
+    method: string,
+    params: Record<string, unknown>,
+    scopes = ["events:subscribe"],
+    enabled = true,
+  ) => {
+    const body = {
+      jsonrpc: "2.0",
+      id: 1,
+      method,
+      params: {
+        ...params,
+        _meta: {
+          "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+          "io.modelcontextprotocol/clientInfo": {
+            name: "Synthetic Events",
+            version: "1",
+          },
+          "io.modelcontextprotocol/clientCapabilities": {},
+        },
+      },
+    };
+    return createKnowledgeHandler(operation, enabled).fetch(
+      new Request("https://scroll.companynerve.com/mcp", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          accept: "application/json, text/event-stream",
+          "mcp-protocol-version": "2026-07-28",
+          "mcp-method": method,
+        },
+        body: JSON.stringify(body),
+      }),
+      {
+        parsedBody: body,
+        authInfo: {
+          token: "synthetic-token",
+          clientId: "synthetic",
+          scopes,
+          resource: new URL("https://scroll.companynerve.com/mcp"),
+        },
+      },
+    );
+  };
+  const discovery = await run("server/discover", {});
+  expect(discovery.status, await discovery.clone().text()).toBe(200);
+  expect((await packet(discovery)).result.capabilities.events).toEqual({});
+  const list = await run("events/list", {});
+  expect(list.status, await list.clone().text()).toBe(200);
+  expect((await packet(list)).result.events[0].name).toBe("analysis_completed");
+  operation.mockClear();
+  const denied = await run("events/list", {}, []);
+  expect((await packet(denied)).error).toBeDefined();
+  expect(operation).not.toHaveBeenCalled();
+  const params = {
+    name: "analysis_completed",
+    arguments: {
+      profileId: "private",
+      sourceId: "source",
+      generation: 1,
+      grantVersion: 1,
+    },
+    delivery: {
+      mode: "webhook",
+      url: "https://receiver.example/callback",
+      secret: "whsec_" + Buffer.alloc(24, 1).toString("base64"),
+    },
+    cursor: null,
+  };
+  const subscribed = await run("events/subscribe", params);
+  expect((await packet(subscribed)).result.id).toBe("sub_synthetic");
+  expect(operation).toHaveBeenCalledWith("events/subscribe", params);
+  operation.mockClear();
+  await run("events/subscribe", {
+    ...params,
+    arguments: { ...params.arguments, actor: "foreign" },
+  });
+  expect(operation).not.toHaveBeenCalled();
+  const stopped = await run("events/unsubscribe", {
+    name: params.name,
+    arguments: params.arguments,
+    delivery: { mode: "webhook", url: params.delivery.url },
+  });
+  expect((await packet(stopped)).result).toBeDefined();
+  const disabled = await run(
+    "server/discover",
+    {},
+    ["events:subscribe"],
+    false,
+  );
+  expect((await packet(disabled)).result.capabilities.events).toBeUndefined();
+  const legacy = await call("events/list", {}, ["events:subscribe"]);
+  expect((await packet(legacy)).error).toBeDefined();
+});

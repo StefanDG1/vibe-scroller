@@ -56,4 +56,10 @@ crons.interval(
   internal.knowledge.recoverPage,
   {},
 );
+crons.interval(
+  "Recover and expire scoped Events",
+  { minutes: 1 },
+  internal.assistantEvents.recover,
+  {},
+);
 export default crons;

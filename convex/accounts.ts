@@ -188,6 +188,14 @@ export const finishDelete = internalMutation({
   handler: async (ctx, { jobId }) => {
     const job = await ctx.db.get(jobId);
     if (!job) return;
+    const subscriptions = await ctx.db
+      .query("assistantSubscriptions")
+      .withIndex("by_actor", (q) => q.eq("actor", job.userId))
+      .take(25);
+    for (const s of subscriptions)
+      await ctx.scheduler.runAfter(0, internal.assistantEvents.expire, {
+        id: s._id,
+      });
     const intakes = await ctx.db
       .query("assistantIntakes")
       .withIndex("by_actor", (q) => q.eq("actor", job.userId))
@@ -198,7 +206,11 @@ export const finishDelete = internalMutation({
       .withIndex("by_actor_client", (q) => q.eq("actor", job.userId))
       .take(100);
     for (const grant of grants) await ctx.db.delete(grant._id);
-    if (grants.length === 100 || intakes.length === 100) {
+    if (
+      subscriptions.length > 0 ||
+      grants.length === 100 ||
+      intakes.length === 100
+    ) {
       await ctx.scheduler.runAfter(0, internal.accounts.finishDelete, {
         jobId,
       });
