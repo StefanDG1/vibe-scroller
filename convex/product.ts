@@ -307,6 +307,50 @@ export async function settle(
     ...(credits === 0 ? { eur: 0 } : {}),
   });
 }
+export const libraryContext = query({
+  args: org,
+  handler: async (ctx, { organizationId }) => {
+    const { organization, membership } = await access(ctx, organizationId);
+    const [repositories, proposals, notifications] = await Promise.all([
+      ctx.db
+        .query("repositories")
+        .withIndex("by_org", (q) => q.eq("organizationId", organizationId))
+        .collect(),
+      ctx.db
+        .query("proposals")
+        .withIndex("by_org", (q) => q.eq("organizationId", organizationId))
+        .order("desc")
+        .take(100),
+      ctx.db
+        .query("notifications")
+        .withIndex("by_org", (q) => q.eq("organizationId", organizationId))
+        .order("desc")
+        .take(30),
+    ]);
+    const current = [];
+    for (const p of proposals)
+      if (
+        !p.references ||
+        (await referencesCurrent(ctx, organizationId, p.references))
+      )
+        current.push({ _id: p._id, review: p.review });
+    return {
+      workspaceName: organization.name,
+      privateLibrary: Boolean(organization.privateOwnerId),
+      role: membership.role,
+      repositories: repositories.map(
+        ({ _id, fullName, enabled, confirmed }) => ({
+          _id,
+          fullName,
+          enabled,
+          confirmed,
+        }),
+      ),
+      proposals: current,
+      notifications: notifications.map(({ _id, read }) => ({ _id, read })),
+    };
+  },
+});
 export const library = query({
   args: {
     ...org,

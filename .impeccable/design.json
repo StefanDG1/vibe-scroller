@@ -3,6 +3,32 @@
   "generatedAt": "2026-10-07T04:58:24Z",
   "title": "Design System: VibeScroll",
   "extensions": {
+    "visibleLibraryContextReview": {
+      "mode": "Operate",
+      "identity": "Incumbent Scroll charcoal studio, mint selection, warm original artwork, familiar Library controls and responsive navigation; no visual-world, asset, token or appearance change.",
+      "sources": [
+        "apps/starter/components/console.tsx",
+        "apps/starter/lib/workspace-data.ts",
+        "convex/product.ts",
+        "docs/adr/089-visible-library-context.md"
+      ],
+      "contextConvention": "Explicit metadata-only Library slices merge into the current workspace state while preserving the separate paged Posts cache and its cursor. Posts read only while their section is active; metadata is not complete capture context.",
+      "captureConvention": "Reload full authorized workspace options before opening capture from a Library slice; refuse another partial response.",
+      "disclosureConvention": "Trial reads require visible Posts, expanded Analyze saved posts and personal-alpha eligibility. Collapsing the disclosure or leaving Posts disables that read.",
+      "accessConvention": "Access loss clears private workspace and Home caches, advances the Posts request generation, aborts outstanding Posts reads and settles loading. A failed authorization refresh cannot initiate another Posts read; a late prior response cannot repopulate cleared rows.",
+      "finishDisposition": "Ship for the single resolved access-loss race fix scored by .impeccable/review/library-context/verdict.md. Original review .impeccable/review/library-context/reviewer.md identified that fix; this is not whole-surface acceptance.",
+      "captures": [
+        ".impeccable/review/library-context/mobile-320.png",
+        ".impeccable/review/library-context/mobile.png",
+        ".impeccable/review/library-context/tablet.png",
+        ".impeccable/review/library-context/desktop.png",
+        ".impeccable/review/library-context/confirmation/mobile-320.png",
+        ".impeccable/review/library-context/confirmation/mobile.png",
+        ".impeccable/review/library-context/confirmation/tablet.png",
+        ".impeccable/review/library-context/confirmation/desktop.png"
+      ],
+      "evidenceBoundary": "Local labeled synthetic actual-Console captures at 320, 390, 768 and 1440 CSS pixels, sampled current code, private/vibescroll-library-context-ui.json and private/vibescroll-library-context-race.json. The race proof records zero sources before and after a late successful Posts response, settled loading and unchanged request counts after denial. Fixture banners and test controls are not product patterns. Empty detector.txt establishes no detector pass. No production, provider, physical-device, human keyboard or comprehension acceptance, whole-plan acceptance or cost claim follows."
+    },
     "compactHomeReview": {
       "mode": "Operate",
       "identity": "Incumbent flat charcoal Home, meaningful mint actions, amber original Scroll, existing typography and native phone flow; no visual-world or token change.",
