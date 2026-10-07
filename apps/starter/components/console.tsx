@@ -1860,9 +1860,9 @@ export function Console({
                     <h2>Your ChatGPT plan</h2>
                     <p>
                       Prefer your own allowance for eligible AI requests and
-                      keep VibeScroller inference credits for other work.
-                      ChatGPT limits still apply; transcription, storage and
-                      cloud execution have separate costs.
+                      keep VibeScroll inference credits for other work. ChatGPT
+                      limits still apply; transcription, storage and cloud
+                      execution have separate costs.
                     </p>
                     <label
                       style={{
@@ -3727,8 +3727,8 @@ function SourceDetail({
               s
             </summary>
             <p>
-              Model: {detail.processingReceipt.model}. Funded by your
-              VibeScroller allowance.
+              Model: {detail.processingReceipt.model}. Funded by your VibeScroll
+              allowance.
             </p>
             <p>
               Inference estimate:{" "}
@@ -3914,8 +3914,8 @@ function PersonalSourceAnalysis({
               {source.kind !== "text"
                 ? "Your laptop transcribes audio locally, then sends sampled frames and the transcript to your ChatGPT account. Media preparation reserves up to 10 compute credits."
                 : "Your laptop sends this text to your ChatGPT account."}{" "}
-              No VibeScroller inference credits or paid AI fallback. Your
-              ChatGPT limits apply.
+              No VibeScroll inference credits or paid AI fallback. Your ChatGPT
+              limits apply.
             </p>
             {!eligible.length ? (
               <p>

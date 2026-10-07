@@ -55,7 +55,7 @@ export function SiteFooter() {
             {p.replaceAll("-", " ")}
           </Link>
         ))}
-        <a href="https://github.com/StefanDG1/vibe-scroller">MIT source</a>
+        <a href="https://github.com/StefanDG1/vibescroll">MIT source</a>
         <CookieSettings />
       </nav>
       <small>

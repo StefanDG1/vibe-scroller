@@ -19,9 +19,9 @@ const pages: Record<string, { title: string; body: string[] }> = {
     ],
   },
   about: {
-    title: "Why VibeScroller exists",
+    title: "Why VibeScroll exists",
     body: [
-      "I kept finding useful videos about coding, AI, marketing, and business. I saved them because I wanted to use the ideas. But I could watch ten videos faster than I could apply one. VibeScroller is the system I wanted between saving something and building something from it.",
+      "I kept finding useful videos about coding, AI, marketing, and business. I saved them because I wanted to use the ideas. But I could watch ten videos faster than I could apply one. VibeScroll is the system I wanted between saving something and building something from it.",
       "V1 focuses on a private library, evidence, project relevance, reviewed plans and draft pull requests. The operator is EXPONENTIAL EDUCATION S.R.L. No provider affiliation or legal review is claimed.",
     ],
   },
@@ -161,6 +161,10 @@ export default async function Page({
             Effective {policyRelease.effectiveDate} · {policyRelease.id}
           </p>
         )}
+        <p>
+          VibeScroll was previously called VibeScroller. This published policy
+          retains its original name and version.
+        </p>
         <PolicyDocument text={text} />
       </PublicPage>
     );

@@ -1,5 +1,11 @@
 # Foundational idea backlog
 
+## F016: compatible brand and deployed boundary evidence, October 7
+
+Owner-authorized implementation and repository rename carry F014/F015 into engineering. The audience remains adult project owners using AI, including non-coders. Current display copy uses VibeScroll and Make scrolling useful. Reuse the original Scroll and selected mark; preserve private configuration, stable provider identities and historical releases. Published legal policy bytes, terms and acceptance versions remain unchanged, with the rename explained beside those originals.
+
+The studio and explicit owner-private authorization boundary have production receipts. Actual owner private-library creation passed, while two-account browser acceptance, Personal/Business filing and sharing, onboarding, assistant OAuth, independent comprehension and measured savings remain open. Compact Home metadata is still off by default. New brand assets are a local implementation candidate until their exact release is verified. Adopt this precise availability language across the four briefs; do not infer commercial permission or customer value from engineering checks. Counterargument: a clearer name and character alone do not establish that retrieval or project decisions are useful. Verify real retrieval, a correction and an authorized project decision with independent users before claiming those benefits.
+
 ## F015: persuasive design and analysis references, October 7
 
 Source: explicit owner refinement after reviewing the rejection explanation. Status: pricing anchors, restrained CTA shimmer, genuine unfinished loops and the conditional techniques are adopted for planning. Conversion/retention effects remain unvalidated. See [ADR 076](../adr/076-persuasive-design-and-analysis-references.md), [the revised plan](../VIBESCROLL-EVOLUTION-PLAN.md) and [the reassessment](../VIBESCROLL-INSIGHT-REVIEW.md#owner-refinement).
