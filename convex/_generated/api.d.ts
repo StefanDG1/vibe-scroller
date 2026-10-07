@@ -59,6 +59,7 @@ import type * as lib from "../lib.js";
 import type * as lib_assistantEvents from "../lib/assistantEvents.js";
 import type * as lib_assistantPrincipal from "../lib/assistantPrincipal.js";
 import type * as lib_assistantProject from "../lib/assistantProject.js";
+import type * as lib_assistantSourceScope from "../lib/assistantSourceScope.js";
 import type * as lib_cloudAccess from "../lib/cloudAccess.js";
 import type * as lib_dashboardProjection from "../lib/dashboardProjection.js";
 import type * as lib_deletionMarkers from "../lib/deletionMarkers.js";
@@ -175,6 +176,7 @@ declare const fullApi: ApiFromModules<{
   "lib/assistantEvents": typeof lib_assistantEvents;
   "lib/assistantPrincipal": typeof lib_assistantPrincipal;
   "lib/assistantProject": typeof lib_assistantProject;
+  "lib/assistantSourceScope": typeof lib_assistantSourceScope;
   "lib/cloudAccess": typeof lib_cloudAccess;
   "lib/dashboardProjection": typeof lib_dashboardProjection;
   "lib/deletionMarkers": typeof lib_deletionMarkers;

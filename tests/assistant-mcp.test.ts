@@ -364,3 +364,33 @@ it("serves scoped Events through the actual modern SDK and excludes legacy/disab
   const legacy = await call("events/list", {}, ["events:subscribe"]);
   expect((await packet(legacy)).error).toBeDefined();
 });
+
+it("explains unsupported intake before backend dispatch and preserves supported-link dispatch", async () => {
+  invoke.mockClear();
+  const args = {
+    url: "https://github.com/owner/disposable",
+    title: "Owned test",
+    key: "intake-replay-key",
+    explicitlyRequested: true,
+    rightsAttested: true,
+  };
+  const rejected = await packet(
+    await call("tools/call", { name: "save_link", arguments: args }, [
+      "links:save",
+    ]),
+  );
+  expect(rejected.result.isError).toBe(true);
+  expect(JSON.parse(rejected.result.content[0].text).code).toBe(
+    "UNSUPPORTED_SOURCE",
+  );
+  expect(invoke).not.toHaveBeenCalled();
+  await call(
+    "tools/call",
+    {
+      name: "save_link",
+      arguments: { ...args, url: "https://www.youtube.com/watch?v=owned_test" },
+    },
+    ["links:save"],
+  );
+  expect(invoke).toHaveBeenCalledOnce();
+});
