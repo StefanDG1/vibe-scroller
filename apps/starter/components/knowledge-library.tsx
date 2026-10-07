@@ -1167,7 +1167,7 @@ function IssueReview({
       </p>
       <p>
         {d.visibility === "public"
-          ? "PUBLIC repository: anyone can read this issue. Private workspace knowledge will leave VibeScroller if included below."
+          ? "PUBLIC repository: anyone can read this issue. Private workspace knowledge will leave VibeScroll if included below."
           : d.visibility === "private"
             ? "PRIVATE repository: everyone with repository access can read this text. Workspace membership and repository membership can differ."
             : "Repository visibility and Issues write permission must be verified before publication."}

@@ -1,6 +1,6 @@
-# VibeScroller
+# VibeScroll
 
-Make scrolling productive. Keep permitted sources in a library, inspect cited insights, check their fit to selected projects and review a plan before approving code. No fit and already implemented are useful outcomes too.
+Make scrolling useful. Keep permitted sources in a library, inspect cited insights, check their fit to selected projects and review a plan before approving code. No fit and already implemented are useful outcomes too.
 
 Use [the hosted application](https://scroll.companynerve.com/app) and [first-source tutorial](docs/HOSTED-TUTORIAL.md). GitHub is optional for the first library result. Managed analysis and approved Vercel coding use explicit funding, reservations and existing ceilings. Personal ChatGPT analysis requires the user's eligible paired laptop; general hosted commercial ChatGPT access and Windows local coding remain gated.
 

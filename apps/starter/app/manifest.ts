@@ -6,8 +6,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Make scrolling useful",
     start_url: "/app",
     display: "standalone",
-    background_color: "#101010",
-    theme_color: "#171717",
+    background_color: "#141918",
+    theme_color: "#141918",
     icons: [
       { src: "/icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" },
       {

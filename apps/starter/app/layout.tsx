@@ -22,10 +22,10 @@ export const metadata: Metadata = {
     siteName: "VibeScroll",
     images: [
       {
-        url: "/social-card.png?v=sv14c",
+        url: "/social-card.png?v=vibescroll-20261007",
         width: 1200,
         height: 630,
-        alt: "VibeScroll: saved video, evidence, project match, reviewed plan, draft PR",
+        alt: "VibeScroll and Scroll: saved idea, evidence, project fit, reviewed plan, draft PR",
       },
     ],
   },
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "VibeScroll · Make scrolling useful",
     description: company.product.description,
-    images: ["/social-card.png?v=sv14c"],
+    images: ["/social-card.png?v=vibescroll-20261007"],
   },
 };
 export default async function Layout({
