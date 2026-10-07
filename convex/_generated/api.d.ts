@@ -9,11 +9,12 @@
  */
 
 import type * as accounts from "../accounts.js";
+import type * as aiPreferences from "../aiPreferences.js";
+import type * as assets from "../assets.js";
 import type * as assistant from "../assistant.js";
 import type * as assistantGrants from "../assistantGrants.js";
 import type * as assistantHttp from "../assistantHttp.js";
-import type * as aiPreferences from "../aiPreferences.js";
-import type * as assets from "../assets.js";
+import type * as assistantSchema from "../assistantSchema.js";
 import type * as billing from "../billing.js";
 import type * as billingChanges from "../billingChanges.js";
 import type * as billingV1 from "../billingV1.js";
@@ -52,6 +53,7 @@ import type * as knowledgeExplore from "../knowledgeExplore.js";
 import type * as knowledgeGrants from "../knowledgeGrants.js";
 import type * as knowledgeSchema from "../knowledgeSchema.js";
 import type * as lib from "../lib.js";
+import type * as lib_assistantPrincipal from "../lib/assistantPrincipal.js";
 import type * as lib_cloudAccess from "../lib/cloudAccess.js";
 import type * as lib_dashboardProjection from "../lib/dashboardProjection.js";
 import type * as lib_deletionMarkers from "../lib/deletionMarkers.js";
@@ -118,11 +120,12 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   accounts: typeof accounts;
+  aiPreferences: typeof aiPreferences;
+  assets: typeof assets;
   assistant: typeof assistant;
   assistantGrants: typeof assistantGrants;
   assistantHttp: typeof assistantHttp;
-  aiPreferences: typeof aiPreferences;
-  assets: typeof assets;
+  assistantSchema: typeof assistantSchema;
   billing: typeof billing;
   billingChanges: typeof billingChanges;
   billingV1: typeof billingV1;
@@ -161,6 +164,7 @@ declare const fullApi: ApiFromModules<{
   knowledgeGrants: typeof knowledgeGrants;
   knowledgeSchema: typeof knowledgeSchema;
   lib: typeof lib;
+  "lib/assistantPrincipal": typeof lib_assistantPrincipal;
   "lib/cloudAccess": typeof lib_cloudAccess;
   "lib/dashboardProjection": typeof lib_dashboardProjection;
   "lib/deletionMarkers": typeof lib_deletionMarkers;

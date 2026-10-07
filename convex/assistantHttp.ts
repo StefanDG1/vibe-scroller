@@ -11,6 +11,31 @@ const profileId = z.string().max(100).optional();
 const operations = z.discriminatedUnion("operation", [
   z
     .object({
+      operation: z.literal("record_feedback"),
+      args: z
+        .object({
+          profileId,
+          sourceId: z.string().min(1).max(100),
+          generation: z.number().int().nonnegative(),
+          revision: z.number().int().nonnegative(),
+          grantVersion: z.number().int().positive(),
+          key: z.string().regex(/^[a-zA-Z0-9_-]{8,64}$/),
+          expectedVersion: z.number().int().nonnegative(),
+          explicitlyRequested: z.literal(true),
+          action: z.enum([
+            "useful",
+            "not_relevant",
+            "already_implemented",
+            "unsafe_unsupported",
+            "later",
+          ]),
+          note: z.string().max(2000),
+        })
+        .strict(),
+    })
+    .strict(),
+  z
+    .object({
       operation: z.literal("save_link"),
       args: z
         .object({
@@ -106,6 +131,13 @@ export const tools = httpAction(async (ctx, request) => {
         : undefined;
     let value: unknown;
     switch (input.operation) {
+      case "record_feedback":
+        value = await ctx.runMutation(internal.assistant.recordFeedback, {
+          ...input.args,
+          profileId: selectedProfile,
+          sourceId: input.args.sourceId as Id<"sources">,
+        });
+        break;
       case "get_profile":
         value = await ctx.runQuery(internal.assistant.getProfile, {});
         break;

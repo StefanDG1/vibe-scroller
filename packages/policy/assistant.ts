@@ -5,6 +5,7 @@ export const assistantScopes = [
   "links:save",
   "jobs:read",
   "analysis:request",
+  "feedback:write",
 ] as const;
 export type AssistantScope = (typeof assistantScopes)[number];
 export function isAssistantScope(value: unknown): value is AssistantScope {

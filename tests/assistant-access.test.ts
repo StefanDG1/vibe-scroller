@@ -27,6 +27,7 @@ async function setup() {
           "links:save",
           "jobs:read",
           "analysis:request",
+          "feedback:write",
         ],
       },
     ]),
@@ -47,7 +48,8 @@ async function setup() {
     subject,
     issuer,
     client_id: clientId,
-    scope: "knowledge:read context:read links:save jobs:read analysis:request",
+    scope:
+      "knowledge:read context:read links:save jobs:read analysis:request feedback:write",
     sid: "app_consent_01234567890123456789012345",
   });
   const organizationId = await owner.mutation(
@@ -76,6 +78,100 @@ async function setup() {
   };
   return { t, owner, assistant, organizationId, sourceId, args };
 }
+it("records explicit source judgments with replay-safe corrections while preserving manual reviews and denying stale or revoked writes", async () => {
+  const s = await setup();
+  const grant = await s.owner.mutation(api.assistantGrants.save, {
+    ...s.args,
+    scopes: ["feedback:write"],
+  });
+  const input = {
+    profileId: s.organizationId,
+    sourceId: s.sourceId,
+    generation: s.args.sources[0].generation,
+    revision: s.args.sources[0].revision,
+    grantVersion: 1,
+    key: "stable-feedback-key",
+    expectedVersion: 0,
+    explicitlyRequested: true as const,
+    action: "useful" as const,
+    note: "I found this relevant. Benefit has not been measured.",
+  };
+  const manual = await s.owner.mutation(api.product.feedback, {
+    organizationId: s.organizationId,
+    target: s.sourceId,
+    action: "manual",
+    benefit: "not_measured",
+    note: "Keep my prior judgment",
+  });
+  const first = await s.assistant.mutation(
+    internal.assistant.recordFeedback,
+    input,
+  );
+  expect(first).toMatchObject({
+    version: 1,
+    benefit: "not_measured",
+    status: "recorded",
+  });
+  expect(
+    (await s.assistant.mutation(internal.assistant.recordFeedback, input))
+      .feedback_id,
+  ).toBe(first.feedback_id);
+  await expect(
+    s.assistant.mutation(internal.assistant.recordFeedback, {
+      ...input,
+      action: "later",
+    }),
+  ).rejects.toThrow("APPROVAL_STALE");
+  const corrected = await s.assistant.mutation(
+    internal.assistant.recordFeedback,
+    { ...input, expectedVersion: 1, action: "later" },
+  );
+  expect(corrected.version).toBe(2);
+  const rows = await s.t.run((ctx) => ctx.db.query("feedback").collect());
+  expect(rows).toHaveLength(3);
+  expect(rows.find((r) => r._id === manual)?.note).toBe(
+    "Keep my prior judgment",
+  );
+  expect(
+    rows
+      .filter((r) => r.assistantClientId)
+      .every((r) => r.benefit === "not_measured" && !r.qualityVerdict),
+  ).toBe(true);
+  const noScope = s.t.withIdentity({
+    subject,
+    issuer,
+    client_id: clientId,
+    scope: "knowledge:read",
+    sid: "app_consent_01234567890123456789012345",
+  });
+  await expect(
+    noScope.mutation(internal.assistant.recordFeedback, {
+      ...input,
+      expectedVersion: 2,
+    }),
+  ).rejects.toThrow("FORBIDDEN");
+  await expect(
+    s.assistant.mutation(internal.assistant.recordFeedback, {
+      ...input,
+      expectedVersion: 2,
+      revision: input.revision + 1,
+    }),
+  ).rejects.toThrow("APPROVAL_STALE");
+  await s.owner.mutation(api.assistantGrants.revoke, {
+    id: grant.id,
+    expectedVersion: 1,
+  });
+  await expect(
+    s.assistant.mutation(internal.assistant.recordFeedback, {
+      ...input,
+      expectedVersion: 2,
+    }),
+  ).rejects.toThrow("FORBIDDEN");
+  expect(
+    await s.t.run((ctx) => ctx.db.query("reservations").collect()),
+  ).toEqual([]);
+  expect(await s.t.run((ctx) => ctx.db.query("outbox").collect())).toEqual([]);
+});
 it("keeps Connect identities out of ordinary app queries, captures and account bootstrap", async () => {
   const s = await setup();
   await expect(

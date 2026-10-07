@@ -84,6 +84,44 @@ it("challenges absent tool scopes before invoking the backend and rejects unknow
   expect(invoke).toHaveBeenCalledOnce();
 });
 
+it("requires the feedback scope and explicit request before dispatching a versioned judgment", async () => {
+  invoke.mockClear();
+  const input = {
+    sourceId: "selected-source",
+    generation: 1,
+    revision: 123,
+    grantVersion: 1,
+    key: "feedback-key",
+    expectedVersion: 0,
+    explicitlyRequested: true,
+    action: "later",
+    note: "Review next week",
+  };
+  const denied = await call(
+    "tools/call",
+    { name: "record_feedback", arguments: input },
+    ["knowledge:read"],
+  );
+  expect(denied.status).toBe(403);
+  expect(denied.headers.get("www-authenticate")).toContain("feedback:write");
+  expect(invoke).not.toHaveBeenCalled();
+  await call(
+    "tools/call",
+    {
+      name: "record_feedback",
+      arguments: { ...input, explicitlyRequested: false },
+    },
+    ["feedback:write"],
+  );
+  expect(invoke).not.toHaveBeenCalled();
+  const accepted = await call(
+    "tools/call",
+    { name: "record_feedback", arguments: input },
+    ["feedback:write"],
+  );
+  expect(accepted.status).toBe(200);
+  expect(invoke).toHaveBeenCalledWith("record_feedback", input);
+});
 it("blocks foreign browser origins and rebinding hosts without requiring Origin from server clients", async () => {
   const { assistantRequestAllowed, readAssistantBody } =
     await import("../packages/policy/assistant-http");
