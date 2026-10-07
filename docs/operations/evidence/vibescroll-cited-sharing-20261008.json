@@ -58,6 +58,95 @@
     "basicPolicyPassed": 5,
     "productionBuildsPassed": 2,
     "browserScope": "static actual-component SSR; synthetic untimed user-note; 390/1440 no overflow; unhydrated controls",
-    "productionNewFrontend": "pending exact PR checks/deployment"
+    "productionNewFrontend": "verified by exact release record above; no new real citation grant created after this frontend deployment"
+  },
+  "productionRelease": {
+    "mainCommit": "8d47b6a6947a3cea7bad64bf875640f071a6362d",
+    "version": "0.1.0-alpha.20261007223357.g8d47b6a6947a",
+    "deployment": "dpl_FYBaLE6no681v25txTe4Wy9era4r",
+    "vercelReadyExactGit": true,
+    "canonicalHealth": {
+      "at": "2026-10-07T22:36:47.431357+00:00",
+      "status": 200,
+      "cache": "no-store"
+    },
+    "checks": {
+      "prVerify": 37696759905,
+      "mainVerify": 37696993313,
+      "version": 37696993316,
+      "release": 37697128091,
+      "result": "all passed"
+    },
+    "tag": "v0.1.0-alpha.20261007223357.g8d47b6a6947a",
+    "publishedAt": "2026-10-07T22:35:22Z",
+    "nativeSharedHeading": "Shared knowledge in header and h1; ordinary authenticated empty-page render",
+    "settings": {
+      "at": "2026-10-07T22:41:30.361515+00:00",
+      "machine": "Basic 2 vCPU / 8 GB",
+      "concurrent": "on-demand disabled; queue one build at a time",
+      "changed": false
+    },
+    "backend": "unchanged compatible 1db35d26d357990a0b81cad7170b8f6b011e1efe"
+  },
+  "manualDocumentationExecution": {
+    "modelResult": "needs_context retained in original detail",
+    "reviewerCorrection": "separate explicit relevant correction grounded in actual two-line README and owner-requested synthetic checklist; not model fit or customer value",
+    "planVersion": 3,
+    "planHash": "0e87192af87303e8503fb1f97a55798297924d6428b2350f20c512d4b4c4cdbb",
+    "allowedFiles": ["README.md"],
+    "executor": "managed Google / ephemeral Vercel Sandbox fra1, 2 vCPU / 4 GB, deny-all, no ports, persistence disabled",
+    "approvedCredits": 19,
+    "maxSeconds": 500,
+    "checks": [
+      "git diff --check: exit 0",
+      "reviewed Node README title/purpose/review-heading assertion: exit 0"
+    ],
+    "finalPatch": "separately native-reviewed, only nine added README lines, original title/purpose preserved, no private quotes or secrets",
+    "privateDraft": {
+      "number": 1,
+      "state": "OPEN",
+      "isDraft": true,
+      "currentHead": "ea7c131e2b7fe9cb2ba0eedb88013118aeddd7bb",
+      "baseUnchanged": true,
+      "exactReviewedBytesMatch": true,
+      "observedAt": "2026-10-07T22:39:38.052Z",
+      "merged": false,
+      "deployed": false
+    },
+    "teardown": {
+      "at": "2026-10-07T22:40:16.592Z",
+      "authenticatedProviderLookup": 404,
+      "resume": false,
+      "newWorker": false,
+      "shortLivedCredentialsStored": false,
+      "earlierCli403": "not treated as deletion evidence"
+    },
+    "serviceCreditSettlement": {
+      "at": "2026-10-07T22:42:53.927Z",
+      "state": "settled",
+      "ceiling": 19,
+      "actual": 2
+    },
+    "inferenceProvisionEurMicros": 1406,
+    "retry": false,
+    "cashInvoiceSettlement": "pending",
+    "changedHeadTest": "not exercised by this exact-current-head verification"
+  },
+  "spendingRefresh": {
+    "cumulativeCeilingEurMicros": 2000000,
+    "measuredInferenceProvisionEurMicros": 6161,
+    "infrastructureReservedEurMicros": 500000,
+    "sandboxOutboundReservedEurMicros": 200000,
+    "remainingUnallocatedEurMicros": 1293839,
+    "historicalUnknownHoldsPreserved": true,
+    "convex": {
+      "at": "2026-10-07T22:40:33.446523+00:00",
+      "teamUpcomingUsd": 0.56,
+      "unchanged": true,
+      "disableThresholdUsd": 15,
+      "settingsChanged": false,
+      "scope": "delayed team invoice, not proof of zero new cost or settled job cost"
+    },
+    "periodicMonitor": "read-only every six hours; quiet on unchanged state; no paid work or limit changes"
   }
 }

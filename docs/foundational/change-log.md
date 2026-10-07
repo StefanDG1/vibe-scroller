@@ -122,3 +122,7 @@ Updated Research, Avatar, Offer and Beliefs together with actual production allo
 ## F027: cited sharing and honest evidence labels, October 8
 
 Updated all four briefs together with bounded two-owner-account technical evidence and ADR 092. Preserve the failed role-removal observation, pending invoice settlement and independent acceptance gates. No measured benefit, price or expanded permission is inferred.
+
+## F028: separate manual review and exact private draft, October 8
+
+Updated all four briefs together for the owner-authorized synthetic documentation journey and bounded cost evidence. Retain the original needs_context assessment, unresolved independent/provider/commercial gates and invoice limits.
