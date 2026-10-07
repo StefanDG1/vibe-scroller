@@ -205,6 +205,7 @@ it("inventories only surviving retained frames and fences deletion or source cha
       canonical: "synthetic:evidence-inventory",
       kind: "text",
       title: "Synthetic evidence inventory",
+      text: "PRIVATE recovered transcript must stay outside current-record projections",
       tags: [],
       state: "ready",
       coverage: "full_sampled",
@@ -267,6 +268,40 @@ it("inventories only surviving retained frames and fences deletion or source cha
       generation: 2,
       type: "image/jpeg",
     });
+    await expect(
+      t.query(internal.recovery.evidenceRestoreCurrent, {
+        key: state.key,
+        asOf,
+      }),
+    ).rejects.toThrow("POLICY_BLOCKED");
+    vi.stubEnv("RESTORE_LOCK", "true");
+    const restoreCurrent = await t.query(
+      internal.recovery.evidenceRestoreCurrent,
+      { key: state.key, asOf },
+    );
+    expect(restoreCurrent).toMatchObject({
+      locked: true,
+      source: { id: state.source, generation: 2 },
+      asset: { key: state.key, type: "image/jpeg", size: 40 },
+      organization: { id: org, status: "active" },
+    });
+    expect(JSON.stringify(restoreCurrent)).not.toContain(
+      "PRIVATE recovered transcript",
+    );
+    expect(restoreCurrent).not.toHaveProperty("latestMarkersApplied");
+    for (const name of ["retired", "expired", "temporary", "foreign"])
+      expect(
+        await t.query(internal.recovery.evidenceRestoreCurrent, {
+          key: `${org}/${name}`,
+          asOf,
+        }),
+      ).toBeNull();
+    await expect(
+      t.query(internal.recovery.evidenceRestoreCurrent, {
+        key: "x".repeat(301),
+        asOf,
+      }),
+    ).rejects.toThrow("INVALID_INPUT");
     vi.stubEnv("R2_ENDPOINT", "https://synthetic.eu.r2.cloudflarestorage.com");
     vi.stubEnv("R2_BUCKET", "synthetic-evidence");
     vi.stubEnv("R2_ACCESS_KEY_ID", "synthetic-backup-read-key");
@@ -286,6 +321,12 @@ it("inventories only surviving retained frames and fences deletion or source cha
       ).toBeNull();
     await t.run((ctx) => ctx.db.patch(state.source, { generation: 3 }));
     expect(
+      await t.query(internal.recovery.evidenceRestoreCurrent, {
+        key: state.key,
+        asOf,
+      }),
+    ).toMatchObject({ source: { generation: 3 } });
+    expect(
       await t.query(internal.recovery.evidenceCurrent, {
         key: state.key,
         asOf,
@@ -300,6 +341,12 @@ it("inventories only surviving retained frames and fences deletion or source cha
     );
     expect(
       await t.query(internal.recovery.evidenceCurrent, {
+        key: state.key,
+        asOf,
+      }),
+    ).toBeNull();
+    expect(
+      await t.query(internal.recovery.evidenceRestoreCurrent, {
         key: state.key,
         asOf,
       }),
