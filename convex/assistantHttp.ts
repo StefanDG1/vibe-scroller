@@ -86,6 +86,7 @@ const operations = z.discriminatedUnion("operation", [
         .object({
           query: z.string().min(1).max(200),
           offset: z.number().int().min(0).max(49).optional(),
+          cursor: z.string().max(4096).optional(),
           profileId,
         })
         .strict(),

@@ -478,6 +478,73 @@ it("pages live all-library search five posts at a time, binds cursors and reject
   ).rejects.toThrow("STALE_APPROVAL");
   expect((await s.t.run((ctx) => ctx.db.get(grant.id)))?.sources).toEqual([]);
 });
+it("passes live search cursors through the authenticated HTTP boundary without widening accepted input", async () => {
+  const s = await setup();
+  await s.owner.mutation(api.assistantGrants.save, {
+    ...s.args,
+    sources: [],
+    libraryScope: "all",
+  });
+  await s.t.run(async (ctx) => {
+    const {
+      _id: _unusedId,
+      _creationTime: _time,
+      ...original
+    } = (await ctx.db.get(s.sourceId))!;
+    for (let index = 0; index < 6; index++) {
+      const id = await ctx.db.insert("sources", {
+        ...original,
+        key: `http-page-${index}`,
+        canonical: `text:http-page-${index}`,
+        title: `Future HTTP source ${index}`,
+        updatedAt: original.updatedAt + index + 1,
+      });
+      await syncDashboardCard(ctx, "sources", id, await ctx.db.get(id));
+    }
+  });
+  const provider = vi.fn(async () => Response.json({ sub: subject }));
+  vi.stubGlobal("fetch", provider);
+  const search = (args: Record<string, unknown>) =>
+    s.assistant.fetch("/assistant-tools", {
+      method: "POST",
+      headers: {
+        authorization: "Bearer synthetic-access-token-0123456789",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        operation: "search",
+        args: { profileId: s.organizationId, query: "Future", ...args },
+      }),
+    });
+  const first = await search({});
+  expect(first.status).toBe(200);
+  expect(first.headers.get("cache-control")).toBe("no-store");
+  const page = await first.json();
+  expect(page.results).toHaveLength(5);
+  expect(page.next_cursor).toBeTruthy();
+  const second = await search({ cursor: page.next_cursor });
+  expect(second.status).toBe(200);
+  expect(second.headers.get("cache-control")).toBe("no-store");
+  const following = await second.json();
+  expect(following.results).toHaveLength(1);
+  expect(following.next_cursor).toBeNull();
+  expect(
+    following.results.some((r: { id: string }) =>
+      page.results.some((p: { id: string }) => p.id === r.id),
+    ),
+  ).toBe(false);
+  expect(provider).toHaveBeenCalledTimes(2);
+  for (const args of [{ cursor: "x".repeat(4097) }, { actor: "foreign" }]) {
+    expect((await search(args)).status).toBe(403);
+  }
+  expect(provider).toHaveBeenCalledTimes(2);
+  expect(
+    (await search({ cursor: page.next_cursor, query: "Changed" })).status,
+  ).toBe(403);
+  expect(
+    await s.t.run((ctx) => ctx.db.query("reservations").collect()),
+  ).toEqual([]);
+});
 it("rejects wrong client, OAuth scope, machine subject, consent and private owner", async () => {
   const s = await setup();
   await s.owner.mutation(api.assistantGrants.save, s.args);
