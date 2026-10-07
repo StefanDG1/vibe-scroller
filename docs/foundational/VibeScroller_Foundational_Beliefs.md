@@ -111,3 +111,7 @@ The retained exclusions concern fabricated evidence, unsupported threats, shame/
 ## F020: scoped assistant candidate, October 7
 
 F020 supports the existing six beliefs through inspectable permissions and protected citations. A saved link is distinct from analyzed evidence; requesting analysis returns a funding review rather than granting spend. Revocation stops future retrieval but cannot erase prior third-party disclosure. No new belief, testimonial, outcome guarantee or provider permission follows from local engineering.
+
+## F021: exact project context and private assistant drafts, October 7
+
+F021 reinforces inspectable selected context, evidence-backed fit and separate action authority. A reviewed evaluation can become a private draft, while no-fit and unsupported claims remain honest decisions. Manual corrections survive retries. Neither assistant consent nor a private suggestion grants spending, coding or publication; no new belief or testimonial follows.

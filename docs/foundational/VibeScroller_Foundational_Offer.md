@@ -248,3 +248,7 @@ The current onboarding remains one eligible real post before asking for payment.
 ## F020: scoped assistant candidate, October 7
 
 F020 prepares official scoped assistant retrieval and explicit link intake. Production access remains disabled pending provider configuration, real consent and actual client acceptance. Do not advertise a working ChatGPT/Codex connection, persistent Events, access to chat history, automatic analysis or a fee-free hosted subscription route from these local tests. Prices, budgets and separate publication/coding approval remain authoritative.
+
+## F021: exact project context and private assistant drafts, October 7
+
+F021 prepares private cited project drafts through an explicitly scoped assistant request. A current relevant evaluation is reused without another inference; retries preserve manual edits. Other fit judgments create no draft. Assistant access remains disabled pending real host/provider acceptance. Do not advertise automatic coding, publication, measured benefit, a working connection or a new allowance. Prices, budgets and separate approvals remain unchanged.

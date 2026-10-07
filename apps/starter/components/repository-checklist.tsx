@@ -360,7 +360,7 @@ export function BusinessContext({
     ? freeText
     : fields.map((f) => `${f}: ${values[f]}`).join("\n\n");
   return (
-    <section className="panel form-grid">
+    <section id={`repository-${r._id ?? r.id}`} className="panel form-grid">
       <h2>{r.fullName}</h2>
       <p>
         {r.confirmed

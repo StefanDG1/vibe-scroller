@@ -28,6 +28,7 @@ async function setup() {
           "jobs:read",
           "analysis:request",
           "feedback:write",
+          "suggestions:draft",
         ],
       },
     ]),
@@ -49,7 +50,7 @@ async function setup() {
     issuer,
     client_id: clientId,
     scope:
-      "knowledge:read context:read links:save jobs:read analysis:request feedback:write",
+      "knowledge:read context:read links:save jobs:read analysis:request feedback:write suggestions:draft",
     sid: "app_consent_01234567890123456789012345",
   });
   const organizationId = await owner.mutation(
@@ -541,4 +542,365 @@ it("pages all grant choices with bounded metadata and refuses stale context with
       contextVersion: 1,
     }),
   ).rejects.toThrow("STALE_APPROVAL");
+});
+
+async function projectSuggestion() {
+  const s = await setup();
+  const data = await s.t.run(async (ctx) => {
+    const now = Date.now();
+    const actor = (await ctx.db
+      .query("users")
+      .withIndex("by_subject", (q) => q.eq("subject", subject))
+      .unique())!;
+    await ctx.db.patch(s.sourceId, {
+      state: "ready",
+      analysis: {
+        summary: "Synthetic",
+        insights: [
+          {
+            id: "point-owned",
+            title: "Review",
+            claim: "A synthetic owned claim",
+            topics: ["Review"],
+            evidence: [],
+          },
+        ],
+      },
+    });
+    const repositoryId = await ctx.db.insert("repositories", {
+      organizationId: s.organizationId,
+      installationId: 42,
+      providerId: 55,
+      fullName: "owned/synthetic",
+      branch: "main",
+      sha: "a".repeat(40),
+      enabled: true,
+      confirmed: true,
+      profile: "purpose: review synthetic ideas",
+      profileVersion: 1,
+      manifest: ["README.md"],
+      status: "connected",
+      context: "PRIVATE CODE MUST NOT BE DISCLOSED",
+      createdAt: now,
+      updatedAt: now,
+    });
+    const topicId = await ctx.db.insert("knowledgeTopics", {
+      organizationId: s.organizationId,
+      key: "review",
+      name: "Review",
+      pinned: false,
+      version: 1,
+      state: "ready",
+      createdAt: now,
+      updatedAt: now,
+    });
+    const references = [{ ...s.args.sources[0], insightId: "point-owned" }];
+    const output = {
+      disposition: "relevant",
+      title: "Synthetic project suggestion",
+      rationale: "An owned review task",
+      problem: "Review a decision",
+      approach: "Document it",
+      acceptance: ["Reviewable"],
+      tests: ["Inspect decision"],
+      risks: ["Benefit unmeasured"],
+      alternatives: [],
+      questions: [],
+      references,
+      repositoryEvidence: [],
+    };
+    const evaluationId = await ctx.db.insert("knowledgeEvaluations", {
+      organizationId: s.organizationId,
+      topicId,
+      repositoryId,
+      actor: actor._id,
+      topicVersion: 1,
+      baseSha: "a".repeat(40),
+      profileVersion: 1,
+      selectionVersion: 0,
+      references,
+      sourceSetHash: "synthetic",
+      key: "synthetic-evaluation",
+      state: "ready",
+      decision: "relevant",
+      output,
+      processingVersion: "synthetic",
+      covered: 1,
+      omitted: true,
+      createdAt: now,
+      updatedAt: now,
+    });
+    return { repositoryId, evaluationId, output };
+  });
+  const repositories = [
+    {
+      repositoryId: data.repositoryId,
+      baseSha: "a".repeat(40),
+      profileVersion: 1,
+      selectionVersion: 0,
+    },
+  ];
+  const grant = await s.owner.mutation(api.assistantGrants.save, {
+    ...s.args,
+    repositories,
+    scopes: ["context:read", "suggestions:draft"],
+  });
+  const profile = await s.assistant.query(internal.assistant.getProfile, {
+    profileId: s.organizationId,
+  });
+  const input = {
+    profileId: s.organizationId,
+    evaluationId: data.evaluationId,
+    evaluationHash:
+      profile.profiles[0].projects[0].evaluations![0].evaluation_hash,
+    grantVersion: grant.version,
+    explicitlyRequested: true as const,
+  };
+  return { ...s, ...data, repositories, input, profile, grant };
+}
+it("shares only selected current project context and reuses private cited drafts without overwriting edits or granting publication", async () => {
+  const s = await projectSuggestion();
+  expect(JSON.stringify(s.profile)).not.toContain("PRIVATE CODE");
+  expect(s.profile.profiles[0].projects[0]).toMatchObject({
+    context: "purpose: review synthetic ideas",
+    selection_version: 0,
+  });
+  expect(
+    (await s.assistant.query(internal.assistant.getProfile, {})).profiles[0]
+      .projects,
+  ).toEqual([]);
+  const first = await s.assistant.mutation(
+    internal.assistant.draftProjectSuggestion,
+    s.input,
+  );
+  expect(first).toMatchObject({
+    draft_created: true,
+    publication_started: false,
+    coding_started: false,
+    status: "draft",
+  });
+  const draft = (await s.t.run((ctx) => ctx.db.get(first.draft_id!)))!;
+  expect(draft.body).toContain(`/library/${s.sourceId}`);
+  expect(draft.body).toContain("Benefit and effort remain hypotheses");
+  await s.t.run((ctx) =>
+    ctx.db.patch(draft._id, {
+      title: "My manual correction",
+      body: "My private manual body",
+      version: 2,
+    }),
+  );
+  const replay = await s.assistant.mutation(
+    internal.assistant.draftProjectSuggestion,
+    s.input,
+  );
+  expect(replay).toMatchObject({ draft_id: draft._id, draft_created: false });
+  expect((await s.t.run((ctx) => ctx.db.get(draft._id)))!.body).toBe(
+    "My private manual body",
+  );
+  for (const table of ["issueAttempts", "reservations", "runs"] as const)
+    expect(await s.t.run((ctx) => ctx.db.query(table).collect())).toEqual([]);
+});
+it("requires exact current evaluation, project, grant and all selected evidence for assistant project drafts", async () => {
+  const s = await projectSuggestion();
+  await expect(
+    s.assistant.mutation(internal.assistant.draftProjectSuggestion, {
+      ...s.input,
+      evaluationHash: "b".repeat(64),
+    }),
+  ).rejects.toThrow("APPROVAL_STALE");
+  await expect(
+    s.assistant.mutation(internal.assistant.draftProjectSuggestion, {
+      ...s.input,
+      grantVersion: 2,
+    }),
+  ).rejects.toThrow("APPROVAL_STALE");
+  await s.t.run((ctx) => ctx.db.patch(s.repositoryId, { profileVersion: 2 }));
+  await expect(
+    s.assistant.mutation(internal.assistant.draftProjectSuggestion, s.input),
+  ).rejects.toThrow("APPROVAL_STALE");
+  expect(
+    (
+      await s.assistant.query(internal.assistant.getProfile, {
+        profileId: s.organizationId,
+      })
+    ).profiles[0].projects[0],
+  ).toMatchObject({ context_changed: true });
+  await s.t.run((ctx) => ctx.db.patch(s.repositoryId, { profileVersion: 1 }));
+  await s.t.run((ctx) => ctx.db.patch(s.sourceId, { rightsAttested: false }));
+  await expect(
+    s.assistant.mutation(internal.assistant.draftProjectSuggestion, s.input),
+  ).rejects.toThrow("APPROVAL_STALE");
+  expect(await s.t.run((ctx) => ctx.db.query("issueDrafts").collect())).toEqual(
+    [],
+  );
+});
+it("keeps non-fit judgments distinct and denies unselected context or a revoked project grant", async () => {
+  const s = await projectSuggestion();
+  for (const disposition of [
+    "no_fit",
+    "already_implemented",
+    "unsupported_claim",
+    "needs_context",
+    "defer",
+  ]) {
+    await s.t.run((ctx) =>
+      ctx.db.patch(s.evaluationId, { output: { ...s.output, disposition } }),
+    );
+    const current = await s.assistant.query(internal.assistant.getProfile, {
+      profileId: s.organizationId,
+    });
+    const result = await s.assistant.mutation(
+      internal.assistant.draftProjectSuggestion,
+      {
+        ...s.input,
+        evaluationHash:
+          current.profiles[0].projects[0].evaluations![0].evaluation_hash,
+      },
+    );
+    expect(result).toMatchObject({ status: disposition, draft_created: false });
+  }
+  expect(await s.t.run((ctx) => ctx.db.query("issueDrafts").collect())).toEqual(
+    [],
+  );
+  await expect(
+    s.owner.mutation(api.assistantGrants.save, {
+      ...s.args,
+      expectedVersion: 1,
+      repositories: s.repositories,
+      scopes: ["suggestions:draft"],
+    }),
+  ).rejects.toThrow("INVALID_INPUT");
+  await expect(
+    s.owner.mutation(api.assistantGrants.save, {
+      ...s.args,
+      expectedVersion: 1,
+      repositories: [{ ...s.repositories[0], baseSha: "b".repeat(40) }],
+      scopes: ["context:read"],
+    }),
+  ).rejects.toThrow("STALE_APPROVAL");
+  await s.owner.mutation(api.assistantGrants.revoke, {
+    id: s.grant.id,
+    expectedVersion: 1,
+  });
+  await expect(
+    s.assistant.query(internal.assistant.getProfile, {
+      profileId: s.organizationId,
+    }),
+  ).rejects.toThrow("FORBIDDEN");
+});
+
+it("pages project choices independently and rejects foreign or duplicate project bindings without broadening source approval", async () => {
+  const s = await projectSuggestion();
+  const foreign = await s.owner.mutation(api.organizations.create, {
+    name: "Other owned workspace",
+  });
+  await s.t.run(async (ctx) => {
+    const existing = (await ctx.db.get(s.repositoryId))!;
+    const { _id, _creationTime, ...record } = existing;
+    for (let n = 0; n < 22; n++)
+      await ctx.db.insert("repositories", {
+        ...record,
+        providerId: 100 + n,
+        fullName: `owned/other-${n}`,
+      });
+    await ctx.db.patch(s.repositoryId, { organizationId: foreign });
+  });
+  const first = await s.owner.query(api.assistantGrants.projectChoices, {
+    organizationId: s.organizationId,
+  });
+  const second = await s.owner.query(api.assistantGrants.projectChoices, {
+    organizationId: s.organizationId,
+    cursor: first.repositoryNextCursor,
+  });
+  expect(first.repositories.length + second.repositories.length).toBe(22);
+  expect(
+    first.repositories.some((r) => r.repositoryId === s.repositoryId),
+  ).toBe(false);
+  await expect(
+    s.owner.mutation(api.assistantGrants.save, {
+      ...s.args,
+      expectedVersion: 1,
+      repositories: s.repositories,
+      scopes: ["context:read"],
+    }),
+  ).rejects.toThrow("STALE_APPROVAL");
+  await s.t.run((ctx) =>
+    ctx.db.patch(s.repositoryId, { organizationId: s.organizationId }),
+  );
+  await expect(
+    s.owner.mutation(api.assistantGrants.save, {
+      ...s.args,
+      expectedVersion: 1,
+      repositories: [...s.repositories, ...s.repositories],
+      scopes: ["context:read"],
+    }),
+  ).rejects.toThrow("INVALID_INPUT");
+  await s.owner.mutation(api.assistantGrants.save, {
+    ...s.args,
+    expectedVersion: 1,
+    sources: [],
+    repositories: s.repositories,
+    scopes: ["context:read", "links:save"],
+  });
+  expect(
+    (
+      await s.assistant.query(internal.assistant.getProfile, {
+        profileId: s.organizationId,
+      })
+    ).profiles[0].projects[0].evaluations,
+  ).toEqual([]);
+});
+
+it("preserves owner/admin drafting authority when current membership loses that role", async () => {
+  const s = await projectSuggestion();
+  await s.t.run(async (ctx) => {
+    const actor = (await ctx.db
+      .query("users")
+      .withIndex("by_subject", (q) => q.eq("subject", subject))
+      .unique())!;
+    const member = (await ctx.db
+      .query("memberships")
+      .withIndex("by_pair", (q) =>
+        q.eq("organizationId", s.organizationId).eq("userId", actor._id),
+      )
+      .unique())!;
+    await ctx.db.patch(member._id, { role: "member" });
+  });
+  await expect(
+    s.assistant.mutation(internal.assistant.draftProjectSuggestion, s.input),
+  ).rejects.toThrow("FORBIDDEN");
+  expect(await s.t.run((ctx) => ctx.db.query("issueDrafts").collect())).toEqual(
+    [],
+  );
+});
+
+it("withholds derived evaluation metadata from a context-only grant or OAuth scope", async () => {
+  const s = await projectSuggestion();
+  const contextOnly = s.t.withIdentity({
+    subject,
+    issuer,
+    client_id: clientId,
+    scope: "context:read",
+    sid: "app_consent_01234567890123456789012345",
+  });
+  expect(
+    (
+      await contextOnly.query(internal.assistant.getProfile, {
+        profileId: s.organizationId,
+      })
+    ).profiles[0].projects[0].evaluations,
+  ).toEqual([]);
+  await s.owner.mutation(api.assistantGrants.save, {
+    ...s.args,
+    expectedVersion: 1,
+    repositories: s.repositories,
+    scopes: ["context:read"],
+  });
+  const profile = await s.assistant.query(internal.assistant.getProfile, {
+    profileId: s.organizationId,
+  });
+  expect(profile.profiles[0].projects[0].context).toBe(
+    "purpose: review synthetic ideas",
+  );
+  expect(profile.profiles[0].projects[0].evaluations).toEqual([]);
 });

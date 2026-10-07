@@ -88,7 +88,7 @@ export async function createIssueCore(
   const prior = await ctx.db
     .query("issueDrafts")
     .withIndex("by_evaluation", (q) => q.eq("evaluationId", e._id))
-    .collect();
+    .take(2);
   ensure(
     !prior.length || a.followUp,
     "DUPLICATE_ISSUE",

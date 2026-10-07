@@ -214,3 +214,44 @@ it("serves modern MCP discovery/tools with per-request identity and rejects a mi
     ),
   ).toBe(true);
 });
+
+it("requires the project draft scope and exact review bindings through actual MCP dispatch", async () => {
+  invoke.mockClear();
+  const input = {
+    profileId: "selected-profile",
+    evaluationId: "current-evaluation",
+    evaluationHash: "a".repeat(64),
+    grantVersion: 1,
+    explicitlyRequested: true,
+  };
+  const denied = await call(
+    "tools/call",
+    { name: "draft_project_suggestion", arguments: input },
+    ["context:read"],
+  );
+  expect(denied.status).toBe(403);
+  expect(invoke).not.toHaveBeenCalled();
+  await call(
+    "tools/call",
+    {
+      name: "draft_project_suggestion",
+      arguments: { ...input, publicationApproved: true },
+    },
+    ["suggestions:draft", "context:read"],
+  );
+  expect(invoke).not.toHaveBeenCalled();
+  const missingContext = await call(
+    "tools/call",
+    { name: "draft_project_suggestion", arguments: input },
+    ["suggestions:draft"],
+  );
+  expect(missingContext.status).toBe(403);
+  expect(invoke).not.toHaveBeenCalled();
+  const good = await call(
+    "tools/call",
+    { name: "draft_project_suggestion", arguments: input },
+    ["suggestions:draft", "context:read"],
+  );
+  expect(good.status).toBe(200);
+  expect(invoke).toHaveBeenCalledWith("draft_project_suggestion", input);
+});

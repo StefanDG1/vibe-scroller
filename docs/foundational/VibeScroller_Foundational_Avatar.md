@@ -195,3 +195,7 @@ Copy should sound like a useful friendly product: "Save something worth keeping"
 ## F020: scoped assistant candidate, October 7
 
 F020 preserves the project-owner audience and its need to understand what an assistant can access. The candidate offers explicit selected posts, separate confirmed context, a seven-day default and revocation. Local synthetic checks are not new customer observations or proof that people understand these controls. Previously disclosed conversation content may remain with the host.
+
+## F021: exact project context and private assistant drafts, October 7
+
+F021 retains the project-owner audience. The control now lets owners choose library context and project context separately, inspect commit/context versions and review retained selections. This addresses the access-boundary task without claiming that prospective users understand it; fresh-user comprehension and wrong-account checks remain required.

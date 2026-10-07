@@ -21,7 +21,7 @@ export function createKnowledgeHandler(
       const register = (
         name: string,
         description: string,
-        scope: string,
+        scope: string | [string, ...string[]],
         schema: StandardSchemaWithJSON<Record<string, unknown>>,
         readOnly = true,
       ) =>
@@ -36,8 +36,18 @@ export function createKnowledgeHandler(
               idempotentHint: true,
               openWorldHint: false,
             },
-            scopeChallenge: requireScopes(scope),
-            _meta: { securitySchemes: [{ type: "oauth2", scopes: [scope] }] },
+            scopeChallenge:
+              typeof scope === "string"
+                ? requireScopes(scope)
+                : requireScopes(...scope),
+            _meta: {
+              securitySchemes: [
+                {
+                  type: "oauth2",
+                  scopes: typeof scope === "string" ? [scope] : scope,
+                },
+              ],
+            },
           },
           async (args) => {
             const result = await invoke(name, args as Record<string, unknown>);
@@ -72,6 +82,21 @@ export function createKnowledgeHandler(
             };
           },
         );
+      register(
+        "draft_project_suggestion",
+        "Prepare or reopen a private cited project draft from an exact current relevant evaluation returned by get_profile(profileId). Explicit selected project context and evidence are required. Preserve manual edits and distinguish no-fit, already implemented, unsupported, needs-context and deferred results. This tool starts no analysis, spending, publication or coding.",
+        ["suggestions:draft", "context:read"],
+        z
+          .object({
+            profileId: z.string().max(100).optional(),
+            evaluationId: z.string().min(1).max(100),
+            evaluationHash: z.string().regex(/^[a-f0-9]{64}$/),
+            grantVersion: z.number().int().positive(),
+            explicitlyRequested: z.literal(true),
+          })
+          .strict(),
+        false,
+      );
       register(
         "record_feedback",
         "Record only an explicitly requested judgment about exact current granted evidence. Keep useful, not relevant, already implemented, unsafe/unsupported and later distinct. Corrections require the returned feedback version and stable key. Records a judgment, never a measured benefit or authorization to change evidence, preferences, spending or publication.",
@@ -125,7 +150,12 @@ export function createKnowledgeHandler(
         "get_profile",
         "Return only explicitly approved current workspace profiles and selected stated context. Stable profile IDs survive reconnect. No access to general chat history or inferred context.",
         "context:read",
-        z.object({}).strict(),
+        z
+          .object({
+            profileId: z.string().max(100).optional(),
+            cursor: z.string().max(4096).nullable().optional(),
+          })
+          .strict(),
       );
       register(
         "save_link",

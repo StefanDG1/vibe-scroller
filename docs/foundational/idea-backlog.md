@@ -146,3 +146,7 @@ Research: no new interviews, customer outcomes or causal measurement. Avatar: re
 ## F020: scoped assistant candidate, October 7
 
 F020 is an authorized implementation candidate under ADR 085. Official scoped OAuth, selected current knowledge and explicit intake reuse the current foundation. Production remains disabled. Real supported-client consent and retrieval, remaining V1 tools, interface acceptance and persistent Events where supported are open. No campaign or public plugin submission is authorized by recording this entry.
+
+## F021: exact project context and private assistant drafts, October 7
+
+F021 is an authorized implementation candidate under [ADR 087](../adr/087-exact-project-context-assistant-drafts.md). Record exact project grants and reuse private cited drafts rather than adding another model pass. Local handler and synthetic interface evidence support implementation; real scope consent, provider revocation, fresh-user comprehension and practical usefulness remain tests. A possible counterargument is that version-rich access selection may burden first-time users; validate comprehension without weakening explicit consent. No campaign or public plugin distribution is authorized.
