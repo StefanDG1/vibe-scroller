@@ -94,3 +94,7 @@ Updated Research, Avatar, Offer and Beliefs together for bounded evidence reuse,
 ## F020: scoped assistant candidate, October 7
 
 Updated all four briefs together for F020. The candidate separates assistant OAuth from app authority, uses current explicit grants and reuses capture without media fetch or spending. Local access/HTTP/MCP checks are recorded separately from real provider/client acceptance. The execution ledger also records the merged Explore release and independently authenticated backup without claiming human usefulness or serving recovery.
+
+## F021: exact project context and private assistant drafts, October 7
+
+Updated all four briefs together for F021 and ADR 087. Exact project bindings, separately selected library context and private draft reuse are candidate implementation facts. Local handler tests and scoped synthetic contrast verdict remain separate from real OAuth, human comprehension, two-account integration and measured benefit. Preserve prior research, prices, hypotheses and dissent.

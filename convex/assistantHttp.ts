@@ -11,6 +11,20 @@ const profileId = z.string().max(100).optional();
 const operations = z.discriminatedUnion("operation", [
   z
     .object({
+      operation: z.literal("draft_project_suggestion"),
+      args: z
+        .object({
+          profileId,
+          evaluationId: z.string().min(1).max(100),
+          evaluationHash: z.string().regex(/^[a-f0-9]{64}$/),
+          grantVersion: z.number().int().positive(),
+          explicitlyRequested: z.literal(true),
+        })
+        .strict(),
+    })
+    .strict(),
+  z
+    .object({
       operation: z.literal("record_feedback"),
       args: z
         .object({
@@ -86,7 +100,12 @@ const operations = z.discriminatedUnion("operation", [
   z
     .object({
       operation: z.literal("get_profile"),
-      args: z.object({}).strict(),
+      args: z
+        .object({
+          profileId,
+          cursor: z.string().max(4096).nullable().optional(),
+        })
+        .strict(),
     })
     .strict(),
 ]);
@@ -131,6 +150,16 @@ export const tools = httpAction(async (ctx, request) => {
         : undefined;
     let value: unknown;
     switch (input.operation) {
+      case "draft_project_suggestion":
+        value = await ctx.runMutation(
+          internal.assistant.draftProjectSuggestion,
+          {
+            ...input.args,
+            profileId: selectedProfile,
+            evaluationId: input.args.evaluationId as Id<"knowledgeEvaluations">,
+          },
+        );
+        break;
       case "record_feedback":
         value = await ctx.runMutation(internal.assistant.recordFeedback, {
           ...input.args,
@@ -139,7 +168,10 @@ export const tools = httpAction(async (ctx, request) => {
         });
         break;
       case "get_profile":
-        value = await ctx.runQuery(internal.assistant.getProfile, {});
+        value = await ctx.runQuery(internal.assistant.getProfile, {
+          ...input.args,
+          profileId: selectedProfile,
+        });
         break;
       case "search":
         value = await ctx.runQuery(internal.assistant.search, {

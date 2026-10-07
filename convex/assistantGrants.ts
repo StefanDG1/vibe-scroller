@@ -7,7 +7,9 @@ import {
   assistantIssuer,
   assistantScopes,
 } from "../packages/policy/assistant";
-import { ensure } from "../packages/policy";
+import { ensure, containsSecret } from "../packages/policy";
+import { assistantRepositoryBinding } from "./assistantSchema";
+import { snapshotScopeCurrent } from "../packages/repositories/scope";
 const binding = v.object({
   sourceId: v.id("sources"),
   generation: v.number(),
@@ -48,6 +50,7 @@ export const setup = query({
           sources: g.sources,
           scopes: g.scopes,
           contextVersion: g.contextVersion,
+          repositories: g.repositories ?? [],
           intakeSpace: g.intakeSpace,
           version: g.version,
           state: g.state,
@@ -75,11 +78,46 @@ export const setup = query({
     };
   },
 });
+export const projectChoices = query({
+  args: {
+    organizationId: v.id("organizations"),
+    cursor: v.optional(v.union(v.string(), v.null())),
+  },
+  handler: async (ctx, a) => {
+    await access(ctx, a.organizationId);
+    const repositories = await ctx.db
+      .query("repositories")
+      .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
+      .paginate({ cursor: a.cursor ?? null, numItems: 20 });
+    return {
+      repositoryNextCursor: repositories.isDone
+        ? null
+        : repositories.continueCursor,
+      repositories: repositories.page
+        .filter(
+          (r) =>
+            r.enabled &&
+            r.confirmed &&
+            snapshotScopeCurrent(r) &&
+            r.profile.length <= 8000 &&
+            !containsSecret(r.profile),
+        )
+        .map((r) => ({
+          repositoryId: r._id,
+          name: r.fullName,
+          baseSha: r.sha,
+          profileVersion: r.profileVersion,
+          selectionVersion: r.selectionVersion ?? 0,
+        })),
+    };
+  },
+});
 export const save = mutation({
   args: {
     organizationId: v.id("organizations"),
     clientId: v.string(),
     sources: v.array(binding),
+    repositories: v.optional(v.array(assistantRepositoryBinding)),
     scopes: v.array(v.string()),
     contextVersion: v.optional(v.number()),
     intakeSpace: v.optional(
@@ -142,22 +180,76 @@ export const save = mutation({
         "A selected post changed. Review it again.",
       );
     }
-    if (a.scopes.includes("context:read")) {
+    const repositories = a.repositories ?? [];
+    ensure(
+      repositories.length <= 5 &&
+        new Set(repositories.map((r) => r.repositoryId)).size ===
+          repositories.length,
+      "INVALID_INPUT",
+      "Select at most five distinct projects.",
+    );
+    ensure(
+      !repositories.length || a.scopes.includes("context:read"),
+      "INVALID_INPUT",
+      "Selected project context requires its explicit read scope.",
+    );
+    for (const ref of repositories) {
+      const r = await ctx.db.get(ref.repositoryId);
+      ensure(
+        r &&
+          r.organizationId === a.organizationId &&
+          r.enabled &&
+          r.confirmed &&
+          snapshotScopeCurrent(r) &&
+          r.sha === ref.baseSha &&
+          r.profileVersion === ref.profileVersion &&
+          (r.selectionVersion ?? 0) === ref.selectionVersion &&
+          r.profile.length <= 8000 &&
+          !containsSecret(r.profile),
+        "STALE_APPROVAL",
+        "A selected project changed. Review its current context and snapshot.",
+      );
+    }
+    if (a.contextVersion !== undefined) {
       const context = await ctx.db
         .query("librarySetup")
         .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
         .unique();
       ensure(
-        context?.confirmed && context.version === a.contextVersion,
+        a.scopes.includes("context:read") &&
+          context?.confirmed &&
+          context.version === a.contextVersion,
         "STALE_APPROVAL",
         "Review the current stated context.",
       );
-    } else
-      ensure(
-        a.contextVersion === undefined,
-        "INVALID_INPUT",
-        "Context requires a separate selected scope.",
-      );
+    }
+    ensure(
+      !a.scopes.includes("context:read") ||
+        a.contextVersion !== undefined ||
+        repositories.length > 0,
+      "INVALID_INPUT",
+      "Select the confirmed library context or a current project.",
+    );
+    ensure(
+      !a.scopes.includes("suggestions:draft") ||
+        (a.scopes.includes("context:read") &&
+          repositories.length > 0 &&
+          a.sources.length > 0 &&
+          ["owner", "admin"].includes(
+            (
+              await ctx.db
+                .query("memberships")
+                .withIndex("by_pair", (q) =>
+                  q
+                    .eq("organizationId", a.organizationId)
+                    .eq("userId", actor._id),
+                )
+                .unique()
+            )?.role ?? "",
+          )),
+      "INVALID_INPUT",
+      "Project suggestions require selected project context and evidence, and an owner or admin.",
+    );
     ensure(
       !a.intakeSpace ||
         (organization.privateOwnerId === actor._id &&
@@ -195,6 +287,7 @@ export const save = mutation({
       actor: actor._id,
       clientId: a.clientId,
       sources: a.sources,
+      repositories,
       scopes: a.scopes,
       contextVersion: a.contextVersion,
       intakeSpace: a.intakeSpace,

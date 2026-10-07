@@ -250,3 +250,7 @@ Measure discovery and useful completion as well as conversion, comprehension, re
 ## F020: scoped assistant candidate, October 7
 
 F020 adds a scoped assistant implementation candidate. Local security and protocol tests are engineering evidence, not proof of demand, real account interoperability, better recall or saved time. Independent production-backup authentication covers current retained objects and component paths, but does not establish serving restoration. Keep real client consent and comparative usefulness as separate acceptance needs.
+
+## F021: exact project context and private assistant drafts, October 7
+
+F021 adds local engineering evidence for exact project-context selection and private suggestions reused from current canonical evaluations. The actual handler tests preserve manual edits, distinct non-fit outcomes and current authorization. A fresh finish reviewer resolved one contrast correction in synthetic captures. This is not demand, comprehension, recall or measured-outcome evidence. Actual host consent, provider revocation, two-account isolation and comparative usefulness remain missing.

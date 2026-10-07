@@ -9,6 +9,13 @@ import { ensure, containsSecret, safeSourceUrl } from "../packages/policy";
 import { captureAuthorized, digest } from "./product";
 import { workspaceReadable } from "./lib/workspacePrivacy";
 import { internal } from "./_generated/api";
+import { assistantProject } from "./lib/assistantProject";
+import { evaluationCurrent } from "./knowledge";
+import { createIssueCore } from "./issues";
+import {
+  evaluation as evaluationContract,
+  assertReferences,
+} from "../packages/knowledge/contracts";
 const profile = { profileId: v.optional(v.id("organizations")) };
 export const redactIntakes = internalMutation({
   args: { sourceId: v.id("sources") },
@@ -248,17 +255,22 @@ export const throttle = internalMutation({
   },
 });
 export const getProfile = internalQuery({
-  args: {},
-  handler: async (ctx) => {
+  args: { ...profile, cursor: v.optional(v.union(v.string(), v.null())) },
+  handler: async (ctx, args) => {
     const p = await assistantPrincipal(ctx, "context:read");
-    const rows = await ctx.db
-      .query("assistantGrants")
-      .withIndex("by_actor_client", (q) =>
-        q.eq("actor", p.actor._id).eq("clientId", p.client.id),
-      )
-      .take(51);
+    const page = args.profileId
+      ? null
+      : await ctx.db
+          .query("assistantGrants")
+          .withIndex("by_actor_client", (q) =>
+            q.eq("actor", p.actor._id).eq("clientId", p.client.id),
+          )
+          .paginate({ cursor: args.cursor ?? null, numItems: 10 });
+    const selected = args.profileId
+      ? await assistantGrant(ctx, args.profileId, "context:read")
+      : null;
     const profiles = [];
-    for (const grant of rows) {
+    for (const grant of selected ? [selected.grant] : page!.page) {
       const org = await ctx.db.get(grant.organizationId);
       const member = await ctx.db
         .query("memberships")
@@ -276,40 +288,212 @@ export const getProfile = internalQuery({
         !grant.scopes.includes("context:read")
       )
         continue;
-      const context = await ctx.db
-        .query("librarySetup")
-        .withIndex("by_org", (q) =>
-          q.eq("organizationId", grant.organizationId),
-        )
-        .unique();
+      const context =
+        grant.contextVersion === undefined
+          ? null
+          : await ctx.db
+              .query("librarySetup")
+              .withIndex("by_org", (q) =>
+                q.eq("organizationId", grant.organizationId),
+              )
+              .unique();
+      const projects = [];
+      if (selected)
+        for (const ref of (grant.repositories ?? []).slice(0, 5)) {
+          let repository;
+          try {
+            repository = await assistantProject(
+              ctx,
+              selected,
+              ref.repositoryId,
+            );
+          } catch {
+            projects.push({
+              project_id: ref.repositoryId,
+              context_changed: true,
+            });
+            continue;
+          }
+          const rows =
+            selected.scopes.includes("suggestions:draft") &&
+            selected.client.scopes.includes("suggestions:draft") &&
+            grant.scopes.includes("suggestions:draft")
+              ? await ctx.db
+                  .query("knowledgeEvaluations")
+                  .withIndex("by_repo", (q) =>
+                    q.eq("repositoryId", repository._id),
+                  )
+                  .order("desc")
+                  .take(5)
+              : [];
+          const evaluations = [];
+          for (const e of rows) {
+            const parsed = evaluationContract.safeParse(e.output);
+            if (
+              e.organizationId !== grant.organizationId ||
+              e.state !== "ready" ||
+              !parsed.success ||
+              containsSecret(parsed.data.title) ||
+              !(await evaluationCurrent(ctx, e))
+            )
+              continue;
+            try {
+              assertReferences([parsed.data], e.references);
+            } catch {
+              continue;
+            }
+            let granted = true;
+            for (const r of [...e.references, ...parsed.data.references])
+              if (
+                !(await sourceFor(
+                  ctx,
+                  selected,
+                  ctx.db.normalizeId("sources", r.sourceId),
+                ))
+              )
+                granted = false;
+            if (granted)
+              evaluations.push({
+                evaluation_id: e._id,
+                evaluation_hash: await digest(JSON.stringify(e.output)),
+                title: parsed.data.title,
+                disposition: parsed.data.disposition,
+              });
+          }
+          projects.push({
+            project_id: repository._id,
+            name: repository.fullName.slice(0, 200),
+            base_sha: repository.sha,
+            profile_version: repository.profileVersion,
+            selection_version: repository.selectionVersion ?? 0,
+            context: repository.profile,
+            evaluations,
+            context_changed: false,
+          });
+        }
       profiles.push({
         profile_id: grant.organizationId,
-        name: org!.name,
+        name: org!.name.slice(0, 200),
         grant_version: grant.version,
         expires_at: grant.expiresAt,
+        selected_project_count: (grant.repositories ?? []).length,
+        projects,
         context:
           context?.confirmed && context.version === grant.contextVersion
             ? {
-                goal: context.goal,
-                interests: context.interests,
-                role: context.role,
+                goal: context.goal.slice(0, 500),
+                interests: context.interests
+                  .slice(0, 20)
+                  .map((i) => i.slice(0, 80)),
+                role: context.role.slice(0, 160),
               }
             : undefined,
-        context_changed: !!context && context.version !== grant.contextVersion,
+        context_changed:
+          grant.contextVersion !== undefined &&
+          (!context?.confirmed || context.version !== grant.contextVersion),
       });
     }
     return {
       profiles,
+      next_cursor: page && !page.isDone ? page.continueCursor : null,
       coverage:
-        "Only explicitly approved current profiles; no account email, prior conversations or inferred personal context.",
+        "Ten approved profile records per page. Select profileId for at most five explicitly granted project contexts and five current evaluations per project; other evaluations are omitted. No repository code, account email or conversation history.",
+    };
+  },
+});
+export const draftProjectSuggestion = internalMutation({
+  args: {
+    ...profile,
+    evaluationId: v.id("knowledgeEvaluations"),
+    evaluationHash: v.string(),
+    grantVersion: v.number(),
+    explicitlyRequested: v.literal(true),
+  },
+  handler: async (ctx, args) => {
+    const a = await assistantGrant(
+      ctx,
+      await selectedProfile(ctx, args.profileId),
+      "suggestions:draft",
+    );
+    await assistantGrant(ctx, a.organization._id, "context:read");
+    const e = await ctx.db.get(args.evaluationId);
+    ensure(
+      e &&
+        e.organizationId === a.organization._id &&
+        e.state === "ready" &&
+        e.output &&
+        args.grantVersion === a.grant.version &&
+        /^[a-f0-9]{64}$/.test(args.evaluationHash) &&
+        args.evaluationHash === (await digest(JSON.stringify(e.output))),
+      "APPROVAL_STALE",
+      "Review the exact current project evaluation and assistant grant.",
+    );
+    await assistantProject(ctx, a, e.repositoryId);
+    const output = evaluationContract.parse(e.output);
+    assertReferences([output], e.references);
+    ensure(
+      !containsSecret(output.title),
+      "POLICY_BLOCKED",
+      "Project suggestions cannot disclose credentials.",
+    );
+    ensure(
+      await evaluationCurrent(ctx, e),
+      "APPROVAL_STALE",
+      "Project fit or its source evidence changed.",
+    );
+    for (const ref of [...e.references, ...output.references])
+      ensure(
+        await sourceFor(ctx, a, ctx.db.normalizeId("sources", ref.sourceId)),
+        "FORBIDDEN",
+        "Every cited post must be explicitly granted and current.",
+      );
+    ensure(
+      ["owner", "admin"].includes(a.membership.role),
+      "FORBIDDEN",
+      "Private project drafts require an owner or admin.",
+    );
+    const review_url = `https://scroll.companynerve.com/app/${a.organization._id}/projects`;
+    if (output.disposition !== "relevant")
+      return {
+        status: output.disposition,
+        draft_created: false,
+        review_url,
+        note: "This evaluation does not establish a suitable implementation task. Review its evidence and uncertainty in VibeScroll.",
+      };
+    const previous = await ctx.db
+      .query("issueDrafts")
+      .withIndex("by_evaluation", (q) => q.eq("evaluationId", e._id))
+      .take(2);
+    const id =
+      previous[0]?._id ??
+      (await createIssueCore(ctx, { id: e._id, followUp: false }, a.actor));
+    await audit(
+      ctx,
+      a.organization._id,
+      a.actor._id,
+      "assistant.project_suggestion_reviewed",
+      id,
+    );
+    return {
+      draft_id: id,
+      status: previous[0]?.state ?? "draft",
+      draft_created: !previous.length,
+      review_url,
+      review_section: "Reviewed issues",
+      evaluation_id: e._id,
+      title: output.title,
+      publication_started: false,
+      coding_started: false,
+      note: "Private cited draft only. Existing edits are preserved. Benefit and effort remain hypotheses; publication and coding each require their separate approvals.",
     };
   },
 });
 async function sourceFor(
   ctx: QueryCtx,
   a: Awaited<ReturnType<typeof assistantGrant>>,
-  sourceId: Id<"sources">,
+  sourceId: Id<"sources"> | null,
 ) {
+  if (!sourceId) return null;
   const binding = a.grant.sources.find((r) => r.sourceId === sourceId);
   if (!binding) return null;
   const source = await ctx.db.get(sourceId);
@@ -479,7 +663,11 @@ export const search = internalQuery({
         card.state === "deleted"
       )
         continue;
-      const source = await sourceFor(ctx, a, ref.sourceId);
+      const source = await sourceFor(
+        ctx,
+        a,
+        ctx.db.normalizeId("sources", ref.sourceId),
+      );
       if (!source) continue;
       const url = `https://scroll.companynerve.com/app/${a.organization._id}/library/${source._id}`;
       const insights =

@@ -123,3 +123,7 @@ Follow [ADR 058](adr/058-bounded-full-library-scans.md): full URL-link paginatio
 ## October 7: resumable bounded evidence backups
 
 [ADR 083](adr/083-resumable-bounded-evidence-backups.md) adds an operator-only encrypted checkpoint and bounded parts while preserving existing per-object and batch/restore limits, fresh deletion/generation guards and seven-day retention. Local regression checks do not establish a full retained-object backup or serving restoration.
+
+## October 7: exact project context and private assistant suggestions
+
+[ADR 087](adr/087-exact-project-context-assistant-drafts.md) makes confirmed library context and exact project context separate explicit choices. Private assistant suggestions reuse current canonical evaluations and existing private drafts, preserving manual edits and distinct non-fit judgments. They grant no spending, publication or coding authority. Real OAuth and host acceptance remain separate gates.

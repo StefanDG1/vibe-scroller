@@ -1,5 +1,11 @@
 import { defineTable } from "convex/server";
 import { v } from "convex/values";
+export const assistantRepositoryBinding = v.object({
+  repositoryId: v.id("repositories"),
+  baseSha: v.string(),
+  profileVersion: v.number(),
+  selectionVersion: v.number(),
+});
 export const assistantTables = {
   assistantIntakes: defineTable({
     organizationId: v.id("organizations"),
@@ -29,6 +35,7 @@ export const assistantTables = {
     ),
     scopes: v.array(v.string()),
     contextVersion: v.optional(v.number()),
+    repositories: v.optional(v.array(assistantRepositoryBinding)),
     intakeSpace: v.optional(
       v.union(v.literal("personal"), v.literal("business")),
     ),

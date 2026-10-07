@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-07T02:36:10Z",
+  "generatedAt": "2026-10-07T04:58:24Z",
   "title": "Design System: VibeScroll",
   "extensions": {
     "assistantAccessReview": {
@@ -11,7 +11,7 @@
       "maximumSelectedPosts": 50,
       "grantDurationDays": 7,
       "pollIntervalMs": 60000,
-      "pollScope": "Workspace and source-page cursor; visible/online pages only; suspended during pending mutation; generation-fenced responses.",
+      "pollScope": "Workspace, source-page cursor and project-page cursor; visible/online pages only; suspended during pending mutation; generation-fenced responses.",
       "finishDisposition": "All three requested corrections resolved at fix-list scope only: wrapping intrinsic pagination controls, independent 44px review-link targets and operation-specific save/revoke pending labels.",
       "stateReviewDisposition": "Separate ship disposition for two resolved state fixes only: readable scoped error material and accurate new-grant preparation notice. Original three corrections remain resolved.",
       "preparedState": "New grants unavailable until official OAuth is configured and verified; existing access records and revoke controls remain visible.",
@@ -31,6 +31,36 @@
         ".impeccable/review/assistant-access/error-390.png"
       ],
       "evidenceBoundary": "Local synthetic captures with emulated focus. No real OAuth, human keyboard acceptance, privacy-integration acceptance or production acceptance."
+    },
+    "assistantProjectContextReview": {
+      "mode": "Operate",
+      "identity": "Completed extension of incumbent Scroll studio assistant access; existing palette, typography, flat fieldsets, controls and artwork preserved.",
+      "sources": [
+        "apps/starter/components/assistant-connections.tsx",
+        "apps/starter/app/product.css: assistant styles",
+        "apps/starter/components/repository-checklist.tsx: BusinessContext repository anchor"
+      ],
+      "contextChoice": "Explicit confirmed-library checkbox, up to five confirmed current projects, or both; shown only with context-read permission.",
+      "maximumSelectedProjects": 5,
+      "projectPaging": "Independent bounded project pages retain selected references across pages; First projects, More projects and Clear projects retain intrinsic wrapping controls.",
+      "retainedReview": "Native selected-project disclosure includes context version, snapshot version and abbreviated commit. Independent 44px project links reach stable repository business-context anchors.",
+      "metadataTreatment": "Project-row small text is block-level secondary text using existing --subtle, normal weight and a 4px top gap; long names and metadata wrap within the panel.",
+      "acknowledgment": "Exact posts, selected context and actions for seven days; binding includes project references and confirmed-library inclusion. Relevant changes and project-page navigation clear acknowledgment.",
+      "privateSuggestionDependencies": "Selected posts, selected project context and context-read permission; visible dependency copy also requires owner/admin access. Repository code, spending, coding, publication and chat history are excluded.",
+      "finishReview": ".impeccable/review/project-grants/finish-review.md: fix, one project-metadata contrast correction.",
+      "finishDisposition": ".impeccable/review/project-grants/finish-verdict.md: ship at the single contrast-fix scope only; supplied corrected text/panel contrast is 9.11:1.",
+      "captures": [
+        ".impeccable/review/project-grants/review-320.png",
+        ".impeccable/review/project-grants/review-390.png",
+        ".impeccable/review/project-grants/review-768.png",
+        ".impeccable/review/project-grants/review-1440.png"
+      ],
+      "proofs": [
+        ".impeccable/review/project-grants/contrast-fix-proof.json",
+        ".impeccable/review/project-grants/browser-proof.json",
+        ".impeccable/review/project-grants/interaction-proof.json"
+      ],
+      "evidenceBoundary": "Supplied local synthetic screenshots and computed/interaction proofs only. No new world, seed, approved comp, raster asset, detector or render run. No real OAuth, fresh-login, two-account privacy, physical/mobile provider or production acceptance."
     },
     "colorMeta": {
       "ink": {

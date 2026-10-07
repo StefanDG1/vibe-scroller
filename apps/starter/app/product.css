@@ -2877,3 +2877,10 @@ dialog.capture-modal::backdrop {
   background: #3e242e;
   border-color: #764153;
 }
+
+.assistant-source-choices small {
+  display: block;
+  margin-top: 4px;
+  color: var(--subtle);
+  font-weight: 400;
+}
