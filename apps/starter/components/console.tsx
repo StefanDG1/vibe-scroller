@@ -377,6 +377,7 @@ export function Console({
       ].filter((element) => element.getClientRects().length);
     controls()[0]?.focus();
     function keyboard(event: KeyboardEvent) {
+      if (event.defaultPrevented) return;
       if (event.key === "Escape") {
         event.preventDefault();
         setCaptureOpen(false);

@@ -1,5 +1,11 @@
 "use client";
-import { Children, isValidElement, useState, type ReactNode } from "react";
+import {
+  Children,
+  isValidElement,
+  useCallback,
+  useState,
+  type ReactNode,
+} from "react";
 import * as Menu from "@radix-ui/react-dropdown-menu";
 import { Check, ChevronDown } from "lucide-react";
 
@@ -37,6 +43,10 @@ export function ChoiceSelect({
       return props;
     });
   const [local, setLocal] = useState(defaultValue ?? options[0]?.value ?? "");
+  const [portalContainer, setPortalContainer] = useState<HTMLElement>();
+  const bindTrigger = useCallback((node: HTMLButtonElement | null) => {
+    if (node) setPortalContainer(node.closest("dialog") ?? undefined);
+  }, []);
   const selected = value ?? local;
   return (
     <>
@@ -45,6 +55,7 @@ export function ChoiceSelect({
       )}
       <Menu.Root>
         <Menu.Trigger
+          ref={bindTrigger}
           id={id}
           disabled={disabled}
           className="choice-trigger"
@@ -56,7 +67,7 @@ export function ChoiceSelect({
           </span>
           <ChevronDown size={16} aria-hidden="true" />
         </Menu.Trigger>
-        <Menu.Portal>
+        <Menu.Portal container={portalContainer}>
           <Menu.Content
             className="choice-menu"
             sideOffset={6}
