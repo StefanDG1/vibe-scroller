@@ -2,6 +2,10 @@
 
 Mode: reference. These decisions supersede earlier alternatives in the discussion.
 
+## October 7: bounded Library Explore
+
+[ADR 084](adr/084-bounded-library-explore.md) reuses current cited evidence and recorded outcomes in five bounded Explore views. Owner-private space filters and all-input checks run on the server. Manual layout/alias corrections do not rerun analysis or confer sharing authority. Exact release and independent retrieval/usefulness acceptance remain pending.
+
 ## October 7: private filing and setup
 
 [ADR 081](adr/081-private-filing-and-confirmed-setup.md) adds explicit Personal/Business memberships and saved user-stated setup only within the enforced owner-private library. Confirmed combined browsing is distinct from team/assistant grants and funding authority.

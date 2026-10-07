@@ -210,6 +210,8 @@ The studio welcome pairs a 192px-wide character with the next action, separated 
 
 **The Touch Target Rule.** Interactive controls keep at least a 44px target; small type and icons do not justify a smaller hit area. Informational chips are not controls.
 
+Explore keeps its five view controls and representation controls wrapping rather than squeezing their targets. Topic rows use a full-width reading area with a minimum height (64px); nested native disclosures use quiet left rules and reduce deep indentation on phones (480px and below). The optional connection canvas scrolls inside a bounded viewport (560px maximum height). Its two node columns each occupy 40% of the surface, with a fixed row pitch (112px) and node height (92px); relation counts stay inside the node. Canvas previews may truncate claims, while the evidence dialog retains the full text. At 480px and below that native dialog becomes a full-width bottom sheet with rounded top corners; on larger screens it is centered, width bounded to 680px and height bounded to 85dvh.
+
 ## Elevation & Depth
 
 The shell uses tonal layering and thin separators. Source rows sit directly on the canvas, panels have quiet borders and the toolbar separates from content with a dark line. The account menu alone carries a soft floating shadow (`0 12px 32px #0006`). Dialogs dim the surrounding surface (`#0009`) rather than decorating the dialog with a dramatic shadow.
@@ -305,6 +307,26 @@ Color and border responses run briefly (140ms ease-out). Account menus reveal wi
 Keep search and filters in the existing dark control style. Use accessible names for unlabeled selectors, 44 px controls and wrapping layouts on narrow screens. Search uses relevance and disables date/title sorting until cleared. A source row displays its insight count, a short point preview and up to four category names; the full row opens actual details. Category editing lives in a native disclosure within those details, with saving, error, empty and success behavior using the existing operation state. Shared suggestions are a separate owner/admin choice with a concise privacy explanation.
 
 Source thumbnails use the first retained private frame when available, load lazily and fade in over 160 ms. Failed or unavailable evidence retains the media-type icon. Reduced motion disables the fade. The image goes through the tenant-checked no-store endpoint and bypasses public image optimization. Completed sources show their insight count without a redundant ready label. Phone filters each keep a usable full-width touch target.
+
+### Library Explore
+
+Explore reuses the studio material and existing native buttons, shared choice controls and disclosures. Its five views are Topic tree, Connections, Idea journey, Topic overview and What helped. The selected view uses mint with accent ink; unselected controls stay quiet. Topic tree is the default, built only from the bounded loaded page. Expand a parent with a native disclosure, then use its separate Inspect action to read evidence. A parent missing from the loaded page remains a root; hierarchy never implies new evidence or authorization. When available, Edit topic structure stays in a native disclosure. Representation switches, recovery actions and this summary retain minimum 44px targets and visible keyboard focus, including a two-pixel ring with three-pixel offset on the summary.
+
+Connections defaults to a readable list. Focused canvas is an optional equivalent representation of the same current cited groups and ideas. Labels distinguish Similar ideas, Work together, Disagreement and Useful combination. Lines connect a cited group to its supporting ideas; they neither assert pairwise agreement nor establish causation. Topic membership alone is not agreement. Keep the textual equivalent reachable and retain source evidence for each idea.
+
+**The Cited Group Rule.** Display a connection only when all of its exact source, generation, revision and insight references exist in current permitted evidence. A connection is an explained cited group; neither its line nor topic membership proves causation or agreement.
+
+The focused canvas uses keyboard buttons for every node, a keyboard-scrollable viewport and Fit and reset. Selecting a node opens a labeled native modal dialog containing the full explanation, claims and source links. Escape and Close evidence close it and return focus to the invoking node. Phone presentation uses the bottom sheet described in Layout. The readable list reveals the same claims and source links inline.
+
+**The Explore Coverage Rule.** Keep counts tied to the loaded page and explain overlap: shared topic membership is not independent corroboration. Show at most 40 loaded topics and 40 connection-map nodes. Topic overview bars use the twenty-idea evidence-page limit as full scale, not whole-topic size or benefit.
+
+Use Show more topics for the bounded accumulating topic window and Back to first topics page to recover its beginning. Use Next evidence page for the next part of a topic; both the button and explanatory copy use that label. Cited groups paginate separately with Next cited groups and First cited groups. Keep loading announcements, empty coverage and failed-access recovery distinct; an access failure clears the selected evidence rather than becoming a successful empty result.
+
+Idea journey presents the recorded sequence: saved posts and cited ideas, evaluation with repository version, issue draft or published issue, implementation run and PR, deployment record, then outcome when present. Current and historical project fit remain visibly distinct. What helped separates Recorded judgment from Reported comparison; a comparison retains before/after values, units, sample counts, baseline and observation periods, and limitations. Deployment-version absence stays explicit.
+
+**The Recorded Outcome Rule.** Present saving, evaluation, issue, PR, merge, deployment and benefit as separate recorded facts. A judgment is not a measured comparison, and a merged PR alone does not establish benefit.
+
+October 7 documentation evidence is the implemented Explore, connection map and canvas plus their scoped design-recipe styles. The fixed desktop/phone captures, desktop-tree-final.png, mobile-tree-final.png, phone-320-tree.png and tablet-768-tree.png in .impeccable/review/knowledge-explore/ retain the local synthetic review. proof.json records native Escape closing, focus return and no horizontal overflow; fix-target-proof.json records the native structure summary's visible mint focus ring. Independent finish review cleared all five corrections: representation/recovery/disclosure targets, summary focus, canvas count fit, overview scale explanation and matching evidence-pagination copy. The ship disposition is LOCAL SYNTHETIC FRONTEND SLICE only. It establishes no real authentication, provider, source, permission, production, customer-result or full V1 acceptance.
 
 ### Plan review
 

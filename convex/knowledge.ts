@@ -279,6 +279,7 @@ export async function syncKnowledge(
           organizationId: source.organizationId,
           key,
           name: normalized,
+          searchText: normalized,
           pinned: false,
           version: 1,
           state: "pending",
@@ -626,7 +627,10 @@ export const correct = mutation({
         "POLICY_BLOCKED",
         "Do not include secrets.",
       );
-      await ctx.db.patch(t._id, { name });
+      await ctx.db.patch(t._id, {
+        name,
+        searchText: [name, ...(t.aliases ?? [])].join(" "),
+      });
     }
     if (a.pinned !== undefined) await ctx.db.patch(t._id, { pinned: a.pinned });
     if (a.memberId) {
@@ -650,6 +654,7 @@ export const correct = mutation({
         dest = await ctx.db.insert("knowledgeTopics", {
           organizationId: t.organizationId,
           name,
+          searchText: name.toLocaleLowerCase(),
           key: `manual_${crypto.randomUUID()}`,
           version: 1,
           state: "pending",

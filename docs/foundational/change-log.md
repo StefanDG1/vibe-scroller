@@ -86,3 +86,7 @@ Updated all four current briefs with the limited local slice: VibeScroll display
 ## F017: private setup and filing candidate, October 7
 
 Reconciled Research, Avatar, Offer and Beliefs together for the actual candidate handlers and reviewed local synthetic UI. User-stated answers have provenance and versioned confirmation; Personal/Business filing stays within real owner-private authorization. Combined browsing has a separate confirmed preference, while team/assistant grants and spending remain separate. Six local handler tests and native fixture checks support implementation facts, not demand, production, first-analysis or real two-account acceptance. These gates remain visible; prior research and dissent are unchanged.
+
+## F019, October 7: exploration candidate
+
+Updated Research, Avatar, Offer and Beliefs together for bounded evidence reuse, server-enforced private space filtering, manual hierarchy/aliases, recorded journeys and judgment/comparison distinction. Native fixtures and local tests are engineering evidence. Exact serving release and independent recall/quality/outcome acceptance remain pending. No customer result, provider permission, pricing change or campaign is claimed.

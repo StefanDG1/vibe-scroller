@@ -45,6 +45,7 @@ import type * as issues from "../issues.js";
 import type * as jobs from "../jobs.js";
 import type * as knowledge from "../knowledge.js";
 import type * as knowledgeActions from "../knowledgeActions.js";
+import type * as knowledgeExplore from "../knowledgeExplore.js";
 import type * as knowledgeGrants from "../knowledgeGrants.js";
 import type * as knowledgeSchema from "../knowledgeSchema.js";
 import type * as lib from "../lib.js";
@@ -150,6 +151,7 @@ declare const fullApi: ApiFromModules<{
   jobs: typeof jobs;
   knowledge: typeof knowledge;
   knowledgeActions: typeof knowledgeActions;
+  knowledgeExplore: typeof knowledgeExplore;
   knowledgeGrants: typeof knowledgeGrants;
   knowledgeSchema: typeof knowledgeSchema;
   lib: typeof lib;

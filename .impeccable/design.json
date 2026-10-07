@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-07T01:47:03Z",
+  "generatedAt": "2026-10-07T02:36:10Z",
   "title": "Design System: VibeScroll",
   "extensions": {
     "colorMeta": {
@@ -407,6 +407,20 @@
       "description": "Scoped separation between the new sharing action and saved recipient grants. Static synthetic specimen; controls do not create or revoke real grants.",
       "html": "<section class=\"ds-grants\" aria-label=\"Synthetic saved grants specimen\"><button class=\"ds-grant-button\" disabled>Share reviewed version</button><h3 class=\"ds-grants-heading\">Your workspace grants</h3><ul class=\"ds-grants-list\"><li><span><strong>Synthetic workspace</strong><span class=\"ds-grant-meta\"> Expires in seven days / 1 selected source version. Changed versions require review.</span></span><button class=\"ds-grant-button ds-grant-secondary\">Revoke grant</button></li></ul></section>",
       "css": ".ds-grants{color:var(--ink,#f4f4f4);font:14px/1.6 Inter,system-ui,sans-serif}.ds-grants-heading{margin:28px 0 12px;font-size:1.05rem;font-weight:550}.ds-grants-list{list-style:none;padding:0;margin-block:1rem;min-width:0}.ds-grants-list li{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;padding-block:.75rem;border-bottom:1px solid var(--border,#39453f)}.ds-grant-meta{color:var(--subtle,#b3bdb7);font-size:.8rem}.ds-grant-button{min-height:44px;min-width:44px;padding:10px 17px;border:1px solid var(--ink,#f4f4f4);border-radius:10px;background:var(--ink,#f4f4f4);color:#141414;font:550 14px/1.6 Inter,system-ui,sans-serif;white-space:nowrap;cursor:pointer;transition:background-color 140ms ease-out}.ds-grant-secondary{background:transparent;color:var(--ink,#f4f4f4);border-color:var(--line,#39453f)}.ds-grant-secondary:hover:not(:disabled){background:var(--soft,#262626)}.ds-grant-button:focus-visible{outline:2px solid #d4d4d4;outline-offset:3px}.ds-grant-button:disabled{opacity:.45;cursor:not-allowed}@media(max-width:480px){.ds-grants-list li{flex-direction:column;gap:.25rem}}@media(prefers-reduced-motion:reduce){.ds-grant-button{transition:none}}"
+    },
+    {
+      "name": "Explore topic disclosure",
+      "kind": "custom",
+      "description": "Bounded native topic tree, the default among five Explore views. Static synthetic specimen; inspection does not load actual records.",
+      "html": "<section class=\"ds-explore-tree\"><details><summary><span><strong>Synthetic topic</strong><span class=\"ds-explore-meta\">2 posts / 2 current ideas</span></span></summary><button class=\"ds-explore-inspect\">Inspect topic</button><ul><li><button class=\"ds-explore-row\"><span><strong>Synthetic child topic</strong><span class=\"ds-explore-meta\">1 post / 1 current idea</span></span></button></li></ul></details><p class=\"ds-explore-meta\">Counts describe this page; overlapping topics are not independent corroboration.</p></section>",
+      "css": ".ds-explore-tree{color:var(--foreground,#f4f4f4);font:14px/1.6 Inter,system-ui,sans-serif}.ds-explore-tree summary,.ds-explore-row{display:flex;align-items:center;gap:16px;min-height:64px;padding:16px 8px;border:0;background:transparent;color:inherit;text-align:left;white-space:normal;cursor:pointer}.ds-explore-tree summary>span,.ds-explore-row>span{display:grid;gap:8px;min-width:0;overflow-wrap:anywhere}.ds-explore-meta{display:block;color:var(--muted-foreground,#b3bdb7);font-size:13px}.ds-explore-tree ul{list-style:none;margin:0 0 0 16px;padding:0 0 0 12px;border-left:1px solid var(--border,#39453f)}.ds-explore-row{width:100%}.ds-explore-inspect{min-height:44px;min-width:44px;padding:10px 16px;border:1px solid var(--border,#39453f);border-radius:8px;background:var(--card,#1d2421);color:inherit;font:600 14px/1.6 Inter,system-ui,sans-serif;cursor:pointer}.ds-explore-tree summary:hover,.ds-explore-row:hover{background:var(--muted,#262626)}.ds-explore-inspect:hover{border-color:var(--primary,#87dfc1)}.ds-explore-tree summary:focus-visible,.ds-explore-row:focus-visible,.ds-explore-inspect:focus-visible{outline:2px solid var(--ring,#87dfc1);outline-offset:3px}"
+    },
+    {
+      "name": "Explore connection representation",
+      "kind": "custom",
+      "description": "Readable list is the default; focused canvas uses the same cited groups. Representation, recovery and disclosure controls retain 44px targets. Static synthetic specimen; canvas evidence uses a native modal with focus return in the application.",
+      "html": "<section class=\"ds-explore-representations\"><fieldset aria-label=\"Connection representation\"><button aria-pressed=\"true\">Readable list</button><button aria-pressed=\"false\">Focused canvas</button></fieldset><p>Lines join a cited connection group to its supporting ideas. They do not establish causation.</p><div class=\"ds-explore-cited\"><strong>Work together</strong><span>2 ideas</span></div><details><summary>Full synthetic evidence</summary><p>Inspect the full claim and its exact source evidence in the application.</p></details></section>",
+      "css": ".ds-explore-representations{color:var(--foreground,#f4f4f4);font:14px/1.6 Inter,system-ui,sans-serif}.ds-explore-representations fieldset{display:flex;gap:8px;flex-wrap:wrap;padding:0;border:0;margin:16px 0 24px}.ds-explore-representations button{min-width:44px;min-height:44px;padding:10px 14px;border:1px solid var(--border,#39453f);border-radius:8px;color:inherit;background:var(--card,#1d2421);font:600 14px/1.6 Inter,system-ui,sans-serif;cursor:pointer}.ds-explore-representations button[aria-pressed=true]{color:var(--primary-foreground,#10251e);background:var(--primary,#87dfc1);border-color:var(--primary,#87dfc1)}.ds-explore-representations button:hover{border-color:var(--primary,#87dfc1)}.ds-explore-representations button:focus-visible,.ds-explore-representations summary:focus-visible{outline:2px solid var(--ring,#87dfc1);outline-offset:3px}.ds-explore-cited{padding:12px;border:1px solid var(--border,#39453f);border-radius:12px;background:var(--muted,#262626)}.ds-explore-cited strong,.ds-explore-cited span{display:block;font-size:14px;line-height:1.5}.ds-explore-cited strong{margin-bottom:8px}.ds-explore-representations summary{display:flex;align-items:center;min-height:44px;padding-block:10px;cursor:pointer}"
     }
   ],
   "narrative": {
@@ -449,6 +463,21 @@
       {
         "name": "The Private Filing Rule",
         "body": "Organization choices describe the owner's private views; they never imply sharing permission or analysis authority. Setup rows wrap on narrow screens while action labels remain on one line. Combined browsing requires explicit confirmed setup; turning it off fences earlier responses and clears visible results.",
+        "section": "components"
+      },
+      {
+        "name": "The Cited Group Rule",
+        "body": "Display a connection only when all of its exact source, generation, revision and insight references exist in current permitted evidence. A connection is an explained cited group; neither its line nor topic membership proves causation or agreement.",
+        "section": "components"
+      },
+      {
+        "name": "The Explore Coverage Rule",
+        "body": "Keep counts tied to the loaded page and explain overlap: shared topic membership is not independent corroboration. Show at most 40 loaded topics and 40 connection-map nodes. Topic overview bars use the twenty-idea evidence-page limit as full scale, not whole-topic size or benefit.",
+        "section": "components"
+      },
+      {
+        "name": "The Recorded Outcome Rule",
+        "body": "Present saving, evaluation, issue, PR, merge, deployment and benefit as separate recorded facts. A judgment is not a measured comparison, and a merged PR alone does not establish benefit.",
         "section": "components"
       }
     ],
