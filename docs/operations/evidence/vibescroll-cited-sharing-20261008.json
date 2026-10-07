@@ -86,7 +86,20 @@
       "concurrent": "on-demand disabled; queue one build at a time",
       "changed": false
     },
-    "backend": "unchanged compatible 1db35d26d357990a0b81cad7170b8f6b011e1efe"
+    "backend": "unchanged compatible 1db35d26d357990a0b81cad7170b8f6b011e1efe",
+    "newLiveCitedGrant": {
+      "at": "2026-10-07T22:50:23.662417+00:00",
+      "ordinaryViewerDetail": 200,
+      "sameLabeledSyntheticSource": true,
+      "ownerAccounts": 2,
+      "nativeCitationAt": "2026-10-07T22:50:34.815383+00:00",
+      "untimedNoteRemainsUntimed": true,
+      "headerAndH1": "Shared knowledge",
+      "phone390Overflow": false,
+      "phoneScope": "native Chrome CSS viewport; physical-device acceptance not claimed",
+      "optionalAnalytics": "explicit native rejection; no analytics granted"
+    },
+    "newLiveCitationScope": "Actual subsequent production grant supersedes the earlier no-second-live-grant limitation; static specimen remains separately labeled."
   },
   "manualDocumentationExecution": {
     "modelResult": "needs_context retained in original detail",
@@ -148,5 +161,48 @@
       "scope": "delayed team invoice, not proof of zero new cost or settled job cost"
     },
     "periodicMonitor": "read-only every six hours; quiet on unchanged state; no paid work or limit changes"
+  },
+  "correctionAndRoleLoss": {
+    "correctionAt": "2026-10-07T22:51:23.899893+00:00",
+    "oldDetailStatus": 400,
+    "code": "FORBIDDEN",
+    "cache": "no-store",
+    "nativeStaleUiAt": "2026-10-07T22:51:37.099878+00:00",
+    "oldClaimVisible": false,
+    "revisionAdvanced": true,
+    "originalContentRestored": {
+      "status": 200,
+      "cache": "no-store",
+      "titlePreserved": true,
+      "textPreserved": true,
+      "summaryRestored": true,
+      "analysisPreserved": true,
+      "generationPreserved": true,
+      "revisionAdvanced": true
+    },
+    "roleRemovalAt": "2026-10-07T22:52:14.669517+00:00",
+    "roleStatus": 403,
+    "roleCode": "ACCESS_LOST",
+    "roleCache": "no-store",
+    "earlierAttempt": "preserved as failed 200 observation; later exact direct native update established removal, not a server fix",
+    "cleanupAt": "2026-10-07T22:52:44.981479+00:00",
+    "ownerWorkspace": 404,
+    "secondWorkspace": 404,
+    "focusRestored": true,
+    "isolatedLoginRetainedBlank": true,
+    "paidProcessingStarted": false,
+    "limits": [
+      "One synthetic untimed note, two owner-controlled accounts.",
+      "No natural expiry, mixed-evidence, independent person or physical-device acceptance."
+    ]
+  },
+  "receiptMainRelease": {
+    "commit": "43ec6dbd3976d4c93e1a53b2b488eab05e47a026",
+    "pr": 79,
+    "verify": 37698426807,
+    "version": 37698426806,
+    "release": 37698531433,
+    "result": "passed",
+    "frontend": "preserved application 8d47b6a6947a; documentation-only skip"
   }
 }
