@@ -1,0 +1,79 @@
+{
+  "mode": "coarse engineering evidence",
+  "observedDate": "2026-10-07",
+  "applicationCommit": "d8407a951a3e16688d73af38315a4d8d5d2eb367",
+  "applicationVersion": "0.1.0-alpha.20261007195127.gd8407a951a3e",
+  "pullRequest": 76,
+  "checks": {
+    "prVerify": 37677480816,
+    "mainVerify": 37677653924,
+    "version": 37677653826,
+    "release": 37677844654,
+    "result": "passed"
+  },
+  "local": {
+    "command": "pnpm check",
+    "applicationTreeCommit": "fef23ab38ea6f7b706f2c02fd15cdb72af64ac5e",
+    "observedAt": "2026-10-07T19:48:32.9143284Z",
+    "unitPassed": 532,
+    "unitExternalSkipped": 3,
+    "authPassed": 28,
+    "pythonPassed": [6, 6, 3],
+    "basicPolicyPassed": 5,
+    "productionBuildsPassed": 2
+  },
+  "deployment": {
+    "canonicalHealth": "HTTP 200, no-store, exact version/commit",
+    "healthObservedAt": "2026-10-07T19:55:42.227497Z",
+    "vercelReadyExactGit": true,
+    "actualBuildMachine": "Basic 2 vCPU/8 GB",
+    "onDemandConcurrentBuilds": "Disabled",
+    "settingsObservedAt": "2026-10-07T19:55:37.078372Z",
+    "backendDeploymentNeeded": false
+  },
+  "matchedResponse": {
+    "sameAuthorizedWorkspaceAndRoute": true,
+    "beforeDecodedBytes": 436367,
+    "afterDecodedBytes": 1014,
+    "beforeObservedAt": "2026-10-07T19:30:33.800187Z",
+    "afterObservedAt": "2026-10-07T19:53:47.532379Z",
+    "status": 200,
+    "cacheControl": "no-store",
+    "availableCredits": 4,
+    "reservedCredits": 10,
+    "recentEntryBound": 10,
+    "rawLedgerAndUnrelatedRecordsOmitted": true,
+    "databaseBillingOrSpeedMeasured": false
+  },
+  "design": {
+    "mode": "Operate refinement",
+    "genuineStagingViewportWidths": [390, 1440, 1567],
+    "horizontalOverflow": false,
+    "freshScopedReviewer": "ship",
+    "physicalDeviceOrIndependentHumanAcceptance": false
+  },
+  "preparation": {
+    "ownerMaximumAuthorizedCredits": 20,
+    "singleFitMaximum": 10,
+    "result": "INSUFFICIENT_CREDITS before inference/reservation",
+    "retries": 0,
+    "paidFallback": false,
+    "planCodingPublicationStarted": false,
+    "unknownHoldsReleased": false
+  },
+  "citedSharing": {
+    "result": "not passed; private library has no analyzed source",
+    "existingLegacySourceMoved": false,
+    "temporaryWorkspaceRemoved": true,
+    "ordinaryOwnerAndSecondaryCleanup": "404, no-store",
+    "cleanupObservedAt": "2026-10-07T20:01:17.832348Z",
+    "newAnalysisOrSpend": false
+  },
+  "limits": [
+    "No lower database I/O or Convex invoice claim",
+    "No physical-device, independent-user, comprehension or measured benefit claim",
+    "Unknown financial holds remain unresolved",
+    "Coding and publication require distinct exact review",
+    "Events, provider lifecycle, restricted installations, eligible first analysis and complete V1 acceptance remain open"
+  ]
+}

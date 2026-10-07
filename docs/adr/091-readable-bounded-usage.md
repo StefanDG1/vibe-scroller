@@ -13,3 +13,7 @@ The authenticated Usage loader calls only the existing organization-details and 
 The existing charcoal studio, typography, tokens and mobile navigation remain. Native numeric balances lead; the meter supplements them without a chart library, animation or additional request. Billing remains a separate review link, with no purchase action on Usage.
 
 Affected tests are the allowance projection, revoked-credit advisory calculation and authenticated workspace-route tests. They cover expiry, revoked allowance, retained expired holds, bounded recent coverage, safe serialization, the two-query slice and foreign-workspace denial. Genuine staging viewport review at 390, 1440 and 1567 CSS pixels and a fresh design reviewer cover the changed surface only. Exact commands, failures, commit, production comparison and remaining external gates belong in implementation status.
+
+## October 7 exact bounded Usage release
+
+PR 76 production main d8407a951a3e passed exact CI/release, canonical health/version and fixed Basic queued settings. Matched Usage returned 1,014 versus 436,367 decoded bytes, with actual four available/ten reserved credits and no raw ledger/private identifiers. This is serialization/transfer acceptance only. Backend and financial authority remain unchanged; implementation status and the coarse evidence receipt record exact timestamps and retained external gates.

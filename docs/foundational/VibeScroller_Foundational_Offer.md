@@ -264,3 +264,7 @@ F022 prepares finite selected-work completion notifications. Production MCP/Even
 ## F023: simpler live assistant scope, October 7
 
 The candidate assistant connection offers one current/future library scope with seven-day access and explicit actions/context. Both includes unfiled eligible posts. Legacy grants stay exact until replaced. Connection does not authorize spending, coding, publication or repository-code access. Availability and successful tools must follow actual serving acceptance; no price or hosted subscription promise changes.
+
+## F026: actual allowance without a new offer, October 7
+
+Production Usage shows actual available/reserved allowance, expiry and up to ten recent settled credit entries, with a separate Billing review link. Revoked and expired credits do not become spendable; unknown holds remain reserved. A smaller decoded response is not a cheaper service promise. The owner-authorized preparation refused because allowance was insufficient, and no plan or execution resulted. Prices, trial terms, purchase authority, provider budgets and coding/publication approval remain unchanged. Do not advertise every V1 acceptance gate as closed.
