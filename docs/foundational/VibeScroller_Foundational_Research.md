@@ -1,5 +1,9 @@
 # VibeScroll foundational research
 
+## F018: deployed filing and explicit sharing candidate, October 7
+
+The authenticated owner completed the deployed setup/filing journey using a labelled synthetic source on main 75c2e1b. This is one operator observation, not customer research or useful-analysis evidence. The new exact-version team-sharing candidate has local handler and native synthetic UI checks; independent scope comprehension and real two-account acceptance remain missing. See [implementation status](../implementation-status.md) and [ADR 082](../adr/082-exact-version-team-knowledge-grants.md).
+
 F017 implementation candidate, October 7: Personal/Business filing and saved user-stated setup now have bounded owner-private handlers and a reviewed local synthetic UI. No source is copied or analyzed through filing; confirmed combined browsing grants no external sharing or spending. Real two-account acceptance, first-result processing, assistant grants and production filing are still pending. Retain F016's verified release facts and earlier research limits.
 
 Current direction, October 7, F014: the owner selected VibeScroll, an original always-present Scroll character and a dashboard for adults who own projects and use AI agents, including non-coders. Personal/Business organization and scoped assistant retrieval support the saved-idea-to-outcome workflow. [ADR 075](../adr/075-vibescroll-product-direction.md) and [the evolution plan](../VIBESCROLL-EVOLUTION-PLAN.md) govern future copy and implementation. The September research and dated release observations below remain historical; this direction is not new demand evidence.

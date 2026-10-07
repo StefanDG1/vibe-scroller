@@ -16,6 +16,7 @@ export default defineConfig({
       "apps/starter/auth-redirect.test.ts",
       "apps/starter/billing-actions.test.ts",
       "apps/starter/product-errors.test.ts",
+      "apps/starter/shared-refresh.test.ts",
     ],
     environment: "node",
   },

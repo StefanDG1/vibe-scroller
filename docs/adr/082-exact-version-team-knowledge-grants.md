@@ -1,0 +1,13 @@
+# Share exact source versions through separate team grants
+
+Mode: reference. Decision October 7, 2026. Status: implemented candidate; exact delivery and real two-account acceptance pending.
+
+Personal/Business filing and confirmed combined browsing remain owner-private. A separate `teamKnowledgeGrants` record names a recipient shared workspace and one to 50 exact source generations/revisions. The sender must currently own the private library and hold an owner/admin/member role in the recipient workspace. Creation requires authentication within 300 seconds, acknowledged selection, a future expiry within 30 days and the current grant version. The UI chooses seven days. Revocation requires the current owner and grant version without an additional authentication-age barrier.
+
+Every page and fetch rechecks active accounts/workspaces, private ownership, sender role, recipient membership, state, expiry, source scope/version and rights. Correction or deletion immediately invalidates affected references. Shared lists read one grant and at most 50 compact atomic cards per page. Explicit source fetch returns bounded cited claims, exact references and protected app URLs. No transcripts, frames, asset leases, original URLs, profile answers, credentials, source movement, processing or spending follows. Previously disclosed material cannot be retracted from recipients.
+
+Mixed summaries are not exposed by this interface. The all-input reference guard rejects a derived group unless all nonempty bounded references belong to exact selected current sources and existing insights. Tests exercise that helper separately; they do not establish end-to-end shared summaries or assistant access. Those integrations require their own principal/client grants.
+
+The UI binds acknowledgment to source, generation, revision, target, grant version and replacement choice. Any change clears its authority. A deep-linked recipient source is rechecked independently of the first grant page during workspace refresh; changed or denied data remounts without retaining old detail. Hidden disclosures make no sharing-list reads. Errors and successful empty pages have distinct explanations. Existing ordinary private-source APIs keep denying recipient access.
+
+Affected checks: `tests/knowledge-grants.test.ts`, `tests/library-spaces.test.ts`, `apps/starter/shared-refresh.test.ts`, full required checks and labelled native mobile/desktop captures. Actual fresh provider authentication, two real accounts, recipient-role loss in a browser and production release are recorded separately. F018 updates all four foundational briefs without a new marketing, pricing or provider claim. Workspace deletion purges both donor and recipient grants.

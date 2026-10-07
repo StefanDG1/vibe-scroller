@@ -5,6 +5,25 @@ export const librarySpace = v.union(
   v.literal("business"),
 );
 export const librarySpacesTables = {
+  teamKnowledgeGrants: defineTable({
+    organizationId: v.id("organizations"),
+    recipientOrganizationId: v.id("organizations"),
+    actor: v.id("users"),
+    sources: v.array(
+      v.object({
+        sourceId: v.id("sources"),
+        generation: v.number(),
+        revision: v.number(),
+      }),
+    ),
+    version: v.number(),
+    state: v.union(v.literal("active"), v.literal("revoked")),
+    expiresAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_org", ["organizationId"])
+    .index("by_recipient", ["recipientOrganizationId"])
+    .index("by_pair", ["organizationId", "recipientOrganizationId"]),
   librarySetup: defineTable({
     organizationId: v.id("organizations"),
     actor: v.id("users"),

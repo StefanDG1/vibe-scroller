@@ -1,5 +1,9 @@
 # VibeScroll foundational offer
 
+## F018: deployed filing and explicit sharing candidate, October 7
+
+PR 57 deployed resumable setup, private multi-filing, bounded browsing and filing export. Actual-owner synthetic production checks passed within their recorded scope. Exact-version, expiring team sharing is the next candidate, not a verified production offer or assistant connection. It shares titles and clipped cited claims only; provider/funding and processing authority stay separate. See [implementation status](../implementation-status.md) and [ADR 082](../adr/082-exact-version-team-knowledge-grants.md).
+
 F017 implementation candidate, October 7: Personal/Business filing and saved user-stated setup now have bounded owner-private handlers and a reviewed local synthetic UI. No source is copied or analyzed through filing; confirmed combined browsing grants no external sharing or spending. Real two-account acceptance, first-result processing, assistant grants and production filing are still pending. Retain F016's verified release facts and earlier research limits.
 
 VibeScroll's proposed offer is a mobile browser library that helps adults turn saved ideas into retrievable knowledge and considered project decisions, including owners whose AI agent does the coding. Personal/Business views, a useful dashboard and Scroll, an original soft illustrated creature, support that workflow. Lead with project relevance and source-to-outcome evidence. A video summary or coding agent alone is already available elsewhere.

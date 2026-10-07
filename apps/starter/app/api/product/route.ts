@@ -3,6 +3,12 @@ import { backend, api, configured } from "@/lib/backend";
 import { withAuth } from "@workos-inc/authkit-nextjs";
 import { allowedRequestOrigin } from "@/lib/request-origin";
 const operations = {
+  teamKnowledgeTargets: ["query", api.knowledgeGrants.targets],
+  teamKnowledgeGrants: ["query", api.knowledgeGrants.listOwn],
+  saveTeamKnowledgeGrant: ["mutation", api.knowledgeGrants.save],
+  revokeTeamKnowledgeGrant: ["mutation", api.knowledgeGrants.revoke],
+  sharedKnowledge: ["query", api.knowledgeGrants.shared],
+  sharedKnowledgeSource: ["query", api.knowledgeGrants.fetchShared],
   connectedSpaceSources: ["query", api.librarySpaces.connected],
   librarySetup: ["query", api.librarySpaces.setup],
   saveLibrarySetup: ["mutation", api.librarySpaces.saveSetup],

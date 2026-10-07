@@ -107,3 +107,7 @@ Follow [ADR 058](adr/058-bounded-full-library-scans.md): full URL-link paginatio
 [ADR 076](adr/076-persuasive-design-and-analysis-references.md) refines that plan with owner-approved pricing anchors, restrained CTA shimmer, genuine unfinished loops and conditional persuasive techniques. Saved-post citations open authenticated VibeScroll analyses. Current onboarding keeps one real result before payment; the earlier-payment A/B investigation is future work outside this plan. Prices, permissions, funding and production behavior remain unchanged.
 
 [ADR 077](adr/077-optional-vibescroll-local-workspace.md) allows implementation in the current checkout or a new `C:\Code\VibeScroll` root, with verified backup, preserved local/private work and deliberate setup updates. It supersedes the earlier single-path restriction without authorizing unrelated work or replacement infrastructure. Prepare feasible login/MFA/consent actions at the start; later action-specific approvals remain enforced. No directory move is performed by this documentation update.
+
+## October 7: explicit exact-version team knowledge sharing
+
+[ADR 082](adr/082-exact-version-team-knowledge-grants.md) separates expiring team grants from owner-private filing and combined browsing. Exact current sources, target workspace, recent sign-in and grant version are enforced outside the model. No mixed derived content, original evidence, assistant grant, funding or publication authority follows. Actual two-account acceptance remains a separate gate.

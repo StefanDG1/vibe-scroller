@@ -1,5 +1,9 @@
 # Foundational document change log
 
+## F018: deployed filing and explicit sharing candidate, October 7
+
+Updated all four briefs together using PR 57's exact release and actual-owner synthetic receipt. Distinguish deployed private setup/filing from the next team-sharing candidate. Explicit target, versions, expiry, fresh sign-in and current authorization preserve the privacy objection without promising retraction of material already received. Local synthetic UI and negative handler checks are separate from real account/client acceptance, customer research, first analysis, legal review and physical phones. No audience, price, budget, provider entitlement or measured customer benefit changed.
+
 ## F016: compatible brand and deployed boundaries, October 7
 
 Updated all four briefs together after verified studio/private-boundary releases, actual owner private creation and the existing repository rename. Current branding uses VibeScroll and Make scrolling useful; historical policies retain their original bytes, terms and acceptance version. Original Scroll and the selected mark are reused. New generated brand assets remain a candidate until their own release. Real two-account browser acceptance, Personal/Business filing and sharing, first-result onboarding, assistant OAuth and independent usefulness remain open. No new audience, price, allowance, provider permission, legal approval, customer quote or measured saving was introduced. F016 records the counterargument and required independent tasks.

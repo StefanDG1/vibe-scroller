@@ -11,6 +11,8 @@ export async function ProductPage({
   sort = "newest",
   sourceId,
   compactHome = false,
+  sharedSourceId,
+  sharedGrantId,
 }: {
   org: string;
   view: string;
@@ -21,6 +23,8 @@ export async function ProductPage({
   sort?: string;
   sourceId?: string;
   compactHome?: boolean;
+  sharedSourceId?: string;
+  sharedGrantId?: string;
 }) {
   const initial = await workspaceData({
     org,
@@ -31,6 +35,8 @@ export async function ProductPage({
     sort,
     sourceId,
     compactHome,
+    sharedSourceId,
+    sharedGrantId,
   });
   if (sourceId && !("selectedSource" in initial && initial.selectedSource))
     notFound();

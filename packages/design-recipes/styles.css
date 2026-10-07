@@ -1058,3 +1058,7 @@ th {
   background: #3e242e;
   border: 1px solid #764153;
 }
+
+.private-library-setup .knowledge-grants-heading {
+  margin: 28px 0 12px;
+}
