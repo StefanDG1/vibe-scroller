@@ -38,5 +38,21 @@
     "productionRecovery": "pending"
   },
   "events": "disabled",
-  "fullV1": "incomplete; retained external gates in implementation status"
+  "fullV1": "incomplete; retained external gates in implementation status",
+  "subsequentRecoveryRelease": {
+    "applicationCommit": "95f4265b12707d6e1f8b152381a3693ff4677f1b",
+    "version": "0.1.0-alpha.20261007185020.g95f4265b1270",
+    "deployment": "dpl_DevpoWJp545Z8Wjkp8PjA2WhRXPM",
+    "mainVerify": 37669890160,
+    "release": 37670088439,
+    "canonicalHealth": 200,
+    "buildMachine": "fixed Basic 2 vCPU 8 GB",
+    "concurrentBuilds": "disabled",
+    "productionRecoveryObservedAt": "2026-10-07T19:02:38.403016+00:00",
+    "actualProductionRefusalAndSSOReturn": "passed",
+    "exactSourcePathAndQueryPreserved": true,
+    "grantCountAfterOAuth": 0,
+    "originalSourceExactResponseUnchanged": true,
+    "backend": "compatible prior main 1db35d26d357990a0b81cad7170b8f6b011e1efe"
+  }
 }
