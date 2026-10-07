@@ -1,0 +1,68 @@
+{
+  "recordedAt": "2026-10-07T11:29:20.101232Z",
+  "scope": "one-client private assistant pilot and real two-account HTTP isolation; full V1 acceptance incomplete",
+  "applicationCommit": "0ef14ba31b49125df2ed4bdc87373e6cdc86d6f4",
+  "backendCommit": "0ef14ba31b49125df2ed4bdc87373e6cdc86d6f4",
+  "applicationVersion": "0.1.0-alpha.20261007070122.g0ef14ba31b49",
+  "productionDomain": "https://scroll.companynerve.com",
+  "frontend": {
+    "deployment": "dpl_CkwacS1BsnhyEe67pKy8N932o3P3",
+    "state": "READY",
+    "buildMachine": "basic",
+    "selection": "fixed",
+    "assignedCores": 2,
+    "memoryMiB": 8192,
+    "elasticConcurrencyEnabled": false,
+    "temporaryForceBuildRemovedAfterReady": true
+  },
+  "assistant": {
+    "McpEnabled": true,
+    "EventsEnabled": false,
+    "registeredClients": 1,
+    "registeredScopes": 8,
+    "thirdPartyPublicPkce": true,
+    "protectedResourceMetadata": "200/no-store",
+    "unauthenticatedInitialize": "401/no-store with resource metadata challenge",
+    "officialHostConnectedUiObservedAt": "2026-10-07T11:29:20.101232Z",
+    "officialHost": "ChatGPT Plugins",
+    "hostPermissionMode": "Allow low-risk",
+    "exactAppGrant": "not yet accepted at this receipt",
+    "actualTools": "unverified",
+    "providerUserinfoRevocation": "unverified",
+    "persistentHostEvents": "unverified and disabled"
+  },
+  "twoAccountChecks": {
+    "environment": "real canonical production, authenticated isolated Chrome context, two owner-controlled accounts",
+    "ownHomeObservedAt": "2026-10-07T11:26:23.301357Z",
+    "bothOwnHome": "200/no-store",
+    "alternateToMainHome": "404/no-store",
+    "alternateToMainLibraryMetadata": "404/no-store",
+    "alternateToMainSavedPosts": "404/no-store",
+    "foreignProductQueriesObservedAt": "2026-10-07T11:28:43.676575Z",
+    "alternateToMainAssistantSetup": "403/ACCESS_LOST/no-store",
+    "alternateToMainExploreTopics": "403/ACCESS_LOST/no-store",
+    "limits": "HTTP route isolation only; no exact sharing/revocation, independent human, physical-device or first-result acceptance inferred"
+  },
+  "preservation": {
+    "ordinaryAppClientAndCallbacksUnchanged": true,
+    "noExistingGitHubInstallationSelectionChanged": true,
+    "privateDisposableRepositoryPrepared": true,
+    "noDataGrantSavedByAgent": true,
+    "noInferenceOrPublicationPerformed": true,
+    "noCodesOrTokensRecorded": true
+  },
+  "failedPreparation": [
+    "Malformed private environment JSON failed parsing before provider mutation; corrected single-quoted JSON round-trip passed.",
+    "Private helper's explicit process exit triggered a Windows libuv assertion after output; natural async completion passed.",
+    "A browser mouse transport timeout and hidden-tab menu dismissal attempts did not establish an interaction pass; focus emulation allowed the menu to finish closing."
+  ],
+  "remaining": [
+    "exact fresh-authenticated app grant and real cited host tools",
+    "actual app and provider revocation",
+    "supported-host Events lifecycle",
+    "real sharing/revocation and restricted/multiple GitHub installation checks",
+    "eligible first-result, independent human and physical-device evidence",
+    "protected serving recovery and whole approved isolated job-to-draft-PR journey",
+    "retained legal/provider/commercial/invoice gates"
+  ]
+}

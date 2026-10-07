@@ -1,0 +1,15 @@
+# Current and future assistant library scopes
+
+Mode: reference. Decision October 7, 2026. Status: implementation candidate; serving acceptance pending.
+
+The owner explicitly requested simpler ChatGPT access: Off, Personal, Business or Both, including future posts. Selecting individual posts is too burdensome for this connection. This decision refines ADRs 085 and 087 for assistant library retrieval. Exact-version team sharing in ADR 082 and coding approvals remain unchanged.
+
+New assistant grants may select one live library scope. Both includes all current and future eligible posts in the authorized workspace, including unfiled posts. Personal and Business require the actual owner-private library and current actor-owned filing. Shared workspaces expose an explicit all-posts workspace choice, without pretending their content is owner-private. Off creates no authority; the existing grant's Turn off access action revokes it immediately. Existing exact-post grants retain their original sources and versions until explicitly replaced. No migration broadens them.
+
+Every request checks the current principal, client, membership, workspace, grant state/version/expiry, source rights and deletion. Moving a post out of the chosen filing removes retrieval, work status and completion delivery authority. Current references are returned for live scopes; feedback writes still require exact current source and correction versions. Confirmed library and project context retain separate explicit version bindings. OAuth connection alone shares no library. Saving still requires recent authentication and an acknowledgment bound to the reviewed scope and actions. The UI grants seven days; the existing backend maximum remains thirty days.
+
+Scope grants contain no copied list of the library. Setup reads the actor/workspace grant index and confirmed context, without source, card or filing enumeration. Connections requests a dedicated four-query workspace slice and does not poll in the background. Project choices load only when context is selected. Search pages at most five source candidates through existing source-card or filing indexes; cursors bind the grant ID/version, scope and query. Retrieval performs current source checks. These implementation bounds are not a measured Convex billing or database-I/O reduction.
+
+Selected actions still grant no spending, coding, publication, repository code or chat history. Analysis requests prepare the existing approval route. Private suggestions reuse current evaluations. Completion Events remain disabled pending actual supported-host lifecycle acceptance. Previously disclosed conversation content cannot be withdrawn by revoking future retrieval.
+
+Acceptance includes future capture, unfiled/all behavior, Personal-to-Business moves, lost rights, deletion, foreign workspace denial, revoked grants, nonoverlapping pagination, cursor mismatch and exact stale feedback refusal. Native synthetic mobile/desktop review and local handler tests are separate from real account grants, host tools, provider revocation and independent usability evidence.

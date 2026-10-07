@@ -203,3 +203,7 @@ F021 retains the project-owner audience. The control now lets owners choose libr
 ## F022: finite scoped completion Events, October 7
 
 F022 retains the same project-owner audience. A person needs to distinguish a saved link, ready analysis, received notification and demonstrated benefit, and to understand when background authority expires. The implemented thirty-minute maximum lease addresses the authorization boundary; independent comprehension has not been observed.
+
+## F023: simpler live assistant scope, October 7
+
+Keep the existing project-owner and library-only audiences. The owner finds individual-post assistant selection burdensome and requests Off, Personal, Business or Both, including future posts. This is owner preference evidence, not a new interview cohort. Explain the live scope plainly and retain an immediate revocation action.

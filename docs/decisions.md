@@ -131,3 +131,7 @@ Follow [ADR 058](adr/058-bounded-full-library-scans.md): full URL-link paginatio
 ## October 7: persistent scoped completion Events
 
 [ADR 088](adr/088-persistent-scoped-completion-events.md) adds finite renewable source-status webhooks through the actual modern MCP SDK. Callback verification, connection-time public-address checks, encrypted purpose-bound authority, current provider/app checks, durable receipts, bounded retry and recovery quarantine are required. HTTP receipt remains separate from host processing. Activation and real supported-host acceptance remain gated.
+
+## October 7: current and future assistant library scopes
+
+[ADR 090](adr/090-current-and-future-assistant-library-scopes.md) implements the owner-requested Off, Personal, Business or Both choice, including future eligible posts. Legacy exact-post grants are not expanded automatically. Current rights, filing, tenancy, expiry and revocation remain enforced; exact team/coding approvals are unchanged. Bounded indexed retrieval and a dedicated Connections slice avoid whole-library setup reads and background polling. Actual host acceptance remains separate.

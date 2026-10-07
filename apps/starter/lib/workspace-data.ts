@@ -91,6 +91,31 @@ export async function workspaceData({
       usage: null,
     };
   }
+  if (view === "connections") {
+    const [organization, customerRoutes, connections, aiPreference] =
+      await Promise.all([
+        c.query(api.organizations.details, { organizationId }),
+        c.query(api.jobs.customerRoutes, { organizationId }),
+        c.query(api.jobs.connections, { organizationId }),
+        c.query(api.aiPreferences.read, { organizationId }),
+      ]);
+    return {
+      workspaceSlice: "connections" as const,
+      compact: false,
+      workspaceName: organization.name,
+      privateLibrary: organization.private,
+      role: organization.role,
+      sources: [],
+      repositories: [],
+      proposals: [],
+      runs: [],
+      notifications: [],
+      usage: null,
+      customerRoutes,
+      connections,
+      aiPreference,
+    };
+  }
   const [
     library,
     repositories,

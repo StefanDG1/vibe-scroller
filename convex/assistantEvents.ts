@@ -5,6 +5,7 @@ import { eventSubscriptionCurrent, eventsEnabled } from "./lib/assistantEvents";
 import { ensure } from "../packages/policy";
 import { audit, limit } from "./lib";
 import { internal } from "./_generated/api";
+import { sourceWithinAssistantScope } from "./lib/assistantSourceScope";
 const selected = {
   profileId: v.id("organizations"),
   sourceId: v.id("sources"),
@@ -28,6 +29,15 @@ async function reviewed(
     "Review the current Events grant.",
   );
   const source = await ctx.db.get(args.sourceId);
+  const scoped =
+    !!a.grant.libraryScope &&
+    (await sourceWithinAssistantScope(
+      ctx,
+      a.grant,
+      a.organization,
+      a.actor._id,
+      source,
+    ));
   const selected = a.grant.sources.find(
     (r) => r.sourceId === args.sourceId && r.generation === args.generation,
   );
@@ -48,10 +58,12 @@ async function reviewed(
       source.state !== "deleted" &&
       source.rightsAttested &&
       source.generation === args.generation &&
-      (selected ||
-        (intake?.grantId === a.grant._id &&
-          intake.grantVersion === a.grant.version &&
-          intake.generation === args.generation)),
+      (scoped ||
+        (!a.grant.libraryScope &&
+          (selected ||
+            (intake?.grantId === a.grant._id &&
+              intake.grantVersion === a.grant.version &&
+              intake.generation === args.generation)))),
     "FORBIDDEN",
     "Select current work before subscribing to completion.",
   );

@@ -154,3 +154,7 @@ F021 is an authorized implementation candidate under [ADR 087](../adr/087-exact-
 ## F022: finite scoped completion Events, October 7
 
 F022 implements the authorized background portion of the evolution plan under [ADR 088](../adr/088-persistent-scoped-completion-events.md). Exact source-status subscriptions reuse completed analysis and existing grants. They start no inference or budget reservation. Local handler/transport checks and a disabled serving release are engineering evidence; actual supported-host consent, revocation, receipt and processing remain separate gates. A counterargument is that a short renewable lease may confuse people expecting indefinite monitoring. Validate that understanding without retaining longer provider authority or claiming an unverified benefit. This entry authorizes no campaign, public distribution or deferred experiment.
+
+## F023: simpler live assistant scope, October 7
+
+Source: explicit owner instructions, including future posts and efficient Convex usage. Status: authorized implementation candidate under ADR 090. Use one scope choice rather than individual-post selection; enforce current access and revocation. Counterargument: automatic future inclusion may surprise users, so name it in the scope explanation, review and acknowledgment. Local security tests and synthetic review do not establish comprehension or savings. No independent tester is available; retain that limitation. No campaign or public plugin distribution follows.

@@ -12,6 +12,7 @@ import { internal } from "./_generated/api";
 import { assistantProject } from "./lib/assistantProject";
 import { evaluationCurrent } from "./knowledge";
 import { createIssueCore } from "./issues";
+import { sourceWithinAssistantScope } from "./lib/assistantSourceScope";
 import {
   evaluation as evaluationContract,
   assertReferences,
@@ -137,7 +138,29 @@ async function selectedWork(
     await selectedProfile(ctx, profileId),
     scope,
   );
-  const selected = a.grant.sources.find((r) => r.sourceId === sourceId);
+  const source = await ctx.db.get(sourceId);
+  const scoped =
+    !!a.grant.libraryScope &&
+    (await sourceWithinAssistantScope(
+      ctx,
+      a.grant,
+      a.organization,
+      a.actor._id,
+      source,
+    ));
+  if (a.grant.libraryScope)
+    ensure(
+      scoped,
+      "FORBIDDEN",
+      "This work is outside the approved library scope.",
+    );
+  const selected = scoped
+    ? {
+        sourceId,
+        generation: source!.generation,
+        revision: source!.updatedAt,
+      }
+    : a.grant.sources.find((r) => r.sourceId === sourceId);
   const intake = await ctx.db
     .query("assistantIntakes")
     .withIndex("by_pair", (q) =>
@@ -152,7 +175,6 @@ async function selectedWork(
     (intake?.grantId === a.grant._id && intake.grantVersion === a.grant.version
       ? intake
       : null);
-  const source = await ctx.db.get(sourceId);
   ensure(
     ref &&
       source &&
@@ -494,15 +516,14 @@ async function sourceFor(
   sourceId: Id<"sources"> | null,
 ) {
   if (!sourceId) return null;
-  const binding = a.grant.sources.find((r) => r.sourceId === sourceId);
-  if (!binding) return null;
   const source = await ctx.db.get(sourceId);
-  return source &&
-    source.organizationId === a.organization._id &&
-    source.rightsAttested &&
-    source.state !== "deleted" &&
-    source.generation === binding.generation &&
-    source.updatedAt === binding.revision
+  return (await sourceWithinAssistantScope(
+    ctx,
+    a.grant,
+    a.organization,
+    a.actor._id,
+    source,
+  ))
     ? source
     : null;
 }
@@ -630,7 +651,12 @@ export const recordFeedback = internalMutation({
   },
 });
 export const search = internalQuery({
-  args: { ...profile, query: v.string(), offset: v.optional(v.number()) },
+  args: {
+    ...profile,
+    query: v.string(),
+    offset: v.optional(v.number()),
+    cursor: v.optional(v.string()),
+  },
   handler: async (ctx, args) => {
     ensure(
       args.query.trim().length > 0 && args.query.length <= 200,
@@ -650,19 +676,106 @@ export const search = internalQuery({
       ),
       words = args.query.toLocaleLowerCase().trim().split(/\s+/).slice(0, 12);
     const results = [];
-    for (const ref of a.grant.sources.slice(offset, offset + 5)) {
-      const card = await ctx.db
-        .query("dashboardCards")
-        .withIndex("by_entity", (q) => q.eq("entityId", ref.sourceId))
-        .unique();
-      if (
-        card?.organizationId !== a.organization._id ||
-        !card.rightsAttested ||
-        card.generation !== ref.generation ||
-        card.updatedAt !== ref.revision ||
-        card.state === "deleted"
-      )
-        continue;
+    let nextCursor: string | null = null;
+    let candidates = a.grant.sources.slice(offset, offset + 5);
+    if (a.grant.libraryScope) {
+      ensure(
+        offset === 0,
+        "INVALID_INPUT",
+        "Use the returned cursor for library search.",
+      );
+      let cursor: string | null = null;
+      if (args.cursor) {
+        ensure(
+          args.cursor.length <= 4096,
+          "INVALID_INPUT",
+          "Invalid search cursor.",
+        );
+        let parsed;
+        try {
+          parsed = JSON.parse(args.cursor);
+        } catch {
+          ensure(false, "INVALID_INPUT", "Invalid search cursor.");
+        }
+        ensure(
+          parsed &&
+            parsed.grant === a.grant._id &&
+            parsed.version === a.grant.version &&
+            parsed.scope === a.grant.libraryScope &&
+            parsed.query === args.query.trim() &&
+            typeof parsed.cursor === "string",
+          "STALE_APPROVAL",
+          "Search access changed. Start a new search.",
+        );
+        cursor = parsed.cursor;
+      }
+      if (a.grant.libraryScope === "all") {
+        const page = await ctx.db
+          .query("dashboardCards")
+          .withIndex("by_org_kind_updated", (q) =>
+            q.eq("organizationId", a.organization._id).eq("kind", "source"),
+          )
+          .order("desc")
+          .paginate({ cursor, numItems: 5 });
+        candidates = page.page.flatMap((card) => {
+          const sourceId = ctx.db.normalizeId("sources", card.entityId);
+          return sourceId
+            ? [
+                {
+                  sourceId,
+                  generation: card.generation ?? 0,
+                  revision: card.updatedAt,
+                },
+              ]
+            : [];
+        });
+        nextCursor = page.isDone ? null : page.continueCursor;
+      } else {
+        const page = await ctx.db
+          .query("sourceSpaces")
+          .withIndex("by_space", (q) =>
+            q
+              .eq("organizationId", a.organization._id)
+              .eq("space", a.grant.libraryScope as "personal" | "business"),
+          )
+          .order("desc")
+          .paginate({ cursor, numItems: 5 });
+        candidates = page.page.map((row) => ({
+          sourceId: row.sourceId,
+          generation: 0,
+          revision: 0,
+        }));
+        nextCursor = page.isDone ? null : page.continueCursor;
+      }
+      if (nextCursor)
+        nextCursor = JSON.stringify({
+          grant: a.grant._id,
+          version: a.grant.version,
+          scope: a.grant.libraryScope,
+          query: args.query.trim(),
+          cursor: nextCursor,
+        });
+    } else
+      ensure(
+        !args.cursor,
+        "INVALID_INPUT",
+        "Use source offsets for this legacy grant.",
+      );
+    for (const ref of candidates) {
+      if (!a.grant.libraryScope) {
+        const card = await ctx.db
+          .query("dashboardCards")
+          .withIndex("by_entity", (q) => q.eq("entityId", ref.sourceId))
+          .unique();
+        if (
+          card?.organizationId !== a.organization._id ||
+          !card.rightsAttested ||
+          card.generation !== ref.generation ||
+          card.updatedAt !== ref.revision ||
+          card.state === "deleted"
+        )
+          continue;
+      }
       const source = await sourceFor(
         ctx,
         a,
@@ -713,11 +826,15 @@ export const search = internalQuery({
     }
     return {
       results,
-      next_offset: offset + 5 < a.grant.sources.length ? offset + 5 : null,
+      next_offset:
+        !a.grant.libraryScope && offset + 5 < a.grant.sources.length
+          ? offset + 5
+          : null,
+      next_cursor: nextCursor,
       profile_id: a.organization._id,
       grant_version: a.grant.version,
       coverage:
-        "Up to five explicitly granted posts and 20 matching ideas per page. Current selected inputs only; incomplete coverage is not a no-fit judgment.",
+        "Up to five permitted posts and 20 matching ideas per page. Follow next_cursor or next_offset for more; an incomplete page does not establish absence or no fit.",
     };
   },
 });

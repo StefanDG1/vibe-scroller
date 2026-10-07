@@ -258,3 +258,7 @@ F021 adds local engineering evidence for exact project-context selection and pri
 ## F022: finite scoped completion Events, October 7
 
 F022 adds local engineering and exact deployed-release evidence for finite scoped completion webhooks. It does not establish demand, saved time, measured usefulness or actual ChatGPT processing. Provider/callback test responses are synthetic; real consent, provider revocation and supported-host completion after UI closes remain open.
+
+## F023: simpler live assistant scope, October 7
+
+The owner requested current and future eligible posts through one explicit library scope. Official ChatGPT connected UI is verified; this establishes connection status only. Bounded handler tests and synthetic mobile/desktop review support implementation, not independent comprehension, recall, time saved or lower Convex charges. Preserve unresolved real tool and provider revocation acceptance.

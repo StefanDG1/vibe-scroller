@@ -97,6 +97,9 @@ export const assistantTables = {
       }),
     ),
     scopes: v.array(v.string()),
+    libraryScope: v.optional(
+      v.union(v.literal("all"), v.literal("personal"), v.literal("business")),
+    ),
     contextVersion: v.optional(v.number()),
     repositories: v.optional(v.array(assistantRepositoryBinding)),
     intakeSpace: v.optional(
@@ -109,5 +112,6 @@ export const assistantTables = {
   })
     .index("by_org", ["organizationId"])
     .index("by_actor_client", ["actor", "clientId"])
+    .index("by_actor_org", ["actor", "organizationId"])
     .index("by_pair", ["organizationId", "actor", "clientId"]),
 };

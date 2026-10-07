@@ -55,6 +55,49 @@ async function ready(s: Awaited<ReturnType<typeof selected>>) {
     return { before, after, ids };
   });
 }
+it("rechecks live Personal scope before subscription and delivery, including filing removal", async () => {
+  const s = await setup();
+  await s.owner.mutation(api.librarySpaces.fileSource, {
+    organizationId: s.organizationId,
+    sourceId: s.sourceId,
+    spaces: ["personal"],
+  });
+  const grant = await s.owner.mutation(api.assistantGrants.save, {
+    ...s.args,
+    sources: [],
+    libraryScope: "personal",
+    scopes: ["events:subscribe"],
+  });
+  const input = {
+    profileId: s.organizationId,
+    sourceId: s.sourceId,
+    generation: s.args.sources[0].generation,
+    grantVersion: grant.version,
+    externalId: "sub_" + "b".repeat(64),
+    ciphertext: "synthetic-encrypted-authority",
+    keyVersion: "1",
+    expiresAt: Date.now() + 600000,
+    callbackVerifiedAt: Date.now(),
+  };
+  await s.assistant.mutation(internal.assistantEvents.install, input);
+  const subscription = (await s.t.run((ctx) =>
+    ctx.db.query("assistantSubscriptions").first(),
+  ))!;
+  expect(
+    await s.t.run((ctx) => eventSubscriptionCurrent(ctx, subscription)),
+  ).toBe(true);
+  await s.owner.mutation(api.librarySpaces.fileSource, {
+    organizationId: s.organizationId,
+    sourceId: s.sourceId,
+    spaces: ["business"],
+  });
+  expect(
+    await s.t.run((ctx) => eventSubscriptionCurrent(ctx, subscription)),
+  ).toBe(false);
+  await expect(
+    s.assistant.mutation(internal.assistantEvents.install, input),
+  ).rejects.toThrow("FORBIDDEN");
+});
 it("bounds renewable ownership and source authority, updates one subscription, and never replays a ready source", async () => {
   const s = await selected();
   expect(s.result).toMatchObject({

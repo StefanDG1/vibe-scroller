@@ -2,6 +2,7 @@ import type { QueryCtx, MutationCtx } from "../_generated/server";
 import type { Doc } from "../_generated/dataModel";
 import { assistantClients } from "../../packages/policy/assistant";
 import { workspaceReadable } from "./workspacePrivacy";
+import { sourceWithinAssistantScope } from "./assistantSourceScope";
 export const eventsEnabled = () =>
   process.env.MCP_ENABLED === "true" &&
   process.env.MCP_EVENTS_ENABLED === "true" &&
@@ -44,6 +45,15 @@ export async function eventSubscriptionCurrent(
     source.generation !== s.generation
   )
     return false;
+  if (grant.libraryScope)
+    return await sourceWithinAssistantScope(
+      ctx,
+      grant,
+      organization!,
+      s.actor,
+      source,
+      false,
+    );
   const selected = grant.sources.some(
     (r) => r.sourceId === s.sourceId && r.generation === s.generation,
   );

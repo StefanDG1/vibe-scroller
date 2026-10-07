@@ -256,3 +256,7 @@ F021 prepares private cited project drafts through an explicitly scoped assistan
 ## F022: finite scoped completion Events, October 7
 
 F022 prepares finite selected-work completion notifications. Production MCP/Events remain disabled. Do not advertise working background ChatGPT notification, indefinite monitoring, automatic analysis, coding, publication or measured benefit from a deployed adapter. Prices, existing allowances, budgets and separate app approvals remain unchanged.
+
+## F023: simpler live assistant scope, October 7
+
+The candidate assistant connection offers one current/future library scope with seven-day access and explicit actions/context. Both includes unfiled eligible posts. Legacy grants stay exact until replaced. Connection does not authorize spending, coding, publication or repository-code access. Availability and successful tools must follow actual serving acceptance; no price or hosted subscription promise changes.
