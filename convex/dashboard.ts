@@ -152,6 +152,7 @@ export const home = query({
       compact: true as const,
       role: membership.role,
       workspaceName: organization.name,
+      privateLibrary: Boolean(organization.privateOwnerId),
       sources: sources.map(display),
       repositories: repositories.map(display),
       proposals: current.map(display),

@@ -34,6 +34,7 @@ import { LibraryScan } from "./library-scan";
 import { SubscriptionTrials } from "./subscription-trials";
 import { Improvements } from "./improvements";
 import { NoticeToast } from "./notice-toast";
+import { PrivateLibrary } from "./private-library";
 import { StudioHome } from "./studio-home";
 import { ScrollCharacter } from "./scroll-character";
 import { MotionPreference } from "./motion-preference";
@@ -55,6 +56,7 @@ import { productAnalyticsEvent } from "@/lib/analytics-events";
 import type { ImportPreview } from "../../../packages/instagram-import";
 type Initial = {
   compact?: boolean;
+  privateLibrary?: boolean;
   workspaceName?: string;
   aiPreference?: {
     preferChatGPTPlan: boolean;
@@ -1046,26 +1048,41 @@ export function Console({
                 </>
               )}
               {view === "home" && (
-                <StudioHome
-                  key={organizationId}
-                  sources={home.sources}
-                  proposals={home.proposals}
-                  repositories={home.repositories}
-                  runs={home.runs}
-                  libraryNext={home.libraryNext}
-                  draft={sharedDraft}
-                  onDraft={setSharedDraft}
-                  onSave={() => {
-                    void openCapture();
-                  }}
-                  onOpenSource={findSource}
-                  onOpenProposal={(proposal) => {
-                    void openProposal(id(proposal));
-                  }}
-                  go={go}
-                  readOnly={readOnly}
-                  busy={busy}
-                />
+                <>
+                  {data.privateLibrary && !demo && (
+                    <PrivateLibrary
+                      key={organizationId}
+                      organizationId={organizationId}
+                      call={call}
+                      readOnly={readOnly}
+                      onOpenSource={findSource}
+                      onSave={() => {
+                        void openCapture();
+                      }}
+                      onProjects={() => go("projects")}
+                    />
+                  )}
+                  <StudioHome
+                    key={organizationId}
+                    sources={home.sources}
+                    proposals={home.proposals}
+                    repositories={home.repositories}
+                    runs={home.runs}
+                    libraryNext={home.libraryNext}
+                    draft={sharedDraft}
+                    onDraft={setSharedDraft}
+                    onSave={() => {
+                      void openCapture();
+                    }}
+                    onOpenSource={findSource}
+                    onOpenProposal={(proposal) => {
+                      void openProposal(id(proposal));
+                    }}
+                    go={go}
+                    readOnly={readOnly}
+                    busy={busy}
+                  />
+                </>
               )}
               {view === "library" && librarySection === "posts" && (
                 <>
@@ -3430,6 +3447,47 @@ function SourceDetail({
               ? "Images support the analysis. Open one to inspect the evidence."
               : "Selected frames support the analysis. Sampling can miss short scenes."}
           </p>
+        </section>
+      )}
+      {detail.privateLibrary && !demo && !detailLoading && (
+        <section
+          className="panel source-notes"
+          aria-label="Private space filing"
+        >
+          <h2>File this post</h2>
+          <p className="fine">
+            Personal and Business are views of your private library. Filing
+            never shares this post or runs another analysis.
+          </p>
+          <div className="row">
+            {(["personal", "business"] as const).map((space) => (
+              <label key={space} className="check">
+                <input
+                  type="checkbox"
+                  checked={(detail.spaces ?? []).includes(space)}
+                  disabled={readOnly || busy}
+                  onChange={async (event) => {
+                    const spaces = event.target.checked
+                      ? [...(detail.spaces ?? []), space]
+                      : (detail.spaces ?? []).filter(
+                          (s: string) => s !== space,
+                        );
+                    const result = await call("fileSourceSpaces", {
+                      organizationId: org,
+                      sourceId,
+                      spaces,
+                    });
+                    if (result)
+                      setDetail((old: any) => ({
+                        ...old,
+                        spaces: result.spaces,
+                      }));
+                  }}
+                />
+                {space === "personal" ? "Personal" : "Business"}
+              </label>
+            ))}
+          </div>
         </section>
       )}
       <details

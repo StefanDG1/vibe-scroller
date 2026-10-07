@@ -1,3 +1,4 @@
+import { librarySpacesTables } from "./librarySpacesSchema";
 import { productTables } from "./productSchema";
 import { knowledgeTables } from "./knowledgeSchema";
 import { improvementTables } from "./improvementSchema";
@@ -13,6 +14,7 @@ export const role = v.union(
   v.literal("viewer"),
 );
 export default defineSchema({
+  ...librarySpacesTables,
   ...productTables,
   ...knowledgeTables,
   ...improvementTables,

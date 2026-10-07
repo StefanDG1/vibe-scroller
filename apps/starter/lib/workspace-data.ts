@@ -83,6 +83,7 @@ export async function workspaceData({
     throw new Error("Proposal unavailable.");
   return {
     workspaceName: organization.name,
+    privateLibrary: organization.private,
     role: organization.role,
     compact: false,
     sources: library.items,

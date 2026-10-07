@@ -68,6 +68,8 @@ import type * as lib_workspacePrivacy from "../lib/workspacePrivacy.js";
 import type * as libraryScanSchema from "../libraryScanSchema.js";
 import type * as libraryScanWorker from "../libraryScanWorker.js";
 import type * as libraryScans from "../libraryScans.js";
+import type * as librarySpaces from "../librarySpaces.js";
+import type * as librarySpacesSchema from "../librarySpacesSchema.js";
 import type * as limitsV1 from "../limitsV1.js";
 import type * as localLibrary from "../localLibrary.js";
 import type * as localLibraryActions from "../localLibraryActions.js";
@@ -170,6 +172,8 @@ declare const fullApi: ApiFromModules<{
   libraryScanSchema: typeof libraryScanSchema;
   libraryScanWorker: typeof libraryScanWorker;
   libraryScans: typeof libraryScans;
+  librarySpaces: typeof librarySpaces;
+  librarySpacesSchema: typeof librarySpacesSchema;
   limitsV1: typeof limitsV1;
   localLibrary: typeof localLibrary;
   localLibraryActions: typeof localLibraryActions;

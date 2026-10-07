@@ -1,3 +1,4 @@
+import { filing } from "./librarySpaces";
 import { repositoryContent } from "./lib/repositoryContent";
 import { validateInspectedContext } from "../packages/repositories/retrieval";
 import { inspectionManifestValidator } from "../packages/repositories/context";
@@ -567,6 +568,10 @@ export const detail = query({
       .collect();
     return {
       ...s,
+      spaces: reader.organization.privateOwnerId
+        ? await filing(ctx, id)
+        : undefined,
+      privateLibrary: Boolean(reader.organization.privateOwnerId),
       analysisHash,
       analysisReview: currentReview?.qualityVerdict
         ? {
@@ -1411,6 +1416,11 @@ export async function redactSource(ctx: MutationCtx, id: Id<"sources">) {
     });
   const s = await ctx.db.get(id);
   if (!s) return;
+  for (const row of await ctx.db
+    .query("sourceSpaces")
+    .withIndex("by_source", (q) => q.eq("sourceId", id))
+    .take(3))
+    await ctx.db.delete(row._id);
   if (s.state !== "deleted") {
     const counts = await ctx.db
       .query("sourceCounts")

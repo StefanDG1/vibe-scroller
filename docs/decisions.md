@@ -2,6 +2,10 @@
 
 Mode: reference. These decisions supersede earlier alternatives in the discussion.
 
+## October 7: private filing and setup
+
+[ADR 081](adr/081-private-filing-and-confirmed-setup.md) adds explicit Personal/Business memberships and saved user-stated setup only within the enforced owner-private library. Confirmed combined browsing is distinct from team/assistant grants and funding authority.
+
 ## October 7: bounded Home metadata
 
 [ADR 080](adr/080-stable-repository-rename-authority.md) preserves release and backup authority across the authorized GitHub rename using the existing repository's stable ID. Compatibility preparation precedes the external rename; it changes no provider identity or private configuration.

@@ -1,0 +1,13 @@
+# Private filing and confirmed setup
+
+Mode: reference. Decision October 7, 2026. Status: implemented candidate, production acceptance pending.
+
+Ownership and filing remain distinct. ADR 078's owner-private organization is the only scope accepted by Personal/Business filing and setup. Existing shared workspaces and memberships do not become private through a name or category. No existing source is moved or automatically classified.
+
+`sourceSpaces` stores at most two explicit memberships per canonical source, with user actor/provenance and filing time. Indexed reads use bounded atomic `dashboardCards` rather than transcript/analysis payloads. Every read checks current ownership/membership first, and every card must belong to that same organization. Missing/deleted cards contribute no metadata; derived main points require current ready rights-attested metadata. Filing changes neither source evidence revisions nor categories or funding. Source deletion removes memberships immediately; tenant purge includes the tables. Paginated export includes explicit membership provenance without signed assets or credentials.
+
+`librarySetup` stores versioned user-stated focus, goal, interests, optional role, stage and confirmation. Compare-and-swap prevents concurrent changes from silently overwriting confirmation. Reload resumes the saved stage. A combined read requires the confirmed two-space preference on every page. Revocation clears outstanding UI generations and denies subsequent combined reads; explicit single-space reads remain owner-authorized. This preference is not a team or assistant grant, project-context confirmation, processing authorization or provider consent.
+
+The UI renders private setup before the studio, previews stored answers and keeps GitHub optional. It shows success-empty and access-failed states distinctly. Existing Save processing controls and all trial/reservation/provider policies remain authoritative. There is no additional model invocation for setup, filing, browsing or export.
+
+Changed security acceptance uses six Convex-handler integration tests, including concurrent filing, stale setup, accidental private membership, mismatched source scope, immediate revocation/deletion, bounded metadata and unconfirmed/disabled combined reads. Native local synthetic fixture evidence covers responsive controls, keyboard, reload, filing and export separately; it does not establish real-account, first-analysis, phone or commercial acceptance. The larger evolution plan remains unfinished until those and its remaining scoped sharing, exploration, assistant and recovery gates are fulfilled.

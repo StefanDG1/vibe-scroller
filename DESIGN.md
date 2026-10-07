@@ -21,6 +21,9 @@ colors:
   primary-text: "#141414"
   chip-text: "#bdbdbd"
   error: "#fca5a5"
+  private-recovery-text: "#ffdae2"
+  private-recovery-surface: "#3e242e"
+  private-recovery-border: "#764153"
   focus: "#d4d4d4"
 typography:
   studio-headline:
@@ -128,6 +131,11 @@ components:
     textColor: "{colors.ink}"
     padding: "12px 0"
     height: "44px"
+  private-recovery:
+    backgroundColor: "{colors.private-recovery-surface}"
+    textColor: "{colors.private-recovery-text}"
+    rounded: "{rounded.control}"
+    padding: "12px 16px"
 ---
 
 # Design System: VibeScroll
@@ -173,6 +181,8 @@ The palette separates quiet surfaces by brightness and green-gray hue. Mint sign
 - **Focus:** clearly identifies keyboard interaction.
 
 The historical `--teal` property still resolves to Ink: it does not make every retained control mint. Error uses a pale red alongside explanatory text. Success and pending states use explicit labels, never color alone. The frontmatter records the effective studio cascade; rail, fields, menus and selected navigation retain their older neutral fills.
+
+Owner-private setup recovery notices use the scoped Private recovery text, surface and border colors. Their text/surface contrast is 10.94:1. This readable rose treatment is specific to setup recovery, not a replacement of the studio palette or all error styling.
 
 **The Meaningful Accent Rule.** Use mint for permitted studio actions and connections, amber for Scroll's warmth, and preserve retained neutral reading controls. Neither color proves success or benefit.
 
@@ -223,6 +233,18 @@ The studio main Button uses mint fill, dark text, 500 weight, 8px 16px padding, 
 ### Scroll and studio shelves
 
 Scroll stays visible in the normal shell and Home. The home character is a named greeting button with a state caption; compact shell artwork is still. Shelf rows use an 80px minimum height, 14px 8px padding, 8px corners and quiet top separators between rows. Mint line icons identify sources and projects; muted arrows identify the row action. Recent-source coverage stays explicit: current-page records are not full-library totals. Later dismisses a suggested next action locally; it does not complete or approve it.
+
+### Owner-private setup and filing
+
+In owner-private Home, the setup panel precedes the studio welcome. Three saved, resumable steps lead from Personal/Business focus to the user's goal and interests, then a preview and explicit confirmation. A Business project role is optional. Treat these fields as user-provided direction, never inferred profile facts. The panel retains the incumbent dark material and controls; fieldsets are unframed with clear legends, full-width inputs and visible labels.
+
+Personal and Business are filing views of the same owner-private library. Source detail offers independent checkbox membership in either or both views; filing does not copy evidence, share content or queue inference. Combined browsing is offered only for explicitly confirmed, enabled setup and reads bounded metadata. Saving a change fences earlier browse responses and clears the list immediately, so turning combined browsing off cannot leave an old combined result visible. Failed browsing shows recovery text rather than successful empty guidance. Export remains bounded and does not download a partial result when its page limit is exceeded.
+
+Setup rows wrap on narrow screens while action labels stay on one line. Space result rows use quiet bottom separators and readable linked titles; at 480px and below, state text moves below the title. Keep setup's scoped recovery notice legible using the Private recovery tokens and a thin border. Sharing, assistant access, account connection, processing routes and spending authority remain separate choices.
+
+**The Private Filing Rule.** Organization choices describe the owner's private views; they never imply sharing permission or analysis authority.
+
+Local evidence comprises six handler tests and the labeled synthetic native packet in `.impeccable/review/private-library/proof.json`, including 320/390/768/1440px checks, saved-step resumption, combined-view confirmation, source filing, empty/error feedback and bounded export. The finish reviewer cleared the scored corrections within that candidate scope. Fixture routes were removed from the application before final builds; real-account, production, second-account and genuine analysis acceptance remain pending.
 
 ### Inputs / Fields
 

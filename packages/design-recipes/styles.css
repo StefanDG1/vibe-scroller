@@ -992,3 +992,69 @@ th {
     animation: none;
   }
 }
+
+.private-library-setup {
+  margin-block: 1.5rem;
+}
+.private-library-setup fieldset {
+  border: 0;
+  padding: 0;
+  margin-block: 1.25rem;
+  min-width: 0;
+}
+.private-library-setup legend {
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+.private-library-setup fieldset > label {
+  display: block;
+  margin-block: 1rem;
+}
+.private-library-setup input:not([type="checkbox"]) {
+  display: block;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+.private-space-actions {
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+.private-space-list {
+  list-style: none;
+  padding: 0;
+  margin-block: 1rem;
+}
+.private-space-list li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+.private-space-list button {
+  text-align: left;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.private-space-list .fine {
+  flex-shrink: 0;
+}
+@media (max-width: 480px) {
+  .private-space-list li {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}
+
+.private-library-setup .row {
+  flex-wrap: wrap;
+}
+.private-library-setup button {
+  white-space: nowrap;
+}
+.private-library-setup .error {
+  color: #ffdae2;
+  background: #3e242e;
+  border: 1px solid #764153;
+}

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-07T00:43:15.461553Z",
+  "generatedAt": "2026-10-07T01:16:14.130959Z",
   "title": "Design System: VibeScroll",
   "extensions": {
     "colorMeta": {
@@ -213,6 +213,18 @@
       "amber": {
         "role": "secondary",
         "displayName": "Scroll amber"
+      },
+      "private-recovery-text": {
+        "role": "semantic",
+        "displayName": "Private setup recovery text"
+      },
+      "private-recovery-surface": {
+        "role": "semantic",
+        "displayName": "Private setup recovery surface"
+      },
+      "private-recovery-border": {
+        "role": "semantic",
+        "displayName": "Private setup recovery border"
       }
     },
     "typographyMeta": {
@@ -380,6 +392,14 @@
       "description": "Permitted next action beside Scroll; mint fill does not certify success.",
       "html": "<button class=\"ds-studio-action\">Review project context <span aria-hidden=\"true\">â†’</span></button>",
       "css": ".ds-studio-action{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;min-width:44px;padding:8px 16px;background:var(--primary,#87dfc1);color:var(--primary-foreground,#10251e);border:0;border-radius:10px;font:500 14px/1.6 Inter,system-ui,sans-serif;white-space:normal;text-align:center;cursor:pointer;transition:color 150ms ease,background-color 150ms ease,opacity 150ms ease}.ds-studio-action:hover:not(:disabled){opacity:.9}.ds-studio-action:focus-visible{outline:2px solid var(--ring,#87dfc1);outline-offset:4px}.ds-studio-action:disabled{opacity:.5;pointer-events:none}@media(prefers-reduced-motion:reduce){.ds-studio-action{transition:none}}"
+    },
+    {
+      "name": "Private setup recovery",
+      "kind": "custom",
+      "refersTo": "private-recovery",
+      "description": "Scoped error feedback in owner-private setup; never render failed browsing as a successful empty list.",
+      "html": "<p class=\"ds-private-recovery\" role=\"alert\">Your private library is unavailable. Check your session and reload.</p>",
+      "css": ".ds-private-recovery{padding:12px 16px;background:#3e242e;color:#ffdae2;border:1px solid #764153;border-radius:var(--radius,.625rem);font:14px/1.6 Inter,system-ui,sans-serif;overflow-wrap:anywhere}"
     }
   ],
   "narrative": {
@@ -412,6 +432,11 @@
       {
         "name": "The Dialog Choice Rule",
         "body": "A modal's choice menu belongs inside its active native dialog; a visually visible menu must also accept pointer and keyboard selection. Outside dialogs the shared control retains its default portal. Appearance and token primitives are unchanged.",
+        "section": "components"
+      },
+      {
+        "name": "The Private Filing Rule",
+        "body": "Organization choices describe the owner's private views; they never imply sharing permission or analysis authority. Setup rows wrap on narrow screens while action labels remain on one line. Combined browsing requires explicit confirmed setup; turning it off fences earlier responses and clears visible results.",
         "section": "components"
       }
     ],
