@@ -5,6 +5,8 @@ import { KnowledgeMap } from "./knowledge-map";
 import { ChoiceSelect } from "./choice-select";
 import { usePolling } from "@/lib/use-polling";
 import { buildTopicTree, type TopicNode } from "@/lib/topic-tree";
+import type { FunctionReturnType } from "convex/server";
+import type { api } from "../../../convex/_generated/api";
 
 type View = "tree" | "connections" | "journey" | "overview" | "helped";
 const views: [View, string][] = [
@@ -38,7 +40,18 @@ const fixture = {
     "Synthetic demonstration. Two illustrative ideas; no saved customer data or measured benefit.",
 };
 const fixtureDetail = {
-  topic: { _id: "demo-topic", name: "A useful first result", version: 1 },
+  topic: {
+    _id: "demo-topic",
+    name: "A useful first result",
+    version: 1,
+    layoutVersion: 0,
+    aliases: [],
+  } satisfies Omit<
+    NonNullable<
+      FunctionReturnType<typeof api.knowledgeExplore.detail>["topic"]
+    >,
+    "_id"
+  > & { _id: string },
   members: [
     "Show a populated example before asking for project setup.",
     "Offer one clear next decision after the first result.",
