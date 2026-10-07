@@ -3,6 +3,9 @@ import { backend, api, configured } from "@/lib/backend";
 import { withAuth } from "@workos-inc/authkit-nextjs";
 import { allowedRequestOrigin } from "@/lib/request-origin";
 const operations = {
+  assistantSetup: ["query", api.assistantGrants.setup],
+  saveAssistantGrant: ["mutation", api.assistantGrants.save],
+  revokeAssistantGrant: ["mutation", api.assistantGrants.revoke],
   organizeExploreTopic: ["mutation", api.knowledgeExplore.organize],
   exploreTopics: ["query", api.knowledgeExplore.topics],
   exploreDetail: ["query", api.knowledgeExplore.detail],

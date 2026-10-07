@@ -1,4 +1,5 @@
 "use node";
+import { isAssistantIdentity } from "../packages/policy/assistant";
 import { WorkOS } from "@workos-inc/node";
 import { action, internalAction } from "./_generated/server";
 import { internal } from "./_generated/api";
@@ -7,7 +8,8 @@ export const bootstrap = action({
   args: {},
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Sign in to continue.");
+    if (!identity || isAssistantIdentity(identity))
+      throw new Error("Sign in to continue.");
     const provider = new WorkOS(process.env.WORKOS_API_KEY);
     const profile = await provider.userManagement.getUser(identity.subject);
     if (!profile.emailVerified)

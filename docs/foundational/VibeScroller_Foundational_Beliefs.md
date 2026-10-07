@@ -107,3 +107,7 @@ A user can dismiss a prompt, defer an idea, reject unsafe advice, cancel or leav
 Price anchors can help explain relative value. CTA shimmer can reveal the useful next action. A real unfinished task can invite completion, and a genuine activation can merit celebration. These are compatible with the six beliefs when the actual offer/state is clear and the user can inspect, choose, finish or defer. A selected default is not spending permission. An animation or open loop is not a model-derived fact or a reason to resume stale approval.
 
 The retained exclusions concern fabricated evidence, unsupported threats, shame/ego pressure, selectively filtered public ratings, privacy leakage and unauthorized actions. Accurate value comparisons, authentic founder investment, original AI-assisted demo content and authorized useful outreach remain conditional uses. Future paywall timing is explicitly outside the current implementation plan. Neither owner preference nor a saved creator claim proves conversion; observe real usefulness and comprehension after implementation.
+
+## F020: scoped assistant candidate, October 7
+
+F020 supports the existing six beliefs through inspectable permissions and protected citations. A saved link is distinct from analyzed evidence; requesting analysis returns a funding review rather than granting spend. Revocation stops future retrieval but cannot erase prior third-party disclosure. No new belief, testimonial, outcome guarantee or provider permission follows from local engineering.

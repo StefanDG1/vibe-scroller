@@ -2,6 +2,10 @@
 
 Mode: reference. These decisions supersede earlier alternatives in the discussion.
 
+## October 7: scoped assistant candidate
+
+[ADR 085](adr/085-scoped-assistant-oauth-and-intake.md) separates official user OAuth from ordinary app identity and requires current, versioned app grants for every assistant operation. Explicit intake reuses capture policy without fetching or spending. Production access remains disabled pending configuration, review and actual supported-client acceptance.
+
 ## October 7: bounded Library Explore
 
 [ADR 084](adr/084-bounded-library-explore.md) reuses current cited evidence and recorded outcomes in five bounded Explore views. Owner-private space filters and all-input checks run on the server. Manual layout/alias corrections do not rerun analysis or confer sharing authority. Exact release and independent retrieval/usefulness acceptance remain pending.

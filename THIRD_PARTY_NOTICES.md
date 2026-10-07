@@ -1,5 +1,9 @@
 # Third-party material
 
+## Assistant protocol runtime
+
+The exact `@modelcontextprotocol/server` 2.3.1 dependency implements the official MCP protocol. Its complete mixed license notice is preserved in [the runtime notice](licenses/modelcontextprotocol-server-2.3.1.txt): Apache-2.0 for new and consented code, MIT for unrelicensed contributions, and CC-BY-4.0 for documentation excluding specifications. Upstream source is [modelcontextprotocol/typescript-sdk](https://github.com/modelcontextprotocol/typescript-sdk). The dependency's SDK version does not change VibeScroll's product V1 scope. Protocol support alone does not establish a working account connection, persistent Events delivery, or provider approval.
+
 Ten skills are copied from the owner's installed global skills into `.agents/skills`. Their supporting files are included. `skills-manifest.json` records each source location relative to the global skill or plugin directory, snapshot date, notices found, and SHA-256 hashes.
 
 The frontend-design skill includes its original `LICENSE.txt`. Other selected skill directories do not contain a standalone license notice in the copied directory. Missing notices are unresolved provenance items, not evidence of permission to redistribute publicly. Review the upstream package terms before public distribution and remove or replace material whose distribution rights cannot be established.

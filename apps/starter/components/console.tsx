@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, useEffectEvent } from "react";
 import { useRouter } from "next/navigation";
 import { usePolling } from "@/lib/use-polling";
+import { AssistantConnections } from "./assistant-connections";
 import Link from "next/link";
 import Image from "next/image";
 import { Brand } from "./site";
@@ -1904,6 +1905,13 @@ export function Console({
               )}
               {view === "connections" && (
                 <>
+                  <AssistantConnections
+                    key={organizationId}
+                    organizationId={organizationId}
+                    call={call}
+                    readOnly={readOnly}
+                    demo={demo}
+                  />
                   <section className="panel">
                     <h2>Your ChatGPT plan</h2>
                     <p>

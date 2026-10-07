@@ -3,6 +3,35 @@
   "generatedAt": "2026-10-07T02:36:10Z",
   "title": "Design System: VibeScroll",
   "extensions": {
+    "assistantAccessReview": {
+      "mode": "Operate",
+      "identity": "Incumbent Scroll/14C charcoal, mint and amber studio; no durable-world change.",
+      "source": "apps/starter/components/assistant-connections.tsx and scoped appended apps/starter/app/product.css rules",
+      "metadataEntriesPerPage": 20,
+      "maximumSelectedPosts": 50,
+      "grantDurationDays": 7,
+      "pollIntervalMs": 60000,
+      "pollScope": "Workspace and source-page cursor; visible/online pages only; suspended during pending mutation; generation-fenced responses.",
+      "finishDisposition": "All three requested corrections resolved at fix-list scope only: wrapping intrinsic pagination controls, independent 44px review-link targets and operation-specific save/revoke pending labels.",
+      "stateReviewDisposition": "Separate ship disposition for two resolved state fixes only: readable scoped error material and accurate new-grant preparation notice. Original three corrections remain resolved.",
+      "preparedState": "New grants unavailable until official OAuth is configured and verified; existing access records and revoke controls remain visible.",
+      "recoveryPalette": {
+        "textToken": "private-recovery-text",
+        "surfaceToken": "private-recovery-surface",
+        "borderToken": "private-recovery-border",
+        "sourceRule": "Scoped assistant-connections error rule overrides inherited pale error background.",
+        "evidence": "Synthetic state capture and computed DOM confirmation of #ffdae2 text, #3e242e surface and #764153 border."
+      },
+      "captures": [
+        ".impeccable/review/assistant-access/review-320.png",
+        ".impeccable/review/assistant-access/review-390.png",
+        ".impeccable/review/assistant-access/review-768.png",
+        ".impeccable/review/assistant-access/review-1440.png",
+        ".impeccable/review/assistant-access/disabled-390.png",
+        ".impeccable/review/assistant-access/error-390.png"
+      ],
+      "evidenceBoundary": "Local synthetic captures with emulated focus. No real OAuth, human keyboard acceptance, privacy-integration acceptance or production acceptance."
+    },
     "colorMeta": {
       "ink": {
         "role": "neutral",
@@ -409,6 +438,13 @@
       "css": ".ds-grants{color:var(--ink,#f4f4f4);font:14px/1.6 Inter,system-ui,sans-serif}.ds-grants-heading{margin:28px 0 12px;font-size:1.05rem;font-weight:550}.ds-grants-list{list-style:none;padding:0;margin-block:1rem;min-width:0}.ds-grants-list li{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;padding-block:.75rem;border-bottom:1px solid var(--border,#39453f)}.ds-grant-meta{color:var(--subtle,#b3bdb7);font-size:.8rem}.ds-grant-button{min-height:44px;min-width:44px;padding:10px 17px;border:1px solid var(--ink,#f4f4f4);border-radius:10px;background:var(--ink,#f4f4f4);color:#141414;font:550 14px/1.6 Inter,system-ui,sans-serif;white-space:nowrap;cursor:pointer;transition:background-color 140ms ease-out}.ds-grant-secondary{background:transparent;color:var(--ink,#f4f4f4);border-color:var(--line,#39453f)}.ds-grant-secondary:hover:not(:disabled){background:var(--soft,#262626)}.ds-grant-button:focus-visible{outline:2px solid #d4d4d4;outline-offset:3px}.ds-grant-button:disabled{opacity:.45;cursor:not-allowed}@media(max-width:480px){.ds-grants-list li{flex-direction:column;gap:.25rem}}@media(prefers-reduced-motion:reduce){.ds-grant-button{transition:none}}"
     },
     {
+      "name": "Assistant retained-selection review",
+      "kind": "custom",
+      "description": "Native retained-selection disclosure before exact-access acknowledgment. Static synthetic specimen; no real access grant.",
+      "html": "<section class=\"ds-assistant-review\" aria-label=\"Synthetic assistant review specimen\"><p>2 of 50 selected. Your selection stays while you browse pages.</p><div class=\"ds-assistant-actions\"><button type=\"button\">Newest posts</button><button type=\"button\">Older posts</button><button type=\"button\">Clear selection</button></div><details open><summary>Review 2 selected posts</summary><ul><li><a href=\"#synthetic-post-one\">Synthetic selected evidence 1</a></li><li><a href=\"#synthetic-post-two\">Synthetic selected evidence 2</a></li></ul></details><label class=\"ds-assistant-check\"><input type=\"checkbox\" disabled><span>I approve these exact posts and actions for seven days. A replacement removes any previously selected access.</span></label><button class=\"ds-assistant-save\" type=\"button\" disabled>Save reviewed access</button></section>",
+      "css": ".ds-assistant-review{color:var(--foreground,#f4f4f4);font:14px/1.6 Inter,system-ui,sans-serif;overflow-wrap:anywhere}.ds-assistant-review>p{font-size:12px;color:var(--muted-foreground,#b3bdb7)}.ds-assistant-actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center}.ds-assistant-actions button,.ds-assistant-save{min-height:44px;max-width:100%;padding:10px 17px;border:1px solid var(--border,#39453f);border-radius:10px;font:500 14px/1.6 Inter,system-ui,sans-serif;cursor:pointer}.ds-assistant-actions button{flex:0 0 auto;background:transparent;color:inherit;word-break:normal;overflow-wrap:normal;white-space:normal}.ds-assistant-review summary{min-height:44px;padding:10px 0;cursor:pointer}.ds-assistant-review a{display:flex;align-items:center;min-height:44px;width:fit-content;max-width:100%;color:inherit}.ds-assistant-check{display:flex;align-items:flex-start;gap:12px;min-height:44px;padding:10px 0;font-size:13px}.ds-assistant-check input{width:18px;height:18px;flex-shrink:0;margin-top:3px}.ds-assistant-save{background:var(--foreground,#f4f4f4);color:#141414}.ds-assistant-review button:disabled{opacity:.5;cursor:not-allowed}.ds-assistant-actions button:hover:not(:disabled){background:var(--muted,#262626)}.ds-assistant-review a:hover{color:var(--primary,#87dfc1)}.ds-assistant-review button:focus-visible,.ds-assistant-review summary:focus-visible,.ds-assistant-review a:focus-visible{outline:2px solid var(--ring,#87dfc1);outline-offset:3px}"
+    },
+    {
       "name": "Explore topic disclosure",
       "kind": "custom",
       "description": "Bounded native topic tree, the default among five Explore views. Static synthetic specimen; inspection does not load actual records.",
@@ -425,6 +461,11 @@
   ],
   "narrative": {
     "rules": [
+      {
+        "name": "The Reviewed Access Rule",
+        "body": "Keep retained selections and exact allowed actions reviewable before acknowledgment; show pending feedback for the operation that is actually running.",
+        "section": "components"
+      },
       {
         "name": "Selected knowledge sharing",
         "body": "Keep sharing in a native disclosure after private filing, with the shared Radix workspace choice, exact source version and seven-day duration visible before acknowledgment. Target, source version, saved grant version and replacement changes invalidate acknowledgment; closing clears loaded choices, grants and acknowledgment. Separate the action from saved grants with the scoped heading margin (28px above, 12px below). Recipient reading retains bounded rows, coverage and exact insight/revision citations. Local labeled synthetic captures fix-mobile-active-controls.png (390px), fix-desktop-active.png (1440px) and mobile-recipient-reading.png (390px) in .impeccable/review/knowledge-grants/ support a ship disposition for that spacing correction only; they do not establish real grants, second-account consent, provider/auth acceptance or production deployment.",
