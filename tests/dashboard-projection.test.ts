@@ -256,3 +256,87 @@ it("rejects foreign/private-owner mismatches, membership revocation and restore 
     "Recovery",
   );
 });
+
+it("loads complete Library project choices and bounded current attention without private editor content", async () => {
+  const s = await setup();
+  await s.t.run(async (ctx) => {
+    const original = (await ctx.db.get(s.repo))!;
+    const { _id, _creationTime, ...base } = original;
+    for (let i = 0; i < 35; i++)
+      await ctx.db.insert("repositories", {
+        ...base,
+        providerId: i + 2,
+        fullName: `synthetic/project-${i}`,
+      });
+    for (let i = 0; i < 35; i++)
+      await ctx.db.insert("notifications", {
+        organizationId: s.organizationId,
+        createdAt: Date.now() + i,
+        updatedAt: Date.now() + i,
+        key: `notice-${i}`,
+        message: "PRIVATE_NOTIFICATION",
+        read: false,
+      });
+  });
+  const context = await s.owner.query(api.product.libraryContext, {
+    organizationId: s.organizationId,
+  });
+  expect(context.repositories).toHaveLength(36);
+  expect(context.notifications).toHaveLength(30);
+  expect(context.proposals).toContainEqual({
+    _id: s.proposal,
+    review: "unreviewed",
+  });
+  expect(Object.keys(context.repositories[0]).sort()).toEqual([
+    "_id",
+    "confirmed",
+    "enabled",
+    "fullName",
+  ]);
+  expect(JSON.stringify(context)).not.toContain("PRIVATE_");
+  await s.owner.mutation(api.product.editSource, {
+    id: s.sources[0],
+    summary: "Manual correction",
+    tags: [],
+  });
+  const after = await s.owner.query(api.product.libraryContext, {
+    organizationId: s.organizationId,
+  });
+  expect(after.proposals.some((p) => p._id === s.proposal)).toBe(false);
+});
+it("denies foreign, private-owner mismatch, lost membership and locked recovery Library contexts", async () => {
+  const s = await setup();
+  const query = () =>
+    s.owner.query(api.product.libraryContext, {
+      organizationId: s.organizationId,
+    });
+  await expect(
+    s.foreign.query(api.product.libraryContext, {
+      organizationId: s.organizationId,
+    }),
+  ).rejects.toThrow();
+  await s.t.run((ctx) =>
+    ctx.db.insert("memberships", {
+      organizationId: s.organizationId,
+      userId: s.foreignId,
+      role: "owner",
+    }),
+  );
+  await expect(
+    s.foreign.query(api.product.libraryContext, {
+      organizationId: s.organizationId,
+    }),
+  ).rejects.toThrow();
+  await s.t.run(async (ctx) => {
+    const membership = await ctx.db
+      .query("memberships")
+      .withIndex("by_pair", (q) =>
+        q.eq("organizationId", s.organizationId).eq("userId", s.actor),
+      )
+      .unique();
+    await ctx.db.delete(membership!._id);
+  });
+  await expect(query()).rejects.toThrow();
+  vi.stubEnv("RESTORE_LOCK", "true");
+  await expect(query()).rejects.toThrow("Recovery");
+});

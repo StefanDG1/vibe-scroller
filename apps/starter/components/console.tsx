@@ -58,6 +58,7 @@ import { track } from "@/lib/analytics";
 import { productAnalyticsEvent } from "@/lib/analytics-events";
 import type { ImportPreview } from "../../../packages/instagram-import";
 type Initial = {
+  workspaceSlice?: "library";
   compact?: boolean;
   privateLibrary?: boolean;
   sharedKnowledge?: { items: any[]; next: string | null };
@@ -248,7 +249,8 @@ export function Console({
     [reauthNeeded, setReauthNeeded] = useState(false),
     [busy, setBusy] = useState(false),
     [libraryLoading, setLibraryLoading] = useState(
-      demo && demoState === "loading",
+      (demo && demoState === "loading") ||
+        (!demo && initial.workspaceSlice === "library"),
     ),
     [libraryError, setLibraryError] = useState(
       demo && demoState === "error"
@@ -275,6 +277,7 @@ export function Console({
   const seenNotifications = useRef(new Set(initial.notifications.map(id)));
   const captureDialog = useRef<HTMLDialogElement>(null);
   const [sharedDraft, setSharedDraft] = useState(initialSharedDraft);
+  const [analysisSettingsOpen, setAnalysisSettingsOpen] = useState(false);
   const libraryRequest = useRef(0);
   const libraryAbort = useRef<AbortController | null>(null);
   const refreshFlight = useRef<Promise<Initial | undefined> | null>(null);
@@ -301,7 +304,11 @@ export function Console({
         cache: "no-store",
         signal: abort.signal,
       });
-      if (!response.ok || response.redirected)
+      if (response.redirected || [401, 403, 404].includes(response.status)) {
+        if (generation === libraryRequest.current) clearAccess();
+        throw new Error("Your library could not be loaded. Sign in again.");
+      }
+      if (!response.ok)
         throw new Error("Your library could not be loaded. Try again.");
       const result = await response.json();
       if (generation !== libraryRequest.current) return;
@@ -410,6 +417,16 @@ export function Console({
     };
   }, [captureOpen]);
   function applyData(next: Initial) {
+    if (next.workspaceSlice === "library") {
+      setData((current) => ({
+        ...current,
+        ...next,
+        sources: current.sources,
+        libraryNext: current.libraryNext,
+      }));
+      notify(next.notifications);
+      return;
+    }
     if (next.compact) {
       setHomeData(next);
       setData((current) => ({ ...current, notifications: next.notifications }));
@@ -469,6 +486,12 @@ export function Console({
   }
   function clearAccess() {
     viewGeneration.current++;
+    libraryRequest.current++;
+    libraryAbort.current?.abort();
+    setLibraryLoading(false);
+    setLibraryError(
+      "Your session or access changed. Sign in again to continue.",
+    );
     setHomeData(null);
     setSelected(null);
     setData({
@@ -484,7 +507,12 @@ export function Console({
   async function refreshData() {
     if (demo) return;
     if (refreshFlight.current) return refreshFlight.current;
-    const request = refreshWorkspace();
+    const request = (async () => {
+      const next = await refreshWorkspace();
+      if (next && view === "library" && librarySection === "posts")
+        await loadLibrary();
+      return next;
+    })();
     refreshFlight.current = request;
     try {
       await request;
@@ -537,7 +565,7 @@ export function Console({
   }
   const refreshView = useEffectEvent(async () => {
     if (refreshFlight.current) await refreshFlight.current;
-    await refreshData();
+    await refreshWorkspace();
   });
   useEffect(() => {
     viewGeneration.current++;
@@ -551,12 +579,12 @@ export function Console({
       );
   }, [view, demo]);
   async function openCapture() {
-    if (data.compact && !demo) {
+    if ((data.compact || data.workspaceSlice === "library") && !demo) {
       setBusy(true);
       try {
         if (refreshFlight.current) await refreshFlight.current;
         const next = await refreshWorkspace("full");
-        if (!next || next.compact)
+        if (!next || next.compact || next.workspaceSlice)
           throw new Error("Capture options could not be loaded. Try again.");
         setCaptureOpen(true);
       } catch (error) {
@@ -1047,6 +1075,9 @@ export function Console({
                   <details
                     className="library-analysis-settings"
                     hidden={librarySection !== "posts"}
+                    onToggle={(event) =>
+                      setAnalysisSettingsOpen(event.currentTarget.open)
+                    }
                   >
                     <summary>Analyze saved posts</summary>
                     <SubscriptionTrials
@@ -1055,7 +1086,10 @@ export function Console({
                       call={call}
                       readOnly={readOnly}
                       enabled={
-                        !demo && !!data.aiPreference?.personalAlphaEnabled
+                        !demo &&
+                        librarySection === "posts" &&
+                        analysisSettingsOpen &&
+                        !!data.aiPreference?.personalAlphaEnabled
                       }
                     />
                   </details>

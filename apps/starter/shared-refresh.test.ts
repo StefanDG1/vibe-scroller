@@ -57,3 +57,64 @@ it("refreshes an explicitly opened source beyond the first grant page and clears
   expect(JSON.stringify(data)).not.toContain("Private upstream");
   expect(state.query).toHaveBeenCalledTimes(6);
 });
+
+it("loads Library context without hidden source, runner, wallet or full-editor queries", async () => {
+  const names: string[] = [];
+  state.query.mockImplementation(async (reference) => {
+    const name = getFunctionName(reference);
+    names.push(name);
+    if (name === "product:libraryContext")
+      return {
+        workspaceName: "Synthetic",
+        privateLibrary: true,
+        role: "owner",
+        repositories: [
+          {
+            _id: "project",
+            fullName: "synthetic/project",
+            enabled: true,
+            confirmed: true,
+          },
+        ],
+        proposals: [{ _id: "idea", review: "unreviewed" }],
+        notifications: [],
+      };
+    if (name === "categories:list")
+      return [{ key: "topic", name: "Topic", count: 1 }];
+    if (name === "aiPreferences:read") return { personalAlphaEnabled: true };
+    throw Error("Hidden workspace content requested");
+  });
+  const response = await GET(
+    new Request(
+      "https://synthetic.example.test/api/workspace/owner?view=library",
+    ),
+    { params: Promise.resolve({ org: "owner" }) },
+  );
+  expect(response.status).toBe(200);
+  expect(response.headers.get("cache-control")).toBe("no-store");
+  expect(names.sort()).toEqual([
+    "aiPreferences:read",
+    "categories:list",
+    "product:libraryContext",
+  ]);
+  expect(await response.json()).toMatchObject({
+    workspaceSlice: "library",
+    compact: false,
+    sources: [],
+    runs: [],
+    usage: null,
+    repositories: [{ _id: "project", confirmed: true }],
+  });
+});
+it("clears Library context on actual access failure without returning cached payloads or diagnostics", async () => {
+  state.query.mockRejectedValue(Error("Private permission diagnostic"));
+  const response = await GET(
+    new Request(
+      "https://synthetic.example.test/api/workspace/owner?view=library",
+    ),
+    { params: Promise.resolve({ org: "owner" }) },
+  );
+  expect(response.status).toBe(404);
+  expect(response.headers.get("cache-control")).toBe("no-store");
+  expect(await response.json()).toEqual({ error: "Workspace unavailable." });
+});

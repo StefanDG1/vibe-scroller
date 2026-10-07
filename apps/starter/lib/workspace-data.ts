@@ -74,6 +74,23 @@ export async function workspaceData({
     });
     if (home.ready) return home;
   }
+  if (view === "library") {
+    const [context, categories, aiPreference] = await Promise.all([
+      c.query(api.product.libraryContext, { organizationId }),
+      c.query(api.categories.list, { organizationId }),
+      c.query(api.aiPreferences.read, { organizationId }),
+    ]);
+    return {
+      ...context,
+      workspaceSlice: "library" as const,
+      compact: false,
+      categories,
+      aiPreference,
+      sources: [],
+      runs: [],
+      usage: null,
+    };
+  }
   const [
     library,
     repositories,
