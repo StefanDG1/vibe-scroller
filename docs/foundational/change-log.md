@@ -106,3 +106,7 @@ Updated all four briefs and the backlog together for F022. The deployed adapter 
 ## F023: simpler live assistant scope, October 7
 
 Updated Research, Avatar, Offer and Beliefs together for the owner-requested Off/Personal/Business/Both choice with current and future eligible posts. ADR 090 replaces individual-post selection for new assistant grants without expanding legacy grants or team sharing. Official ChatGPT connected UI is actual evidence; live-scope handler tests and synthetic screens are engineering evidence. Real host tools, provider revocation, comprehension and measured benefit remain separate. Prices, audience, provider restrictions and publication authority are unchanged.
+
+## F024: private-pilot and recovery evidence, October 7
+
+Updated all four current briefs together for actual bounded ChatGPT/Codex owner-pilot tools, separately granted current/future scope and isolated ordinary owner/foreign serving. Preserve earlier dated pending/failure observations and all six beliefs, audience, prices, provider restrictions and exact action authority. Native search pagination metadata, Events/provider lifecycle, independent human/device/quality and commercial/legal acceptance remain open. No customer outcome, savings, public availability or campaign is inferred.
