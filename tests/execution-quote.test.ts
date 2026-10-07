@@ -10,6 +10,7 @@ it("excludes expired, consumed and concurrently reserved allowance from the advi
         { granted: 30, spent: 7, reserved: 10, expiresAt: 200 },
         { granted: 65, spent: 0, reserved: 0, expiresAt: 100 },
         { granted: 10, spent: 20, reserved: 0 },
+        { granted: 20, spent: 3, reserved: 2, revoked: 15 },
       ],
       100,
     ),

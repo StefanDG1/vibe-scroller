@@ -1,6 +1,7 @@
 import "server-only";
 import { backend, api } from "@/lib/backend";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { usageOverview } from "../../../packages/billing/usage-overview";
 
 export async function workspaceData({
   org,
@@ -29,6 +30,25 @@ export async function workspaceData({
 }) {
   const c = await backend(),
     organizationId = org as Id<"organizations">;
+  if (view === "usage") {
+    const [organization, usage] = await Promise.all([
+      c.query(api.organizations.details, { organizationId }),
+      c.query(api.product.usage, { organizationId }),
+    ]);
+    return {
+      workspaceSlice: "usage" as const,
+      compact: false,
+      workspaceName: organization.name,
+      privateLibrary: organization.private,
+      role: organization.role,
+      sources: [],
+      repositories: [],
+      proposals: [],
+      runs: [],
+      notifications: [],
+      usage: usageOverview(usage),
+    };
+  }
   if (view === "shared") {
     const [organization, sharedKnowledge] = await Promise.all([
       c.query(api.organizations.details, { organizationId }),

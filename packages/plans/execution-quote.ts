@@ -4,13 +4,15 @@ export function availableProcessingCredits(
     granted: number;
     spent: number;
     reserved: number;
+    revoked?: number;
     expiresAt?: number;
   }[],
   now = Date.now(),
 ) {
   return pools.reduce((sum, pool) => {
     if (pool.expiresAt !== undefined && pool.expiresAt <= now) return sum;
-    const amount = pool.granted - pool.spent - pool.reserved;
+    const amount =
+      pool.granted - pool.spent - pool.reserved - (pool.revoked ?? 0);
     return sum + (Number.isSafeInteger(amount) ? Math.max(0, amount) : 0);
   }, 0);
 }
