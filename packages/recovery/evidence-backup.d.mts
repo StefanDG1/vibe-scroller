@@ -32,3 +32,9 @@ export function openEvidence(
   current: unknown,
   now?: number,
 ): Buffer;
+export function verifyEvidenceBackup(
+  archive: unknown,
+  backupKey: Uint8Array,
+  current: EvidenceFrame | null,
+  now?: number,
+): { sha256: string; size: number };

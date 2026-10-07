@@ -111,3 +111,7 @@ Follow [ADR 058](adr/058-bounded-full-library-scans.md): full URL-link paginatio
 ## October 7: explicit exact-version team knowledge sharing
 
 [ADR 082](adr/082-exact-version-team-knowledge-grants.md) separates expiring team grants from owner-private filing and combined browsing. Exact current sources, target workspace, recent sign-in and grant version are enforced outside the model. No mixed derived content, original evidence, assistant grant, funding or publication authority follows. Actual two-account acceptance remains a separate gate.
+
+## October 7: resumable bounded evidence backups
+
+[ADR 083](adr/083-resumable-bounded-evidence-backups.md) adds an operator-only encrypted checkpoint and bounded parts while preserving existing per-object and batch/restore limits, fresh deletion/generation guards and seven-day retention. Local regression checks do not establish a full retained-object backup or serving restoration.
