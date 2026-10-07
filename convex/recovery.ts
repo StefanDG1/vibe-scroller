@@ -114,6 +114,46 @@ export const evidenceCurrent = internalQuery({
     return retainedFrame(ctx, a.key, a.asOf);
   },
 });
+// Operator-only current-record projection for each restore write/read fence.
+// Applying the latest independent markers remains a separate required step.
+export const evidenceRestoreCurrent = internalQuery({
+  args: { key: v.string(), asOf: v.number() },
+  handler: async (ctx, a) => {
+    ensure(
+      process.env.RESTORE_LOCK === "true",
+      "POLICY_BLOCKED",
+      "Evidence restoration requires a locked destination.",
+    );
+    ensure(a.key.length <= 300, "INVALID_INPUT", "Use a bounded evidence key.");
+    const evidence = await retainedFrame(ctx, a.key, a.asOf);
+    if (!evidence) return null;
+    const source = (await ctx.db.get(evidence.sourceId))!;
+    return {
+      locked: true,
+      source: {
+        id: source._id,
+        organizationId: source.organizationId,
+        generation: source.generation,
+        state: source.state,
+      },
+      organization: { id: evidence.organizationId, status: "active" },
+      asset: {
+        key: evidence.key,
+        sourceId: evidence.sourceId,
+        organizationId: evidence.organizationId,
+        state: "complete",
+        type: evidence.type,
+        size: evidence.size,
+        ...(evidence.expiresAt === undefined
+          ? {}
+          : { expiresAt: evidence.expiresAt }),
+      },
+      retiredKeys: [],
+      deletedSources: [],
+      deletedWorkspaces: [],
+    };
+  },
+});
 const entry = v.object({
   kind: v.union(
     v.literal("source"),
