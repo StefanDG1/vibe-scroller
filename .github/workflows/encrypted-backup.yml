@@ -13,6 +13,9 @@ jobs:
     if: github.repository_id == '1396686369' && github.ref == 'refs/heads/main' && vars.VIBE_BACKUP_ENABLED == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    outputs:
+      as_of: ${{ steps.evidence.outputs.as_of }}
+      needs_resume: ${{ steps.evidence.outputs.needs_resume }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -29,7 +32,8 @@ jobs:
           CONVEX_DEPLOY_KEY: ${{ secrets.VIBE_BACKUP_CONVEX_KEY }}
           BACKUP_ENCRYPTION_KEY: ${{ secrets.VIBE_BACKUP_ENCRYPTION_KEY }}
       - name: Read and encrypt retained evidence without exporting storage credentials
-        run: node scripts/production-evidence-backup.mjs
+        id: evidence
+        run: node scripts/evidence-backup-job.mjs
         env:
           VIBE_BACKUP_ENABLED: "true"
           CONVEX_DEPLOY_KEY: ${{ secrets.VIBE_BACKUP_CONVEX_KEY }}
@@ -38,6 +42,40 @@ jobs:
         if: always()
         with:
           name: encrypted-production-backup-${{ github.run_id }}
-          path: outputs/production-backup/*.sealed.json
+          path: |
+            outputs/production-backup/*.sealed.json
+          if-no-files-found: error
+          retention-days: 7
+  resume:
+    needs: backup
+    if: needs.backup.result == 'success' && needs.backup.outputs.needs_resume == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+      - run: npm install --global pnpm@12.3.4
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: encrypted-production-backup-${{ github.run_id }}
+          path: outputs/production-backup
+      - name: Resume the original checkpoint without extending expiry
+        run: node scripts/evidence-backup-job.mjs
+        env:
+          VIBE_BACKUP_ENABLED: "true"
+          VIBE_EVIDENCE_RESUME_AS_OF: ${{ needs.backup.outputs.as_of }}
+          VIBE_EVIDENCE_FINAL_JOB: "true"
+          CONVEX_DEPLOY_KEY: ${{ secrets.VIBE_BACKUP_CONVEX_KEY }}
+          BACKUP_ENCRYPTION_KEY: ${{ secrets.VIBE_BACKUP_ENCRYPTION_KEY }}
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: encrypted-production-evidence-resume-${{ github.run_id }}
+          path: outputs/evidence-job/*.sealed.json
           if-no-files-found: error
           retention-days: 7

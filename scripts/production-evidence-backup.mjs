@@ -64,7 +64,9 @@ try {
     throw Error();
   const output = resolve("outputs/production-backup");
   mkdirSync(output, { recursive: true, mode: 0o700 });
+  stage = "code_identity";
   const commit = buildVersion().commit;
+  stage = "evidence_checkpoint";
   const resume = process.env.VIBE_EVIDENCE_RESUME_AS_OF;
   if (resume !== undefined && !/^[1-9][0-9]{12}$/.test(resume)) throw Error();
   const { asOf } = resume
@@ -74,6 +76,7 @@ try {
     output,
     `${asOf}.evidence-checkpoint.sealed.json`,
   );
+  stage = "checkpoint_initialization";
   const state = resume
     ? openEvidenceCheckpoint(readArchive(checkpointPath, 6000000), key, {
         deployment,
