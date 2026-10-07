@@ -127,3 +127,7 @@ Follow [ADR 058](adr/058-bounded-full-library-scans.md): full URL-link paginatio
 ## October 7: exact project context and private assistant suggestions
 
 [ADR 087](adr/087-exact-project-context-assistant-drafts.md) makes confirmed library context and exact project context separate explicit choices. Private assistant suggestions reuse current canonical evaluations and existing private drafts, preserving manual edits and distinct non-fit judgments. They grant no spending, publication or coding authority. Real OAuth and host acceptance remain separate gates.
+
+## October 7: persistent scoped completion Events
+
+[ADR 088](adr/088-persistent-scoped-completion-events.md) adds finite renewable source-status webhooks through the actual modern MCP SDK. Callback verification, connection-time public-address checks, encrypted purpose-bound authority, current provider/app checks, durable receipts, bounded retry and recovery quarantine are required. HTTP receipt remains separate from host processing. Activation and real supported-host acceptance remain gated.

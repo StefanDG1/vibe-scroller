@@ -1,19 +1,22 @@
 import {
   McpServer,
+  ProtocolError,
   createMcpHandler,
   requireScopes,
   type AuthInfo,
   type StandardSchemaWithJSON,
 } from "@modelcontextprotocol/server";
+import { completionEvent, eventSubscribe, eventUnsubscribe } from "./events";
 import { z } from "zod";
 export function createKnowledgeHandler(
   invoke: (
     operation: string,
     args: Record<string, unknown>,
   ) => Promise<{ ok: boolean; status: number; value: Record<string, unknown> }>,
+  events = false,
 ) {
   return createMcpHandler(
-    () => {
+    (requestContext) => {
       const server = new McpServer({
         name: "VibeScroll",
         version: process.env.NEXT_PUBLIC_APP_VERSION ?? "development",
@@ -191,6 +194,55 @@ export function createKnowledgeHandler(
         "analysis:request",
         sourceRequest,
       );
+      if (events && requestContext.era === "modern") {
+        // The Events extension uses the SDK's validated custom-method seam.
+        const eventCapabilities = { experimental: {}, events: {} };
+        server.server.registerCapabilities(eventCapabilities);
+        const scope = () => {
+          if (!requestContext.authInfo?.scopes.includes("events:subscribe"))
+            throw new ProtocolError(
+              -32003,
+              "Completion Events require events:subscribe authorization.",
+            );
+        };
+        const run = async (
+          operation: string,
+          args: Record<string, unknown>,
+        ) => {
+          scope();
+          const response = await invoke(operation, args);
+          if (!response.ok)
+            throw new ProtocolError(
+              -32003,
+              "Review current Events authorization in Connections.",
+            );
+          if (response.value.verified === false)
+            throw new ProtocolError(
+              -32015,
+              "Callback endpoint verification failed.",
+              { reason: response.value.reason },
+            );
+          return response.value;
+        };
+        server.server.setRequestHandler(
+          "events/list",
+          { params: z.object({ cursor: z.null().optional() }).strict() },
+          async () => {
+            await run("events/list", {});
+            return { events: [completionEvent] };
+          },
+        );
+        server.server.setRequestHandler(
+          "events/subscribe",
+          { params: eventSubscribe },
+          (args) => run("events/subscribe", args),
+        );
+        server.server.setRequestHandler(
+          "events/unsubscribe",
+          { params: eventUnsubscribe },
+          (args) => run("events/unsubscribe", args),
+        );
+      }
       return server;
     },
     { legacy: "stateless" },

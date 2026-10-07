@@ -299,6 +299,10 @@ export const applyMarkers = internalMutation({
 export const quarantinePage = internalMutation({
   args: {
     section: v.union(
+      v.literal("assistantSubscriptions"),
+      v.literal("assistantDeliveries"),
+      v.literal("assistantGrants"),
+      v.literal("assistantIntakes"),
       v.literal("connections"),
       v.literal("devices"),
       v.literal("githubLinks"),
@@ -430,9 +434,17 @@ export const readiness = internalQuery({
         ),
       )
       .first();
+    const assistantAuthority = await ctx.db
+      .query("assistantSubscriptions")
+      .first();
+    const assistantGrant = await ctx.db.query("assistantGrants").first();
+    const assistantDelivery = await ctx.db.query("assistantDeliveries").first();
     return {
       locked: process.env.RESTORE_LOCK === "true",
       quarantineComplete:
+        !assistantAuthority &&
+        !assistantGrant &&
+        !assistantDelivery &&
         !deleting &&
         !credentials &&
         !device &&
