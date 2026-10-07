@@ -3,6 +3,12 @@ import { backend, api, configured } from "@/lib/backend";
 import { withAuth } from "@workos-inc/authkit-nextjs";
 import { allowedRequestOrigin } from "@/lib/request-origin";
 const operations = {
+  connectedSpaceSources: ["query", api.librarySpaces.connected],
+  librarySetup: ["query", api.librarySpaces.setup],
+  saveLibrarySetup: ["mutation", api.librarySpaces.saveSetup],
+  fileSourceSpaces: ["mutation", api.librarySpaces.fileSource],
+  spaceSources: ["query", api.librarySpaces.list],
+  exportSourceSpaces: ["query", api.librarySpaces.exportPage],
   localLibraryPrepare: ["mutation", api.localLibrary.prepare],
   localLibraryList: ["query", api.localLibrary.list],
   localLibraryCancel: ["mutation", api.localLibrary.cancel],

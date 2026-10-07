@@ -78,3 +78,7 @@ The owner reported that the map was difficult to find and the interface was conf
 ## F014/F015: first studio implementation evidence, October 7
 
 Updated all four current briefs with the limited local slice: VibeScroll display copy, original Scroll, bounded next actions and compact navigation. Automated and labeled synthetic layout evidence supports those implementation facts only. Personal privacy, onboarding and assistant OAuth remain pending. No demand, conversion, customer comprehension, new price, provider permission or production completion is claimed. Historical observations and dissent remain intact. See the October 7 implementation-status entry.
+
+## F017: private setup and filing candidate, October 7
+
+Reconciled Research, Avatar, Offer and Beliefs together for the actual candidate handlers and reviewed local synthetic UI. User-stated answers have provenance and versioned confirmation; Personal/Business filing stays within real owner-private authorization. Combined browsing has a separate confirmed preference, while team/assistant grants and spending remain separate. Six local handler tests and native fixture checks support implementation facts, not demand, production, first-analysis or real two-account acceptance. These gates remain visible; prior research and dissent are unchanged.
