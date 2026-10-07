@@ -1,6 +1,6 @@
 # Load only visible Library context and defer collapsed trial reads
 
-Mode: reference. Decision October 7, 2026. Status: implemented candidate; release and production measurement pending.
+Mode: reference. Decision October 7, 2026. Status: deployed through PR 67; bounded authenticated production traffic verified October 7.
 
 The authenticated Home comparison exposed two Library costs: the generic workspace loader returned 433,170 decoded bytes even on Topics, while the collapsed analysis section fetched 249,048 bytes of ready-source data and trial history. Existing posts, topics, corrections, project choices and source detail must remain available. A hidden control is not a reason to read its data.
 
@@ -11,3 +11,5 @@ Paged Posts use their existing authorized source endpoint only while Posts is ac
 The explicit slice never counts as complete capture context. Capture reloads the existing full authorized context before opening and refuses another partial snapshot. Trial requests require both Posts and the expanded analysis section. Closing it or selecting another section disables the read effect while preserving the component's local selections. Authorization loss in a Posts response discards private workspace and Home caches instead of displaying previously permitted evidence.
 
 Checks: actual Library-context handler with complete thirty-six-project choices, bounded notifications, excluded private profile/code/notification bodies, corrected source references, foreign/private-owner mismatch, lost membership and restore lock; actual HTTP loader queries only three required endpoints and returns no-store/404 without diagnostics. Local synthetic Console fixture verifies deferred trial reads, full capture reload/Escape and private cache clearing on actual simulated 404. Real-account serving and physical-device/comprehension acceptance remain separate. No new processing, provider consent, spending, grant or publication follows from viewing Library.
+
+On exact application main `6362fe75e0d2097c81409889bfecf1691fe9c946`, a controlled thirty-second Topics window returned 11,837-byte workspace metadata and 2,270-byte Explore data with no ready-source/trial requests. A separate ten-second Posts window rendered thirty actual rows with analysis collapsed and retained its existing 249,048-byte paged source response plus visible thumbnails. Full capture opened and Escape closed it at 390 pixels. The first Posts measurement switched to another browser tab and is retained as invalid/excluded. This is bounded transfer/behavior evidence, not causal database-I/O/cost, physical-device or human acceptance. Exact CI/deployment/version and private receipts are recorded in implementation status.
