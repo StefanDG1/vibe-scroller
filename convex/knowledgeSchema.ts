@@ -122,7 +122,6 @@ export const knowledgeTables = {
     .index("by_org", ["organizationId"])
     .index("by_org_state", ["organizationId", "state"])
     .index("by_topic", ["topicId"])
-    .index("by_topic", ["topicId"])
     .index("by_topic_repo", ["topicId", "repositoryId"])
     .index("by_repo", ["repositoryId"])
     .index("by_key", ["key"]),
