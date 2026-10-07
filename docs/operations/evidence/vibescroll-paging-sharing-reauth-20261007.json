@@ -1,0 +1,42 @@
+{
+  "recordedAt": "2026-10-07T18:45:00.059317Z",
+  "scope": "bounded live paging, owner-controlled saved-title sharing and candidate reauthentication recovery; full V1 external acceptance incomplete",
+  "productionCommit": "1db35d26d357990a0b81cad7170b8f6b011e1efe",
+  "productionVersion": "0.1.0-alpha.20261007180442.g1db35d26d357",
+  "domain": "https://scroll.companynerve.com",
+  "cursor": {
+    "nativePages": 22,
+    "uniqueIdeas": 15,
+    "repeatedResults": 0,
+    "terminal": true,
+    "chatgptReasoning": "Extra High",
+    "chatgptSuccessfulPages": 2,
+    "inferenceOrWrites": false
+  },
+  "sharing": {
+    "ordinaryOwnerControlledAccounts": 2,
+    "independentTester": false,
+    "source": "existing labeled saved-title source, no cited analysis",
+    "grantReadRevokeRoleLossCleanup": "passed",
+    "originalSourceExactResponseUnchanged": true,
+    "emailOrAnalysisOrCodingStarted": false
+  },
+  "reauthCandidate": {
+    "applicationCommit": "59416f18f489f1b732f651a645b607937e92c7d6",
+    "unitPassed": 529,
+    "externalSkips": 3,
+    "authPassed": 26,
+    "pythonPassed": [6, 6, 3],
+    "basicChecksPassed": 5,
+    "bothBuilds": "passed",
+    "viewportWidths": [390, 1440, 1567],
+    "failure": "simulated HTTP 400 before backend dispatch",
+    "realStagingOAuthReturn": "exact source pathname and query preserved",
+    "candidatePort": 3115,
+    "configuredCallbackPort": 3001,
+    "operationReplayed": false,
+    "productionRecovery": "pending"
+  },
+  "events": "disabled",
+  "fullV1": "incomplete; retained external gates in implementation status"
+}

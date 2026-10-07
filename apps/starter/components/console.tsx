@@ -246,7 +246,7 @@ export function Console({
     [noticeKind, setNoticeKind] = useState<"info" | "success" | "error">(
       "info",
     ),
-    [reauthNeeded, setReauthNeeded] = useState(false),
+    [reauthReturnTo, setReauthReturnTo] = useState(""),
     [busy, setBusy] = useState(false),
     [libraryLoading, setLibraryLoading] = useState(
       (demo && demoState === "loading") ||
@@ -688,7 +688,7 @@ export function Console({
     setBusy(true);
     setNoticeKind("info");
     setNotice("");
-    setReauthNeeded(false);
+    setReauthReturnTo("");
     try {
       if (demo) {
         setNotice(
@@ -715,7 +715,11 @@ export function Console({
         );
       const body = await res.json();
       if (!res.ok) {
-        setReauthNeeded(body.code === "REAUTH_REQUIRED");
+        setReauthReturnTo(
+          body.code === "REAUTH_REQUIRED"
+            ? window.location.pathname + window.location.search
+            : "",
+        );
         if (!demo)
           track("operation_failed", {
             operation,
@@ -1002,9 +1006,9 @@ export function Console({
             kind={noticeKind}
             onDismiss={() => setNotice("")}
             action={
-              reauthNeeded ? (
+              reauthReturnTo ? (
                 <a
-                  href={`/sign-in?reauth=true&returnTo=${encodeURIComponent(`/app?workspace=${organizationId}`)}`}
+                  href={`/sign-in?reauth=true&returnTo=${encodeURIComponent(reauthReturnTo)}`}
                 >
                   Sign in again
                 </a>

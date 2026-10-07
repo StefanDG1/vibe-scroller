@@ -298,6 +298,12 @@ Coverage, state and tags share a small neutral badge. They supplement source tex
 
 Library items are rows with thin bottom separators, a quiet media icon and a readable linked title. Settings, plans and evidence use bordered panels. Empty views keep a plain background, a short explanation and a relevant action. Notices use a neutral raised fill and live output for action feedback; errors also use the error color and precise explanation.
 
+### Reauthentication recovery
+
+**The Review Return Rule.** When an operation requires fresh sign-in, retain the current application pathname and query in the existing error toast's recovery link. Keep the app-only server return-path guard. Recovery returns to the review location; it does not retry the failed operation or grant approval, access or spending authority.
+
+The incumbent toast, Sign in again label and native anchor remain unchanged. October 7 evidence in `.impeccable/review/reauth-route-20261007/browser-proof.json` records the source-specific link at 390, 1440 and 1567 CSS pixels and a later pathname/query check. The client received a simulated HTTP 400 before backend dispatch in a genuine staging session with a genuine source; no source edit occurred. The fresh reviewer cleared this routing correction. Its report retains the narrower evidence available at review time, before the later query check. These captures and checks do not establish live OAuth completion, production recovery, independent human or physical-phone acceptance, or full V1 acceptance.
+
 ### Processing and private evidence
 
 The implemented personal-video UI shows prepare, transcribe and analyze stages, an explicit automatic-analysis permission choice, private frame access and original transcript inspection. Current and completed steps brighten their labels; pending work uses a spinner. Recorded verification now includes a real production upload whose generation-one personal-alpha analysis completed automatic Whisper transcription and sampled-frame ChatGPT analysis using gpt-5.6-sol at medium reasoning. This observed completion does not establish global production readiness, legal approval or audiovisual completeness.

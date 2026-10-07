@@ -577,6 +577,11 @@
   "narrative": {
     "rules": [
       {
+        "name": "The Review Return Rule",
+        "body": "When an operation requires fresh sign-in, retain the current application pathname and query in the existing error toast's recovery link. Keep the app-only server return-path guard. Recovery returns to the review location; it does not retry the failed operation or grant approval, access or spending authority.",
+        "section": "components"
+      },
+      {
         "name": "The Reviewed Access Rule",
         "body": "Keep the library scope, future inclusion, exact context and allowed actions reviewable before acknowledgment, with immediate revocation and operation-specific feedback.",
         "section": "components"
