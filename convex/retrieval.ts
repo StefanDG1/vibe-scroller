@@ -1,5 +1,5 @@
 import { workspaceReadable } from "./lib/workspacePrivacy";
-import { mutation, internalMutation } from "./_generated/server";
+import { mutation, internalMutation } from "./lib/projectedMutations";
 import { v } from "convex/values";
 import { ensure, containsSecret } from "../packages/policy";
 import { writeAccess, fail } from "./lib";

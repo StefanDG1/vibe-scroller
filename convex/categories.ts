@@ -1,9 +1,5 @@
-import {
-  query,
-  mutation,
-  internalMutation,
-  internalQuery,
-} from "./_generated/server";
+import { query, internalQuery } from "./_generated/server";
+import { mutation, internalMutation } from "./lib/projectedMutations";
 import { v } from "convex/values";
 import { syncKnowledge } from "./knowledge";
 import type { QueryCtx, MutationCtx } from "./_generated/server";
@@ -190,14 +186,15 @@ export const assign = mutation({
         "Use category names of 1 to 48 letters, numbers or spaces.",
       );
     }
+    const revision = Math.max(Date.now(), source.updatedAt + 1);
     await ctx.db.patch(source._id, {
       categoryOverride: names,
-      updatedAt: Date.now(),
+      updatedAt: revision,
     });
     await syncCategories(ctx, {
       ...source,
       categoryOverride: names,
-      updatedAt: Date.now(),
+      updatedAt: revision,
     });
     const saved = await ctx.db.get(source._id);
     if (saved) await syncKnowledge(ctx, saved);

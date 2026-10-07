@@ -1,4 +1,5 @@
-import { query, mutation } from "./_generated/server";
+import { query } from "./_generated/server";
+import { mutation } from "./lib/projectedMutations";
 import { v } from "convex/values";
 import { role } from "./schema";
 import {

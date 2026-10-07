@@ -1,5 +1,6 @@
 import { workspaceReadable } from "./lib/workspacePrivacy";
-import { internalQuery, internalMutation } from "./_generated/server";
+import { internalQuery } from "./_generated/server";
+import { internalMutation } from "./lib/projectedMutations";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { ensure } from "../packages/policy";

@@ -1,9 +1,5 @@
-import {
-  query,
-  mutation,
-  internalMutation,
-  internalQuery,
-} from "./_generated/server";
+import { query, internalQuery } from "./_generated/server";
+import { mutation, internalMutation } from "./lib/projectedMutations";
 import { v } from "convex/values";
 import { access, writeAccess, audit, recentAuthentication, limit } from "./lib";
 import { requireInvoiceOperator } from "./lib/invoiceOperator";

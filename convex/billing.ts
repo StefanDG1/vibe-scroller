@@ -1,4 +1,5 @@
-import { query, internalQuery, internalMutation } from "./_generated/server";
+import { query, internalQuery } from "./_generated/server";
+import { internalMutation } from "./lib/projectedMutations";
 import { v } from "convex/values";
 import { access, billingFor, fail, limit } from "./lib";
 import { billingReadiness } from "../packages/providers/billing-readiness";

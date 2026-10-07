@@ -1,4 +1,4 @@
-import { internalMutation } from "./_generated/server";
+import { internalMutation } from "./lib/projectedMutations";
 import { vWorkflowId, vResultValidator } from "@convex-dev/workflow";
 import { WorkflowManager } from "@convex-dev/workflow";
 import { components, internal } from "./_generated/api";

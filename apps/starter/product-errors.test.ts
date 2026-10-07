@@ -18,6 +18,34 @@ vi.mock("@workos-inc/authkit-nextjs", () => ({
   withAuth: async () => ({ user: { id: "synthetic-owner" } }),
 }));
 import { POST } from "./app/api/product/route";
+it.each([
+  "Organization unavailable.",
+  "Account unavailable. Complete account setup first.",
+  "Recovery is in progress. Private access is paused.",
+])(
+  "reports lost access as HTTP 403 so private UI caches can be discarded: %s",
+  async (message) => {
+    vi.stubEnv("APP_URL", "https://synthetic.example.test");
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    state.invoke.mockRejectedValue(
+      Object.assign(new Error("wrapped upstream error"), { data: message }),
+    );
+    const response = await POST(
+      new NextRequest("https://synthetic.example.test/api/product", {
+        method: "POST",
+        headers: { Origin: "https://synthetic.example.test" },
+        body: JSON.stringify({
+          operation: "knowledgeEvaluate",
+          args: { id: "synthetic-topic" },
+        }),
+      }),
+    );
+    expect(response.status).toBe(403);
+    expect((await response.json()).code).toBe("ACCESS_LOST");
+    expect(response.headers.get("cache-control")).toBe("no-store");
+    expect(state.invoke).toHaveBeenCalledTimes(1);
+  },
+);
 afterEach(() => {
   vi.unstubAllEnvs();
   vi.restoreAllMocks();

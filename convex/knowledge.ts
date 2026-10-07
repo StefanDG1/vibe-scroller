@@ -1,12 +1,7 @@
 import { workspaceReadable } from "./lib/workspacePrivacy";
 import { repositoryContent } from "./lib/repositoryContent";
-import {
-  internalMutation,
-  mutation,
-  query,
-  type MutationCtx,
-  type QueryCtx,
-} from "./_generated/server";
+import { query, type MutationCtx, type QueryCtx } from "./_generated/server";
+import { internalMutation, mutation } from "./lib/projectedMutations";
 import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import { v } from "convex/values";

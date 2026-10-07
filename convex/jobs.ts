@@ -11,12 +11,8 @@ import { internal } from "./_generated/api";
 import { workflow } from "./workflows";
 import { actorCurrent, referencesCurrent } from "./knowledge";
 import { improvementCurrent, runPolicyCurrent } from "./lib/improvementContext";
-import {
-  query,
-  mutation,
-  internalQuery,
-  internalMutation,
-} from "./_generated/server";
+import { query, internalQuery } from "./_generated/server";
+import { mutation, internalMutation } from "./lib/projectedMutations";
 import { v } from "convex/values";
 import { access, fail, writeAccess, recentAuthentication } from "./lib";
 import {

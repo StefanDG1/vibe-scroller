@@ -31,7 +31,17 @@ Private restoration manifest, encrypted configuration and Git bundle remain igno
 
 Physical Android and fresh-user comprehension, independent quality judgments, professional legal/provider evidence and full serving/all-object recovery remain separate. Do not infer them from viewport emulation, fixtures or a successful deployment.
 
+## Private boundary release and Home metadata preparation
+
+PR 51 merged to `1ec908a490f71c1888afd5d5b6ee5e6cebd542f9` after Verify `37548341016` passed. Exact main Verify `37548790694`, version `37548790707` and alpha release `37548914794` succeeded. Production Convex accepted the additive owner index. Vercel `dpl_BLYpBvJW2YnxvoSruKQo1N5ByJpz` is READY; canonical health returns HTTP 200 with this exact commit and `0.1.0-alpha.20261006235055.g1ec908a490f7`. Real private creation/two-account browser acceptance remains pending.
+
+Before this backend release, an encrypted production database backup was created and authenticated in memory. Its offline check validated 109 tables and 9,343 JSONL records and rejected modified metadata. This is not a hosted/serving restore or complete evidence-object backup. The retained JPEG inventory exceeds the existing 200 MB single-batch bound; resumable partitioned recovery remains required rather than increasing that cap or claiming full recovery.
+
+ADR 079 introduces atomic compact Home metadata and a bounded resumable backfill. Its first full local check passed 441 unit tests with three external skips, 18 auth tests, Python 6/6/3, five Basic-build tests and both builds. Subsequent lost-access cache and notification preservation changes passed targeted tests, lint and types; final build/review remains to be recorded. Development backfill completed without changing canonical versions or starting model work. The finish reviewer requested changed desktop/mobile behavior captures and identified an authorization-failure cache path; both caches now clear consistently. No rendered compact-Home acceptance is inferred.
+
 ## Approvals that cannot happen upfront
+
+Stripe's official dashboard also has an active session. The official Resend login is open for transactional-email configuration checks. Staging and Resend were batched in one owner request; neither sign-in has been confirmed. No provider/authentication tabs were closed after the retention correction. Assistant scoped consent still requires the concrete completed endpoint, and restricted personal execution requires its actual temporary session at test time.
 
 Temporary own-subscription sessions require fresh official sign-in at a specific test and expire at the fixed approved deadline. Login does not authorize a new charge, public issue, coding plan or merge. Assistant connection requires the actual host's scoped consent. GitHub or another provider may require fresh security confirmation when a concrete account change is ready. The existing prohibition on a real purchase/refund test remains. Continue independent work when one of these steps is blocked.
 

@@ -1,5 +1,6 @@
 import { paginationOptsValidator } from "convex/server";
-import { query, mutation } from "./_generated/server";
+import { query } from "./_generated/server";
+import { mutation } from "./lib/projectedMutations";
 import { v } from "convex/values";
 import { fail, recentAuthentication, limit } from "./lib";
 import { invoiceOperator, requireInvoiceOperator } from "./lib/invoiceOperator";

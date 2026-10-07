@@ -1,5 +1,6 @@
 import { storageUsage, insertAsset, deleteAsset } from "./lib/storageUsage";
-import { query, mutation, internalMutation } from "./_generated/server";
+import { query } from "./_generated/server";
+import { mutation, internalMutation } from "./lib/projectedMutations";
 import { v } from "convex/values";
 import { access, limit, fail, writeAccess } from "./lib";
 import { ensure } from "../packages/policy";

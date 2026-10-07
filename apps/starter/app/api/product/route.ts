@@ -145,6 +145,8 @@ export async function POST(req: NextRequest) {
     );
   } catch (error) {
     const messages: Record<string, string> = {
+      ACCESS_LOST:
+        "Your session or workspace access changed. Sign in again to continue.",
       EVIDENCE_REQUIRED:
         "Confirm the release you used before judging its outcome.",
       CHECKS_PENDING: "Wait for the required GitHub checks and reviews.",
@@ -221,11 +223,18 @@ export async function POST(req: NextRequest) {
     const message = data || (error instanceof Error ? error.message : "");
     const category =
       error instanceof Error
-        ? message.includes(
-            "Sign in again before changing a sensitive connection.",
-          )
-          ? "REAUTH_REQUIRED"
-          : Object.keys(messages).find((code) => message.includes(`${code}:`))
+        ? [
+            "Sign in to continue.",
+            "Account unavailable. Complete account setup first.",
+            "Organization unavailable.",
+            "Recovery is in progress. Private access is paused.",
+          ].some((text) => message.includes(text))
+          ? "ACCESS_LOST"
+          : message.includes(
+                "Sign in again before changing a sensitive connection.",
+              )
+            ? "REAUTH_REQUIRED"
+            : Object.keys(messages).find((code) => message.includes(`${code}:`))
         : undefined;
     // Do not log payloads, source text, credentials, tokens or upstream errors.
     console.error("product_operation_failed", {
@@ -249,7 +258,10 @@ export async function POST(req: NextRequest) {
           : "This action could not be completed. Check its latest status before trying again.",
         code: category ?? "UNCLASSIFIED",
       },
-      { status: 400, headers: { "Cache-Control": "no-store" } },
+      {
+        status: category === "ACCESS_LOST" ? 403 : 400,
+        headers: { "Cache-Control": "no-store" },
+      },
     );
   }
 }

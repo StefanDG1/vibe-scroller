@@ -1,5 +1,5 @@
 import { storageUsage, insertAsset } from "./lib/storageUsage";
-import { internalMutation } from "./_generated/server";
+import { internalMutation } from "./lib/projectedMutations";
 import { v } from "convex/values";
 import { syncCategories } from "./categories";
 import { wallet } from "./product";

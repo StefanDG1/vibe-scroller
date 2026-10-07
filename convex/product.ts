@@ -2,12 +2,8 @@ import { repositoryContent } from "./lib/repositoryContent";
 import { validateInspectedContext } from "../packages/repositories/retrieval";
 import { inspectionManifestValidator } from "../packages/repositories/context";
 import { inspectedContextValidator } from "../packages/repositories/context";
-import {
-  query,
-  mutation,
-  internalQuery,
-  internalMutation,
-} from "./_generated/server";
+import { query, internalQuery } from "./_generated/server";
+import { mutation, internalMutation } from "./lib/projectedMutations";
 import { v } from "convex/values";
 import { workflow } from "./workflows";
 import { validateRepositoryEvidence } from "../packages/repositories/context";
@@ -1282,7 +1278,7 @@ export const editSource = mutation({
             error: undefined,
           }
         : {}),
-      updatedAt: Date.now(),
+      updatedAt: Math.max(Date.now(), s.updatedAt + 1),
     });
     await syncKnowledge(ctx, (await ctx.db.get(s._id))!);
   },

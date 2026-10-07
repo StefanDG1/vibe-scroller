@@ -1,5 +1,6 @@
 import { clearRepositoryContent } from "./lib/repositoryContent";
-import { internalMutation, internalQuery } from "./_generated/server";
+import { internalQuery } from "./_generated/server";
+import { internalMutation } from "./lib/projectedMutations";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { ensure } from "../packages/policy";

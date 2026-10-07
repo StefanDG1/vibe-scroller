@@ -1,4 +1,4 @@
-import { mutation } from "./_generated/server";
+import { mutation } from "./lib/projectedMutations";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { writeAccess, limit } from "./lib";
@@ -152,7 +152,7 @@ export const save = mutation({
     return result;
   },
 });
-import { internalMutation } from "./_generated/server";
+import { internalMutation } from "./lib/projectedMutations";
 export const preparationState = internalMutation({
   args: {
     id: v.id("repositories"),

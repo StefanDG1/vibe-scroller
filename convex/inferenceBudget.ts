@@ -1,4 +1,4 @@
-import { internalMutation } from "./_generated/server";
+import { internalMutation } from "./lib/projectedMutations";
 import { v } from "convex/values";
 import { ensure } from "../packages/policy";
 export const reserve = internalMutation({
