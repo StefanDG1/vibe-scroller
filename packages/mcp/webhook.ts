@@ -108,6 +108,7 @@ export async function sendWebhook(
   body: string,
   headers: Record<string, string>,
   beforeSend?: () => Promise<boolean>,
+  receiptOnly = false,
 ): Promise<{ status: number; body: Uint8Array }> {
   const url = webhookUrl(raw);
   if (Buffer.byteLength(body) > 262144) throw Error("CALLBACK_PAYLOAD_DENIED");
@@ -175,7 +176,7 @@ export async function sendWebhook(
             reject(Error("CALLBACK_REDIRECT_DENIED"));
             return;
           }
-          if (status === 410 || status === 413) {
+          if (receiptOnly || status === 410 || status === 413) {
             resolve({ status, body: new Uint8Array() });
             res.destroy();
             return;

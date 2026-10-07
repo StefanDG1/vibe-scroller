@@ -252,3 +252,7 @@ F020 prepares official scoped assistant retrieval and explicit link intake. Prod
 ## F021: exact project context and private assistant drafts, October 7
 
 F021 prepares private cited project drafts through an explicitly scoped assistant request. A current relevant evaluation is reused without another inference; retries preserve manual edits. Other fit judgments create no draft. Assistant access remains disabled pending real host/provider acceptance. Do not advertise automatic coding, publication, measured benefit, a working connection or a new allowance. Prices, budgets and separate approvals remain unchanged.
+
+## F022: finite scoped completion Events, October 7
+
+F022 prepares finite selected-work completion notifications. Production MCP/Events remain disabled. Do not advertise working background ChatGPT notification, indefinite monitoring, automatic analysis, coding, publication or measured benefit from a deployed adapter. Prices, existing allowances, budgets and separate app approvals remain unchanged.

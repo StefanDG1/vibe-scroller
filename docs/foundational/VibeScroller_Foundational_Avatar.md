@@ -199,3 +199,7 @@ F020 preserves the project-owner audience and its need to understand what an ass
 ## F021: exact project context and private assistant drafts, October 7
 
 F021 retains the project-owner audience. The control now lets owners choose library context and project context separately, inspect commit/context versions and review retained selections. This addresses the access-boundary task without claiming that prospective users understand it; fresh-user comprehension and wrong-account checks remain required.
+
+## F022: finite scoped completion Events, October 7
+
+F022 retains the same project-owner audience. A person needs to distinguish a saved link, ready analysis, received notification and demonstrated benefit, and to understand when background authority expires. The implemented thirty-minute maximum lease addresses the authorization boundary; independent comprehension has not been observed.

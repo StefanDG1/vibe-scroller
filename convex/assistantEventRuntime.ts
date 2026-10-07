@@ -272,6 +272,7 @@ export const deliver = internalAction({
             id,
             lease: d.lease,
           }),
+        true,
       );
       status = receipt.status;
       outcome =

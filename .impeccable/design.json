@@ -3,6 +3,27 @@
   "generatedAt": "2026-10-07T04:58:24Z",
   "title": "Design System: VibeScroll",
   "extensions": {
+    "compactHomeReview": {
+      "mode": "Operate",
+      "identity": "Incumbent flat charcoal Home, meaningful mint actions, amber original Scroll, existing typography and native phone flow; no visual-world or token change.",
+      "sources": [
+        "apps/starter/components/studio-home.tsx",
+        "apps/starter/components/console.tsx",
+        "docs/adr/079-atomic-home-metadata.md"
+      ],
+      "coverage": "Home uses bounded metadata for the same next-action, capture, recent-knowledge and project-shelf composition. Recent rows describe the current loaded page rather than whole-library coverage.",
+      "viewIsolation": "Compact refreshes update the independent Home cache without replacing full editor data or drafts. Capture and proposal review request authorized full content when needed; view-generation fencing rejects stale refresh responses and lost authorization clears access.",
+      "responsiveConvention": "Retain wrapping real titles, visible linked phone workspace scope and bottom navigation, native vertical scrolling and the existing stacked phone/tablet shelves. Preserve existing permissions, protected navigation and draft state.",
+      "finishDisposition": "Ship at supplied authenticated Home first-view and sampled implementation scope only; no material fixes requested.",
+      "captures": [
+        ".impeccable/review/compact-home/mobile-320.png",
+        ".impeccable/review/compact-home/mobile.png",
+        ".impeccable/review/compact-home/tablet.png",
+        ".impeccable/review/compact-home/desktop.png"
+      ],
+      "payloadObservation": "The supplied authenticated workspace response measured 9,040 decoded HTTP bytes against a 433,170-byte baseline. This bounded response observation does not establish cost savings or usability improvement.",
+      "evidenceBoundary": "Four authenticated production-preview first views at 320, 390, 768 and 1440 CSS pixels plus sampled component/cache code. Controlled focus emulation is not human keyboard or physical-device acceptance. Empty detector.txt supplies no readable detector findings or detector-pass claim. Whole-page journeys, dynamic states, second-account isolation, operator activation and full evolution-plan acceptance remain outside this disposition. Private record titles and details stay out of public documentation."
+    },
     "assistantAccessReview": {
       "mode": "Operate",
       "identity": "Incumbent Scroll/14C charcoal, mint and amber studio; no durable-world change.",

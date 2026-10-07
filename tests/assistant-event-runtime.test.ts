@@ -175,6 +175,7 @@ it("delivers minimal status with stable signed identity across retries, stops pe
   callback.mockResolvedValueOnce({ status: 503, body: Buffer.from("") });
   await s.t.action(internal.assistantEventRuntime.deliver, { id });
   const first = callback.mock.calls.at(-1)!;
+  expect(first[4]).toBe(true);
   const event = JSON.parse(first[1]);
   expect(event).toMatchObject({
     eventId: "evt_" + id,

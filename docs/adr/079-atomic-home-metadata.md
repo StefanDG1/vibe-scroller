@@ -1,6 +1,6 @@
 # Keep Home metadata atomic and bounded
 
-Mode: reference. Decision October 7, 2026. Status: implemented locally; exact release and authenticated browser acceptance pending.
+Mode: reference. Decision October 7, 2026. Status: deployed and operator-enabled October 7 after bounded authenticated engineering acceptance. External usability and cost acceptance remain open.
 
 The migration checkpoint defaults compact Home off. An explicit authenticated `homeMode=compact` URL selects the same bounded authorized query for acceptance; it cannot grant access or relax evidence/cost limits. After exact CI, the compatible frontend can deploy with ordinary Home unchanged. The operator enables compact Home only after real captures, using an internal mutation that requires a complete migration and unlocked recovery. This avoids copying production authentication into staging or altering login callbacks merely to test the interface. Disabling the checkpoint retains the compatible full path for rollback.
 
@@ -15,3 +15,9 @@ The internal backfill processes ten canonical records per transaction, checkpoin
 The application keeps compact Home state separate from full editor state. Opening capture or an idea loads actual authorized content/options. Switching views fences earlier responses and preserves serialized polling. Authorization failures discard both caches. Explicit shared capture drafts initially load full context. Existing editors, provider restrictions, reservations, unknown-cost holds and publication/coding approvals remain unchanged.
 
 Tests: `tests/dashboard-projection.test.ts` covers bounded interrupted backfill, private payload exclusion, source revision invalidation, deletion and authorization/recovery locks. `apps/starter/product-errors.test.ts` covers HTTP 403 on lost workspace/account access so clients can clear private caches. These are local fixture tests, not real-account, serving recovery or provider acceptance.
+
+## October 7 bounded production acceptance
+
+On main `519e77ba57ce2240256164715723af35a86f6448`, the existing completed migration remained unchanged. Authenticated preview comparison in the same workspace returned 433,170 decoded bytes for the full Home workspace response and 9,040 for compact Home, a 97.91% response-size reduction. Initial HTML was 503,513 versus 44,199 decoded bytes. These are bounded response observations, not measured database I/O, cost or Core Web Vitals. Chrome visibility was explicitly emulated; differing timer phases prevent a causal request-total comparison. Offline phases made no requests. The hidden-tab attempt still reported visible and is excluded. Invalid earlier windows remain in the private ledger.
+
+Actual 320/390/768/1440 captures showed loaded visible artwork and no horizontal overflow. The fresh Impeccable reviewer returned `ship` for those first views and sampled implementation only. Native Home/Library/Home navigation retained an unsaved URL; capture opened and Escape closed it with focus on a button, without saving or processing the synthetic URL. The guarded internal `dashboard:setEnabled` mutation returned `enabled:true` at approximately 06:16 UTC. Default-route verification is recorded separately in implementation status. Private evidence stays in .impeccable/review/compact-home and private/vibescroll-home-efficiency. Real two-account, human/physical-device and broader serving-recovery acceptance remain open.
