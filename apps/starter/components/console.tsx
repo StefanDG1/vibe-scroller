@@ -935,7 +935,10 @@ export function Console({
                     ? "Proposals"
                     : view === "menu"
                       ? "More"
-                      : (nav.find((n) => n[0] === view)?.[1] ?? "Review plan")}
+                      : view === "shared"
+                        ? "Shared knowledge"
+                        : (nav.find((n) => n[0] === view)?.[1] ??
+                          "Review plan")}
               </span>
               <Link
                 href={demo ? "/demo" : "/app/workspaces"}
@@ -991,7 +994,10 @@ export function Console({
                     ? selected?.title
                     : view === "menu"
                       ? "More"
-                      : (nav.find((n) => n[0] === view)?.[1] ?? "Review plan")}
+                      : view === "shared"
+                        ? "Shared knowledge"
+                        : (nav.find((n) => n[0] === view)?.[1] ??
+                          "Review plan")}
               </h1>
             </div>
             {selected && (
