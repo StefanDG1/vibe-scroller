@@ -2,6 +2,7 @@ import { ConvexHttpClient } from "convex/browser";
 import { makeFunctionReference } from "convex/server";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { resolve, join } from "node:path";
+import { isVibeScrollRepository } from "./repository-identity.mjs";
 import {
   backupEvidenceBatch,
   readEvidenceBytes,
@@ -16,7 +17,10 @@ try {
   const inCI = process.env.GITHUB_ACTIONS === "true";
   if (
     inCI
-      ? process.env.GITHUB_REPOSITORY !== "StefanDG1/vibe-scroller" ||
+      ? !isVibeScrollRepository(
+          process.env.GITHUB_REPOSITORY,
+          process.env.GITHUB_REPOSITORY_ID,
+        ) ||
         process.env.GITHUB_REF !== "refs/heads/main" ||
         !["schedule", "workflow_dispatch"].includes(
           process.env.GITHUB_EVENT_NAME,

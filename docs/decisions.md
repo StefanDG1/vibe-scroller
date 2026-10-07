@@ -4,6 +4,8 @@ Mode: reference. These decisions supersede earlier alternatives in the discussio
 
 ## October 7: bounded Home metadata
 
+[ADR 080](adr/080-stable-repository-rename-authority.md) preserves release and backup authority across the authorized GitHub rename using the existing repository's stable ID. Compatibility preparation precedes the external rename; it changes no provider identity or private configuration.
+
 [ADR 079](adr/079-atomic-home-metadata.md) uses atomic metadata triggers and a resumable ten-record backfill for bounded authorized Home reads. Full-content checks, privacy, budgets and approvals remain authoritative. Manual source/category corrections advance timestamp revisions monotonically so same-millisecond edits cannot leave old references current. Actual compact browser and serving recovery acceptance remain separate from local checks.
 
 | ID  | Decision                                                                                                                                                | Basis                                               |

@@ -11,6 +11,7 @@ import {
 import { join, resolve, basename, sep } from "node:path";
 import { tmpdir } from "node:os";
 import { sealDatabase } from "../packages/recovery/database-backup.mjs";
+import { isVibeScrollRepository } from "./repository-identity.mjs";
 const deployment = "bold-lemur-667";
 let temporary,
   stage = "authorization";
@@ -21,7 +22,10 @@ try {
   const inCI = process.env.GITHUB_ACTIONS === "true";
   if (
     inCI
-      ? process.env.GITHUB_REPOSITORY !== "StefanDG1/vibe-scroller" ||
+      ? !isVibeScrollRepository(
+          process.env.GITHUB_REPOSITORY,
+          process.env.GITHUB_REPOSITORY_ID,
+        ) ||
         process.env.GITHUB_REF !== "refs/heads/main" ||
         !["schedule", "workflow_dispatch"].includes(
           process.env.GITHUB_EVENT_NAME,
