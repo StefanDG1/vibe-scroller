@@ -123,7 +123,9 @@ export const saveLink = internalMutation({
       status: "saved",
       url: `https://scroll.companynerve.com/app/${a.organization._id}/library/${id}`,
       analysis_started: false,
-      note: "Saved without fetching media or spending. Review the post in VibeScroll to approve analysis or grant retrieval.",
+      note: a.grant.libraryScope
+        ? "Saved without fetching media or spending. Your live library scope includes eligible future posts. Review the post in VibeScroll to approve analysis."
+        : "Saved without fetching media or spending. Review the post in VibeScroll to approve analysis or grant retrieval.",
     };
   },
 });

@@ -8,6 +8,7 @@ import {
 } from "@modelcontextprotocol/server";
 import { completionEvent, eventSubscribe, eventUnsubscribe } from "./events";
 import { z } from "zod";
+import { safeSourceUrl } from "../policy";
 export function createKnowledgeHandler(
   invoke: (
     operation: string,
@@ -53,6 +54,26 @@ export function createKnowledgeHandler(
             },
           },
           async (args) => {
+            if (name === "save_link") {
+              try {
+                safeSourceUrl(String(args.url));
+              } catch {
+                return {
+                  content: [
+                    {
+                      type: "text" as const,
+                      text: JSON.stringify({
+                        code: "UNSUPPORTED_SOURCE",
+                        error:
+                          "Save a supported YouTube, Instagram, TikTok or Vimeo link. Other sources need an upload or supplied text in VibeScroll.",
+                        app_review_url: "https://scroll.companynerve.com/app",
+                      }),
+                    },
+                  ],
+                  isError: true,
+                };
+              }
+            }
             const result = await invoke(name, args as Record<string, unknown>);
             if (!result.ok)
               return {
@@ -163,7 +184,7 @@ export function createKnowledgeHandler(
       );
       register(
         "save_link",
-        "Save only a link the user explicitly asks VibeScroll to save, with their stated rights confirmation. Saves without fetching media or starting paid analysis; new content is not automatically granted for retrieval.",
+        "Save only a supported YouTube, Instagram, TikTok or Vimeo link the user explicitly asks VibeScroll to save, with their stated rights confirmation. Saves without fetching media or starting paid analysis. Current live library scopes include eligible future posts; legacy exact-post grants require separate review. Other sources need an upload or supplied text in the app.",
         "links:save",
         z
           .object({

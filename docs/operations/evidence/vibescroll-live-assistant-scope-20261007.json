@@ -1,0 +1,66 @@
+{
+  "observedAt": "2026-10-07T12:30:49.344019Z",
+  "applicationCommit": "6f89d91bccd7bc537a1e63fbe957362165dbcaff",
+  "version": "0.1.0-alpha.20261007121751.g6f89d91bccd7",
+  "domain": "https://scroll.companynerve.com",
+  "pullRequest": 69,
+  "verifyPR": 37619789036,
+  "verifyMain": 37619990567,
+  "versionRun": 37619990542,
+  "releaseRun": 37620138654,
+  "frontend": {
+    "status": "Ready",
+    "deploymentPath": "/stefandg1s-projects/vibe-scroller/J7iGuwVdcPXJa6e5jeLNJDjabxao",
+    "machine": "Basic",
+    "vCPU": 2,
+    "memoryGB": 8,
+    "onDemandConcurrentBuilds": false,
+    "region": "fra1"
+  },
+  "backend": {
+    "deployment": "bold-lemur-667",
+    "indexAdded": "assistantGrants.by_actor_org",
+    "indexesRemoved": []
+  },
+  "actualAppGrant": {
+    "libraryScope": "all",
+    "futurePosts": true,
+    "copiedSourceCount": 0,
+    "registeredActions": 8,
+    "projectContexts": 5,
+    "durationDays": 7,
+    "activeVersionAfterRevocationTest": 3
+  },
+  "hostRead": {
+    "environment": "Official ChatGPT UI",
+    "profileRead": true,
+    "search": true,
+    "fetch": true,
+    "protectedCitationOpened": true,
+    "firstSearchPageEmpty": true,
+    "narrowerSearchReportedIdeas": 7,
+    "rawBearerInspected": false
+  },
+  "appRevocation": {
+    "stateIndependentlyVerified": "revoked",
+    "version": 2,
+    "freshHostFetchReportedError": true,
+    "freshContentReturned": false,
+    "errorGeneric": true,
+    "grantRestored": true
+  },
+  "mcpEnabled": true,
+  "eventsEnabled": false,
+  "remaining": [
+    "Write-tool host acceptance",
+    "Provider disconnect/revocation",
+    "Supported-host Events lifecycle",
+    "Protected serving recovery",
+    "Independent human/quality/device evidence",
+    "Retained commercial/legal/invoice gates"
+  ],
+  "limitations": [
+    "Host activity and reported outputs are distinct from inspecting private provider tokens/responses",
+    "No corpus-completeness or measured efficiency claim"
+  ]
+}
