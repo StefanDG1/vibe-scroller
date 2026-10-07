@@ -228,6 +228,14 @@ Scroll stays visible in the normal shell and Home. The home character is a named
 
 Fields have a dark fill, restrained outline and readable placeholder. The link composer groups input and circular submit into one containing field; focus brightens its containing border instead of drawing an inner outline. Checkbox labels provide a full control target and keep permissions explicit.
 
+Shared choice menus opened inside a native modal dialog keep their portal within that dialog, so choices remain interactive and exposed to accessibility tools. Outside dialogs they use the default portal. Preserve the existing appearance, radio selection semantics, keyboard navigation and collision-aware positioning (6px side offset, 16px collision padding).
+
+Escape closes the active choice menu first and returns focus to its trigger. The enclosing capture dialog respects consumed keyboard events; a subsequent Escape closes capture and returns focus to Save.
+
+**The Dialog Choice Rule.** A modal's choice menu belongs inside its active native dialog; a visually visible menu must also accept pointer and keyboard selection.
+
+The October 7 repair follows a real-production reproduction of an inert menu outside the dialog. Local synthetic checks at 390px and 1440px verified open menus inside the viewport without page overflow, pointer transcript selection and keyboard Home/Enter URL selection. Private evidence is retained in `private/vibescroll-dialog-choice-menu-390.png`, `private/vibescroll-dialog-choice-menu-1440.png`, `private/vibescroll-dialog-choice-desktop.png` and `private/vibescroll-dialog-choice-proof.json`. The finish disposition covers this synthetic control only; it does not establish production saving, deployment or whole-plan acceptance.
+
 ### Navigation
 
 Desktop navigation uses line icons, text and occasional informational counts. Hover brightens the row; selection has a lighter neutral fill and stronger text. Radix account menus use compact rows with keyboard highlight and collision-aware placement. The mobile account trigger keeps its target while showing only the avatar. More exposes secondary destinations without overloading bottom navigation.

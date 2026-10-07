@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-06T23:30:47.326776Z",
+  "generatedAt": "2026-10-07T00:43:15.461553Z",
   "title": "Design System: VibeScroll",
   "extensions": {
     "colorMeta": {
@@ -407,6 +407,11 @@
       {
         "body": "Keep the sampling and automatic-transcription caution visible for sampled audiovisual coverage while placing the retained full summary and detailed analysis notes in the disclosure.",
         "name": "The Visible Limits Rule",
+        "section": "components"
+      },
+      {
+        "name": "The Dialog Choice Rule",
+        "body": "A modal's choice menu belongs inside its active native dialog; a visually visible menu must also accept pointer and keyboard selection. Outside dialogs the shared control retains its default portal. Appearance and token primitives are unchanged.",
         "section": "components"
       }
     ],

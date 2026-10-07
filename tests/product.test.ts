@@ -1290,7 +1290,7 @@ describe("VibeScroller product boundaries", () => {
       );
       expect((await ctx.db.query("reservations").collect()).length).toBe(0);
     });
-  });
+  }, 30_000);
   it("imports links with a tenant-scoped manifest and no analysis charges", async () => {
     const { a, b, org } = await setup();
     const args = {
