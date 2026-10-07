@@ -2,12 +2,14 @@
 import { useState } from "react";
 import { GitBranch, Lightbulb, Link2, ChevronDown } from "lucide-react";
 import { buildKnowledgeMap } from "@/lib/knowledge-map";
+import { KnowledgeCanvas } from "./knowledge-canvas";
 
 const labels: Record<string, string> = {
   similar: "Similar ideas",
   complementary: "Work together",
   conflicting: "Disagreement",
   useful_combination: "Useful combination",
+  useful_connection: "Useful connection",
 };
 export function KnowledgeMap({
   detail,
@@ -18,8 +20,14 @@ export function KnowledgeMap({
   organizationId: string;
   demo?: boolean;
 }) {
-  const graph = buildKnowledgeMap(detail.members, detail.summaries);
+  const [relationOffset, setRelationOffset] = useState(0);
+  const graph = buildKnowledgeMap(
+    detail.members,
+    detail.summaries,
+    relationOffset,
+  );
   const [selected, setSelected] = useState<string | null>(null);
+  const [view, setView] = useState("text");
   const evidence = (shown: typeof graph.insights, explanation?: string) => (
     <section
       className="knowledge-map-inspector"
@@ -81,13 +89,40 @@ export function KnowledgeMap({
       <p className="knowledge-map-caption">
         Select a connection or idea to see its evidence.
       </p>
+      <fieldset
+        className="knowledge-map-toggle"
+        aria-label="Connection representation"
+      >
+        <button aria-pressed={view === "text"} onClick={() => setView("text")}>
+          Readable list
+        </button>
+        <button
+          aria-pressed={view === "canvas"}
+          onClick={() => setView("canvas")}
+        >
+          Focused canvas
+        </button>
+      </fieldset>
+      {view === "canvas" && graph.insights.length > 0 && (
+        <KnowledgeCanvas
+          graph={graph}
+          organizationId={organizationId}
+          demo={demo}
+        />
+      )}
+      {graph.omittedRelations > 0 && (
+        <p>
+          {graph.omittedRelations} other cited groups are outside this 40-node
+          view. Use the group pages below to inspect them.
+        </p>
+      )}
       {graph.insights.length === 0 ? (
         <p>
           No current evidence on this page. Include an excluded idea or open
           another evidence page to inspect its connections.
         </p>
       ) : (
-        <ul className="knowledge-map-branches">
+        <ul className="knowledge-map-branches" hidden={view === "canvas"}>
           {graph.relations.map((r) => (
             <li className="knowledge-map-branch" key={r.id}>
               <button
@@ -131,9 +166,30 @@ export function KnowledgeMap({
           does not mean the ideas agree.
         </p>
       )}
+      {graph.nextRelations !== null && (
+        <button
+          onClick={() => {
+            setSelected(null);
+            setRelationOffset(graph.nextRelations!);
+          }}
+        >
+          Next cited groups
+        </button>
+      )}
+      {relationOffset > 0 && (
+        <button
+          className="secondary"
+          onClick={() => {
+            setSelected(null);
+            setRelationOffset(0);
+          }}
+        >
+          First cited groups
+        </button>
+      )}
       {detail.next && (
         <p>
-          More evidence is available. Use “Next evidence batch” below to see the
+          More evidence is available. Use “Next evidence page” below to see the
           next part of this topic.
         </p>
       )}

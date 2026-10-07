@@ -25,6 +25,27 @@ const summary = (references: ReturnType<typeof reference>[]) => [
   },
 ];
 describe("knowledge map provenance", () => {
+  it("pages cited groups within forty nodes without losing or inventing supporting inputs", () => {
+    const members = Array.from({ length: 20 }, (_, n) => member(String(n)));
+    const summaries = Array.from({ length: 31 }, (_, n) => ({
+      ...summary([reference("0"), reference("1")])[0],
+      id: `summary-${n}`,
+    }));
+    const first = buildKnowledgeMap(members, summaries);
+    expect(first.insights.length + first.relations.length).toBe(40);
+    expect(first.nextRelations).toBe(20);
+    const second = buildKnowledgeMap(members, summaries, first.nextRelations!);
+    expect(second.relations).toHaveLength(11);
+    expect(second.nextRelations).toBeNull();
+    expect(
+      new Set([...first.relations, ...second.relations].map((r) => r.id)).size,
+    ).toBe(31);
+    expect(
+      second.relations.every(
+        (r) => r.members.map((m) => m._id).join() === "0,1",
+      ),
+    ).toBe(true);
+  });
   it("preserves a multi-source group without inventing pairwise edges", () => {
     const graph = buildKnowledgeMap(
       [member("a"), member("b"), member("c"), member("d")],

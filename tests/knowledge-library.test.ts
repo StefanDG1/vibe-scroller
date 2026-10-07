@@ -456,6 +456,86 @@ export async function preparedIdea() {
   });
   return { ...s, evaluationId: queued.id, repositoryId, topic };
 }
+it("projects only recorded source-to-evaluation-to-issue steps and marks changed project fit without inventing a PR or benefit", async () => {
+  const s = await preparedIdea();
+  const args = { organizationId: s.org, topicId: s.topic._id };
+  let journey = await s.a.query(api.knowledgeExplore.journey, args);
+  expect(journey.items).toHaveLength(1);
+  expect(journey.items[0]).toMatchObject({
+    current: true,
+    disposition: "relevant",
+    steps: [],
+  });
+  expect(journey.items[0].sources).toHaveLength(2);
+  await s.a.mutation(api.issues.create, {
+    id: s.evaluationId,
+    followUp: false,
+  });
+  journey = await s.a.query(api.knowledgeExplore.journey, args);
+  expect(journey.items[0].steps).toEqual([
+    expect.objectContaining({
+      title: "Synthetic reviewed issue",
+    }),
+  ]);
+  await s.t.run((ctx) => ctx.db.patch(s.repositoryId, { profileVersion: 2 }));
+  expect(
+    (await s.a.query(api.knowledgeExplore.journey, args)).items[0],
+  ).toMatchObject({ current: false, state: "stale" });
+  await s.t.run(async (ctx) => {
+    const e = (await ctx.db.get(s.evaluationId))!;
+    await ctx.db.patch(e.references[0].sourceId, { rightsAttested: false });
+  });
+  expect((await s.a.query(api.knowledgeExplore.journey, args)).items).toEqual(
+    [],
+  );
+});
+it("keeps recorded unmeasured judgments distinct from reported comparisons and removes attribution after evidence deletion", async () => {
+  const s = await preparedIdea();
+  const issueId = await s.a.mutation(api.issues.create, {
+    id: s.evaluationId,
+    followUp: false,
+  });
+  const id = await s.a.mutation(api.improvements.create, {
+    issueId,
+    goal: "Synthetic result, not measured",
+  });
+  await s.a.mutation(api.improvements.outcome, {
+    id,
+    version: 1,
+    verdict: "not_measured",
+    method: "judgment",
+    note: "No result has been measured.",
+  });
+  const args = { organizationId: s.org };
+  expect(
+    (
+      await s.a.query(api.knowledgeExplore.helped, {
+        ...args,
+        method: "judgment",
+      })
+    ).items,
+  ).toEqual([
+    expect.objectContaining({
+      verdict: "not_measured",
+      method: "judgment",
+    }),
+  ]);
+  expect(
+    (
+      await s.a.query(api.knowledgeExplore.helped, {
+        ...args,
+        method: "measurement",
+      })
+    ).items,
+  ).toEqual([]);
+  await s.t.run(async (ctx) => {
+    const e = (await ctx.db.get(s.evaluationId))!;
+    await ctx.db.delete(e.references[0].sourceId);
+  });
+  expect((await s.a.query(api.knowledgeExplore.helped, args)).items).toEqual(
+    [],
+  );
+});
 it("grounds multi-source evaluations, reuses completed requests and refuses changed repository context", async () => {
   const s = await preparedIdea();
   const repeated = await s.a.mutation(api.knowledge.startEvaluation, {

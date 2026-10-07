@@ -1,5 +1,9 @@
 # VibeScroll foundational research
 
+## F019: bounded exploration candidate, October 7
+
+The current implementation candidate reuses permitted topic evidence and recorded project/outcome facts in Topic tree, Connections, Idea journey, Topic overview and What helped. Personal/Business filters and every cited input are checked on the server; combined browsing requires current confirmation. Structural aliases/parents do not rerun analysis or grant sharing. Page counts describe current bounded evidence, and a PR merge is distinct from a benefit. Local synthetic screens and handler tests establish neither real source recall, independent comprehension nor measured value. Exact deployment and held-out quality evidence remain pending. See [ADR 084](../adr/084-bounded-library-explore.md) and [implementation status](../implementation-status.md). Existing audience, prices, six beliefs, provider restrictions and earlier research limits remain authoritative.
+
 ## F018: deployed filing and explicit sharing candidate, October 7
 
 The authenticated owner completed the deployed setup/filing journey using a labelled synthetic source on main 75c2e1b. This is one operator observation, not customer research or useful-analysis evidence. The new exact-version team-sharing candidate has local handler and native synthetic UI checks; independent scope comprehension and real two-account acceptance remain missing. See [implementation status](../implementation-status.md) and [ADR 082](../adr/082-exact-version-team-knowledge-grants.md).

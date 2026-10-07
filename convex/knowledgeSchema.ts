@@ -26,6 +26,10 @@ export const knowledgeTables = {
     ...tenant,
     key: v.string(),
     name: v.string(),
+    aliases: v.optional(v.array(v.string())),
+    searchText: v.optional(v.string()),
+    parentId: v.optional(v.id("knowledgeTopics")),
+    layoutVersion: v.optional(v.number()),
     pinned: v.boolean(),
     sourceCount: v.optional(v.number()),
     insightCount: v.optional(v.number()),
@@ -39,6 +43,10 @@ export const knowledgeTables = {
     .index("by_key", ["organizationId", "key"])
     .searchIndex("search_name", {
       searchField: "name",
+      filterFields: ["organizationId", "state"],
+    })
+    .searchIndex("search_explore", {
+      searchField: "searchText",
       filterFields: ["organizationId", "state"],
     }),
   knowledgeMembers: defineTable({
@@ -113,6 +121,7 @@ export const knowledgeTables = {
   })
     .index("by_org", ["organizationId"])
     .index("by_org_state", ["organizationId", "state"])
+    .index("by_topic", ["topicId"])
     .index("by_topic", ["topicId"])
     .index("by_topic_repo", ["topicId", "repositoryId"])
     .index("by_repo", ["repositoryId"])

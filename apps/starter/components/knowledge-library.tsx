@@ -4,6 +4,7 @@ import { usePolling } from "@/lib/use-polling";
 import ReactMarkdown from "react-markdown";
 import { ChoiceSelect } from "./choice-select";
 import { downloadText } from "@/lib/download";
+import { LibraryExplore } from "./library-explore";
 import { KnowledgeMap } from "./knowledge-map";
 
 type Call = (operation: string, args: any) => Promise<any>;
@@ -63,6 +64,7 @@ export function KnowledgeLibrary(p: Props) {
     "topics" | "ideas" | "issues"
   >("topics");
   const activeSection = p.section ?? localSection;
+  const [exploring, setExploring] = useState(true);
   const returnToTopic = useRef(false);
   const [topics, setTopics] = useState<any[]>(p.demo ? [synthetic] : []),
     [next, setNext] = useState<string | null>(null),
@@ -153,7 +155,7 @@ export function KnowledgeLibrary(p: Props) {
     const detailAtStart = detailGeneration.current;
     try {
       const [list, policy, ideas, drafts, localRuns] = await Promise.all([
-        activeSection === "topics"
+        activeSection === "topics" && !exploring
           ? scopedRead("knowledgeList", {
               organizationId: p.organizationId,
               search: searchScope === "topic" ? search || undefined : undefined,
@@ -167,7 +169,7 @@ export function KnowledgeLibrary(p: Props) {
               repositoryId: project || undefined,
             })
           : Promise.resolve(null),
-        activeSection === "topics"
+        activeSection === "topics" && !exploring
           ? scopedRead("knowledgePolicy", { organizationId: p.organizationId })
           : Promise.resolve(null),
         activeSection === "ideas"
@@ -179,7 +181,7 @@ export function KnowledgeLibrary(p: Props) {
         activeSection === "issues"
           ? scopedRead("issueList", { organizationId: p.organizationId })
           : Promise.resolve(null),
-        activeSection === "topics"
+        activeSection === "topics" && !exploring
           ? scopedRead("localLibraryList", { organizationId: p.organizationId })
           : Promise.resolve(null),
       ]);
@@ -230,10 +232,14 @@ export function KnowledgeLibrary(p: Props) {
   usePolling(
     () => refresh(),
     processing ? 15000 : 60000,
-    !p.demo && p.enabled !== false && !browsingLaterPages,
+    !p.demo &&
+      p.enabled !== false &&
+      !browsingLaterPages &&
+      !(activeSection === "topics" && exploring),
     JSON.stringify([
       p.organizationId,
       activeSection,
+      exploring,
       search,
       searchScope,
       recent,
@@ -370,10 +376,32 @@ export function KnowledgeLibrary(p: Props) {
           }
         />
       )}
-      {activeSection === "topics" && selected && loading && !detail && (
-        <output aria-live="polite">Opening topic…</output>
-      )}
       {activeSection === "topics" && (
+        <>
+          <button
+            className="secondary"
+            onClick={() => setExploring(!exploring)}
+          >
+            {exploring ? "Analysis and corrections" : "Back to Explore"}
+          </button>
+          {exploring && (
+            <LibraryExplore
+              key={`${p.organizationId}:${p.demo}`}
+              organizationId={p.organizationId}
+              demo={p.demo}
+              enabled={p.enabled !== false}
+              readOnly={p.readOnly}
+              call={p.call}
+            />
+          )}
+        </>
+      )}
+      {activeSection === "topics" &&
+        !exploring &&
+        selected &&
+        loading &&
+        !detail && <output aria-live="polite">Opening topic…</output>}
+      {activeSection === "topics" && !exploring && (
         <div
           className="knowledge-overview"
           hidden={!!selected}
@@ -605,7 +633,7 @@ export function KnowledgeLibrary(p: Props) {
           )}
         </div>
       )}
-      {activeSection === "topics" && selected && detail && (
+      {activeSection === "topics" && !exploring && selected && detail && (
         <div
           className="knowledge-detail"
           aria-label="Topic detail"
@@ -869,7 +897,7 @@ export function KnowledgeLibrary(p: Props) {
           </details>
           {detail.next && (
             <button onClick={() => void open(selected, detail.next)}>
-              Next evidence batch
+              Next evidence page
             </button>
           )}
           {cursor && (
