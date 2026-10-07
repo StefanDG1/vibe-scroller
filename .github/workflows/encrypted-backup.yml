@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   backup:
-    if: github.repository == 'StefanDG1/vibe-scroller' && github.ref == 'refs/heads/main' && vars.VIBE_BACKUP_ENABLED == 'true'
+    if: github.repository_id == '1396686369' && github.ref == 'refs/heads/main' && vars.VIBE_BACKUP_ENABLED == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:

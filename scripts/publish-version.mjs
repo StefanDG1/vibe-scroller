@@ -1,4 +1,5 @@
 import { buildVersion } from "./version.mjs";
+import { isVibeScrollRepository } from "./repository-identity.mjs";
 const {
   GITHUB_TOKEN,
   GITHUB_REPOSITORY,
@@ -6,7 +7,10 @@ const {
   VERSION_COMMIT,
   PUBLISH_RELEASE,
 } = process.env;
-if (!GITHUB_TOKEN || GITHUB_REPOSITORY !== "StefanDG1/vibe-scroller")
+if (
+  !GITHUB_TOKEN ||
+  !isVibeScrollRepository(GITHUB_REPOSITORY, process.env.GITHUB_REPOSITORY_ID)
+)
   throw new Error("Repository release credentials required");
 const value = buildVersion(VERSION_COMMIT ?? GITHUB_SHA ?? "HEAD");
 const api = `https://api.github.com/repos/${GITHUB_REPOSITORY}`;
