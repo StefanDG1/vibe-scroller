@@ -74,7 +74,17 @@ export function layoutKnowledgeNetwork(
       n.y = Math.max(n.radius + 20, Math.min(height - n.radius - 20, n.y));
     }
   }
-  return { width, height, nodes, edges };
+  // Sparse topics can settle around the center of a tall phone world. Start
+  // at actual evidence rather than an unused portion of that world.
+  if (nodes.length) {
+    const top = Math.min(...nodes.map((n) => n.y - n.radius));
+    for (const n of nodes) n.y -= top - 20;
+  }
+  const occupiedHeight = Math.max(
+    520,
+    ...nodes.map((n) => n.y + n.radius + 20),
+  );
+  return { width, height: occupiedHeight, nodes, edges };
 }
 
 /** Saved parent edges only. Missing/off-page parents remain separate roots. */

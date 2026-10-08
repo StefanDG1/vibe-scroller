@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-08T01:26:41Z",
+  "generatedAt": "2026-10-08T01:37:23Z",
   "title": "Design System: VibeScroll",
   "extensions": {
     "usageAllowanceReview": {
@@ -515,7 +515,7 @@
       ],
       "metrics": "Four defined native metric buttons with What this counts disclosures; deduplicated loaded records, deleted posts excluded, explicit acceptance, enabled projects and unique recorded merged GitHub PR links. Compact merge value is Not loaded. State charts retain labels, counts and loaded-record denominators; no conversion funnel or whole-library total.",
       "network": "Complete native circular buttons, mint-filled ideas and panel-filled cited groups. Amber complementary, blue similar and dashed violet disagreement. Useful combination retains its full accessible name, legend and evidence heading with Combine ideas inside the circle. Link count controls circle size, never quality. Edges join exact cited groups to ideas, never invented pairwise or causal links.",
-      "networkInteraction": "Measured-width local layout uses a taller world below 500px. Toolbar supports 65%-160% zoom; Reset view restores 100% and scroll origin. Touch scroll, mouse background drag, keyboard scroll, Tab/Enter inspection and native Escape/Close focus return. Full claims and source evidence remain in the dialog and readable list. No new inference, queries, motion or authorization.",
+      "networkInteraction": "Measured-width local layout uses a taller initial world below 500px. After settlement, all nodes receive a uniform vertical translation to a 20px top occupied inset; rendered height follows the bottom occupied boundary plus 20px with a 520px minimum. Relative geometry, cited edges and link counts are retained. Toolbar supports 65%-160% zoom; Reset view restores 100% and scroll origin. Touch scroll, mouse background drag, keyboard scroll, Tab/Enter inspection and native Escape/Close focus return. Full claims and source evidence remain in the dialog and readable list. No new inference, queries, motion or authorization.",
       "topicHierarchy": "Saved parent links only, with missing/off-page parents as separate roots. First root centered on entry and resize; visible swipe/scroll guidance. Topic buttons share evidence with Readable tree.",
       "trace": "Up to five loaded source-linked proposals and five proposal-linked runs. Native source/proposal record buttons, Runs action and wrapping readable links. Missing loaded run explicit; lines record provenance, not approval or outcomes.",
       "responsive": "Statistics use four columns, two at 680px and below; paired charts stack at 680px. Network viewport is capped at 600px; topic and trace viewports at 560px. Trace retains a 900px internally scrolling world. Toolbars and legends wrap; incumbent shell and navigation retained.",
@@ -530,7 +530,19 @@
         ".impeccable/review/visual-dashboard-20261008/tree-1440.png",
         ".impeccable/review/visual-dashboard-20261008/tree-390.png"
       ],
-      "evidenceBoundary": "Seven labeled synthetic local captures opened by the fix-only reviewer. Zoom/reset and Enter/Escape focus-return checks are builder evidence. No whole-surface, authenticated customer, human keyboard, physical-device or production acceptance follows. No new shipping raster artwork."
+      "evidenceBoundary": "Seven labeled synthetic local captures opened by the fix-only reviewer. Zoom/reset and Enter/Escape focus-return checks are builder evidence. No whole-surface, authenticated customer, human keyboard, physical-device or production acceptance follows. No new shipping raster artwork.",
+      "sparseFramingReview": {
+        "convention": "Uniform node translation aligns the top occupied boundary to 20px. Rendered height is the lowest occupied boundary plus 20px, with a 520px minimum. No edge, degree or relative-position change.",
+        "productionTrigger": "Actual sparse 22-node phone population showed unused vertical lead-in before the fix.",
+        "captures": [
+          ".impeccable/review/visual-dashboard-20261008/framing-fix/network-1440.png",
+          ".impeccable/review/visual-dashboard-20261008/framing-fix/network-390.png"
+        ],
+        "verdict": "private/vibescroll-network-framing-review-20261008.md",
+        "finishDisposition": "Ship for sparse blank lead-in resolved locally; original three findings retained within change scope. Settled measured-width replacements supersede the unsettled desktop capture.",
+        "builderEvidence": "20-isolated-idea regression; reported 539 passing tests, three skips, 28 authentication tests and both builds. Reviewer did not rerun these checks.",
+        "evidenceBoundary": "Larger actual production after-fix recapture remains pending. No fresh topic runtime, whole-surface, authenticated customer, human keyboard, physical-device or production acceptance follows."
+      }
     }
   },
   "components": [

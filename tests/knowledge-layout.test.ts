@@ -72,3 +72,26 @@ it("draws saved hierarchy only, preserves missing-parent roots and bounds cycles
     ]).edges,
   ).toEqual([]);
 });
+it("opens a larger sparse phone network at its actual evidence, without an empty lead-in", () => {
+  const members = Array.from({ length: 20 }, (_, i) => ({
+    _id: String(i),
+    evidence: {
+      title: String(i),
+      insight: { claim: String(i) },
+      reference: {
+        sourceId: String(i),
+        generation: 1,
+        revision: 1,
+        insightId: String(i),
+      },
+    },
+  }));
+  const graph = buildKnowledgeMap(members, []);
+  const layout = layoutKnowledgeNetwork(graph, 290);
+  expect(Math.min(...layout.nodes.map((n) => n.y - n.radius))).toBeCloseTo(20);
+  expect(layout.nodes.every((n) => n.y + n.radius <= layout.height - 20)).toBe(
+    true,
+  );
+  expect(layout.nodes).toHaveLength(20);
+  expect(layout.edges).toEqual([]);
+});
