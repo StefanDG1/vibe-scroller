@@ -143,3 +143,7 @@ Follow [ADR 058](adr/058-bounded-full-library-scans.md): full URL-link paginatio
 ## October 8: honest shared evidence labels
 
 [ADR 092](adr/092-honest-shared-evidence-labels.md) preserves untimed shared citations without inventing a video timestamp and labels the shared route correctly. Permissions, exact-version grants, pagination and budgets remain unchanged.
+
+## October 8: visual library and dashboard
+
+[ADR 093](adr/093-visual-library-and-dashboard.md) adopts the owner-requested circular network, saved-parent branching diagram and real loaded-record dashboard charts. Graph lines preserve provenance; counts state their cohorts and browsing starts no inference. Exact acceptance and deployment evidence remain separately recorded.

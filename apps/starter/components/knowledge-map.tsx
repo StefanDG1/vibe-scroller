@@ -27,7 +27,7 @@ export function KnowledgeMap({
     relationOffset,
   );
   const [selected, setSelected] = useState<string | null>(null);
-  const [view, setView] = useState("text");
+  const [view, setView] = useState("canvas");
   const evidence = (shown: typeof graph.insights, explanation?: string) => (
     <section
       className="knowledge-map-inspector"
@@ -100,7 +100,7 @@ export function KnowledgeMap({
           aria-pressed={view === "canvas"}
           onClick={() => setView("canvas")}
         >
-          Focused canvas
+          Network map
         </button>
       </fieldset>
       {view === "canvas" && graph.insights.length > 0 && (

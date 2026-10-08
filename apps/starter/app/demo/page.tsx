@@ -27,7 +27,7 @@ export default async function Demo({
         sources:
           demoState === "loading" || demoState === "empty"
             ? []
-            : fixture.sources,
+            : fixture.sources.map((source) => ({ ...source, state: "ready" })),
         repositories:
           demoState === "ready"
             ? [
@@ -61,8 +61,52 @@ export default async function Demo({
           demoState === "ready"
             ? [{ id: 1, installationId: 1, fullName: "synthetic/demo-planner" }]
             : [],
-        proposals: [],
-        runs: [],
+        proposals:
+          demoState === "ready"
+            ? [
+                {
+                  _id: "synthetic-review",
+                  sourceId: "src_demo_001",
+                  repositoryId: "synthetic-project",
+                  title: "Preview a useful result before setup",
+                  review: "unreviewed",
+                  disposition: "useful",
+                  version: 1,
+                  baseSha: "a".repeat(40),
+                  profileVersion: 1,
+                  detail: {
+                    reason:
+                      "Synthetic example only. Inspect the onboarding idea before deciding.",
+                  },
+                },
+                {
+                  _id: "synthetic-accepted",
+                  sourceId: "src_demo_001",
+                  repositoryId: "synthetic-project",
+                  title: "Keep setup reversible",
+                  review: "accepted",
+                  disposition: "useful",
+                  version: 1,
+                  baseSha: "a".repeat(40),
+                  profileVersion: 1,
+                  detail: {
+                    reason:
+                      "Synthetic review decision. Acceptance does not establish a benefit.",
+                  },
+                },
+              ]
+            : [],
+        runs:
+          demoState === "ready"
+            ? [
+                {
+                  _id: "synthetic-run",
+                  proposalId: "synthetic-accepted",
+                  repositoryId: "synthetic-project",
+                  state: "completed",
+                },
+              ]
+            : [],
         notifications: [],
         usage: null,
       }}

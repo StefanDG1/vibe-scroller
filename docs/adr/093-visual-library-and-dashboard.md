@@ -1,0 +1,13 @@
+# Visual library and dashboard
+
+Mode: reference. Decision October 8, 2026. Status: implementation candidate.
+
+The owner supplied a circular relationship network and a branching task diagram and identified the missing dashboard statistics. These visual forms extend the existing charcoal studio without changing permissions, funding or inference. Connections opens a deterministic local circular network, retaining exact cited group-to-idea edges rather than inventing pairwise agreement or causality. Circle size describes current-page degree, not truth, importance or corroboration. Colors and dashed disagreement links have a text legend. Native buttons open the existing evidence dialog; zoom, bounded scrolling and mouse background panning supplement the readable list.
+
+Topic tree adds a branching diagram of saved parent relationships with a readable tree alternative. Missing or off-page parents remain separate roots; no inferred hierarchy is saved. Topic editing retains its existing version and authorization checks. Both diagrams retain bounded existing reads and currentness handling.
+
+Home adds inspectable statistics, state-distribution charts and a source-to-project diagram from already authorized loaded source, proposal, repository and run records. Diagram links require a loaded primary source and an exact recorded proposal/run link; absent work stays explicitly unavailable. Each definition names its cohort. These are not full-library totals, a time-series, a conversion funnel or measured benefit. Unique merged PR counts require a recorded merge and valid GitHub PR URL; completed execution does not imply merge. Compact Home withholds merge counts because it omits PR details. No automatic full-library scan, new query, projection migration, paid job or extra polling is added.
+
+Acceptance requires layout/provenance and deduplication tests, responsive browser checks, native evidence/keyboard/zoom/tree controls, full repository checks, dependency/secret checks, fresh design review and exact production deployment evidence. Independent comprehension and relation quality remain unverified rather than inferred from screenshots.
+
+The release dependency check discovered the newly published Next.js GHSA-cjq9-62q9-8jv4 advisory. Its primary upstream advisory identifies 16.3.8 as fixed; both applications and their exact lockfile move from 16.3.6 to 16.3.8. The subsequent audit has no unresolved advisories, retaining the previously documented exact local braces mitigation. [Upstream advisory](https://github.com/vercel/next.js/security/advisories/GHSA-cjq9-62q9-8jv4).

@@ -10,6 +10,9 @@ colors:
   accent: "#87dfc1"
   accent-ink: "#10251e"
   amber: "#f3c785"
+  diagram-blue: "#92c5ed"
+  diagram-violet: "#d5ade9"
+  diagram-node-hover: "#283b33"
   soft: "#262626"
   rail: "#171717"
   control: "#202020"
@@ -131,6 +134,16 @@ components:
     textColor: "{colors.ink}"
     padding: "12px 0"
     height: "44px"
+  network-idea:
+    backgroundColor: "{colors.accent}"
+    textColor: "{colors.accent-ink}"
+    rounded: "{rounded.circle}"
+    padding: "15px"
+  network-group:
+    backgroundColor: "{colors.panel}"
+    textColor: "{colors.accent}"
+    rounded: "{rounded.circle}"
+    padding: "15px"
   private-recovery:
     backgroundColor: "{colors.private-recovery-surface}"
     textColor: "{colors.private-recovery-text}"
@@ -156,6 +169,7 @@ Content, actual state and permitted actions establish hierarchy. Source icons id
 - Readable source rows rather than nested decorative cards.
 - Accessible menus, visible focus and generous touch targets.
 - Short motion tied to state changes and evidence arrival.
+- Cited circle networks, saved topic branches and defined loaded-record charts.
 
 ## Colors
 
@@ -169,7 +183,9 @@ The palette separates quiet surfaces by brightness and green-gray hue. Mint sign
 
 ### Secondary
 
-- **Amber:** Scroll artwork and state captions. The illustration contains its own painterly shading rather than a flat recolor.
+- **Amber:** Scroll artwork and state captions. The illustration contains its own painterly shading rather than a flat recolor. In diagrams amber also identifies complementary groups and project ideas; in state charts it marks needs attention and awaiting review.
+- **Diagram blue:** similar cited groups, recorded-work nodes, and queued/processing or deferred chart states.
+- **Diagram violet:** disagreement groups with dashed borders and links, plus rejected and stale chart states. Labels retain the distinction between these roles. Neither chart color nor diagram color establishes quality or benefit.
 
 ### Neutral
 
@@ -178,6 +194,7 @@ The palette separates quiet surfaces by brightness and green-gray hue. Mint sign
 - **Line and control line:** separate rows and define fields without heavy framing.
 - **Muted and chip text:** support secondary explanation, metadata and state labels.
 - **Selected and soft:** indicate selected navigation and hover responses.
+- **Diagram node hover:** a scoped green charcoal fill for topic and source-to-project node hover.
 - **Focus:** clearly identifies keyboard interaction.
 
 The historical `--teal` property still resolves to Ink: it does not make every retained control mint. Error uses a pale red alongside explanatory text. Success and pending states use explicit labels, never color alone. The frontmatter records the effective studio cascade; rail, fields, menus and selected navigation retain their older neutral fills.
@@ -210,7 +227,9 @@ The studio welcome pairs a 192px-wide character with the next action, separated 
 
 **The Touch Target Rule.** Interactive controls keep at least a 44px target; small type and icons do not justify a smaller hit area. Informational chips are not controls.
 
-Explore keeps its five view controls and representation controls wrapping rather than squeezing their targets. Topic rows use a full-width reading area with a minimum height (64px); nested native disclosures use quiet left rules and reduce deep indentation on phones (480px and below). The optional connection canvas scrolls inside a bounded viewport (560px maximum height). Its two node columns each occupy 40% of the surface, with a fixed row pitch (112px) and node height (92px); relation counts stay inside the node. Canvas previews may truncate claims, while the evidence dialog retains the full text. At 480px and below that native dialog becomes a full-width bottom sheet with rounded top corners; on larger screens it is centered, width bounded to 680px and height bounded to 85dvh.
+Explore keeps its five view controls and representation controls wrapping rather than squeezing their targets. Topic rows use a full-width reading area with a minimum height (64px); nested native disclosures use quiet left rules and reduce deep indentation on phones (480px and below). The optional circular connection canvas scrolls inside a bounded viewport (600px maximum height). Its local layout measures available width, with a minimum world width of 220px. Below a 500px world width, it uses smaller complete circles and a taller world with at least 520px height. Topic diagrams keep a bounded scrolling viewport (560px maximum height); saved roots are centered on entry and resize. Branches use a 240px leaf pitch and 140px depth pitch. The source-to-project diagram keeps its 900px world inside a scrolling viewport (560px maximum height), with a wrapping readable-links disclosure below it. Canvas previews may truncate claims, while the evidence dialog retains the full text. At 480px and below that native dialog becomes a full-width bottom sheet with rounded top corners; on larger screens it is centered, width bounded to 680px and height bounded to 85dvh.
+
+Home statistics use four columns, with two columns at 680px and below. Their two state charts stack at the same breakpoint. Chart rows retain visible labels and counts above 10px tracks; bars describe each state's share of the loaded records. The toolbar, legend and section actions wrap. Diagram overflow stays inside its viewport; visible swipe/scroll guidance and readable alternatives remain outside it. These additions retain the incumbent shell width and navigation.
 
 ## Elevation & Depth
 
@@ -223,6 +242,8 @@ The shell uses tonal layering and thin separators. Source rows sit directly on t
 Fields and navigation have restrained rounded corners. Controls use the Control radius, panels and menus use Panel, dialogs use Dialog, and badges use Chip. Circular avatars and composer send controls are purposeful exceptions. The capture composer has a softer containing outline (18px radius), while library rows have straight separators and no enclosing card radius.
 
 Scroll uses the original transparent warm paper-creature artwork; the 192px/240px home image and compact 36px/44px shell mark share the same still asset. Phone header Scroll is 26px/34px. Status wording changes with authoritative next-action state; separate expression artwork is not implemented. [Artwork provenance](apps/starter/public/scroll/PROVENANCE.md) records generation and the alpha-preserving WebP derivative without claiming trademark clearance.
+
+Cited ideas and relationship groups use complete circular native buttons. Idea circles have mint fill and dark text; groups have panel fill with a semantic colored outline. Disagreement uses a dashed outline and dashed links. Topic and recorded-work nodes use quiet rounded rectangles (12px corners), keeping saved hierarchy distinct from the circle network.
 
 Lucide line icons communicate navigation, media type and actions. Supplied personal reference screenshots remain local reference material, not bundled imagery.
 
@@ -342,13 +363,17 @@ Source thumbnails use the first retained private frame when available, load lazi
 
 ### Library Explore
 
-Explore reuses the studio material and existing native buttons, shared choice controls and disclosures. Its five views are Topic tree, Connections, Idea journey, Topic overview and What helped. The selected view uses mint with accent ink; unselected controls stay quiet. Topic tree is the default, built only from the bounded loaded page. Expand a parent with a native disclosure, then use its separate Inspect action to read evidence. A parent missing from the loaded page remains a root; hierarchy never implies new evidence or authorization. When available, Edit topic structure stays in a native disclosure. Representation switches, recovery actions and this summary retain minimum 44px targets and visible keyboard focus, including a two-pixel ring with three-pixel offset on the summary.
+Explore reuses the studio material and existing native buttons, shared choice controls and disclosures. Its five views are Topic tree, Connections, Idea journey, Topic overview and What helped. The selected view uses mint with accent ink; unselected controls stay quiet. Topic tree is the default, built only from the bounded loaded page. Branching diagram is the initial representation. In Readable tree, expand a parent with a native disclosure, then use its separate Inspect action to read evidence. A parent missing from the loaded page remains a root; hierarchy never implies new evidence or authorization. When available, Edit topic structure stays in a native disclosure. Representation switches, recovery actions and this summary retain minimum 44px targets and visible keyboard focus, including a two-pixel ring with three-pixel offset on the summary.
 
-Connections defaults to a readable list. Focused canvas is an optional equivalent representation of the same current cited groups and ideas. Labels distinguish Similar ideas, Work together, Disagreement and Useful combination. Lines connect a cited group to its supporting ideas; they neither assert pairwise agreement nor establish causation. Topic membership alone is not agreement. Keep the textual equivalent reachable and retain source evidence for each idea.
+Topic tree offers Branching diagram and Readable tree representations. The diagram uses only saved parent links. Separate roots include parents missing from the loaded page; a branch never invents hierarchy. Native topic buttons open the same cited evidence, and the entry viewport centers the first saved root before horizontal exploration.
+
+Connections defaults to Network map, a circle network. Readable list is an equivalent representation of the same current cited groups and ideas. Labels distinguish Similar ideas, Work together, Disagreement and Useful combination. Lines connect a cited group to its supporting ideas; they neither assert pairwise agreement nor establish causation. Topic membership alone is not agreement. Keep the textual equivalent reachable and retain source evidence for each idea.
 
 **The Cited Group Rule.** Display a connection only when all of its exact source, generation, revision and insight references exist in current permitted evidence. A connection is an explained cited group; neither its line nor topic membership proves causation or agreement.
 
-The focused canvas uses keyboard buttons for every node, a keyboard-scrollable viewport and Fit and reset. Selecting a node opens a labeled native modal dialog containing the full explanation, claims and source links. Escape and Close evidence close it and return focus to the invoking node. Phone presentation uses the bottom sheet described in Layout. The readable list reveals the same claims and source links inline.
+The circle network uses native buttons for every idea and cited group. Circle size reflects the number of cited links on this page, never quality. Desktop radii start at 48px and gain up to 18px from link count; narrow-world radii start at 36px and gain up to 10px. Labels retain up to three lines at 13px with zoom compensation when zoomed out. The group circle reads Combine ideas, while its accessible name, legend and evidence heading retain Useful combination and its full explanation. Hover brightens a circle; focus uses a visible 3px outline with a 5px offset.
+
+Zoom controls span 65% to 160%. Reset view restores 100% and scroll origin. Touch scrolling, mouse background dragging, keyboard scrolling, Tab and Enter remain available, with visible exploration guidance. Layout and zoom add no motion, inference, queries or authorization. Selecting a node opens a labeled native modal dialog containing the full explanation, claims and source links. Escape and Close evidence close it and return focus to the invoking node. Phone presentation uses the bottom sheet described in Layout. The readable list reveals the same claims and source links inline.
 
 **The Explore Coverage Rule.** Keep counts tied to the loaded page and explain overlap: shared topic membership is not independent corroboration. Show at most 40 loaded topics and 40 connection-map nodes. Topic overview bars use the twenty-idea evidence-page limit as full scale, not whole-topic size or benefit.
 
@@ -359,6 +384,16 @@ Idea journey presents the recorded sequence: saved posts and cited ideas, evalua
 **The Recorded Outcome Rule.** Present saving, evaluation, issue, PR, merge, deployment and benefit as separate recorded facts. A judgment is not a measured comparison, and a merged PR alone does not establish benefit.
 
 October 7 documentation evidence is the implemented Explore, connection map and canvas plus their scoped design-recipe styles. The fixed desktop/phone captures, desktop-tree-final.png, mobile-tree-final.png, phone-320-tree.png and tablet-768-tree.png in .impeccable/review/knowledge-explore/ retain the local synthetic review. proof.json records native Escape closing, focus return and no horizontal overflow; fix-target-proof.json records the native structure summary's visible mint focus ring. Independent finish review cleared all five corrections: representation/recovery/disclosure targets, summary focus, canvas count fit, overview scale explanation and matching evidence-pagination copy. The ship disposition is LOCAL SYNTHETIC FRONTEND SLICE only. It establishes no real authentication, provider, source, permission, production, customer-result or full V1 acceptance.
+
+### Home statistics and recorded links
+
+Home retains Scroll, the next action and capture before the scoped library overview. Four native metric buttons lead to Posts with insights, Ideas accepted, Merged pull requests and Selected projects. Each has a native What this counts disclosure with a 44px summary target. Tabular values use 30px medium-weight text, reducing to 26px at 680px and below. Charts retain compact 14px labels, exact counts and explicit loaded-record coverage.
+
+Counts deduplicate loaded records and exclude deleted posts. Ready posts require the ready state, accepted ideas require explicit acceptance, and selected projects require enabled repositories. Merged PRs count unique recorded GitHub pull-request links with recorded merge state or time. Compact Home shows Not loaded for merges rather than zero. Posts and proposals retain every current state through labeled categories, including saved/other and unreviewed/other. These are state distributions, not a conversion funnel or whole-library totals.
+
+Where your ideas went joins loaded non-deleted sources to up to five proposals through saved source IDs, then to up to five loaded runs through proposal IDs. Native source and proposal buttons open their records; run buttons open Runs. Mint, amber and blue outlines distinguish the stages. A missing loaded run has explicit text. Read source-to-project links exposes the same source and proposal actions as wrapping readable rows. Lines record attribution; acceptance, implementation, merge, deployment and measured outcomes remain separate facts.
+
+The October 8 fix-only finish disposition is ship for responsive network framing, centered topic-root entry and the complete Combine ideas label. The final seven labeled synthetic captures in `.impeccable/review/visual-dashboard-20261008/` are `home-1440.png`, `home-390.png`, `network-1440.png`, `network-390.png`, `network-evidence-390.png`, `tree-1440.png` and `tree-390.png`. The reviewer opened all seven; builder evidence records zoom/reset and Enter/Escape focus return. The verdict at `private/vibescroll-visual-dashboard-finish-review-final-20261008.md` resolves the three existing findings only. It does not establish whole-surface, authenticated customer, human keyboard, physical-device or production acceptance. User-supplied diagrams remain direction references; the implemented diagrams are native code and add no shipping raster artwork.
 
 ### Plan review
 

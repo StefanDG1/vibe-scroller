@@ -130,3 +130,7 @@ Updated all four briefs together for the owner-authorized synthetic documentatio
 ## F029: current shared version and role loss, October 8
 
 Updated all four briefs together for actual post-release citation rendering, correction invalidation and exact role removal. Original fixture content was restored, revision history remained advanced and temporary sharing was removed. Earlier failures and independent/provider/commercial limits remain explicit.
+
+## F030: visual dashboard and graph forms, October 8
+
+Updated all four briefs together for the owner-supplied visual references and correction to the previous UI readiness claim. Retain source provenance, page denominators, separate benefit evidence and the existing provider/budget/privacy boundaries. Independent comprehension remains untested.
