@@ -4,6 +4,8 @@ Mode: reference. This is an evidence-backed inventory, not a new implementation 
 
 The application has substantial implemented and deployed functionality. The entire evolution plan, all V1 acceptance gates and all UI/UX work are **not complete**. The October 8 [layout options](design/vibescroll-layout-options-20261008.md) are unapproved concepts and are not implemented.
 
+Subsequent owner feedback selected design 2 for Library and design 3 for Projects, five mobile controls with Save centered, overview-first with remembered position, and device-following theme. These are planning decisions in [ADR 094](adr/094-vertical-library-and-project-trail-direction.md) and the [refined UI and UX plan](design/VIBESCROLL-UI-UX-PLAN-20261008.md). Detailed mockup compositions remain proposals. The later bounded existing-app browser review does not implement or validate the redesigned interface.
+
 ## How to read this inventory
 
 - **Implemented:** source and engineering records support the behavior. This does not establish every external journey.

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-08T16:24:06.584164+00:00",
+  "baseline": "79d645a2f14672a24affd930bbac8388eb640c24",
+  "scope": "owner preference updates and bounded read-only serving-app review; no application changes",
+  "confirmedPreferences": {
+    "startup": "overview first; remember valid place afterward",
+    "theme": "device light/dark setting"
+  },
+  "pending": ["refined composition"],
+  "review": {
+    "provider": "local Chrome through browser-harness after owner consent",
+    "viewportsCss": [
+      [1600, 809],
+      [390, 844]
+    ],
+    "screens": ["Library", "Home", "Projects"],
+    "observations": [
+      "Library controls and explanations precede a horizontal flat-root strip in the reviewed Workspace cohort",
+      "Home has loaded-cohort statistics and charts below a large header/capture region",
+      "Mobile navigation already has five items, with Save fourth and More last",
+      "Projects setup and reviewed full-library scan precede returning project content",
+      "One Projects navigation retained Home body and active state until reload; root cause unconfirmed"
+    ],
+    "limits": [
+      "Existing app only, not new-design acceptance",
+      "Early loading and mismatched-route captures excluded",
+      "Wheel attempt timed out",
+      "No physical device, assistive technology, independent user or measured cost acceptance",
+      "Workspace display name does not establish private ownership"
+    ],
+    "restoration": "Original Library/Knowledge/Topic tree/Branching diagram, 1600x809, outer scroll 300 restored; inner pan not recorded",
+    "tabsCreated": 0,
+    "tabsClosed": 0
+  },
+  "applicationCodeChanged": false,
+  "processingJobs": 0,
+  "permissionsChanged": false,
+  "deploymentRequired": false,
+  "recentApplicationChecks": "Reuse successful pnpm check and exact/main CI from documentation PR86; follow-up formatting/document validation and CI recorded separately",
+  "followupChecks": {
+    "documentValidation": "pnpm validate: 221 documents and 12 skill snapshots passed",
+    "formatting": "changed documentation and receipt formatted with Prettier",
+    "whitespace": "git diff --cached --check passed",
+    "secretScan": "Gitleaks 8.30.1 staged redacted scan: no leaks",
+    "exactHeadMainCI": "required after commit; not established by this receipt"
+  }
+}

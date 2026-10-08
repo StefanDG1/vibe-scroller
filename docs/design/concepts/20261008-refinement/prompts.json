@@ -23,5 +23,12 @@
       "id": "projects",
       "prompt": "Use case: ui-mockup. High-fidelity portrait MOBILE WEB APP project proposal detail for VibeScroll, design 3 \"Proposal trail\" adapted to approved design 2 cool white surfaces and navy/teal accents, yellow centered Save. No phone hardware. Readable short labels, generous spacing, crisp thin connectors, minimum descriptive prose, no gradients.\nCompact header small yellow scroll mark VibeScroll, search icon. Back breadcrumb \"Projects / Demo shop\". Title \"Simplify onboarding\", badge \"Proposal · To review\".\nStack a genuinely VERTICAL trail of connected cards:\nFirst compact card \"Saved post\", thumbnail of plain notebook, short label \"Make the next step obvious\", link \"View source\".\nDownward thin arrow.\nSecond card \"Insight\", claim \"Show one clear next step\".\nDownward thin arrow.\nThird selected teal-outlined card \"Proposal\", \"Simplify onboarding\", link \"Why this fits\", status \"To review\".\nThen lower outlined muted card \"Plan\", status \"Not prepared\". Outline dotted connector leading to muted future card \"Change\", status \"Not started\". NO checkmarks on unstarted stages.\nNear Plan, a clear single primary button \"Review preparation\". A small readable hint \"Review sources, project and cost first\". This opens preparation review, not paid processing or coding. No invented money or credits, no confirmed outcome claims.\nBottom FIXED bar EXACTLY FIVE touch actions ordered Home, Library, centered circular yellow plus Save, Projects selected, Account. Two items either side of Save. Large touch targets, safe-area space. Small \"Concept · sample content\". Keep bottom bar distinct from step cards and visible. A calm beautiful coherent usable project journal, novice-friendly, no GitHub jargon or code console."
     }
-  ]
+  ],
+  "ownerFollowup": {
+    "date": "2026-10-08",
+    "startup": "overview first; remember last valid place afterward",
+    "theme": "device light/dark setting",
+    "pending": "refined composition",
+    "generationTimeMetadataRetained": true
+  }
 }
