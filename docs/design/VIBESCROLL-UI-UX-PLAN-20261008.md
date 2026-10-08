@@ -34,6 +34,8 @@ All four are native imagegen composition studies with illustrative content, not 
 
 Recommended combination: R1 for overview, R2 inside a branch, R3 for Home and R4 for project detail. These are views of one system, not four separate visual identities. Keep R2's card copy shorter than the generated sample. The Home sample assumes combined browsing was explicitly confirmed; it does not authorize combining real Personal/Business knowledge. Its numbers are illustrative and not validated metrics.
 
+The later [Library density and motion studies](LIBRARY-DENSITY-AND-MOTION-20261008.md) explore icon-led cards, busy branches, bounded pagination, a denser desktop layout and reuse of Motion for React. These are proposals for review, not implemented scaling or animation acceptance.
+
 ## Screen architecture
 
 ### Read-only review of the existing app
