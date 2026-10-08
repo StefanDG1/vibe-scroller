@@ -15,11 +15,11 @@ Baseline: documentation main `833917db6c149d7d54456b35bd71df815a60f313`; last re
 | Product language    | Post, insight, category, project, proposal, plan, change and result; GitHub issue only at the explicit publication destination |
 | Main purpose        | Recognize what was saved, understand what was learned, and optionally review how it could help a project                       |
 | Visual identity     | Design 2's bright, calm visual language is the starting point; existing charcoal styling is not binding                        |
-| Startup, pending    | Proposed default: first visit shows overview; later visits restore the last valid scope/branch/position                        |
-| Theme, pending      | Proposed default: bright mode with a matching optional dark mode; ask the owner before freezing this                           |
+| Startup             | Owner confirmed: first visit shows overview; later visits restore the last valid scope/branch/position                         |
+| Theme               | Owner confirmed: follow the device light/dark setting; matching themes, with an optional System/Light/Dark Account override    |
 | Scope boundary      | Design planning only. Final composition and implementation remain a later step                                                 |
 
-Pending questions are preferences, not approvals for spending or account access. If unanswered, these defaults remain labeled assumptions. Do not interpret elapsed time as acceptance.
+Startup and device-theme defaults are confirmed owner preferences. The combined overview/focused-branch composition remains a recommendation for review. Preferences do not authorize spending or account access; elapsed time does not establish acceptance.
 
 ## New mockups
 
@@ -35,6 +35,18 @@ All four are native imagegen composition studies with illustrative content, not 
 Recommended combination: R1 for overview, R2 inside a branch, R3 for Home and R4 for project detail. These are views of one system, not four separate visual identities. Keep R2's card copy shorter than the generated sample. The Home sample assumes combined browsing was explicitly confirmed; it does not authorize combining real Personal/Business knowledge. Its numbers are illustrative and not validated metrics.
 
 ## Screen architecture
+
+### Read-only review of the existing app
+
+After the owner allowed local Chrome access, a bounded review of the serving Library, Home and Projects used the existing session at 1600 x 809 and an emulated 390 x 844 viewport. These observations describe the existing app, not acceptance of the proposed designs. Source-containing screenshots remain private.
+
+- Library places several rows of tabs, view controls and explanatory text above a horizontal topic strip. The reviewed Workspace cohort showed flat roots. Reduce these control layers and provide a genuine organization path before claiming a nested atlas.
+- Home already contains loaded-cohort statistics and visualizations. A large greeting/capture area places them farther down the mobile page. Make current attention, counts and the knowledge preview easier to reach. Do not describe the current dashboard as having no charts.
+- The mobile bar already has five items in the order Home, Library, Projects, Save, More. The new shell changes the order and makes Account explicit.
+- Projects begins with setup and a reviewed full-library scan before existing selected projects. Returning users should see projects/proposals first; keep setup contextual and broad scans secondary.
+- One desktop navigation changed the URL to Projects while Home content and the active destination persisted. Reloading then settled on Projects. The cause is unconfirmed. Require route, body heading and active navigation to agree after navigation, direct load, back and forward.
+
+Some early captures showed loading or the route/content mismatch and are excluded from visual acceptance. A wheel attempt timed out. The final Library check had loaded content, Knowledge/Topic tree/Branching diagram, the original desktop viewport and outer scroll position restored. The previous inner diagram pan was not recorded, so exact pan restoration is not claimed. No tabs were created or closed, and no processing, grant, correction or publication action was used.
 
 ### App shell and navigation
 
@@ -62,7 +74,7 @@ Keep existing timed-video, numbered-image and untimed-note evidence behavior. A 
 
 ### Projects and proposals
 
-Project list uses friendly project names with actual stage counts and contextual setup states. Missing connection or confirmed context prompts the next supported setup step; browsing the library does not require GitHub.
+Project list starts with existing selected projects and their proposals for returning users, using friendly project names with actual stage counts. Show contextual setup where needed. Keep full-library scan available as a secondary reviewed action, rather than the main returning-user entry. Missing connection or confirmed context prompts the next supported setup step; browsing the library does not require GitHub.
 
 Project detail groups proposals into To review, Planned, Working, Change ready, Done and Paused where those labels correspond to real states. A no-fit, already-implemented, deferred or needs-context evaluation stays visible in an appropriate secondary group. It is not converted into a positive proposal just to populate the UI.
 
@@ -122,6 +134,8 @@ First use should lead from intended focus to one permitted saved post, real cite
 
 ## Data and cost design before UI implementation
 
+Before presenting Personal/Business roots, audit ownership and filing for the existing visible corpus. A workspace display name does not prove private ownership. Preserve legacy/team sources in an explicitly labeled Workspace knowledge view until their actual authorized scope is resolved. Do not silently move sources, remap IDs, change tenancy or relabel workspace-owned content to fit the mockup. Any required transition needs a separate reviewed compatibility plan preserving history, provenance, corrections and grants.
+
 Proposed primary hierarchy: **virtual Personal/Business roots from source filing → existing knowledge topics and their saved parent links → current insight memberships**. Preserve existing whole-post categories as tags; do not merge two taxonomies merely because their names look similar. The hierarchy uses existing topic IDs and versions; topic terminology becomes category/subcategory in the presentation. A structural alias or move does not rerun analysis.
 
 An insight may appear through several memberships. Use scope/topic/membership identities for its displayed occurrence and its canonical source/generation/revision/insight reference for evidence and deduplication. Cross-links point to existing canonical records. A topic visible in both roots is not a duplicated stored topic. Partial/off-page parents must have a scoped load path or an explicit missing-context state, never an invented parent.
@@ -140,7 +154,7 @@ Budget efficiency is measured, not assumed: record request count, payload, datab
 
 | Phase                               | Work                                                                                                                                                        | Required evidence before advancing                                                                                                                         |
 | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| UX0: resolve refinements            | Confirm startup/theme and whether overview plus focus is the chosen interaction; turn selected mockups into state specifications                            | Owner choices recorded; imagery remains illustrative; no coding before the planning boundary is lifted                                                     |
+| UX0: resolve refinements            | Apply confirmed startup/device theme; review overview plus focus composition and turn selected mockups into state specifications                            | Owner choices recorded; imagery remains illustrative; no coding before the planning boundary is lifted                                                     |
 | UX1: validate hierarchy and metrics | Inventory current fields/indexes/roles; validate the virtual-root/topic/membership mapping, tags, counters, late-response rules and representative fixtures | Current IDs/manual edits/export/deletion preserved; scoped negative tests; sparse, deep, wide and overlapping memberships; documented query bounds         |
 | UX2: shell, Save and Account        | Implement five mobile actions, desktop rail, keyboard-safe capture and coherent Account destination with preserved direct links                             | Correct action/destination semantics, unsaved-draft recovery, direct links, focus return, safe-area/keyboard checks                                        |
 | UX3: Library atlas and evidence     | Build overview/focused path with deterministic local layout, breadcrumbs, pagination, search reveal, cited detail and contextual project arrows             | No clipping/mandatory zoom, no invented parents or edges, current evidence and original image/timestamp behavior, scope-reset/stale-read tests             |
@@ -167,7 +181,7 @@ Inspect actual route contracts and existing tests before splitting components or
 2. A library with one source, missing parents or unfiled items remains useful. A twenty-idea sparse topic starts at its content rather than a blank canvas. Deep paths and large sibling pages stay readable without horizontal document overflow.
 3. Search reveals a current insight in context; back/close restores branch, scroll and focus. Later visits restore only valid authorized state. Persisted view preferences must not contain source text/tokens and must be cleared appropriately on sign-out/account changes.
 4. One insight in several categories is not double-counted as several insights or sources. A current-source correction/deletion/revocation clears stale detail and project arrows. Viewer scope cannot reveal another owner's evidence or hidden totals.
-5. Save is centered among five labeled actions, opens capture and preserves the current page. Navigation, browser back and a software keyboard do not erase an unsaved draft or cover its error/action controls.
+5. Save is centered among five labeled actions, opens capture and preserves the current page. Route, body heading and active navigation agree after navigation, direct load, back and forward. A software keyboard does not erase an unsaved draft or cover its error/action controls.
 6. A proposal with no plan offers preparation review, not execution. Changed base, plan, evidence, provider rights, executor or cost authority invalidates the relevant action. Opening detail or viewing the trail starts no paid work.
 7. All displayed Home values resolve to the matching permitted records. Post-stage values use the same post cohort; insights, proposals and PRs are not mixed into one funnel. Missing data stays unavailable. Merge remains distinct from benefit.
 8. Keyboard and touch users can expand, select, inspect evidence and return. Test focus, reduced motion, contrast, 200% zoom, long labels and screen-reader structure. Viewport emulation is not physical-device or AT acceptance.
@@ -202,4 +216,4 @@ Impeccable's shape/Operate guidance informed planning, state coverage and restra
 
 ## Next decision
 
-Review the four refinements and answer startup/theme preferences. The plan's confirmed structural choices stand; remaining composition assumptions can change. Freeze a state-by-state specification after that review, then begin implementation only when requested. Until then, the live interface and all provider/funding authority remain unchanged.
+Review the four refinements as one proposed interface: overview, focused branch, useful Home and project trail. Overview-first with remembered position and device-following theme are now confirmed. The plan's confirmed structural choices stand; remaining composition assumptions can change. Freeze a state-by-state specification after that review, then begin implementation only when requested. Until then, the live interface and all provider/funding authority remain unchanged.

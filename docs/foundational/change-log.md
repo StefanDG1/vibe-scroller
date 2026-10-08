@@ -139,4 +139,4 @@ F030 release addendum: all four briefs now reference the checked initial and spa
 
 ## F031: chosen library and project direction, October 8
 
-Updated all four briefs together for the owner's design 2/design 3 selection, collection-desk rejection and five mobile controls. Record the draft plan and illustrative refinements without promoting them to implemented features, independent comprehension or a measured outcome. Startup/theme/composition remain open; all earlier evidence and product authority boundaries remain intact.
+Updated all four briefs together for the owner's design 2/design 3 selection, collection-desk rejection and five mobile controls. Record the draft plan and illustrative refinements without promoting them to implemented features, independent comprehension or a measured outcome. Owner follow-up confirmed overview-first/remembered-position and device-following theme. Composition remains open. Record bounded existing-app review separately, including scope compatibility, control density, returning-project priority and an unresolved route/content mismatch. All earlier evidence and product authority boundaries remain intact.
