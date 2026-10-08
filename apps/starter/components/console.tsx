@@ -1152,6 +1152,7 @@ export function Console({
                     repositories={home.repositories}
                     runs={home.runs}
                     libraryNext={home.libraryNext}
+                    compact={home.compact}
                     draft={sharedDraft}
                     onDraft={setSharedDraft}
                     onSave={() => {

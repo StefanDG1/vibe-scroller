@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-07T12:14:16.248127+00:00",
+  "generatedAt": "2026-10-08T01:26:41Z",
   "title": "Design System: VibeScroll",
   "extensions": {
     "usageAllowanceReview": {
@@ -324,6 +324,18 @@
       "private-recovery-border": {
         "role": "semantic",
         "displayName": "Private setup recovery border"
+      },
+      "diagram-blue": {
+        "role": "secondary",
+        "displayName": "Diagram blue"
+      },
+      "diagram-violet": {
+        "role": "secondary",
+        "displayName": "Diagram violet"
+      },
+      "diagram-node-hover": {
+        "role": "neutral",
+        "displayName": "Diagram node hover"
       }
     },
     "typographyMeta": {
@@ -416,6 +428,10 @@
       {
         "name": "studio-stacked",
         "value": "768px"
+      },
+      {
+        "name": "visual-dashboard-stacked",
+        "value": "680px"
       }
     ],
     "assistantAccessHistoricalReview": {
@@ -482,6 +498,39 @@
       ],
       "proof": ".impeccable/review/assistant-scope/proof.json",
       "evidenceBoundary": "Eight labeled synthetic actual-component captures at 320/390/768/1440 CSS pixels with emulated metrics/focus, plus native synthetic checkbox/Space, save and revocation fixture checks. Historical assistant-access and project-grants captures retain their dated original scopes. No production grant/tool, real OAuth/provider, independent comprehension, human keyboard or physical-device acceptance follows; provider/OAuth acceptance is separate."
+    },
+    "visualDashboardReview": {
+      "recordedDate": "2026-10-08",
+      "identity": "Bounded visual extension of Scroll's incumbent charcoal studio, existing type, mint actions and amber artwork; circle networks and saved topic branches follow owner-supplied references.",
+      "contract": "apps/starter/.impeccable/surfaces/apps-starter-components-studio-home-tsx.md",
+      "sources": [
+        "apps/starter/app/studio.css",
+        "apps/starter/components/dashboard-visuals.tsx",
+        "apps/starter/components/dashboard-trace.tsx",
+        "apps/starter/components/topic-diagram.tsx",
+        "apps/starter/components/knowledge-canvas.tsx",
+        "apps/starter/lib/knowledge-layout.ts",
+        "apps/starter/lib/dashboard-visuals.ts",
+        "apps/starter/lib/knowledge-map.ts"
+      ],
+      "metrics": "Four defined native metric buttons with What this counts disclosures; deduplicated loaded records, deleted posts excluded, explicit acceptance, enabled projects and unique recorded merged GitHub PR links. Compact merge value is Not loaded. State charts retain labels, counts and loaded-record denominators; no conversion funnel or whole-library total.",
+      "network": "Complete native circular buttons, mint-filled ideas and panel-filled cited groups. Amber complementary, blue similar and dashed violet disagreement. Useful combination retains its full accessible name, legend and evidence heading with Combine ideas inside the circle. Link count controls circle size, never quality. Edges join exact cited groups to ideas, never invented pairwise or causal links.",
+      "networkInteraction": "Measured-width local layout uses a taller world below 500px. Toolbar supports 65%-160% zoom; Reset view restores 100% and scroll origin. Touch scroll, mouse background drag, keyboard scroll, Tab/Enter inspection and native Escape/Close focus return. Full claims and source evidence remain in the dialog and readable list. No new inference, queries, motion or authorization.",
+      "topicHierarchy": "Saved parent links only, with missing/off-page parents as separate roots. First root centered on entry and resize; visible swipe/scroll guidance. Topic buttons share evidence with Readable tree.",
+      "trace": "Up to five loaded source-linked proposals and five proposal-linked runs. Native source/proposal record buttons, Runs action and wrapping readable links. Missing loaded run explicit; lines record provenance, not approval or outcomes.",
+      "responsive": "Statistics use four columns, two at 680px and below; paired charts stack at 680px. Network viewport is capped at 600px; topic and trace viewports at 560px. Trace retains a 900px internally scrolling world. Toolbars and legends wrap; incumbent shell and navigation retained.",
+      "finishDisposition": "Ship for the three resolved findings only: responsive network framing, centered topic-root entry and complete group label.",
+      "verdict": "private/vibescroll-visual-dashboard-finish-review-final-20261008.md",
+      "captures": [
+        ".impeccable/review/visual-dashboard-20261008/home-1440.png",
+        ".impeccable/review/visual-dashboard-20261008/home-390.png",
+        ".impeccable/review/visual-dashboard-20261008/network-1440.png",
+        ".impeccable/review/visual-dashboard-20261008/network-390.png",
+        ".impeccable/review/visual-dashboard-20261008/network-evidence-390.png",
+        ".impeccable/review/visual-dashboard-20261008/tree-1440.png",
+        ".impeccable/review/visual-dashboard-20261008/tree-390.png"
+      ],
+      "evidenceBoundary": "Seven labeled synthetic local captures opened by the fix-only reviewer. Zoom/reset and Enter/Escape focus-return checks are builder evidence. No whole-surface, authenticated customer, human keyboard, physical-device or production acceptance follows. No new shipping raster artwork."
     }
   },
   "components": [
@@ -589,9 +638,24 @@
     {
       "name": "Explore connection representation",
       "kind": "custom",
-      "description": "Readable list is the default; focused canvas uses the same cited groups. Representation, recovery and disclosure controls retain 44px targets. Static synthetic specimen; canvas evidence uses a native modal with focus return in the application.",
-      "html": "<section class=\"ds-explore-representations\"><fieldset aria-label=\"Connection representation\"><button aria-pressed=\"true\">Readable list</button><button aria-pressed=\"false\">Focused canvas</button></fieldset><p>Lines join a cited connection group to its supporting ideas. They do not establish causation.</p><div class=\"ds-explore-cited\"><strong>Work together</strong><span>2 ideas</span></div><details><summary>Full synthetic evidence</summary><p>Inspect the full claim and its exact source evidence in the application.</p></details></section>",
+      "description": "Network map is the default; readable list uses the same exact cited groups and full claims. Representation, recovery and disclosure controls retain 44px targets. Static synthetic specimen; application canvas evidence uses a native modal with focus return.",
+      "html": "<section class=\"ds-explore-representations\"><fieldset aria-label=\"Connection representation\"><button aria-pressed=\"false\">Readable list</button><button aria-pressed=\"true\">Network map</button></fieldset><p>Lines join a cited connection group to its supporting ideas. They do not establish causation.</p><div class=\"ds-explore-cited\"><strong>Work together</strong><span>2 ideas</span></div><details><summary>Full synthetic evidence</summary><p>Inspect the full claim and its exact source evidence in the application.</p></details></section>",
       "css": ".ds-explore-representations{color:var(--foreground,#f4f4f4);font:14px/1.6 Inter,system-ui,sans-serif}.ds-explore-representations fieldset{display:flex;gap:8px;flex-wrap:wrap;padding:0;border:0;margin:16px 0 24px}.ds-explore-representations button{min-width:44px;min-height:44px;padding:10px 14px;border:1px solid var(--border,#39453f);border-radius:8px;color:inherit;background:var(--card,#1d2421);font:600 14px/1.6 Inter,system-ui,sans-serif;cursor:pointer}.ds-explore-representations button[aria-pressed=true]{color:var(--primary-foreground,#10251e);background:var(--primary,#87dfc1);border-color:var(--primary,#87dfc1)}.ds-explore-representations button:hover{border-color:var(--primary,#87dfc1)}.ds-explore-representations button:focus-visible,.ds-explore-representations summary:focus-visible{outline:2px solid var(--ring,#87dfc1);outline-offset:3px}.ds-explore-cited{padding:12px;border:1px solid var(--border,#39453f);border-radius:12px;background:var(--muted,#262626)}.ds-explore-cited strong,.ds-explore-cited span{display:block;font-size:14px;line-height:1.5}.ds-explore-cited strong{margin-bottom:8px}.ds-explore-representations summary{display:flex;align-items:center;min-height:44px;padding-block:10px;cursor:pointer}"
+    },
+    {
+      "name": "Cited circle network",
+      "kind": "custom",
+      "refersTo": "network-group",
+      "description": "Static synthetic specimen of complete native circle buttons; size records cited links, not quality. Application inspection opens full evidence with focus return.",
+      "html": "<section class=\"ds-circle-network\" aria-label=\"Synthetic cited group specimen\"><button class=\"ds-circle-idea\" aria-label=\"Inspect synthetic idea\">Synthetic cited idea</button><span aria-hidden=\"true\" class=\"ds-circle-link\"></span><button class=\"ds-circle-group\" aria-label=\"Inspect Useful combination: synthetic cited group\"><strong>Combine ideas</strong><span>2 ideas</span></button><p>Lines join exact cited groups to ideas. Read full claims in the readable list.</p></section>",
+      "css": ".ds-circle-network{display:flex;flex-wrap:wrap;align-items:center;gap:16px;color:var(--foreground,#f4f4f4);font:13px/1.3 Inter,system-ui,sans-serif}.ds-circle-network button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;flex-shrink:0;width:108px;height:108px;padding:15px;border:2px solid var(--primary,#87dfc1);border-radius:50%;font:inherit;white-space:normal;text-align:center;cursor:pointer}.ds-circle-idea{background:var(--primary,#87dfc1);color:var(--primary-foreground,#10251e)}.ds-circle-group{background:var(--panel,#1d2421);color:var(--primary,#87dfc1)}.ds-circle-link{width:32px;height:1.5px;background:var(--primary,#87dfc1)}.ds-circle-network button:hover{filter:brightness(1.12)}.ds-circle-network button:focus-visible{outline:3px solid var(--foreground,#f4f4f4);outline-offset:5px}.ds-circle-network p{flex-basis:100%;color:var(--subtle,#b3bdb7);font-size:13px;line-height:1.6}"
+    },
+    {
+      "name": "Saved topic branch node",
+      "kind": "button",
+      "description": "Native saved-topic button shared by branching diagram and readable tree. Static synthetic specimen; it does not load actual evidence.",
+      "html": "<button class=\"ds-topic-node\" aria-label=\"Open synthetic topic\"><strong>Synthetic topic</strong><span>2 posts · 2 current ideas</span></button>",
+      "css": ".ds-topic-node{display:flex;flex-direction:column;justify-content:center;gap:6px;width:208px;min-height:88px;max-height:100px;padding:12px;border:1px solid var(--primary,#87dfc1);border-radius:12px;background:var(--panel,#1d2421);color:var(--foreground,#f4f4f4);font:14px/1.35 Inter,system-ui,sans-serif;text-align:center;white-space:normal;cursor:pointer}.ds-topic-node strong{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}.ds-topic-node span{color:var(--subtle,#b3bdb7);font-size:12px}.ds-topic-node:hover{background:#283b33}.ds-topic-node:focus-visible{outline:2px solid var(--ring,#87dfc1);outline-offset:3px}"
     }
   ],
   "narrative": {
@@ -683,7 +747,8 @@
       "Original Scroll remains present in the normal shell and onboarding.",
       "Readable rows, quiet borders and familiar controls.",
       "Visible workspace scope on phones; accessible focus and generous targets.",
-      "Bounded local motion with a still alternative."
+      "Bounded local motion with a still alternative.",
+      "Cited circle networks, saved topic branches and defined loaded-record charts."
     ],
     "northStar": "Scroll's studio",
     "overview": "VibeScroll uses green charcoal surfaces, meaningful mint actions and warm amber original artwork. Scroll is the owner's always-present guide: a soft folded-paper creature with expressive dark eyes, a curled tuft and mint bookmark. Familiar controls, readable rows and restrained framing keep the artwork approachable without competing with evidence. The owner pinned this world in the October 7 evolution request; no direction roll, seeded round or QUALITY BAR card is claimed. The first surface's composition stays in [the studio direction contract](docs/design/vibescroll-studio.md).\n\nContent, actual state and permitted actions establish hierarchy. Source icons identify media without inventing thumbnails. Panels remain subdued so titles, evidence and the next action carry attention. [PRODUCT.md](PRODUCT.md) records the product constraints; the four foundational documents remain the copy brief. This document does not change copy, establish benefit, or approve legal publication."

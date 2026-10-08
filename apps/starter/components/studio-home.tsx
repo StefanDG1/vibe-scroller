@@ -8,6 +8,8 @@ import {
   type NextAction,
 } from "../../../packages/knowledge/dashboard";
 import { ScrollCharacter } from "./scroll-character";
+import { DashboardVisuals } from "./dashboard-visuals";
+import { DashboardTrace } from "./dashboard-trace";
 
 export function StudioHome({
   sources,
@@ -23,6 +25,7 @@ export function StudioHome({
   go,
   readOnly,
   busy,
+  compact = false,
 }: {
   sources: DashboardItem[];
   proposals: DashboardItem[];
@@ -37,6 +40,7 @@ export function StudioHome({
   go: (view: string) => void;
   readOnly: boolean;
   busy: boolean;
+  compact?: boolean;
 }) {
   const [dismissed, setDismissed] = useState<string[]>([]);
   const [highlightStopped, setHighlightStopped] = useState(false);
@@ -116,6 +120,22 @@ export function StudioHome({
           <ArrowRight size={20} aria-hidden="true" />
         </button>
       </form>
+      <DashboardVisuals
+        sources={sources}
+        proposals={proposals}
+        repositories={repositories}
+        runs={runs}
+        go={go}
+        compact={compact}
+      />
+      <DashboardTrace
+        sources={sources}
+        proposals={proposals}
+        runs={runs}
+        onOpenSource={onOpenSource}
+        onOpenProposal={onOpenProposal}
+        go={go}
+      />
       <div className="studio-shelves">
         <section aria-labelledby="studio-knowledge">
           <div className="row spread">

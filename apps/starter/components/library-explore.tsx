@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, GitBranch, ArrowRight, Lightbulb } from "lucide-react";
 import { KnowledgeMap } from "./knowledge-map";
+import { TopicDiagram } from "./topic-diagram";
 import { ChoiceSelect } from "./choice-select";
 import { usePolling } from "@/lib/use-polling";
 import { buildTopicTree, type TopicNode } from "@/lib/topic-tree";
@@ -27,6 +28,51 @@ const fixture = {
     {
       id: "demo-topic",
       name: "A useful first result",
+      ideas: 6,
+      posts: 6,
+      moreEvidence: false,
+      pinned: false,
+    },
+    {
+      id: "demo-guidance",
+      name: "Clear guidance",
+      parentId: "demo-topic",
+      ideas: 3,
+      posts: 3,
+      moreEvidence: false,
+      pinned: false,
+    },
+    {
+      id: "demo-evidence",
+      name: "Inspect the evidence",
+      parentId: "demo-topic",
+      ideas: 3,
+      posts: 3,
+      moreEvidence: false,
+      pinned: false,
+    },
+    {
+      id: "demo-next",
+      name: "One useful next step",
+      parentId: "demo-guidance",
+      ideas: 2,
+      posts: 2,
+      moreEvidence: false,
+      pinned: false,
+    },
+    {
+      id: "demo-control",
+      name: "Keep decisions reversible",
+      parentId: "demo-guidance",
+      ideas: 2,
+      posts: 2,
+      moreEvidence: false,
+      pinned: false,
+    },
+    {
+      id: "demo-outcomes",
+      name: "Record what helped",
+      parentId: "demo-evidence",
       ideas: 2,
       posts: 2,
       moreEvidence: false,
@@ -37,7 +83,7 @@ const fixture = {
   scope: "workspace",
   scopes: ["workspace"],
   coverage:
-    "Synthetic demonstration. Two illustrative ideas; no saved customer data or measured benefit.",
+    "Synthetic demonstration. Six illustrative ideas; no saved customer data or measured benefit.",
 };
 const fixtureDetail = {
   topic: {
@@ -55,6 +101,10 @@ const fixtureDetail = {
   members: [
     "Show a populated example before asking for project setup.",
     "Offer one clear next decision after the first result.",
+    "Show the source behind a recommendation.",
+    "Keep setup reversible until the person confirms it.",
+    "Let the person inspect uncertainty before acting.",
+    "Record the observed result separately from implementation.",
   ].map((claim, i) => ({
     _id: `demo-${i}`,
     evidence: {
@@ -81,7 +131,36 @@ fixtureDetail.summaries = [
           kind: "complementary",
           explanation:
             "The example provides context; the next decision gives the person somewhere to go. This is illustrative, not a measured result.",
-          references: fixtureDetail.members.map((m) => m.evidence.reference),
+          references: fixtureDetail.members
+            .slice(0, 2)
+            .map((m) => m.evidence.reference),
+        },
+        {
+          kind: "similar",
+          explanation:
+            "Synthetic examples both make the supporting evidence inspectable.",
+          references: fixtureDetail.members
+            .slice(2, 5)
+            .filter((_, i) => i !== 1)
+            .map((m) => m.evidence.reference),
+        },
+        {
+          kind: "complementary",
+          explanation:
+            "Synthetic guidance pairs a clear next step with the option to change a decision.",
+          references: [
+            fixtureDetail.members[1].evidence.reference,
+            fixtureDetail.members[3].evidence.reference,
+          ],
+        },
+        {
+          kind: "useful_combination",
+          explanation:
+            "Synthetic example combines evidence review with recording a result. No benefit has been measured.",
+          references: [
+            fixtureDetail.members[2].evidence.reference,
+            fixtureDetail.members[5].evidence.reference,
+          ],
         },
       ],
     },
@@ -104,6 +183,7 @@ export function LibraryExplore({
 }) {
   const [view, setView] = useState<View>("tree"),
     [scope, setScope] = useState("");
+  const [treeDiagram, setTreeDiagram] = useState(true);
   const [topics, setTopics] = useState<any>(demo ? fixture : null),
     [search, setSearch] = useState("");
   const [selected, setSelected] = useState<any>(null),
@@ -227,7 +307,21 @@ export function LibraryExplore({
       setJourney(null);
     }
     if (demo) {
-      setDetail(fixtureDetail);
+      const demoMembers: Record<string, number[]> = {
+        "demo-guidance": [0, 1, 3],
+        "demo-evidence": [2, 4, 5],
+        "demo-next": [0, 1],
+        "demo-control": [1, 3],
+        "demo-outcomes": [2, 5],
+      };
+      const indices = demoMembers[topic.id];
+      setDetail({
+        ...fixtureDetail,
+        members: indices
+          ? indices.map((i) => fixtureDetail.members[i])
+          : fixtureDetail.members,
+        topic: { ...fixtureDetail.topic, _id: topic.id, name: topic.name },
+      });
       setJourney({
         items: [],
         next: null,
@@ -709,10 +803,36 @@ export function LibraryExplore({
             </p>
           )}
           {view === "tree" ? (
-            <TopicBranches
-              topics={topics?.items ?? []}
-              onOpen={(topic) => void open(topic)}
-            />
+            <>
+              <fieldset
+                className="explore-views"
+                aria-label="Topic tree representation"
+              >
+                <button
+                  aria-pressed={treeDiagram}
+                  onClick={() => setTreeDiagram(true)}
+                >
+                  Branching diagram
+                </button>
+                <button
+                  aria-pressed={!treeDiagram}
+                  onClick={() => setTreeDiagram(false)}
+                >
+                  Readable tree
+                </button>
+              </fieldset>
+              {treeDiagram ? (
+                <TopicDiagram
+                  topics={topics?.items ?? []}
+                  onOpen={(topic) => void open(topic)}
+                />
+              ) : (
+                <TopicBranches
+                  topics={topics?.items ?? []}
+                  onOpen={(topic) => void open(topic)}
+                />
+              )}
+            </>
           ) : (
             <ul
               className={`explore-topics ${view === "overview" ? "explore-bars" : ""}`}
