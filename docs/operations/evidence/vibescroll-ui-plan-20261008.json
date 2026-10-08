@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "baseline": "833917db6c149d7d54456b35bd71df815a60f313",
+  "scope": "planning, references and illustrative mockups; no app code or deployment",
+  "ownerDecisions": [
+    "Design 2 vertical Library atlas",
+    "Design 3 Projects trail",
+    "Design 1 rejected",
+    "Five mobile actions: Home, Library, Save, Projects, Account"
+  ],
+  "pendingPreferences": ["startup view", "theme", "refined composition"],
+  "newConceptImages": 4,
+  "imageTool": "native imagegen",
+  "imagesAreAcceptance": false,
+  "plan": "docs/design/VIBESCROLL-UI-UX-PLAN-20261008.md",
+  "prompts": "docs/design/concepts/20261008-refinement/prompts.json",
+  "checks": {
+    "command": "pnpm check",
+    "log": "outputs/vibescroll-ui-plan-check-20261008.log",
+    "exitCode": 0,
+    "applicationSource": "unchanged from baseline; documentation completed and validated separately afterward",
+    "unitIntegrationPassed": 539,
+    "externalSkipped": 3,
+    "authorizationPassed": 28,
+    "pythonPassed": [6, 6, 3],
+    "basicPolicyPassed": 5,
+    "bothProductionBuilds": "passed; not deployed",
+    "lintTypes": "passed",
+    "finalDocumentValidation": "221 documents and 12 skill snapshots passed",
+    "dependencyAuditObservedAt": "2026-10-08T15:56:46.335Z",
+    "unresolvedAdvisories": 0,
+    "locallyMitigatedRegistryFinding": "GHSA-vfj7-8cjw-p6xm braces; not upstream-fixed",
+    "exactHeadMainCI": "separate release gate; not established by this receipt"
+  },
+  "providerChanges": false,
+  "newPaidProductInference": 0,
+  "newCodingJobs": 0,
+  "productPermissionsChanged": false,
+  "limitations": "No new app browser, physical-device, AT, independent user or actual cost acceptance. Prior backup resume failure remains a separate operational issue."
+}

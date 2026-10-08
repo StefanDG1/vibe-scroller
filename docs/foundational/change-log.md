@@ -136,3 +136,7 @@ Updated all four briefs together for actual post-release citation rendering, cor
 Updated all four briefs together for the owner-supplied visual references and correction to the previous UI readiness claim. Retain source provenance, page denominators, separate benefit evidence and the existing provider/budget/privacy boundaries. Independent comprehension remains untested.
 
 F030 release addendum: all four briefs now reference the checked initial and sparse-network correction releases. Native owner-session evidence does not establish independent comprehension or complete V1 acceptance.
+
+## F031: chosen library and project direction, October 8
+
+Updated all four briefs together for the owner's design 2/design 3 selection, collection-desk rejection and five mobile controls. Record the draft plan and illustrative refinements without promoting them to implemented features, independent comprehension or a measured outcome. Startup/theme/composition remain open; all earlier evidence and product authority boundaries remain intact.
