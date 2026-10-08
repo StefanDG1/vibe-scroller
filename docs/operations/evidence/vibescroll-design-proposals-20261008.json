@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "mode": "design exploration and implementation inventory; no app changes",
+  "auditedBaseline": "81c08ca21a2f661091e87f0893c9cafa7f12d508",
+  "applicationDeployment": "unchanged; prior evidence 41a9b286840ed5508c0a10f7c5966fbeec42b790",
+  "concepts": {
+    "approved": false,
+    "tool": "native imagegen",
+    "count": 3,
+    "content": "illustrative, synthetic; not screenshots or acceptance",
+    "prompts": "docs/design/concepts/20261008/prompts.json"
+  },
+  "checks": {
+    "pnpmValidate": "passed: 219 documents and 12 skill snapshots before this receipt",
+    "firstPnpmCheck": "failed: recovery test timeout at 5000ms; 538 passed, 1 failed, 3 external skipped",
+    "focusedRecovery": "passed: 5 tests, unchanged source",
+    "secondPnpmCheck": "validation/lint/types passed; 539 unit/integration and 28 authorization passed; PCM 6 passed; stopped at proxy timing assertion 2 != 4",
+    "focusedProxy": "passed: 6 tests, unchanged source",
+    "focusedSampling": "passed: 3 tests",
+    "buildPolicy": "passed: 5 tests",
+    "pnpmBuild": "passed: both production builds; not deployed",
+    "dependencyAudit": {
+      "observedAt": "2026-10-08T14:48:42.536Z",
+      "unresolved": 0,
+      "locallyMitigatedRegistryFinding": "GHSA-vfj7-8cjw-p6xm braces; not upstream-fixed"
+    },
+    "limitations": "No single clean local pnpm check run is claimed. Failures and separate passing checks are preserved. Exact PR/main CI is a separate gate."
+  },
+  "browser": {
+    "newApplicationAcceptance": false,
+    "chrome": "remote-debugging prompt requires local owner action; unavailable while owner is on phone; not bypassed",
+    "alternative": "stateless primary-source web research and native concept-image inspection"
+  },
+  "research": {
+    "savedPosts": "authorized read-only connector searches; relevant results; incomplete after authorization/evidence refusal; no bypass or exhaustive claim",
+    "newSkillInstalled": false,
+    "licenses": "Taste Skill and UI UX Pro Max MIT; Impeccable Apache 2.0; primary sources linked in design document"
+  },
+  "productActions": {
+    "newPaidProductInference": 0,
+    "newCodingJobs": 0,
+    "newPublication": 0,
+    "permissionsBudgetsProvidersChanged": false,
+    "newApplicationDeployment": false
+  }
+}
