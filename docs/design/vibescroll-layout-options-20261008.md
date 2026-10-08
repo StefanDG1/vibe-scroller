@@ -2,6 +2,8 @@
 
 Mode: explanation. Status: **unapproved design exploration**. No application code or existing design contract changes are authorized by this document. The owner requested concepts before implementation and explicitly allowed a new visual identity beyond the current system.
 
+Owner selection addendum, October 8: design 2 is preferred for Library, design 3 for Projects, and design 1 is rejected. Future mobile navigation has five controls with Save centered and Account on the right. See the [draft redesign plan and refinements](VIBESCROLL-UI-UX-PLAN-20261008.md). The original alternatives below remain historical; their images are not implemented interfaces.
+
 See the separate [implementation snapshot](../PROJECT-IMPLEMENTATION-SNAPSHOT-20261008.md) for what actually exists. All mockup covers, dates, avatars, counts, project names and wording below are illustrative, not customer data, measured outcomes or enabled-feature promises.
 
 ## Recommended experience

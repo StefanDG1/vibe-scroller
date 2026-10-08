@@ -147,3 +147,7 @@ Follow [ADR 058](adr/058-bounded-full-library-scans.md): full URL-link paginatio
 ## October 8: visual library and dashboard
 
 [ADR 093](adr/093-visual-library-and-dashboard.md) adopts the owner-requested circular network, saved-parent branching diagram and real loaded-record dashboard charts. Graph lines preserve provenance; counts state their cohorts and browsing starts no inference. Exact acceptance and deployment evidence remain separately recorded.
+
+## October 8: owner-selected vertical atlas and five mobile actions
+
+[ADR 094](adr/094-vertical-library-and-project-trail-direction.md) records design 2 for Library, design 3 for Projects, rejection of the collection desk and the future Home/Library/Save/Projects/Account mobile structure. The [draft UI and UX plan](design/VIBESCROLL-UI-UX-PLAN-20261008.md) retains pending composition, startup and theme choices. This is a planning decision, not implementation or a production design contract.

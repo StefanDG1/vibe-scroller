@@ -188,3 +188,11 @@ Decision: adopted as bounded engineering evidence only. No expanded permissions,
 A new actual owner-account production grant verified the shipped untimed user-note label and Shared knowledge headings. Correcting the synthetic summary denied the old shared reference and cleared its remounted claim; restoring the original summary advanced revision and did not restore old authority. A direct repeat of role removal returned ACCESS_LOST/403. Both accounts belong to the operator, and the source is an explicitly labeled synthetic fixture; no independent comprehension, natural expiry, mixed-evidence quality, physical-device result or customer value follows. No new inference ran. Preserve the earlier failed role-removal observation, prices, audience, six beliefs and remaining provider/commercial/human gates. See [implementation status](../implementation-status.md).
 
 Decision: adopted as bounded engineering evidence, without a new marketing or expanded-permission claim.
+
+## F031: selected vertical atlas and project trail, October 8
+
+Source: explicit owner feedback on the three October 8 concepts. Adopt design 2's Library hierarchy, design 3's Projects trail and five mobile actions with Save centered and Account on the right. Reject design 1. See [ADR 094](../adr/094-vertical-library-and-project-trail-direction.md) and the [draft UI and UX plan](../design/VIBESCROLL-UI-UX-PLAN-20261008.md).
+
+Research: owner preference, not new-user validation. Avatar: retain project owners including non-coders and library-only users. Offer: these are future interface changes; no enabled-feature, price or allowance expansion. Beliefs: make evidence and decisions inspectable while retaining agency. Counterargument: a tree can be unfamiliar or become crowded; test finding one saved idea, understanding its source and navigating to an actual proposal with sparse/deep/wide fixtures and later independent people. Scope/cost/currentness tests precede aggregate statistics.
+
+Decision: adopted as structural planning constraints only. Refinement composition, startup and theme remain pending. The four briefs are updated together without changing audience, prices, provider limits, current/future assistant grants or exact work authority. No application implementation, spending, publication or campaign follows.
