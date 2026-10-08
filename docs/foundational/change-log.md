@@ -134,3 +134,5 @@ Updated all four briefs together for actual post-release citation rendering, cor
 ## F030: visual dashboard and graph forms, October 8
 
 Updated all four briefs together for the owner-supplied visual references and correction to the previous UI readiness claim. Retain source provenance, page denominators, separate benefit evidence and the existing provider/budget/privacy boundaries. Independent comprehension remains untested.
+
+F030 release addendum: all four briefs now reference the checked initial and sparse-network correction releases. Native owner-session evidence does not establish independent comprehension or complete V1 acceptance.

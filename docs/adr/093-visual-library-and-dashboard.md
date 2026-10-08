@@ -1,6 +1,6 @@
 # Visual library and dashboard
 
-Mode: reference. Decision October 8, 2026. Status: implementation candidate.
+Mode: reference. Decision October 8, 2026. Status: implemented and production-verified at the recorded scope.
 
 The owner supplied a circular relationship network and a branching task diagram and identified the missing dashboard statistics. These visual forms extend the existing charcoal studio without changing permissions, funding or inference. Connections opens a deterministic local circular network, retaining exact cited group-to-idea edges rather than inventing pairwise agreement or causality. Circle size describes current-page degree, not truth, importance or corroboration. Colors and dashed disagreement links have a text legend. Native buttons open the existing evidence dialog; zoom, bounded scrolling and mouse background panning supplement the readable list.
 
@@ -11,3 +11,5 @@ Home adds inspectable statistics, state-distribution charts and a source-to-proj
 Acceptance requires layout/provenance and deduplication tests, responsive browser checks, native evidence/keyboard/zoom/tree controls, full repository checks, dependency/secret checks, fresh design review and exact production deployment evidence. Independent comprehension and relation quality remain unverified rather than inferred from screenshots.
 
 The release dependency check discovered the newly published Next.js GHSA-cjq9-62q9-8jv4 advisory. Its primary upstream advisory identifies 16.3.8 as fixed; both applications and their exact lockfile move from 16.3.6 to 16.3.8. The subsequent audit has no unresolved advisories, retaining the previously documented exact local braces mitigation. [Upstream advisory](https://github.com/vercel/next.js/security/advisories/GHSA-cjq9-62q9-8jv4).
+
+[Implementation status](../implementation-status.md) and the [coarse release receipt](../operations/evidence/vibescroll-visual-dashboard-20261008.json) bind exact source, CI, version and native production checks. A subsequent sparse-topic framing correction removes unused leading height without changing cited geometry. Independent comprehension, whole-library totals and full V1 acceptance remain separate.

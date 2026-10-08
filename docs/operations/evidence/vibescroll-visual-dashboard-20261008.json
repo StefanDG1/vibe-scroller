@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-08T01:43:50.101746+00:00",
+  "application": {
+    "commit": "41a9b286840ed5508c0a10f7c5966fbeec42b790",
+    "version": "0.1.0-alpha.20261008013944.g41a9b286840e",
+    "pullRequests": [81, 83],
+    "mainVerifyRun": 37714037287,
+    "versionRun": 37714037308,
+    "releaseRun": 37714217917,
+    "releasePublishedAt": "2026-10-08T01:42:06Z"
+  },
+  "deployment": {
+    "id": "dpl_8BfoZnYP7KsHgeUEggzbcKkZTT64",
+    "status": "READY",
+    "region": "fra1",
+    "domain": "https://scroll.companynerve.com",
+    "healthStatus": 200,
+    "healthCache": "no-store",
+    "healthExactCommit": true,
+    "buildMachine": "Basic 2vCPU/8GB",
+    "onDemandConcurrentBuilds": "disabled",
+    "backendCommitUnchanged": "1db35d26d357990a0b81cad7170b8f6b011e1efe"
+  },
+  "checks": {
+    "command": "pnpm check",
+    "environment": "Windows Node24.12.0 local and GitHub Ubuntu Node24 CI",
+    "candidateCommit": "3ff865b2a7a391d6fc98b8bbbd09036d5b11c2b3",
+    "localStartedAt": "2026-10-08T01:33:50Z",
+    "unitIntegrationPassed": 539,
+    "externalSkipped": 3,
+    "authorizationPassed": 28,
+    "pythonPassed": [6, 6, 3],
+    "basicPolicyPassed": 5,
+    "bothProductionBuilds": "passed",
+    "formatLintTypesValidation": "passed",
+    "stagedRedactedSecretScan": "passed",
+    "unresolvedDependencyAdvisories": 0,
+    "registryLocalMitigation": "GHSA-vfj7-8cjw-p6xm braces; registry finding remains"
+  },
+  "browser": {
+    "environment": "native Chrome CSS viewport emulation; owner authenticated production",
+    "observedAt": "2026-10-08T01:41:32.460574Z",
+    "widths": [1440, 390],
+    "homeCharts": 2,
+    "homeCountsScope": "loaded records; compact merge details withheld",
+    "liveTopicNodes": 22,
+    "liveTopicCitedEdges": 4,
+    "topBoundaryPx": 20,
+    "documentOverflow": false,
+    "initialReleaseEvidenceEnterEscapeSourceLink": "passed",
+    "initialLiveTopicRoots": 10,
+    "initialLiveSavedParentEdges": 0,
+    "syntheticDemoHierarchy": {
+      "nodes": 6,
+      "edges": 5,
+      "notCustomerEvidence": true
+    },
+    "limitations": [
+      "Not physical-device or assistive-technology acceptance",
+      "No independent first-use/comprehension/quality acceptance",
+      "No inferred hierarchy, agreement, causal benefit or full-library totals"
+    ]
+  },
+  "cost": {
+    "newInferenceRequests": 0,
+    "convexRoundedTeamUpcomingUsd": 0.57,
+    "previousEstimateUsd": 0.56,
+    "disableThresholdUsd": 15,
+    "cumulativeAuthorizationEur": 2,
+    "incrementalAttribution": "unknown; existing infrastructure reserve retained",
+    "cashInvoiceReconciliation": "pending"
+  },
+  "preservedFailures": [
+    "Existing recovery-test timeout before passing focused/full reruns",
+    "Browser quoting, early-loading, ambiguous-navigation and incorrect clip probes",
+    "Initial sparse-network blank lead-in before root correction"
+  ],
+  "fullV1Complete": false,
+  "remainingGates": [
+    "Independent first use, human comprehension and relation quality",
+    "Supported-host Events lifecycle",
+    "Restricted/multiple installation and provider revocation",
+    "Natural expiry and mixed evidence",
+    "Applicable commercial/legal/recovery/invoices"
+  ]
+}
