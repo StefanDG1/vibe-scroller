@@ -26,7 +26,7 @@
     "reducedMotionRunningAnimations": 0,
     "sameNavGeometryAndRelatedDestination": true,
     "proposalPreview": "Synthetic exact-version fixture only",
-    "limitations": "Authenticated production scope switching, expanded-search recovery, physical-device smoothness and independent comprehension not yet verified"
+    "limitations": "Physical-device and independent comprehension unverified. Native expanded-search recovery additionally verified in production; alternate access scope unavailable on owner page."
   },
   "data": {
     "inference": false,
@@ -45,12 +45,61 @@
     "finalDisposition": "ship for the two named fixes only"
   },
   "release": {
-    "status": "pending exact checks/backend/frontend/canonical verification"
+    "status": "verified canonical production at recorded scope",
+    "pullRequest": 97,
+    "headCommit": "77b7236ef215ae2baec2c76b043c1025a2a6f545",
+    "applicationCommit": "306a0ec01ff85d167b7ea676d9a62006d8e38098",
+    "prVerify": 37933551729,
+    "mainVerify": 37933869184,
+    "versionRun": 37933869284,
+    "alphaRun": 37934049280,
+    "version": "0.1.0-alpha.20261009130048.g306a0ec01ff8",
+    "domain": "https://scroll.companynerve.com",
+    "vercelDeployment": "56aVeNDpGxazvnZHJxaZtxRBpYN7",
+    "providerStatus": "Ready Production Latest; canonical alias; source main306a0ec; observed39s duration",
+    "backend": "bold-lemur-667; checked PR source; typecheck and schema validation complete; no index changes"
   },
   "failuresPreserved": [
     "Initial TypeScript enriched generic-return test corrected",
     "Missing Account aria-current corrected",
     "Avatar-initial raw text assertion corrected without removing avatar",
     "Expanded-search native setup did not complete; not a pass"
-  ]
+  ],
+  "production": {
+    "verifiedAt": "2026-10-09T13:08:17.614371+00:00",
+    "command": "native browser-harness owner canonical page",
+    "storedDescriptiveTitles": true,
+    "semanticLegacyIcons": true,
+    "categoryNoWrap": true,
+    "selectedTopicLabel": "Interface design",
+    "fullOriginalClaimMatches": true,
+    "closedCategoryUnhighlighted": true,
+    "reloadedFoldersAndExpandedInsight": true,
+    "expandedSearchClearRecovery": true,
+    "widths": [320, 390, 412, 1440],
+    "overflow": false,
+    "accountVersion": "Alpha \u00b7 0.1.0-alpha.20261009130048.g306a0ec01ff8",
+    "health": {
+      "status": "ok",
+      "service": "vibescroller",
+      "version": "0.1.0-alpha.20261009130048.g306a0ec01ff8",
+      "commit": "306a0ec01ff85d167b7ea676d9a62006d8e38098"
+    },
+    "proposalSample": "No current exact proposal returned for sampled insight; positive previews only verified in synthetic fixture/currentness tests",
+    "scopeSwitch": "Only Workspace offered; real alternate-scope native check unavailable. Fresh/missing/revoked scope covered by helper tests and keyed/reset code. No permissions changed."
+  },
+  "productionTestCorrections": [
+    "Native clear attempt failed to clear Pricing; corrected with observed input, native click/selectAll and Windows virtual key codes. Actual clear then restored expanded insight/view. Original failed receipt preserved.",
+    "Scope trigger accessible name was Library access view; corrected native lookup returned only Workspace. No alternate-scope pass asserted."
+  ],
+  "billing": {
+    "latestPanel": "Navigation only; fresh invoice fields unavailable",
+    "lastConfirmedTeamUpcomingUSD": 1.15,
+    "lastConfirmedDisableThresholdUSD": 15,
+    "taskAttribution": "unknown",
+    "EURSettlement": "unknown",
+    "newPaidInferenceOrSandbox": false,
+    "limitsOrHoldsChanged": false
+  },
+  "documentationFollowUp": "Only docs/** changes; ADR033 may skip this deployment. Serving application remains the explicitly identified application commit/version."
 }
