@@ -1,5 +1,6 @@
 import { Console } from "./console";
 import { workspaceData } from "@/lib/workspace-data";
+import { withAuth } from "@workos-inc/authkit-nextjs";
 import { notFound } from "next/navigation";
 export async function ProductPage({
   org,
@@ -28,6 +29,7 @@ export async function ProductPage({
   sharedSourceId?: string;
   sharedGrantId?: string;
 }) {
+  const { user } = await withAuth();
   const initial = await workspaceData({
     org,
     view: draft ? "full" : view,
@@ -44,6 +46,15 @@ export async function ProductPage({
     notFound();
   return (
     <Console
+      profile={
+        user
+          ? {
+              firstName: user.firstName,
+              name: [user.firstName, user.lastName].filter(Boolean).join(" "),
+              pictureUrl: user.profilePictureUrl,
+            }
+          : undefined
+      }
       compactHomePreview={compactHome}
       initialReviewDraftId={reviewDraftId}
       key={`${org}:${sourceId ?? "workspace"}`}

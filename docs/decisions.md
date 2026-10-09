@@ -159,3 +159,7 @@ Follow [ADR 058](adr/058-bounded-full-library-scans.md): full URL-link paginatio
 ## October 9: exact hybrid reference and saved filing hierarchy
 
 [ADR 096](adr/096-exact-hybrid-library-and-authored-filing.md) records the owner's rejection of the deployed flat layout and exact replacement Tree/Folders references. It authorizes deterministic saved category organization without model calls, preserves manual corrections and distinguishes filing labels from access scopes. Runtime connectors, bounded exact proposal reviews and candidate/release evidence remain separate from full V1 acceptance.
+
+## Stable mobile Library navigation
+
+[ADR 097](adr/097-stable-mobile-library-navigation.md) records the owner screenshot rejection and fixed filing/view controls, stable scrollable category rows, one-level expansion, inline insight evidence and the shared bottom Account menu. Actual mobile-width verification replaces the insufficient overflow comparison.

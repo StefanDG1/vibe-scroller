@@ -374,8 +374,8 @@ export function LibraryExplore({
       return;
     }
     const ticket = ++selectionGeneration.current;
-    if (focus) {
-      focusPending.current = true;
+    if (!cursor) {
+      focusPending.current = focus;
       detailCursor.current = cursor;
       setSelected(topic);
       setDetail(null);
@@ -451,7 +451,7 @@ export function LibraryExplore({
       >
         <LibraryAtlas
           animateEntry={pointerTransition}
-          key={`${topics?.scope}:${selected?.id}:${treeDiagram}:${detail?.members.map((member: any) => [member._id, member.evidence.reference.generation, member.evidence.reference.revision].join(":")).join("|")}`}
+          key={`${organizationId}:${topics?.scope}`}
           topics={topics}
           selected={selected}
           detail={detail}
@@ -462,7 +462,7 @@ export function LibraryExplore({
           }}
           folders={!treeDiagram}
           onFolders={(value) => setTreeDiagram(!value)}
-          onOpen={(topic) => void open(topic)}
+          onOpen={(topic) => void open(topic, undefined, false)}
           onMoreTopics={() => {
             setLaterPage(true);
             void refresh(topics.next, true);

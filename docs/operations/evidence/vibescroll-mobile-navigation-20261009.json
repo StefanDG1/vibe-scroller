@@ -1,0 +1,65 @@
+{
+  "scope": "ADR097 mobile Library and shared shell correction",
+  "time": "2026-10-09T10:26:30.347991+00:00",
+  "baseCommit": "0b670c44c25051d343a28dd43253581e82df2cfb",
+  "branch": "fix/mobile-library-navigation",
+  "local": {
+    "command": "pnpm check; final reviewed Starter build; formatting; dependency audit",
+    "unitPassed": 549,
+    "externalSkipped": 3,
+    "authorizationPassed": 28,
+    "pythonPassed": [6, 6, 3],
+    "basicPolicyPassed": 5,
+    "buildsPassed": ["marketing", "starter"],
+    "dependencyUnresolved": 0,
+    "knownLocallyMitigated": "Braces advisory remains upstream advisory"
+  },
+  "browser": {
+    "command": "Get-Content private/mobile-navigation-verify.py -Raw | browser-harness",
+    "environment": "Local production build, labeled synthetic fixtures",
+    "requestedEqualsActualWidth": [320, 390, 412, 768, 1440, 1600],
+    "behaviors": [
+      "one level per category click",
+      "fixed adjacent representation/filing controls",
+      "same sibling order and position",
+      "close old branch before new branch opens",
+      "inline full claims/source/exact proposal in Tree and Folders",
+      "keyboard and reduced motion immediate after preceding pointer transition settled",
+      "named Account/Usage/Connections/Computers/Privacy/Inbox/Billing destinations",
+      "same five bottom-control rectangles across pages",
+      "account-menu Escape restores trigger focus",
+      "Save dialog/Escape restores Save focus",
+      "favicon logo returns Home"
+    ],
+    "claimLimit": "No physical-device smoothness or independent comprehension acceptance"
+  },
+  "preservedFailure": {
+    "precedingServingCommit": "aacdc9ce237d82aab0ccf544c24c9c3342eab104",
+    "requestedWidth": 390,
+    "actualLayoutWidth": 846,
+    "actualScrollWidth": 846,
+    "result": "FAIL; comparison only against inflated innerWidth was insufficient"
+  },
+  "data": {
+    "newInference": false,
+    "apiTokenCategorization": false,
+    "sourceClaimsRewritten": false,
+    "newGrant": false,
+    "financialHoldReleased": false,
+    "backendDeployRequired": false
+  },
+  "release": {
+    "status": "pending exact-head CI, merge, immutable alpha and canonical authenticated verification"
+  },
+  "review": {
+    "freshFullDisposition": "fix",
+    "namedFindings": ["dark Save label contrast", "PRODUCT/DESIGN freshness"],
+    "darkSaveCodeFix": "theme subtle foreground; dark ink only on yellow SVG",
+    "verdict": "ship for the two named corrections; both resolved; production/physical-device/OAuth-image/fullV1 outside verdict"
+  },
+  "remaining": [
+    "physical phone usability/motion",
+    "new independent tester",
+    "other V1 external acceptance gates retained in implementation-status"
+  ]
+}

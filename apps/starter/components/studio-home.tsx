@@ -7,7 +7,6 @@ import {
   type DashboardItem,
   type NextAction,
 } from "../../../packages/knowledge/dashboard";
-import { ScrollCharacter } from "./scroll-character";
 import { DashboardVisuals } from "./dashboard-visuals";
 import { KnowledgePreview } from "./knowledge-preview";
 import { DashboardTrace } from "./dashboard-trace";
@@ -73,7 +72,6 @@ export function StudioHome({
         compact={compact}
       >
         <section className="studio-welcome" aria-label="Your next useful step">
-          <ScrollCharacter state={next.character} />
           <div className="studio-next">
             <h2>{next.title}</h2>
             <p>{next.reason}</p>
