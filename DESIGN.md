@@ -223,7 +223,7 @@ General panels retain 24px padding and Panel corners. Insight cards use 12px pad
 
 ### Inputs / Fields
 
-Fields use Panel, Ink and Line, with Field corners and 10px 12px padding. Search and capture placeholders use Subtle at full opacity; caret uses Ink. Native capture choice menus remain inside the active dialog, preserving keyboard selection and focus return. Escape closes the choice menu before capture.
+Fields use Panel, Ink and Line, with Field corners and 10px 12px padding. Search and capture placeholders use Subtle at full opacity; caret uses Ink. Native capture choice menus remain inside the active dialog, preserving keyboard selection and focus return. Escape closes the choice menu before capture. Capture records its opener synchronously before the full-editor refresh can disable Save or move focus. On close, it restores that opener only while access is valid and the element remains connected, enabled, visible and outside BODY; otherwise it uses an enabled visible header or phone Save control. Failed or obsolete opening and access loss clear the saved opener.
 
 ### Navigation
 
@@ -251,7 +251,9 @@ Motion for React (14.0.0) reveals pointer-expanded branches over 180ms with opac
 
 ### Candidate verification boundary
 
-The October 9 reviewer scored all eight original fixes resolved in [.impeccable/review/atlas-20261009/verdict-1.md](docs/operations/evidence/vibescroll-atlas-20261009.json). This covers the supplied candidate fix evidence, including hierarchy geometry, project-link geometry, source scopes, access-loss capture recovery, truthful trail labels, accessible surfaces, first-viewport density and visibility refresh. It is not a whole-surface audit, production release or full V1 acceptance. Real authenticated deployed-data acceptance, independent browser and physical-device testing, and provider/cost settlement remain separate.
+The October 9 reviewer scored all eight original fixes resolved in [the public Atlas evidence receipt](docs/operations/evidence/vibescroll-atlas-20261009.json). This covers the supplied candidate fix evidence, including hierarchy geometry, project-link geometry, source scopes, access-loss capture recovery, truthful trail labels, accessible surfaces, first-viewport density and visibility refresh. It is not a whole-surface audit, production release or full V1 acceptance. Real authenticated deployed-data acceptance, independent browser and physical-device testing, and provider/cost settlement remain separate.
+
+The subsequent capture focus-recovery review cleared the bounded code correction and supplied local authenticated compact-path keyboard receipt at 390px and 1440px. Escape returned focus to Save and Enter reopened capture after the actual full-workspace refresh. Disconnected/disabled-opener fallback and access-loss suppression were reviewed in code only. Exact deployed-release compact keyboard acceptance remains pending; the original eight-fix verdict keeps its unchanged scope. This correction changes no palette, layout, tokens or visual world.
 
 ### Historical evidence
 
