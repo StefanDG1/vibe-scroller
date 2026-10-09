@@ -15,3 +15,9 @@ Draw category, selected-leaf and proposal connectors from measured runtime node 
 Verification must distinguish local synthetic fixtures, commit-bound CI, compatible backend deployment and real canonical hierarchy writes. Preserve observed failures and owner rejection. Mechanical comparison at the wrong desktop breakpoint cannot establish phone fidelity. Independent comprehension, physical-device smoothness and all unrelated external V1 gates remain separate.
 
 The owner explicitly selected compact card excerpts with complete evidence on tap. Excerpts are deterministic prefixes of the saved claim, visibly marked with ellipsis; full claims, source titles and accessible labels remain unchanged. This permits readable compact cards without rewriting evidence or calling a model.
+
+## Owner refinement: stacked Tree insights
+
+On October9 the owner explicitly replaced the Tree's four-card grid with a vertical stack like Folders, and requested smooth opening, closing and switching between branches. This supersedes only the grid's composition constraint; connected category pairs, source evidence, proposal links and the selected references' visual language remain the brief. Tree uses full-width icon/source rows, contextual More insights and unchanged complete evidence on tap.
+
+Motion for React animates branch height and opacity for pointer interaction over240ms. Keyboard interaction, reduced motion and the Account motion-off setting remain immediate. Closed descendants and evidence become inert and hidden from assistive technology immediately; connectors skip collapsed content. Switching renders the current branch without retaining an outgoing evidence snapshot. These display transitions create no inference or additional backend reads. The preceding78% mechanical FAIL is historical evidence of the earlier grid composition, not a pass of this owner-changed design.

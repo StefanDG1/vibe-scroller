@@ -55,6 +55,7 @@ export function LibraryAtlas({
   readJourney,
   advanced,
   corrections,
+  animateEntry = false,
 }: {
   topics: any;
   selected: any;
@@ -73,6 +74,7 @@ export function LibraryAtlas({
   readJourney: () => Promise<any>;
   advanced: React.ReactNode;
   corrections: React.ReactNode;
+  animateEntry?: boolean;
 }) {
   const initial = useRef("");
   const atlasRef = useRef<HTMLElement>(null);
@@ -187,7 +189,7 @@ export function LibraryAtlas({
         atlas.querySelectorAll<HTMLElement>(".hybrid-node[data-topic-id]"),
       ).find((node) => node.dataset.topicId === selectedTopicId);
       const tray = atlas.querySelector<HTMLElement>(".hybrid-insight-tray");
-      if (!leaf || !tray) {
+      if (!leaf || !tray || tray.closest('[aria-hidden="true"]')) {
         setEvidenceEdges({
           width: bounds.width,
           height: bounds.height,
@@ -423,14 +425,14 @@ export function LibraryAtlas({
         <p>No current insights here. Try another topic or library view.</p>
       )}
       <TopicDiagram
+        animateEntry={animateEntry}
         topics={topics?.items ?? []}
         onOpen={onOpen}
         selectedId={selected?.id}
         representation={folders ? "folders" : "tree"}
       >
-        {folders ? evidence : null}
+        {evidence}
       </TopicDiagram>
-      {!folders && evidence}
       {topics?.next && (
         <button
           className="hybrid-more"

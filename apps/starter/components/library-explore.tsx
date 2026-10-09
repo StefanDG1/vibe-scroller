@@ -194,6 +194,7 @@ export function LibraryExplore({
   const [view, setView] = useState<View>("tree"),
     [scope, setScope] = useState("");
   const [treeDiagram, setTreeDiagram] = useState(true);
+  const [pointerTransition, setPointerTransition] = useState(false);
   const [topics, setTopics] = useState<any>(demo ? fixture : null),
     [search, setSearch] = useState("");
   const [selected, setSelected] = useState<any>(null),
@@ -444,160 +445,166 @@ export function LibraryExplore({
     );
   if ((view as string) === "tree")
     return (
-      <LibraryAtlas
-        key={`${topics?.scope}:${selected?.id}:${treeDiagram}:${detail?.members.map((member: any) => [member._id, member.evidence.reference.generation, member.evidence.reference.revision].join(":")).join("|")}`}
-        topics={topics}
-        selected={selected}
-        detail={detail}
-        search={search}
-        onSearch={(value) => {
-          reset();
-          setSearch(value);
-        }}
-        folders={!treeDiagram}
-        onFolders={(value) => setTreeDiagram(!value)}
-        onOpen={(topic) => void open(topic)}
-        onMoreTopics={() => {
-          setLaterPage(true);
-          void refresh(topics.next, true);
-        }}
-        onMoreEvidence={() => void open(selected, detail.next)}
-        loading={loading}
-        message={message}
-        organizationId={organizationId}
-        demo={demo}
-        readJourney={() => {
-          const key = `${organizationId}:${scope}:${selected.id}:${detail?.members.map((member: any) => JSON.stringify(member.evidence.reference)).join("|")}`;
-          if (journeyPreview.current?.key !== key) {
-            const result = read("exploreJourney", {
-              ...args(),
-              topicId: selected.id,
-            }).catch((error) => {
-              if (journeyPreview.current?.result === result)
-                journeyPreview.current = null;
-              throw error;
-            });
-            journeyPreview.current = { key, result };
+      <div
+        onPointerDownCapture={() => setPointerTransition(true)}
+        onKeyDownCapture={() => setPointerTransition(false)}
+      >
+        <LibraryAtlas
+          animateEntry={pointerTransition}
+          key={`${topics?.scope}:${selected?.id}:${treeDiagram}:${detail?.members.map((member: any) => [member._id, member.evidence.reference.generation, member.evidence.reference.revision].join(":")).join("|")}`}
+          topics={topics}
+          selected={selected}
+          detail={detail}
+          search={search}
+          onSearch={(value) => {
+            reset();
+            setSearch(value);
+          }}
+          folders={!treeDiagram}
+          onFolders={(value) => setTreeDiagram(!value)}
+          onOpen={(topic) => void open(topic)}
+          onMoreTopics={() => {
+            setLaterPage(true);
+            void refresh(topics.next, true);
+          }}
+          onMoreEvidence={() => void open(selected, detail.next)}
+          loading={loading}
+          message={message}
+          organizationId={organizationId}
+          demo={demo}
+          readJourney={() => {
+            const key = `${organizationId}:${scope}:${selected.id}:${detail?.members.map((member: any) => JSON.stringify(member.evidence.reference)).join("|")}`;
+            if (journeyPreview.current?.key !== key) {
+              const result = read("exploreJourney", {
+                ...args(),
+                topicId: selected.id,
+              }).catch((error) => {
+                if (journeyPreview.current?.result === result)
+                  journeyPreview.current = null;
+                throw error;
+              });
+              journeyPreview.current = { key, result };
+            }
+            return journeyPreview.current.result;
+          }}
+          corrections={
+            detail?.topic && !readOnly && !demo ? (
+              <details className="hybrid-filing-editor">
+                <summary>Change category</summary>
+                <form
+                  className="form-grid"
+                  onSubmit={async (event) => {
+                    event.preventDefault();
+                    if (!call) return;
+                    const parent = String(
+                      new FormData(event.currentTarget).get("parent"),
+                    );
+                    setSavingStructure(true);
+                    try {
+                      await call("organizeExploreTopic", {
+                        topicId: selected.id,
+                        layoutVersion: detail.topic.layoutVersion,
+                        parentId: parent || null,
+                        aliases: detail.topic.aliases ?? [],
+                      });
+                      await refresh();
+                    } catch (error) {
+                      setMessage(
+                        error instanceof Error
+                          ? error.message
+                          : "Category was not saved.",
+                      );
+                    } finally {
+                      setSavingStructure(false);
+                    }
+                  }}
+                >
+                  <label>
+                    Category
+                    <ChoiceSelect
+                      name="parent"
+                      defaultValue={selected.parentId ?? ""}
+                    >
+                      <option value="">Unfiled</option>
+                      {topics.items
+                        .filter((topic: any) => topic.id !== selected.id)
+                        .map((topic: any) => (
+                          <option key={topic.id} value={topic.id}>
+                            {topic.name}
+                          </option>
+                        ))}
+                    </ChoiceSelect>
+                  </label>
+                  <button disabled={savingStructure}>Save category</button>
+                </form>
+              </details>
+            ) : null
           }
-          return journeyPreview.current.result;
-        }}
-        corrections={
-          detail?.topic && !readOnly && !demo ? (
-            <details className="hybrid-filing-editor">
-              <summary>Change category</summary>
-              <form
-                className="form-grid"
-                onSubmit={async (event) => {
-                  event.preventDefault();
-                  if (!call) return;
-                  const parent = String(
-                    new FormData(event.currentTarget).get("parent"),
-                  );
-                  setSavingStructure(true);
-                  try {
-                    await call("organizeExploreTopic", {
-                      topicId: selected.id,
-                      layoutVersion: detail.topic.layoutVersion,
-                      parentId: parent || null,
-                      aliases: detail.topic.aliases ?? [],
-                    });
-                    await refresh();
-                  } catch (error) {
-                    setMessage(
-                      error instanceof Error
-                        ? error.message
-                        : "Category was not saved.",
-                    );
-                  } finally {
-                    setSavingStructure(false);
-                  }
-                }}
-              >
-                <label>
-                  Category
-                  <ChoiceSelect
-                    name="parent"
-                    defaultValue={selected.parentId ?? ""}
-                  >
-                    <option value="">Unfiled</option>
-                    {topics.items
-                      .filter((topic: any) => topic.id !== selected.id)
-                      .map((topic: any) => (
-                        <option key={topic.id} value={topic.id}>
-                          {topic.name}
-                        </option>
-                      ))}
-                  </ChoiceSelect>
-                </label>
-                <button disabled={savingStructure}>Save category</button>
-              </form>
-            </details>
-          ) : null
-        }
-        advanced={
-          <>
-            <label>
-              Library access view
-              <ChoiceSelect
-                value={scope || topics?.scope || ""}
-                onValueChange={(value) => {
-                  reset();
-                  setScope(value);
-                }}
-              >
-                {(topics?.scopes ?? []).map((value: string) => (
-                  <option key={value} value={value}>
-                    {scopeNames[value]}
-                  </option>
-                ))}
-              </ChoiceSelect>
-            </label>
-            {!readOnly && !demo && (
-              <button
-                disabled={savingStructure || !topics?.items.length}
-                onClick={async () => {
-                  setSavingStructure(true);
-                  try {
-                    await call?.("autoOrganizeExploreTopics", {
-                      organizationId,
-                      topicIds: topics.items
-                        .filter((topic: any) => !topic.autoCategory)
-                        .slice(0, 20)
-                        .map((topic: any) => topic.id),
-                    });
-                    await refresh();
-                  } catch (error) {
-                    setMessage(
-                      error instanceof Error
-                        ? error.message
-                        : "Categories were not saved.",
-                    );
-                  } finally {
-                    setSavingStructure(false);
-                  }
-                }}
-              >
-                Organize uncategorized topics
-              </button>
-            )}
-            <fieldset aria-label="Additional library views">
-              {views
-                .filter(([id]) => id !== "tree")
-                .map(([id, label]) => (
-                  <button
-                    key={id}
-                    onClick={() => {
-                      reset();
-                      setView(id);
-                    }}
-                  >
-                    {label}
-                  </button>
-                ))}
-            </fieldset>
-          </>
-        }
-      />
+          advanced={
+            <>
+              <label>
+                Library access view
+                <ChoiceSelect
+                  value={scope || topics?.scope || ""}
+                  onValueChange={(value) => {
+                    reset();
+                    setScope(value);
+                  }}
+                >
+                  {(topics?.scopes ?? []).map((value: string) => (
+                    <option key={value} value={value}>
+                      {scopeNames[value]}
+                    </option>
+                  ))}
+                </ChoiceSelect>
+              </label>
+              {!readOnly && !demo && (
+                <button
+                  disabled={savingStructure || !topics?.items.length}
+                  onClick={async () => {
+                    setSavingStructure(true);
+                    try {
+                      await call?.("autoOrganizeExploreTopics", {
+                        organizationId,
+                        topicIds: topics.items
+                          .filter((topic: any) => !topic.autoCategory)
+                          .slice(0, 20)
+                          .map((topic: any) => topic.id),
+                      });
+                      await refresh();
+                    } catch (error) {
+                      setMessage(
+                        error instanceof Error
+                          ? error.message
+                          : "Categories were not saved.",
+                      );
+                    } finally {
+                      setSavingStructure(false);
+                    }
+                  }}
+                >
+                  Organize uncategorized topics
+                </button>
+              )}
+              <fieldset aria-label="Additional library views">
+                {views
+                  .filter(([id]) => id !== "tree")
+                  .map(([id, label]) => (
+                    <button
+                      key={id}
+                      onClick={() => {
+                        reset();
+                        setView(id);
+                      }}
+                    >
+                      {label}
+                    </button>
+                  ))}
+              </fieldset>
+            </>
+          }
+        />
+      </div>
     );
   return (
     <section className="library-explore" aria-label="Library Explore">

@@ -1864,3 +1864,71 @@
     font-size: 10px;
   }
 }
+/* Owner refinement: connected categories with full-width, stacked insight rows. */
+.hybrid-tree .hybrid-insight-tray > ul {
+  grid-template-columns: minmax(0, 1fr);
+}
+.atlas-shell .hybrid-tree .hybrid-insight-select {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 18px;
+  min-height: 76px;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+}
+.hybrid-tree .hybrid-insight-select > span:nth-child(2) {
+  grid-column: auto;
+  grid-row: auto;
+  order: 0;
+}
+.hybrid-tree .hybrid-insight-select > svg {
+  grid-column: auto;
+  grid-row: auto;
+}
+.hybrid-tree .hybrid-insight-icon {
+  width: 44px;
+  height: 44px;
+}
+.hybrid-tree .hybrid-insight-select strong {
+  font-size: 15px;
+  line-height: 1.4;
+  -webkit-line-clamp: 2;
+}
+.hybrid-tree .hybrid-insight-select small {
+  font-size: 12px;
+}
+.hybrid-tree .hybrid-proposal-icon {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+@media (max-width: 700px) {
+  .hybrid-tree .hybrid-switch {
+    width: 40%;
+    min-width: 152px;
+  }
+  .atlas-shell .hybrid-tree .hybrid-switch button {
+    flex: 1;
+    padding-inline: 6px;
+  }
+}
+.hybrid-node-level,
+.hybrid-branch-evidence {
+  overflow: hidden;
+}
+.hybrid-node-level {
+  padding-top: 0;
+}
+.hybrid-topic-tree > .hybrid-node-level {
+  margin-top: 0;
+}
+.hybrid-level-content {
+  padding-top: 32px;
+}
+.hybrid-node-level[data-depth="0"] .hybrid-level-content {
+  padding-top: 0;
+}
+.hybrid-node-level[data-collapsed="true"] {
+  margin-top: 0;
+  margin-bottom: 0;
+}

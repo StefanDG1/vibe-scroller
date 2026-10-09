@@ -27,3 +27,7 @@ Local labeled fixtures establish render/state behavior only. Record real staging
 ## References
 
 The [UI plan](VIBESCROLL-UI-UX-PLAN-20261008.md) retains researched references and the acceptance matrix. Earlier [mobile atlas](concepts/20261008-refinement/mobile-atlas-overview.png), [project trail](concepts/20261008-refinement/mobile-project-trail.png), and [density study](concepts/20261008-density/mobile-expanded.png) retain historical context. The owner-selected October 9 hybrid Tree and expanded Folders images supplied in the chat are the current composition authority. Their private originals remain outside source control; their illustrative content establishes no customer facts. Connector endpoints must represent actual relationships and meet actual nodes.
+
+## October9 stacked Tree refinement
+
+The owner explicitly replaced the four-card Tree grid with vertically stacked insight rows like Folders. Preserve the connected category composition; each row has an icon, compact claim excerpt, source label and evidence action. Open/close and branch switching use the existing Motion library. Closed branches are inert immediately, keyboard and reduced-motion interaction are immediate, and animations cause no backend reads. This refinement supersedes the earlier grid-only requirement. The preceding mechanical78% FAIL remains historical, and does not establish acceptance of the new stacked layout.

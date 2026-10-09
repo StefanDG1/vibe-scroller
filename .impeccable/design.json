@@ -430,13 +430,18 @@
       },
       {
         "name": "pointer-branch-entry",
-        "value": "180ms; opacity 0 to 1; translateY 6px to 0",
-        "purpose": "Motion for React pointer expansion only; keyboard and reduced-motion actions remain immediate."
+        "value": "240ms; height 0/auto; opacity 0/1; cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "Pointer-driven Tree branch/evidence opening and closing; hidden content immediately inert and aria-hidden. Keyboard and reduced-motion actions immediate."
       },
       {
         "name": "pointer-capture-entry",
         "value": "180ms; opacity 0 to 1; translateY 8px to 0",
         "purpose": "Motion for React pointer capture entry; live system/app suppression applies."
+      },
+      {
+        "name": "pointer-folder-entry",
+        "value": "200ms; opacity 0 to 1",
+        "purpose": "Pointer origin retained by stable LibraryExplore through keyed Atlas; keyboard and live reduced-motion/app-off entry immediate."
       }
     ],
     "breakpoints": [
@@ -471,11 +476,12 @@
         "apps/starter/app/atlas.css"
       ],
       "geometry": "Runtime measured category, selected-leaf and proposal SVG paths; 1040px composition cap, 6.4% inset; constrained 53% Folder filing strip.",
-      "responsive": "Tree icons above claims at <=360px; horizontal at 361–700px, card minimum 66px, root minimum 62px, deeper-node minimum 56px, row gaps 32px and bounded 6.4vw heading. Desktop nodes minimum 46px. Folders stays horizontal. Filing strip and representation switch use corrected gutter. Latest 361–700px scale: category labels 14px, category icons 26px, Tree card icons 36px by 40px, heading bottom margin 7px; Customer experience wraps to two lines at 512px. Tree source metadata is 11px, reduced to 10px at <=430px.",
-      "pagination": "Four initial Tree cards or six Folders rows, then explicit More insights or Next insights page.",
+      "responsive": "The owner subsequently replaced the four-card Tree grid with a vertical stacked list like Folders. Tree now uses one column of horizontal insight rows with 44px icons, a 76px minimum row height, 15px claims clamped to two lines and 12px source metadata. Proposal icons are also 44px. On phones the Tree/Folders switch occupies 40% width with a 152px minimum. Tree initially reveals four rows and Folders six; More insights adds four or six, while Next insights page requests the next authorized page. Connected category nodes retain the current stepped layout and effective desktop minimum height of 46px. From 361px through 700px category roots have a 62px minimum, deeper nodes 56px, labels 14px and icons 26px; the heading bottom margin is 7px. The superseded phone icon-above-claim layout and two-column evidence grid remain in older CSS declarations but are overridden by the final stacked-row rules.",
+      "pagination": "Four initial stacked Tree rows or six Folders rows, explicit More insights and Next insights page.",
       "boundary": "Filing is independent of server-authorized access scope; empty templates carry no evidence or grant.",
-      "verification": "Seven final local synthetic PNG captures valid; native full-claim/source-title activation and no-overflow checks passed. Mechanical 512 CSS-pixel hero crop at 2x from native app origin, reference DPR unknown, recorded 78% drift: FAIL, hard veto, fidelity gate not advanced. Final review and hybrid production deployment pending. Reported 549 passing tests, three external skips and 28 authentication tests. No whole-surface finish, independent comprehension, physical-device or full V1 acceptance. Latest 512px native synthetic proposal bottom 798.39px is above nav top 813.41px; viewport placement evidence only. Mechanical output: .impeccable/review/diff/hero.",
-      "compactEvidence": "Owner chose compact excerpts with full evidence on tap. First clause/prefix, 28-character/five-word budget, first word retained; ellipsis when shortened. Full claim unchanged in aria label, title and activated source pane; pane absent before activation. Demo rows show Example N with explicit synthetic banner and full source title on activation."
+      "verification": "The later owner-authorized stacked Tree and transition revision supersedes the four-card grid requirement. Five final stacked screenshots are valid. Native checks observed three running pointer animations after Pricing, one after switching to Folders, zero for keyboard Marketing and zero for reduced-motion Product. These counts verify the recorded native interaction states, not physical-device smoothness or independent comprehension. Final review for this revision remains pending. The 78% drift FAIL and hard veto under `.impeccable/review/diff/hero` are historical evidence for the preceding grid; they have not been rerun or passed for the owner-changed stack. Prior seven captures, full-evidence activation and 512px proposal placement retain their earlier revision scope. Hybrid production deployment and all independent, physical-device, provider/cost and full V1 gates remain pending.",
+      "compactEvidence": "Owner chose compact excerpts with full evidence on tap. First clause/prefix, 28-character/five-word budget, first word retained; ellipsis when shortened. Full claim unchanged in aria label, title and activated source pane; pane absent before activation. Demo rows show Example N with explicit synthetic banner and full source title on activation.",
+      "motion": "Tree evidence now renders inside TopicDiagram beneath its selected branch. Active branches toggle collapsed state; hidden descendants and evidence immediately receive inert and aria-hidden while pointer-driven height/opacity open and close transitions run for 240ms with cubic-bezier(0.22, 1, 0.36, 1). Keyboard and live reduced-motion/app-off actions are immediate. Outgoing stale evidence is not retained; measured edges skip collapsed rows and hidden trays. LibraryExplore captures pointer/key origin on its stable ancestor and passes animateEntry through the keyed Atlas into TopicDiagram, preserving stale/private reset keys. Incoming pointer branches use the 240ms height/opacity reveal; incoming Folders uses a 200ms fade. Keyboard and live reduced-motion/app-off entry remain immediate. Representation changes retain only current authorized evidence."
     }
   },
   "components": [
