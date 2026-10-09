@@ -3,6 +3,31 @@ export type TopicNode = {
   parentId?: string;
   children: TopicNode[];
 };
+// Retain a whole returned path when capping accumulated cursor pages.
+export function boundTopicHierarchy<
+  T extends { id: string; parentId?: string; autoCategory?: boolean },
+>(topics: T[]): T[] {
+  const records = new Map(topics.map((topic) => [topic.id, topic]));
+  const retained = new Map<string, T>();
+  for (const topic of [...records.values()].reverse()) {
+    if (topic.autoCategory) continue;
+    const path: T[] = [];
+    const seen = new Set<string>();
+    let node: T | undefined = topic;
+    while (node && !seen.has(node.id) && path.length < 12) {
+      seen.add(node.id);
+      path.unshift(node);
+      node = node.parentId ? records.get(node.parentId) : undefined;
+    }
+    if (
+      retained.size + path.filter((item) => !retained.has(item.id)).length >
+      40
+    )
+      continue;
+    for (const item of path) retained.set(item.id, item);
+  }
+  return [...retained.values()];
+}
 export function topicPath<T extends { id: string; parentId?: string }>(
   topics: T[],
   id: string,

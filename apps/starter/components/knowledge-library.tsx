@@ -17,6 +17,7 @@ type Props = {
   onOpenImprovements?: () => void;
   section?: "topics" | "ideas" | "issues";
   enabled?: boolean;
+  targetDraftId?: string;
 };
 async function read(operation: string, args: any) {
   const response = await fetch("/api/product", {
@@ -179,7 +180,10 @@ export function KnowledgeLibrary(p: Props) {
             })
           : Promise.resolve(null),
         activeSection === "issues"
-          ? scopedRead("issueList", { organizationId: p.organizationId })
+          ? scopedRead("issueList", {
+              organizationId: p.organizationId,
+              id: p.targetDraftId,
+            })
           : Promise.resolve(null),
         activeSection === "topics" && !exploring
           ? scopedRead("localLibraryList", { organizationId: p.organizationId })
@@ -1066,6 +1070,7 @@ export function KnowledgeLibrary(p: Props) {
         {issues.map((d) => (
           <details
             className="knowledge-result"
+            open={p.targetDraftId === d._id}
             key={`${d._id}:${d.version}:${d.visibility ?? "unchecked"}:${d.body ? "text" : "redacted"}`}
           >
             <summary>

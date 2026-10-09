@@ -14,6 +14,7 @@ import {
 import type { Reference } from "../packages/knowledge/contracts";
 import { knowledgeReadContext } from "./lib/knowledgeReadContext";
 import { filing } from "./librarySpaces";
+import { organizeTopicAutomatically } from "./lib/topicHierarchy";
 
 const referenceKey = (r: Reference) =>
   JSON.stringify([r.sourceId, r.generation, r.revision, r.insightId]);
@@ -27,6 +28,41 @@ const scopeArgs = {
   organizationId: v.id("organizations"),
   scope: v.optional(scopeValue),
 };
+// Bounded explicit organization, never a write hidden inside a read query.
+export const autoOrganize = mutation({
+  args: {
+    organizationId: v.id("organizations"),
+    topicIds: v.array(v.id("knowledgeTopics")),
+  },
+  handler: async (ctx, a) => {
+    const { actor } = await writeAccess(ctx, a.organizationId);
+    ensure(
+      a.topicIds.length <= 20,
+      "INVALID_INPUT",
+      "Organize up to twenty topics at once.",
+    );
+    await limit(ctx, `explore-layout:${a.organizationId}`, 20);
+    let changed = 0;
+    for (const id of new Set(a.topicIds)) {
+      const topic = await ctx.db.get(id);
+      ensure(
+        topic && topic.organizationId === a.organizationId && !topic.redirect,
+        "FORBIDDEN",
+        "Topic unavailable.",
+      );
+      if (await organizeTopicAutomatically(ctx, topic)) changed++;
+    }
+    if (changed)
+      await audit(
+        ctx,
+        a.organizationId,
+        actor._id,
+        "topic_categories_created",
+        a.organizationId,
+      );
+    return { changed };
+  },
+});
 export const organize = mutation({
   args: {
     topicId: v.id("knowledgeTopics"),
@@ -227,14 +263,16 @@ export const topics = query({
           .paginate({ cursor: a.cursor ?? null, numItems: 10 })
       : await ctx.db
           .query("knowledgeTopics")
-          .withIndex("by_org_priority", (q) =>
-            q.eq("organizationId", a.organizationId),
+          .withIndex("by_org_leaf", (q) =>
+            q
+              .eq("organizationId", a.organizationId)
+              .eq("autoCategory", undefined),
           )
           .order("desc")
           .paginate({ cursor: a.cursor ?? null, numItems: 10 });
     const items = [];
     for (const topic of page.page) {
-      if (topic.redirect) continue;
+      if (topic.redirect || topic.autoCategory) continue;
       const members = await ctx.db
         .query("knowledgeMembers")
         .withIndex("by_topic", (q) => q.eq("topicId", topic._id))
@@ -269,9 +307,62 @@ export const topics = query({
         moreEvidence: members.length > 20,
       });
     }
-    const visibleIds = new Set(items.map((item) => item.id));
+    // Generic authored ancestors appear ONLY through an already permitted leaf.
+    // No descendant scan, memberships copied to parents, or global count exposure.
+    const ancestors = new Map<
+      string,
+      {
+        id: Id<"knowledgeTopics">;
+        name: string;
+        parentId?: Id<"knowledgeTopics">;
+        version: number;
+        pinned: boolean;
+        aliases: string[];
+        layoutVersion: number;
+        ideas: number;
+        posts: number;
+        moreEvidence: boolean;
+        autoCategory: boolean;
+      }
+    >();
+    for (const item of items) {
+      let id = item.parentId;
+      const seen = new Set<string>([item.id]);
+      for (
+        let depth = 0;
+        id && depth < 12 && !seen.has(id) && ancestors.size < 30;
+        depth++
+      ) {
+        seen.add(id);
+        if (ancestors.has(id)) break;
+        const parent = await ctx.db.get(id);
+        if (
+          !parent ||
+          parent.organizationId !== a.organizationId ||
+          parent.redirect ||
+          !parent.autoCategory
+        )
+          break;
+        ancestors.set(id, {
+          id: parent._id,
+          name: parent.name,
+          parentId: parent.parentId,
+          version: parent.version,
+          pinned: parent.pinned,
+          aliases: parent.aliases ?? [],
+          layoutVersion: parent.layoutVersion ?? 0,
+          ideas: 0,
+          posts: 0,
+          moreEvidence: false,
+          autoCategory: true,
+        });
+        id = parent.parentId;
+      }
+    }
+    const all = [...ancestors.values(), ...items];
+    const visibleIds = new Set(all.map((item) => item.id));
     return {
-      items: items.map((item) => ({
+      items: all.map((item) => ({
         ...item,
         parentId:
           item.parentId && visibleIds.has(item.parentId)

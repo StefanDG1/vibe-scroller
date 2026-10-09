@@ -148,3 +148,7 @@ Updated all four briefs together for the owner's icon-led, scrollable and space-
 ## F033: atlas implementation authorized, October 9
 
 Updated all four briefs together for the owner-authorized branching Tree and expanded Folders implementation. Reference the [implementation contract](../design/ATLAS-IMPLEMENTATION-CONTRACT-20261009.md) and ADR 095. The direction favors understandable evidence and reviewed proposals without new audience, pricing, grant or work authority. Implementation candidates and verified release evidence stay separate; no independent comprehension, smoothness, savings or measured benefit is claimed.
+
+## F034: exact reference correction, October 9
+
+Updated all four briefs together for the owner-rejected flat layout, exact Tree/Folders authority and deterministic saved filing categories. Retain original rejection, source/access separation, manual corrections and unproven independent usability, cost savings and outcome claims. See ADR 096 and separately dated implementation evidence.

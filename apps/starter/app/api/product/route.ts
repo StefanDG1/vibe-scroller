@@ -7,6 +7,7 @@ const operations = {
   assistantProjectChoices: ["query", api.assistantGrants.projectChoices],
   saveAssistantGrant: ["mutation", api.assistantGrants.save],
   revokeAssistantGrant: ["mutation", api.assistantGrants.revoke],
+  autoOrganizeExploreTopics: ["mutation", api.knowledgeExplore.autoOrganize],
   organizeExploreTopic: ["mutation", api.knowledgeExplore.organize],
   exploreTopics: ["query", api.knowledgeExplore.topics],
   exploreDetail: ["query", api.knowledgeExplore.detail],

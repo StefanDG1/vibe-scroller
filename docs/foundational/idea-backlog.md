@@ -206,3 +206,9 @@ Decision: record as an owner-requested refinement and proposed tool choice. Deta
 ## F033: atlas implementation authorized, October 9
 
 Updated all four briefs together for the owner-authorized branching Tree and expanded Folders implementation. Reference the [implementation contract](../design/ATLAS-IMPLEMENTATION-CONTRACT-20261009.md) and ADR 095. The direction favors understandable evidence and reviewed proposals without new audience, pricing, grant or work authority. Implementation candidates and verified release evidence stay separate; no independent comprehension, smoothness, savings or measured benefit is claimed.
+
+## F034: exact hybrid correction and authored filing, October 9
+
+The owner rejected the released flat Atlas using actual phone screenshots and selected exact connected Tree and expanded Folders compositions. [ADR 096](../adr/096-exact-hybrid-library-and-authored-filing.md) records the correction and deterministic saved category defaults without model calls. Filing labels remain separate from access scopes; manual placements, corrected evidence and exact work authority remain protected. This is owner preference and engineering work, not independent comprehension, measured smoothness, Convex savings or customer benefit. Candidate checks and production results stay separately dated; audience, price, allowance and external gates remain unchanged.
+
+Decision: adopted for the exact UI correction and authorized bounded organization. Counterargument: long labels and deeply nested filing can still overwhelm users; verify readable narrow cards, real ancestry, keyboard correction and current source-to-proposal review before release. Independent usability remains untested.

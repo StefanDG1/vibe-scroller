@@ -11,6 +11,7 @@ import { reserve, settle, digest } from "./product";
 import { categoryKey, categoryName } from "../packages/categories";
 import { snapshotScopeCurrent } from "../packages/repositories/scope";
 import { knowledgeReadContext } from "./lib/knowledgeReadContext";
+import { organizeTopicAutomatically } from "./lib/topicHierarchy";
 import {
   assertReferences,
   limits,
@@ -287,6 +288,7 @@ export async function syncKnowledge(
           updatedAt: Date.now(),
         });
         topic = (await ctx.db.get(id))!;
+        await organizeTopicAutomatically(ctx, topic);
       }
       // Merge redirects are durable. A manual exclusion in either topic remains authoritative.
       const target = topic.redirect ? await ctx.db.get(topic.redirect) : topic;
@@ -461,8 +463,10 @@ export const list = query({
             .paginate(pagination)
         : await ctx.db
             .query("knowledgeTopics")
-            .withIndex("by_org_priority", (q) =>
-              q.eq("organizationId", a.organizationId),
+            .withIndex("by_org_leaf", (q) =>
+              q
+                .eq("organizationId", a.organizationId)
+                .eq("autoCategory", undefined),
             )
             .order("desc")
             .paginate(pagination);
@@ -475,6 +479,7 @@ export const list = query({
       seen.add(t._id);
       if (
         t.redirect ||
+        t.autoCategory ||
         (a.sourceSearch &&
           a.search &&
           !t.name

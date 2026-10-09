@@ -4,9 +4,15 @@ import { ChevronDown, GitBranch, ArrowRight, Lightbulb } from "lucide-react";
 import { KnowledgeMap } from "./knowledge-map";
 import { InsightProjectLinks } from "./insight-project-links";
 import { TopicDiagram } from "./topic-diagram";
+import { LibraryAtlas } from "./library-atlas";
 import { ChoiceSelect } from "./choice-select";
 import { libraryPlaceKey, permittedLibraryPlace } from "@/lib/library-place";
-import { buildTopicTree, topicPath, type TopicNode } from "@/lib/topic-tree";
+import {
+  buildTopicTree,
+  topicPath,
+  boundTopicHierarchy,
+  type TopicNode,
+} from "@/lib/topic-tree";
 import type { FunctionReturnType } from "convex/server";
 import type { api } from "../../../convex/_generated/api";
 
@@ -28,7 +34,8 @@ const fixture = {
   items: [
     {
       id: "demo-topic",
-      name: "A useful first result",
+      name: "Business",
+      autoCategory: true,
       ideas: 6,
       posts: 6,
       moreEvidence: false,
@@ -36,7 +43,8 @@ const fixture = {
     },
     {
       id: "demo-guidance",
-      name: "Clear guidance",
+      name: "Product",
+      autoCategory: true,
       parentId: "demo-topic",
       ideas: 3,
       posts: 3,
@@ -45,7 +53,8 @@ const fixture = {
     },
     {
       id: "demo-evidence",
-      name: "Inspect the evidence",
+      name: "Marketing",
+      autoCategory: true,
       parentId: "demo-topic",
       ideas: 3,
       posts: 3,
@@ -54,7 +63,7 @@ const fixture = {
     },
     {
       id: "demo-next",
-      name: "One useful next step",
+      name: "Customer experience",
       parentId: "demo-guidance",
       ideas: 2,
       posts: 2,
@@ -63,7 +72,7 @@ const fixture = {
     },
     {
       id: "demo-control",
-      name: "Keep decisions reversible",
+      name: "Pricing",
       parentId: "demo-guidance",
       ideas: 2,
       posts: 2,
@@ -72,7 +81,7 @@ const fixture = {
     },
     {
       id: "demo-outcomes",
-      name: "Record what helped",
+      name: "Content strategy",
       parentId: "demo-evidence",
       ideas: 2,
       posts: 2,
@@ -201,6 +210,9 @@ export function LibraryExplore({
     selectedHeading = useRef<HTMLHeadingElement>(null),
     focusPending = useRef(false),
     detailCursor = useRef<string | undefined>(undefined);
+  const journeyPreview = useRef<{ key: string; result: Promise<any> } | null>(
+    null,
+  );
   async function read(operation: string, args: any) {
     if (load) return load(operation, args);
     const response = await fetch("/api/product", {
@@ -223,6 +235,7 @@ export function LibraryExplore({
   const args = () => ({ organizationId, scope: scope || undefined });
   async function refresh(cursor?: string, append = false) {
     if (demo) return;
+    journeyPreview.current = null;
     const ticket = ++generation.current;
     setLoading(true);
     try {
@@ -243,11 +256,7 @@ export function LibraryExplore({
           ...result,
           items:
             append && old
-              ? [
-                  ...new Map(
-                    [...old.items, ...result.items].map((t: any) => [t.id, t]),
-                  ).values(),
-                ].slice(-40)
+              ? boundTopicHierarchy([...old.items, ...result.items])
               : result.items,
         }));
       // Revalidate the selected branch on the same visibility-aware refresh.
@@ -356,6 +365,13 @@ export function LibraryExplore({
     }
   }, [detail?.topic, journey]);
   async function open(topic: any, cursor?: string, focus = true) {
+    if (topic.autoCategory) {
+      selectionGeneration.current++;
+      setSelected(topic);
+      setDetail({ topic: null, members: [], summaries: [], next: null });
+      setJourney(null);
+      return;
+    }
     const ticket = ++selectionGeneration.current;
     if (focus) {
       focusPending.current = true;
@@ -368,7 +384,7 @@ export function LibraryExplore({
       const demoMembers: Record<string, number[]> = {
         "demo-guidance": [0, 1, 3],
         "demo-evidence": [2, 4, 5],
-        "demo-next": [0, 1],
+        "demo-next": [0, 1, 2, 3, 4, 5],
         "demo-control": [1, 3],
         "demo-outcomes": [2, 5],
       };
@@ -425,6 +441,163 @@ export function LibraryExplore({
       <span>Synthetic example</span>
     ) : (
       <a href={`/app/${organizationId}/library/${source.id}`}>{source.title}</a>
+    );
+  if ((view as string) === "tree")
+    return (
+      <LibraryAtlas
+        key={`${topics?.scope}:${selected?.id}:${treeDiagram}:${detail?.members.map((member: any) => [member._id, member.evidence.reference.generation, member.evidence.reference.revision].join(":")).join("|")}`}
+        topics={topics}
+        selected={selected}
+        detail={detail}
+        search={search}
+        onSearch={(value) => {
+          reset();
+          setSearch(value);
+        }}
+        folders={!treeDiagram}
+        onFolders={(value) => setTreeDiagram(!value)}
+        onOpen={(topic) => void open(topic)}
+        onMoreTopics={() => {
+          setLaterPage(true);
+          void refresh(topics.next, true);
+        }}
+        onMoreEvidence={() => void open(selected, detail.next)}
+        loading={loading}
+        message={message}
+        organizationId={organizationId}
+        demo={demo}
+        readJourney={() => {
+          const key = `${organizationId}:${scope}:${selected.id}:${detail?.members.map((member: any) => JSON.stringify(member.evidence.reference)).join("|")}`;
+          if (journeyPreview.current?.key !== key) {
+            const result = read("exploreJourney", {
+              ...args(),
+              topicId: selected.id,
+            }).catch((error) => {
+              if (journeyPreview.current?.result === result)
+                journeyPreview.current = null;
+              throw error;
+            });
+            journeyPreview.current = { key, result };
+          }
+          return journeyPreview.current.result;
+        }}
+        corrections={
+          detail?.topic && !readOnly && !demo ? (
+            <details className="hybrid-filing-editor">
+              <summary>Change category</summary>
+              <form
+                className="form-grid"
+                onSubmit={async (event) => {
+                  event.preventDefault();
+                  if (!call) return;
+                  const parent = String(
+                    new FormData(event.currentTarget).get("parent"),
+                  );
+                  setSavingStructure(true);
+                  try {
+                    await call("organizeExploreTopic", {
+                      topicId: selected.id,
+                      layoutVersion: detail.topic.layoutVersion,
+                      parentId: parent || null,
+                      aliases: detail.topic.aliases ?? [],
+                    });
+                    await refresh();
+                  } catch (error) {
+                    setMessage(
+                      error instanceof Error
+                        ? error.message
+                        : "Category was not saved.",
+                    );
+                  } finally {
+                    setSavingStructure(false);
+                  }
+                }}
+              >
+                <label>
+                  Category
+                  <ChoiceSelect
+                    name="parent"
+                    defaultValue={selected.parentId ?? ""}
+                  >
+                    <option value="">Unfiled</option>
+                    {topics.items
+                      .filter((topic: any) => topic.id !== selected.id)
+                      .map((topic: any) => (
+                        <option key={topic.id} value={topic.id}>
+                          {topic.name}
+                        </option>
+                      ))}
+                  </ChoiceSelect>
+                </label>
+                <button disabled={savingStructure}>Save category</button>
+              </form>
+            </details>
+          ) : null
+        }
+        advanced={
+          <>
+            <label>
+              Library access view
+              <ChoiceSelect
+                value={scope || topics?.scope || ""}
+                onValueChange={(value) => {
+                  reset();
+                  setScope(value);
+                }}
+              >
+                {(topics?.scopes ?? []).map((value: string) => (
+                  <option key={value} value={value}>
+                    {scopeNames[value]}
+                  </option>
+                ))}
+              </ChoiceSelect>
+            </label>
+            {!readOnly && !demo && (
+              <button
+                disabled={savingStructure || !topics?.items.length}
+                onClick={async () => {
+                  setSavingStructure(true);
+                  try {
+                    await call?.("autoOrganizeExploreTopics", {
+                      organizationId,
+                      topicIds: topics.items
+                        .filter((topic: any) => !topic.autoCategory)
+                        .slice(0, 20)
+                        .map((topic: any) => topic.id),
+                    });
+                    await refresh();
+                  } catch (error) {
+                    setMessage(
+                      error instanceof Error
+                        ? error.message
+                        : "Categories were not saved.",
+                    );
+                  } finally {
+                    setSavingStructure(false);
+                  }
+                }}
+              >
+                Organize uncategorized topics
+              </button>
+            )}
+            <fieldset aria-label="Additional library views">
+              {views
+                .filter(([id]) => id !== "tree")
+                .map(([id, label]) => (
+                  <button
+                    key={id}
+                    onClick={() => {
+                      reset();
+                      setView(id);
+                    }}
+                  >
+                    {label}
+                  </button>
+                ))}
+            </fieldset>
+          </>
+        }
+      />
     );
   return (
     <section className="library-explore" aria-label="Library Explore">
