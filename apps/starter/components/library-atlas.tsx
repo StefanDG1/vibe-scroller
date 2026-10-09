@@ -62,7 +62,6 @@ function EvidenceList({
   demo,
   readJourney,
   onMoreEvidence,
-  corrections,
   place,
   onRemember,
 }: {
@@ -71,7 +70,6 @@ function EvidenceList({
   demo: boolean;
   readJourney: () => Promise<any>;
   onMoreEvidence: () => void;
-  corrections: React.ReactNode;
   place?: LibraryPlace | null;
   onRemember: (patch: Partial<LibraryPlace>) => void;
 }) {
@@ -311,7 +309,6 @@ function EvidenceList({
           )}
         </div>
       )}
-      {detail && corrections}
     </div>
   );
 }
@@ -468,7 +465,6 @@ export function LibraryAtlas({
             demo={demo}
             readJourney={readJourney}
             onMoreEvidence={onMoreEvidence}
-            corrections={corrections}
             place={place}
             onRemember={onRemember}
           />
@@ -476,11 +472,12 @@ export function LibraryAtlas({
       </TopicDiagram>
       {topics?.next && (
         <button
-          className="hybrid-more"
+          className="hybrid-topic-more"
           disabled={loading}
           onClick={onMoreTopics}
         >
-          Next categories page <ChevronDown size={18} />
+          {loading ? "Loading topics…" : "Show more topics"}{" "}
+          <ChevronDown size={18} />
         </button>
       )}
       <details className="hybrid-settings">
@@ -488,6 +485,7 @@ export function LibraryAtlas({
           <SlidersHorizontal size={17} />
           Library options
         </summary>
+        {corrections}
         {advanced}
         <p>{topics?.coverage}</p>
       </details>

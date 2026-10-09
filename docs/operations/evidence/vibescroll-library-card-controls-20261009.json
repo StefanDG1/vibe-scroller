@@ -1,0 +1,39 @@
+{
+  "scope": "ADR099 card labels and topic controls",
+  "time": "2026-10-09T13:26:53.976228+00:00",
+  "baseCommit": "86724563589e4215f9b6d608bfc6ccb44a0b67b2",
+  "branch": "fix/library-card-labels-and-controls",
+  "local": {
+    "command": "pnpm check; dependency audit; native browser-harness",
+    "unitPassed": 557,
+    "externalSkipped": 3,
+    "authorizationPassed": 28,
+    "python": [6, 6, 3],
+    "basicBuildPolicyPassed": 5,
+    "productionBuildsPassed": ["marketing", "starter"],
+    "dependencyUnresolved": 0,
+    "finalSelectedTopicFormKey": "lint/types/Starter build passed after selected-topic/layout-version key; no visible fixture state changed"
+  },
+  "browser": {
+    "environment": "Local production build, labeled synthetic fixture",
+    "widths": [320, 390, 768, 1440],
+    "documentOverflow": false,
+    "multiwordTreeCategoryHeight": 64,
+    "wordBoundaryLines": 2,
+    "singleWordsUnbroken": true,
+    "insightTitlesUnclampedAndFullyFit": true,
+    "sameTreeFolderNavRectangles": true,
+    "limitations": "Positive production Move editor and further topic cursor absent from fixture; no live categorization write required"
+  },
+  "review": "ship for scoped source/capture review and single named documentation correction",
+  "release": {
+    "status": "pending"
+  },
+  "data": {
+    "sourceOrCategorizationWrite": false,
+    "newInference": false,
+    "newGrant": false,
+    "financialHoldOrLimitChanged": false,
+    "backendDeployRequired": false
+  }
+}

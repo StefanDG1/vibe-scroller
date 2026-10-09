@@ -573,8 +573,9 @@ export function LibraryExplore({
           corrections={
             detail?.topic && !readOnly && !demo ? (
               <details className="hybrid-filing-editor">
-                <summary>Change category</summary>
+                <summary>Move {selected.name}</summary>
                 <form
+                  key={`${selected.id}:${detail.topic.layoutVersion}`}
                   className="form-grid"
                   onSubmit={async (event) => {
                     event.preventDefault();
@@ -603,7 +604,7 @@ export function LibraryExplore({
                   }}
                 >
                   <label>
-                    Category
+                    Parent category
                     <ChoiceSelect
                       name="parent"
                       defaultValue={selected.parentId ?? ""}
@@ -618,7 +619,7 @@ export function LibraryExplore({
                         ))}
                     </ChoiceSelect>
                   </label>
-                  <button disabled={savingStructure}>Save category</button>
+                  <button disabled={savingStructure}>Move topic</button>
                 </form>
               </details>
             ) : null

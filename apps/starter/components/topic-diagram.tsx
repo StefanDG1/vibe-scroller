@@ -233,6 +233,7 @@ export function TopicDiagram({
         className="hybrid-node"
         data-topic-id={node.id}
         data-selected={expanded}
+        data-wrap-label={/\S+\s+\S+/.test(topic.name)}
         aria-label={`Open ${topic.name}`}
         aria-expanded={
           node.children.length || node.id === selectedId ? expanded : undefined
