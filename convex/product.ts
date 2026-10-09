@@ -1,3 +1,4 @@
+import { presentAnalysis } from "../packages/insights/presentation";
 import { filing } from "./librarySpaces";
 import { repositoryContent } from "./lib/repositoryContent";
 import { validateInspectedContext } from "../packages/repositories/retrieval";
@@ -1168,7 +1169,7 @@ export const commitAnalysis = internalMutation({
         "FORBIDDEN",
         "Media authorization changed before output commit.",
       );
-      analysis = insightOutput.parse(a.output);
+      analysis = presentAnalysis(insightOutput.parse(a.output) as any);
       ensure(
         analysis.sourceId === s._id &&
           analysis.processingRunId === `${s._id}:${a.generation}`,

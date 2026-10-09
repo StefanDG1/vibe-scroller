@@ -1,3 +1,4 @@
+import { presentAnalysis } from "../packages/insights/presentation";
 import { repositoryContent } from "./lib/repositoryContent";
 import { query, internalQuery, type QueryCtx } from "./_generated/server";
 import { mutation, internalMutation } from "./lib/projectedMutations";
@@ -456,7 +457,7 @@ export const sourceFinish = mutation({
       return { saved: true, cached: true };
     }
     const { j, run, s } = await sourceImport(ctx, a.id),
-      output: any = insightOutput.parse(a.output);
+      output: any = presentAnalysis(insightOutput.parse(a.output) as any);
     ensure(
       output.sourceId === s._id &&
         output.processingRunId === `${s._id}:${s.generation}` &&

@@ -1,4 +1,5 @@
 "use client";
+import { CircleHelp } from "lucide-react";
 import { summarizeDashboard, type VisualRecord } from "@/lib/dashboard-visuals";
 export function DashboardVisuals({
   sources,
@@ -92,8 +93,11 @@ export function DashboardVisuals({
               </strong>
               <span>{m.label}</span>
             </button>
-            <details>
-              <summary>What this counts</summary>
+            <details className="metric-help">
+              <summary aria-label={`About ${m.label}`}>
+                <CircleHelp size={17} aria-hidden="true" />
+                <span className="sr-only">What this counts</span>
+              </summary>
               <p>{m.definition}</p>
             </details>
           </div>

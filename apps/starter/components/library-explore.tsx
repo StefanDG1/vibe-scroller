@@ -6,7 +6,11 @@ import { InsightProjectLinks } from "./insight-project-links";
 import { TopicDiagram } from "./topic-diagram";
 import { LibraryAtlas } from "./library-atlas";
 import { ChoiceSelect } from "./choice-select";
-import { libraryPlaceKey, permittedLibraryPlace } from "@/lib/library-place";
+import {
+  libraryPlaceKey,
+  restoredLibraryPlace,
+  type LibraryPlace,
+} from "@/lib/library-place";
 import {
   buildTopicTree,
   topicPath,
@@ -125,7 +129,18 @@ const fixtureDetail = {
         revision: 1,
         insightId: `idea-${i}`,
       },
-      insight: { claim },
+      insight: {
+        claim,
+        title: [
+          "Show a useful example",
+          "Offer one clear next step",
+          "Show the source evidence",
+          "Keep optional setup reversible",
+          "Review uncertainty before acting",
+          "Measure the actual result",
+        ][i],
+        icon: ["palette", "compass", "shield", "checklist", "book", "chart"][i],
+      },
     },
   })),
   summaries: [] as any[],
@@ -307,22 +322,28 @@ export function LibraryExplore({
       selectionGeneration.current++;
     };
   }, [enabled, demo, organizationId, scope, search, view, method]);
-  const restored = useRef<string | null>(null);
+  const [place, setPlace] = useState<LibraryPlace | null>(null);
+  const restored = useRef<string | null>(null),
+    pendingScroll = useRef<LibraryPlace | null>(null);
   const restoreTopic = useEffectEvent((topic: any) =>
     open(topic, undefined, false),
   );
   useEffect(() => {
-    if (!topics || demo || search || view !== "tree") return;
+    if (!topics || search || view !== "tree") return;
     const key = libraryPlaceKey(organizationId, topics.scope);
     if (restored.current === key) return;
     restored.current = key;
     try {
-      const place = permittedLibraryPlace(
+      const place = restoredLibraryPlace(
         localStorage.getItem(key),
         topics.items,
       );
       // oxlint-disable-next-line react/set-state-in-effect -- Synchronize the authorized page with an external, scoped browser preference.
-      if (place) setTreeDiagram(place.representation === "tree");
+      if (place) {
+        setTreeDiagram(place.representation === "tree");
+        setPlace(place);
+        pendingScroll.current = place;
+      }
       const topic = topics.items.find((t: any) => t.id === place?.topicId);
       if (topic) {
         setSelected(topic);
@@ -332,22 +353,68 @@ export function LibraryExplore({
       /* A fresh overview remains available without storage. */
     }
   }, [topics, demo, search, view, organizationId]);
+  function remember(patch: Partial<LibraryPlace>) {
+    if (!topics || search || view !== "tree") return;
+    setPlace((old) => {
+      const next: LibraryPlace = {
+        ...old,
+        representation: treeDiagram ? "tree" : "folders",
+        ...patch,
+      };
+      try {
+        localStorage.setItem(
+          libraryPlaceKey(organizationId, topics.scope),
+          JSON.stringify(next),
+        );
+      } catch {
+        /* Optional browser preference. */
+      }
+      return next;
+    });
+  }
+  const rememberScroll = useEffectEvent(() => {
+    if (pendingScroll.current) return;
+    remember({
+      scrollTop: window.scrollY,
+      rowScroll: [...document.querySelectorAll<HTMLElement>(".hybrid-node-row")]
+        .map((row) => row.scrollLeft)
+        .slice(0, 8),
+    });
+  });
   useEffect(() => {
-    if (!topics || demo || search || view !== "tree") return;
-    const key = libraryPlaceKey(organizationId, topics.scope);
-    if (restored.current !== key) return;
-    try {
-      localStorage.setItem(
-        key,
-        JSON.stringify({
-          representation: treeDiagram ? "tree" : "folders",
-          topicId: selected?.id,
-        }),
-      );
-    } catch {
-      /* Browsing never requires persistence. */
-    }
-  }, [topics, demo, search, view, organizationId, treeDiagram, selected]);
+    if (!topics || view !== "tree") return;
+    let timer: ReturnType<typeof setTimeout>;
+    const save = () => {
+      clearTimeout(timer);
+      timer = setTimeout(rememberScroll, 150);
+    };
+    window.addEventListener("scroll", save, true);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("scroll", save, true);
+    };
+  }, [topics, view]);
+  useEffect(() => {
+    const saved = pendingScroll.current;
+    if (
+      !saved ||
+      !topics ||
+      loading ||
+      (saved.topicId && !selected) ||
+      (selected && !selected.autoCategory && !detail)
+    )
+      return;
+    const frame = requestAnimationFrame(() => {
+      document
+        .querySelectorAll<HTMLElement>(".hybrid-node-row")
+        .forEach((row, i) => {
+          row.scrollLeft = saved.rowScroll?.[i] ?? 0;
+        });
+      window.scrollTo({ top: saved.scrollTop ?? 0, behavior: "instant" });
+      pendingScroll.current = null;
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [topics, loading, selected, detail]);
   useEffect(
     () => () => {
       generation.current++;
@@ -433,6 +500,10 @@ export function LibraryExplore({
     setDetail(null);
     setJourney(null);
     setHelped(null);
+    setPlace(null);
+    pendingScroll.current = null;
+    restored.current = null;
+    setTreeDiagram(true);
     setTopics(demo ? fixture : null);
     setLaterPage(false);
     detailCursor.current = undefined;
@@ -461,8 +532,20 @@ export function LibraryExplore({
             setSearch(value);
           }}
           folders={!treeDiagram}
-          onFolders={(value) => setTreeDiagram(!value)}
-          onOpen={(topic) => void open(topic, undefined, false)}
+          onFolders={(value) => {
+            setTreeDiagram(!value);
+            remember({ representation: value ? "folders" : "tree" });
+          }}
+          onOpen={(topic) => {
+            remember({
+              topicId: topic.id,
+              closedTopicId: undefined,
+              insightId: undefined,
+            });
+            void open(topic, undefined, false);
+          }}
+          place={place}
+          onRemember={remember}
           onMoreTopics={() => {
             setLaterPage(true);
             void refresh(topics.next, true);
