@@ -167,3 +167,7 @@ Follow [ADR 058](adr/058-bounded-full-library-scans.md): full URL-link paginatio
 ## Descriptive insight cards and remembered position
 
 [ADR 098](adr/098-insight-presentation-and-library-position.md) records short authored titles, semantic icons, exact proposal previews, bounded navigation resumption and related bottom-navigation highlighting. It replaces click-only journey retrieval with one shared bounded topic lookup.
+
+## ADR 099: Readable card labels and topic controls
+
+[ADR 099](adr/099-readable-card-labels-and-topic-controls.md) permits taller word-boundary labels, complete descriptive insight titles, topic organization under Library options and a quieter explicit Show more topics control. It preserves bounded reads and supersedes ADR098's multiword one-line rule.
