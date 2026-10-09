@@ -14,7 +14,13 @@ import {
   Layers,
 } from "lucide-react";
 import { motion } from "motion/react";
-import { buildTopicTree, topicPath, type TopicNode } from "@/lib/topic-tree";
+import {
+  buildTopicTree,
+  topicPath,
+  singleChildTarget,
+  type TopicNode,
+} from "@/lib/topic-tree";
+import { ProposalBubble } from "./proposal-bubble";
 import { useInterfaceMotion } from "./motion-preference";
 type Topic = {
   id: string;
@@ -43,8 +49,10 @@ export function TopicDiagram({
   children,
   closedTopicId,
   onCollapse,
+  proposalCounts,
 }: {
   topics: Topic[];
+  proposalCounts?: Record<string, number>;
   onOpen: (topic: Topic) => void;
   selectedId?: string;
   representation?: "tree" | "folders";
@@ -71,6 +79,7 @@ export function TopicDiagram({
   const [cutDepth, setCutDepth] = useState(0);
   const pending = useRef<string | null>(null);
   const switching = useRef(false);
+  const closing = useRef(false);
   const previousFiling = useRef(filing);
   const [pointer, setPointer] = useState(false);
   const animate = useInterfaceMotion();
@@ -81,7 +90,8 @@ export function TopicDiagram({
     height: 1,
     paths: [] as string[],
   });
-  const candidate = visualId && records.has(visualId) ? visualId : root?.id;
+  const start = visualId && records.has(visualId) ? visualId : root?.id;
+  const candidate = start ? singleChildTarget(topics, start)?.id : undefined;
   const originalPath = topicPath(topics, candidate ?? "");
   const path = organized
     ? originalPath.filter((_t) => originalPath[0]?.id === root?.id)
@@ -92,11 +102,15 @@ export function TopicDiagram({
     previousFiling.current = filing;
     pending.current = null;
     switching.current = false;
+    closing.current = false;
     setVisualId(selectedId);
-    const closedDepth = topicPath(
+    const restoredTarget = singleChildTarget(
       topics,
       selectedId ?? root?.id ?? "",
-    ).findIndex((t) => t.id === closedTopicId);
+    );
+    const closedDepth = topicPath(topics, restoredTarget?.id ?? "").findIndex(
+      (t) => t.id === closedTopicId,
+    );
     setCutDepth(Math.max(0, closedDepth));
     setPhase(closedDepth >= 0 ? "closed" : "open");
   });
@@ -165,7 +179,9 @@ export function TopicDiagram({
     };
   }, [visualId, phase, representation, topics, filing, selectedId, children]);
   function finish() {
-    if (phase !== "closing") return;
+    if (phase !== "closing" || !closing.current) return;
+    // Nested Motion callbacks can finish together. Consume this handoff once.
+    closing.current = false;
     if (pending.current) {
       const id = pending.current;
       pending.current = null;
@@ -184,8 +200,9 @@ export function TopicDiagram({
     const shouldAnimate = animate && pointerActivation;
     const topic = records.get(node.id);
     if (!topic) return;
-    const newPath = topicPath(topics, node.id);
-    const depth = Math.max(0, newPath.length - 1);
+    const target = singleChildTarget(topics, node.id) ?? topic;
+    const newPath = topicPath(topics, target.id);
+    const depth = Math.max(0, topicPath(topics, node.id).length - 1);
     if (node.id === candidate && phase === "closed") {
       onCollapse?.(undefined);
       setPhase("open");
@@ -194,8 +211,10 @@ export function TopicDiagram({
     if (active.has(node.id) && phase === "open") {
       pending.current = null;
       setCutDepth(depth);
-      if (shouldAnimate) setPhase("closing");
-      else {
+      if (shouldAnimate) {
+        closing.current = true;
+        setPhase("closing");
+      } else {
         setPhase("closed");
         onCollapse?.(node.id);
       }
@@ -211,15 +230,16 @@ export function TopicDiagram({
       common++;
     setCutDepth(Math.max(0, common));
     if (shouldAnimate && path.length > common && phase !== "closed") {
-      pending.current = node.id;
+      pending.current = target.id;
       switching.current = true;
+      closing.current = true;
       setPhase("closing");
     } else {
       pending.current = null;
       switching.current = false;
-      setVisualId(node.id);
+      setVisualId(target.id);
       setPhase("open");
-      onOpen(topic);
+      onOpen(target);
     }
   }
   function control(node: TopicNode, folder = false) {
@@ -233,8 +253,9 @@ export function TopicDiagram({
         className="hybrid-node"
         data-topic-id={node.id}
         data-selected={expanded}
+        data-has-bubble={!!proposalCounts?.[node.id]}
         data-wrap-label={/\S+\s+\S+/.test(topic.name)}
-        aria-label={`Open ${topic.name}`}
+        aria-label={`Open ${topic.name}${proposalCounts?.[node.id] ? `, ${proposalCounts[node.id]} open proposals` : ""}`}
         aria-expanded={
           node.children.length || node.id === selectedId ? expanded : undefined
         }
@@ -244,6 +265,7 @@ export function TopicDiagram({
       >
         <Icon aria-hidden="true" />
         <strong>{topic.name}</strong>
+        <ProposalBubble count={proposalCounts?.[node.id]} />
         {expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
       </button>
     );

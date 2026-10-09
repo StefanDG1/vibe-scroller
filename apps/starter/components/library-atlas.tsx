@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useEffectEvent, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Search,
   Network,
@@ -24,8 +24,18 @@ import {
   CircleHelp,
 } from "lucide-react";
 import { motion } from "motion/react";
+import { Button } from "@companynerve/ui";
+import { LibrarySkeleton } from "./library-skeleton";
+import { TopicLoader } from "./topic-loader";
+import { ProposalBubble } from "./proposal-bubble";
+import {
+  proposalBadgeTotals,
+  openReferenceProposals,
+  badgeReferenceKey,
+  type ProposalBadgePage,
+} from "../../../packages/knowledge/proposal-badges";
 import { TopicDiagram } from "./topic-diagram";
-import { linkedInsightProposals } from "@/lib/insight-project-links";
+import { insightProposalStatus } from "@/lib/insight-project-links";
 import { topicPath } from "@/lib/topic-tree";
 import { insightPresentation } from "../../../packages/insights/presentation";
 import type { LibraryPlace } from "@/lib/library-place";
@@ -56,27 +66,30 @@ function HelpNote({ children }: { children: React.ReactNode }) {
     </details>
   );
 }
+const emptyMembers: any[] = [];
 function EvidenceList({
   detail,
   organizationId,
   demo,
-  readJourney,
+  badges,
   onMoreEvidence,
+  loadingEvidence,
   place,
   onRemember,
 }: {
   detail: any;
   organizationId: string;
   demo: boolean;
-  readJourney: () => Promise<any>;
+  badges: ProposalBadgePage | null;
   onMoreEvidence: () => void;
+  loadingEvidence: boolean;
   place?: LibraryPlace | null;
   onRemember: (patch: Partial<LibraryPlace>) => void;
 }) {
-  const members = detail?.members ?? [];
+  const members = detail?.members ?? emptyMembers;
   const [visible, setVisible] = useState(() =>
       Math.max(
-        6,
+        5,
         members.findIndex((m: any) => m._id === place?.insightId) + 1,
       ),
     ),
@@ -84,65 +97,14 @@ function EvidenceList({
       members.some((m: any) => m._id === place?.insightId)
         ? place!.insightId!
         : null,
-    ),
-    [links, setLinks] = useState<any>(null),
-    [linkError, setLinkError] = useState("");
+    );
   const [pointer, setPointer] = useState(false),
     animate = useInterfaceMotion();
-  const loadLinks = useEffectEvent(async () =>
-    demo
-      ? {
-          items: members.length
-            ? [
-                {
-                  id: "demo-link",
-                  current: true,
-                  sources: [
-                    {
-                      id: members[0].evidence.reference.sourceId,
-                      insights: [members[0].evidence.reference.insightId],
-                    },
-                  ],
-                  repository: "Demo shop",
-                  steps: [
-                    {
-                      id: "demo-proposal",
-                      title: "Simplify onboarding",
-                      description:
-                        "Show a useful example before asking for optional setup.",
-                      state: "ready",
-                      references: [members[0].evidence.reference],
-                    },
-                  ],
-                },
-              ]
-            : [],
-          next: null,
-        }
-      : readJourney(),
-  );
-  const hasMembers = members.length > 0;
-  useEffect(() => {
-    if (!hasMembers) return;
-    let active = true;
-    void loadLinks()
-      .then((result) => {
-        if (active) setLinks(result);
-      })
-      .catch(() => {
-        if (active)
-          setLinkError(
-            "Proposal connections unavailable. Reopen this topic to retry.",
-          );
-      });
-    return () => {
-      active = false;
-    };
-  }, [hasMembers]);
+  const totals = proposalBadgeTotals(badges);
   return (
     <div className="hybrid-evidence" data-evidence-topic={detail?.topic?.name}>
       {!detail ? (
-        <output>Opening source-backed insights...</output>
+        <LibrarySkeleton />
       ) : (
         <div className="hybrid-insight-tray">
           <div className="hybrid-evidence-heading">
@@ -154,16 +116,21 @@ function EvidenceList({
               const presentation = insightPresentation(member.evidence.insight),
                 Icon = insightIcons[presentation.icon],
                 expanded = member._id === insightId,
-                steps = linkedInsightProposals(
+                steps = openReferenceProposals(
+                  badges,
                   member.evidence.reference,
-                  links?.items ?? [],
-                );
+                ),
+                count =
+                  totals?.references[
+                    badgeReferenceKey(member.evidence.reference)
+                  ];
               return (
                 <li key={member._id} data-selected={expanded}>
                   <button
                     className="hybrid-insight-select"
-                    aria-label={`Inspect ${member.evidence.insight.claim}`}
+                    aria-label={`Inspect ${member.evidence.insight.claim}${count ? `, ${count} open proposals` : ""}`}
                     aria-expanded={expanded}
+                    data-has-bubble={!!count}
                     onPointerDown={() => setPointer(true)}
                     onKeyDown={() => setPointer(false)}
                     onClick={(event) => {
@@ -200,16 +167,8 @@ function EvidenceList({
                             : member.evidence.title}
                         </span>
                       </small>
-                      {steps.length > 0 && (
-                        <span className="hybrid-proposal-count">
-                          {steps.length}
-                          {links?.next ? "+" : ""}{" "}
-                          {steps.length === 1 && !links?.next
-                            ? "proposal"
-                            : "proposals"}
-                        </span>
-                      )}
                     </span>
+                    <ProposalBubble count={count} />
                     {expanded ? (
                       <ChevronDown size={18} aria-hidden="true" />
                     ) : (
@@ -233,57 +192,57 @@ function EvidenceList({
                     <div>
                       <h3>{member.evidence.title}</h3>
                       <p>{member.evidence.insight.claim}</p>
-                      <a
-                        href={
-                          demo
-                            ? "/demo"
-                            : `/app/${organizationId}/library?source=${encodeURIComponent(member.evidence.reference.sourceId)}`
-                        }
+                      <Button
+                        asChild
+                        variant="outline"
+                        className="hybrid-source-button"
                       >
-                        View source evidence
-                      </a>
-                      {expanded && !links && !linkError && (
-                        <output>Checking proposals...</output>
+                        <a
+                          href={
+                            demo
+                              ? `/demo?view=library&source=${encodeURIComponent(member.evidence.reference.sourceId)}`
+                              : `/app/${organizationId}/library?source=${encodeURIComponent(member.evidence.reference.sourceId)}`
+                          }
+                        >
+                          <FileText size={17} aria-hidden="true" />
+                          View source evidence
+                          <ChevronRight size={16} aria-hidden="true" />
+                        </a>
+                      </Button>
+                      {expanded && !badges && (
+                        <LibrarySkeleton kind="proposals" rows={2} />
                       )}
-                      {expanded && linkError && <p role="alert">{linkError}</p>}
                       {expanded && steps.length > 0 && (
                         <div className="hybrid-proposals">
-                          <span>Related proposals</span>
+                          <span>Open proposals</span>
                           {steps.map((step: any) => (
-                            <a
-                              className="hybrid-proposal-link"
+                            <ProposalLink
                               key={step.id}
-                              href={
-                                demo
-                                  ? "/demo?view=projects"
-                                  : `/app/${organizationId}/projects?proposal=${encodeURIComponent(step.id)}`
-                              }
-                            >
-                              <FileText size={18} aria-hidden="true" />
-                              <div>
-                                <strong>{step.title}</strong>
-                                <small>
-                                  {step.repository} ·{" "}
-                                  {step.state.replaceAll("_", " ")}
-                                </small>
-                                {step.description && (
-                                  <p>
-                                    {step.description
-                                      .replace(/^[#>*\s]+/gm, "")
-                                      .replace(/\s+/g, " ")}
-                                  </p>
-                                )}
-                              </div>
-                              <ChevronRight size={17} aria-hidden="true" />
-                            </a>
+                              step={step}
+                              demo={demo}
+                              organizationId={organizationId}
+                            />
                           ))}
-                          {demo && <small>Illustrative demo connection</small>}
+                          {demo && (
+                            <small>
+                              Illustrative demo connections. No real changes.
+                            </small>
+                          )}
                         </div>
                       )}
-                      {expanded && links?.next && (
+                      {expanded && badges && !steps.length && (
+                        <p className="hybrid-proposal-empty">
+                          {totals
+                            ? "No open proposals for this insight."
+                            : "No open proposals in the checked pages yet."}
+                        </p>
+                      )}
+                      {expanded && badges && !totals && (
                         <HelpNote>
-                          Counts cover the loaded current evaluations. More may
-                          be available in Projects.
+                          {badges.next
+                            ? "Proposal totals appear after all current permitted pages are checked. Continue browsing to load more."
+                            : "This bounded check could not establish the total. Review proposals in Projects."}
+                          Closed proposals remain in Projects.
                         </HelpNote>
                       )}
                     </div>
@@ -295,13 +254,21 @@ function EvidenceList({
           {members.length > visible ? (
             <button
               className="hybrid-more"
-              onClick={() => setVisible((n) => n + 6)}
+              onClick={() => setVisible((n) => n + 5)}
             >
               More insights <ChevronDown size={18} />
             </button>
           ) : detail.next ? (
-            <button className="hybrid-more" onClick={onMoreEvidence}>
-              Next insights page <ChevronDown size={18} />
+            <button
+              className="hybrid-more"
+              disabled={loadingEvidence}
+              onClick={() => {
+                setVisible((n) => n + 5);
+                onMoreEvidence();
+              }}
+            >
+              {loadingEvidence ? "Loading insights..." : "More insights"}{" "}
+              <ChevronDown size={18} />
             </button>
           ) : null}
           {!members.length && (
@@ -310,6 +277,43 @@ function EvidenceList({
         </div>
       )}
     </div>
+  );
+}
+function ProposalLink({
+  step,
+  demo,
+  organizationId,
+}: {
+  step: any;
+  demo: boolean;
+  organizationId: string;
+}) {
+  const status = insightProposalStatus(step);
+  return (
+    <a
+      className="hybrid-proposal-link"
+      data-open={status.open}
+      href={
+        demo
+          ? `/demo?view=projects&proposal=${encodeURIComponent(step.id)}`
+          : `/app/${organizationId}/projects?proposal=${encodeURIComponent(step.id)}`
+      }
+    >
+      <FileText size={18} aria-hidden="true" />
+      <div>
+        <strong>{step.title}</strong>
+        <small>
+          {step.repository} ·{" "}
+          <span className="hybrid-proposal-state">{status.label}</span>
+        </small>
+        {step.description && (
+          <p>
+            {step.description.replace(/^[#>*\s]+/gm, "").replace(/\s+/g, " ")}
+          </p>
+        )}
+      </div>
+      <ChevronRight size={17} aria-hidden="true" />
+    </a>
   );
 }
 export function LibraryAtlas({
@@ -324,10 +328,12 @@ export function LibraryAtlas({
   onMoreTopics,
   onMoreEvidence,
   loading,
+  loadingEvidence,
   message,
+  onRetry,
   organizationId,
   demo,
-  readJourney,
+  badges,
   advanced,
   corrections,
   place,
@@ -344,10 +350,12 @@ export function LibraryAtlas({
   onMoreTopics: () => void;
   onMoreEvidence: () => void;
   loading: boolean;
+  loadingEvidence: boolean;
   message: string;
+  onRetry: () => void;
   organizationId: string;
   demo: boolean;
-  readJourney: () => Promise<any>;
+  badges: ProposalBadgePage | null;
   advanced: React.ReactNode;
   corrections: React.ReactNode;
   place?: LibraryPlace | null;
@@ -379,7 +387,7 @@ export function LibraryAtlas({
     // oxlint-disable-next-line react/set-state-in-effect -- Restore the authorized branch's filing when external navigation loads.
     if (next) setFiling(next);
   }, [startingRoot, place?.filing, defaultFiling]);
-  const evidenceKey = `${selected?.id}:${detail?.members.map((member: any) => [member._id, member.evidence.reference.generation, member.evidence.reference.revision].join(":")).join("|")}`;
+  const evidenceKey = `${selected?.id}:${detail?.resetKey ?? "opening"}`;
   function chooseFiling(value: "Personal" | "Business") {
     setFiling(value);
     const root = items.find(
@@ -397,6 +405,7 @@ export function LibraryAtlas({
     <section
       className={`hybrid-library ${folders ? "hybrid-folders" : "hybrid-tree"}`}
       aria-label="Library atlas"
+      aria-busy={loading || loadingEvidence}
     >
       <div className="hybrid-heading-row">
         <h2>Library</h2>
@@ -437,13 +446,21 @@ export function LibraryAtlas({
           </button>
         </div>
       </div>
-      {loading && <output aria-live="polite">Loading library...</output>}
-      {message && <p role="alert">{message}</p>}
+      {loading && !items.length && <LibrarySkeleton kind="topics" rows={3} />}
+      {message && (
+        <div>
+          <p role="alert">{message}</p>
+          <button onClick={onRetry} disabled={loading}>
+            Retry loading library
+          </button>
+        </div>
+      )}
       {!loading && !message && !items.length && (
         <p>No current insights here. Try another topic or library view.</p>
       )}
       <TopicDiagram
         topics={items}
+        proposalCounts={proposalBadgeTotals(badges)?.topics}
         onOpen={onOpen}
         selectedId={selected?.id}
         representation={folders ? "folders" : "tree"}
@@ -463,22 +480,21 @@ export function LibraryAtlas({
             detail={detail}
             organizationId={organizationId}
             demo={demo}
-            readJourney={readJourney}
+            badges={badges}
             onMoreEvidence={onMoreEvidence}
+            loadingEvidence={loadingEvidence}
             place={place}
             onRemember={onRemember}
           />
         )}
       </TopicDiagram>
-      {topics?.next && (
-        <button
-          className="hybrid-topic-more"
-          disabled={loading}
-          onClick={onMoreTopics}
-        >
-          {loading ? "Loading topics…" : "Show more topics"}{" "}
-          <ChevronDown size={18} />
-        </button>
+      {(topics?.next || badges?.next) && (
+        <TopicLoader
+          key={`${organizationId}:${topics.scope}:${search}`}
+          cursor={JSON.stringify([topics?.next, badges?.next])}
+          loading={loading}
+          onMore={onMoreTopics}
+        />
       )}
       <details className="hybrid-settings">
         <summary>

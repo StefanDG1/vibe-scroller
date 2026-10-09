@@ -71,6 +71,13 @@ export const knowledgeTables = {
     .index("by_source", ["sourceId"])
     .index("by_topic", ["topicId"])
     .index("by_topic_source", ["topicId", "sourceId"])
+    .index("by_reference", [
+      "organizationId",
+      "sourceId",
+      "generation",
+      "revision",
+      "insightId",
+    ])
     .searchIndex("search_title", {
       searchField: "sourceTitle",
       filterFields: ["organizationId"],
@@ -174,5 +181,11 @@ export const knowledgeTables = {
   })
     .index("by_org", ["organizationId"])
     .index("by_draft", ["draftId"])
+    .index("by_current_publication", [
+      "draftId",
+      "state",
+      "hash",
+      "draftVersion",
+    ])
     .index("by_repo", ["repositoryId"]),
 };

@@ -1,0 +1,55 @@
+{
+  "time": "2026-10-09T16:05:40.648930+00:00",
+  "baseCommit": "c1363fe059f1e13f1e2107221256627b72200a2f",
+  "environment": "Windows local source candidate; native Chrome emulation; labeled synthetic demo",
+  "local": {
+    "command": "pnpm check",
+    "unitIntegrationPassed": 569,
+    "externalSkipped": 3,
+    "authPassed": 28,
+    "pythonPassed": [6, 6, 3],
+    "basicPolicyPassed": 5,
+    "lintTypesValidationBothBuilds": "passed",
+    "afterUIFix": "pnpm lint/typecheck and Starter production builds passed; native browser receipt PASS"
+  },
+  "browser": {
+    "widths": [320, 390, 768, 1440],
+    "singleChildChains": "pass",
+    "forkStop": "pass",
+    "closeThenOpen": "pass after consumed handoff fix",
+    "initialFiveAndMore": "pass",
+    "sourceButton44pxAndMatchingRoute": "pass",
+    "openOnlyAndRightSideBubbles": "pass",
+    "exactSyntheticTotals": "pass",
+    "closedMergedFullDemoRoutes": "pass",
+    "skeletonLibrary": "15 placeholders observed, reduced motion pass",
+    "physicalPhone": "not tested",
+    "realHistoricalProposals": "not tested"
+  },
+  "backend": "Production dry run passed, additive exact-reference/current-publication indexes; deployment pending",
+  "designReview": "pending fresh reviewer",
+  "release": "pending commit, exact CI, merge and production verification",
+  "cost": {
+    "upcomingTeamUSD": 1.38,
+    "previousTeamUSD": 1.15,
+    "lastPaidUSD": 10.6,
+    "newPaidInvoice": false,
+    "disableThresholdUSD": 15,
+    "newInferenceSandbox": false,
+    "taskAttributionEURSettlement": "unverified",
+    "ownerCumulativeNewSpendCeilingEUR": 2
+  },
+  "failedChecks": [
+    "Initial new backend test fixtures omitted required profile then context fields; corrected and final tests passed.",
+    "Initial native script expected wrong demo branch membership count; corrected.",
+    "History click harness failure retained; owner then removed Library history.",
+    "After bubble labels, initial native normalization and coordinate/state failures retained.",
+    "Intermittent branch handoff consumed more than once; guarded once, final native pass.",
+    "Reviewer first required recapture because full-proposal image showed overview; replaced with open title/body capture."
+  ],
+  "limitations": [
+    "Totals suppressed while paged proof is pending or incomplete; no capped page presented as a whole-category total.",
+    "Totals reflect bounded authorized reads and recorded provider states; no live provider polling or future snapshot consistency claimed.",
+    "No inference, grants, paid fallback, purchase, limit increase or hold release."
+  ]
+}

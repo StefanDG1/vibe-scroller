@@ -12,6 +12,7 @@ const operations = {
   exploreTopics: ["query", api.knowledgeExplore.topics],
   exploreDetail: ["query", api.knowledgeExplore.detail],
   exploreJourney: ["query", api.knowledgeExplore.journey],
+  exploreProposalBadges: ["query", api.knowledgeExplore.proposalBadges],
   exploreHelped: ["query", api.knowledgeExplore.helped],
   teamKnowledgeTargets: ["query", api.knowledgeGrants.targets],
   teamKnowledgeGrants: ["query", api.knowledgeGrants.listOwn],

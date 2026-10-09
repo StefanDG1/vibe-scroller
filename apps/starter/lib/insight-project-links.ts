@@ -1,3 +1,5 @@
+import { insightProposalStatus } from "../../../packages/knowledge/proposal-status";
+export { insightProposalStatus } from "../../../packages/knowledge/proposal-status";
 type Reference = { sourceId: string; insightId: string };
 export function linkedInsightProjects<
   T extends {
@@ -19,6 +21,7 @@ export function linkedInsightProjects<
 export function linkedInsightProposals(
   reference: Reference & { generation: number; revision: number },
   evaluations: any[],
+  includeHistory = false,
 ) {
   const seen = new Set<string>();
   return linkedInsightProjects(reference, evaluations).flatMap((evaluation) =>
@@ -26,9 +29,8 @@ export function linkedInsightProposals(
       .filter((step: any) => {
         if (
           seen.has(step.id) ||
-          ["deleted", "rejected"].includes(step.state) ||
-          step.run?.mergedAt ||
-          step.run?.prState === "closed"
+          step.state === "deleted" ||
+          (!includeHistory && !insightProposalStatus(step).open)
         )
           return false;
         const cited = step.references?.some(

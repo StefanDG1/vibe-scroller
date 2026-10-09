@@ -264,6 +264,7 @@ it("rejects foreign readers and recovery before returning private names or outco
   for (const operation of [
     api.knowledgeExplore.topics,
     api.knowledgeExplore.helped,
+    api.knowledgeExplore.proposalBadges,
   ])
     await expect(
       s.other.query(operation, { organizationId: s.args.organizationId }),
@@ -509,4 +510,162 @@ it("projects existing titles and icons only through current permitted insight ev
   await expect(
     s.other.query(api.knowledgeExplore.detail, s.args),
   ).rejects.toThrow();
+});
+
+async function badgeFixture() {
+  const s = await setup();
+  const ids = await s.t.run(async (ctx) => {
+    const root = await ctx.db.insert("knowledgeTopics", {
+      organizationId: s.args.organizationId,
+      key: "parent",
+      name: "Parent",
+      pinned: false,
+      version: 1,
+      state: "ready",
+      autoCategory: true,
+      createdAt: 1,
+      updatedAt: 1,
+    });
+    await ctx.db.patch(s.args.topicId, { parentId: root });
+    const repositoryId = await ctx.db.insert("repositories", {
+      organizationId: s.args.organizationId,
+      installationId: 1,
+      providerId: 1,
+      fullName: "owned/synthetic",
+      branch: "main",
+      sha: "a".repeat(40),
+      enabled: true,
+      confirmed: true,
+      profileVersion: 1,
+      profile: "Synthetic profile",
+      context: "Synthetic context",
+      manifest: [],
+      status: "connected",
+      createdAt: 1,
+      updatedAt: 1,
+    });
+    const evaluationId = await ctx.db.insert("knowledgeEvaluations", {
+      organizationId: s.args.organizationId,
+      topicId: s.args.topicId,
+      repositoryId,
+      actor: s.actor._id,
+      topicVersion: 1,
+      baseSha: "a".repeat(40),
+      profileVersion: 1,
+      references: [s.personal],
+      sourceSetHash: "synthetic",
+      key: "badge-evaluation",
+      state: "ready",
+      decision: "accepted",
+      covered: 1,
+      omitted: false,
+      processingVersion: "synthetic",
+      createdAt: 1,
+      updatedAt: 1,
+    });
+    const drafts = [];
+    for (let i = 0; i < 7; i++)
+      drafts.push(
+        await ctx.db.insert("issueDrafts", {
+          organizationId: s.args.organizationId,
+          evaluationId,
+          repositoryId,
+          topicId: s.args.topicId,
+          topicVersion: 1,
+          baseSha: "a".repeat(40),
+          profileVersion: 1,
+          references: [s.personal],
+          title: "Synthetic proposal " + i,
+          body: "Synthetic",
+          hash: "hash",
+          version: 1,
+          marker: "synthetic",
+          state: i === 0 ? "published" : "draft",
+          sensitive: false,
+          followUp: false,
+          createdAt: 1,
+          updatedAt: 1,
+        }),
+      );
+    await ctx.db.insert("issueAttempts", {
+      organizationId: s.args.organizationId,
+      draftId: drafts[0],
+      repositoryId,
+      actor: s.actor._id,
+      hash: "hash",
+      draftVersion: 1,
+      marker: "synthetic",
+      state: "published",
+      visibility: "private",
+      externalState: "closed",
+      createdAt: 1,
+      updatedAt: 1,
+    });
+    return { root, repositoryId, evaluationId, drafts };
+  });
+  return { ...s, ...ids };
+}
+it("pages exact open proposals by organization, follows memberships to ancestors and hides closed current publications", async () => {
+  const s = await badgeFixture(),
+    args = {
+      organizationId: s.args.organizationId,
+      scope: "personal" as const,
+    };
+  const first = await s.owner.query(api.knowledgeExplore.proposalBadges, args);
+  expect(first.items).toHaveLength(4);
+  expect(first.next).not.toBeNull();
+  expect(first.complete).toBe(true);
+  const last = await s.owner.query(api.knowledgeExplore.proposalBadges, {
+    ...args,
+    cursor: first.next!,
+  });
+  expect(last.items).toHaveLength(2);
+  expect(last.next).toBeNull();
+  for (const item of [...first.items, ...last.items])
+    expect(item.topicIds).toEqual([s.args.topicId, s.root]);
+  expect(
+    (
+      await s.owner.query(api.knowledgeExplore.proposalBadges, {
+        ...args,
+        scope: "business",
+      })
+    ).items,
+  ).toEqual([]);
+  await expect(
+    s.other.query(api.knowledgeExplore.proposalBadges, args),
+  ).rejects.toThrow();
+  await s.t.run((ctx) => ctx.db.patch(s.personal.sourceId, { generation: 2 }));
+  expect(
+    (await s.owner.query(api.knowledgeExplore.proposalBadges, args)).items,
+  ).toEqual([]);
+});
+it("withholds total proof for capped memberships and unknown states, and removes stale repository bindings", async () => {
+  const s = await badgeFixture(),
+    args = {
+      organizationId: s.args.organizationId,
+      scope: "personal" as const,
+    };
+  await s.t.run(async (ctx) => {
+    for (let i = 0; i < 21; i++)
+      await ctx.db.insert("knowledgeMembers", {
+        organizationId: s.args.organizationId,
+        topicId: s.args.topicId,
+        ...s.personal,
+        excluded: false,
+        manual: false,
+        createdAt: 1,
+        updatedAt: 1,
+      });
+  });
+  expect(
+    (await s.owner.query(api.knowledgeExplore.proposalBadges, args)).complete,
+  ).toBe(false);
+  await s.t.run((ctx) => ctx.db.patch(s.repositoryId, { profileVersion: 2 }));
+  expect(
+    (await s.owner.query(api.knowledgeExplore.proposalBadges, args)).items,
+  ).toEqual([]);
+  vi.stubEnv("RESTORE_LOCK", "true");
+  await expect(
+    s.owner.query(api.knowledgeExplore.proposalBadges, args),
+  ).rejects.toThrow("Recovery");
 });
