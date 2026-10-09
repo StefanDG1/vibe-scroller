@@ -8,6 +8,8 @@ Subsequent owner feedback selected design 2 for Library and design 3 for Project
 
 ## October 9 implemented design update
 
+The selected redesign is now released on canonical production at application `e68fc3e52946`, version `0.1.0-alpha.20261009001912.ge68fc3e52946`. Actual populated Library/Home reads and the corrected compact capture keyboard path have bounded production evidence. The older work-needed list below describes the October 8 baseline; items1 and3 are superseded by this update. Unified source/topic semantics, independent experience and external V1 gates remain separate.
+
 The owner has now authorized and the candidate implements the selected Tree/Folders experience, icon-led evidence cards, exact insight-to-project links, five phone controls, device theme, restrained Motion transitions, state-based Home actions/statistics/charts and project-first screens. [ADR 095](adr/095-atlas-shell-and-bounded-visual-workflows.md) supersedes the planning-only boundary above. The dated October 8 inventory remains historical; use [the latest receipt](operations/evidence/vibescroll-atlas-20261009.json) and [implementation status](implementation-status.md) for this candidate's checks and later release result.
 
 | Requested change                                   | October 9 implementation                                                                                                                                             | Acceptance limit                                                                                     |

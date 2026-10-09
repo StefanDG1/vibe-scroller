@@ -1,6 +1,6 @@
 {
-  "observedAt": "2026-10-08T23:59:50.717208+00:00",
-  "status": "Atlas application released; bounded capture-focus follow-up locally verified, production pending",
+  "observedAt": "2026-10-09T00:21:39.486850Z",
+  "status": "Atlas application and bounded capture-focus correction released and verified in production",
   "baseCommit": "c8f6cee31a5381a10d79e88547fd7218f1e32b8f",
   "branch": "feat/atlas-design-system",
   "checks": {
@@ -40,8 +40,7 @@
     "limits": [
       "physical-device motion unverified",
       "independent comprehension unverified",
-      "dense forty-topic visual fixture unverified",
-      "actual deployed candidate reads pending"
+      "dense forty-topic visual fixture unverified"
     ]
   },
   "review": {
@@ -62,7 +61,9 @@
     "previousTeamEstimateUSD": 0.58,
     "disableThresholdUSD": 15,
     "taskAttribution": "unknown; delayed team accounting, no verified currency conversion or settled invoice",
-    "unknownHolds": "preserved"
+    "unknownHolds": "preserved",
+    "closingTeamEstimateUSD": 1.09,
+    "closingComparison": "unchanged, threshold15 unchanged, no new paid invoice; delayed accounting remains unsettled"
   },
   "release": {
     "pullRequest": 89,
@@ -120,6 +121,25 @@
     "localWidths": [390, 1440],
     "localResult": "Escape returns BUTTON Save, Enter reopens, opacity1 zero reduced-motion animations",
     "review": "ship for bounded correction by code and local native receipts",
-    "production": "pending checked follow-up release"
+    "production": "Verified authenticated canonical compact Home at390/1440: Escape returns Save, Enter reopens; opacity1, zero reduced-motion animations",
+    "productionVerifiedAt": "2026-10-09T00:21:39.486850Z"
+  },
+  "followupRelease": {
+    "pullRequest": 91,
+    "checkedHead": "1ebd81346af05fe167a92b8cbdaa3861d6e2f0df",
+    "mainCommit": "e68fc3e52946c72ff83367416148ffaa67886e37",
+    "prVerify": 37863963619,
+    "mainVerify": 37864162198,
+    "versionWorkflow": 37864162225,
+    "releaseWorkflow": 37864309058,
+    "tag": "v0.1.0-alpha.20261009001912.ge68fc3e52946",
+    "publishedAt": "2026-10-09T00:21:05Z",
+    "vercelOverview": "https://vercel.com/stefandg1s-projects/vibe-scroller/F8huDBq6WG1X2kgcAMGViz5VAMsm",
+    "vercelState": "Ready Production",
+    "domain": "https://scroll.companynerve.com",
+    "healthStatus": 200,
+    "healthCache": "no-store",
+    "healthVersion": "0.1.0-alpha.20261009001912.ge68fc3e52946",
+    "healthCommit": "e68fc3e52946c72ff83367416148ffaa67886e37"
   }
 }
