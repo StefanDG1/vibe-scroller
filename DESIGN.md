@@ -301,3 +301,5 @@ Retain the existing dark overview, main-point cards and 44 px controls. The actu
 - **Don't** make a pointer reveal delay keyboard reading or action.
 - **Don't** put a duplicate source enclosure around insight-owned cards.
 - **Don't** publish private reference screenshots or turn a scoped fix verdict into production or full V1 acceptance.
+
+October 9 release evidence supersedes the Atlas candidate and compact capture production-pending statements above: application e68fc3e52946 is Ready Production with exact canonical health/version, actual populated Library/Home reads and native compact header capture recovery at390/1440. See [the committed receipt](docs/operations/evidence/vibescroll-atlas-20261009.json). Review scopes and remaining independent/physical/provider/cost gates are unchanged.
