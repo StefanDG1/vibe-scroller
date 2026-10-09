@@ -3,6 +3,7 @@ import { company } from "@companynerve/company-config";
 import { ConsentProvider } from "@/components/consent";
 import { MotionPreference } from "@/components/motion-preference";
 import "vanilla-cookieconsent/dist/cookieconsent.css";
+import "react-loading-skeleton/dist/skeleton.css";
 import "./globals.css";
 import "./product.css";
 import "./studio.css";

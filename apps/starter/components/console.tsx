@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { AccountMenu, type AccountProfile } from "./account-menu";
 import { KnowledgeLibrary, LibrarySections } from "./knowledge-library";
+import { LibrarySkeleton } from "./library-skeleton";
 import { LibraryScan } from "./library-scan";
 import { SubscriptionTrials } from "./subscription-trials";
 import { Improvements } from "./improvements";
@@ -1471,10 +1472,7 @@ export function Console({
                   )}
                   <div className="source-list" aria-busy={libraryLoading}>
                     {libraryLoading && !filtered.length ? (
-                      <output className="empty">
-                        <Loader2 className="spinner" size={24} />
-                        <p>Loading your library...</p>
-                      </output>
+                      <LibrarySkeleton kind="topics" rows={5} />
                     ) : filtered.length ? (
                       filtered.map((s) => (
                         <article key={id(s)} className="source-card">

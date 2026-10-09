@@ -3,36 +3,18 @@ export type TopicNode = {
   parentId?: string;
   children: TopicNode[];
 };
-// Retain a whole returned path when capping accumulated cursor pages.
+// Merge bounded server pages without moving previously loaded siblings.
+// This cache contains returned metadata only; detail and authority stay server-bound.
 export function boundTopicHierarchy<
   T extends { id: string; parentId?: string; autoCategory?: boolean },
 >(topics: T[]): T[] {
-  const records = new Map(topics.map((topic) => [topic.id, topic]));
-  const retained = new Map<string, T>();
-  for (const topic of [...records.values()].reverse()) {
-    if (topic.autoCategory) continue;
-    const path: T[] = [];
-    const seen = new Set<string>();
-    let node: T | undefined = topic;
-    while (node && !seen.has(node.id) && path.length < 12) {
-      seen.add(node.id);
-      path.unshift(node);
-      node = node.parentId ? records.get(node.parentId) : undefined;
-    }
-    if (
-      retained.size + path.filter((item) => !retained.has(item.id)).length >
-      40
-    )
-      continue;
-    for (const item of path) retained.set(item.id, item);
-  }
-  return [...retained.values()];
+  return [...new Map(topics.map((topic) => [topic.id, topic])).values()];
 }
 export function topicPath<T extends { id: string; parentId?: string }>(
   topics: T[],
   id: string,
 ): T[] {
-  const records = new Map(topics.slice(-40).map((topic) => [topic.id, topic]));
+  const records = new Map(topics.map((topic) => [topic.id, topic]));
   const path: T[] = [];
   const seen = new Set<string>();
   let current = records.get(id);
@@ -46,12 +28,10 @@ export function topicPath<T extends { id: string; parentId?: string }>(
 // Only returned topics can appear as parents. A missing parent stays a root on this page.
 export function buildTopicTree(topics: { id: string; parentId?: string }[]) {
   const nodes = new Map(
-    topics
-      .slice(-40)
-      .map((t) => [
-        t.id,
-        { id: t.id, parentId: t.parentId, children: [] } as TopicNode,
-      ]),
+    topics.map((t) => [
+      t.id,
+      { id: t.id, parentId: t.parentId, children: [] } as TopicNode,
+    ]),
   );
   const roots = [];
   for (const node of nodes.values()) {
@@ -72,4 +52,38 @@ export function buildTopicTree(topics: { id: string; parentId?: string }[]) {
     else roots.push(node);
   }
   return roots;
+}
+
+// Follow only returned, choice-free categories. A topic with its own insights
+// and a child offers two destinations, so retain it as the stopping point.
+export function singleChildTarget<
+  T extends {
+    id: string;
+    parentId?: string;
+    ideas?: number;
+    autoCategory?: boolean;
+  },
+>(topics: T[], id: string): T | undefined {
+  const records = new Map(topics.map((topic) => [topic.id, topic]));
+  const nodes = new Map<string, TopicNode>();
+  const collect = (node: TopicNode) => {
+    nodes.set(node.id, node);
+    node.children.forEach(collect);
+  };
+  buildTopicTree(topics).forEach(collect);
+  let current = records.get(id);
+  const seen = new Set(topicPath(topics, id).map((topic) => topic.id));
+  while (current && seen.size < 12) {
+    const children = nodes.get(current.id)?.children ?? [];
+    if (
+      children.length !== 1 ||
+      (!current.autoCategory && (current.ideas ?? 0) > 0)
+    )
+      break;
+    const child = children[0];
+    if (seen.has(child.id)) break;
+    seen.add(child.id);
+    current = records.get(child.id) ?? current;
+  }
+  return current;
 }

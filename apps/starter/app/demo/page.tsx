@@ -1,4 +1,5 @@
 import { Console } from "@/components/console";
+import { libraryDemoSources } from "@/lib/library-demo";
 import fixture from "../../../../fixtures/dashboard.json";
 export const metadata = {
   title: "Labeled workflow demo",
@@ -7,7 +8,12 @@ export const metadata = {
 export default async function Demo({
   searchParams,
 }: {
-  searchParams: Promise<{ uiState?: string; view?: string }>;
+  searchParams: Promise<{
+    uiState?: string;
+    view?: string;
+    proposal?: string;
+    source?: string;
+  }>;
 }) {
   const params = await searchParams;
   const state = params.uiState;
@@ -18,6 +24,9 @@ export default async function Demo({
   return (
     <Console
       demo
+      readOnly
+      initialReviewDraftId={params.proposal}
+      initialSource={libraryDemoSources.find((s) => s._id === params.source)}
       demoState={demoState}
       initialView={
         demoState !== "ready"

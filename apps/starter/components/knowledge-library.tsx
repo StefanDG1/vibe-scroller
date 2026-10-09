@@ -5,6 +5,7 @@ import ReactMarkdown from "react-markdown";
 import { ChoiceSelect } from "./choice-select";
 import { downloadText } from "@/lib/download";
 import { LibraryExplore } from "./library-explore";
+import { libraryDemoDrafts } from "@/lib/library-demo";
 import { KnowledgeMap } from "./knowledge-map";
 
 type Call = (operation: string, args: any) => Promise<any>;
@@ -81,7 +82,7 @@ export function KnowledgeLibrary(p: Props) {
     [localRuns, setLocalRuns] = useState<any[]>([]),
     [ideas, setIdeas] = useState<any[]>([]),
     [ideaNext, setIdeaNext] = useState<string | null>(null),
-    [issues, setIssues] = useState<any[]>([]),
+    [issues, setIssues] = useState<any[]>(p.demo ? libraryDemoDrafts : []),
     [issueNext, setIssueNext] = useState<string | null>(null),
     [project, setProject] = useState(""),
     [message, setMessage] = useState(""),
@@ -1085,7 +1086,7 @@ export function KnowledgeLibrary(p: Props) {
               key={`${d._id}:${d.version}:${d.visibility ?? "unchecked"}:${d.body ? "text" : "redacted"}`}
               draft={d}
               busy={busy}
-              readOnly={p.readOnly}
+              readOnly={p.readOnly || p.demo}
               run={run}
               onOpenImprovements={p.onOpenImprovements}
             />

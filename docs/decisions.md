@@ -171,3 +171,5 @@ Follow [ADR 058](adr/058-bounded-full-library-scans.md): full URL-link paginatio
 ## ADR 099: Readable card labels and topic controls
 
 [ADR 099](adr/099-readable-card-labels-and-topic-controls.md) permits taller word-boundary labels, complete descriptive insight titles, topic organization under Library options and a quieter explicit Show more topics control. It preserves bounded reads and supersedes ADR098's multiword one-line rule.
+
+- [ADR100: Lazy library browsing and choice-free branches](adr/100-lazy-library-and-choice-free-branches.md) records the owner-approved interaction and loading refinement.

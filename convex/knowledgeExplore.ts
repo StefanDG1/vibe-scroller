@@ -4,6 +4,7 @@ import type { QueryCtx } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
 import { v } from "convex/values";
 import { access, writeAccess, limit, audit } from "./lib";
+import { insightProposalStatus } from "../packages/knowledge/proposal-status";
 import { categoryName } from "../packages/categories";
 import { ensure, containsSecret } from "../packages/policy";
 import {
@@ -597,6 +598,7 @@ export const journey = query({
           references: draft.references,
           state: draft.state,
           issueUrl: publication?.url,
+          issueState: publication?.externalState,
           run,
           outcome,
         });
@@ -689,6 +691,163 @@ export const helped = query({
       scopes: scope.scopes,
       coverage:
         "Up to 20 recorded outcomes per page. Reported comparisons retain their sampling windows and limitations; they do not establish causation.",
+    };
+  },
+});
+
+// One indexed page per browse request. Never claim a capped page as a total.
+export const proposalBadges = query({
+  args: { ...scopeArgs, cursor: v.optional(v.string()) },
+  handler: async (ctx, a) => {
+    ctx = knowledgeReadContext(ctx);
+    const scope = await exploreScope(ctx, a.organizationId, a.scope);
+    const page = await ctx.db
+      .query("issueDrafts")
+      .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
+      .paginate({ cursor: a.cursor ?? null, numItems: 5 });
+    const items = [];
+    let complete = true;
+    for (const draft of page.page) {
+      if (["deleted", "rejected"].includes(draft.state)) continue;
+      // Large legacy citations require a separate bounded proof, not a larger read.
+      if (draft.references.length > 16) {
+        complete = false;
+        continue;
+      }
+      const evaluation = await ctx.db.get(draft.evaluationId);
+      if (evaluation && evaluation.references.length > 16) {
+        complete = false;
+        continue;
+      }
+      if (
+        !evaluation ||
+        evaluation.organizationId !== a.organizationId ||
+        evaluation.repositoryId !== draft.repositoryId ||
+        evaluation.topicId !== draft.topicId ||
+        evaluation.topicVersion !== draft.topicVersion ||
+        evaluation.baseSha !== draft.baseSha ||
+        evaluation.profileVersion !== draft.profileVersion ||
+        (evaluation.selectionVersion ?? 0) !== (draft.selectionVersion ?? 0) ||
+        !(await evaluationCurrent(ctx, evaluation)) ||
+        !(await scope.permitted(draft.references)) ||
+        !draft.references.every((ref) =>
+          evaluation.references.some(
+            (cited) => referenceKey(cited) === referenceKey(ref),
+          ),
+        )
+      )
+        continue;
+      const repository = await ctx.db.get(draft.repositoryId);
+      if (repository?.organizationId !== a.organizationId) continue;
+      const observedPublication = await ctx.db
+        .query("issueAttempts")
+        .withIndex("by_current_publication", (q) =>
+          q
+            .eq("draftId", draft._id)
+            .eq("state", "published")
+            .eq("hash", draft.hash)
+            .eq("draftVersion", draft.version),
+        )
+        .order("desc")
+        .first();
+      const publication =
+        observedPublication?.organizationId === a.organizationId &&
+        observedPublication.repositoryId === draft.repositoryId
+          ? observedPublication
+          : null;
+      const improvement = await ctx.db
+        .query("improvements")
+        .withIndex("by_issue", (q) => q.eq("issueDraftId", draft._id))
+        .unique();
+      let run;
+      if (
+        improvement &&
+        improvement.organizationId === a.organizationId &&
+        improvement.repositoryId === draft.repositoryId &&
+        improvement.evaluationId === evaluation._id &&
+        improvement.issueHash === draft.hash &&
+        improvement.issueVersion === draft.version &&
+        improvement.state !== "deleted" &&
+        (await scope.permitted(improvement.references))
+      ) {
+        const proposal = await ctx.db.get(improvement.proposalId);
+        if (
+          proposal?.organizationId === a.organizationId &&
+          proposal.improvementId === improvement._id
+        ) {
+          const observed = await ctx.db
+            .query("runs")
+            .withIndex("by_proposal", (q) => q.eq("proposalId", proposal._id))
+            .order("desc")
+            .first();
+          if (
+            observed?.organizationId === a.organizationId &&
+            observed.repositoryId === draft.repositoryId
+          )
+            run = { prState: observed.prState, mergedAt: observed.mergedAt };
+        }
+      }
+      const status = insightProposalStatus({
+        state: draft.state,
+        issueState: publication?.externalState,
+        run,
+      });
+      if (!status.known) complete = false;
+      if (!status.open) continue;
+      const topicIds = new Set<string>();
+      for (const ref of draft.references) {
+        const memberships = await ctx.db
+          .query("knowledgeMembers")
+          .withIndex("by_reference", (q) =>
+            q
+              .eq("organizationId", a.organizationId)
+              .eq("sourceId", ref.sourceId as Id<"sources">)
+              .eq("generation", ref.generation)
+              .eq("revision", ref.revision)
+              .eq("insightId", ref.insightId),
+          )
+          .take(21);
+        if (memberships.length > 20) complete = false;
+        for (const member of memberships.slice(0, 20)) {
+          if (member.excluded) continue;
+          let id: Id<"knowledgeTopics"> | undefined = member.topicId;
+          const seen = new Set<string>();
+          for (let depth = 0; id && depth < 12; depth++) {
+            if (seen.has(id)) {
+              complete = false;
+              break;
+            }
+            seen.add(id);
+            const topic: Doc<"knowledgeTopics"> | null = await ctx.db.get(id);
+            if (
+              !topic ||
+              topic.organizationId !== a.organizationId ||
+              topic.redirect
+            )
+              break;
+            topicIds.add(topic._id);
+            id = topic.parentId;
+          }
+          if (id) complete = false;
+        }
+      }
+      items.push({
+        id: draft._id,
+        title: draft.title,
+        description: draft.body.slice(0, 500),
+        repository: repository.fullName,
+        state: draft.state,
+        issueState: publication?.externalState,
+        run,
+        references: draft.references,
+        topicIds: [...topicIds],
+      });
+    }
+    return {
+      items,
+      next: page.isDone ? null : page.continueCursor,
+      complete,
+      scope: scope.scope,
     };
   },
 });

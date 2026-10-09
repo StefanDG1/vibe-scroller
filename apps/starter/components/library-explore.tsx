@@ -5,6 +5,11 @@ import { KnowledgeMap } from "./knowledge-map";
 import { InsightProjectLinks } from "./insight-project-links";
 import { TopicDiagram } from "./topic-diagram";
 import { LibraryAtlas } from "./library-atlas";
+import {
+  appendProposalBadges,
+  type ProposalBadgePage,
+} from "../../../packages/knowledge/proposal-badges";
+import { libraryDemoMembers, demoProposalBadges } from "@/lib/library-demo";
 import { ChoiceSelect } from "./choice-select";
 import {
   libraryPlaceKey,
@@ -15,6 +20,7 @@ import {
   buildTopicTree,
   topicPath,
   boundTopicHierarchy,
+  singleChildTarget,
   type TopicNode,
 } from "@/lib/topic-tree";
 import type { FunctionReturnType } from "convex/server";
@@ -112,37 +118,7 @@ const fixtureDetail = {
     >,
     "_id"
   > & { _id: string },
-  members: [
-    "Show a populated example before asking for project setup.",
-    "Offer one clear next decision after the first result.",
-    "Show the source behind a recommendation.",
-    "Keep setup reversible until the person confirms it.",
-    "Let the person inspect uncertainty before acting.",
-    "Record the observed result separately from implementation.",
-  ].map((claim, i) => ({
-    _id: `demo-${i}`,
-    evidence: {
-      title: `Synthetic example ${i + 1}`,
-      reference: {
-        sourceId: `demo-${i}`,
-        generation: 1,
-        revision: 1,
-        insightId: `idea-${i}`,
-      },
-      insight: {
-        claim,
-        title: [
-          "Show a useful example",
-          "Offer one clear next step",
-          "Show the source evidence",
-          "Keep optional setup reversible",
-          "Review uncertainty before acting",
-          "Measure the actual result",
-        ][i],
-        icon: ["palette", "compass", "shield", "checklist", "book", "chart"][i],
-      },
-    },
-  })),
+  members: libraryDemoMembers,
   summaries: [] as any[],
   next: null,
   coverage: "Synthetic evidence only.",
@@ -212,6 +188,9 @@ export function LibraryExplore({
   const [pointerTransition, setPointerTransition] = useState(false);
   const [topics, setTopics] = useState<any>(demo ? fixture : null),
     [search, setSearch] = useState("");
+  const [badges, setBadges] = useState<ProposalBadgePage | null>(
+    demo ? demoProposalBadges() : null,
+  );
   const [selected, setSelected] = useState<any>(null),
     [detail, setDetail] = useState<any>(null),
     [journey, setJourney] = useState<any>(null),
@@ -220,15 +199,13 @@ export function LibraryExplore({
     [savingStructure, setSavingStructure] = useState(false),
     [message, setMessage] = useState(""),
     [loading, setLoading] = useState(!demo),
+    [loadingEvidence, setLoadingEvidence] = useState(false),
     [laterPage, setLaterPage] = useState(false);
   const generation = useRef(0),
     selectionGeneration = useRef(0),
     selectedHeading = useRef<HTMLHeadingElement>(null),
     focusPending = useRef(false),
     detailCursor = useRef<string | undefined>(undefined);
-  const journeyPreview = useRef<{ key: string; result: Promise<any> } | null>(
-    null,
-  );
   async function read(operation: string, args: any) {
     if (load) return load(operation, args);
     const response = await fetch("/api/product", {
@@ -251,21 +228,32 @@ export function LibraryExplore({
   const args = () => ({ organizationId, scope: scope || undefined });
   async function refresh(cursor?: string, append = false) {
     if (demo) return;
-    journeyPreview.current = null;
     const ticket = ++generation.current;
     setLoading(true);
+    if (!append) setBadges(null);
     try {
-      const result = await read(
-        view === "helped" ? "exploreHelped" : "exploreTopics",
-        {
-          ...args(),
-          cursor,
-          ...(view === "helped"
-            ? { method: method || undefined }
-            : { search: search || undefined }),
-        },
-      );
+      const [result, badgePage] = await Promise.all([
+        append && !cursor && view !== "helped"
+          ? Promise.resolve(topics)
+          : read(view === "helped" ? "exploreHelped" : "exploreTopics", {
+              ...args(),
+              cursor,
+              ...(view === "helped"
+                ? { method: method || undefined }
+                : { search: search || undefined }),
+            }),
+        view === "tree" && (!append || badges?.next)
+          ? read("exploreProposalBadges", {
+              ...args(),
+              cursor: append ? badges?.next : undefined,
+            })
+          : Promise.resolve(null),
+      ]);
       if (ticket !== generation.current) return;
+      if (badgePage)
+        setBadges((old) =>
+          appendProposalBadges(append ? old : null, badgePage),
+        );
       if (view === "helped") setHelped(result);
       else
         setTopics((old: any) => ({
@@ -278,6 +266,7 @@ export function LibraryExplore({
       // Revalidate the selected branch on the same visibility-aware refresh.
       if (
         selected &&
+        !append &&
         (await open(selected, detailCursor.current, false)) === false
       )
         return false;
@@ -286,6 +275,7 @@ export function LibraryExplore({
       if (ticket !== generation.current) return;
       selectionGeneration.current++;
       setTopics(null);
+      setBadges(null);
       setDetail(null);
       setJourney(null);
       setHelped(null);
@@ -348,6 +338,13 @@ export function LibraryExplore({
       if (topic) {
         setSelected(topic);
         void restoreTopic(topic);
+      } else {
+        const root = topics.items.find(
+          (item: any) =>
+            !item.parentId && item.autoCategory && item.name === place.filing,
+        );
+        const target = root && singleChildTarget(topics.items, root.id);
+        if (target && target.id !== root.id) void restoreTopic(target);
       }
     } catch {
       /* A fresh overview remains available without storage. */
@@ -433,14 +430,23 @@ export function LibraryExplore({
     }
   }, [detail?.topic, journey]);
   async function open(topic: any, cursor?: string, focus = true) {
+    if (view === "tree" && !cursor) {
+      const target = singleChildTarget(topics?.items ?? [], topic.id);
+      if (target && target.id !== topic.id) {
+        topic = target;
+        remember({ topicId: target.id });
+      }
+    }
     if (topic.autoCategory) {
       selectionGeneration.current++;
+      setLoadingEvidence(false);
       setSelected(topic);
       setDetail({ topic: null, members: [], summaries: [], next: null });
       setJourney(null);
       return;
     }
     const ticket = ++selectionGeneration.current;
+    setLoadingEvidence(true);
     if (!cursor) {
       focusPending.current = focus;
       detailCursor.current = cursor;
@@ -464,6 +470,7 @@ export function LibraryExplore({
           : fixtureDetail.members,
         topic: { ...fixtureDetail.topic, _id: topic.id, name: topic.name },
       });
+      setLoadingEvidence(false);
       setJourney({
         items: [],
         next: null,
@@ -480,7 +487,21 @@ export function LibraryExplore({
       if (ticket !== selectionGeneration.current) return;
       if (view === "journey") setJourney(result);
       else {
-        setDetail(result);
+        setDetail((old: any) => ({
+          ...result,
+          resetKey: cursor ? (old?.resetKey ?? ticket) : ticket,
+          members:
+            cursor && old
+              ? [
+                  ...new Map(
+                    [...old.members, ...result.members].map((member: any) => [
+                      member._id,
+                      member,
+                    ]),
+                  ).values(),
+                ]
+              : result.members,
+        }));
         if (!result.topic && !result.next) setSelected(null);
       }
       setMessage("");
@@ -491,6 +512,8 @@ export function LibraryExplore({
       setSelected(null);
       setMessage(error instanceof Error ? error.message : "Topic unavailable.");
       return false;
+    } finally {
+      if (ticket === selectionGeneration.current) setLoadingEvidence(false);
     }
   }
   function reset() {
@@ -505,6 +528,7 @@ export function LibraryExplore({
     restored.current = null;
     setTreeDiagram(true);
     setTopics(demo ? fixture : null);
+    setBadges(demo ? demoProposalBadges() : null);
     setLaterPage(false);
     detailCursor.current = undefined;
   }
@@ -524,6 +548,7 @@ export function LibraryExplore({
           animateEntry={pointerTransition}
           key={`${organizationId}:${topics?.scope}`}
           topics={topics}
+          badges={badges}
           selected={selected}
           detail={detail}
           search={search}
@@ -548,28 +573,15 @@ export function LibraryExplore({
           onRemember={remember}
           onMoreTopics={() => {
             setLaterPage(true);
-            void refresh(topics.next, true);
+            void refresh(topics?.next ?? undefined, true);
           }}
           onMoreEvidence={() => void open(selected, detail.next)}
+          loadingEvidence={loadingEvidence}
           loading={loading}
           message={message}
+          onRetry={() => void refresh()}
           organizationId={organizationId}
           demo={demo}
-          readJourney={() => {
-            const key = `${organizationId}:${scope}:${selected.id}:${detail?.members.map((member: any) => JSON.stringify(member.evidence.reference)).join("|")}`;
-            if (journeyPreview.current?.key !== key) {
-              const result = read("exploreJourney", {
-                ...args(),
-                topicId: selected.id,
-              }).catch((error) => {
-                if (journeyPreview.current?.result === result)
-                  journeyPreview.current = null;
-                throw error;
-              });
-              journeyPreview.current = { key, result };
-            }
-            return journeyPreview.current.result;
-          }}
           corrections={
             detail?.topic && !readOnly && !demo ? (
               <details className="hybrid-filing-editor">
@@ -1231,7 +1243,7 @@ export function LibraryExplore({
             </ul>
           )}
           <p className="explore-coverage">
-            {topics?.coverage} Up to 40 loaded topics are shown at once.
+            {topics?.coverage} Loaded topic pages are retained while browsing.
             {view === "overview" &&
               " Bars use the twenty-idea evidence-page limit as their full scale. They do not measure whole-topic size or independent corroboration."}
           </p>
@@ -1251,7 +1263,7 @@ export function LibraryExplore({
               disabled={loading}
               onClick={() => {
                 setLaterPage(true);
-                void refresh(topics.next, true);
+                void refresh(topics?.next ?? undefined, true);
               }}
             >
               Show more topics
