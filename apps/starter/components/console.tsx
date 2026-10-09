@@ -233,6 +233,7 @@ export function Console({
 }) {
   const [accessAvailable, setAccessAvailable] = useState(true);
   const captureAccess = useRef(true);
+  const captureOrigin = useRef<HTMLElement | null>(null);
   const router = useRouter(),
     [data, setData] = useState(initial),
     [view, setView] = useState(
@@ -395,7 +396,7 @@ export function Console({
   }, [demo]);
   useEffect(() => {
     if (!captureOpen) return;
-    const previous = document.activeElement as HTMLElement | null;
+    const previous = captureOrigin.current;
     const dialog = captureDialog.current;
     dialog?.showModal();
     const controls = () =>
@@ -427,7 +428,21 @@ export function Console({
     return () => {
       document.removeEventListener("keydown", keyboard);
       dialog?.close();
-      previous?.focus();
+      const available = (element: HTMLElement | null) =>
+        captureAccess.current &&
+        element?.isConnected &&
+        element !== document.body &&
+        !element.matches(":disabled") &&
+        element.getClientRects().length > 0;
+      const target = available(previous)
+        ? previous
+        : [
+            ...document.querySelectorAll<HTMLButtonElement>(
+              ".product-top button.primary, .mobile-save",
+            ),
+          ].find(available);
+      target?.focus();
+      captureOrigin.current = null;
     };
   }, [captureOpen]);
   function applyData(next: Initial) {
@@ -502,6 +517,7 @@ export function Console({
   }
   function clearAccess() {
     captureAccess.current = false;
+    captureOrigin.current = null;
     setAccessAvailable(false);
     setCaptureOpen(false);
     try {
@@ -604,20 +620,35 @@ export function Console({
   }, [view, demo]);
   async function openCapture() {
     if (readOnly || !captureAccess.current) return;
+    // Full-editor loading can disable Save and move focus to the page body.
+    // Retain the actual opener before starting that asynchronous refresh.
+    captureOrigin.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+    const origin = captureOrigin.current;
+    const forgetOrigin = () => {
+      if (captureOrigin.current === origin) captureOrigin.current = null;
+    };
     const generation = viewGeneration.current;
     if ((data.compact || data.workspaceSlice) && !demo) {
       setBusy(true);
       try {
         if (refreshFlight.current) await refreshFlight.current;
-        if (!captureAccess.current || generation !== viewGeneration.current)
+        if (!captureAccess.current || generation !== viewGeneration.current) {
+          forgetOrigin();
           return;
+        }
         const next = await refreshWorkspace("full");
-        if (!captureAccess.current || generation !== viewGeneration.current)
+        if (!captureAccess.current || generation !== viewGeneration.current) {
+          forgetOrigin();
           return;
+        }
         if (!next || next.compact || next.workspaceSlice)
           throw new Error("Capture options could not be loaded. Try again.");
         setCaptureOpen(true);
       } catch (error) {
+        forgetOrigin();
         setNoticeKind("error");
         setNotice(
           error instanceof Error

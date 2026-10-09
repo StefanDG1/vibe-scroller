@@ -1,6 +1,6 @@
 {
   "observedAt": "2026-10-08T23:59:50.717208+00:00",
-  "status": "local candidate; release pending",
+  "status": "Atlas application released; bounded capture-focus follow-up locally verified, production pending",
   "baseCommit": "c8f6cee31a5381a10d79e88547fd7218f1e32b8f",
   "branch": "feat/atlas-design-system",
   "checks": {
@@ -64,7 +64,24 @@
     "taskAttribution": "unknown; delayed team accounting, no verified currency conversion or settled invoice",
     "unknownHolds": "preserved"
   },
-  "release": null,
+  "release": {
+    "pullRequest": 89,
+    "checkedHead": "036a513238d571c2682129b422f37f6fc0c48aa9",
+    "mainCommit": "ea900fe0ffa1eb97edc2e85c6301b2344e2bab8c",
+    "prVerify": 37862984941,
+    "mainVerify": 37863184796,
+    "versionWorkflow": 37863184754,
+    "releaseWorkflow": 37863314250,
+    "tag": "v0.1.0-alpha.20261009000801.gea900fe0ffa1",
+    "publishedAt": "2026-10-09T00:09:40Z",
+    "vercelOverview": "https://vercel.com/stefandg1s-projects/vibe-scroller/Gm1nnRCyEB1aKEhvujuL973wJgDw",
+    "vercelState": "Ready Production",
+    "domain": "https://scroll.companynerve.com",
+    "healthStatus": 200,
+    "healthCache": "no-store",
+    "healthVersion": "0.1.0-alpha.20261009000801.gea900fe0ffa1",
+    "healthCommit": "ea900fe0ffa1eb97edc2e85c6301b2344e2bab8c"
+  },
   "fullV1": "not claimed; independent/provider/lifecycle/commercial/recovery/invoice gates remain separate",
   "hosting": {
     "observedAt": "2026-10-09T00:01:33.906074+00:00",
@@ -72,5 +89,37 @@
     "settingsChanged": false,
     "cliRead": "existing CLI read403; official signed-in browser remains available"
   },
-  "backendRelease": "pending same-source Convex bundle redeployment for patched dependency"
+  "backendRelease": {
+    "deployment": "bold-lemur-667",
+    "sourceCommit": "ea900fe0ffa1eb97edc2e85c6301b2344e2bab8c",
+    "result": "successful Convex deploy with typecheck enabled, codegen disabled",
+    "scope": "same source/functions/schema as compatible backend, patched Node dependency rebundle; no indexes deleted or policy/env changes",
+    "paidProductWork": 0
+  },
+  "productionBrowser": {
+    "observedAt": "2026-10-09T00:09:43.852336Z",
+    "views": ["Home", "Library", "Projects", "Account"],
+    "phoneOverflow": false,
+    "desktopOverflow": false,
+    "loadedLibraryTopics": 10,
+    "loadedTopicRoots": 10,
+    "insightCards": 20,
+    "sourceEvidenceLinks": 20,
+    "currentScope": "Workspace",
+    "desktopMetrics": 4,
+    "desktopBars": 9,
+    "limitations": "Ten roots have no saved parents; do not fabricate category relationships. Normal/mobile capture focus returned Save, but explicit compact first header capture failed focus recovery and is fixed locally below."
+  },
+  "captureFocusFollowup": {
+    "productionFailureAt": "2026-10-09T00:11:40.489097Z",
+    "trigger": "fresh explicit compact Home, headerSave, await dialog.open, Escape",
+    "failure": "closed with BODY focus",
+    "cause": "busy full-data refresh disables the opener before the old effect captures it",
+    "fix": "save opener before refresh; restore only current connected visible enabled authorized control, otherwise visible Save; forget on abort/access loss",
+    "localVerifiedAt": "2026-10-09T00:14:41.941318Z",
+    "localWidths": [390, 1440],
+    "localResult": "Escape returns BUTTON Save, Enter reopens, opacity1 zero reduced-motion animations",
+    "review": "ship for bounded correction by code and local native receipts",
+    "production": "pending checked follow-up release"
+  }
 }
