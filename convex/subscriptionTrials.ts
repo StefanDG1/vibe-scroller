@@ -1,3 +1,4 @@
+import { presentAnalysis } from "../packages/insights/presentation";
 import { query } from "./_generated/server";
 import { mutation, internalMutation } from "./lib/projectedMutations";
 import { internal } from "./_generated/api";
@@ -268,7 +269,7 @@ export const finish = mutation({
     const seen = new Set();
     const normalized = [];
     for (const raw of a.results) {
-      const output: any = insightOutput.parse(raw);
+      const output: any = presentAnalysis(insightOutput.parse(raw) as any);
       const f = t.input.sources.find((s: any) => s.id === output.sourceId);
       ensure(
         f &&

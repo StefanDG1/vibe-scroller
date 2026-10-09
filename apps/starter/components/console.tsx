@@ -43,6 +43,7 @@ import { PrivateLibrary } from "./private-library";
 import { StudioHome } from "./studio-home";
 import { motion } from "motion/react";
 import { useInterfaceMotion } from "./motion-preference";
+import { mobileNavigationGroup } from "@/lib/mobile-navigation";
 import { clearLibraryPlaces } from "@/lib/library-place";
 import { ProposalTrail } from "./proposal-trail";
 import { AppTheme } from "./app-theme";
@@ -2591,8 +2592,10 @@ export function Console({
         <nav className="mobile-nav" aria-label="Mobile navigation">
           {nav.slice(0, 2).map(([key, title, Icon]) => (
             <button
-              className={view === key ? "active" : ""}
-              aria-current={view === key ? "page" : undefined}
+              className={mobileNavigationGroup(view) === key ? "active" : ""}
+              aria-current={
+                mobileNavigationGroup(view) === key ? "page" : undefined
+              }
               key={key}
               onClick={() => go(key)}
             >
@@ -2612,8 +2615,12 @@ export function Console({
             <span>Save</span>
           </button>
           <button
-            aria-current={view === "projects" ? "page" : undefined}
-            className={view === "projects" ? "active" : ""}
+            aria-current={
+              mobileNavigationGroup(view) === "projects" ? "page" : undefined
+            }
+            className={
+              mobileNavigationGroup(view) === "projects" ? "active" : ""
+            }
             onClick={() => go("projects")}
           >
             <GitBranch size={20} aria-hidden="true" />
@@ -2624,14 +2631,7 @@ export function Console({
             demo={demo}
             profile={profile}
             mobile
-            active={[
-              "menu",
-              "usage",
-              "billing",
-              "runners",
-              "privacy",
-              "connections",
-            ].includes(view)}
+            active={mobileNavigationGroup(view) === "account"}
           />
         </nav>
       </div>

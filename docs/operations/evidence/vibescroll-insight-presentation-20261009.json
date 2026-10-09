@@ -1,0 +1,56 @@
+{
+  "scope": "ADR098 insight presentation and Library place",
+  "time": "2026-10-09T12:55:40.326981+00:00",
+  "baseCommit": "5009dbb31d015b6e81f4b5c7e5cb36caf8508889",
+  "branch": "feat/insight-presentation-and-library-place",
+  "environment": "Windows Node24 local production build and labeled synthetic fixtures",
+  "local": {
+    "command": "pnpm check (outputs/insight-presentation-ready-check-20261009.log); final scope targeted17; dependency audit",
+    "unitPassed": 557,
+    "externalSkipped": 3,
+    "authorizationPassed": 28,
+    "pythonPassed": [6, 6, 3],
+    "basicPolicyPassed": 5,
+    "buildsPassed": ["marketing", "starter"],
+    "finalScopeTestsPassed": 17,
+    "dependencyUnresolved": 0,
+    "knownMitigation": "Braces advisory remains upstream advisory"
+  },
+  "browser": {
+    "receipt": "private/insight-presentation-browser-scope-fix-20261009.json",
+    "widths": [320, 390, 412, 768, 1440],
+    "overflow": false,
+    "reloadFoldersExpandedInsight": true,
+    "categoryCloseUnhighlight": true,
+    "nativeSequentialBranchSwitch": true,
+    "reducedMotionRunningAnimations": 0,
+    "sameNavGeometryAndRelatedDestination": true,
+    "proposalPreview": "Synthetic exact-version fixture only",
+    "limitations": "Authenticated production scope switching, expanded-search recovery, physical-device smoothness and independent comprehension not yet verified"
+  },
+  "data": {
+    "inference": false,
+    "apiTokenReanalysis": false,
+    "pastEvidenceRewritten": false,
+    "newGrant": false,
+    "financialHoldReleased": false,
+    "backendDeployRequired": true
+  },
+  "review": {
+    "initialDisposition": "fix",
+    "namedFixes": [
+      "scope reset and fresh defaults",
+      "PRODUCT/DESIGN/sidecar reconciliation"
+    ],
+    "finalDisposition": "ship for the two named fixes only"
+  },
+  "release": {
+    "status": "pending exact checks/backend/frontend/canonical verification"
+  },
+  "failuresPreserved": [
+    "Initial TypeScript enriched generic-return test corrected",
+    "Missing Account aria-current corrected",
+    "Avatar-initial raw text assertion corrected without removing avatar",
+    "Expanded-search native setup did not complete; not a pass"
+  ]
+}

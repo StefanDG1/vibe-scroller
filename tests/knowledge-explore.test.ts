@@ -480,3 +480,33 @@ it("hides authored ancestors when every descendant loses current source rights a
     }),
   ).rejects.toThrow("FORBIDDEN");
 });
+
+it("projects existing titles and icons only through current permitted insight evidence", async () => {
+  const s = await setup();
+  await s.t.run(async (ctx) => {
+    const source = (await ctx.db.get(s.personal.sourceId))!;
+    await ctx.db.patch(source._id, {
+      analysis: {
+        ...source.analysis,
+        insights: source.analysis.insights.map((insight: any) => ({
+          ...insight,
+          title: "Review source evidence",
+          icon: "shield",
+        })),
+      },
+    });
+  });
+  const detail = await s.owner.query(api.knowledgeExplore.detail, {
+    ...s.args,
+    scope: "personal",
+  });
+  expect(detail.members).toHaveLength(1);
+  expect(detail.members[0].evidence.insight).toMatchObject({
+    title: "Review source evidence",
+    icon: "shield",
+    claim: "Synthetic personal-fixture",
+  });
+  await expect(
+    s.other.query(api.knowledgeExplore.detail, s.args),
+  ).rejects.toThrow();
+});

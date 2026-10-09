@@ -406,6 +406,9 @@ export const detail = query({
             reference: evidence.reference,
             title: evidence.title,
             insight: {
+              title: evidence.insight.title,
+              icon: evidence.insight.icon,
+              categories: evidence.insight.categories,
               claim: evidence.insight.claim,
               evidence: evidence.insight.evidence,
             },
@@ -590,6 +593,8 @@ export const journey = query({
         steps.push({
           id: draft._id,
           title: draft.title,
+          description: draft.body.slice(0, 500),
+          references: draft.references,
           state: draft.state,
           issueUrl: publication?.url,
           run,

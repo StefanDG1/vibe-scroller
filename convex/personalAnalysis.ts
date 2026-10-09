@@ -1,3 +1,4 @@
+import { presentAnalysis } from "../packages/insights/presentation";
 import { workspaceReadable } from "./lib/workspacePrivacy";
 import { query, internalQuery } from "./_generated/server";
 import { mutation, internalMutation } from "./lib/projectedMutations";
@@ -573,7 +574,7 @@ export const dispatch = internalMutation({
       });
       return { valid: true, deadline: job.deadline };
     }
-    const output: any = insightOutput.parse(a.output);
+    const output: any = presentAnalysis(insightOutput.parse(a.output) as any);
     if (source.kind !== "text")
       output.warnings = [
         ...new Set([

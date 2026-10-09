@@ -163,3 +163,7 @@ Follow [ADR 058](adr/058-bounded-full-library-scans.md): full URL-link paginatio
 ## Stable mobile Library navigation
 
 [ADR 097](adr/097-stable-mobile-library-navigation.md) records the owner screenshot rejection and fixed filing/view controls, stable scrollable category rows, one-level expansion, inline insight evidence and the shared bottom Account menu. Actual mobile-width verification replaces the insufficient overflow comparison.
+
+## Descriptive insight cards and remembered position
+
+[ADR 098](adr/098-insight-presentation-and-library-position.md) records short authored titles, semantic icons, exact proposal previews, bounded navigation resumption and related bottom-navigation highlighting. It replaces click-only journey retrieval with one shared bounded topic lookup.

@@ -52,7 +52,7 @@ typography:
     lineHeight: 1.2
   mobile-category:
     fontSize: "13px"
-  insight-excerpt:
+  insight-title:
     fontSize: "15px"
     fontWeight: 650
     lineHeight: 1.4
@@ -67,6 +67,7 @@ typography:
     lineHeight: 1.4
 rounded:
   chip: "5px"
+  proposal-count: "7px"
   field: "9px"
   control: "10px"
   insight: "12px"
@@ -141,6 +142,9 @@ components:
     rounded: "{rounded.insight}"
     padding: "10px"
     height: "56px"
+    width: "190px"
+  hybrid-category-mobile:
+    width: "170px"
   hybrid-search:
     backgroundColor: "{colors.panel}"
     textColor: "{colors.ink}"
@@ -157,6 +161,10 @@ components:
     textColor: "{colors.ink}"
     rounded: "{rounded.insight}"
     padding: "0"
+  proposal-count:
+    textColor: "{colors.primary}"
+    rounded: "{rounded.proposal-count}"
+    padding: "3px 7px"
 ---
 
 # Design System: VibeScroll Atlas
@@ -173,7 +181,8 @@ This is the owner-authorized October 9 application world, extracted from the bui
 
 - Cool light surfaces and matching dark surfaces with teal selection.
 - Favicon Home link and authenticated account avatar.
-- Stable saved-topic branches and evidence expanded inside each insight row.
+- Stable saved-topic branches, scoped remembered position and evidence expanded inside each insight row.
+- Descriptive insight titles, semantic icons and exact loaded-page proposal badges.
 - Five phone actions: Home, Library, Save, Projects, Account.
 - Short pointer-triggered motion with immediate keyboard actions and a still alternative.
 - Loaded-record statistics and explicitly recorded project trails.
@@ -201,7 +210,7 @@ The frontmatter records the effective Atlas light palette and its dark counterpa
 - **Quiet line and Muted surface:** borders, branch stems, active rail rows and informational tags.
 - **Dark canvas, panel, ink, subtle, line and muted:** matching roles when the device or Account selects dark appearance.
 
-The category selection fill mixes theme Teal at 8% with Panel. Insight icon backgrounds use the same selection fill or blue at 16%, yellow at 18% and purple at 16% mixed with Panel. These incumbent `color-mix()` tints follow the existing theme; they introduce no new permission or outcome state.
+The category selection fill mixes theme Teal at 8% with Panel. Insight icon backgrounds use the same selection fill or blue at 16%, yellow at 18% and purple at 16% mixed with Panel. The semantic icon key determines the pastel tone, so reordering records does not change it. These incumbent `color-mix()` tints follow the existing theme; they introduce no new permission or outcome state. Closed categories lose the active fill and border.
 
 **The Recorded Meaning Rule.** Selection and connectors describe returned records; neither color nor a line establishes permission, independent corroboration or benefit.
 
@@ -217,8 +226,8 @@ The category selection fill mixes theme Teal at 8% with Panel. Insight icon back
 
 - **Headline:** inherited page title; Library uses a 36px heading, reduced to 30px on phones.
 - **Studio headline:** the next action on Home; phone Atlas overrides it to 23px.
-- **Topic title:** saved topic names, with unrestricted word wrapping.
-- **Body / Insight:** full claims use 14px; row excerpts use 15px and weight 650, reduced to 14px on phones.
+- **Topic title:** category names use one line and ellipsis; the accessible name retains the complete label.
+- **Body / Insight:** full unchanged claims use 14px; stored descriptive insight titles use 15px and weight 650, reduced to 14px on phones. Compact titles clamp to two lines. Legacy records without a title use the unchanged claim as a display fallback.
 - **Metadata:** source and proposal detail use 12px; phone row metadata and bottom labels use 11px. Categories use 14px, reduced to 13px on phones, and toolbar labels use 13px, reduced to 12px. The 11/12/13/14/15px scale is retained intentionally for the operative density and does not reduce hit areas.
 
 **The Reading Hierarchy Rule.** Keep title, explanation and metadata distinct through scale, weight and neutral contrast; use concise sentence case labels instead of ornamental eyebrows.
@@ -227,9 +236,9 @@ The category selection fill mixes theme Teal at 8% with Panel. Insight icon back
 
 The inherited desktop shell keeps a 244px rail, 64px toolbar and main content capped at 1120px. The rail narrows at 1050px. Earlier 720px shell and 700px Atlas declarations remain in the cascade; the final mobile correction applies at 760px and below, with 16px 12px 110px main padding. The mobile header hides the workspace strip, status and rail opener. The favicon logo links to Home. The same five bottom controls remain on every app page in Home, Library, Save, Projects, Account order. The fixed strip uses five equal columns, safe-area padding and at least 76px height; selected destinations have a 28px underline. Save is a transparent action with a raised 48px yellow SVG circle and an 11px theme-Subtle label.
 
-Library is capped at 1040px with 20px inset, removed on phones. The heading and search share a row. A separate stationary toolbar has two equal segments containing Tree/Folders and Personal/Business, capped at 600px on desktop. It stays in the same position across representation and filing changes; it is not sticky to the viewport. Tree displays one authored filing root. Every returned sibling keeps its saved order in a horizontal scrolling row; cards are 170px wide on desktop and 148px on phones, with a 10px gap. Selection does not reorder or automatically scroll a card. Each category click opens one level. Folders uses 12px indentation, reduced to 10px on phones, and expands only the chosen path. Unorganized legacy topics retain their returned roots.
+Library is capped at 1040px with 20px inset, removed on phones. The heading and search share a row. A separate stationary toolbar has two equal segments containing Tree/Folders and Personal/Business, capped at 600px on desktop. It stays in the same position across representation and filing changes; it is not sticky to the viewport. Tree displays one authored filing root. Every returned sibling keeps its saved order in a horizontal scrolling row; the frontmatter records the wider desktop and phone card widths, with a 10px gap. Selection does not reorder or automatically scroll a card. Each category click opens one level. Folders uses 12px indentation, reduced to 10px on phones, and expands only the chosen path. Unorganized legacy topics retain their returned roots.
 
-Both views place stacked evidence inside the selected branch. Rows have an 80px minimum selection area, 42px icons and compact excerpts; phone icons are 36px. A row expands its full original claim, title, source link and any exact recorded proposal within the row. Both views initially show six returned insights; More insights adds six, while Next insights page requests the next authorized page. Navigation stays mounted when evidence arrives. Only the evidence list resets on its topic, insight generation and revision key; workspace/scope changes still reset private state. Runtime SVG connectors use measured category rectangles and skip hidden levels. The earlier pair grid, stepped composition, detached source pane and automatic deepest-branch preview are historical under ADR 097.
+Both views place stacked evidence inside the selected branch. Rows have an 80px minimum selection area, 42px semantic icons and descriptive insight titles; phone icons are 36px. A row expands its full original claim, source title, source link and exact recorded proposals within the row. Both views initially show six returned insights; More insights adds six, while Next insights page requests the next authorized page. Navigation stays mounted when evidence arrives. The evidence list resets on its topic, insight generation and revision key. Workspace/scope changes and search resets also clear in-memory place and pending scroll restoration; the fresh authorized page supplies the saved place or available overview. Runtime SVG connectors use measured category rectangles and skip hidden levels. Tree includes the selected topic-to-insights connector, and both views repeat the topic name beside Insights. The earlier pair grid, stepped composition, detached source pane and automatic deepest-branch preview are historical under ADR 097; ADR098 governs the current title, icon and restoration refinement.
 
 **The Touch Target Rule.** Interactive controls keep at least a 44px target; small type and icons do not justify a smaller hit area. Informational chips are not controls.
 
@@ -245,7 +254,7 @@ Thin borders and tonal surfaces establish depth. Earlier topic-node variants ret
 
 ## Shapes
 
-Soft rounded rectangles define the atlas. Current categories, insight rows, search, toolbar containers and More insights controls use Insight corners. Segmented toolbar buttons retain Field corners, and icon backgrounds retain Control corners. The 9/10/12px control radii are intentionally retained for operative density. Earlier topic-node variants retain Node corners; general panels use Panel and informational badges use Chip. Proposal-stage markers and authenticated avatars are circles. The favicon supplies the app identity; line icons identify media, navigation and recorded stages.
+Soft rounded rectangles define the atlas. Current categories, insight rows, search, toolbar containers and More insights controls use Insight corners. Segmented toolbar buttons retain Field corners, and icon backgrounds retain Control corners. The 9/10/12px control radii are intentionally retained for operative density. Earlier topic-node variants retain Node corners; general panels use Panel and ordinary informational badges use Chip. The proposal-count badge intentionally uses its own 7px corners. Proposal-stage markers and authenticated avatars are circles. The favicon supplies the app identity; line icons identify media, navigation and recorded stages.
 
 ## Components
 
@@ -257,6 +266,8 @@ Retained primary controls use the Legacy primary palette and medium weight (550)
 
 Status and tag badges use Muted with Ink and Chip corners. Small labels supplement readable state text. Synthetic records remain labeled; a badge never implies complete analysis.
 
+Proposal-count badges use theme Teal and the category selection tint, their own frontmatter radius and compact padding. Counts cover matching loaded drafts only; a plus indicates additional evaluations. They make no external GitHub-open assertion.
+
 ### Cards / Containers
 
 General panels retain 24px padding and Panel corners. Insight rows use a thin line border and Insight corners. Their selection button has 12px padding, reduced to 10px on phones. Expanded detail uses 14px padding and an internal top divider; full source headings and recorded proposals stay inside the row. Trace cards use 16px padding and Node corners, with Canvas-filled action rows and centered downward arrows.
@@ -267,13 +278,15 @@ Fields use Panel, Ink and Line, with Field corners and 10px 12px padding. Search
 
 ### Navigation
 
-The desktop rail uses subtle text, line icons and a muted selected/hover fill. Phone navigation uses theme-primary active text; the yellow Save SVG opens the reviewed capture dialog and its label uses theme Subtle. Bottom Account opens the existing dropdown upward; the mobile top account control is absent. Account exposes appearance and motion preferences alongside existing workflow destinations. Appearance offers Device setting, Light and Dark, following live device changes in Device setting mode. Account retains appearance, Usage, Billing, Computers, Privacy, Cookie preferences, version, Account & sign out and Website destinations; the Account page keeps the other workflow links. WorkOS passes the current authenticated user's HTTPS OAuth picture, with a first-name initial when absent or failed. It fetches no other user profile.
+The desktop rail uses subtle text, line icons and a muted selected/hover fill. Phone navigation uses theme-primary active text; the centered yellow Save SVG opens the reviewed capture dialog and its label uses theme Subtle. Source and shared Library pages select Library. Proposal, improvement and run pages select Projects. Other Account destinations preserve the Account current-page marker. Bottom Account opens the existing dropdown upward; the mobile top account control is absent. Account exposes appearance and motion preferences alongside existing workflow destinations. Appearance offers Device setting, Light and Dark, following live device changes in Device setting mode. Account retains appearance, Usage, Billing, Computers, Privacy, Cookie preferences, version, Account & sign out and Website destinations; the Account page keeps the other workflow links. WorkOS passes the current authenticated user's HTTPS OAuth picture, with a first-name initial when absent or failed. It fetches no other user profile.
 
 ### Saved topic atlas and insight links
 
-Tree is the default; Folders provides an expanded alternative over the same returned IDs and exact evidence. Remembered topic IDs restore only after the current authorized page returns them. Personal/Business roots are authored filing containers, independent of access scope. A missing counterpart can appear as an empty local filing template with no evidence, totals or grant. Library access view uses only server-returned permitted scopes; team libraries retain Workspace. Missing parents remain separate roots. The explicit deterministic category helper uses no model call and preserves saved manual layout versions.
+Tree is the default; Folders provides an expanded alternative over the same returned IDs and exact evidence. The current filing root opens by default. Browser preferences store representation, filing, topic, closed branch, expanded insight and bounded page/row scroll under workspace/scope keys. Only identifiers and geometry are stored. Topic and closed-branch IDs restore after the fresh authorized page returns them; expanded insight IDs must match its returned members. Missing or revoked topics discard insight and geometry. Missing saved entries use Tree and the available filing overview. Scope and search resets clear pending restoration; access loss clears saved preferences. Personal/Business roots are authored filing containers, independent of access scope. A missing counterpart can appear as an empty local filing template with no evidence, totals or grant. Library access view uses only server-returned permitted scopes; team libraries retain Workspace. Missing parents remain separate roots. The explicit deterministic category helper uses no model call and preserves saved manual layout versions.
 
-Activating an insight expands the unchanged full claim, full source title and source link inside that row. Compact excerpts do not replace original evidence. Demo rows abbreviate Synthetic example to Example while the explicit synthetic banner and full source title retain context. Project connections start only on an actual insight click, reuse the bounded current-topic reference cache and filter exact source and insight IDs. Failed reads are cleared for explicit retry. Matching recorded proposals appear inside the expanded row; Review opens that exact proposal. Category correction remains version-bound, and Library options retains access view, explicit deterministic organization and coverage. Empty or partial pages explain missing coverage. Native disclosures retain 44px targets; advanced evidence representations remain reachable.
+The stored insight title leads each row. Future analysis asks for a descriptive three-to-seven-word title and an icon from the fixed semantic whitelist. A deterministic fallback displays legacy records and persists an omitted icon at new completion without rewriting historical claims or starting reanalysis. Icons describe subject, never confidence. Activating an insight expands the unchanged full claim, full source title and source link inside that row. Demo rows abbreviate Synthetic example to Example while the explicit synthetic banner and full source title retain context.
+
+A selected topic reads one bounded current journey page shared by all its insight cards. This supersedes ADR097's click-only read and adds no per-card query, scan, automatic journey pagination, inference or polling. Exact source, insight, generation and revision references filter current drafts; rejected, deleted, observed merged and observed closed-PR records are excluded. Unknown external issue closure remains unknown. Counts describe the loaded page and add a plus when more evaluations exist. Expanded proposals show title, project, recorded state and up to 500 characters of description, visually clamped to two lines. The whole proposal row opens the existing authorized exact-draft review route. Failed reads are cleared for explicit retry. Category correction remains version-bound, and Library options retains access view, explicit deterministic organization and coverage. Empty or partial pages explain missing coverage. Native circle-help disclosures carry small metric and connection explanations with readable labels and 44px targets. Essential errors and task controls stay visible; advanced evidence representations remain reachable.
 
 **The Cited Group Rule.** Display a connection only when all of its exact source, generation, revision and insight references exist in current permitted evidence. A connection is an explained cited group; neither its line nor topic membership proves causation or agreement.
 
@@ -291,7 +304,9 @@ Pointer branch switching closes the old branch before opening the next with 220m
 
 ### Candidate verification boundary
 
-The final native local browser receipt at `private/mobile-navigation-final-browser-20261009.json` reports PASS at requested/actual widths 320, 390, 412, 768, 1440 and 1600. It covers inline Tree/Folders evidence, stationary toolbar and bottom controls, one-level interaction, sequential pointer close/open, keyboard/reduced-motion behavior and actual Account destinations. The nine captures under `.impeccable/review/` are synthetic browser proof: `mobile.png`, `mobile-folders.png`, `user-320.png`, `desktop.png`, `mobile-dark.png`, `mobile-account-menu.png`, `mobile-home.png`, `mobile-projects.png` and `mobile-account.png`. The fresh full reviewer handoff identified the dark Save label and documentation freshness; the code correction and this documentation refresh address those findings, with final reviewer disposition pending. No review file is asserted from that handoff.
+Current ADR098 evidence is `private/insight-presentation-browser-scope-fix-20261009.json`, the fresh local synthetic native PASS after the final build. The earlier receipt at `private/insight-presentation-browser-20261009.json` and preceding failures remain historical. The same six recaptured and inspected captures in `.impeccable/review/insight-presentation/` are `mobile.png`, `mobile-expanded.png`, `mobile-folders.png`, `user-320.png`, `desktop.png` and `mobile-dark.png`. They show 390px Tree, scrolled inline proposal, Folders, 320px Folders, 1440px desktop and dark Tree. The dark capture shows Product open and Customer experience closed and unhighlighted. The fresh full reviewer at `private/insight-presentation-finish-review-20261009.md` returned fix for stale documentation and scope restoration. This document records the refinement, and the owner implementation adds fresh-default restoration and pending-state resets. Final reviewer clearance and exact release/publish verification remain pending. Builder reports record 556 unit passes with three external skips, 28 authentication passes, Python suites of 6/6/3, Basic-build checks of five and both builds, plus 17 targeted restoration regression passes. State-reset behavior has code and regression evidence; authenticated production scope switching remains pending. The fresh native receipt confirms the rendered synthetic journey, including the Account current marker with its avatar initial retained. They remain local evidence.
+
+The earlier ADR097 native local receipt at `private/mobile-navigation-final-browser-20261009.json` reports PASS at requested/actual widths 320, 390, 412, 768, 1440 and 1600. Its nine captures under `.impeccable/review/` and later committed production receipt retain their original correction scope; they do not verify ADR098.
 
 This local receipt does not establish physical-device smoothness, independent comprehension, actual OAuth picture delivery, exact production acceptance, provider/cost settlement or full V1 acceptance. The preceding ADR 095/096 grid, its 78% drift FAIL and hard veto under `.impeccable/review/diff/hero`, the earlier stacked captures and recorded animation counts remain historical. They are neither current composition instructions nor passes for this revision.
 
@@ -301,9 +316,9 @@ The subsequent capture focus-recovery review cleared the bounded code correction
 
 ### Historical evidence
 
-The latest serving application before this correction was `aacdc9ce237d82aab0ccf544c24c9c3342eab104`, version `0.1.0-alpha.20261009085602.gaacdc9ce237d`, with documentation main `0b670c4`, supplied in the release handoff. Those identifiers are historical and do not establish the current candidate deployment.
+The historical serving application before the ADR097 correction was `aacdc9ce237d82aab0ccf544c24c9c3342eab104`, version `0.1.0-alpha.20261009085602.gaacdc9ce237d`, with documentation main `0b670c4`, supplied in the release handoff. Those identifiers are historical and do not establish the current candidate deployment.
 
-Historical October 9 release e68fc3e52946 was Ready Production with canonical health/version, populated Library/Home reads and compact header capture recovery at 390/1440 in [the committed receipt](docs/operations/evidence/vibescroll-atlas-20261009.json). That release supersedes only its preceding candidate production-pending statements. It does not verify the later ADR 097 correction, whose exact production acceptance remains pending. Review scopes and independent/physical/provider/cost gates remain unchanged.
+Historical October 9 release e68fc3e52946 was Ready Production with canonical health/version, populated Library/Home reads and compact header capture recovery at 390/1440 in [the committed receipt](docs/operations/evidence/vibescroll-atlas-20261009.json). That release supersedes only its preceding candidate production-pending statements. It did not verify the later ADR097 correction; its separate release receipt below records that acceptance. Review scopes and independent/physical/provider/cost gates remain unchanged.
 
 The receipts below retain their original dates and acceptance limits. Their earlier visual descriptions are historical; the Atlas tokens and rules above define the current application candidate. Public policy and marketing styling remain outside this replacement.
 
@@ -350,4 +365,4 @@ Retain the existing dark overview, main-point cards and 44 px controls. The actu
 - **Don't** detach evidence from its insight row, remount navigation on evidence arrival, reorder siblings or automatically open the deepest branch.
 - **Don't** publish private reference screenshots or turn a scoped fix verdict into production or full V1 acceptance.
 
-October 9 ADR097 release receipt: application `e9a7b2b527e46fd9bc3bd23e06e46b19b364ed27`, alpha `0.1.0-alpha.20261009103606.ge9a7b2b527e4`, is verified on canonical production at the bounded owner-page scope. This supersedes the current correction's preceding production-pending statements. The fresh reviewer cleared the two named corrections after recapture. Actual Tree/Folders controls remain stationary, real claims expand inline, and requested 320/390/412/1440 widths fit. The first-name initial is observed; OAuth-image delivery, physical-device motion and full V1 acceptance remain unverified. Earlier failed fidelity and 846px Folder results remain historical evidence. [The mobile navigation receipt](docs/operations/evidence/vibescroll-mobile-navigation-20261009.json) distinguishes exact serving source from this documentation-only follow-up.
+October 9 ADR097 release receipt: application `e9a7b2b527e46fd9bc3bd23e06e46b19b364ed27`, alpha `0.1.0-alpha.20261009103606.ge9a7b2b527e4`, is verified on canonical production at the bounded owner-page scope. This supersedes ADR097's preceding production-pending statements only; it does not verify the later ADR098 candidate. The fresh reviewer cleared the two named corrections after recapture. Actual Tree/Folders controls remain stationary, real claims expand inline, and requested 320/390/412/1440 widths fit. The first-name initial is observed; OAuth-image delivery, physical-device motion and full V1 acceptance remain unverified. Earlier failed fidelity and 846px Folder results remain historical evidence. [The mobile navigation receipt](docs/operations/evidence/vibescroll-mobile-navigation-20261009.json) records the exact serving source for ADR097.

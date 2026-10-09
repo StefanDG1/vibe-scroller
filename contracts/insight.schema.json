@@ -140,6 +140,23 @@
               "type": "string",
               "maxLength": 500
             }
+          },
+          "icon": {
+            "enum": [
+              "lightbulb",
+              "compass",
+              "checklist",
+              "code",
+              "chart",
+              "megaphone",
+              "users",
+              "palette",
+              "shield",
+              "workflow",
+              "book",
+              "heart",
+              "wrench"
+            ]
           }
         }
       }

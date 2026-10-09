@@ -63,6 +63,7 @@ export function AccountMenu({
       <Menu.Trigger
         className={`account-trigger ${mobile ? "mobile-account-trigger" : ""} ${active ? "active" : ""}`}
         aria-label="Account menu"
+        aria-current={active ? "page" : undefined}
       >
         <ProfileAvatar
           key={profile?.pictureUrl ?? profile?.firstName ?? "default"}

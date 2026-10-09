@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import {
   ChevronDown,
   ChevronRight,
@@ -41,6 +41,8 @@ export function TopicDiagram({
   representation = "tree",
   filing = "Business",
   children,
+  closedTopicId,
+  onCollapse,
 }: {
   topics: Topic[];
   onOpen: (topic: Topic) => void;
@@ -48,6 +50,8 @@ export function TopicDiagram({
   representation?: "tree" | "folders";
   filing?: "Personal" | "Business";
   children?: React.ReactNode;
+  closedTopicId?: string;
+  onCollapse?: (topicId?: string) => void;
   animateEntry?: boolean;
 }) {
   const records = new Map(topics.map((t) => [t.id, t]));
@@ -83,14 +87,22 @@ export function TopicDiagram({
     ? originalPath.filter((_t) => originalPath[0]?.id === root?.id)
     : originalPath;
   const active = new Set(path.map((t) => t.id));
-  useEffect(() => {
+  const syncNavigation = useEffectEvent(() => {
     if (switching.current && previousFiling.current === filing) return;
     previousFiling.current = filing;
     pending.current = null;
     switching.current = false;
     setVisualId(selectedId);
-    setPhase("open");
-  }, [selectedId, filing]);
+    const closedDepth = topicPath(
+      topics,
+      selectedId ?? root?.id ?? "",
+    ).findIndex((t) => t.id === closedTopicId);
+    setCutDepth(Math.max(0, closedDepth));
+    setPhase(closedDepth >= 0 ? "closed" : "open");
+  });
+  useEffect(() => {
+    syncNavigation();
+  }, [selectedId, filing, closedTopicId]);
   useEffect(() => {
     const tree = treeRef.current;
     if (!tree || representation !== "tree") return;
@@ -121,6 +133,19 @@ export function TopicDiagram({
           paths.push(`M ${x} ${y} V ${m} H ${cx} V ${cy}`);
         }
       }
+      const evidence = tree.querySelector<HTMLElement>(".hybrid-evidence");
+      const selected = tree.querySelector<HTMLElement>(
+        `.hybrid-node[data-topic-id="${selectedId}"][data-selected="true"]`,
+      );
+      if (evidence && selected && !evidence.closest('[aria-hidden="true"]')) {
+        const p = selected.getBoundingClientRect(),
+          e = evidence.getBoundingClientRect();
+        const x = p.left + p.width / 2 - bounds.left,
+          y = p.bottom - bounds.top,
+          ex = e.left + e.width / 2 - bounds.left,
+          ey = e.top + 18 - bounds.top;
+        paths.push(`M ${x} ${y} V ${(y + ey) / 2} H ${ex} V ${ey}`);
+      }
       setEdges({ width: bounds.width, height: bounds.height, paths });
     }
     const observer = new ResizeObserver(measure);
@@ -138,7 +163,7 @@ export function TopicDiagram({
       cancelAnimationFrame(frame);
       tree.removeEventListener("scroll", scroll, true);
     };
-  }, [visualId, phase, representation, topics, filing]);
+  }, [visualId, phase, representation, topics, filing, selectedId, children]);
   function finish() {
     if (phase !== "closing") return;
     if (pending.current) {
@@ -148,7 +173,10 @@ export function TopicDiagram({
       setPhase("open");
       const topic = records.get(id);
       if (topic) onOpen(topic);
-    } else setPhase("closed");
+    } else {
+      setPhase("closed");
+      onCollapse?.(path[cutDepth]?.id);
+    }
     switching.current = false;
   }
   function choose(node: TopicNode, pointerActivation: boolean) {
@@ -159,6 +187,7 @@ export function TopicDiagram({
     const newPath = topicPath(topics, node.id);
     const depth = Math.max(0, newPath.length - 1);
     if (node.id === candidate && phase === "closed") {
+      onCollapse?.(undefined);
       setPhase("open");
       return;
     }
@@ -166,9 +195,13 @@ export function TopicDiagram({
       pending.current = null;
       setCutDepth(depth);
       if (shouldAnimate) setPhase("closing");
-      else setPhase("closed");
+      else {
+        setPhase("closed");
+        onCollapse?.(node.id);
+      }
       return;
     }
+    onCollapse?.(undefined);
     let common = 0;
     while (
       common < path.length &&
@@ -199,7 +232,7 @@ export function TopicDiagram({
       <button
         className="hybrid-node"
         data-topic-id={node.id}
-        data-selected={active.has(node.id)}
+        data-selected={expanded}
         aria-label={`Open ${topic.name}`}
         aria-expanded={
           node.children.length || node.id === selectedId ? expanded : undefined
