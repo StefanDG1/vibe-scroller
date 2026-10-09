@@ -27,7 +27,20 @@
   },
   "review": "ship for scoped source/capture review and single named documentation correction",
   "release": {
-    "status": "pending"
+    "status": "Production Ready; scope-specific acceptance",
+    "pullRequest": 99,
+    "candidateHead": "6404b0b6bbb5560dcd9daebc51b51961838558a4",
+    "applicationCommit": "29711f849ff487100cc23d6202e31f899ce714ac",
+    "alpha": "0.1.0-alpha.20261009133235.g29711f849ff4",
+    "requiredPRVerify": 37937313641,
+    "mainVerify": 37937592341,
+    "mainVersion": 37937592167,
+    "mainAlpha": 37937772794,
+    "vercel": "FNjAQNzwqQMMZAJhRWqrRHuPtK3o",
+    "checkedAt": "2026-10-09T13:34:49.088620+00:00",
+    "canonicalDomain": "scroll.companynerve.com",
+    "health": "HTTP200; status ok; exact source and version",
+    "backendDeployed": false
   },
   "data": {
     "sourceOrCategorizationWrite": false,
@@ -35,5 +48,19 @@
     "newGrant": false,
     "financialHoldOrLimitChanged": false,
     "backendDeployRequired": false
+  },
+  "productionBrowser": {
+    "environment": "Authenticated canonical owner browser; native desktop Chrome emulated viewports; reduced motion",
+    "widths": [320, 390, 412, 1440],
+    "documentOverflow": false,
+    "storedTitleThreeLinesAndFullFit": true,
+    "moveEditorInLibraryOptions": true,
+    "moveFormParent": "Operations",
+    "mutationSubmitted": false,
+    "exactAccountVersionVerified": true,
+    "cursorActionCount": 1,
+    "newVisibleTopicsAcceptance": "NOT DEMONSTRATED",
+    "cursorObservation": "The one bounded cursor action left the same 18 visible Business node IDs, reordered. Show more topics remained available. The initial positive-added-topic assertion failed and is preserved privately. Backend pages ten leaf records before current-evidence/scope filtering; UI also filters Personal/Business filing. Empty visible batches are possible. No additional automatic paging ran.",
+    "limitations": "No physical phone, independent comprehension or positive new-category batch acceptance. No whole-V1 claim."
   }
 }
