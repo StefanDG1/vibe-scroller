@@ -36,6 +36,10 @@ export function AccountMenu({
           align="end"
           collisionPadding={12}
         >
+          <Menu.Item className="menu-item" onSelect={() => go("menu")}>
+            <UserRound size={17} />
+            Account and appearance
+          </Menu.Item>
           <Menu.Item className="menu-item" onSelect={() => go("usage")}>
             <Settings2 size={17} />
             Usage

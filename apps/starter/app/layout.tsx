@@ -6,6 +6,7 @@ import "vanilla-cookieconsent/dist/cookieconsent.css";
 import "./globals.css";
 import "./product.css";
 import "./studio.css";
+import "./atlas.css";
 export const metadata: Metadata = {
   title: {
     default: company.product.name,

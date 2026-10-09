@@ -144,3 +144,7 @@ Updated all four briefs together for the owner's design 2/design 3 selection, co
 ## F032: density and motion studies, October 8
 
 Updated all four briefs together for the owner's icon-led, scrollable and space-efficient Library request. Preserve synthetic image limits and unimplemented motion/virtualization proposals. Scope, currentness, read bounds, performance/accessibility evidence and existing product authority remain required.
+
+## F033: atlas implementation authorized, October 9
+
+Updated all four briefs together for the owner-authorized branching Tree and expanded Folders implementation. Reference the [implementation contract](../design/ATLAS-IMPLEMENTATION-CONTRACT-20261009.md) and ADR 095. The direction favors understandable evidence and reviewed proposals without new audience, pricing, grant or work authority. Implementation candidates and verified release evidence stay separate; no independent comprehension, smoothness, savings or measured benefit is claimed.

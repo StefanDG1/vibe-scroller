@@ -1,447 +1,301 @@
 ---
-name: VibeScroll
-description: Scroll's charcoal studio for saved knowledge, project decisions and permitted next actions.
+name: VibeScroll Atlas
+description: Cool surfaces, readable saved knowledge and recorded project trails, with original Scroll artwork.
 colors:
-  ink: "#f4f4f4"
-  canvas: "#141918"
-  panel: "#1d2421"
-  line: "#39453f"
-  muted: "#b3bdb7"
-  accent: "#87dfc1"
-  accent-ink: "#10251e"
+  canvas: "#f5f8fa"
+  panel: "#ffffff"
+  ink: "#182e42"
+  subtle: "#526578"
+  line: "#dce5eb"
+  muted: "#eaf0f4"
+  primary: "#166b58"
+  primary-foreground: "#ffffff"
+  accent: "#bce8da"
+  accent-ink: "#134b40"
+  dark-canvas: "#121b23"
+  dark-panel: "#1b2833"
+  dark-ink: "#e7f0f7"
+  dark-subtle: "#a9bac8"
+  dark-line: "#354652"
+  dark-muted: "#263642"
+  dark-primary: "#87dfc1"
+  dark-primary-foreground: "#102d24"
+  save: "#f4cb68"
+  save-ink: "#33270c"
+  legacy-primary: "#f4f4f4"
+  legacy-primary-ink: "#141414"
+  legacy-primary-hover: "#d8d8d8"
   amber: "#f3c785"
   diagram-blue: "#92c5ed"
   diagram-violet: "#d5ade9"
-  diagram-node-hover: "#283b33"
-  soft: "#262626"
-  rail: "#171717"
-  control: "#202020"
-  control-line: "#3d3d3d"
-  composer: "#232323"
-  menu: "#252525"
-  selected: "#2a2a2a"
-  primary-hover: "#d8d8d8"
-  primary-text: "#141414"
-  chip-text: "#bdbdbd"
-  error: "#fca5a5"
-  private-recovery-text: "#ffdae2"
-  private-recovery-surface: "#3e242e"
-  private-recovery-border: "#764153"
-  focus: "#d4d4d4"
 typography:
-  studio-headline:
-    fontSize: "clamp(26px, 3vw, 38px)"
-    lineHeight: 1.18
-    letterSpacing: "-0.025em"
-  studio-body:
-    fontSize: "16px"
-    lineHeight: 1.6
   headline:
     fontFamily: 'Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
     fontSize: "clamp(24px, 2.2vw, 32px)"
     fontWeight: 550
     lineHeight: 1.3
-    letterSpacing: "-0.035em"
-  title:
-    fontFamily: 'Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
-    fontSize: "16px"
-    fontWeight: 550
-    lineHeight: 1.5
+  studio-headline:
+    fontSize: "clamp(26px, 3vw, 38px)"
+    lineHeight: 1.18
     letterSpacing: "-0.025em"
-  source-headline:
-    fontSize: "clamp(20px, 2vw, 27px)"
-    lineHeight: 1.3
+  topic-title:
+    fontSize: "14px"
+    lineHeight: 1.35
   body:
-    fontFamily: 'Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
     fontSize: "14px"
     lineHeight: 1.6
-  source-body:
-    fontSize: "13px"
-    lineHeight: 1.6
-  label:
-    fontSize: "13px"
-    lineHeight: 1.6
+  insight:
+    fontSize: "14px"
+    lineHeight: 1.5
   metadata:
     fontSize: "12px"
-    lineHeight: 1.6
+    lineHeight: 1.4
 rounded:
   chip: "5px"
-  menu-item: "8px"
   field: "9px"
   control: "10px"
-  thumbnail: "12px"
+  insight: "12px"
   panel: "14px"
-  dialog: "16px"
+  node: "16px"
+  composer: "18px"
   circle: "50%"
 spacing:
-  tight: "4px"
   small: "8px"
-  control: "10px"
+  compact: "10px"
   row: "12px"
   standard: "16px"
+  branch: "18px"
   section: "20px"
   panel: "24px"
 components:
-  studio-action:
-    backgroundColor: "{colors.accent}"
-    textColor: "{colors.accent-ink}"
-    rounded: "{rounded.control}"
-    padding: "8px 16px"
-    height: "44px"
   button-primary:
-    backgroundColor: "{colors.ink}"
-    textColor: "{colors.primary-text}"
+    backgroundColor: "{colors.legacy-primary}"
+    textColor: "{colors.legacy-primary-ink}"
     rounded: "{rounded.control}"
     padding: "10px 17px"
     height: "44px"
   button-primary-hover:
-    backgroundColor: "{colors.primary-hover}"
+    backgroundColor: "{colors.legacy-primary-hover}"
   button-secondary:
     backgroundColor: "transparent"
     textColor: "{colors.ink}"
     rounded: "{rounded.control}"
     padding: "10px 17px"
     height: "44px"
+  mobile-save:
+    backgroundColor: "{colors.save}"
+    textColor: "{colors.save-ink}"
+    rounded: "{rounded.node}"
   field:
-    backgroundColor: "{colors.control}"
+    backgroundColor: "{colors.panel}"
     textColor: "{colors.ink}"
     rounded: "{rounded.field}"
     padding: "10px 12px"
     height: "44px"
   navigation-item:
-    textColor: "#b5b5b5"
+    textColor: "{colors.subtle}"
     rounded: "{rounded.field}"
     padding: "10px 12px"
     height: "44px"
   navigation-item-selected:
-    backgroundColor: "{colors.selected}"
-    textColor: "#ffffff"
+    backgroundColor: "{colors.muted}"
+    textColor: "{colors.ink}"
   chip:
-    backgroundColor: "{colors.menu}"
-    textColor: "{colors.chip-text}"
+    backgroundColor: "{colors.muted}"
+    textColor: "{colors.ink}"
     rounded: "{rounded.chip}"
-    padding: "4px 9px"
   panel:
     backgroundColor: "{colors.panel}"
     rounded: "{rounded.panel}"
     padding: "24px"
-  menu:
-    backgroundColor: "{colors.menu}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.panel}"
-    padding: "6px"
-  source-notes:
-    textColor: "{colors.ink}"
-    padding: "12px 0"
-    height: "44px"
-  network-idea:
-    backgroundColor: "{colors.accent}"
-    textColor: "{colors.accent-ink}"
-    rounded: "{rounded.circle}"
-    padding: "15px"
-  network-group:
+  topic-node:
     backgroundColor: "{colors.panel}"
-    textColor: "{colors.accent}"
-    rounded: "{rounded.circle}"
-    padding: "15px"
-  private-recovery:
-    backgroundColor: "{colors.private-recovery-surface}"
-    textColor: "{colors.private-recovery-text}"
-    rounded: "{rounded.control}"
-    padding: "12px 16px"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.node}"
+    padding: "14px"
+    height: "76px"
+  insight-card:
+    backgroundColor: "{colors.panel}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.insight}"
+    padding: "12px"
 ---
 
-# Design System: VibeScroll
+# Design System: VibeScroll Atlas
 
 ## Overview
 
-**Creative North Star: "Scroll's studio"**
+**Creative North Star: "Scroll's knowledge atlas"**
 
-VibeScroll uses green charcoal surfaces, meaningful mint actions and warm amber original artwork. Scroll is the owner's always-present guide: a soft folded-paper creature with expressive dark eyes, a curled tuft and mint bookmark. Familiar controls, readable rows and restrained framing keep the artwork approachable without competing with evidence. The owner pinned this world in the October 7 evolution request; no direction roll, seeded round or QUALITY BAR card is claimed. The first surface's composition stays in [the studio direction contract](docs/design/vibescroll-studio.md).
+The app uses cool canvas, white reading surfaces, navy ink and teal selection. Its matching dark theme keeps the same hierarchy and original warm Scroll artwork. Quiet borders and compact icon-led cards let saved knowledge and the next permitted action lead. Device setting is the default appearance; Account offers Light and Dark overrides.
 
-Content, actual state and permitted actions establish hierarchy. Source icons identify media without inventing thumbnails. Panels remain subdued so titles, evidence and the next action carry attention. [PRODUCT.md](PRODUCT.md) records the product constraints; the four foundational documents remain the copy brief. This document does not change copy, establish benefit, or approve legal publication.
+This is the owner-authorized October 9 application world, extracted from the built code. Its boundary is the Atlas shell, Home, Library, Projects, Account and capture. The public marketing world remains Scroll's charcoal studio. The original Scroll image is reused; this update introduces no shipping raster artwork. Product authority remains in [PRODUCT.md](PRODUCT.md), with the selected interaction scope in [the Atlas implementation contract](docs/design/ATLAS-IMPLEMENTATION-CONTRACT-20261009.md).
 
 **Key Characteristics:**
 
-- Dark charcoal and green-gray surfaces with mint actions and amber artwork.
-- Original Scroll artwork remains present in the normal shell and onboarding.
-- Compact text hierarchy and quiet borders.
-- Readable source rows rather than nested decorative cards.
-- Accessible menus, visible focus and generous touch targets.
-- Short motion tied to state changes and evidence arrival.
-- Cited circle networks, saved topic branches and defined loaded-record charts.
+- Cool light surfaces and matching dark surfaces with teal selection.
+- Original Scroll artwork and visible workspace scope.
+- Compact saved-topic branches and insight-owned evidence cards.
+- Five phone actions: Home, Library, Save, Projects, Account.
+- Short pointer-triggered motion with immediate keyboard actions and a still alternative.
+- Loaded-record statistics and explicitly recorded project trails.
 
 ## Colors
 
-The palette separates quiet surfaces by brightness and green-gray hue. Mint signals useful actions and connections; amber gives Scroll warmth and marks its short state caption. Existing white controls remain part of the system.
+The frontmatter records the effective Atlas light palette and its dark counterparts from `atlas.css`; it also records retained control and chart colors that still appear in the application.
 
 ### Primary
 
-- **Mint and accent ink:** the studio principal action, knowledge-map selection and meaningful connection indicators; dark text keeps mint-filled controls readable.
-- **Ink:** bright reading text and retained white save/legacy primary controls; dark primary text keeps those controls legible.
-- **Primary hover:** gently dims filled controls in response to pointer interaction.
+- **Deep teal / Dark mint:** active selection, focus, topic icons and recorded connectors. The primary foreground follows the selected theme.
+- **Soft teal / Accent ink:** filled selected representation and appearance controls.
+- **Legacy primary / Legacy primary ink:** retained bright primary controls, with the established dimmer hover response. These remain distinct from token-driven teal controls.
 
 ### Secondary
 
-- **Amber:** Scroll artwork and state captions. The illustration contains its own painterly shading rather than a flat recolor. In diagrams amber also identifies complementary groups and project ideas; in state charts it marks needs attention and awaiting review.
-- **Diagram blue:** similar cited groups, recorded-work nodes, and queued/processing or deferred chart states.
-- **Diagram violet:** disagreement groups with dashed borders and links, plus rejected and stale chart states. Labels retain the distinction between these roles. Neither chart color nor diagram color establishes quality or benefit.
+- **Warm Save / Save ink:** the phone's central Save action, opening capture.
+- **Amber:** original Scroll warmth and retained chart attention states.
+- **Diagram blue and violet:** retained labeled state and cited-group distinctions. Color does not establish benefit or quality.
 
 ### Neutral
 
-- **Canvas, rail and panel:** establish the dark page, slightly lighter navigation and contained settings/evidence surfaces.
-- **Control, composer and menu:** distinguish editable fields, capture and floating choices.
-- **Line and control line:** separate rows and define fields without heavy framing.
-- **Muted and chip text:** support secondary explanation, metadata and state labels.
-- **Selected and soft:** indicate selected navigation and hover responses.
-- **Diagram node hover:** a scoped green charcoal fill for topic and source-to-project node hover.
-- **Focus:** clearly identifies keyboard interaction.
+- **Cool canvas and White panel:** page, rail, toolbar, cards, fields and menus.
+- **Navy ink and Secondary ink:** reading text and supporting explanation; placeholders use secondary ink at full opacity.
+- **Quiet line and Muted surface:** borders, branch stems, active rail rows and informational tags.
+- **Dark canvas, panel, ink, subtle, line and muted:** matching roles when the device or Account selects dark appearance.
 
-The historical `--teal` property still resolves to Ink: it does not make every retained control mint. Error uses a pale red alongside explanatory text. Success and pending states use explicit labels, never color alone. The frontmatter records the effective studio cascade; rail, fields, menus and selected navigation retain their older neutral fills.
-
-Owner-private setup recovery notices and assistant-access recovery alerts use the scoped Private recovery text, surface and border colors. Their text/surface contrast is 10.94:1. Assistant-access alerts override the inherited pale error background with this dark rose surface. This readable rose treatment remains scoped to these recovery surfaces, not a replacement of the studio palette or all error styling.
-
-**The Meaningful Accent Rule.** Use mint for permitted studio actions and connections, amber for Scroll's warmth, and preserve retained neutral reading controls. Neither color proves success or benefit.
+**The Recorded Meaning Rule.** Selection and connectors describe returned records; neither color nor a line establishes permission, independent corroboration or benefit.
 
 ## Typography
 
-**UI Font:** Inter with system UI, Apple system, BlinkMacSystemFont, Segoe UI and sans-serif fallbacks. The app declares this stack; it does not load Inter through `next/font` in the root layout. **Code Font:** UI monospace with monospace fallback.
+**Display Font:** Inter with system-ui, Apple system, BlinkMacSystemFont, Segoe UI and sans-serif fallbacks.
+**Body Font:** the same declared stack; the root layout does not load Inter through `next/font`.
+**Label/Mono Font:** UI monospace for code and serialized detail.
 
-The console uses an intentionally close reading scale, medium headings and normal case. Source titles use the Title role, descriptions use Source body, and metadata uses Metadata. Panel headings are slightly larger (18px); navigation uses compact UI text (14px). Status chips are small labels (11px), never a substitute for the readable state explanation.
+**Character:** a compact reading hierarchy with medium headings and sentence case labels. Evidence remains readable beside the branching structure.
 
-Page headings use Headline; mobile page and capture headings settle at 25px. Source titles reduce to 14px on mobile. The capture field stays at 16px. Source descriptions limit line length to 70ch; general paragraphs limit it to 72ch.
+### Hierarchy
 
-The studio next-action heading uses Studio headline with balanced wrapping; at 768px and below it uses `clamp(23px, 5vw, 30px)`. Studio body is 16px, reducing to 14px for the next-action explanation on phones. Shelf headings are 20px, row titles 16px and row metadata 13px. The next-action block is bounded to 55ch and its explanation to 48ch.
+- **Headline:** page title; the frontmatter captures its inherited scale.
+- **Studio headline:** the next action on Home; phone Atlas overrides it to 23px.
+- **Topic title:** saved topic names, with unrestricted word wrapping.
+- **Body / Insight:** reading copy and icon-led insight claims.
+- **Metadata:** topic counts and source/project detail; trail explanations use 13px.
 
 **The Reading Hierarchy Rule.** Keep title, explanation and metadata distinct through scale, weight and neutral contrast; use concise sentence case labels instead of ornamental eyebrows.
 
 ## Layout
 
-The desktop shell is a flex layout with a sticky full-height rail (244px), compact top toolbar (64px), and content column capped at 1120px. Main content padding is 32px 40px 64px. At 1050px, the rail narrows to 220px and main padding becomes 28px.
+The inherited desktop shell keeps a 244px rail, 64px toolbar and main content capped at 1120px with 32px 40px 64px padding. The rail narrows at 1050px. The inherited phone shell activates at 720px; Atlas compaction applies at 700px. Phone navigation contains Home, Library, Save, Projects and Account in that order, with safe-area padding and workspace scope in the header. Save is an action rather than a destination.
 
-At 720px and below, the rail gives way to Home, Library, Projects, Save and More, with the account trigger in the sticky top toolbar. Main content uses 24px 16px 104px padding to clear the fixed bottom navigation. Bottom navigation includes safe-area padding. Core surfaces must remain usable at the confirmed 320 CSS pixel width.
+Library's inner explorer is full width with a 1180px cap. At 1000px and above, the tree and evidence use 0.9fr/1.2fr columns with a 28px gap; the tree sticks at 88px and scrolls within `calc(100dvh - 120px)`. Below that width they follow document flow. Roots have no invented sibling links. Exactly two children of a root use a horizontal parent bus; other and deeper children use a parent-side stem. Nodes have a 320px cap except where side-stem branches require available width. Topic opening and expansion are separate controls.
 
-The capture composer has a bounded width (680px) and source rows have thumbnail, flexible text and an optional open control. Filters wrap on mobile; source-row open controls yield to the linked source title. Settings and evidence use panels with desktop padding (24px) and mobile padding (18px). Private evidence frames use a responsive grid with columns that fit the available width and contained imagery.
-
-The studio welcome pairs a 192px-wide character with the next action, separated by `clamp(20px, 4vw, 56px)`. Knowledge and project shelves use a 1.2fr/1fr grid with a 42px gap. At 768px and below shelves stack with a 26px gap; the character narrows to `clamp(84px, 25vw, 130px)` and the welcome gap is 16px. The header keeps a linked workspace name beside compact Scroll on phones (14ch maximum, ellipsis when needed); a collapsed rail must not remove visible scope. Composer and review spacing remain generous enough to distinguish capture from history.
+On phones the branch gap reduces, node icons become 28px and topic buttons have a 102px minimum height. Expand controls retain 44px targets. Home puts the real next action above loaded-record statistics; its compact Scroll image is 64px on phones. Current knowledge is one bounded page. Source-to-proposal/run trace cards flow vertically. Projects use an auto-fitting grid with 340px minimum columns when space permits.
 
 **The Touch Target Rule.** Interactive controls keep at least a 44px target; small type and icons do not justify a smaller hit area. Informational chips are not controls.
 
-Explore keeps its five view controls and representation controls wrapping rather than squeezing their targets. Topic rows use a full-width reading area with a minimum height (64px); nested native disclosures use quiet left rules and reduce deep indentation on phones (480px and below). The optional circular connection canvas scrolls inside a bounded viewport (600px maximum height). Its local layout measures available width, with a minimum world width of 220px. Below a 500px world width, it uses smaller complete circles and a taller initial layout. After settlement, every node receives the same vertical translation so the top occupied boundary begins at a 20px inset. The rendered world height follows the lowest occupied boundary plus 20px, with a 520px minimum. Relative node geometry, cited edges and link counts are retained; sparse populations start at evidence instead of unused leading space. Topic diagrams keep a bounded scrolling viewport (560px maximum height); saved roots are centered on entry and resize. Branches use a 240px leaf pitch and 140px depth pitch. The source-to-project diagram keeps its 900px world inside a scrolling viewport (560px maximum height), with a wrapping readable-links disclosure below it. Canvas previews may truncate claims, while the evidence dialog retains the full text. At 480px and below that native dialog becomes a full-width bottom sheet with rounded top corners; on larger screens it is centered, width bounded to 680px and height bounded to 85dvh.
-
-Home statistics use four columns, with two columns at 680px and below. Their two state charts stack at the same breakpoint. Chart rows retain visible labels and counts above 10px tracks; bars describe each state's share of the loaded records. The toolbar, legend and section actions wrap. Diagram overflow stays inside its viewport; visible swipe/scroll guidance and readable alternatives remain outside it. These additions retain the incumbent shell width and navigation.
-
 ## Elevation & Depth
 
-The shell uses tonal layering and thin separators. Source rows sit directly on the canvas, panels have quiet borders and the toolbar separates from content with a dark line. The account menu alone carries a soft floating shadow (`0 12px 32px #0006`). Dialogs dim the surrounding surface (`#0009`) rather than decorating the dialog with a dramatic shadow.
+Thin borders and tonal surfaces establish depth. Topic nodes have a small ambient shadow; selection adds a teal ring. Menus retain floating depth, and dialogs use the inherited dim backdrop. Insight cards own their enclosure; source headings do not gain a duplicate card wrapper.
 
-**The Flat Surface Rule.** Keep routine content flat; use floating depth for a menu or modal that temporarily interrupts the underlying task.
+### Shadow Vocabulary
+
+- **Topic ambient** (`0 3px 12px rgb(18 46 66 / 4%)`): saved topic nodes at rest.
+- **Topic selection** (`0 0 0 2px color-mix(in srgb, var(--primary) 14%, transparent)`): the selected topic.
+- **Menu floating** (`0 12px 32px #0006`): the account menu.
 
 ## Shapes
 
-Fields and navigation have restrained rounded corners. Controls use the Control radius, panels and menus use Panel, dialogs use Dialog, and badges use Chip. Circular avatars and composer send controls are purposeful exceptions. The capture composer has a softer containing outline (18px radius), while library rows have straight separators and no enclosing card radius.
-
-Scroll uses the original transparent warm paper-creature artwork; the 192px/240px home image and compact 36px/44px shell mark share the same still asset. Phone header Scroll is 26px/34px. Status wording changes with authoritative next-action state; separate expression artwork is not implemented. [Artwork provenance](apps/starter/public/scroll/PROVENANCE.md) records generation and the alpha-preserving WebP derivative without claiming trademark clearance.
-
-Cited ideas and relationship groups use complete circular native buttons. Idea circles have mint fill and dark text; groups have panel fill with a semantic colored outline. Disagreement uses a dashed outline and dashed links. Topic and recorded-work nodes use quiet rounded rectangles (12px corners), keeping saved hierarchy distinct from the circle network.
-
-Lucide line icons communicate navigation, media type and actions. Supplied personal reference screenshots remain local reference material, not bundled imagery.
+Soft rounded rectangles define the atlas: topic nodes use Node, insight cards use Insight, general panels use Panel, fields use Field and informational badges use Chip. Proposal-stage markers are 33px circles linked by a thin vertical stem. Original Scroll retains its warm paper silhouette and transparent asset; line icons identify media, navigation and recorded stages.
 
 ## Components
 
 ### Buttons
 
-The studio main Button uses mint fill, dark text, 500 weight, 8px 16px padding, 10px corners and a 44px minimum target. Hover reduces opacity to 0.9; keyboard focus uses a 2px mint outline with a 4px offset; disabled opacity is 0.5. Retained save and legacy primary controls use white. Those controls are bright, compact and medium weight (550). Secondary controls are transparent, bordered and equally usable. Hover dims primary fill or brightens the neutral secondary surface. Keyboard focus uses a visible outline (2px) with a gap (3px). Disabled controls reduce opacity (0.45); pending controls show a spinner and disable duplicate submission. Icon controls are square (44px) with an accessible name.
-
-### Scroll and studio shelves
-
-Scroll stays visible in the normal shell and Home. The home character is a named greeting button with a state caption; compact shell artwork is still. Shelf rows use an 80px minimum height, 14px 8px padding, 8px corners and quiet top separators between rows. Mint line icons identify sources and projects; muted arrows identify the row action. Recent-source coverage stays explicit: current-page records are not full-library totals. Later dismisses a suggested next action locally; it does not complete or approve it.
-
-### Owner-private setup and filing
-
-In owner-private Home, the setup panel precedes the studio welcome. Three saved, resumable steps lead from Personal/Business focus to the user's goal and interests, then a preview and explicit confirmation. A Business project role is optional. Treat these fields as user-provided direction, never inferred profile facts. The panel retains the incumbent dark material and controls; fieldsets are unframed with clear legends, full-width inputs and visible labels.
-
-Personal and Business are filing views of the same owner-private library. Source detail offers independent checkbox membership in either or both views; filing does not copy evidence, share content or queue inference. Combined browsing is offered only for explicitly confirmed, enabled setup and reads bounded metadata. Saving a change fences earlier browse responses and clears the list immediately, so turning combined browsing off cannot leave an old combined result visible. Failed browsing shows recovery text rather than successful empty guidance. Export remains bounded and does not download a partial result when its page limit is exceeded.
-
-Setup rows wrap on narrow screens while action labels stay on one line. Space result rows use quiet bottom separators and readable linked titles; at 480px and below, state text moves below the title. Keep setup's scoped recovery notice legible using the Private recovery tokens and a thin border. Sharing, assistant access, account connection, processing routes and spending authority remain separate choices.
-
-**The Private Filing Rule.** Organization choices describe the owner's private views; they never imply sharing permission or analysis authority.
-
-Local evidence comprises six handler tests and the labeled synthetic native packet in `.impeccable/review/private-library/proof.json`, including 320/390/768/1440px checks, saved-step resumption, combined-view confirmation, source filing, empty/error feedback and bounded export. The finish reviewer cleared the scored corrections within that candidate scope. Fixture routes were removed from the application before final builds; real-account, production, second-account and genuine analysis acceptance remain pending.
-
-### Selected knowledge sharing and recipient reading
-
-Owner-private source detail keeps sharing in a native disclosure after the separate Personal/Business filing controls. The disclosure uses the existing quiet panel, readable explanation and full-size controls. Its workspace choice uses the shared Radix choice control. Show the selected recipient, source generation/revision and seven-day duration before the explicit version acknowledgment; changing the target, source version, saved grant version or replacement choice invalidates that acknowledgment. Closing the disclosure clears loaded choices, grants and acknowledgment.
-
-Keep the new sharing action visually separate from saved grants. The saved-grants heading has a clear section break (28px above, 12px below); this scoped spacing correction does not change other panel headings. Rows name the recipient and show expiry/revoked state and the count of selected versions, with a separate Revoke grant control. Rows retain the existing quiet separators and stack at 480px and below; action labels stay on one line and controls keep the existing 44px targets.
-
-Recipient reading uses a separate panel and bounded source list. Detail retains the title, source generation, grant version, coverage and exact insight/revision citations in the existing reading hierarchy. Loading, unavailable, empty and no-analysis states remain explicit. Read access does not visually imply permission to operate on the owner's library or inspect transcripts, frames, profile answers or credentials.
-
-October 7 finish disposition is ship for the scoped saved-grants spacing correction only. `.impeccable/review/knowledge-grants/fix-mobile-active-controls.png` (390px), `fix-desktop-active.png` (1440px) and `mobile-recipient-reading.png` (390px) capture labeled synthetic local controls and reading. They do not establish real grants, second-account consent, provider/auth acceptance or production deployment. This merge preserves Scroll's studio and the existing token primitives.
-
-### Assistant access review
-
-Assistant access preserves the incumbent Scroll studio in Operate mode: quiet neutral panels, restrained borders, readable compact hierarchy and a white primary Save action. Current grants lead with identity, expiry and either a live library scope or a legacy exact-post count, followed by Turn off access. Existing exact-post grants stay exact until explicitly replaced.
-
-Choose assistant access opens one review disclosure. A sole registered assistant is selected automatically; multiple assistants use the existing choice control. Library access offers Off, Personal, Business or Both in an actual owner-private library. Both includes eligible unfiled posts. Shared workspaces instead offer all eligible posts in that workspace. Current and future inclusion appears in the introduction, scope explanation, review and acknowledgment. Off leaves saving unavailable and points to the existing grant's revocation action.
-
-Select all actions provides a convenient explicit selection; Customize actions retains individually labeled permissions. Events permission does not activate completion notifications. Context choices load only when context read is selected, with twenty projects per page, up to five retained selections, separately confirmed library context and review links. Selecting confirmed context on the page selects those visible eligible choices without saving authority. Private suggestions require granted evidence, project context, context permission and owner/admin access.
-
-The seven-day acknowledgment binds workspace, assistant, live scope, actions, intake destination, confirmed context/project references and saved-grant version. Relevant changes require renewed acknowledgment. Review states no spending, coding, publication, repository code or chat history, plus the assistant's possible retention of already disclosed content. Recent sign-in opens separately so the original selection remains available. Save/revoke pending labels describe the actual operation; duplicate mutations are disabled.
-
-Connections uses a dedicated workspace slice and has no recurring polling. Assistant setup loads on mount, explicit refresh and after mutations; context selection and project pagination refresh the bounded choices. Generation fencing rejects stale responses, workspace changes remount the editor, and failed access checks clear the reviewed selections. Phone controls wrap within the panel without horizontal page overflow.
-
-**The Reviewed Access Rule.** Keep the library scope, future inclusion, exact context and allowed actions reviewable before acknowledgment, with immediate revocation and operation-specific feedback.
-
-Historical October 7 exact-post review captures in `.impeccable/review/assistant-access/` and project-context captures retain their original evidence scope. Their paginated post picker and recurring polling describe the earlier implementation, superseded here. The eight October 7 `.impeccable/review/assistant-scope/` captures are explicitly synthetic at 320, 390, 768 and 1440 CSS pixels, with a top and consent-review capture at each width and focus/metrics emulation. The finish reviewer marked the persistence correction ship at that fix scope only; the supplied visual matrix matched. They establish scoped visual review and native fixture checks, not production grant/tool acceptance, independent comprehension or physical-device testing. The durable studio identity and recovery tokens remain unchanged.
-
-### Inputs / Fields
-
-Fields have a dark fill, restrained outline and readable placeholder. The link composer groups input and circular submit into one containing field; focus brightens its containing border instead of drawing an inner outline. Checkbox labels provide a full control target and keep permissions explicit.
-
-Shared choice menus opened inside a native modal dialog keep their portal within that dialog, so choices remain interactive and exposed to accessibility tools. Outside dialogs they use the default portal. Preserve the existing appearance, radio selection semantics, keyboard navigation and collision-aware positioning (6px side offset, 16px collision padding).
-
-Escape closes the active choice menu first and returns focus to its trigger. The enclosing capture dialog respects consumed keyboard events; a subsequent Escape closes capture and returns focus to Save.
-
-**The Dialog Choice Rule.** A modal's choice menu belongs inside its active native dialog; a visually visible menu must also accept pointer and keyboard selection.
-
-The October 7 repair follows a real-production reproduction of an inert menu outside the dialog. Local synthetic checks at 390px and 1440px verified open menus inside the viewport without page overflow, pointer transcript selection and keyboard Home/Enter URL selection. Private evidence is retained in `private/vibescroll-dialog-choice-menu-390.png`, `private/vibescroll-dialog-choice-menu-1440.png`, `private/vibescroll-dialog-choice-desktop.png` and `private/vibescroll-dialog-choice-proof.json`. The finish disposition covers this synthetic control only; it does not establish production saving, deployment or whole-plan acceptance.
-
-### Navigation
-
-Desktop navigation uses line icons, text and occasional informational counts. Hover brightens the row; selection has a lighter neutral fill and stronger text. Radix account menus use compact rows with keyboard highlight and collision-aware placement. The mobile account trigger keeps its target while showing only the avatar. More exposes secondary destinations without overloading bottom navigation.
+Retained primary controls use the Legacy primary palette and medium weight (550); secondary controls are transparent with the quiet outline. Atlas button and link responses name background-color and border-color at 120ms ease-out. Focus uses a two-pixel theme-primary outline with a three-pixel offset. Disabled controls retain explicit unavailable state and inherited reduced opacity. Token-driven shared buttons may use theme Primary rather than the legacy fill.
 
 ### Chips
 
-Coverage, state and tags share a small neutral badge. They supplement source text and never imply completed analysis solely from their styling. Synthetic demo badges remain explicit.
+Status and tag badges use Muted with Ink and Chip corners. Small labels supplement readable state text. Synthetic records remain labeled; a badge never implies complete analysis.
 
 ### Cards / Containers
 
-Library items are rows with thin bottom separators, a quiet media icon and a readable linked title. Settings, plans and evidence use bordered panels. Empty views keep a plain background, a short explanation and a relevant action. Notices use a neutral raised fill and live output for action feedback; errors also use the error color and precise explanation.
+General panels retain 24px padding and Panel corners. Insight cards use 12px padding, a thin line border and Insight corners. Their source heading is outside the card. Trace cards use 16px padding and Node corners, with Canvas-filled action rows and centered downward arrows.
 
-### Usage allowance and recent credit use
+### Inputs / Fields
 
-Usage keeps the existing quiet settings panels and Inter reading hierarchy. Available and reserved credits lead together as labeled, tabular numerals; the balance group wraps within the panel on narrow screens. A supplementary native meter uses the existing mint and neutral tokens, with a readable label, visible zero-to-allowance range and accessible value text. The meter describes availability from unexpired allowances, not completed work, benefit or invoice settlement. Its corners follow the incumbent radius rather than introducing another shape token.
+Fields use Panel, Ink and Line, with Field corners and 10px 12px padding. Search and capture placeholders use Subtle at full opacity; caret uses Ink. Native capture choice menus remain inside the active dialog, preserving keyboard selection and focus return. Escape closes the choice menu before capture.
 
-Keep dated UTC expiry and unresolved-reservation explanations next to the balances. Recent credit use uses flat separated rows: activity and UTC date on the left, actual credit amount on the right, including zero-credit entries. The visible coverage note bounds the list to ten recent entries and distinguishes credits from provider invoices. Missing or invalid allowance data remains unavailable; empty recent use has its own explanation. The existing secondary Billing link opens review and grants no purchase or spending authority.
+### Navigation
 
-**The Allowance Reading Rule.** Keep available and reserved numbers primary, the labeled native meter supplementary, unresolved holds explicit and recent-use coverage bounded.
+The desktop rail uses subtle text, line icons and a muted selected/hover fill. Phone navigation uses theme-primary active text; yellow Save opens the reviewed capture dialog. Account exposes appearance and motion preferences alongside existing workflow destinations. Appearance offers Device setting, Light and Dark, following live device changes in Device setting mode.
 
-The October 7 reviewer cleared this narrow Usage refinement with no material fixes. Populated genuine-staging captures in `.impeccable/review/usage-20261007/` cover 390, 1440 and 1567 CSS pixels with no horizontal page overflow. These are viewport emulations; they do not establish every dynamic state, physical-device, production candidate, provider-invoice or full V1 acceptance. No new palette, artwork, type or motion convention follows from this addition.
+### Saved topic atlas and insight links
 
-### Reauthentication recovery
+Tree is the default; Folders provides an expanded alternative over the same returned IDs and exact evidence. Overview comes first; remembered topic IDs restore only after the current authorized page returns them. Scope choices derive from the server, including Personal/Business only when actually returned; team libraries retain Workspace. Missing parents remain separate roots with an explanation.
 
-**The Review Return Rule.** When an operation requires fresh sign-in, retain the current application pathname and query in the existing error toast's recovery link. Keep the app-only server return-path guard. Recovery returns to the review location; it does not retry the failed operation or grant approval, access or spending authority.
-
-The incumbent toast, Sign in again label and native anchor remain unchanged. October 7 evidence in `.impeccable/review/reauth-route-20261007/browser-proof.json` records the source-specific link at 390, 1440 and 1567 CSS pixels and a later pathname/query check. The client received a simulated HTTP 400 before backend dispatch in a genuine staging session with a genuine source; no source edit occurred. The fresh reviewer cleared this routing correction. Its report retains the narrower evidence available at review time, before the later query check. These captures and checks do not establish live OAuth completion, production recovery, independent human or physical-phone acceptance, or full V1 acceptance.
-
-### Processing and private evidence
-
-The implemented personal-video UI shows prepare, transcribe and analyze stages, an explicit automatic-analysis permission choice, private frame access and original transcript inspection. Current and completed steps brighten their labels; pending work uses a spinner. Recorded verification now includes a real production upload whose generation-one personal-alpha analysis completed automatic Whisper transcription and sampled-frame ChatGPT analysis using gpt-5.6-sol at medium reasoning. This observed completion does not establish global production readiness, legal approval or audiovisual completeness.
-
-### Source overview and analysis notes
-
-Source detail leads with an exact-text overview drawn from the retained summary, followed by the coverage caution and a native disclosure, then Main points. Long summaries shorten at a sentence boundary within 280 characters where possible, otherwise at a word boundary with an ellipsis. The original complete summary remains available in the disclosure when shortened; all analysis warnings, the original source link and capture metadata remain there. The disclosure summary has a 44px minimum target, vertical padding (12px), visible keyboard focus and a small open-state gap (8px).
-
-**The Visible Limits Rule.** Keep the sampling and automatic-transcription caution visible for sampled audiovisual coverage while placing the retained full summary and detailed analysis notes in the disclosure.
-
-### Consent
-
-Consent uses the same dark material, rounded modal and full-size controls. Allow and reject have equal prominence, preferences remain accessible through the account menu, and withdrawal is a visible action. Consent presentation is an implemented interaction, not a legal approval.
-
-### Motion
-
-A requested greeting rocks Scroll once for 650ms with `cubic-bezier(0.16, 1, 0.3, 1)`. The eligible save CTA sweeps once for 750ms after an 1800ms delay. Pointer interaction, focus, completion, disabled state, page hiding, reduced motion and the interface-motion preference stop the effect. The still character remains visible when motion is off. These are local acknowledgments; no looping attention effect is implemented.
-
-Color and border responses run briefly (140ms ease-out). Account menus reveal with clip and opacity (120ms ease-out); source rows and capture dialogs enter with a small vertical change and opacity (180ms ease-out). A pending spinner rotates steadily (800ms). Reduced-motion preferences disable animations and transitions and remove thumbnail movement. Motion acknowledges a change; it must not delay reading or action.
-
-### Library categories and sorting
-
-Keep search and filters in the existing dark control style. Use accessible names for unlabeled selectors, 44 px controls and wrapping layouts on narrow screens. Search uses relevance and disables date/title sorting until cleared. A source row displays its insight count, a short point preview and up to four category names; the full row opens actual details. Category editing lives in a native disclosure within those details, with saving, error, empty and success behavior using the existing operation state. Shared suggestions are a separate owner/admin choice with a concise privacy explanation.
-
-Source thumbnails use the first retained private frame when available, load lazily and fade in over 160 ms. Failed or unavailable evidence retains the media-type icon. Reduced motion disables the fade. The image goes through the tenant-checked no-store endpoint and bypasses public image optimization. Completed sources show their insight count without a redundant ready label. Phone filters each keep a usable full-width touch target.
-
-### Library Explore
-
-Explore reuses the studio material and existing native buttons, shared choice controls and disclosures. Its five views are Topic tree, Connections, Idea journey, Topic overview and What helped. The selected view uses mint with accent ink; unselected controls stay quiet. Topic tree is the default, built only from the bounded loaded page. Branching diagram is the initial representation. In Readable tree, expand a parent with a native disclosure, then use its separate Inspect action to read evidence. A parent missing from the loaded page remains a root; hierarchy never implies new evidence or authorization. When available, Edit topic structure stays in a native disclosure. Representation switches, recovery actions and this summary retain minimum 44px targets and visible keyboard focus, including a two-pixel ring with three-pixel offset on the summary.
-
-Topic tree offers Branching diagram and Readable tree representations. The diagram uses only saved parent links. Separate roots include parents missing from the loaded page; a branch never invents hierarchy. Native topic buttons open the same cited evidence, and the entry viewport centers the first saved root before horizontal exploration.
-
-Connections defaults to Network map, a circle network. Readable list is an equivalent representation of the same current cited groups and ideas. Labels distinguish Similar ideas, Work together, Disagreement and Useful combination. Lines connect a cited group to its supporting ideas; they neither assert pairwise agreement nor establish causation. Topic membership alone is not agreement. Keep the textual equivalent reachable and retain source evidence for each idea.
+Each insight owns its on-demand project-links disclosure. The centered downward arrow leads to evaluations that match both source and insight; server currentness checks exclude stale generations and revisions. Empty or partial pages explain coverage. Native disclosures retain 44px targets. The app's existing advanced evidence representations remain reachable through disclosures.
 
 **The Cited Group Rule.** Display a connection only when all of its exact source, generation, revision and insight references exist in current permitted evidence. A connection is an explained cited group; neither its line nor topic membership proves causation or agreement.
 
-The circle network uses native buttons for every idea and cited group. Circle size reflects the number of cited links on this page, never quality. Desktop radii start at 48px and gain up to 18px from link count; narrow-world radii start at 36px and gain up to 10px. Labels retain up to three lines at 13px with zoom compensation when zoomed out. The group circle reads Combine ideas, while its accessible name, legend and evidence heading retain Useful combination and its full explanation. Hover brightens a circle; focus uses a visible 3px outline with a 5px offset.
+### Home and proposal trails
 
-Zoom controls span 65% to 160%. Reset view restores 100% and scroll origin. Touch scrolling, mouse background dragging, keyboard scrolling, Tab and Enter remain available, with visible exploration guidance. Layout and zoom add no motion, inference, queries or authorization. Selecting a node opens a labeled native modal dialog containing the full explanation, claims and source links. Escape and Close evidence close it and return focus to the invoking node. Phone presentation uses the bottom sheet described in Layout. The readable list reveals the same claims and source links inline.
+Home's state-based next action leads, followed by loaded-record statistics with count definitions, readiness/decision distributions, a bounded knowledge preview and vertical source/proposal/run links. Unknown data remains distinct from zero. Source provenance and recorded run links remain separate from merge or benefit.
 
-**The Explore Coverage Rule.** Keep counts tied to the loaded page and explain overlap: shared topic membership is not independent corroboration. Show at most 40 loaded topics and 40 connection-map nodes. Topic overview bars use the twenty-idea evidence-page limit as full scale, not whole-topic size or benefit.
-
-Use Show more topics for the bounded accumulating topic window and Back to first topics page to recover its beginning. Use Next evidence page for the next part of a topic; both the button and explanatory copy use that label. Cited groups paginate separately with Next cited groups and First cited groups. Keep loading announcements, empty coverage and failed-access recovery distinct; an access failure clears the selected evidence rather than becoming a successful empty result.
-
-Idea journey presents the recorded sequence: saved posts and cited ideas, evaluation with repository version, issue draft or published issue, implementation run and PR, deployment record, then outcome when present. Current and historical project fit remain visibly distinct. What helped separates Recorded judgment from Reported comparison; a comparison retains before/after values, units, sample counts, baseline and observation periods, and limitations. Deployment-version absence stays explicit.
+Projects lead with selected projects and existing proposals. Setup and evidence exploration stay in disclosures. The proposal trail labels Saved post and Saved plan only when source-ID and immutable-plan evidence support them; missing run and PR states remain explicit. A saved plan label does not claim an independently reviewed plan or grant execution authority.
 
 **The Recorded Outcome Rule.** Present saving, evaluation, issue, PR, merge, deployment and benefit as separate recorded facts. A judgment is not a measured comparison, and a merged PR alone does not establish benefit.
 
+### Motion
+
+Motion for React (14.0.0) reveals pointer-expanded branches over 180ms with opacity and a 6px vertical offset; capture uses opacity and an 8px offset over 180ms. Native keyboard entry is immediate. The live device reduced-motion preference and Interface motion switch suppress the effects. CSS button/link responses name their properties at 120ms ease-out. Inherited source-card and capture CSS entry animations are suppressed so the new reveal does not compound them. Scroll stays visible when motion is off. Existing bounded greeting, CTA and pending indicators remain governed by their preference and state checks.
+
+### Candidate verification boundary
+
+The October 9 reviewer scored all eight original fixes resolved in [.impeccable/review/atlas-20261009/verdict-1.md](docs/operations/evidence/vibescroll-atlas-20261009.json). This covers the supplied candidate fix evidence, including hierarchy geometry, project-link geometry, source scopes, access-loss capture recovery, truthful trail labels, accessible surfaces, first-viewport density and visibility refresh. It is not a whole-surface audit, production release or full V1 acceptance. Real authenticated deployed-data acceptance, independent browser and physical-device testing, and provider/cost settlement remain separate.
+
+### Historical evidence
+
+The receipts below retain their original dates and acceptance limits. Their earlier visual descriptions are historical; the Atlas tokens and rules above define the current application candidate. Public policy and marketing styling remain outside this replacement.
+
+Local evidence comprises six handler tests and the labeled synthetic native packet in `.impeccable/review/private-library/proof.json`, including 320/390/768/1440px checks, saved-step resumption, combined-view confirmation, source filing, empty/error feedback and bounded export. The finish reviewer cleared the scored corrections within that candidate scope. Fixture routes were removed from the application before final builds; real-account, production, second-account and genuine analysis acceptance remain pending.
+
+October 7 finish disposition is ship for the scoped saved-grants spacing correction only. `.impeccable/review/knowledge-grants/fix-mobile-active-controls.png` (390px), `fix-desktop-active.png` (1440px) and `mobile-recipient-reading.png` (390px) capture labeled synthetic local controls and reading. They do not establish real grants, second-account consent, provider/auth acceptance or production deployment. This merge preserves Scroll's studio and the existing token primitives.
+
+Historical October 7 exact-post review captures in `.impeccable/review/assistant-access/` and project-context captures retain their original evidence scope. Their paginated post picker and recurring polling describe the earlier implementation, superseded here. The eight October 7 `.impeccable/review/assistant-scope/` captures are explicitly synthetic at 320, 390, 768 and 1440 CSS pixels, with a top and consent-review capture at each width and focus/metrics emulation. The finish reviewer marked the persistence correction ship at that fix scope only; the supplied visual matrix matched. They establish scoped visual review and native fixture checks, not production grant/tool acceptance, independent comprehension or physical-device testing. The durable studio identity and recovery tokens remain unchanged.
+
+The October 7 repair follows a real-production reproduction of an inert menu outside the dialog. Local synthetic checks at 390px and 1440px verified open menus inside the viewport without page overflow, pointer transcript selection and keyboard Home/Enter URL selection. Private evidence is retained in `private/vibescroll-dialog-choice-menu-390.png`, `private/vibescroll-dialog-choice-menu-1440.png`, `private/vibescroll-dialog-choice-desktop.png` and `private/vibescroll-dialog-choice-proof.json`. The finish disposition covers this synthetic control only; it does not establish production saving, deployment or whole-plan acceptance.
+
+The October 7 reviewer cleared this narrow Usage refinement with no material fixes. Populated genuine-staging captures in `.impeccable/review/usage-20261007/` cover 390, 1440 and 1567 CSS pixels with no horizontal page overflow. These are viewport emulations; they do not establish every dynamic state, physical-device, production candidate, provider-invoice or full V1 acceptance. No new palette, artwork, type or motion convention follows from this addition.
+
+The incumbent toast, Sign in again label and native anchor remain unchanged. October 7 evidence in `.impeccable/review/reauth-route-20261007/browser-proof.json` records the source-specific link at 390, 1440 and 1567 CSS pixels and a later pathname/query check. The client received a simulated HTTP 400 before backend dispatch in a genuine staging session with a genuine source; no source edit occurred. The fresh reviewer cleared this routing correction. Its report retains the narrower evidence available at review time, before the later query check. These captures and checks do not establish live OAuth completion, production recovery, independent human or physical-phone acceptance, or full V1 acceptance.
+
 October 7 documentation evidence is the implemented Explore, connection map and canvas plus their scoped design-recipe styles. The fixed desktop/phone captures, desktop-tree-final.png, mobile-tree-final.png, phone-320-tree.png and tablet-768-tree.png in .impeccable/review/knowledge-explore/ retain the local synthetic review. proof.json records native Escape closing, focus return and no horizontal overflow; fix-target-proof.json records the native structure summary's visible mint focus ring. Independent finish review cleared all five corrections: representation/recovery/disclosure targets, summary focus, canvas count fit, overview scale explanation and matching evidence-pagination copy. The ship disposition is LOCAL SYNTHETIC FRONTEND SLICE only. It establishes no real authentication, provider, source, permission, production, customer-result or full V1 acceptance.
-
-### Home statistics and recorded links
-
-Home retains Scroll, the next action and capture before the scoped library overview. Four native metric buttons lead to Posts with insights, Ideas accepted, Merged pull requests and Selected projects. Each has a native What this counts disclosure with a 44px summary target. Tabular values use 30px medium-weight text, reducing to 26px at 680px and below. Charts retain compact 14px labels, exact counts and explicit loaded-record coverage.
-
-Counts deduplicate loaded records and exclude deleted posts. Ready posts require the ready state, accepted ideas require explicit acceptance, and selected projects require enabled repositories. Merged PRs count unique recorded GitHub pull-request links with recorded merge state or time. Compact Home shows Not loaded for merges rather than zero. Posts and proposals retain every current state through labeled categories, including saved/other and unreviewed/other. These are state distributions, not a conversion funnel or whole-library totals.
-
-Where your ideas went joins loaded non-deleted sources to up to five proposals through saved source IDs, then to up to five loaded runs through proposal IDs. Native source and proposal buttons open their records; run buttons open Runs. Mint, amber and blue outlines distinguish the stages. A missing loaded run has explicit text. Read source-to-project links exposes the same source and proposal actions as wrapping readable rows. Lines record attribution; acceptance, implementation, merge, deployment and measured outcomes remain separate facts.
 
 The October 8 fix-only finish disposition is ship for responsive network framing, centered topic-root entry and the complete Combine ideas label. The final seven labeled synthetic captures in `.impeccable/review/visual-dashboard-20261008/` are `home-1440.png`, `home-390.png`, `network-1440.png`, `network-390.png`, `network-evidence-390.png`, `tree-1440.png` and `tree-390.png`. The reviewer opened all seven; builder evidence records zoom/reset and Enter/Escape focus return. The verdict at `private/vibescroll-visual-dashboard-finish-review-final-20261008.md` resolves the three existing findings only. It does not establish whole-surface, authenticated customer, human keyboard, physical-device or production acceptance. User-supplied diagrams remain direction references; the implemented diagrams are native code and add no shipping raster artwork.
 
 The subsequent sparse-network framing review follows an actual production capture with a blank lead-in above 22 nodes. The settled local synthetic replacements at `.impeccable/review/visual-dashboard-20261008/framing-fix/network-1440.png` and `network-390.png` show evidence at the canvas entry. `private/vibescroll-network-framing-review-20261008.md` clears the occupied-origin correction locally and retains the prior three findings within this change scope. The 20-isolated-idea regression and reported 539 passing tests, three skips, 28 authentication tests and both builds are builder evidence. The larger production population after this fix remains pending recapture; this bounded verdict adds no whole-surface or production acceptance.
 
-### Plan review
-
-Review scope, affected files, implementation steps, checks, rollout and rollback in editable fields. File rows distinguish existing and new files and retain 44 px removal controls. On phones the path fills a row, with the change selector and removal control below it. JSON stays in a native disclosure for import and advanced edits. Invalid JSON remains intact until corrected; it never becomes a silently accepted plan.
-
-| Before                                        | After                                           | Why                                                       |
-| --------------------------------------------- | ----------------------------------------------- | --------------------------------------------------------- |
-| JSON was the only editor                      | Labeled plan fields and optional JSON           | Review does not require editing serialized syntax         |
-| A new draft stayed behind a disclosure        | Current unconfirmed draft fills the editor      | The next review step is visible; saving remains explicit  |
-| Blank steps or checks met array length limits | Save rejects empty steps, checks and file paths | A plan must specify work and verification before approval |
-
 October 2 native Chrome checks covered 320, 360, 390, 412, 768 and 1440 CSS pixels without page overflow. Private captures include plan-editor-local-mobile.png and plan-editor-staging-saved-mobile.png. Saving the labeled staging plan created version 2 and a 64-character hash; it did not start coding. These checks do not certify the generated recommendation's usefulness or a full PR journey.
 
-### Permanent source reading
+Documentation evidence: effective `product.css` followed by `studio.css`, `studio-home.tsx`, `scroll-character.tsx`, original asset provenance and the October 7 local desktop/phone captures in `.impeccable/review/studio/`. The synthetic captures establish visual evidence only. Finish disposition is scoped to the owner-pinned contract provenance and visible phone workspace fixes. This undeployed first slice is not full V1 acceptance, a deployment, a customer-data demonstration or completed roadmap work. Earlier component verification above retains its original scope; no new detector-pass claim is made.
 
-| Before                                                                                                                                       | After                                                                                                                                           |
-| -------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| A source detail existed only in client state; reload returned to the library. Refreshing a first page could remove an older selected source. | A tenant-scoped source URL restores the selected record, and background refresh reads that record independently of the paginated/filter result. |
+The implemented personal-video UI shows prepare, transcribe and analyze stages, an explicit automatic-analysis permission choice, private frame access and original transcript inspection. Current and completed steps brighten their labels; pending work uses a spinner. Recorded verification now includes a real production upload whose generation-one personal-alpha analysis completed automatic Whisper transcription and sampled-frame ChatGPT analysis using gpt-5.6-sol at medium reasoning. This observed completion does not establish global production readiness, legal approval or audiovisual completeness.
 
 Retain the existing dark overview, main-point cards and 44 px controls. The actual local detail stayed readable at 320/360/390/412/768/1440 without page overflow. A filtered library with zero rows still returned its separately authorized selected source. Native clicking, reload and background refresh passed; an initial automation reloaded before asynchronous navigation finished and was corrected. Invalid/deleted source links reveal no private record. This verifies source navigation and its states, not a complete mobile execution/PR journey.
-
-### Public policy reading
-
-| Before                                                        | After                                                                     | Why                                                     |
-| ------------------------------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------- |
-| Separate website copies could omit newer merchant disclosures | Build/dev synchronize canonical drafts; validation rejects stale copies   | The displayed policy must match the reviewed source     |
-| Markdown references and lists appeared as literal text        | Safe semantic Markdown with working policy links and list/table structure | Readers can follow their rights and payment disclosures |
-| Wide provider tables were plain wrapped text                  | A keyboard-focusable horizontal table region inside the dark article      | Preserve readable columns without phone page overflow   |
-
-No animation is needed for reading policies. Raw HTML and image loading are disabled. Link transformation accepts secure provider/contact links and known policy references; executable, credential-bearing and protocol-relative URLs are rejected. Review-draft status stays visible until actual publication approval. Browser verification follows the production build.
 
 ## Do's and Don'ts
 
 ### Do:
 
-- **Do** use charcoal, meaningful mint and warm Scroll artwork with concise sentence case interface copy.
-- **Do** keep Scroll present while allowing animation to stop; preserve visible workspace scope on phones.
+- **Do** use cool light and matching dark surfaces with theme-primary selection.
+- **Do** reuse original Scroll artwork and preserve visible phone workspace scope.
 - **Do** keep loading, empty, ready, success and error feedback tied to actual state.
-- **Do** preserve visible keyboard focus, 44px controls and reduced-motion behavior.
-- **Do** keep permissions and private evidence access explicit.
+- **Do** preserve visible keyboard focus, 44px controls and live reduced-motion behavior.
+- **Do** keep evidence, scope and recorded-outcome limits explicit.
 
 ### Don't:
 
-- **Don't** treat the bounded CTA sweep as permission for decorative gradients, looping effects or fabricated thumbnails. A light theme remains a separate owner decision.
-- **Don't** add ornamental eyebrows, zero-count hero metrics or a recurring explanatory motto.
-- **Don't** convert a supplied-text result into a claim of complete audiovisual analysis.
-- **Don't** publish private reference screenshots or promote an unverified outcome into success.
-
-Documentation evidence: effective `product.css` followed by `studio.css`, `studio-home.tsx`, `scroll-character.tsx`, original asset provenance and the October 7 local desktop/phone captures in `.impeccable/review/studio/`. The synthetic captures establish visual evidence only. Finish disposition is scoped to the owner-pinned contract provenance and visible phone workspace fixes. This undeployed first slice is not full V1 acceptance, a deployment, a customer-data demonstration or completed roadmap work. Earlier component verification above retains its original scope; no new detector-pass claim is made.
+- **Don't** invent scope roots, parent links, exact totals, analysis completeness or benefit.
+- **Don't** make a pointer reveal delay keyboard reading or action.
+- **Don't** put a duplicate source enclosure around insight-owned cards.
+- **Don't** publish private reference screenshots or turn a scoped fix verdict into production or full V1 acceptance.

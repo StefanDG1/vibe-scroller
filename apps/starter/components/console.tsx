@@ -28,7 +28,8 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   ArrowRight,
-  MoreHorizontal,
+  UserRound,
+  Lightbulb,
   Check,
 } from "lucide-react";
 import { AccountMenu } from "./account-menu";
@@ -42,6 +43,11 @@ import { SharedKnowledge } from "./shared-knowledge";
 import { PrivateLibrary } from "./private-library";
 import { StudioHome } from "./studio-home";
 import { ScrollCharacter } from "./scroll-character";
+import { motion } from "motion/react";
+import { useInterfaceMotion } from "./motion-preference";
+import { clearLibraryPlaces } from "@/lib/library-place";
+import { ProposalTrail } from "./proposal-trail";
+import { AppTheme } from "./app-theme";
 import { MotionPreference } from "./motion-preference";
 import { downloadText } from "@/lib/download";
 import { RepositoryChecklist, BusinessContext } from "./repository-checklist";
@@ -225,10 +231,16 @@ export function Console({
   initialSource?: any;
   demoState?: "ready" | "loading" | "error" | "empty";
 }) {
+  const [accessAvailable, setAccessAvailable] = useState(true);
+  const captureAccess = useRef(true);
   const router = useRouter(),
     [data, setData] = useState(initial),
     [view, setView] = useState(
-      initialView === "plans" ? "proposals" : initialView,
+      initialView === "account"
+        ? "menu"
+        : initialView === "plans"
+          ? "proposals"
+          : initialView,
     ),
     [librarySection, setLibrarySection] = useState<
       "topics" | "posts" | "ideas" | "issues"
@@ -419,6 +431,8 @@ export function Console({
     };
   }, [captureOpen]);
   function applyData(next: Initial) {
+    captureAccess.current = true;
+    setAccessAvailable(true);
     if (next.workspaceSlice === "library") {
       setData((current) => ({
         ...current,
@@ -487,6 +501,14 @@ export function Console({
     }
   }
   function clearAccess() {
+    captureAccess.current = false;
+    setAccessAvailable(false);
+    setCaptureOpen(false);
+    try {
+      clearLibraryPlaces(localStorage, organizationId);
+    } catch {
+      /* Access loss still clears all rendered data. */
+    }
     viewGeneration.current++;
     libraryRequest.current++;
     libraryAbort.current?.abort();
@@ -581,11 +603,17 @@ export function Console({
       );
   }, [view, demo]);
   async function openCapture() {
+    if (readOnly || !captureAccess.current) return;
+    const generation = viewGeneration.current;
     if ((data.compact || data.workspaceSlice) && !demo) {
       setBusy(true);
       try {
         if (refreshFlight.current) await refreshFlight.current;
+        if (!captureAccess.current || generation !== viewGeneration.current)
+          return;
         const next = await refreshWorkspace("full");
+        if (!captureAccess.current || generation !== viewGeneration.current)
+          return;
         if (!next || next.compact || next.workspaceSlice)
           throw new Error("Capture options could not be loaded. Try again.");
         setCaptureOpen(true);
@@ -794,6 +822,40 @@ export function Console({
       setBusy(false);
     }
   }
+  const syncRoute = useEffectEvent(() => {
+    setView(
+      initialView === "account"
+        ? "menu"
+        : initialView === "plans"
+          ? "proposals"
+          : initialView,
+    );
+    setSelected(initialSource ?? null);
+  });
+  useEffect(() => {
+    syncRoute();
+  }, [initialView, organizationId]);
+  const [projectScanOpen, setProjectScanOpen] = useState(false);
+  const [projectEvidenceOpen, setProjectEvidenceOpen] = useState(false);
+  const [projectEvidenceSection, setProjectEvidenceSection] = useState<
+    "topics" | "ideas" | "issues"
+  >("topics");
+  const pointerInput = useRef(false);
+  useEffect(() => {
+    const pointer = () => {
+      pointerInput.current = true;
+    };
+    const keyboard = () => {
+      pointerInput.current = false;
+    };
+    document.addEventListener("pointerdown", pointer, true);
+    document.addEventListener("keydown", keyboard, true);
+    return () => {
+      document.removeEventListener("pointerdown", pointer, true);
+      document.removeEventListener("keydown", keyboard, true);
+    };
+  }, []);
+  const interfaceMotion = useInterfaceMotion();
   const go = (v: string) => {
     if (!demo && v === "billing") {
       router.push(`/app/${organizationId}/billing`);
@@ -802,14 +864,43 @@ export function Console({
     setView(v);
     setSelected(null);
     if (!demo) track("workspace_viewed", { view: v });
-    if (v === "menu") return;
     if (!demo)
-      history.replaceState(
-        null,
+      history.pushState(
+        history.state,
         "",
-        `/app/${organizationId}/${v === "home" ? "" : v}${v === "home" && homePreview.current ? "?homeMode=compact" : ""}`,
+        `/app/${organizationId}/${v === "home" ? "" : v === "menu" ? "account" : v}${v === "home" && homePreview.current ? "?homeMode=compact" : ""}`,
       );
   };
+  useEffect(() => {
+    if (demo) return;
+    const recover = () => {
+      const parts = location.pathname.split("/").filter(Boolean);
+      if (parts[0] !== "app" || parts[1] !== organizationId) return;
+      const target = parts[2] || "home";
+      if (
+        [
+          "home",
+          "library",
+          "projects",
+          "improvements",
+          "inbox",
+          "runs",
+          "proposals",
+          "usage",
+          "connections",
+          "runners",
+          "privacy",
+          "account",
+        ].includes(target) &&
+        !parts[3]
+      ) {
+        setView(target === "account" ? "menu" : target);
+        setSelected(null);
+      }
+    };
+    window.addEventListener("popstate", recover);
+    return () => window.removeEventListener("popstate", recover);
+  }, [demo, organizationId]);
   const filtered = !demo
     ? data.sources
     : data.sources.filter(
@@ -873,8 +964,9 @@ export function Console({
   ).length;
   return (
     <div
-      className={`product-shell dark ${railCollapsed ? "rail-collapsed" : ""}`}
+      className={`product-shell atlas-shell ${railCollapsed ? "rail-collapsed" : ""}`}
     >
+      <AppTheme />
       <aside className="product-rail">
         <div className="rail-brand">
           <Brand />
@@ -934,7 +1026,7 @@ export function Console({
                   : view === "proposal"
                     ? "Proposals"
                     : view === "menu"
-                      ? "More"
+                      ? "Account"
                       : view === "shared"
                         ? "Shared knowledge"
                         : (nav.find((n) => n[0] === view)?.[1] ??
@@ -956,7 +1048,7 @@ export function Console({
           <div className="row">
             <Button
               busy={busy}
-              disabled={readOnly}
+              disabled={readOnly || !accessAvailable}
               primary
               onClick={() => {
                 void openCapture();
@@ -993,7 +1085,7 @@ export function Console({
                   : view === "proposal"
                     ? selected?.title
                     : view === "menu"
-                      ? "More"
+                      ? "Account"
                       : view === "shared"
                         ? "Shared knowledge"
                         : (nav.find((n) => n[0] === view)?.[1] ??
@@ -1023,7 +1115,20 @@ export function Console({
               ) : undefined
             }
           />
-          {data.compact && view !== "home" && view !== "menu" ? (
+          {!accessAvailable ? (
+            <section className="panel" role="alert">
+              <h2>Your access changed</h2>
+              <p>
+                Sign in again to reload current permitted data. Your unsaved
+                link remains on this page.
+              </p>
+              <Link
+                href={`/sign-in?reauth=true&returnTo=${encodeURIComponent(`/app/${organizationId}/`)}`}
+              >
+                Sign in again
+              </Link>
+            </section>
+          ) : data.compact && view !== "home" && view !== "menu" ? (
             <section aria-busy="true" className="studio-empty">
               <output>Loading this workspace view...</output>
               <Button
@@ -1146,6 +1251,8 @@ export function Console({
                     />
                   )}
                   <StudioHome
+                    organizationId={organizationId}
+                    demo={demo}
                     key={organizationId}
                     sources={home.sources}
                     proposals={home.proposals}
@@ -1506,47 +1613,135 @@ export function Console({
               )}
               {view === "projects" && (
                 <>
-                  <p>Connect projects and review their context.</p>
-                  <LibraryScan
-                    key={`scan:${organizationId}`}
-                    organizationId={organizationId}
-                    repositories={data.repositories}
-                    devices={data.devices ?? []}
-                    call={call}
-                    readOnly={readOnly}
-                    demo={demo}
-                    onOpenIssues={() =>
-                      document
-                        .querySelector('[aria-label="Reviewed issues"]')
-                        ?.scrollIntoView({ block: "start", behavior: "smooth" })
-                    }
-                  />
-                  <RepositoryChecklist
-                    key={`selection:${organizationId}`}
-                    organizationId={organizationId}
-                    repositories={data.repositories}
-                    choices={data.githubChoices ?? []}
-                    call={call}
-                    readOnly={readOnly}
-                    demo={demo}
-                  />
-                  {data.repositories.map((r) => (
-                    <BusinessContext
-                      key={`${id(r)}:${r.profileVersion}:${r.selectionVersion ?? 0}:${r.profileDraftSha ?? ""}`}
-                      repo={r}
+                  <section
+                    className="atlas-projects"
+                    aria-label="Your selected projects"
+                  >
+                    {data.repositories
+                      .filter((r) => r.enabled)
+                      .map((r) => {
+                        const proposals = data.proposals.filter(
+                          (p) => p.repositoryId === id(r),
+                        );
+                        return (
+                          <article className="panel atlas-project" key={id(r)}>
+                            <GitBranch size={24} aria-hidden="true" />
+                            <h2>
+                              {r.fullName ?? r.name ?? "Selected project"}
+                            </h2>
+                            <span className="status">
+                              {r.confirmed
+                                ? "Context reviewed"
+                                : "Context needs review"}
+                            </span>
+                            {proposals.length ? (
+                              <ul>
+                                {proposals.slice(0, 6).map((p) => (
+                                  <li key={id(p)}>
+                                    <button
+                                      onClick={() => void openProposal(id(p))}
+                                    >
+                                      <Lightbulb size={18} aria-hidden="true" />
+                                      <span>{p.title}</span>
+                                      <span className="explore-meta">
+                                        {label(p.review)}
+                                      </span>
+                                      <ArrowRight
+                                        size={16}
+                                        aria-hidden="true"
+                                      />
+                                    </button>
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <p>No proposals on this loaded page.</p>
+                            )}
+                            <Button onClick={() => go("proposals")}>
+                              Review proposals
+                            </Button>
+                          </article>
+                        );
+                      })}
+                    {!data.repositories.some((r) => r.enabled) && (
+                      <section className="panel">
+                        <h2>Your ideas need a destination</h2>
+                        <p>Choose a project below and review its context.</p>
+                      </section>
+                    )}
+                  </section>
+                  <details
+                    className="panel atlas-project-settings"
+                    open={!data.repositories.some((r) => r.enabled)}
+                  >
+                    <summary>Project connections and context</summary>
+                    <RepositoryChecklist
+                      key={`selection:${organizationId}`}
+                      organizationId={organizationId}
+                      repositories={data.repositories}
+                      choices={data.githubChoices ?? []}
                       call={call}
-                      readOnly={readOnly || demo}
+                      readOnly={readOnly}
+                      demo={demo}
                     />
-                  ))}
-                  <KnowledgeLibrary
-                    key={`project-knowledge:${organizationId}`}
-                    organizationId={organizationId}
-                    repositories={data.repositories}
-                    readOnly={readOnly}
-                    demo={demo}
-                    call={call}
-                    onOpenImprovements={() => go("improvements")}
-                  />
+                    {data.repositories.map((r) => (
+                      <BusinessContext
+                        key={`${id(r)}:${r.profileVersion}:${r.selectionVersion ?? 0}:${r.profileDraftSha ?? ""}`}
+                        repo={r}
+                        call={call}
+                        readOnly={readOnly || demo}
+                      />
+                    ))}
+                  </details>
+                  <details
+                    className="panel"
+                    onToggle={(event) =>
+                      setProjectScanOpen(event.currentTarget.open)
+                    }
+                  >
+                    <summary>Find proposals across saved insights</summary>
+                    <LibraryScan
+                      enabled={projectScanOpen}
+                      key={`scan:${organizationId}`}
+                      organizationId={organizationId}
+                      repositories={data.repositories}
+                      devices={data.devices ?? []}
+                      call={call}
+                      readOnly={readOnly}
+                      demo={demo}
+                      onOpenIssues={() => {
+                        setProjectEvidenceSection("issues");
+                        setProjectEvidenceOpen(true);
+                      }}
+                    />
+                  </details>
+                  <details
+                    className="panel"
+                    open={projectEvidenceOpen}
+                    onToggle={(event) =>
+                      setProjectEvidenceOpen(event.currentTarget.open)
+                    }
+                  >
+                    <summary>Explore project evidence</summary>
+                    <LibrarySections
+                      active={projectEvidenceSection}
+                      onSelect={(section) => {
+                        if (section !== "posts")
+                          setProjectEvidenceSection(section);
+                      }}
+                    />
+                    <KnowledgeLibrary
+                      enabled={projectEvidenceOpen}
+                      section={projectEvidenceSection}
+                      key={`project-knowledge:${organizationId}`}
+                      organizationId={organizationId}
+                      repositories={data.repositories}
+                      readOnly={readOnly}
+                      demo={demo}
+                      call={call}
+                      onOpenImprovements={() => go("improvements")}
+                    />
+                  </details>
                   {demo && (
                     <div className="panel">
                       <h2>Demo Planner</h2>
@@ -1627,6 +1822,12 @@ export function Console({
               )}
               {view === "proposal" && selected && (
                 <>
+                  <ProposalTrail
+                    proposal={selected}
+                    runs={data.runs.filter(
+                      (r) => r.proposalId === id(selected),
+                    )}
+                  />
                   <span className="status">{label(selected.disposition)}</span>
                   {selected.reviewerCorrection && (
                     <p className="notice">
@@ -2331,11 +2532,16 @@ export function Console({
               )}
               {view === "menu" && (
                 <section className="panel" aria-label="All application pages">
-                  <h2>More pages</h2>
+                  <h2>Account</h2>
+                  <Link href="/account">Profile and sign out</Link>
+                  <AppTheme control />
+                  <MotionPreference control />
                   <nav aria-label="All mobile pages" className="form-grid">
-                    {nav.slice(3).map(([key, title]) => (
+                    {nav.slice(3).map(([key, title, Icon]) => (
                       <button key={key} onClick={() => go(key)}>
+                        <Icon size={20} aria-hidden="true" />
                         {title}
+                        <ArrowRight size={16} aria-hidden="true" />
                       </button>
                     ))}
                   </nav>
@@ -2345,7 +2551,7 @@ export function Console({
           )}
         </main>
         <nav className="mobile-nav" aria-label="Mobile navigation">
-          {nav.slice(0, 3).map(([key, title, Icon]) => (
+          {nav.slice(0, 2).map(([key, title, Icon]) => (
             <button
               className={view === key ? "active" : ""}
               aria-current={view === key ? "page" : undefined}
@@ -2359,7 +2565,7 @@ export function Console({
           <button
             type="button"
             className="mobile-save"
-            disabled={readOnly || busy}
+            disabled={readOnly || busy || !accessAvailable}
             onClick={() => {
               void openCapture();
             }}
@@ -2367,15 +2573,33 @@ export function Console({
             <Plus size={20} aria-hidden="true" />
             Save
           </button>
-          <button aria-expanded={view === "menu"} onClick={() => go("menu")}>
-            <MoreHorizontal size={20} aria-hidden="true" />
-            More
+          <button
+            aria-current={view === "projects" ? "page" : undefined}
+            className={view === "projects" ? "active" : ""}
+            onClick={() => go("projects")}
+          >
+            <GitBranch size={20} aria-hidden="true" />
+            Projects
+          </button>
+          <button
+            aria-current={view === "menu" ? "page" : undefined}
+            onClick={() => go("menu")}
+          >
+            <UserRound size={20} aria-hidden="true" />
+            Account
           </button>
         </nav>
       </div>
       {captureOpen && (
         <div className="modal-backdrop">
-          <dialog
+          <motion.dialog
+            initial={
+              interfaceMotion && pointerInput.current
+                ? { opacity: 0, y: 8 }
+                : false
+            }
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: interfaceMotion ? 0.18 : 0 }}
             ref={captureDialog}
             aria-labelledby="capture-title"
             className="capture-modal"
@@ -2407,7 +2631,7 @@ export function Console({
                   });
               }}
             />
-          </dialog>
+          </motion.dialog>
         </div>
       )}
     </div>

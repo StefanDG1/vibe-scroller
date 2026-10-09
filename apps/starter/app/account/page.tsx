@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { backend, api } from "@/lib/backend";
+import { SignOutButton } from "@/components/sign-out-button";
+import { AppTheme } from "@/components/app-theme";
 import { Header } from "@/components/header";
 import { ActionForm } from "@/components/action-form";
 import { deleteAccount, logout } from "@/app/actions";
@@ -13,6 +15,7 @@ export default async function Page() {
   ]);
   return (
     <div className="container account-page">
+      <AppTheme />
       <Header />
       <main id="main" className="doc">
         <h1>Your account</h1>
@@ -43,7 +46,7 @@ export default async function Page() {
             <h2 style={{ marginTop: 0 }}>{data.user.name}</h2>
             <p className="muted">{data.user.email}</p>
             <form action={logout}>
-              <Button variant="outline">Sign out</Button>
+              <SignOutButton />
             </form>
           </Card>
           <Card>

@@ -30,6 +30,24 @@ export async function workspaceData({
 }) {
   const c = await backend(),
     organizationId = org as Id<"organizations">;
+  if (view === "account" || view === "menu") {
+    const organization = await c.query(api.organizations.details, {
+      organizationId,
+    });
+    return {
+      workspaceSlice: "usage" as const,
+      compact: false,
+      workspaceName: organization.name,
+      privateLibrary: organization.private,
+      role: organization.role,
+      sources: [],
+      repositories: [],
+      proposals: [],
+      runs: [],
+      notifications: [],
+      usage: null,
+    };
+  }
   if (view === "usage") {
     const [organization, usage] = await Promise.all([
       c.query(api.organizations.details, { organizationId }),

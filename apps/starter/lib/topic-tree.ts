@@ -3,6 +3,21 @@ export type TopicNode = {
   parentId?: string;
   children: TopicNode[];
 };
+export function topicPath<T extends { id: string; parentId?: string }>(
+  topics: T[],
+  id: string,
+): T[] {
+  const records = new Map(topics.slice(-40).map((topic) => [topic.id, topic]));
+  const path: T[] = [];
+  const seen = new Set<string>();
+  let current = records.get(id);
+  while (current && !seen.has(current.id) && path.length < 12) {
+    seen.add(current.id);
+    path.unshift(current);
+    current = current.parentId ? records.get(current.parentId) : undefined;
+  }
+  return path;
+}
 // Only returned topics can appear as parents. A missing parent stays a root on this page.
 export function buildTopicTree(topics: { id: string; parentId?: string }[]) {
   const nodes = new Map(

@@ -1,6 +1,9 @@
 "use client";
-import { useEffect, useMemo, useRef } from "react";
-import { layoutTopicDiagram } from "@/lib/knowledge-layout";
+import { useMemo, useState } from "react";
+import { GitBranch, ChevronDown, ChevronUp, Layers } from "lucide-react";
+import { motion } from "motion/react";
+import { buildTopicTree, type TopicNode } from "@/lib/topic-tree";
+import { useInterfaceMotion } from "./motion-preference";
 type Topic = {
   id: string;
   name: string;
@@ -11,79 +14,98 @@ type Topic = {
 export function TopicDiagram({
   topics,
   onOpen,
+  selectedId,
 }: {
   topics: Topic[];
   onOpen: (topic: Topic) => void;
+  selectedId?: string;
 }) {
-  const layout = useMemo(() => layoutTopicDiagram(topics), [topics]);
-  const points = new Map(layout.nodes.map((n) => [n.id, n]));
-  const viewport = useRef<HTMLDivElement>(null);
-  const rootX = layout.nodes.find((n) => n.y === 70)?.x;
-  useEffect(() => {
-    const element = viewport.current;
-    if (!element || rootX === undefined) return;
-    const center = () => {
-      element.scrollLeft = Math.max(0, rootX - element.clientWidth / 2);
-    };
-    center();
-    const observer = new ResizeObserver(center);
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, [rootX]);
-  const records = new Map(topics.map((t) => [t.id, t]));
+  const roots = useMemo(() => buildTopicTree(topics), [topics]);
+  const records = new Map(topics.map((topic) => [topic.id, topic]));
+  const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
+  const animate = useInterfaceMotion();
+  const [pointer, setPointer] = useState(false);
+  function branch(node: TopicNode, depth: number): React.ReactNode {
+    const topic = records.get(node.id);
+    if (!topic) return null;
+    const isOpen =
+      expanded.has(node.id) ||
+      (depth <= 1 && !expanded.has(`collapsed:${node.id}`));
+    return (
+      <li key={node.id} className="atlas-branch" data-depth={depth}>
+        <div className="atlas-node" data-selected={selectedId === node.id}>
+          <button
+            className="atlas-node-open"
+            onClick={() => onOpen(topic)}
+            aria-label={`Open ${topic.name}`}
+          >
+            <span className="atlas-node-icon">
+              <GitBranch size={19} aria-hidden="true" />
+            </span>
+            <strong>{topic.name}</strong>
+            <span className="atlas-node-count">
+              {topic.ideas} insights · {topic.posts} posts
+            </span>
+          </button>
+          {node.children.length > 0 && (
+            <button
+              className="atlas-expand"
+              aria-expanded={isOpen}
+              aria-label={`${isOpen ? "Collapse" : "Expand"} ${topic.name}`}
+              onPointerDown={() => setPointer(true)}
+              onKeyDown={() => setPointer(false)}
+              onClick={() =>
+                setExpanded((current) => {
+                  const next = new Set(current);
+                  if (isOpen) {
+                    next.delete(node.id);
+                    if (depth <= 1) next.add(`collapsed:${node.id}`);
+                  } else {
+                    next.add(node.id);
+                    next.delete(`collapsed:${node.id}`);
+                  }
+                  return next;
+                })
+              }
+            >
+              {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </button>
+          )}
+        </div>
+        {node.children.length > 0 &&
+          isOpen &&
+          !expanded.has(`collapsed:${node.id}`) && (
+            <motion.ul
+              className="atlas-children"
+              data-pair={node.children.length === 2 && depth === 0}
+              initial={animate && pointer ? { opacity: 0, y: 6 } : false}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: animate && pointer ? 0.18 : 0 }}
+            >
+              {node.children.map((child) => branch(child, depth + 1))}
+            </motion.ul>
+          )}
+      </li>
+    );
+  }
   if (!topics.length) return null;
   return (
-    <section aria-label="Topic branching diagram">
-      <p className="explore-coverage">
-        Branches show saved parent topics. Separate roots have no parent on this
-        page. Select a topic to inspect its cited ideas. Swipe or scroll across
-        branches, or switch to the readable tree.
-      </p>
-      {/* oxlint-disable jsx-a11y/no-noninteractive-tabindex -- Keyboard users can scroll this bounded diagram. */}
-      <div
-        className="topic-diagram-viewport"
-        ref={viewport}
-        tabIndex={0}
-        aria-label="Topic diagram. Scroll to explore branches; Tab and Enter open topics."
-      >
-        <div
-          className="topic-diagram-surface"
-          style={{ width: layout.width, height: layout.height }}
-        >
-          <svg
-            aria-hidden="true"
-            viewBox={`0 0 ${layout.width} ${layout.height}`}
-          >
-            {layout.edges.map((e) => {
-              const a = points.get(e.from)!,
-                b = points.get(e.to)!;
-              return (
-                <path
-                  key={`${e.from}:${e.to}`}
-                  d={`M ${a.x} ${a.y + 44} V ${b.y - 70} H ${b.x} V ${b.y - 44}`}
-                />
-              );
-            })}
-          </svg>
-          {layout.nodes.map((n) => {
-            const topic = records.get(n.id)!;
-            return (
-              <button
-                key={n.id}
-                style={{ left: n.x, top: n.y }}
-                onClick={() => onOpen(topic)}
-                aria-label={`Open ${topic.name}`}
-              >
-                <strong>{topic.name}</strong>
-                <span>
-                  {topic.posts} posts · {topic.ideas} current ideas
-                </span>
-              </button>
-            );
-          })}
-        </div>
+    <section className="atlas-tree" aria-label="Topic branching diagram">
+      <div className="atlas-root">
+        <Layers size={18} aria-hidden="true" />
+        <strong>Your knowledge</strong>
       </div>
-      {/* oxlint-enable jsx-a11y/no-noninteractive-tabindex */}
+      <ul className="atlas-roots" data-single={roots.length === 1}>
+        {roots.map((node) => branch(node, 0))}
+      </ul>
+      <details className="atlas-explanation">
+        <summary>About these branches</summary>
+        <p>
+          Lines show saved parent topics on this page. Topics with an unloaded
+          parent appear separately. Counts describe current permitted evidence,
+          not your whole library.
+        </p>
+      </details>
     </section>
   );
 }

@@ -219,3 +219,7 @@ Impeccable's shape/Operate guidance informed planning, state coverage and restra
 ## Next decision
 
 Review the four refinements as one proposed interface: overview, focused branch, useful Home and project trail. Overview-first with remembered position and device-following theme are now confirmed. The plan's confirmed structural choices stand; remaining composition assumptions can change. Freeze a state-by-state specification after that review, then begin implementation only when requested. Until then, the live interface and all provider/funding authority remain unchanged.
+
+## October 9 implementation authorization
+
+The owner subsequently selected a hybrid branching Tree with an expanded Folders alternative and authorized implementing the design work. Tree remains the starting view; focused-only browsing is not the default. The [implementation contract](ATLAS-IMPLEMENTATION-CONTRACT-20261009.md) records this update and the active state/read/authority contracts. Earlier planning and image limitations remain historical evidence, not a current prohibition on implementation. Exact implemented/verified status belongs in the implementation receipt.

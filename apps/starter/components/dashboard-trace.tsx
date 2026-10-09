@@ -1,4 +1,5 @@
 "use client";
+import { ArrowDown, Bookmark, GitBranch, GitPullRequest } from "lucide-react";
 import {
   buildDashboardTrace,
   type VisualRecord,
@@ -27,131 +28,80 @@ export function DashboardTrace({
       <header className="row spread">
         <h3 id="dashboard-trace-title">Where your ideas went</h3>
         <button className="secondary" onClick={() => go("library")}>
-          Open knowledge maps
+          Explore library
         </button>
       </header>
       <p className="studio-coverage">
-        Recorded links from loaded posts to their project proposals and runs. Up
-        to five proposals are shown. A line records provenance, not approval or
-        a useful outcome.
+        Recorded links in loaded records · up to five proposals
       </p>
       {traces.length ? (
-        <>
-          {/* oxlint-disable jsx-a11y/no-noninteractive-tabindex -- Keyboard scrolling is an alternative to touch panning. */}
-          <div
-            className="dashboard-trace-viewport"
-            tabIndex={0}
-            aria-label="Source to project diagram. Scroll across or use the readable links below."
-          >
-            <div
-              className="dashboard-trace-surface"
-              style={{ height: 60 + traces.length * 150 }}
-            >
-              <div className="dashboard-trace-headings" aria-hidden="true">
-                <span>Saved post</span>
-                <span>Project idea</span>
-                <span>Recorded work</span>
-              </div>
-              <svg
+        <ul className="atlas-traces">
+          {traces.map((trace) => (
+            <li key={trace.proposal._id ?? trace.proposal.id}>
+              <button onClick={() => onOpenSource(trace.source)}>
+                <Bookmark size={20} aria-hidden="true" />
+                <span>
+                  <small>Saved post</small>
+                  <strong>{trace.source.title ?? "Saved post"}</strong>
+                </span>
+              </button>
+              <ArrowDown
+                className="atlas-trace-arrow"
+                size={18}
                 aria-hidden="true"
-                viewBox={`0 0 900 ${60 + traces.length * 150}`}
-              >
-                {traces.map((t, i) => (
-                  <g key={t.proposal._id ?? t.proposal.id}>
-                    <path d={`M 230 ${110 + i * 150} H 340`} />
-                    {t.runs.length > 0 && (
-                      <path d={`M 560 ${110 + i * 150} H 670`} />
-                    )}
-                  </g>
-                ))}
-              </svg>
-              {traces.map((t, i) => (
-                <div key={t.proposal._id ?? t.proposal.id}>
-                  <button
-                    data-stage="source"
-                    style={{ left: 20, top: 64 + i * 150 }}
-                    onClick={() => onOpenSource(t.source)}
-                  >
-                    <strong>{t.source.title ?? "Saved post"}</strong>
+              />
+              <button onClick={() => onOpenProposal(trace.proposal)}>
+                <GitBranch size={20} aria-hidden="true" />
+                <span>
+                  <small>
+                    Project proposal ·{" "}
+                    {trace.proposal.review?.replaceAll("_", " ") ??
+                      "Decision unknown"}
+                  </small>
+                  <strong>{trace.proposal.title ?? "Project proposal"}</strong>
+                </span>
+              </button>
+              {trace.runs.length > 0 && (
+                <>
+                  <ArrowDown
+                    className="atlas-trace-arrow"
+                    size={18}
+                    aria-hidden="true"
+                  />
+                  <button onClick={() => go("runs")}>
+                    <GitPullRequest size={20} aria-hidden="true" />
                     <span>
-                      {t.source.state?.replaceAll("_", " ") ?? "Saved"}
-                    </span>
-                  </button>
-                  <button
-                    data-stage="proposal"
-                    style={{ left: 340, top: 64 + i * 150 }}
-                    onClick={() => onOpenProposal(t.proposal)}
-                  >
-                    <strong>{t.proposal.title ?? "Project idea"}</strong>
-                    <span>
-                      {t.proposal.review?.replaceAll("_", " ") ??
-                        "Decision unknown"}
-                    </span>
-                  </button>
-                  {t.runs.length ? (
-                    <button
-                      data-stage="run"
-                      style={{ left: 670, top: 64 + i * 150 }}
-                      onClick={() => go("runs")}
-                    >
+                      <small>Recorded work</small>
                       <strong>
-                        {t.runs.length}{" "}
-                        {t.runs.length === 1 ? "linked run" : "linked runs"}
-                      </strong>
-                      <span>
-                        {t.runs
+                        {trace.runs
                           .map(
-                            (r) =>
-                              r.state?.replaceAll("_", " ") ??
+                            (run) =>
+                              run.state?.replaceAll("_", " ") ??
                               "Status unavailable",
                           )
                           .join(", ")}
-                      </span>
-                    </button>
-                  ) : (
-                    <p
-                      className="dashboard-trace-unknown"
-                      style={{ top: 80 + i * 150 }}
-                    >
-                      No run loaded for this idea
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-          {/* oxlint-enable jsx-a11y/no-noninteractive-tabindex */}
-          <details className="dashboard-trace-readable">
-            <summary>Read source-to-project links</summary>
-            <ul>
-              {traces.map((t) => (
-                <li key={t.proposal._id ?? t.proposal.id}>
-                  <button
-                    className="secondary"
-                    onClick={() => onOpenSource(t.source)}
-                  >
-                    {t.source.title ?? "Saved post"}
+                      </strong>
+                    </span>
                   </button>
-                  <span>supports</span>
-                  <button
-                    className="secondary"
-                    onClick={() => onOpenProposal(t.proposal)}
-                  >
-                    {t.proposal.title ?? "Project idea"}
-                  </button>
-                  <span>{t.runs.length} linked runs in loaded records</span>
-                </li>
-              ))}
-            </ul>
-          </details>
-        </>
+                </>
+              )}
+            </li>
+          ))}
+        </ul>
       ) : (
         <p className="studio-empty">
-          No source-to-project links are available in the loaded records.
-          Explore your topic network, or review an idea against a selected
-          project.
+          Your saved ideas will connect to project proposals here when a
+          reviewed evaluation records a link.
         </p>
       )}
+      <details>
+        <summary>What these links mean</summary>
+        <p>
+          A line records provenance. It does not grant approval or establish
+          benefit. Missing work on this page means no linked run is loaded, not
+          that none exists.
+        </p>
+      </details>
     </section>
   );
 }
