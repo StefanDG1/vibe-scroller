@@ -251,7 +251,7 @@ Motion for React (14.0.0) reveals pointer-expanded branches over 180ms with opac
 
 ### Candidate verification boundary
 
-The October 9 reviewer scored all eight original fixes resolved in [.impeccable/review/atlas-20261009/verdict-1.md](.impeccable/review/atlas-20261009/verdict-1.md). This covers the supplied candidate fix evidence, including hierarchy geometry, project-link geometry, source scopes, access-loss capture recovery, truthful trail labels, accessible surfaces, first-viewport density and visibility refresh. It is not a whole-surface audit, production release or full V1 acceptance. Real authenticated deployed-data acceptance, independent browser and physical-device testing, and provider/cost settlement remain separate.
+The October 9 reviewer scored all eight original fixes resolved in [.impeccable/review/atlas-20261009/verdict-1.md](docs/operations/evidence/vibescroll-atlas-20261009.json). This covers the supplied candidate fix evidence, including hierarchy geometry, project-link geometry, source scopes, access-loss capture recovery, truthful trail labels, accessible surfaces, first-viewport density and visibility refresh. It is not a whole-surface audit, production release or full V1 acceptance. Real authenticated deployed-data acceptance, independent browser and physical-device testing, and provider/cost settlement remain separate.
 
 ### Historical evidence
 
