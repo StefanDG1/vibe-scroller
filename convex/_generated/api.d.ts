@@ -77,6 +77,7 @@ import type * as lib_projectedMutations from "../lib/projectedMutations.js";
 import type * as lib_repositoryAllowance from "../lib/repositoryAllowance.js";
 import type * as lib_repositoryContent from "../lib/repositoryContent.js";
 import type * as lib_storageUsage from "../lib/storageUsage.js";
+import type * as lib_topicHierarchy from "../lib/topicHierarchy.js";
 import type * as lib_workspacePrivacy from "../lib/workspacePrivacy.js";
 import type * as libraryScanSchema from "../libraryScanSchema.js";
 import type * as libraryScanWorker from "../libraryScanWorker.js";
@@ -194,6 +195,7 @@ declare const fullApi: ApiFromModules<{
   "lib/repositoryAllowance": typeof lib_repositoryAllowance;
   "lib/repositoryContent": typeof lib_repositoryContent;
   "lib/storageUsage": typeof lib_storageUsage;
+  "lib/topicHierarchy": typeof lib_topicHierarchy;
   "lib/workspacePrivacy": typeof lib_workspacePrivacy;
   libraryScanSchema: typeof libraryScanSchema;
   libraryScanWorker: typeof libraryScanWorker;
