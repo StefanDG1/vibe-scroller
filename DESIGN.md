@@ -1,6 +1,6 @@
 ---
 name: VibeScroll Atlas
-description: Cool surfaces, readable saved knowledge and recorded project trails, with original Scroll artwork.
+description: Cool surfaces, stable Library navigation, inline evidence and recorded project trails.
 colors:
   canvas: "#f5f8fa"
   panel: "#ffffff"
@@ -20,8 +20,8 @@ colors:
   dark-muted: "#263642"
   dark-primary: "#87dfc1"
   dark-primary-foreground: "#102d24"
-  save: "#f4cb68"
-  save-ink: "#33270c"
+  save: "#f8cf50"
+  save-ink: "#18272d"
   legacy-primary: "#f4f4f4"
   legacy-primary-ink: "#141414"
   legacy-primary-hover: "#d8d8d8"
@@ -42,13 +42,20 @@ typography:
     fontSize: "14px"
     lineHeight: 1.35
   library-headline:
-    fontSize: "clamp(27px, 6vw, 64px)"
-    fontWeight: 750
-    lineHeight: 1.1
-    letterSpacing: "-0.035em"
+    fontSize: "36px"
+    letterSpacing: "-0.025em"
   hybrid-title:
-    fontSize: "clamp(12px, 1.8vw, 23px)"
-    lineHeight: 1.25
+    fontSize: "14px"
+    lineHeight: 1.35
+  mobile-label:
+    fontSize: "11px"
+    lineHeight: 1.2
+  mobile-category:
+    fontSize: "13px"
+  insight-excerpt:
+    fontSize: "15px"
+    fontWeight: 650
+    lineHeight: 1.4
   body:
     fontSize: "14px"
     lineHeight: 1.6
@@ -91,9 +98,15 @@ components:
     padding: "10px 17px"
     height: "44px"
   mobile-save:
+    backgroundColor: "transparent"
+    textColor: "{colors.subtle}"
+    height: "56px"
+  mobile-save-icon:
     backgroundColor: "{colors.save}"
     textColor: "{colors.save-ink}"
     rounded: "{rounded.circle}"
+    size: "48px"
+    padding: "12px"
   field:
     backgroundColor: "{colors.panel}"
     textColor: "{colors.ink}"
@@ -123,19 +136,27 @@ components:
     padding: "14px"
     height: "76px"
   hybrid-category:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.field}"
-    padding: "8px"
-  hybrid-tray:
     backgroundColor: "{colors.panel}"
-    rounded: "{rounded.control}"
-    padding: "9px"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.insight}"
+    padding: "10px"
+    height: "56px"
+  hybrid-search:
+    backgroundColor: "{colors.panel}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.insight}"
+    padding: "10px 12px"
+  hybrid-switch:
+    rounded: "{rounded.insight}"
+    padding: "3px"
+  hybrid-tray:
+    backgroundColor: "transparent"
+    padding: "0"
   insight-card:
     backgroundColor: "{colors.panel}"
     textColor: "{colors.ink}"
     rounded: "{rounded.insight}"
-    padding: "12px"
+    padding: "0"
 ---
 
 # Design System: VibeScroll Atlas
@@ -144,15 +165,15 @@ components:
 
 **Creative North Star: "Scroll's knowledge atlas"**
 
-The app uses cool canvas, white reading surfaces, navy ink and teal selection. Its matching dark theme keeps the same hierarchy and original warm Scroll artwork. Quiet borders and compact icon-led cards let saved knowledge and the next permitted action lead. Device setting is the default appearance; Account offers Light and Dark overrides.
+The app uses cool canvas, white reading surfaces, navy ink and teal selection. Its matching dark theme keeps the same hierarchy. Quiet borders and compact icon-led cards let saved knowledge and the next permitted action lead. Device setting is the default appearance; Account offers Light and Dark overrides.
 
-This is the owner-authorized October 9 application world, extracted from the built code. Its boundary is the Atlas shell, Home, Library, Projects, Account and capture. The public marketing world remains Scroll's charcoal studio. The original Scroll image is reused; this update introduces no shipping raster artwork. Product authority remains in [PRODUCT.md](PRODUCT.md), with the selected interaction scope in [the Atlas implementation contract](docs/design/ATLAS-IMPLEMENTATION-CONTRACT-20261009.md).
+This is the owner-authorized October 9 application world, extracted from the built code. Its boundary is the Atlas shell, Home, Library, Projects, Account and capture. The public marketing world remains Scroll's charcoal studio. The app logo uses the actual favicon artwork and links to Home. Home and the mobile header no longer show the mascot or top account control under [ADR 097](docs/adr/097-stable-mobile-library-navigation.md). Original Scroll artwork remains part of the public marketing identity; this correction introduces no shipping raster artwork. Product authority remains in [PRODUCT.md](PRODUCT.md), with the selected interaction scope in [the Atlas implementation contract](docs/design/ATLAS-IMPLEMENTATION-CONTRACT-20261009.md).
 
 **Key Characteristics:**
 
 - Cool light surfaces and matching dark surfaces with teal selection.
-- Original Scroll artwork and visible workspace scope.
-- Compact saved-topic branches and insight-owned evidence cards.
+- Favicon Home link and authenticated account avatar.
+- Stable saved-topic branches and evidence expanded inside each insight row.
 - Five phone actions: Home, Library, Save, Projects, Account.
 - Short pointer-triggered motion with immediate keyboard actions and a still alternative.
 - Loaded-record statistics and explicitly recorded project trails.
@@ -169,7 +190,7 @@ The frontmatter records the effective Atlas light palette and its dark counterpa
 
 ### Secondary
 
-- **Warm Save / Save ink:** the phone's central Save action, opening capture.
+- **Warm Save / Save ink:** the phone's central circular SVG, opening capture. The label uses theme Subtle, including dark appearance; dark Save ink is confined to the yellow SVG.
 - **Amber:** original Scroll warmth and retained chart attention states.
 - **Diagram blue and violet:** retained labeled state and cited-group distinctions. Color does not establish benefit or quality.
 
@@ -179,6 +200,8 @@ The frontmatter records the effective Atlas light palette and its dark counterpa
 - **Navy ink and Secondary ink:** reading text and supporting explanation; placeholders use secondary ink at full opacity.
 - **Quiet line and Muted surface:** borders, branch stems, active rail rows and informational tags.
 - **Dark canvas, panel, ink, subtle, line and muted:** matching roles when the device or Account selects dark appearance.
+
+The category selection fill mixes theme Teal at 8% with Panel. Insight icon backgrounds use the same selection fill or blue at 16%, yellow at 18% and purple at 16% mixed with Panel. These incumbent `color-mix()` tints follow the existing theme; they introduce no new permission or outcome state.
 
 **The Recorded Meaning Rule.** Selection and connectors describe returned records; neither color nor a line establishes permission, independent corroboration or benefit.
 
@@ -192,29 +215,27 @@ The frontmatter records the effective Atlas light palette and its dark counterpa
 
 ### Hierarchy
 
-- **Headline:** page title; the frontmatter captures its inherited scale.
+- **Headline:** inherited page title; Library uses a 36px heading, reduced to 30px on phones.
 - **Studio headline:** the next action on Home; phone Atlas overrides it to 23px.
 - **Topic title:** saved topic names, with unrestricted word wrapping.
-- **Body / Insight:** reading copy and icon-led insight claims.
-- **Metadata:** topic counts and source/project detail; trail explanations use 13px.
+- **Body / Insight:** full claims use 14px; row excerpts use 15px and weight 650, reduced to 14px on phones.
+- **Metadata:** source and proposal detail use 12px; phone row metadata and bottom labels use 11px. Categories use 14px, reduced to 13px on phones, and toolbar labels use 13px, reduced to 12px. The 11/12/13/14/15px scale is retained intentionally for the operative density and does not reduce hit areas.
 
 **The Reading Hierarchy Rule.** Keep title, explanation and metadata distinct through scale, weight and neutral contrast; use concise sentence case labels instead of ornamental eyebrows.
 
 ## Layout
 
-The inherited desktop shell keeps a 244px rail, 64px toolbar and main content capped at 1120px with 32px 40px 64px padding. The rail narrows at 1050px. The inherited phone shell activates at 720px; Atlas compaction applies at 700px. Phone navigation contains Home, Library, Save, Projects and Account in that order, with safe-area padding and workspace scope in the header. Save is an action rather than a destination. At 700px and below it is a raised 52px circle with its label below; the selected destination has a 34px underline.
+The inherited desktop shell keeps a 244px rail, 64px toolbar and main content capped at 1120px. The rail narrows at 1050px. Earlier 720px shell and 700px Atlas declarations remain in the cascade; the final mobile correction applies at 760px and below, with 16px 12px 110px main padding. The mobile header hides the workspace strip, status and rail opener. The favicon logo links to Home. The same five bottom controls remain on every app page in Home, Library, Save, Projects, Account order. The fixed strip uses five equal columns, safe-area padding and at least 76px height; selected destinations have a 28px underline. Save is a transparent action with a raised 48px yellow SVG circle and an 11px theme-Subtle label.
 
-The current Library hybrid uses a full-width composition capped at 1040px with 6.4% horizontal inset. Brand and search lead Library and its Tree/Folders switch. Tree places two compact horizontal category nodes per row, with successive selected-branch rows stepping inward. At 360px and below the steps use full width. Runtime SVG paths use measured node rectangles and rounded bends rather than the earlier CSS bus approximations. Folders uses indented category rows and inline evidence under the selected category. Its Personal/Business filing controls occupy a constrained strip beside the heading (53% width); they are separate from Library access view. The earlier 1180px explorer and sticky tree/evidence split remain in CSS for older representations, not this hybrid composition.
+Library is capped at 1040px with 20px inset, removed on phones. The heading and search share a row. A separate stationary toolbar has two equal segments containing Tree/Folders and Personal/Business, capped at 600px on desktop. It stays in the same position across representation and filing changes; it is not sticky to the viewport. Tree displays one authored filing root. Every returned sibling keeps its saved order in a horizontal scrolling row; cards are 170px wide on desktop and 148px on phones, with a 10px gap. Selection does not reorder or automatically scroll a card. Each category click opens one level. Folders uses 12px indentation, reduced to 10px on phones, and expands only the chosen path. Unorganized legacy topics retain their returned roots.
 
-The owner subsequently replaced the four-card Tree grid with a vertical stacked list like Folders. Tree now uses one column of horizontal insight rows with 44px icons, a 76px minimum row height, 15px claims clamped to two lines and 12px source metadata. Proposal icons are also 44px. On phones the Tree/Folders switch occupies 40% width with a 152px minimum. Tree initially reveals four rows and Folders six; More insights adds four or six, while Next insights page requests the next authorized page. Connected category nodes retain the current stepped layout and effective desktop minimum height of 46px. From 361px through 700px category roots have a 62px minimum, deeper nodes 56px, labels 14px and icons 26px; the heading bottom margin is 7px. The superseded phone icon-above-claim layout and two-column evidence grid remain in older CSS declarations but are overridden by the final stacked-row rules.
-
-Tree evidence now renders inside TopicDiagram beneath its selected branch. Active branches toggle collapsed state; hidden descendants and evidence immediately receive inert and aria-hidden while pointer-driven height/opacity open and close transitions run for 240ms with cubic-bezier(0.22, 1, 0.36, 1). Keyboard and live reduced-motion/app-off actions are immediate. Outgoing stale evidence is not retained; measured edges skip collapsed rows and hidden trays. LibraryExplore captures pointer/key origin on its stable ancestor and passes animateEntry through the keyed Atlas into TopicDiagram, preserving stale/private reset keys. Incoming pointer branches use the 240ms height/opacity reveal; incoming Folders uses a 200ms fade. Keyboard and live reduced-motion/app-off entry remain immediate. Representation changes retain only current authorized evidence.
+Both views place stacked evidence inside the selected branch. Rows have an 80px minimum selection area, 42px icons and compact excerpts; phone icons are 36px. A row expands its full original claim, title, source link and any exact recorded proposal within the row. Both views initially show six returned insights; More insights adds six, while Next insights page requests the next authorized page. Navigation stays mounted when evidence arrives. Only the evidence list resets on its topic, insight generation and revision key; workspace/scope changes still reset private state. Runtime SVG connectors use measured category rectangles and skip hidden levels. The earlier pair grid, stepped composition, detached source pane and automatic deepest-branch preview are historical under ADR 097.
 
 **The Touch Target Rule.** Interactive controls keep at least a 44px target; small type and icons do not justify a smaller hit area. Informational chips are not controls.
 
 ## Elevation & Depth
 
-Thin borders and tonal surfaces establish depth. Topic nodes have a small ambient shadow; selection adds a teal ring. Menus retain floating depth, and dialogs use the inherited dim backdrop. Insight cards own their enclosure; source headings do not gain a duplicate card wrapper.
+Thin borders and tonal surfaces establish depth. Earlier topic-node variants retain a small ambient shadow and teal selection ring. Current category and insight rows use borders and tonal selection. Menus retain floating depth, and dialogs use the inherited dim backdrop. Insight cards own their enclosure; source headings do not gain a duplicate card wrapper.
 
 ### Shadow Vocabulary
 
@@ -224,7 +245,7 @@ Thin borders and tonal surfaces establish depth. Topic nodes have a small ambien
 
 ## Shapes
 
-Soft rounded rectangles define the atlas: the current hybrid categories, insight cells and proposal cards use Field corners (9px), and their shared tray uses Control corners (10px). Earlier topic nodes retain Node corners. General panels use Panel, fields use Field and informational badges use Chip. Proposal-stage markers are 33px circles linked by a thin vertical stem. Original Scroll retains its warm paper silhouette and transparent asset; line icons identify media, navigation and recorded stages.
+Soft rounded rectangles define the atlas. Current categories, insight rows, search, toolbar containers and More insights controls use Insight corners. Segmented toolbar buttons retain Field corners, and icon backgrounds retain Control corners. The 9/10/12px control radii are intentionally retained for operative density. Earlier topic-node variants retain Node corners; general panels use Panel and informational badges use Chip. Proposal-stage markers and authenticated avatars are circles. The favicon supplies the app identity; line icons identify media, navigation and recorded stages.
 
 ## Components
 
@@ -238,7 +259,7 @@ Status and tag badges use Muted with Ink and Chip corners. Small labels suppleme
 
 ### Cards / Containers
 
-General panels retain 24px padding and Panel corners. Insight cards use 12px padding, a thin line border and Insight corners. Their source heading is outside the card. Trace cards use 16px padding and Node corners, with Canvas-filled action rows and centered downward arrows.
+General panels retain 24px padding and Panel corners. Insight rows use a thin line border and Insight corners. Their selection button has 12px padding, reduced to 10px on phones. Expanded detail uses 14px padding and an internal top divider; full source headings and recorded proposals stay inside the row. Trace cards use 16px padding and Node corners, with Canvas-filled action rows and centered downward arrows.
 
 ### Inputs / Fields
 
@@ -246,13 +267,13 @@ Fields use Panel, Ink and Line, with Field corners and 10px 12px padding. Search
 
 ### Navigation
 
-The desktop rail uses subtle text, line icons and a muted selected/hover fill. Phone navigation uses theme-primary active text; yellow Save opens the reviewed capture dialog. Account exposes appearance and motion preferences alongside existing workflow destinations. Appearance offers Device setting, Light and Dark, following live device changes in Device setting mode.
+The desktop rail uses subtle text, line icons and a muted selected/hover fill. Phone navigation uses theme-primary active text; the yellow Save SVG opens the reviewed capture dialog and its label uses theme Subtle. Bottom Account opens the existing dropdown upward; the mobile top account control is absent. Account exposes appearance and motion preferences alongside existing workflow destinations. Appearance offers Device setting, Light and Dark, following live device changes in Device setting mode. Account retains appearance, Usage, Billing, Computers, Privacy, Cookie preferences, version, Account & sign out and Website destinations; the Account page keeps the other workflow links. WorkOS passes the current authenticated user's HTTPS OAuth picture, with a first-name initial when absent or failed. It fetches no other user profile.
 
 ### Saved topic atlas and insight links
 
 Tree is the default; Folders provides an expanded alternative over the same returned IDs and exact evidence. Remembered topic IDs restore only after the current authorized page returns them. Personal/Business roots are authored filing containers, independent of access scope. A missing counterpart can appear as an empty local filing template with no evidence, totals or grant. Library access view uses only server-returned permitted scopes; team libraries retain Workspace. Missing parents remain separate roots. The explicit deterministic category helper uses no model call and preserves saved manual layout versions.
 
-Activating an insight reveals Source evidence with the unchanged full claim, full source title and source link; the source pane is absent before activation. The owner chose compact excerpts with full evidence on tap. Demo rows abbreviate Synthetic example to Example while the explicit synthetic banner and source pane retain that context and full title. Current-topic project connections are read once per bounded reference set, then filtered by exact source and insight IDs; failed reads are cleared for explicit retry. Measured SVG stems join the selected leaf to its insight tray, and theme-primary curves terminate at actual recorded proposal cards. Review opens that proposal. The primary foreground is defined separately in light and dark themes. Change category remains a version-bound disclosure, and Library options retains access view, explicit organization and coverage. Empty or partial pages explain coverage. Native disclosures retain 44px targets; advanced evidence representations remain reachable.
+Activating an insight expands the unchanged full claim, full source title and source link inside that row. Compact excerpts do not replace original evidence. Demo rows abbreviate Synthetic example to Example while the explicit synthetic banner and full source title retain context. Project connections start only on an actual insight click, reuse the bounded current-topic reference cache and filter exact source and insight IDs. Failed reads are cleared for explicit retry. Matching recorded proposals appear inside the expanded row; Review opens that exact proposal. Category correction remains version-bound, and Library options retains access view, explicit deterministic organization and coverage. Empty or partial pages explain missing coverage. Native disclosures retain 44px targets; advanced evidence representations remain reachable.
 
 **The Cited Group Rule.** Display a connection only when all of its exact source, generation, revision and insight references exist in current permitted evidence. A connection is an explained cited group; neither its line nor topic membership proves causation or agreement.
 
@@ -266,17 +287,23 @@ Projects lead with selected projects and existing proposals. Setup and evidence 
 
 ### Motion
 
-Tree evidence now renders inside TopicDiagram beneath its selected branch. Active branches toggle collapsed state; hidden descendants and evidence immediately receive inert and aria-hidden while pointer-driven height/opacity open and close transitions run for 240ms with cubic-bezier(0.22, 1, 0.36, 1). Keyboard and live reduced-motion/app-off actions are immediate. Outgoing stale evidence is not retained; measured edges skip collapsed rows and hidden trays. LibraryExplore captures pointer/key origin on its stable ancestor and passes animateEntry through the keyed Atlas into TopicDiagram, preserving stale/private reset keys. Incoming pointer branches use the 240ms height/opacity reveal; incoming Folders uses a 200ms fade. Keyboard and live reduced-motion/app-off entry remain immediate. Representation changes retain only current authorized evidence. Capture retains its 180ms opacity and 8px entry. CSS control responses remain 120ms ease-out; Scroll stays visible when motion is off.
+Pointer branch switching closes the old branch before opening the next with 220ms height/opacity phases and cubic-bezier(0.22, 1, 0.36, 1). Insight expansion uses a 200ms height/opacity transition. Closed branches and evidence immediately receive inert and aria-hidden. Keyboard, live device reduced motion and interface-motion-off actions are immediate. Detail arrival does not remount navigation or replay an entry animation. Outgoing stale evidence is discarded and measured connectors omit hidden rows. Representation changes retain only current authorized evidence. Capture retains its 180ms opacity and 8px entry. CSS control responses remain 120ms ease-out. Motion causes no inference or recurring browse polling.
 
 ### Candidate verification boundary
 
-The later owner-authorized stacked Tree and transition revision supersedes the four-card grid requirement. Five final stacked screenshots are valid. Native checks observed three running pointer animations after Pricing, one after switching to Folders, zero for keyboard Marketing and zero for reduced-motion Product. These counts verify the recorded native interaction states, not physical-device smoothness or independent comprehension. Final review for this revision remains pending. The 78% drift FAIL and hard veto under `.impeccable/review/diff/hero` are historical evidence for the preceding grid; they have not been rerun or passed for the owner-changed stack. Prior seven captures, full-evidence activation and 512px proposal placement retain their earlier revision scope. Hybrid production deployment and all independent, physical-device, provider/cost and full V1 gates remain pending.
+The final native local browser receipt at `private/mobile-navigation-final-browser-20261009.json` reports PASS at requested/actual widths 320, 390, 412, 768, 1440 and 1600. It covers inline Tree/Folders evidence, stationary toolbar and bottom controls, one-level interaction, sequential pointer close/open, keyboard/reduced-motion behavior and actual Account destinations. The nine captures under `.impeccable/review/` are synthetic browser proof: `mobile.png`, `mobile-folders.png`, `user-320.png`, `desktop.png`, `mobile-dark.png`, `mobile-account-menu.png`, `mobile-home.png`, `mobile-projects.png` and `mobile-account.png`. The fresh full reviewer handoff identified the dark Save label and documentation freshness; the code correction and this documentation refresh address those findings, with final reviewer disposition pending. No review file is asserted from that handoff.
 
-The October 9 reviewer scored all eight original fixes resolved in [the public Atlas evidence receipt](docs/operations/evidence/vibescroll-atlas-20261009.json). This covers the supplied candidate fix evidence, including hierarchy geometry, project-link geometry, source scopes, access-loss capture recovery, truthful trail labels, accessible surfaces, first-viewport density and visibility refresh. It is not a whole-surface audit, production release or full V1 acceptance. Real authenticated deployed-data acceptance, independent browser and physical-device testing, and provider/cost settlement remain separate.
+This local receipt does not establish physical-device smoothness, independent comprehension, actual OAuth picture delivery, exact production acceptance, provider/cost settlement or full V1 acceptance. The preceding ADR 095/096 grid, its 78% drift FAIL and hard veto under `.impeccable/review/diff/hero`, the earlier stacked captures and recorded animation counts remain historical. They are neither current composition instructions nor passes for this revision.
+
+The preceding October 9 reviewer scored all eight original fixes resolved in [the public Atlas evidence receipt](docs/operations/evidence/vibescroll-atlas-20261009.json). This covers the supplied candidate fix evidence, including hierarchy geometry, project-link geometry, source scopes, access-loss capture recovery, truthful trail labels, accessible surfaces, first-viewport density and visibility refresh. It is not a whole-surface audit, production release or full V1 acceptance. Real authenticated deployed-data acceptance, independent browser and physical-device testing, and provider/cost settlement remain separate.
 
 The subsequent capture focus-recovery review cleared the bounded code correction and supplied local authenticated compact-path keyboard receipt at 390px and 1440px. Escape returned focus to Save and Enter reopened capture after the actual full-workspace refresh. Disconnected/disabled-opener fallback and access-loss suppression were reviewed in code only. Exact deployed-release compact keyboard acceptance remains pending; the original eight-fix verdict keeps its unchanged scope. This correction changes no palette, layout, tokens or visual world.
 
 ### Historical evidence
+
+The latest serving application before this correction was `aacdc9ce237d82aab0ccf544c24c9c3342eab104`, version `0.1.0-alpha.20261009085602.gaacdc9ce237d`, with documentation main `0b670c4`, supplied in the release handoff. Those identifiers are historical and do not establish the current candidate deployment.
+
+Historical October 9 release e68fc3e52946 was Ready Production with canonical health/version, populated Library/Home reads and compact header capture recovery at 390/1440 in [the committed receipt](docs/operations/evidence/vibescroll-atlas-20261009.json). That release supersedes only its preceding candidate production-pending statements. It does not verify the later ADR 097 correction, whose exact production acceptance remains pending. Review scopes and independent/physical/provider/cost gates remain unchanged.
 
 The receipts below retain their original dates and acceptance limits. Their earlier visual descriptions are historical; the Atlas tokens and rules above define the current application candidate. Public policy and marketing styling remain outside this replacement.
 
@@ -311,7 +338,7 @@ Retain the existing dark overview, main-point cards and 44 px controls. The actu
 ### Do:
 
 - **Do** use cool light and matching dark surfaces with theme-primary selection.
-- **Do** reuse original Scroll artwork and preserve visible phone workspace scope.
+- **Do** use the favicon Home link and current authenticated avatar; keep all five bottom controls stable across app pages.
 - **Do** keep loading, empty, ready, success and error feedback tied to actual state.
 - **Do** preserve visible keyboard focus, 44px controls and live reduced-motion behavior.
 - **Do** keep evidence, scope and recorded-outcome limits explicit.
@@ -320,7 +347,5 @@ Retain the existing dark overview, main-point cards and 44 px controls. The actu
 
 - **Don't** turn filing templates into access scopes, invent parent links, exact totals, analysis completeness or benefit.
 - **Don't** make a pointer reveal delay keyboard reading or action.
-- **Don't** put a duplicate source enclosure around insight-owned cards.
+- **Don't** detach evidence from its insight row, remount navigation on evidence arrival, reorder siblings or automatically open the deepest branch.
 - **Don't** publish private reference screenshots or turn a scoped fix verdict into production or full V1 acceptance.
-
-October 9 release evidence supersedes the Atlas candidate and compact capture production-pending statements above: application e68fc3e52946 is Ready Production with exact canonical health/version, actual populated Library/Home reads and native compact header capture recovery at390/1440. See [the committed receipt](docs/operations/evidence/vibescroll-atlas-20261009.json). Review scopes and remaining independent/physical/provider/cost gates are unchanged.

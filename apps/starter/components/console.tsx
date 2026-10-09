@@ -28,11 +28,10 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   ArrowRight,
-  UserRound,
   Lightbulb,
   Check,
 } from "lucide-react";
-import { AccountMenu } from "./account-menu";
+import { AccountMenu, type AccountProfile } from "./account-menu";
 import { KnowledgeLibrary, LibrarySections } from "./knowledge-library";
 import { LibraryScan } from "./library-scan";
 import { SubscriptionTrials } from "./subscription-trials";
@@ -42,7 +41,6 @@ import { TeamKnowledgeSharing } from "./team-knowledge-sharing";
 import { SharedKnowledge } from "./shared-knowledge";
 import { PrivateLibrary } from "./private-library";
 import { StudioHome } from "./studio-home";
-import { ScrollCharacter } from "./scroll-character";
 import { motion } from "motion/react";
 import { useInterfaceMotion } from "./motion-preference";
 import { clearLibraryPlaces } from "@/lib/library-place";
@@ -201,6 +199,7 @@ function SourceThumbnail({ source, demo }: { source: any; demo: boolean }) {
 }
 
 export function Console({
+  profile,
   compactHomePreview = false,
   demo = false,
   readOnly = false,
@@ -217,6 +216,7 @@ export function Console({
   initialSource = null,
   demoState = "ready",
 }: {
+  profile?: AccountProfile;
   compactHomePreview?: boolean;
   demo?: boolean;
   readOnly?: boolean;
@@ -1003,7 +1003,7 @@ export function Console({
       <AppTheme />
       <aside className="product-rail">
         <div className="rail-brand">
-          <Brand />
+          <Brand href={demo ? "/demo" : `/app/${organizationId}`} />
           <button
             type="button"
             className="icon-button"
@@ -1038,7 +1038,7 @@ export function Console({
             <Plug size={18} />
             Connections
           </button>
-          <AccountMenu go={go} demo={demo} />
+          <AccountMenu go={go} demo={demo} profile={profile} />
         </div>
       </aside>
       <div className="product-body">
@@ -1052,7 +1052,7 @@ export function Console({
             >
               <PanelLeftOpen size={19} />
             </button>
-            <ScrollCharacter compact />
+            <Brand href={demo ? "/demo" : `/app/${organizationId}`} />
             <div className="studio-scope">
               <span className="top-view">
                 {view === "source"
@@ -1091,9 +1091,6 @@ export function Console({
               <Plus size={17} />
               Save
             </Button>
-            <div className="mobile-account">
-              <AccountMenu go={go} demo={demo} />
-            </div>
           </div>
         </header>
         {readOnly && (
@@ -2622,13 +2619,20 @@ export function Console({
             <GitBranch size={20} aria-hidden="true" />
             Projects
           </button>
-          <button
-            aria-current={view === "menu" ? "page" : undefined}
-            onClick={() => go("menu")}
-          >
-            <UserRound size={20} aria-hidden="true" />
-            Account
-          </button>
+          <AccountMenu
+            go={go}
+            demo={demo}
+            profile={profile}
+            mobile
+            active={[
+              "menu",
+              "usage",
+              "billing",
+              "runners",
+              "privacy",
+              "connections",
+            ].includes(view)}
+          />
         </nav>
       </div>
       {captureOpen && (

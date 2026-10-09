@@ -66,9 +66,7 @@ export function MotionPreference({ control = false }: { control?: boolean }) {
         }}
       />
       Interface motion
-      <span>
-        Scroll stays visible. Your device’s reduced-motion setting also applies.
-      </span>
+      <span>Animations also respect your device's reduced-motion setting.</span>
     </label>
   );
 }

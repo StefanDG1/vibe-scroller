@@ -1,16 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import { CookieSettings } from "./consent";
-export function Brand() {
+export function Brand({ href = "/" }: { href?: string }) {
   return (
-    <Link href="/" className="brand">
+    <Link href={href} className="brand">
       <span className="brand-icon" aria-hidden="true">
-        <Image
-          src="/scroll/scroll-welcome.webp"
-          alt=""
-          width={30}
-          height={36}
-        />
+        <Image src="/icon.svg" alt="" width={30} height={30} />
       </span>
       VibeScroll
     </Link>

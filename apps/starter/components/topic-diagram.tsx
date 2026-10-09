@@ -25,14 +25,13 @@ type Topic = {
   autoCategory?: boolean;
 };
 function iconFor(name: string) {
-  const n = name.toLowerCase();
-  if (n === "personal") return UserRound;
-  if (n === "business") return BriefcaseBusiness;
-  if (/product/.test(n)) return Package;
-  if (/market|content|conversion/.test(n)) return Megaphone;
-  if (/customer|interface|experience/.test(n)) return UsersRound;
-  if (/pricing/.test(n)) return Tag;
-  if (/engineer|software|code|ai/.test(n)) return Code;
+  if (name === "Personal") return UserRound;
+  if (name === "Business") return BriefcaseBusiness;
+  if (/product/i.test(name)) return Package;
+  if (/market|content|conversion/i.test(name)) return Megaphone;
+  if (/customer|interface|experience/i.test(name)) return UsersRound;
+  if (/pricing/i.test(name)) return Tag;
+  if (/engineer|software|code|ai/i.test(name)) return Code;
   return Layers;
 }
 export function TopicDiagram({
@@ -40,117 +39,162 @@ export function TopicDiagram({
   onOpen,
   selectedId,
   representation = "tree",
+  filing = "Business",
   children,
-  animateEntry = false,
 }: {
   topics: Topic[];
   onOpen: (topic: Topic) => void;
   selectedId?: string;
   representation?: "tree" | "folders";
+  filing?: "Personal" | "Business";
   children?: React.ReactNode;
   animateEntry?: boolean;
 }) {
-  const organized = topics.some(
-    (topic) => topic.autoCategory && !topic.parentId,
+  const records = new Map(topics.map((t) => [t.id, t]));
+  const allRoots = buildTopicTree(topics);
+  const organized = allRoots.some(
+    (n) =>
+      records.get(n.id)?.autoCategory &&
+      ["Personal", "Business"].includes(records.get(n.id)!.name),
   );
-  const displayTopics = organized
-    ? [
-        ...topics,
-        ...["Personal", "Business"]
-          .filter(
-            (name) =>
-              !topics.some(
-                (topic) =>
-                  topic.autoCategory && topic.name === name && !topic.parentId,
-              ),
-          )
-          .map((name) => ({
-            id: `empty-filing:${name}`,
-            name,
-            ideas: 0,
-            posts: 0,
-            autoCategory: true,
-          })),
-      ]
-    : topics;
-  const roots = buildTopicTree(displayTopics).sort((a, b) => {
-    const order = (id: string) =>
-      displayTopics.find((topic) => topic.id === id)?.name === "Personal"
-        ? 0
-        : 1;
-    return order(a.id) - order(b.id);
-  });
-  const records = new Map(displayTopics.map((t) => [t.id, t]));
-  const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
+  const root = allRoots.find(
+    (n) =>
+      records.get(n.id)?.name === filing && records.get(n.id)?.autoCategory,
+  );
+  const roots = organized ? (root ? [root] : []) : allRoots;
+  const [visualId, setVisualId] = useState(selectedId);
+  const [phase, setPhase] = useState<"open" | "closing" | "closed">("open");
+  const [cutDepth, setCutDepth] = useState(0);
+  const pending = useRef<string | null>(null);
+  const switching = useRef(false);
+  const previousFiling = useRef(filing);
+  const [pointer, setPointer] = useState(false);
   const animate = useInterfaceMotion();
-  const [pointer, setPointer] = useState(animateEntry);
+  const duration = animate && pointer ? 0.22 : 0;
   const treeRef = useRef<HTMLElement>(null);
   const [edges, setEdges] = useState({
     width: 1,
     height: 1,
     paths: [] as string[],
   });
+  const candidate = visualId && records.has(visualId) ? visualId : root?.id;
+  const originalPath = topicPath(topics, candidate ?? "");
+  const path = organized
+    ? originalPath.filter((_t) => originalPath[0]?.id === root?.id)
+    : originalPath;
+  const active = new Set(path.map((t) => t.id));
+  useEffect(() => {
+    if (switching.current && previousFiling.current === filing) return;
+    previousFiling.current = filing;
+    pending.current = null;
+    switching.current = false;
+    setVisualId(selectedId);
+    setPhase("open");
+  }, [selectedId, filing]);
   useEffect(() => {
     const tree = treeRef.current;
     if (!tree || representation !== "tree") return;
-    const observer = new ResizeObserver(() => {
+    let frame = 0;
+    function measure() {
+      if (!tree) return;
       const bounds = tree.getBoundingClientRect();
       const rows = [
         ...tree.querySelectorAll<HTMLElement>(".hybrid-node-level"),
       ];
       const paths: string[] = [];
-      for (let index = 1; index < rows.length; index++) {
-        if (rows[index].dataset.collapsed === "true") continue;
-        const parent = rows[index - 1].querySelector<HTMLElement>(
-          ".hybrid-node-row .hybrid-node[data-selected=true]",
+      for (let i = 1; i < rows.length; i++) {
+        if (rows[i].closest('[aria-hidden="true"]')) continue;
+        const parent = rows[i - 1].querySelector<HTMLElement>(
+          '.hybrid-node[data-selected="true"]',
         );
         if (!parent) continue;
-        const p = parent.getBoundingClientRect();
-        const x = p.left + p.width / 2 - bounds.left,
+        const p = parent.getBoundingClientRect(),
+          x = p.left + p.width / 2 - bounds.left,
           y = p.bottom - bounds.top;
-        for (const child of rows[index].querySelectorAll<HTMLElement>(
+        for (const child of rows[i].querySelectorAll<HTMLElement>(
           ".hybrid-node-row > li > .hybrid-node",
         )) {
-          const c = child.getBoundingClientRect();
-          const cx = c.left + c.width / 2 - bounds.left,
-            cy = c.top - bounds.top;
-          const middle = (y + cy) / 2,
-            radius = Math.min(8, Math.abs(cx - x) / 2, (cy - y) / 3),
-            direction = cx > x ? 1 : -1;
-          paths.push(
-            Math.abs(cx - x) < 1
-              ? `M ${x} ${y} V ${cy}`
-              : `M ${x} ${y} V ${middle - radius} Q ${x} ${middle} ${x + direction * radius} ${middle} H ${cx - direction * radius} Q ${cx} ${middle} ${cx} ${middle + radius} V ${cy}`,
-          );
+          const c = child.getBoundingClientRect(),
+            cx = c.left + c.width / 2 - bounds.left,
+            cy = c.top - bounds.top,
+            m = (y + cy) / 2;
+          paths.push(`M ${x} ${y} V ${m} H ${cx} V ${cy}`);
         }
       }
       setEdges({ width: bounds.width, height: bounds.height, paths });
-    });
-    observer.observe(tree);
-    return () => observer.disconnect();
-  }, [selectedId, representation, topics]);
-  const firstLeaf = topics.find(
-    (t) => !t.autoCategory && !topics.some((c) => c.parentId === t.id),
-  );
-  const path = topicPath(displayTopics, selectedId ?? firstLeaf?.id ?? "");
-  const active = new Set(path.map((t) => t.id));
-  function choose(node: TopicNode) {
-    let leaf = node;
-    const seen = new Set<string>();
-    while (leaf.children.length && !seen.has(leaf.id)) {
-      seen.add(leaf.id);
-      leaf = leaf.children[0];
     }
-    const topic = records.get(leaf.id);
-    if (topic) onOpen(topic);
+    const observer = new ResizeObserver(measure);
+    observer.observe(tree);
+    for (const node of tree.querySelectorAll(".hybrid-node-level"))
+      observer.observe(node);
+    const scroll = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(measure);
+    };
+    tree.addEventListener("scroll", scroll, true);
+    measure();
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(frame);
+      tree.removeEventListener("scroll", scroll, true);
+    };
+  }, [visualId, phase, representation, topics, filing]);
+  function finish() {
+    if (phase !== "closing") return;
+    if (pending.current) {
+      const id = pending.current;
+      pending.current = null;
+      setVisualId(id);
+      setPhase("open");
+      const topic = records.get(id);
+      if (topic) onOpen(topic);
+    } else setPhase("closed");
+    switching.current = false;
+  }
+  function choose(node: TopicNode, pointerActivation: boolean) {
+    setPointer(pointerActivation);
+    const shouldAnimate = animate && pointerActivation;
+    const topic = records.get(node.id);
+    if (!topic) return;
+    const newPath = topicPath(topics, node.id);
+    const depth = Math.max(0, newPath.length - 1);
+    if (node.id === candidate && phase === "closed") {
+      setPhase("open");
+      return;
+    }
+    if (active.has(node.id) && phase === "open") {
+      pending.current = null;
+      setCutDepth(depth);
+      if (shouldAnimate) setPhase("closing");
+      else setPhase("closed");
+      return;
+    }
+    let common = 0;
+    while (
+      common < path.length &&
+      common < newPath.length &&
+      path[common].id === newPath[common].id
+    )
+      common++;
+    setCutDepth(Math.max(0, common));
+    if (shouldAnimate && path.length > common && phase !== "closed") {
+      pending.current = node.id;
+      switching.current = true;
+      setPhase("closing");
+    } else {
+      pending.current = null;
+      switching.current = false;
+      setVisualId(node.id);
+      setPhase("open");
+      onOpen(topic);
+    }
   }
   function control(node: TopicNode, folder = false) {
     const topic = records.get(node.id)!;
     const Icon = folder ? Folder : iconFor(topic.name);
-    const expandable =
-      node.children.length > 0 ||
-      (!folder && active.has(node.id) && !!children);
-    const expanded = active.has(node.id) && !collapsed.has(node.id);
+    const depth = path.findIndex((t) => t.id === node.id);
+    const expanded =
+      active.has(node.id) && !(phase !== "open" && depth >= cutDepth);
     return (
       <button
         className="hybrid-node"
@@ -158,142 +202,96 @@ export function TopicDiagram({
         data-selected={active.has(node.id)}
         aria-label={`Open ${topic.name}`}
         aria-expanded={
-          expandable ? (folder ? !collapsed.has(node.id) : expanded) : undefined
+          node.children.length || node.id === selectedId ? expanded : undefined
         }
         onPointerDown={() => setPointer(true)}
         onKeyDown={() => setPointer(false)}
-        onClick={() => {
-          if (
-            (folder && node.children.length) ||
-            (!folder && expandable && active.has(node.id))
-          )
-            setCollapsed((current) => {
-              const next = new Set(current);
-              if (next.has(node.id)) next.delete(node.id);
-              else next.add(node.id);
-              return next;
-            });
-          else {
-            setCollapsed(new Set());
-            choose(node);
-          }
-        }}
+        onClick={(event) => choose(node, event.detail > 0)}
       >
         <Icon aria-hidden="true" />
         <strong>{topic.name}</strong>
-        {(
-          folder
-            ? node.children.length > 0 && !collapsed.has(node.id)
-            : expanded
-        ) ? (
-          <ChevronDown size={17} aria-hidden="true" />
-        ) : (
-          <ChevronRight size={17} aria-hidden="true" />
-        )}
+        {expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
       </button>
     );
   }
+  const evidenceCurrent = selectedId === candidate;
   function folderBranch(node: TopicNode): React.ReactNode {
+    const depth = path.findIndex((t) => t.id === node.id);
+    const expanded =
+      active.has(node.id) && (phase === "open" || depth < cutDepth);
     return (
       <li key={node.id}>
         {control(node, true)}
-        {node.id === selectedId && children}
-        {node.children.length > 0 && !collapsed.has(node.id) && (
-          <ul>{node.children.map(folderBranch)}</ul>
-        )}
+        <motion.div
+          className="hybrid-folder-branch"
+          initial={false}
+          animate={{ height: expanded ? "auto" : 0, opacity: expanded ? 1 : 0 }}
+          transition={{ duration, ease: [0.22, 1, 0.36, 1] }}
+          inert={!expanded}
+          aria-hidden={!expanded || undefined}
+          onAnimationComplete={() => {
+            if (depth === cutDepth) finish();
+          }}
+        >
+          <div>
+            {node.id === selectedId && evidenceCurrent && children}
+            {node.children.length > 0 && (
+              <ul>{node.children.map(folderBranch)}</ul>
+            )}
+          </div>
+        </motion.div>
       </li>
     );
   }
-  function row(nodes: TopicNode[], depth: number) {
-    const ordered = [...nodes].sort(
-      (a, b) => Number(active.has(b.id)) - Number(active.has(a.id)),
-    );
-    const shown = depth === 0 ? nodes.slice(0, 2) : ordered.slice(0, 2);
-    const hidden = path
-      .slice(0, depth)
-      .some((topic) => collapsed.has(topic.id));
+  if (!roots.length)
     return (
-      <motion.div
-        key={`${depth}:${depth ? path[depth - 1]?.id : "roots"}`}
-        className="hybrid-node-level"
-        data-depth={depth}
-        data-single={shown.length === 1}
-        data-collapsed={hidden}
-        aria-hidden={hidden || undefined}
-        inert={hidden}
-        initial={
-          animate && pointer && depth > 0 ? { opacity: 0, height: 0 } : false
-        }
-        animate={{ opacity: hidden ? 0 : 1, height: hidden ? 0 : "auto" }}
-        transition={{
-          duration: animate && pointer ? 0.24 : 0,
-          ease: [0.22, 1, 0.36, 1],
-        }}
-      >
-        <div className="hybrid-level-content">
-          <ul className="hybrid-node-row">
-            {shown.map((node) => (
+      <p className="hybrid-empty">
+        No {filing.toLowerCase()} topics in this page.
+      </p>
+    );
+  if (representation === "folders")
+    return (
+      <section className="hybrid-folder-tree" aria-label="Category folders">
+        <ul>{(organized ? root!.children : roots).map(folderBranch)}</ul>
+      </section>
+    );
+  function treeLevel(nodes: TopicNode[], depth: number): React.ReactNode {
+    const chosen = nodes.find((node) => node.id === path[depth]?.id);
+    const expanded = !!chosen && (phase === "open" || depth < cutDepth);
+    return (
+      <div className="hybrid-tree-level">
+        <div className="hybrid-node-level" data-depth={depth}>
+          <ul
+            className="hybrid-node-row"
+            aria-label={
+              depth ? "Categories, scroll horizontally" : "Filing root"
+            }
+          >
+            {nodes.map((node) => (
               <li key={node.id}>{control(node)}</li>
             ))}
           </ul>
-          {nodes.length > 2 && (
-            <details className="hybrid-other-categories">
-              <summary>{nodes.length - 2} more categories</summary>
-              <ul>
-                {(depth === 0 ? nodes.slice(2) : ordered.slice(2)).map(
-                  (node) => (
-                    <li key={node.id}>{control(node)}</li>
-                  ),
-                )}
-              </ul>
-            </details>
-          )}
         </div>
-      </motion.div>
+        <motion.div
+          className="hybrid-open-branch"
+          initial={false}
+          animate={{ height: expanded ? "auto" : 0, opacity: expanded ? 1 : 0 }}
+          transition={{ duration, ease: [0.22, 1, 0.36, 1] }}
+          inert={!expanded}
+          aria-hidden={!expanded || undefined}
+          onAnimationComplete={() => {
+            if (depth === cutDepth) finish();
+          }}
+        >
+          <div>
+            {chosen?.children.length
+              ? treeLevel(chosen.children, depth + 1)
+              : null}
+            {chosen?.id === selectedId && evidenceCurrent && children}
+          </div>
+        </motion.div>
+      </div>
     );
-  }
-  if (!topics.length) return null;
-  if (representation === "folders")
-    return (
-      <section
-        className="hybrid-folder-tree"
-        aria-label="Expanded category folders"
-      >
-        {organized ? (
-          <>
-            <div className="hybrid-folder-roots" aria-label="Filing category">
-              {roots.map((root) => (
-                <button
-                  key={root.id}
-                  aria-pressed={active.has(root.id)}
-                  onClick={() => choose(root)}
-                >
-                  {records.get(root.id)?.name}
-                </button>
-              ))}
-            </div>
-            <motion.ul
-              initial={animate && pointer ? { opacity: 0 } : false}
-              animate={{ opacity: 1 }}
-              transition={{ duration: animate && pointer ? 0.2 : 0 }}
-            >
-              {(roots.find((root) => active.has(root.id))?.children ?? []).map(
-                folderBranch,
-              )}
-            </motion.ul>
-          </>
-        ) : (
-          <ul>{roots.map(folderBranch)}</ul>
-        )}
-      </section>
-    );
-  const levels: TopicNode[][] = [roots];
-  let nodes = roots;
-  for (const item of path) {
-    const node = nodes.find((n) => n.id === item.id);
-    if (!node?.children.length) break;
-    levels.push(node.children);
-    nodes = node.children;
   }
   return (
     <section
@@ -306,28 +304,11 @@ export function TopicDiagram({
         viewBox={`0 0 ${edges.width} ${edges.height}`}
         aria-hidden="true"
       >
-        {edges.paths.map((path, index) => (
-          <path key={index} d={path} />
+        {edges.paths.map((d, i) => (
+          <path key={i} d={d} />
         ))}
       </svg>
-      {levels.map(row)}
-      <motion.div
-        key={`evidence:${selectedId}`}
-        className="hybrid-branch-evidence"
-        aria-hidden={path.some((topic) => collapsed.has(topic.id)) || undefined}
-        inert={path.some((topic) => collapsed.has(topic.id))}
-        initial={animate && pointer ? { opacity: 0, height: 0 } : false}
-        animate={{
-          opacity: path.some((topic) => collapsed.has(topic.id)) ? 0 : 1,
-          height: path.some((topic) => collapsed.has(topic.id)) ? 0 : "auto",
-        }}
-        transition={{
-          duration: animate && pointer ? 0.24 : 0,
-          ease: [0.22, 1, 0.36, 1],
-        }}
-      >
-        {children}
-      </motion.div>
+      {treeLevel(roots, 0)}
     </section>
   );
 }
