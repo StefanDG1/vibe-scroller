@@ -20,7 +20,13 @@ export default async function Demo({
       demo
       demoState={demoState}
       initialView={
-        params.view === "library" || demoState !== "ready" ? "library" : "home"
+        demoState !== "ready"
+          ? "library"
+          : ["library", "projects", "proposals", "runs", "account"].includes(
+                params.view ?? "",
+              )
+            ? params.view
+            : "home"
       }
       initialSearch={demoState === "empty" ? "Synthetic absent source" : ""}
       initial={{
@@ -70,11 +76,24 @@ export default async function Demo({
                   repositoryId: "synthetic-project",
                   title: "Preview a useful result before setup",
                   review: "unreviewed",
-                  disposition: "useful",
+                  disposition: "relevant",
                   version: 1,
                   baseSha: "a".repeat(40),
                   profileVersion: 1,
                   detail: {
+                    currentProblem:
+                      "The synthetic setup flow asks for configuration before showing a useful result.",
+                    proposedChange:
+                      "Show a labeled example first, then offer project setup when the person is ready.",
+                    benefitHypothesis:
+                      "An example may make the next decision easier to understand. This has not been measured.",
+                    risks: [
+                      "An example must not appear to be real saved data.",
+                    ],
+                    acceptanceCriteria: [
+                      "Keep the example labeled synthetic.",
+                      "Leave account and payment logic unchanged.",
+                    ],
                     reason:
                       "Synthetic example only. Inspect the onboarding idea before deciding.",
                   },
@@ -85,7 +104,7 @@ export default async function Demo({
                   repositoryId: "synthetic-project",
                   title: "Keep setup reversible",
                   review: "accepted",
-                  disposition: "useful",
+                  disposition: "relevant",
                   version: 1,
                   baseSha: "a".repeat(40),
                   profileVersion: 1,

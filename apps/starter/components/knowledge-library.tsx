@@ -378,12 +378,6 @@ export function KnowledgeLibrary(p: Props) {
       )}
       {activeSection === "topics" && (
         <>
-          <button
-            className="secondary"
-            onClick={() => setExploring(!exploring)}
-          >
-            {exploring ? "Analysis and corrections" : "Back to Explore"}
-          </button>
           {exploring && (
             <LibraryExplore
               key={`${p.organizationId}:${p.demo}`}
@@ -394,6 +388,12 @@ export function KnowledgeLibrary(p: Props) {
               call={p.call}
             />
           )}
+          <button
+            className="secondary"
+            onClick={() => setExploring(!exploring)}
+          >
+            {exploring ? "Analysis and corrections" : "Back to Explore"}
+          </button>
         </>
       )}
       {activeSection === "topics" &&
@@ -1129,8 +1129,12 @@ export function LibrarySections({
           onClick={() => onSelect(section)}
         >
           {section === "topics"
-            ? "Knowledge"
-            : section.charAt(0).toUpperCase() + section.slice(1)}
+            ? "Explore"
+            : section === "ideas"
+              ? "Insights"
+              : section === "issues"
+                ? "Proposals"
+                : "Posts"}
         </button>
       ))}
     </nav>

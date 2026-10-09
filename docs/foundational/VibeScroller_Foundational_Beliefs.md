@@ -155,3 +155,7 @@ The owner selected design 2 for Library and design 3 for Projects, rejected the 
 ## F032: library density and motion, October 8
 
 The owner requested a denser Library with an icon on each insight, efficient cards, easy scrolling and restrained helpful motion. The [density and motion studies](../design/LIBRARY-DENSITY-AND-MOTION-20261008.md) propose compact category outlines, focused icon-led lists and a denser desktop view. Native generated samples are not implemented features, performance, comprehension or animation acceptance. Motion for React core and conditional long-list virtualization are proposed reusable tools, not installed dependencies. Preserve current evidence, scope/ownership, corrections, bounded reads, pricing, budgets and separate action authority; no new value or marketing promise follows.
+
+## F033: authorized atlas implementation, October 9
+
+The owner selected a branching Tree plus expanded Folders over the same evidence and authorized implementing the design plan. The [contract](../design/ATLAS-IMPLEMENTATION-CONTRACT-20261009.md) requires device theme, five mobile actions, icon-led evidence and truthful project progress. These are owner choices and implementation work, not independent usability or customer-outcome evidence. Keep the current audience, allowance, provider, privacy and exact work-approval boundaries. Loaded-record charts do not promise whole-library totals or measured benefit; a current project connection is not coding permission. Preserve earlier disagreements and external acceptance gates.

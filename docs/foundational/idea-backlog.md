@@ -202,3 +202,7 @@ Decision: adopted as structural planning constraints only. The owner confirmed o
 Source: explicit owner request for more categories/insights, icons, efficient cards and smooth restrained animation. The [studies](../design/LIBRARY-DENSITY-AND-MOTION-20261008.md) compare an expanded outline, focused branch and desktop category/cards/detail structure. Counterargument: too many expanded cards, nested scrolling or virtualized focus loss can make the library harder to use. Test deep/wide fixtures, current scope/provenance, stable paging, keyboard/large-text/reduced-motion behavior and matched rendering/read costs before claiming scale or savings.
 
 Decision: record as an owner-requested refinement and proposed tool choice. Detailed compositions and dependencies remain unimplemented; no new audience, price, allowance, marketing or work authority is adopted.
+
+## F033: atlas implementation authorized, October 9
+
+Updated all four briefs together for the owner-authorized branching Tree and expanded Folders implementation. Reference the [implementation contract](../design/ATLAS-IMPLEMENTATION-CONTRACT-20261009.md) and ADR 095. The direction favors understandable evidence and reviewed proposals without new audience, pricing, grant or work authority. Implementation candidates and verified release evidence stay separate; no independent comprehension, smoothness, savings or measured benefit is claimed.

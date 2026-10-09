@@ -7,6 +7,7 @@ export function DashboardVisuals({
   runs,
   go,
   compact = false,
+  children,
 }: {
   sources: VisualRecord[];
   proposals: VisualRecord[];
@@ -14,6 +15,7 @@ export function DashboardVisuals({
   runs: VisualRecord[];
   go: (view: string) => void;
   compact?: boolean;
+  children?: React.ReactNode;
 }) {
   const summary = summarizeDashboard({
     sources,
@@ -79,9 +81,7 @@ export function DashboardVisuals({
         </button>
       </header>
       <p className="studio-coverage">
-        These charts describe loaded records in this workspace, not
-        whole-library totals or a conversion funnel. Open each section for more
-        records.
+        Loaded records in this workspace. Open each section for more.
       </p>
       <div className="dashboard-stat-strip">
         {metrics.map((m) => (
@@ -99,6 +99,7 @@ export function DashboardVisuals({
           </div>
         ))}
       </div>
+      {children}
       <div className="dashboard-chart-grid">
         <section aria-labelledby="dashboard-posts-title">
           <h3 id="dashboard-posts-title">From saved to understood</h3>

@@ -151,3 +151,7 @@ Follow [ADR 058](adr/058-bounded-full-library-scans.md): full URL-link paginatio
 ## October 8: owner-selected vertical atlas and five mobile actions
 
 [ADR 094](adr/094-vertical-library-and-project-trail-direction.md) records design 2 for Library, design 3 for Projects, rejection of the collection desk and the future Home/Library/Save/Projects/Account mobile structure. The [draft UI and UX plan](design/VIBESCROLL-UI-UX-PLAN-20261008.md) records confirmed overview-first/remembered-position and device-theme defaults, with composition still pending. This is a planning decision, not implementation or a production design contract.
+
+## October 9: implement the selected atlas
+
+[ADR 095](adr/095-atlas-shell-and-bounded-visual-workflows.md) and the [implementation contract](design/ATLAS-IMPLEMENTATION-CONTRACT-20261009.md) record the owner's authorization to implement the branching Tree and expanded Folders views, five mobile actions, device theme, real project trails and restrained motion. The implementation candidate preserves all existing authority and budgets; release evidence remains separate.

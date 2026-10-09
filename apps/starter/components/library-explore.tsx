@@ -1,11 +1,12 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { ChevronDown, GitBranch, ArrowRight, Lightbulb } from "lucide-react";
 import { KnowledgeMap } from "./knowledge-map";
+import { InsightProjectLinks } from "./insight-project-links";
 import { TopicDiagram } from "./topic-diagram";
 import { ChoiceSelect } from "./choice-select";
-import { usePolling } from "@/lib/use-polling";
-import { buildTopicTree, type TopicNode } from "@/lib/topic-tree";
+import { libraryPlaceKey, permittedLibraryPlace } from "@/lib/library-place";
+import { buildTopicTree, topicPath, type TopicNode } from "@/lib/topic-tree";
 import type { FunctionReturnType } from "convex/server";
 import type { api } from "../../../convex/_generated/api";
 
@@ -274,12 +275,69 @@ export function LibraryExplore({
       if (ticket === generation.current) setLoading(false);
     }
   }
-  usePolling(
-    () => refresh(),
-    60000,
-    enabled && !demo && !laterPage,
-    JSON.stringify([organizationId, scope, search, view, method]),
+  const refreshVisible = useEffectEvent(() => refresh());
+  useEffect(() => {
+    if (!enabled || demo) return;
+    let last = 0;
+    const revalidate = () => {
+      if (document.hidden || Date.now() - last < 2000) return;
+      last = Date.now();
+      void refreshVisible();
+    };
+    const timeout = setTimeout(revalidate, search ? 250 : 0);
+    window.addEventListener("focus", revalidate);
+    document.addEventListener("visibilitychange", revalidate);
+    return () => {
+      clearTimeout(timeout);
+      window.removeEventListener("focus", revalidate);
+      document.removeEventListener("visibilitychange", revalidate);
+      // oxlint-disable-next-line react-hooks/exhaustive-deps -- Invalidate the shared request counter, not a DOM ref, on cleanup.
+      generation.current++;
+      // oxlint-disable-next-line react-hooks/exhaustive-deps -- Fence pending evidence responses on scope changes.
+      selectionGeneration.current++;
+    };
+  }, [enabled, demo, organizationId, scope, search, view, method]);
+  const restored = useRef<string | null>(null);
+  const restoreTopic = useEffectEvent((topic: any) =>
+    open(topic, undefined, false),
   );
+  useEffect(() => {
+    if (!topics || demo || search || view !== "tree") return;
+    const key = libraryPlaceKey(organizationId, topics.scope);
+    if (restored.current === key) return;
+    restored.current = key;
+    try {
+      const place = permittedLibraryPlace(
+        localStorage.getItem(key),
+        topics.items,
+      );
+      // oxlint-disable-next-line react/set-state-in-effect -- Synchronize the authorized page with an external, scoped browser preference.
+      if (place) setTreeDiagram(place.representation === "tree");
+      const topic = topics.items.find((t: any) => t.id === place?.topicId);
+      if (topic) {
+        setSelected(topic);
+        void restoreTopic(topic);
+      }
+    } catch {
+      /* A fresh overview remains available without storage. */
+    }
+  }, [topics, demo, search, view, organizationId]);
+  useEffect(() => {
+    if (!topics || demo || search || view !== "tree") return;
+    const key = libraryPlaceKey(organizationId, topics.scope);
+    if (restored.current !== key) return;
+    try {
+      localStorage.setItem(
+        key,
+        JSON.stringify({
+          representation: treeDiagram ? "tree" : "folders",
+          topicId: selected?.id,
+        }),
+      );
+    } catch {
+      /* Browsing never requires persistence. */
+    }
+  }, [topics, demo, search, view, organizationId, treeDiagram, selected]);
   useEffect(
     () => () => {
       generation.current++;
@@ -371,48 +429,42 @@ export function LibraryExplore({
   return (
     <section className="library-explore" aria-label="Library Explore">
       <div className="explore-intro">
-        <h2>Explore your library</h2>
-        <p>
-          Follow an idea, inspect its connections, or see what happened when it
-          was tried.
-        </p>
+        <h2>Your library</h2>
+        <p>Your saved ideas, connected.</p>
       </div>
-      {demo && (
-        <p className="notice">
-          Synthetic demonstration. No customer data, project evaluation or
-          measured benefit.
-        </p>
+      {(topics?.scopes?.length ?? 0) > 1 && (
+        <nav className="atlas-scope-roots" aria-label="Library spaces">
+          {topics.scopes.map((available: string) => (
+            <button
+              key={available}
+              aria-pressed={(scope || topics.scope) === available}
+              onClick={() => {
+                reset();
+                setScope(available);
+              }}
+            >
+              {scopeNames[available]}
+            </button>
+          ))}
+        </nav>
       )}
-      <fieldset className="explore-views" aria-label="Explore view">
-        {views.map(([id, label]) => (
-          <button
-            key={id}
-            type="button"
-            aria-pressed={view === id}
-            onClick={() => {
-              reset();
-              setView(id);
-            }}
-          >
-            {label}
-          </button>
-        ))}
-      </fieldset>
       <div className="explore-controls">
         <label>
           Library view
           <ChoiceSelect
             value={scope || topics?.scope || helped?.scope || ""}
+            disabled={!(topics?.scopes?.length || helped?.scopes?.length)}
             onValueChange={(value) => {
               reset();
               setScope(value);
             }}
           >
-            {(
-              topics?.scopes ??
-              helped?.scopes ??
-              (scope ? [scope] : ["personal", "business"])
-            ).map((s: string) => (
+            {!(topics?.scopes?.length || helped?.scopes?.length) && (
+              <option value="">
+                {loading ? "Loading spaces…" : "Unavailable"}
+              </option>
+            )}
+            {(topics?.scopes ?? helped?.scopes ?? []).map((s: string) => (
               <option value={s} key={s}>
                 {scopeNames[s]}
               </option>
@@ -451,6 +503,27 @@ export function LibraryExplore({
           </label>
         )}
       </div>
+      {view === "tree" && (
+        <>
+          <fieldset
+            className="explore-views"
+            aria-label="Topic tree representation"
+          >
+            <button
+              aria-pressed={treeDiagram}
+              onClick={() => setTreeDiagram(true)}
+            >
+              Tree
+            </button>
+            <button
+              aria-pressed={!treeDiagram}
+              onClick={() => setTreeDiagram(false)}
+            >
+              Folders
+            </button>
+          </fieldset>
+        </>
+      )}
       {message && (
         <div role="alert" className="error">
           <p>{message}</p>
@@ -517,282 +590,325 @@ export function LibraryExplore({
         </>
       ) : selected ? (
         <div className="explore-branch">
-          <button
-            className="secondary"
-            onClick={() => {
-              selectionGeneration.current++;
-              setSelected(null);
-              setDetail(null);
-              setJourney(null);
-            }}
-          >
-            Back to topic list
-          </button>
-          <h3 ref={selectedHeading} tabIndex={-1}>
-            {detail?.topic?.name ?? selected.name}
-          </h3>
-          {detail?.topic && !readOnly && (
-            <details className="explore-structure">
-              <summary>Edit topic structure</summary>
-              <form
-                key={`${detail.topic._id}:${detail.topic.layoutVersion}`}
-                className="form-grid"
-                onSubmit={async (e) => {
-                  e.preventDefault();
-                  if (!call || demo) return;
-                  const data = new FormData(e.currentTarget),
-                    parent = String(data.get("parent"));
-                  setSavingStructure(true);
-                  try {
-                    await call("organizeExploreTopic", {
-                      topicId: selected.id,
-                      layoutVersion: detail.topic.layoutVersion,
-                      ...(parent === "keep"
-                        ? {}
-                        : { parentId: parent || null }),
-                      aliases: String(data.get("aliases"))
-                        .split(",")
-                        .map((s) => s.trim())
-                        .filter(Boolean),
-                    });
-                    await refresh();
-                  } catch (error) {
-                    setMessage(
-                      error instanceof Error
-                        ? error.message
-                        : "Structure was not saved. Reload and try again.",
-                    );
-                  } finally {
-                    setSavingStructure(false);
+          {view === "tree" &&
+            (treeDiagram ? (
+              <TopicDiagram
+                topics={topics?.items ?? []}
+                selectedId={selected.id}
+                onOpen={(topic) => void open(topic)}
+              />
+            ) : (
+              <TopicBranches
+                topics={topics?.items ?? []}
+                onOpen={(topic) => void open(topic)}
+              />
+            ))}
+          <div className="atlas-evidence-pane">
+            <nav className="atlas-breadcrumbs" aria-label="Topic ancestors">
+              {topicPath(topics?.items ?? [], selected.id).map((topic: any) => (
+                <button
+                  key={topic.id}
+                  aria-current={
+                    topic.id === selected.id ? "location" : undefined
                   }
-                }}
-              >
-                <label>
-                  Parent topic
-                  <ChoiceSelect
-                    id="explore-parent-topic"
-                    name="parent"
-                    defaultValue="keep"
-                  >
-                    <option value="keep">Keep saved parent</option>
-                    <option value="">No parent</option>
-                    {topics?.items
-                      .filter((t: any) => t.id !== selected.id)
-                      .map((t: any) => (
-                        <option key={t.id} value={t.id}>
-                          {t.name}
-                        </option>
-                      ))}
-                  </ChoiceSelect>
-                </label>
-                <label>
-                  Aliases, separated by commas
-                  <input
-                    name="aliases"
-                    defaultValue={detail.topic.aliases.join(", ")}
-                    maxLength={390}
-                  />
-                </label>
-                <p>
-                  Use up to eight short aliases. Structure and aliases do not
-                  change evidence or authorize analysis.
-                </p>
-                <button disabled={savingStructure || demo || !call}>
-                  Save topic structure
+                  onClick={() => void open(topic)}
+                >
+                  {topic.name}
                 </button>
-              </form>
-            </details>
-          )}
-          {view === "journey" ? (
-            <>
-              {!journey && (
-                <output aria-live="polite">Opening recorded journey…</output>
-              )}
-              {journey?.items.length === 0 && (
-                <p>
-                  No recorded evaluations on this page. Saving a post does not
-                  imply a project change.
-                </p>
-              )}
-              {journey?.items.map((item: any) => (
-                <article className="explore-journey" key={item.id}>
-                  <h4>{item.repository}</h4>
-                  <p className="explore-meta">
-                    {item.current
-                      ? "Current project fit"
-                      : "Historical project fit; refresh before acting"}{" "}
-                    · {item.state.replaceAll("_", " ")}
-                  </p>
-                  <ol>
-                    <li>
-                      <strong>Saved posts and cited ideas</strong>
-                      <ul>
-                        {item.sources.map((s: any) => (
-                          <li key={s.id}>
-                            {sourceLink(s)}{" "}
-                            <span className="explore-meta">
-                              {s.insights.length} cited{" "}
-                              {s.insights.length === 1 ? "idea" : "ideas"}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    </li>
-                    <li>
-                      <strong>Evaluation</strong>
-                      <p>
-                        {item.disposition?.replaceAll("_", " ") ??
-                          "No completed disposition"}{" "}
-                        · Decision: {item.decision.replaceAll("_", " ")}
-                      </p>
-                      <p className="explore-meta">
-                        Repository version {item.baseSha.slice(0, 12)}
-                      </p>
-                    </li>
-                    {item.steps.map((step: any) => (
-                      <li key={step.id}>
-                        <strong>
-                          {step.issueUrl ? (
-                            <a
-                              href={step.issueUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              Published issue: {step.title}
-                            </a>
-                          ) : (
-                            `Issue draft: ${step.title}`
-                          )}
-                        </strong>
-                        <p>{step.state.replaceAll("_", " ")}</p>
-                        {step.run ? (
-                          <>
-                            <p>
-                              {step.run.prUrl ? (
-                                <a
-                                  href={step.run.prUrl}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                >
-                                  Open recorded PR
-                                </a>
-                              ) : (
-                                "No PR recorded"
-                              )}{" "}
-                              ·{" "}
-                              {step.run.prState?.replaceAll("_", " ") ??
-                                step.run.state.replaceAll("_", " ")}
-                            </p>
-                            {step.run.mergedAt && (
-                              <p>
-                                Merged {step.run.mergedAt}. Benefit remains a
-                                separate outcome.
-                              </p>
-                            )}
-                            {step.run.deployment && (
-                              <p>
-                                Deployment record:{" "}
-                                {step.run.deployment.state ??
-                                  step.run.deployment.status ??
-                                  "recorded"}
-                              </p>
-                            )}
-                          </>
-                        ) : (
-                          <p>No implementation run recorded.</p>
-                        )}
-                        {step.outcome ? (
-                          <>
-                            <p>
-                              {step.outcome.verdict.replaceAll("_", " ")} ·{" "}
-                              {step.outcome.method.replaceAll("_", " ")}
-                            </p>
-                            <p>{step.outcome.note}</p>
-                            {step.outcome.measurement && (
-                              <Measurement value={step.outcome.measurement} />
-                            )}
-                          </>
-                        ) : (
-                          <p>No outcome recorded.</p>
-                        )}
-                      </li>
-                    ))}
-                  </ol>
-                </article>
               ))}
-              <p className="explore-coverage">{journey?.coverage}</p>
-              {journey?.next && (
-                <button onClick={() => void open(selected, journey.next)}>
-                  Next evaluations page
-                </button>
-              )}
-            </>
-          ) : (
-            <>
-              {!detail && (
-                <output aria-live="polite">Opening current evidence…</output>
-              )}
-              {detail && view === "connections" && (
-                <KnowledgeMap
-                  key={`${selected.id}:${detail.topic?.version}:${scope}:${detail.members[0]?._id ?? "empty"}`}
-                  detail={detail}
-                  organizationId={organizationId}
-                  demo={demo}
-                />
-              )}
-              {detail && view !== "connections" && (
-                <ul className="explore-tree">
-                  {[
-                    ...new Set(
-                      detail.members.map(
-                        (m: any) => m.evidence.reference.sourceId,
-                      ),
-                    ),
-                  ].map((id: any) => {
-                    const members = detail.members.filter(
-                      (m: any) => m.evidence.reference.sourceId === id,
-                    );
-                    return (
-                      <li key={id}>
-                        <details open>
-                          <summary>
-                            <Lightbulb size={18} aria-hidden="true" />
-                            <span>{members[0].evidence.title}</span>
-                            <span className="explore-meta">
-                              {members.length} ideas
-                            </span>
-                          </summary>
-                          <ul>
-                            {members.map((m: any) => (
-                              <li key={m._id}>
-                                <p>{m.evidence.insight.claim}</p>
-                                {sourceLink({
-                                  id,
-                                  title: "Inspect source evidence",
-                                })}
-                              </li>
-                            ))}
-                          </ul>
-                        </details>
+            </nav>
+            <button
+              className="secondary"
+              onClick={() => {
+                selectionGeneration.current++;
+                setSelected(null);
+                setDetail(null);
+                setJourney(null);
+              }}
+            >
+              Library overview
+            </button>
+            <h3 ref={selectedHeading} tabIndex={-1}>
+              {detail?.topic?.name ?? selected.name}
+            </h3>
+            {detail?.topic && !readOnly && (
+              <details className="explore-structure">
+                <summary>Edit topic structure</summary>
+                <form
+                  key={`${detail.topic._id}:${detail.topic.layoutVersion}`}
+                  className="form-grid"
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    if (!call || demo) return;
+                    const data = new FormData(e.currentTarget),
+                      parent = String(data.get("parent"));
+                    setSavingStructure(true);
+                    try {
+                      await call("organizeExploreTopic", {
+                        topicId: selected.id,
+                        layoutVersion: detail.topic.layoutVersion,
+                        ...(parent === "keep"
+                          ? {}
+                          : { parentId: parent || null }),
+                        aliases: String(data.get("aliases"))
+                          .split(",")
+                          .map((s) => s.trim())
+                          .filter(Boolean),
+                      });
+                      await refresh();
+                    } catch (error) {
+                      setMessage(
+                        error instanceof Error
+                          ? error.message
+                          : "Structure was not saved. Reload and try again.",
+                      );
+                    } finally {
+                      setSavingStructure(false);
+                    }
+                  }}
+                >
+                  <label>
+                    Parent topic
+                    <ChoiceSelect
+                      id="explore-parent-topic"
+                      name="parent"
+                      defaultValue="keep"
+                    >
+                      <option value="keep">Keep saved parent</option>
+                      <option value="">No parent</option>
+                      {topics?.items
+                        .filter((t: any) => t.id !== selected.id)
+                        .map((t: any) => (
+                          <option key={t.id} value={t.id}>
+                            {t.name}
+                          </option>
+                        ))}
+                    </ChoiceSelect>
+                  </label>
+                  <label>
+                    Aliases, separated by commas
+                    <input
+                      name="aliases"
+                      defaultValue={detail.topic.aliases.join(", ")}
+                      maxLength={390}
+                    />
+                  </label>
+                  <p>
+                    Use up to eight short aliases. Structure and aliases do not
+                    change evidence or authorize analysis.
+                  </p>
+                  <button disabled={savingStructure || demo || !call}>
+                    Save topic structure
+                  </button>
+                </form>
+              </details>
+            )}
+            {view === "journey" ? (
+              <>
+                {!journey && (
+                  <output aria-live="polite">Opening recorded journey…</output>
+                )}
+                {journey?.items.length === 0 && (
+                  <p>
+                    No recorded evaluations on this page. Saving a post does not
+                    imply a project change.
+                  </p>
+                )}
+                {journey?.items.map((item: any) => (
+                  <article className="explore-journey" key={item.id}>
+                    <h4>{item.repository}</h4>
+                    <p className="explore-meta">
+                      {item.current
+                        ? "Current project fit"
+                        : "Historical project fit; refresh before acting"}{" "}
+                      · {item.state.replaceAll("_", " ")}
+                    </p>
+                    <ol>
+                      <li>
+                        <strong>Saved posts and cited ideas</strong>
+                        <ul>
+                          {item.sources.map((s: any) => (
+                            <li key={s.id}>
+                              {sourceLink(s)}{" "}
+                              <span className="explore-meta">
+                                {s.insights.length} cited{" "}
+                                {s.insights.length === 1 ? "idea" : "ideas"}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
                       </li>
-                    );
-                  })}
-                </ul>
-              )}
-              {detail?.members.length === 0 && (
-                <p>
-                  No current permitted evidence on this page. Choose another
-                  page or review your filing.
-                </p>
-              )}
-              <p className="explore-coverage">{detail?.coverage}</p>
-              {detail?.next && (
-                <button onClick={() => void open(selected, detail.next)}>
-                  Next evidence page
-                </button>
-              )}
-            </>
-          )}
+                      <li>
+                        <strong>Evaluation</strong>
+                        <p>
+                          {item.disposition?.replaceAll("_", " ") ??
+                            "No completed disposition"}{" "}
+                          · Decision: {item.decision.replaceAll("_", " ")}
+                        </p>
+                        <p className="explore-meta">
+                          Repository version {item.baseSha.slice(0, 12)}
+                        </p>
+                      </li>
+                      {item.steps.map((step: any) => (
+                        <li key={step.id}>
+                          <strong>
+                            {step.issueUrl ? (
+                              <a
+                                href={step.issueUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                Published issue: {step.title}
+                              </a>
+                            ) : (
+                              `Issue draft: ${step.title}`
+                            )}
+                          </strong>
+                          <p>{step.state.replaceAll("_", " ")}</p>
+                          {step.run ? (
+                            <>
+                              <p>
+                                {step.run.prUrl ? (
+                                  <a
+                                    href={step.run.prUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                  >
+                                    Open recorded PR
+                                  </a>
+                                ) : (
+                                  "No PR recorded"
+                                )}{" "}
+                                ·{" "}
+                                {step.run.prState?.replaceAll("_", " ") ??
+                                  step.run.state.replaceAll("_", " ")}
+                              </p>
+                              {step.run.mergedAt && (
+                                <p>
+                                  Merged {step.run.mergedAt}. Benefit remains a
+                                  separate outcome.
+                                </p>
+                              )}
+                              {step.run.deployment && (
+                                <p>
+                                  Deployment record:{" "}
+                                  {step.run.deployment.state ??
+                                    step.run.deployment.status ??
+                                    "recorded"}
+                                </p>
+                              )}
+                            </>
+                          ) : (
+                            <p>No implementation run recorded.</p>
+                          )}
+                          {step.outcome ? (
+                            <>
+                              <p>
+                                {step.outcome.verdict.replaceAll("_", " ")} ·{" "}
+                                {step.outcome.method.replaceAll("_", " ")}
+                              </p>
+                              <p>{step.outcome.note}</p>
+                              {step.outcome.measurement && (
+                                <Measurement value={step.outcome.measurement} />
+                              )}
+                            </>
+                          ) : (
+                            <p>No outcome recorded.</p>
+                          )}
+                        </li>
+                      ))}
+                    </ol>
+                  </article>
+                ))}
+                <p className="explore-coverage">{journey?.coverage}</p>
+                {journey?.next && (
+                  <button onClick={() => void open(selected, journey.next)}>
+                    Next evaluations page
+                  </button>
+                )}
+              </>
+            ) : (
+              <>
+                {!detail && (
+                  <output aria-live="polite">Opening current evidence…</output>
+                )}
+                {detail && view === "connections" && (
+                  <KnowledgeMap
+                    key={`${selected.id}:${detail.topic?.version}:${scope}:${detail.members[0]?._id ?? "empty"}`}
+                    detail={detail}
+                    organizationId={organizationId}
+                    demo={demo}
+                  />
+                )}
+                {detail && view !== "connections" && (
+                  <ul className="explore-tree atlas-insights">
+                    {[
+                      ...new Set(
+                        detail.members.map(
+                          (m: any) => m.evidence.reference.sourceId,
+                        ),
+                      ),
+                    ].map((id: any) => {
+                      const members = detail.members.filter(
+                        (m: any) => m.evidence.reference.sourceId === id,
+                      );
+                      return (
+                        <li key={id}>
+                          <details open>
+                            <summary>
+                              <Lightbulb size={18} aria-hidden="true" />
+                              <span>{members[0].evidence.title}</span>
+                              <span className="explore-meta">
+                                {members.length}{" "}
+                                {members.length === 1 ? "insight" : "insights"}
+                              </span>
+                            </summary>
+                            <ul>
+                              {members.map((m: any) => (
+                                <li key={m._id} className="atlas-insight">
+                                  <Lightbulb size={20} aria-hidden="true" />
+                                  <p>{m.evidence.insight.claim}</p>
+                                  {sourceLink({
+                                    id,
+                                    title: "Inspect source evidence",
+                                  })}
+                                  <InsightProjectLinks
+                                    key={`${scope}:${m._id}`}
+                                    reference={m.evidence.reference}
+                                    topicId={selected.id}
+                                    organizationId={organizationId}
+                                    demo={demo}
+                                    read={() =>
+                                      read("exploreJourney", {
+                                        ...args(),
+                                        topicId: selected.id,
+                                      })
+                                    }
+                                  />
+                                </li>
+                              ))}
+                            </ul>
+                          </details>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+                {detail?.members.length === 0 && (
+                  <p>
+                    No current permitted evidence on this page. Choose another
+                    page or review your filing.
+                  </p>
+                )}
+                <p className="explore-coverage">{detail?.coverage}</p>
+                {detail?.next && (
+                  <button onClick={() => void open(selected, detail.next)}>
+                    Next evidence page
+                  </button>
+                )}
+              </>
+            )}
+          </div>
         </div>
       ) : (
         <>
@@ -804,23 +920,6 @@ export function LibraryExplore({
           )}
           {view === "tree" ? (
             <>
-              <fieldset
-                className="explore-views"
-                aria-label="Topic tree representation"
-              >
-                <button
-                  aria-pressed={treeDiagram}
-                  onClick={() => setTreeDiagram(true)}
-                >
-                  Branching diagram
-                </button>
-                <button
-                  aria-pressed={!treeDiagram}
-                  onClick={() => setTreeDiagram(false)}
-                >
-                  Readable tree
-                </button>
-              </fieldset>
               {treeDiagram ? (
                 <TopicDiagram
                   topics={topics?.items ?? []}
@@ -896,6 +995,24 @@ export function LibraryExplore({
           )}
         </>
       )}
+      <details className="atlas-advanced">
+        <summary>Connections and outcomes</summary>
+        <fieldset className="explore-views" aria-label="Explore view">
+          {views.map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              aria-pressed={view === id}
+              onClick={() => {
+                reset();
+                setView(id);
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </fieldset>
+      </details>
     </section>
   );
 }
@@ -912,7 +1029,7 @@ function TopicBranches({
     return (
       <li key={node.id}>
         {node.children.length ? (
-          <details>
+          <details open>
             <summary>
               <GitBranch size={19} aria-hidden="true" />
               <span>

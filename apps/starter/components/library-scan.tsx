@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePolling } from "@/lib/use-polling";
 import { ChoiceSelect } from "./choice-select";
 import { Layers3, Loader2, Pause, ScanSearch } from "lucide-react";
@@ -33,6 +33,7 @@ export function LibraryScan({
   readOnly,
   demo,
   onOpenIssues,
+  enabled = true,
 }: {
   organizationId: string;
   repositories: any[];
@@ -41,6 +42,7 @@ export function LibraryScan({
   readOnly: boolean;
   demo: boolean;
   onOpenIssues: () => void;
+  enabled?: boolean;
 }) {
   const [jobs, setJobs] = useState<any[]>([]),
     [error, setError] = useState(""),
@@ -113,9 +115,15 @@ export function LibraryScan({
   usePolling(
     refresh,
     jobs.some((j) => j.state === "running") ? 10000 : 60000,
-    !demo,
+    enabled && !demo,
     organizationId,
   );
+  useEffect(() => {
+    const counter = generation.current;
+    return () => {
+      counter.value++;
+    };
+  }, [enabled, organizationId]);
   async function run(operation: string, args: any) {
     setBusy(true);
     try {

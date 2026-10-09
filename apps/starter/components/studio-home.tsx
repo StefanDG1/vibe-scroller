@@ -9,6 +9,7 @@ import {
 } from "../../../packages/knowledge/dashboard";
 import { ScrollCharacter } from "./scroll-character";
 import { DashboardVisuals } from "./dashboard-visuals";
+import { KnowledgePreview } from "./knowledge-preview";
 import { DashboardTrace } from "./dashboard-trace";
 
 export function StudioHome({
@@ -26,6 +27,8 @@ export function StudioHome({
   readOnly,
   busy,
   compact = false,
+  organizationId,
+  demo = false,
 }: {
   sources: DashboardItem[];
   proposals: DashboardItem[];
@@ -41,6 +44,8 @@ export function StudioHome({
   readOnly: boolean;
   busy: boolean;
   compact?: boolean;
+  organizationId?: string;
+  demo?: boolean;
 }) {
   const [dismissed, setDismissed] = useState<string[]>([]);
   const [highlightStopped, setHighlightStopped] = useState(false);
@@ -59,67 +64,6 @@ export function StudioHome({
   const projects = repositories.filter((r) => r.enabled).slice(0, 3);
   return (
     <div className="studio-home">
-      <section className="studio-welcome" aria-label="Your next useful step">
-        <ScrollCharacter state={next.character} />
-        <div className="studio-next">
-          <h2>{next.title}</h2>
-          <p>{next.reason}</p>
-          <div className="row">
-            <Button
-              className={
-                next.destination === "capture" && !highlightStopped
-                  ? "studio-cta"
-                  : ""
-              }
-              onPointerEnter={() => setHighlightStopped(true)}
-              onPointerDown={() => setHighlightStopped(true)}
-              onFocus={() => setHighlightStopped(true)}
-              onAnimationEnd={() => setHighlightStopped(true)}
-              disabled={busy || (readOnly && next.destination === "capture")}
-              onClick={() => open(next)}
-            >
-              {next.action}
-              <ArrowRight size={17} aria-hidden="true" />
-            </Button>
-            {next.key !== "capture" && (
-              <Button
-                variant="ghost"
-                onClick={() =>
-                  setDismissed((current) => [...current, next.key])
-                }
-              >
-                Later
-              </Button>
-            )}
-          </div>
-        </div>
-      </section>
-      <form
-        className="capture-composer studio-composer"
-        aria-label="Save a post"
-        onSubmit={(e) => {
-          e.preventDefault();
-          onSave();
-        }}
-      >
-        <Link2 size={21} aria-hidden="true" />
-        <input
-          type="url"
-          aria-label="Post URL"
-          placeholder="Paste a link worth keeping"
-          value={draft}
-          onChange={(e) => onDraft(e.target.value)}
-          disabled={readOnly || busy}
-        />
-        <button
-          type="submit"
-          className="composer-send"
-          aria-label="Save a link"
-          disabled={readOnly || busy}
-        >
-          <ArrowRight size={20} aria-hidden="true" />
-        </button>
-      </form>
       <DashboardVisuals
         sources={sources}
         proposals={proposals}
@@ -127,7 +71,76 @@ export function StudioHome({
         runs={runs}
         go={go}
         compact={compact}
-      />
+      >
+        <section className="studio-welcome" aria-label="Your next useful step">
+          <ScrollCharacter state={next.character} />
+          <div className="studio-next">
+            <h2>{next.title}</h2>
+            <p>{next.reason}</p>
+            <div className="row">
+              <Button
+                className={
+                  next.destination === "capture" && !highlightStopped
+                    ? "studio-cta"
+                    : ""
+                }
+                onPointerEnter={() => setHighlightStopped(true)}
+                onPointerDown={() => setHighlightStopped(true)}
+                onFocus={() => setHighlightStopped(true)}
+                onAnimationEnd={() => setHighlightStopped(true)}
+                disabled={busy || (readOnly && next.destination === "capture")}
+                onClick={() => open(next)}
+              >
+                {next.action}
+                <ArrowRight size={17} aria-hidden="true" />
+              </Button>
+              {next.key !== "capture" && (
+                <Button
+                  variant="ghost"
+                  onClick={() =>
+                    setDismissed((current) => [...current, next.key])
+                  }
+                >
+                  Later
+                </Button>
+              )}
+            </div>
+          </div>
+        </section>
+        <form
+          className="capture-composer studio-composer"
+          aria-label="Save a post"
+          onSubmit={(e) => {
+            e.preventDefault();
+            onSave();
+          }}
+        >
+          <Link2 size={21} aria-hidden="true" />
+          <input
+            type="url"
+            aria-label="Post URL"
+            placeholder="Paste a link worth keeping"
+            value={draft}
+            onChange={(e) => onDraft(e.target.value)}
+            disabled={readOnly || busy}
+          />
+          <button
+            type="submit"
+            className="composer-send"
+            aria-label="Save a link"
+            disabled={readOnly || busy}
+          >
+            <ArrowRight size={20} aria-hidden="true" />
+          </button>
+        </form>
+        {organizationId && (
+          <KnowledgePreview
+            organizationId={organizationId}
+            demo={demo}
+            onOpen={() => go("library")}
+          />
+        )}
+      </DashboardVisuals>
       <DashboardTrace
         sources={sources}
         proposals={proposals}

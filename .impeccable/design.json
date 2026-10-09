@@ -1,740 +1,567 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-08T01:37:23Z",
-  "title": "Design System: VibeScroll",
+  "generatedAt": "2026-10-09T00:02:49.032785+00:00",
+  "title": "Design System: VibeScroll Atlas",
   "extensions": {
-    "usageAllowanceReview": {
-      "mode": "Operate",
-      "recordedDate": "2026-10-07",
-      "identity": "Incumbent Scroll charcoal studio, Inter, quiet panels, mint native meter and existing secondary Billing review link; no new world, token, artwork or motion.",
-      "sources": [
-        "apps/starter/components/usage-summary.tsx",
-        "apps/starter/app/globals.css",
-        "packages/billing/usage-overview.ts"
-      ],
-      "balanceConvention": "Labeled available and reserved tabular numerals lead together in a wrapping group. A supplementary labeled native meter retains a visible zero-to-unexpired-allowance range and accessible value text; its shape follows the existing radius.",
-      "recentUseConvention": "Flat separated rows retain activity, UTC date and actual credit amount, including zero. Visible coverage is bounded to ten recent entries and distinguishes credit records from provider invoices.",
-      "stateConvention": "Dated expiry and unresolved holds remain explicit; unavailable allowance and empty recent use are separate states. Billing opens review and does not grant purchase or spending authority.",
-      "finishDisposition": "Ship at the narrow changed Usage surface and sampled projection/advisory-helper scope; no material fixes.",
-      "captures": [
-        ".impeccable/review/usage-20261007/mobile.png",
-        ".impeccable/review/usage-20261007/desktop.png",
-        ".impeccable/review/usage-20261007/user-1567.png"
-      ],
-      "evidenceBoundary": "Supplied populated genuine-staging captures and browser-proof.json at emulated 390, 1440 and 1567 CSS pixels, plus final candidate code and reviewer.md. No new browser or detector pass. This is not every dynamic state, physical-device, production candidate, provider-invoice or full V1 acceptance. Actual balances and dates are session evidence, not tokens or defaults."
-    },
-    "visibleLibraryContextReview": {
-      "mode": "Operate",
-      "identity": "Incumbent Scroll charcoal studio, mint selection, warm original artwork, familiar Library controls and responsive navigation; no visual-world, asset, token or appearance change.",
-      "sources": [
-        "apps/starter/components/console.tsx",
-        "apps/starter/lib/workspace-data.ts",
-        "convex/product.ts",
-        "docs/adr/089-visible-library-context.md"
-      ],
-      "contextConvention": "Explicit metadata-only Library slices merge into the current workspace state while preserving the separate paged Posts cache and its cursor. Posts read only while their section is active; metadata is not complete capture context.",
-      "captureConvention": "Reload full authorized workspace options before opening capture from a Library slice; refuse another partial response.",
-      "disclosureConvention": "Trial reads require visible Posts, expanded Analyze saved posts and personal-alpha eligibility. Collapsing the disclosure or leaving Posts disables that read.",
-      "accessConvention": "Access loss clears private workspace and Home caches, advances the Posts request generation, aborts outstanding Posts reads and settles loading. A failed authorization refresh cannot initiate another Posts read; a late prior response cannot repopulate cleared rows.",
-      "finishDisposition": "Ship for the single resolved access-loss race fix scored by .impeccable/review/library-context/verdict.md. Original review .impeccable/review/library-context/reviewer.md identified that fix; this is not whole-surface acceptance.",
-      "captures": [
-        ".impeccable/review/library-context/mobile-320.png",
-        ".impeccable/review/library-context/mobile.png",
-        ".impeccable/review/library-context/tablet.png",
-        ".impeccable/review/library-context/desktop.png",
-        ".impeccable/review/library-context/confirmation/mobile-320.png",
-        ".impeccable/review/library-context/confirmation/mobile.png",
-        ".impeccable/review/library-context/confirmation/tablet.png",
-        ".impeccable/review/library-context/confirmation/desktop.png"
-      ],
-      "evidenceBoundary": "Local labeled synthetic actual-Console captures at 320, 390, 768 and 1440 CSS pixels, sampled current code, private/vibescroll-library-context-ui.json and private/vibescroll-library-context-race.json. The race proof records zero sources before and after a late successful Posts response, settled loading and unchanged request counts after denial. Fixture banners and test controls are not product patterns. Empty detector.txt establishes no detector pass. No production, provider, physical-device, human keyboard or comprehension acceptance, whole-plan acceptance or cost claim follows."
-    },
-    "compactHomeReview": {
-      "mode": "Operate",
-      "identity": "Incumbent flat charcoal Home, meaningful mint actions, amber original Scroll, existing typography and native phone flow; no visual-world or token change.",
-      "sources": [
-        "apps/starter/components/studio-home.tsx",
-        "apps/starter/components/console.tsx",
-        "docs/adr/079-atomic-home-metadata.md"
-      ],
-      "coverage": "Home uses bounded metadata for the same next-action, capture, recent-knowledge and project-shelf composition. Recent rows describe the current loaded page rather than whole-library coverage.",
-      "viewIsolation": "Compact refreshes update the independent Home cache without replacing full editor data or drafts. Capture and proposal review request authorized full content when needed; view-generation fencing rejects stale refresh responses and lost authorization clears access.",
-      "responsiveConvention": "Retain wrapping real titles, visible linked phone workspace scope and bottom navigation, native vertical scrolling and the existing stacked phone/tablet shelves. Preserve existing permissions, protected navigation and draft state.",
-      "finishDisposition": "Ship at supplied authenticated Home first-view and sampled implementation scope only; no material fixes requested.",
-      "captures": [
-        ".impeccable/review/compact-home/mobile-320.png",
-        ".impeccable/review/compact-home/mobile.png",
-        ".impeccable/review/compact-home/tablet.png",
-        ".impeccable/review/compact-home/desktop.png"
-      ],
-      "payloadObservation": "The supplied authenticated workspace response measured 9,040 decoded HTTP bytes against a 433,170-byte baseline. This bounded response observation does not establish cost savings or usability improvement.",
-      "evidenceBoundary": "Four authenticated production-preview first views at 320, 390, 768 and 1440 CSS pixels plus sampled component/cache code. Controlled focus emulation is not human keyboard or physical-device acceptance. Empty detector.txt supplies no readable detector findings or detector-pass claim. Whole-page journeys, dynamic states, second-account isolation, operator activation and full evolution-plan acceptance remain outside this disposition. Private record titles and details stay out of public documentation."
-    },
-    "assistantProjectContextReview": {
-      "mode": "Operate",
-      "identity": "Completed extension of incumbent Scroll studio assistant access; existing palette, typography, flat fieldsets, controls and artwork preserved.",
-      "sources": [
-        "apps/starter/components/assistant-connections.tsx",
-        "apps/starter/app/product.css: assistant styles",
-        "apps/starter/components/repository-checklist.tsx: BusinessContext repository anchor"
-      ],
-      "contextChoice": "Explicit confirmed-library checkbox, up to five confirmed current projects, or both; shown only with context-read permission.",
-      "maximumSelectedProjects": 5,
-      "projectPaging": "Independent bounded project pages retain selected references across pages; First projects, More projects and Clear projects retain intrinsic wrapping controls.",
-      "retainedReview": "Native selected-project disclosure includes context version, snapshot version and abbreviated commit. Independent 44px project links reach stable repository business-context anchors.",
-      "metadataTreatment": "Project-row small text is block-level secondary text using existing --subtle, normal weight and a 4px top gap; long names and metadata wrap within the panel.",
-      "acknowledgment": "Exact posts, selected context and actions for seven days; binding includes project references and confirmed-library inclusion. Relevant changes and project-page navigation clear acknowledgment.",
-      "privateSuggestionDependencies": "Selected posts, selected project context and context-read permission; visible dependency copy also requires owner/admin access. Repository code, spending, coding, publication and chat history are excluded.",
-      "finishReview": ".impeccable/review/project-grants/finish-review.md: fix, one project-metadata contrast correction.",
-      "finishDisposition": ".impeccable/review/project-grants/finish-verdict.md: ship at the single contrast-fix scope only; supplied corrected text/panel contrast is 9.11:1.",
-      "captures": [
-        ".impeccable/review/project-grants/review-320.png",
-        ".impeccable/review/project-grants/review-390.png",
-        ".impeccable/review/project-grants/review-768.png",
-        ".impeccable/review/project-grants/review-1440.png"
-      ],
-      "proofs": [
-        ".impeccable/review/project-grants/contrast-fix-proof.json",
-        ".impeccable/review/project-grants/browser-proof.json",
-        ".impeccable/review/project-grants/interaction-proof.json"
-      ],
-      "evidenceBoundary": "Supplied local synthetic screenshots and computed/interaction proofs only. No new world, seed, approved comp, raster asset, detector or render run. No real OAuth, fresh-login, two-account privacy, physical/mobile provider or production acceptance.",
-      "recordedDate": "2026-10-07",
-      "status": "Historical project-context review and contrast correction. Retained context patterns remain current; exact-post acknowledgment and suggestion dependencies are superseded by assistantScopeReview."
-    },
     "colorMeta": {
-      "ink": {
-        "role": "neutral",
-        "tonalRamp": [
-          "oklch(15% 0 0)",
-          "oklch(26% 0 0)",
-          "oklch(37% 0 0)",
-          "oklch(49% 0 0)",
-          "oklch(60% 0 0)",
-          "oklch(72% 0 0)",
-          "oklch(83% 0 0)",
-          "oklch(95% 0 0)"
-        ],
-        "displayName": "ink"
-      },
       "canvas": {
         "role": "neutral",
-        "displayName": "Studio charcoal"
+        "displayName": "Canvas",
+        "canonical": "#f5f8fa",
+        "tonalRamp": [
+          "oklch(15% 0.0042 236.50)",
+          "oklch(26% 0.0042 236.50)",
+          "oklch(37% 0.0042 236.50)",
+          "oklch(49% 0.0042 236.50)",
+          "oklch(60% 0.0042 236.50)",
+          "oklch(72% 0.0042 236.50)",
+          "oklch(83% 0.0042 236.50)",
+          "oklch(95% 0.0042 236.50)"
+        ]
       },
       "panel": {
         "role": "neutral",
-        "displayName": "Green-gray panel"
+        "displayName": "Panel",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "oklch(15% 0.0000 89.88)",
+          "oklch(26% 0.0000 89.88)",
+          "oklch(37% 0.0000 89.88)",
+          "oklch(49% 0.0000 89.88)",
+          "oklch(60% 0.0000 89.88)",
+          "oklch(72% 0.0000 89.88)",
+          "oklch(83% 0.0000 89.88)",
+          "oklch(95% 0.0000 89.88)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#182e42",
+        "tonalRamp": [
+          "oklch(15% 0.0463 247.47)",
+          "oklch(26% 0.0463 247.47)",
+          "oklch(37% 0.0463 247.47)",
+          "oklch(49% 0.0463 247.47)",
+          "oklch(60% 0.0463 247.47)",
+          "oklch(72% 0.0463 247.47)",
+          "oklch(83% 0.0463 247.47)",
+          "oklch(95% 0.0463 247.47)"
+        ]
+      },
+      "subtle": {
+        "role": "neutral",
+        "displayName": "Subtle",
+        "canonical": "#526578",
+        "tonalRamp": [
+          "oklch(15% 0.0382 248.60)",
+          "oklch(26% 0.0382 248.60)",
+          "oklch(37% 0.0382 248.60)",
+          "oklch(49% 0.0382 248.60)",
+          "oklch(60% 0.0382 248.60)",
+          "oklch(72% 0.0382 248.60)",
+          "oklch(83% 0.0382 248.60)",
+          "oklch(95% 0.0382 248.60)"
+        ]
       },
       "line": {
         "role": "neutral",
-        "displayName": "Green-gray separator"
+        "displayName": "Line",
+        "canonical": "#dce5eb",
+        "tonalRamp": [
+          "oklch(15% 0.0127 236.64)",
+          "oklch(26% 0.0127 236.64)",
+          "oklch(37% 0.0127 236.64)",
+          "oklch(49% 0.0127 236.64)",
+          "oklch(60% 0.0127 236.64)",
+          "oklch(72% 0.0127 236.64)",
+          "oklch(83% 0.0127 236.64)",
+          "oklch(95% 0.0127 236.64)"
+        ]
       },
       "muted": {
         "role": "neutral",
-        "displayName": "Quiet green-gray text"
-      },
-      "soft": {
-        "role": "neutral",
+        "displayName": "Muted",
+        "canonical": "#eaf0f4",
         "tonalRamp": [
-          "oklch(15% 0 0)",
-          "oklch(26% 0 0)",
-          "oklch(37% 0 0)",
-          "oklch(49% 0 0)",
-          "oklch(60% 0 0)",
-          "oklch(72% 0 0)",
-          "oklch(83% 0 0)",
-          "oklch(95% 0 0)"
-        ],
-        "displayName": "soft"
+          "oklch(15% 0.0084 236.56)",
+          "oklch(26% 0.0084 236.56)",
+          "oklch(37% 0.0084 236.56)",
+          "oklch(49% 0.0084 236.56)",
+          "oklch(60% 0.0084 236.56)",
+          "oklch(72% 0.0084 236.56)",
+          "oklch(83% 0.0084 236.56)",
+          "oklch(95% 0.0084 236.56)"
+        ]
       },
-      "rail": {
-        "role": "neutral",
-        "tonalRamp": [
-          "oklch(15% 0 0)",
-          "oklch(26% 0 0)",
-          "oklch(37% 0 0)",
-          "oklch(49% 0 0)",
-          "oklch(60% 0 0)",
-          "oklch(72% 0 0)",
-          "oklch(83% 0 0)",
-          "oklch(95% 0 0)"
-        ],
-        "displayName": "rail"
-      },
-      "control": {
-        "role": "neutral",
-        "tonalRamp": [
-          "oklch(15% 0 0)",
-          "oklch(26% 0 0)",
-          "oklch(37% 0 0)",
-          "oklch(49% 0 0)",
-          "oklch(60% 0 0)",
-          "oklch(72% 0 0)",
-          "oklch(83% 0 0)",
-          "oklch(95% 0 0)"
-        ],
-        "displayName": "control"
-      },
-      "control-line": {
-        "role": "neutral",
-        "tonalRamp": [
-          "oklch(15% 0 0)",
-          "oklch(26% 0 0)",
-          "oklch(37% 0 0)",
-          "oklch(49% 0 0)",
-          "oklch(60% 0 0)",
-          "oklch(72% 0 0)",
-          "oklch(83% 0 0)",
-          "oklch(95% 0 0)"
-        ],
-        "displayName": "control line"
-      },
-      "composer": {
-        "role": "neutral",
-        "tonalRamp": [
-          "oklch(15% 0 0)",
-          "oklch(26% 0 0)",
-          "oklch(37% 0 0)",
-          "oklch(49% 0 0)",
-          "oklch(60% 0 0)",
-          "oklch(72% 0 0)",
-          "oklch(83% 0 0)",
-          "oklch(95% 0 0)"
-        ],
-        "displayName": "composer"
-      },
-      "menu": {
-        "role": "neutral",
-        "tonalRamp": [
-          "oklch(15% 0 0)",
-          "oklch(26% 0 0)",
-          "oklch(37% 0 0)",
-          "oklch(49% 0 0)",
-          "oklch(60% 0 0)",
-          "oklch(72% 0 0)",
-          "oklch(83% 0 0)",
-          "oklch(95% 0 0)"
-        ],
-        "displayName": "menu"
-      },
-      "selected": {
-        "role": "neutral",
-        "tonalRamp": [
-          "oklch(15% 0 0)",
-          "oklch(26% 0 0)",
-          "oklch(37% 0 0)",
-          "oklch(49% 0 0)",
-          "oklch(60% 0 0)",
-          "oklch(72% 0 0)",
-          "oklch(83% 0 0)",
-          "oklch(95% 0 0)"
-        ],
-        "displayName": "selected"
-      },
-      "primary-hover": {
+      "primary": {
         "role": "primary",
+        "displayName": "Primary",
+        "canonical": "#166b58",
         "tonalRamp": [
-          "oklch(15% 0 0)",
-          "oklch(26% 0 0)",
-          "oklch(37% 0 0)",
-          "oklch(49% 0 0)",
-          "oklch(60% 0 0)",
-          "oklch(72% 0 0)",
-          "oklch(83% 0 0)",
-          "oklch(95% 0 0)"
-        ],
-        "displayName": "primary hover"
+          "oklch(15% 0.0834 173.61)",
+          "oklch(26% 0.0834 173.61)",
+          "oklch(37% 0.0834 173.61)",
+          "oklch(49% 0.0834 173.61)",
+          "oklch(60% 0.0834 173.61)",
+          "oklch(72% 0.0834 173.61)",
+          "oklch(83% 0.0834 173.61)",
+          "oklch(95% 0.0834 173.61)"
+        ]
       },
-      "primary-text": {
-        "role": "primary",
-        "tonalRamp": [
-          "oklch(15% 0 0)",
-          "oklch(26% 0 0)",
-          "oklch(37% 0 0)",
-          "oklch(49% 0 0)",
-          "oklch(60% 0 0)",
-          "oklch(72% 0 0)",
-          "oklch(83% 0 0)",
-          "oklch(95% 0 0)"
-        ],
-        "displayName": "primary text"
-      },
-      "chip-text": {
+      "primary-foreground": {
         "role": "neutral",
+        "displayName": "Primary Foreground",
+        "canonical": "#ffffff",
         "tonalRamp": [
-          "oklch(15% 0 0)",
-          "oklch(26% 0 0)",
-          "oklch(37% 0 0)",
-          "oklch(49% 0 0)",
-          "oklch(60% 0 0)",
-          "oklch(72% 0 0)",
-          "oklch(83% 0 0)",
-          "oklch(95% 0 0)"
-        ],
-        "displayName": "chip text"
-      },
-      "error": {
-        "role": "semantic",
-        "tonalRamp": [
-          "oklch(15% 0.08 25)",
-          "oklch(26% 0.08 25)",
-          "oklch(37% 0.08 25)",
-          "oklch(49% 0.08 25)",
-          "oklch(60% 0.08 25)",
-          "oklch(72% 0.08 25)",
-          "oklch(83% 0.08 25)",
-          "oklch(95% 0.08 25)"
-        ],
-        "displayName": "error"
-      },
-      "focus": {
-        "role": "neutral",
-        "tonalRamp": [
-          "oklch(15% 0 0)",
-          "oklch(26% 0 0)",
-          "oklch(37% 0 0)",
-          "oklch(49% 0 0)",
-          "oklch(60% 0 0)",
-          "oklch(72% 0 0)",
-          "oklch(83% 0 0)",
-          "oklch(95% 0 0)"
-        ],
-        "displayName": "focus"
+          "oklch(15% 0.0000 89.88)",
+          "oklch(26% 0.0000 89.88)",
+          "oklch(37% 0.0000 89.88)",
+          "oklch(49% 0.0000 89.88)",
+          "oklch(60% 0.0000 89.88)",
+          "oklch(72% 0.0000 89.88)",
+          "oklch(83% 0.0000 89.88)",
+          "oklch(95% 0.0000 89.88)"
+        ]
       },
       "accent": {
         "role": "primary",
-        "displayName": "Mint action"
+        "displayName": "Accent",
+        "canonical": "#bce8da",
+        "tonalRamp": [
+          "oklch(15% 0.0494 173.80)",
+          "oklch(26% 0.0494 173.80)",
+          "oklch(37% 0.0494 173.80)",
+          "oklch(49% 0.0494 173.80)",
+          "oklch(60% 0.0494 173.80)",
+          "oklch(72% 0.0494 173.80)",
+          "oklch(83% 0.0494 173.80)",
+          "oklch(95% 0.0494 173.80)"
+        ]
       },
       "accent-ink": {
         "role": "neutral",
-        "displayName": "Mint action text"
+        "displayName": "Accent Ink",
+        "canonical": "#134b40",
+        "tonalRamp": [
+          "oklch(15% 0.0602 176.97)",
+          "oklch(26% 0.0602 176.97)",
+          "oklch(37% 0.0602 176.97)",
+          "oklch(49% 0.0602 176.97)",
+          "oklch(60% 0.0602 176.97)",
+          "oklch(72% 0.0602 176.97)",
+          "oklch(83% 0.0602 176.97)",
+          "oklch(95% 0.0602 176.97)"
+        ]
+      },
+      "dark-canvas": {
+        "role": "neutral",
+        "displayName": "Dark Canvas",
+        "canonical": "#121b23",
+        "tonalRamp": [
+          "oklch(15% 0.0206 245.76)",
+          "oklch(26% 0.0206 245.76)",
+          "oklch(37% 0.0206 245.76)",
+          "oklch(49% 0.0206 245.76)",
+          "oklch(60% 0.0206 245.76)",
+          "oklch(72% 0.0206 245.76)",
+          "oklch(83% 0.0206 245.76)",
+          "oklch(95% 0.0206 245.76)"
+        ]
+      },
+      "dark-panel": {
+        "role": "neutral",
+        "displayName": "Dark Panel",
+        "canonical": "#1b2833",
+        "tonalRamp": [
+          "oklch(15% 0.0273 244.58)",
+          "oklch(26% 0.0273 244.58)",
+          "oklch(37% 0.0273 244.58)",
+          "oklch(49% 0.0273 244.58)",
+          "oklch(60% 0.0273 244.58)",
+          "oklch(72% 0.0273 244.58)",
+          "oklch(83% 0.0273 244.58)",
+          "oklch(95% 0.0273 244.58)"
+        ]
+      },
+      "dark-ink": {
+        "role": "neutral",
+        "displayName": "Dark Ink",
+        "canonical": "#e7f0f7",
+        "tonalRamp": [
+          "oklch(15% 0.0135 240.96)",
+          "oklch(26% 0.0135 240.96)",
+          "oklch(37% 0.0135 240.96)",
+          "oklch(49% 0.0135 240.96)",
+          "oklch(60% 0.0135 240.96)",
+          "oklch(72% 0.0135 240.96)",
+          "oklch(83% 0.0135 240.96)",
+          "oklch(95% 0.0135 240.96)"
+        ]
+      },
+      "dark-subtle": {
+        "role": "neutral",
+        "displayName": "Dark Subtle",
+        "canonical": "#a9bac8",
+        "tonalRamp": [
+          "oklch(15% 0.0274 242.84)",
+          "oklch(26% 0.0274 242.84)",
+          "oklch(37% 0.0274 242.84)",
+          "oklch(49% 0.0274 242.84)",
+          "oklch(60% 0.0274 242.84)",
+          "oklch(72% 0.0274 242.84)",
+          "oklch(83% 0.0274 242.84)",
+          "oklch(95% 0.0274 242.84)"
+        ]
+      },
+      "dark-line": {
+        "role": "neutral",
+        "displayName": "Dark Line",
+        "canonical": "#354652",
+        "tonalRamp": [
+          "oklch(15% 0.0298 239.29)",
+          "oklch(26% 0.0298 239.29)",
+          "oklch(37% 0.0298 239.29)",
+          "oklch(49% 0.0298 239.29)",
+          "oklch(60% 0.0298 239.29)",
+          "oklch(72% 0.0298 239.29)",
+          "oklch(83% 0.0298 239.29)",
+          "oklch(95% 0.0298 239.29)"
+        ]
+      },
+      "dark-muted": {
+        "role": "neutral",
+        "displayName": "Dark Muted",
+        "canonical": "#263642",
+        "tonalRamp": [
+          "oklch(15% 0.0300 241.23)",
+          "oklch(26% 0.0300 241.23)",
+          "oklch(37% 0.0300 241.23)",
+          "oklch(49% 0.0300 241.23)",
+          "oklch(60% 0.0300 241.23)",
+          "oklch(72% 0.0300 241.23)",
+          "oklch(83% 0.0300 241.23)",
+          "oklch(95% 0.0300 241.23)"
+        ]
+      },
+      "dark-primary": {
+        "role": "primary",
+        "displayName": "Dark Primary",
+        "canonical": "#87dfc1",
+        "tonalRamp": [
+          "oklch(15% 0.0958 170.12)",
+          "oklch(26% 0.0958 170.12)",
+          "oklch(37% 0.0958 170.12)",
+          "oklch(49% 0.0958 170.12)",
+          "oklch(60% 0.0958 170.12)",
+          "oklch(72% 0.0958 170.12)",
+          "oklch(83% 0.0958 170.12)",
+          "oklch(95% 0.0958 170.12)"
+        ]
+      },
+      "dark-primary-foreground": {
+        "role": "neutral",
+        "displayName": "Dark Primary Foreground",
+        "canonical": "#102d24",
+        "tonalRamp": [
+          "oklch(15% 0.0391 170.45)",
+          "oklch(26% 0.0391 170.45)",
+          "oklch(37% 0.0391 170.45)",
+          "oklch(49% 0.0391 170.45)",
+          "oklch(60% 0.0391 170.45)",
+          "oklch(72% 0.0391 170.45)",
+          "oklch(83% 0.0391 170.45)",
+          "oklch(95% 0.0391 170.45)"
+        ]
+      },
+      "save": {
+        "role": "secondary",
+        "displayName": "Save",
+        "canonical": "#f4cb68",
+        "tonalRamp": [
+          "oklch(15% 0.1263 87.06)",
+          "oklch(26% 0.1263 87.06)",
+          "oklch(37% 0.1263 87.06)",
+          "oklch(49% 0.1263 87.06)",
+          "oklch(60% 0.1263 87.06)",
+          "oklch(72% 0.1263 87.06)",
+          "oklch(83% 0.1263 87.06)",
+          "oklch(95% 0.1263 87.06)"
+        ]
+      },
+      "save-ink": {
+        "role": "neutral",
+        "displayName": "Save Ink",
+        "canonical": "#33270c",
+        "tonalRamp": [
+          "oklch(15% 0.0448 85.02)",
+          "oklch(26% 0.0448 85.02)",
+          "oklch(37% 0.0448 85.02)",
+          "oklch(49% 0.0448 85.02)",
+          "oklch(60% 0.0448 85.02)",
+          "oklch(72% 0.0448 85.02)",
+          "oklch(83% 0.0448 85.02)",
+          "oklch(95% 0.0448 85.02)"
+        ]
+      },
+      "legacy-primary": {
+        "role": "neutral",
+        "displayName": "Legacy Primary",
+        "canonical": "#f4f4f4",
+        "tonalRamp": [
+          "oklch(15% 0.0000 89.88)",
+          "oklch(26% 0.0000 89.88)",
+          "oklch(37% 0.0000 89.88)",
+          "oklch(49% 0.0000 89.88)",
+          "oklch(60% 0.0000 89.88)",
+          "oklch(72% 0.0000 89.88)",
+          "oklch(83% 0.0000 89.88)",
+          "oklch(95% 0.0000 89.88)"
+        ]
+      },
+      "legacy-primary-ink": {
+        "role": "neutral",
+        "displayName": "Legacy Primary Ink",
+        "canonical": "#141414",
+        "tonalRamp": [
+          "oklch(15% 0.0000 89.88)",
+          "oklch(26% 0.0000 89.88)",
+          "oklch(37% 0.0000 89.88)",
+          "oklch(49% 0.0000 89.88)",
+          "oklch(60% 0.0000 89.88)",
+          "oklch(72% 0.0000 89.88)",
+          "oklch(83% 0.0000 89.88)",
+          "oklch(95% 0.0000 89.88)"
+        ]
+      },
+      "legacy-primary-hover": {
+        "role": "neutral",
+        "displayName": "Legacy Primary Hover",
+        "canonical": "#d8d8d8",
+        "tonalRamp": [
+          "oklch(15% 0.0000 89.88)",
+          "oklch(26% 0.0000 89.88)",
+          "oklch(37% 0.0000 89.88)",
+          "oklch(49% 0.0000 89.88)",
+          "oklch(60% 0.0000 89.88)",
+          "oklch(72% 0.0000 89.88)",
+          "oklch(83% 0.0000 89.88)",
+          "oklch(95% 0.0000 89.88)"
+        ]
       },
       "amber": {
         "role": "secondary",
-        "displayName": "Scroll amber"
-      },
-      "private-recovery-text": {
-        "role": "semantic",
-        "displayName": "Private setup recovery text"
-      },
-      "private-recovery-surface": {
-        "role": "semantic",
-        "displayName": "Private setup recovery surface"
-      },
-      "private-recovery-border": {
-        "role": "semantic",
-        "displayName": "Private setup recovery border"
+        "displayName": "Amber",
+        "canonical": "#f3c785",
+        "tonalRamp": [
+          "oklch(15% 0.0973 77.00)",
+          "oklch(26% 0.0973 77.00)",
+          "oklch(37% 0.0973 77.00)",
+          "oklch(49% 0.0973 77.00)",
+          "oklch(60% 0.0973 77.00)",
+          "oklch(72% 0.0973 77.00)",
+          "oklch(83% 0.0973 77.00)",
+          "oklch(95% 0.0973 77.00)"
+        ]
       },
       "diagram-blue": {
         "role": "secondary",
-        "displayName": "Diagram blue"
+        "displayName": "Diagram Blue",
+        "canonical": "#92c5ed",
+        "tonalRamp": [
+          "oklch(15% 0.0781 242.52)",
+          "oklch(26% 0.0781 242.52)",
+          "oklch(37% 0.0781 242.52)",
+          "oklch(49% 0.0781 242.52)",
+          "oklch(60% 0.0781 242.52)",
+          "oklch(72% 0.0781 242.52)",
+          "oklch(83% 0.0781 242.52)",
+          "oklch(95% 0.0781 242.52)"
+        ]
       },
       "diagram-violet": {
         "role": "secondary",
-        "displayName": "Diagram violet"
-      },
-      "diagram-node-hover": {
-        "role": "neutral",
-        "displayName": "Diagram node hover"
+        "displayName": "Diagram Violet",
+        "canonical": "#d5ade9",
+        "tonalRamp": [
+          "oklch(15% 0.0933 314.26)",
+          "oklch(26% 0.0933 314.26)",
+          "oklch(37% 0.0933 314.26)",
+          "oklch(49% 0.0933 314.26)",
+          "oklch(60% 0.0933 314.26)",
+          "oklch(72% 0.0933 314.26)",
+          "oklch(83% 0.0933 314.26)",
+          "oklch(95% 0.0933 314.26)"
+        ]
       }
     },
     "typographyMeta": {
-      "headline": {
-        "displayName": "Page heading",
-        "purpose": "Console page identity; 25px on mobile."
-      },
-      "title": {
-        "displayName": "Source title",
-        "purpose": "Readable source names; 14px on mobile."
-      },
-      "body": {
-        "displayName": "UI body",
-        "purpose": "Forms, navigation and compact explanation."
-      },
-      "source-body": {
-        "displayName": "Source description",
-        "purpose": "Supporting content with a 70ch limit."
-      },
-      "label": {
-        "displayName": "Field label",
-        "purpose": "Concise field and permission labels."
-      },
-      "metadata": {
-        "displayName": "Metadata",
-        "purpose": "Secondary details and frame captions."
-      },
       "studio-headline": {
-        "displayName": "Studio next action",
-        "purpose": "Balanced next-action headline; 23â€“30px responsive clamp on phones."
+        "displayName": "Next-action heading",
+        "purpose": "State-based Home next action; phone Atlas override is 23px."
       },
-      "studio-body": {
-        "displayName": "Studio reading",
-        "purpose": "16px studio body; next-action explanation reduces to 14px on phones."
+      "topic-title": {
+        "displayName": "Saved topic title",
+        "purpose": "Wraps the actual saved topic name."
       }
     },
     "shadows": [
       {
-        "name": "floating-menu",
+        "name": "topic-ambient",
+        "value": "0 3px 12px rgb(18 46 66 / 4%)",
+        "purpose": "Saved topic node at rest."
+      },
+      {
+        "name": "topic-selection",
+        "value": "0 0 0 2px color-mix(in srgb, var(--primary) 14%, transparent)",
+        "purpose": "Selected saved topic."
+      },
+      {
+        "name": "menu-floating",
         "value": "0 12px 32px #0006",
-        "purpose": "Account menu depth."
+        "purpose": "Account menu."
       }
     ],
     "motion": [
       {
-        "name": "control-response",
-        "value": "140ms ease-out",
-        "purpose": "Background, border and text responses."
+        "name": "atlas-control-response",
+        "value": "background-color 120ms ease-out, border-color 120ms ease-out",
+        "purpose": "Named Atlas button/link property responses."
       },
       {
-        "name": "menu-reveal",
-        "value": "120ms ease-out",
-        "purpose": "Clip and opacity reveal."
+        "name": "pointer-branch-entry",
+        "value": "180ms; opacity 0 to 1; translateY 6px to 0",
+        "purpose": "Motion for React pointer expansion only; keyboard and reduced-motion actions remain immediate."
       },
       {
-        "name": "source-enter",
-        "value": "180ms ease-out",
-        "purpose": "Opacity 0 to 1; translateY 4px to 0."
-      },
-      {
-        "name": "pending-spinner",
-        "value": "800ms linear infinite",
-        "purpose": "Ongoing work indication."
-      },
-      {
-        "name": "reduced-motion",
-        "value": "prefers-reduced-motion: reduce",
-        "purpose": "Disable animation and transition; remove thumbnail movement."
-      },
-      {
-        "name": "scroll-greeting",
-        "value": "650ms cubic-bezier(0.16, 1, 0.3, 1) 1",
-        "purpose": "Requested local greeting; rotates -5deg then 4deg and returns to still."
-      },
-      {
-        "name": "studio-cta-sweep",
-        "value": "750ms ease-out 1800ms 1",
-        "purpose": "Single eligible save CTA sweep; stops on interaction, focus, completion, disabled state, page hiding or motion off."
+        "name": "pointer-capture-entry",
+        "value": "180ms; opacity 0 to 1; translateY 8px to 0",
+        "purpose": "Motion for React pointer capture entry; live system/app suppression applies."
       }
     ],
     "breakpoints": [
       {
-        "name": "compact-desktop",
-        "value": "1050px"
+        "name": "atlas-phone",
+        "value": "700px"
       },
       {
-        "name": "mobile",
+        "name": "inherited-phone-shell",
         "value": "720px"
       },
       {
-        "name": "studio-stacked",
-        "value": "768px"
+        "name": "tree-evidence-columns",
+        "value": "1000px"
       },
       {
-        "name": "visual-dashboard-stacked",
-        "value": "680px"
+        "name": "narrow-desktop-rail",
+        "value": "1050px"
       }
-    ],
-    "assistantAccessHistoricalReview": {
-      "mode": "Operate",
-      "identity": "Incumbent Scroll/14C charcoal, mint and amber studio; no durable-world change.",
-      "source": "apps/starter/components/assistant-connections.tsx and scoped appended apps/starter/app/product.css rules",
-      "metadataEntriesPerPage": 20,
-      "maximumSelectedPosts": 50,
-      "grantDurationDays": 7,
-      "pollIntervalMs": 60000,
-      "pollScope": "Workspace, source-page cursor and project-page cursor; visible/online pages only; suspended during pending mutation; generation-fenced responses.",
-      "finishDisposition": "All three requested corrections resolved at fix-list scope only: wrapping intrinsic pagination controls, independent 44px review-link targets and operation-specific save/revoke pending labels.",
-      "stateReviewDisposition": "Separate ship disposition for two resolved state fixes only: readable scoped error material and accurate new-grant preparation notice. Original three corrections remain resolved.",
-      "preparedState": "New grants unavailable until official OAuth is configured and verified; existing access records and revoke controls remain visible.",
-      "recoveryPalette": {
-        "textToken": "private-recovery-text",
-        "surfaceToken": "private-recovery-surface",
-        "borderToken": "private-recovery-border",
-        "sourceRule": "Scoped assistant-connections error rule overrides inherited pale error background.",
-        "evidence": "Synthetic state capture and computed DOM confirmation of #ffdae2 text, #3e242e surface and #764153 border."
-      },
-      "captures": [
-        ".impeccable/review/assistant-access/review-320.png",
-        ".impeccable/review/assistant-access/review-390.png",
-        ".impeccable/review/assistant-access/review-768.png",
-        ".impeccable/review/assistant-access/review-1440.png",
-        ".impeccable/review/assistant-access/disabled-390.png",
-        ".impeccable/review/assistant-access/error-390.png"
-      ],
-      "evidenceBoundary": "Local synthetic captures with emulated focus. No real OAuth, human keyboard acceptance, privacy-integration acceptance or production acceptance.",
-      "recordedDate": "2026-10-07",
-      "status": "Historical exact-post implementation evidence; the post picker and recurring polling are superseded by assistantScopeReview. Its scoped recovery palette remains current."
-    },
-    "assistantScopeReview": {
-      "recordedDate": "2026-10-07",
-      "mode": "Operate",
-      "identity": "Incumbent Scroll charcoal studio, quiet neutral panels, restrained borders, compact readable typography and white Save action; no new visual world, approved comp or token change.",
-      "sources": [
-        "apps/starter/components/assistant-connections.tsx",
-        "apps/starter/app/product.css: existing assistant styles"
-      ],
-      "libraryScope": "Owner-private libraries offer Off, Personal, Business and Both. Personal/Business cover current and future eligible filed posts; moving a post out removes that scope access. Both includes eligible unfiled posts. Shared workspaces offer all eligible workspace posts. Deleted posts and posts without access rights are excluded.",
-      "offConvention": "Off disables saving and points to the current grant row Turn off access control. Existing legacy exact-post grants remain exact until explicitly replaced.",
-      "disclosureConvention": "Choose assistant access contains the scope selector, Select all actions and Customize actions disclosure. Confirmed-context choices appear only with context-read permission; invalid context or private-suggestion dependencies open the context disclosure. Review selected projects exposes exact context/snapshot/commit references and 44px links.",
-      "contextConvention": "Twenty confirmed project choices per page, at most five retained project selections, separate confirmed-library context checkbox, and explicit selection of confirmed context on the visible page. Private suggestions require library access, selected project context, context-read permission and owner/admin access.",
-      "acknowledgment": "The seven-day acknowledgment binds workspace, assistant, library scope including future posts, selected actions, intake destination, confirmed context/project references and saved-grant version. Relevant changes require renewed acknowledgment; saving replaces prior access.",
-      "reviewLimits": "Review explicitly excludes spending, coding, publication, repository code and chat history; assistant retention of already shared conversation content remains disclosed. Events permission alone does not activate completion notifications.",
-      "signInConvention": "Fresh sign-in opens in a separate tab so the original selections remain available. Save/revoke labels describe their actual pending operation and duplicate mutations are disabled.",
-      "refreshConvention": "Dedicated Connections workspace slice with no recurring polling. Setup reads on mount, explicit refresh and after mutations; context-read selection and project pagination refresh bounded choices. Generation fencing rejects stale responses, workspace change remounts the editor, failed checks clear reviewed selections.",
-      "responsiveConvention": "Grant rows and controls wrap inside the quiet panel. Native disclosures and independent review links retain 44px targets. Scoped rose recovery tokens remain unchanged.",
-      "grantDurationDays": 7,
-      "maximumSelectedProjects": 5,
-      "projectEntriesPerPage": 20,
-      "finishDisposition": "Ship for the persistence correction only; supplied visual matrix matched. This is not whole-surface or production acceptance.",
-      "captures": [
-        ".impeccable/review/assistant-scope/user-320.png",
-        ".impeccable/review/assistant-scope/user-320-review.png",
-        ".impeccable/review/assistant-scope/mobile.png",
-        ".impeccable/review/assistant-scope/mobile-review.png",
-        ".impeccable/review/assistant-scope/tablet.png",
-        ".impeccable/review/assistant-scope/tablet-review.png",
-        ".impeccable/review/assistant-scope/desktop.png",
-        ".impeccable/review/assistant-scope/desktop-review.png"
-      ],
-      "proof": ".impeccable/review/assistant-scope/proof.json",
-      "evidenceBoundary": "Eight labeled synthetic actual-component captures at 320/390/768/1440 CSS pixels with emulated metrics/focus, plus native synthetic checkbox/Space, save and revocation fixture checks. Historical assistant-access and project-grants captures retain their dated original scopes. No production grant/tool, real OAuth/provider, independent comprehension, human keyboard or physical-device acceptance follows; provider/OAuth acceptance is separate."
-    },
-    "visualDashboardReview": {
-      "recordedDate": "2026-10-08",
-      "identity": "Bounded visual extension of Scroll's incumbent charcoal studio, existing type, mint actions and amber artwork; circle networks and saved topic branches follow owner-supplied references.",
-      "contract": "apps/starter/.impeccable/surfaces/apps-starter-components-studio-home-tsx.md",
-      "sources": [
-        "apps/starter/app/studio.css",
-        "apps/starter/components/dashboard-visuals.tsx",
-        "apps/starter/components/dashboard-trace.tsx",
-        "apps/starter/components/topic-diagram.tsx",
-        "apps/starter/components/knowledge-canvas.tsx",
-        "apps/starter/lib/knowledge-layout.ts",
-        "apps/starter/lib/dashboard-visuals.ts",
-        "apps/starter/lib/knowledge-map.ts"
-      ],
-      "metrics": "Four defined native metric buttons with What this counts disclosures; deduplicated loaded records, deleted posts excluded, explicit acceptance, enabled projects and unique recorded merged GitHub PR links. Compact merge value is Not loaded. State charts retain labels, counts and loaded-record denominators; no conversion funnel or whole-library total.",
-      "network": "Complete native circular buttons, mint-filled ideas and panel-filled cited groups. Amber complementary, blue similar and dashed violet disagreement. Useful combination retains its full accessible name, legend and evidence heading with Combine ideas inside the circle. Link count controls circle size, never quality. Edges join exact cited groups to ideas, never invented pairwise or causal links.",
-      "networkInteraction": "Measured-width local layout uses a taller initial world below 500px. After settlement, all nodes receive a uniform vertical translation to a 20px top occupied inset; rendered height follows the bottom occupied boundary plus 20px with a 520px minimum. Relative geometry, cited edges and link counts are retained. Toolbar supports 65%-160% zoom; Reset view restores 100% and scroll origin. Touch scroll, mouse background drag, keyboard scroll, Tab/Enter inspection and native Escape/Close focus return. Full claims and source evidence remain in the dialog and readable list. No new inference, queries, motion or authorization.",
-      "topicHierarchy": "Saved parent links only, with missing/off-page parents as separate roots. First root centered on entry and resize; visible swipe/scroll guidance. Topic buttons share evidence with Readable tree.",
-      "trace": "Up to five loaded source-linked proposals and five proposal-linked runs. Native source/proposal record buttons, Runs action and wrapping readable links. Missing loaded run explicit; lines record provenance, not approval or outcomes.",
-      "responsive": "Statistics use four columns, two at 680px and below; paired charts stack at 680px. Network viewport is capped at 600px; topic and trace viewports at 560px. Trace retains a 900px internally scrolling world. Toolbars and legends wrap; incumbent shell and navigation retained.",
-      "finishDisposition": "Ship for the three resolved findings only: responsive network framing, centered topic-root entry and complete group label.",
-      "verdict": "private/vibescroll-visual-dashboard-finish-review-final-20261008.md",
-      "captures": [
-        ".impeccable/review/visual-dashboard-20261008/home-1440.png",
-        ".impeccable/review/visual-dashboard-20261008/home-390.png",
-        ".impeccable/review/visual-dashboard-20261008/network-1440.png",
-        ".impeccable/review/visual-dashboard-20261008/network-390.png",
-        ".impeccable/review/visual-dashboard-20261008/network-evidence-390.png",
-        ".impeccable/review/visual-dashboard-20261008/tree-1440.png",
-        ".impeccable/review/visual-dashboard-20261008/tree-390.png"
-      ],
-      "evidenceBoundary": "Seven labeled synthetic local captures opened by the fix-only reviewer. Zoom/reset and Enter/Escape focus-return checks are builder evidence. No whole-surface, authenticated customer, human keyboard, physical-device or production acceptance follows. No new shipping raster artwork.",
-      "sparseFramingReview": {
-        "convention": "Uniform node translation aligns the top occupied boundary to 20px. Rendered height is the lowest occupied boundary plus 20px, with a 520px minimum. No edge, degree or relative-position change.",
-        "productionTrigger": "Actual sparse 22-node phone population showed unused vertical lead-in before the fix.",
-        "captures": [
-          ".impeccable/review/visual-dashboard-20261008/framing-fix/network-1440.png",
-          ".impeccable/review/visual-dashboard-20261008/framing-fix/network-390.png"
-        ],
-        "verdict": "private/vibescroll-network-framing-review-20261008.md",
-        "finishDisposition": "Ship for sparse blank lead-in resolved locally; original three findings retained within change scope. Settled measured-width replacements supersede the unsettled desktop capture.",
-        "builderEvidence": "20-isolated-idea regression; reported 539 passing tests, three skips, 28 authentication tests and both builds. Reviewer did not rerun these checks.",
-        "evidenceBoundary": "Larger actual production after-fix recapture remains pending. No fresh topic runtime, whole-surface, authenticated customer, human keyboard, physical-device or production acceptance follows."
-      }
-    }
+    ]
   },
   "components": [
     {
-      "name": "Primary button",
+      "name": "Retained primary button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "Main permitted action.",
-      "html": "<button class=\"ds-primary\">Add source</button>",
-      "css": ".ds-primary{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 17px;border:1px solid var(--ink,#f4f4f4);border-radius:10px;background:var(--ink,#f4f4f4);color:#141414;font:550 .87rem/1.6 Inter,system-ui,sans-serif;cursor:pointer;transition:background-color 140ms ease-out,border-color 140ms ease-out}.ds-primary:hover:not(:disabled){background:#d8d8d8;border-color:#d8d8d8}.ds-primary:focus-visible{outline:2px solid #d4d4d4;outline-offset:3px}.ds-primary:disabled{opacity:.45;cursor:not-allowed}@media(prefers-reduced-motion:reduce){.ds-primary{transition:none}}"
+      "description": "Existing bright primary control, separate from theme-primary shared buttons.",
+      "html": "<button class=\"ds-primary\">Save changes</button>",
+      "css": ".ds-primary{font:14px/1.6 Inter,system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif;transition:background-color 120ms ease-out,border-color 120ms ease-out;min-height:44px;padding:10px 17px;border:1px solid #f4f4f4;border-radius:10px;background:#f4f4f4;color:#141414;font-weight:550;cursor:pointer}.ds-primary:hover:not(:disabled){background:#d8d8d8;border-color:#d8d8d8}.ds-primary:focus-visible{outline:2px solid var(--primary,#166b58);outline-offset:3px;}.ds-primary:disabled{opacity:.45;cursor:default}@media(prefers-reduced-motion:reduce){[class^=\"ds-\"]{transition:none;animation:none}}:host-context([data-motion=\"off\"]) [class^=\"ds-\"]{transition:none;animation:none}"
     },
     {
       "name": "Secondary button",
       "kind": "button",
       "refersTo": "button-secondary",
-      "description": "Supporting action with a quiet outline.",
-      "html": "<button class=\"ds-secondary\">Cancel</button>",
-      "css": ".ds-secondary{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 17px;border:1px solid var(--line,#39453f);border-radius:10px;background:transparent;color:var(--ink,#f4f4f4);font:550 .87rem/1.6 Inter,system-ui,sans-serif;cursor:pointer;transition:background-color 140ms ease-out,border-color 140ms ease-out}.ds-secondary:hover:not(:disabled){background:var(--soft,#262626);border-color:#4a4a4a}.ds-secondary:focus-visible{outline:2px solid #d4d4d4;outline-offset:3px}.ds-secondary:disabled{opacity:.45;cursor:not-allowed}@media(prefers-reduced-motion:reduce){.ds-secondary{transition:none}}"
+      "description": "Quiet outline action for navigation and review.",
+      "html": "<button class=\"ds-secondary\">Explore library</button>",
+      "css": ".ds-secondary{font:14px/1.6 Inter,system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif;transition:background-color 120ms ease-out,border-color 120ms ease-out;min-height:44px;padding:10px 17px;border:1px solid var(--line,#dce5eb);border-radius:10px;background:transparent;color:var(--ink,#182e42);font-weight:550;cursor:pointer}.ds-secondary:hover:not(:disabled){background:var(--soft,#eaf0f4);border-color:#4a4a4a}.ds-secondary:focus-visible{outline:2px solid var(--primary,#166b58);outline-offset:3px;}.ds-secondary:disabled{opacity:.45}@media(prefers-reduced-motion:reduce){[class^=\"ds-\"]{transition:none;animation:none}}:host-context([data-motion=\"off\"]) [class^=\"ds-\"]{transition:none;animation:none}"
     },
     {
-      "name": "Text field",
+      "name": "Library search",
       "kind": "input",
       "refersTo": "field",
-      "description": "Compact editable field with visible keyboard focus.",
-      "html": "<label class=\"ds-label\">Source title<input class=\"ds-field\" placeholder=\"Source title\"></label>",
-      "css": ".ds-label{display:grid;gap:6px;color:var(--ink,#f4f4f4);font:13px/1.6 Inter,system-ui,sans-serif}.ds-field{min-width:0;min-height:44px;padding:10px 12px;border:1px solid #3d3d3d;border-radius:9px;background:#202020;color:var(--ink,#f4f4f4);font:14px/1.6 Inter,system-ui,sans-serif;transition:border-color 140ms ease-out}.ds-field::placeholder{color:#989898;opacity:1}.ds-field:focus-visible{outline:2px solid #d4d4d4;outline-offset:3px}@media(prefers-reduced-motion:reduce){.ds-field{transition:none}}"
+      "description": "Search uses the active panel, ink, placeholder and caret palette.",
+      "html": "<label class=\"ds-field\">Search topics<input placeholder=\"Search topics\" type=\"search\"></label>",
+      "css": ".ds-field{display:grid;gap:4px;color:var(--ink,#182e42);font:14px/1.6 Inter,system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif;font-size:12px}.ds-field input{font:14px/1.6 Inter,system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif;transition:background-color 120ms ease-out,border-color 120ms ease-out;min-height:44px;padding:10px 12px;border:1px solid var(--line,#dce5eb);border-radius:9px;background:var(--panel,#fff);color:var(--ink,#182e42);caret-color:var(--ink,#182e42)}.ds-field input::placeholder{color:var(--subtle,#526578);opacity:1}.ds-field input:hover{border-color:var(--primary,#166b58)}.ds-field input:focus-visible{outline:2px solid var(--primary,#166b58);outline-offset:3px;}@media(prefers-reduced-motion:reduce){[class^=\"ds-\"]{transition:none;animation:none}}:host-context([data-motion=\"off\"]) [class^=\"ds-\"]{transition:none;animation:none}"
     },
     {
-      "name": "Navigation item",
+      "name": "Selected rail navigation",
       "kind": "nav",
-      "refersTo": "navigation-item",
-      "description": "Compact desktop destination with a selected neutral fill.",
-      "html": "<nav class=\"ds-nav\" aria-label=\"Workspace\"><button class=\"ds-nav-item\" aria-current=\"page\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z\"/><path d=\"M9 21v-8h6v8\"/></svg>Home</button></nav>",
-      "css": ".ds-nav{padding:12px;background:#171717}.ds-nav-item{display:flex;align-items:center;gap:12px;width:100%;min-height:44px;padding:10px 12px;border:0;border-radius:9px;text-align:left;background:none;color:#b5b5b5;font:14px/1.6 Inter,system-ui,sans-serif;cursor:pointer;transition:background-color 140ms ease-out,color 140ms ease-out}.ds-nav-item:hover{background:#222;color:#f4f4f4}.ds-nav-item[aria-current=page]{background:#2a2a2a;color:#fff;font-weight:550}.ds-nav-item:focus-visible{outline:2px solid #d4d4d4;outline-offset:3px}@media(prefers-reduced-motion:reduce){.ds-nav-item{transition:none}}"
+      "refersTo": "navigation-item-selected",
+      "description": "Theme-muted selected row with an actual 44px target.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Specimen navigation\"><button aria-current=\"page\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z\"/></svg>Home</button><button>Library</button></nav>",
+      "css": ".ds-nav{display:grid;gap:4px;font:14px/1.6 Inter,system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif;}.ds-nav button{font:14px/1.6 Inter,system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif;transition:background-color 120ms ease-out,border-color 120ms ease-out;display:flex;align-items:center;gap:12px;min-height:44px;padding:10px 12px;text-align:left;border:0;border-radius:9px;background:transparent;color:var(--subtle,#526578);cursor:pointer}.ds-nav button[aria-current],.ds-nav button:hover{background:var(--muted,#eaf0f4);color:var(--ink,#182e42)}.ds-nav button[aria-current]{font-weight:550}.ds-nav button:focus-visible{outline:2px solid var(--primary,#166b58);outline-offset:3px;}@media(prefers-reduced-motion:reduce){[class^=\"ds-\"]{transition:none;animation:none}}:host-context([data-motion=\"off\"]) [class^=\"ds-\"]{transition:none;animation:none}"
     },
     {
-      "name": "State chip",
+      "name": "Phone Save action",
+      "kind": "button",
+      "refersTo": "mobile-save",
+      "description": "The yellow center action opens capture; it is not a selected destination.",
+      "html": "<button class=\"ds-save\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M12 5v14M5 12h14\"/></svg><span>Save</span></button>",
+      "css": ".ds-save{font:14px/1.6 Inter,system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif;transition:background-color 120ms ease-out,border-color 120ms ease-out;display:grid;justify-items:center;gap:4px;min-width:52px;min-height:44px;padding:8px;border:0;border-radius:16px;background:#f4cb68;color:#33270c;cursor:pointer}.ds-save:hover{background:#f4cb68}.ds-save:focus-visible{outline:2px solid var(--primary,#166b58);outline-offset:3px;}.ds-save:disabled{opacity:.45}@media(prefers-reduced-motion:reduce){[class^=\"ds-\"]{transition:none;animation:none}}:host-context([data-motion=\"off\"]) [class^=\"ds-\"]{transition:none;animation:none}"
+    },
+    {
+      "name": "State tag",
       "kind": "chip",
       "refersTo": "chip",
-      "description": "Informational source state; not an interactive control.",
-      "html": "<span class=\"ds-chip\">Ready</span>",
-      "css": ".ds-chip{display:inline-flex;align-items:center;min-height:28px;padding:4px 9px;border:0;border-radius:5px;background:#252525;color:#bdbdbd;font:600 11px/1.6 Inter,system-ui,sans-serif}"
+      "description": "Informational tag supplements readable state text.",
+      "html": "<span class=\"ds-tag\">Saved</span>",
+      "css": ".ds-tag{font:14px/1.6 Inter,system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif;display:inline-flex;font-size:11px;border:0;border-radius:5px;background:var(--muted,#eaf0f4);color:var(--ink,#182e42);padding:4px 9px}@media(prefers-reduced-motion:reduce){[class^=\"ds-\"]{transition:none;animation:none}}:host-context([data-motion=\"off\"]) [class^=\"ds-\"]{transition:none;animation:none}"
     },
     {
-      "name": "Panel",
+      "name": "Insight evidence card",
       "kind": "card",
+      "refersTo": "insight-card",
+      "description": "Synthetic specimen of an insight-owned enclosure and native project disclosure.",
+      "html": "<article class=\"ds-insight\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M9 18h6M10 22h4M8 14a6 6 0 1 1 8 0c-1 1-1 2-1 3H9c0-1 0-2-1-3z\"/></svg><p>Synthetic insight: keep the next decision visible.</p><details><summary>Project connections</summary><div class=\"ds-destination\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M12 5v14m-5-5 5 5 5-5\"/></svg><a href=\"#synthetic-project\">Synthetic project</a><span>Illustrative current evaluation</span></div></details></article>",
+      "css": ".ds-insight{font:14px/1.6 Inter,system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif;display:grid;grid-template-columns:24px minmax(0,1fr);gap:8px;padding:12px;border:1px solid var(--line,#dce5eb);border-radius:12px;background:var(--panel,#fff);color:var(--ink,#182e42)}.ds-insight>svg{color:var(--primary,#166b58)}.ds-insight p{margin:0;font-size:14px;line-height:1.5}.ds-insight details{grid-column:2;font-size:12px}.ds-insight summary{min-height:44px;padding:8px 0;cursor:pointer}.ds-destination{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;padding:8px 0}.ds-destination>svg{margin-inline:auto;color:var(--primary,#166b58)}.ds-destination>a{transition:background-color 120ms ease-out,border-color 120ms ease-out;display:flex;align-items:center;padding:10px;border:1px solid var(--line,#dce5eb);border-radius:10px;color:var(--ink,#182e42)}.ds-destination span{color:var(--subtle,#526578)}.ds-destination>a:hover{background:var(--muted,#eaf0f4)}.ds-insight summary:focus-visible,.ds-destination>a:focus-visible{outline:2px solid var(--primary,#166b58);outline-offset:3px;}@media(prefers-reduced-motion:reduce){[class^=\"ds-\"]{transition:none;animation:none}}:host-context([data-motion=\"off\"]) [class^=\"ds-\"]{transition:none;animation:none}"
+    },
+    {
+      "name": "Saved topic node",
+      "kind": "custom",
+      "refersTo": "topic-node",
+      "description": "Synthetic selected saved topic; opening evidence is separate from expanding children.",
+      "html": "<div class=\"ds-node\" data-selected=\"true\"><button class=\"ds-node-open\"><span class=\"ds-node-icon\"><svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M6 3v12a6 6 0 0 0 6-6V6\"/><circle cx=\"6\" cy=\"18\" r=\"3\"/><circle cx=\"12\" cy=\"3\" r=\"3\"/></svg></span><strong>Synthetic topic</strong><span class=\"ds-node-count\">2 insights · 1 posts</span></button><button class=\"ds-expand\" aria-label=\"Expand synthetic topic\" aria-expanded=\"false\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"m6 9 6 6 6-6\"/></svg></button></div>",
+      "css": ".ds-node{font:14px/1.6 Inter,system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif;display:flex;align-items:center;max-width:320px;min-width:0;border:1px solid var(--line,#dce5eb);border-radius:16px;background:var(--panel,#fff);box-shadow:0 3px 12px rgb(18 46 66 / 4%)}.ds-node[data-selected=true]{border-color:var(--primary,#166b58);box-shadow:0 0 0 2px color-mix(in srgb,var(--primary,#166b58) 14%,transparent)}.ds-node-open{font:14px/1.6 Inter,system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif;transition:background-color 120ms ease-out,border-color 120ms ease-out;display:grid;grid-template-columns:34px minmax(0,1fr);gap:3px 10px;width:100%;min-height:76px;padding:14px;border:0;border-radius:16px;background:transparent;color:var(--ink,#182e42);text-align:left;cursor:pointer}.ds-node-open strong{font-size:14px;line-height:1.35;overflow-wrap:anywhere;align-self:center}.ds-node-icon{grid-row:span 2;display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:var(--muted,#eaf0f4);color:var(--primary,#166b58)}.ds-node-count{font-size:12px;line-height:1.4;color:var(--subtle,#526578)}.ds-expand{transition:background-color 120ms ease-out,border-color 120ms ease-out;min-width:44px;min-height:44px;border:0;background:transparent;color:var(--subtle,#526578);cursor:pointer}.ds-node button:hover{border-color:var(--primary,#166b58)}.ds-node button:focus-visible{outline:2px solid var(--primary,#166b58);outline-offset:3px;}@media(prefers-reduced-motion:reduce){[class^=\"ds-\"]{transition:none;animation:none}}:host-context([data-motion=\"off\"]) [class^=\"ds-\"]{transition:none;animation:none}"
+    },
+    {
+      "name": "Proposal recorded stage",
+      "kind": "custom",
       "refersTo": "panel",
-      "description": "Contained settings or evidence, without a decorative shadow.",
-      "html": "<section class=\"ds-panel\"><h2 class=\"ds-panel-title\">Evidence</h2><p class=\"ds-panel-copy\">Sampled evidence is not exhaustive analysis.</p></section>",
-      "css": ".ds-panel{padding:24px;border:1px solid var(--line,#39453f);border-radius:14px;background:var(--panel,#1d2421);color:var(--ink,#f4f4f4);font:14px/1.6 Inter,system-ui,sans-serif}.ds-panel-title{margin:0 0 12px;font-size:18px;line-height:1.35;font-weight:550;letter-spacing:-.025em}.ds-panel-copy{margin:0;color:var(--subtle,#b3bdb7);max-width:72ch}@media(max-width:720px){.ds-panel{padding:18px}}"
-    },
-    {
-      "name": "Account menu",
-      "kind": "custom",
-      "refersTo": "menu",
-      "description": "Floating secondary destinations with accessible focus styling.",
-      "html": "<div class=\"ds-menu\"><button class=\"ds-menu-item\">Usage</button><button class=\"ds-menu-item\">Privacy</button><button class=\"ds-menu-item\">Cookie preferences</button></div>",
-      "css": ".ds-menu{min-width:220px;padding:6px;border-radius:14px;background:#252525;color:var(--ink,#f4f4f4);box-shadow:0 12px 32px #0006;animation:ds-menu-enter 120ms ease-out}.ds-menu-item{display:flex;align-items:center;width:100%;min-height:44px;padding:10px 12px;border:0;border-radius:8px;background:none;color:inherit;font:14px/1.6 Inter,system-ui,sans-serif;text-align:left;cursor:pointer}.ds-menu-item:hover,.ds-menu-item:focus-visible{background:#383838;outline:none}@keyframes ds-menu-enter{from{clip-path:inset(0 0 8% 0);opacity:.8}to{clip-path:inset(0);opacity:1}}@media(prefers-reduced-motion:reduce){.ds-menu{animation:none}}"
-    },
-    {
-      "kind": "custom",
-      "name": "Source overview and analysis notes",
-      "css": ".ds-source-detail{padding:24px;border:1px solid var(--line,#39453f);border-radius:14px;background:var(--panel,#1d2421);color:var(--ink,#f4f4f4);font:16px/1.6 Inter,system-ui,sans-serif}.ds-source-heading{margin:0 0 12px;font-size:18px;line-height:1.35;font-weight:550;letter-spacing:-.025em}.ds-source-copy{margin:0 0 16px;color:var(--subtle,#b3bdb7);max-width:72ch}.ds-source-fine{margin:0 0 16px;color:var(--subtle,#b3bdb7);font-size:.8rem;max-width:72ch}.ds-source-notes>summary{min-height:44px;padding:12px 0;cursor:pointer;color:var(--console-ink,#f4f4f4)}.ds-source-notes>summary:focus-visible{outline:2px solid #d4d4d4;outline-offset:3px}.ds-source-notes[open]>summary{margin-bottom:8px}.ds-source-subheading{margin:0 0 12px;font-size:1.05rem;font-weight:550}@media(max-width:720px){.ds-source-detail{padding:18px}}",
-      "refersTo": "source-notes",
-      "description": "Native disclosure keeps detailed notes available while the sampled-coverage caution stays visible.",
-      "html": "<section class=\"ds-source-detail\"><h2 class=\"ds-source-heading\">AI summary</h2><p class=\"ds-source-copy\">Sampled evidence is not exhaustive analysis.</p><p class=\"ds-source-fine\">Frames are sampled. Automatic transcripts can contain errors.</p><details class=\"ds-source-notes\"><summary>Full summary and analysis notes</summary><section aria-label=\"Analysis limitations\"><h3 class=\"ds-source-subheading\">Limitations and uncertainty</h3><p class=\"ds-source-copy\">Sampled evidence is not exhaustive analysis.</p></section></details></section>"
-    },
-    {
-      "name": "Studio action",
-      "kind": "button",
-      "refersTo": "studio-action",
-      "description": "Permitted next action beside Scroll; mint fill does not certify success.",
-      "html": "<button class=\"ds-studio-action\">Review project context <span aria-hidden=\"true\">â†’</span></button>",
-      "css": ".ds-studio-action{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;min-width:44px;padding:8px 16px;background:var(--primary,#87dfc1);color:var(--primary-foreground,#10251e);border:0;border-radius:10px;font:500 14px/1.6 Inter,system-ui,sans-serif;white-space:normal;text-align:center;cursor:pointer;transition:color 150ms ease,background-color 150ms ease,opacity 150ms ease}.ds-studio-action:hover:not(:disabled){opacity:.9}.ds-studio-action:focus-visible{outline:2px solid var(--ring,#87dfc1);outline-offset:4px}.ds-studio-action:disabled{opacity:.5;pointer-events:none}@media(prefers-reduced-motion:reduce){.ds-studio-action{transition:none}}"
-    },
-    {
-      "name": "Private setup recovery",
-      "kind": "custom",
-      "refersTo": "private-recovery",
-      "description": "Scoped error feedback in owner-private setup; never render failed browsing as a successful empty list.",
-      "html": "<p class=\"ds-private-recovery\" role=\"alert\">Your private library is unavailable. Check your session and reload.</p>",
-      "css": ".ds-private-recovery{padding:12px 16px;background:#3e242e;color:#ffdae2;border:1px solid #764153;border-radius:var(--radius,.625rem);font:14px/1.6 Inter,system-ui,sans-serif;overflow-wrap:anywhere}"
-    },
-    {
-      "name": "Saved workspace grants section",
-      "kind": "custom",
-      "description": "Scoped separation between the new sharing action and saved recipient grants. Static synthetic specimen; controls do not create or revoke real grants.",
-      "html": "<section class=\"ds-grants\" aria-label=\"Synthetic saved grants specimen\"><button class=\"ds-grant-button\" disabled>Share reviewed version</button><h3 class=\"ds-grants-heading\">Your workspace grants</h3><ul class=\"ds-grants-list\"><li><span><strong>Synthetic workspace</strong><span class=\"ds-grant-meta\"> Expires in seven days / 1 selected source version. Changed versions require review.</span></span><button class=\"ds-grant-button ds-grant-secondary\">Revoke grant</button></li></ul></section>",
-      "css": ".ds-grants{color:var(--ink,#f4f4f4);font:14px/1.6 Inter,system-ui,sans-serif}.ds-grants-heading{margin:28px 0 12px;font-size:1.05rem;font-weight:550}.ds-grants-list{list-style:none;padding:0;margin-block:1rem;min-width:0}.ds-grants-list li{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;padding-block:.75rem;border-bottom:1px solid var(--border,#39453f)}.ds-grant-meta{color:var(--subtle,#b3bdb7);font-size:.8rem}.ds-grant-button{min-height:44px;min-width:44px;padding:10px 17px;border:1px solid var(--ink,#f4f4f4);border-radius:10px;background:var(--ink,#f4f4f4);color:#141414;font:550 14px/1.6 Inter,system-ui,sans-serif;white-space:nowrap;cursor:pointer;transition:background-color 140ms ease-out}.ds-grant-secondary{background:transparent;color:var(--ink,#f4f4f4);border-color:var(--line,#39453f)}.ds-grant-secondary:hover:not(:disabled){background:var(--soft,#262626)}.ds-grant-button:focus-visible{outline:2px solid #d4d4d4;outline-offset:3px}.ds-grant-button:disabled{opacity:.45;cursor:not-allowed}@media(max-width:480px){.ds-grants-list li{flex-direction:column;gap:.25rem}}@media(prefers-reduced-motion:reduce){.ds-grant-button{transition:none}}"
-    },
-    {
-      "name": "Assistant library-scope review",
-      "kind": "custom",
-      "description": "Current/future library scope with native disclosures, exact context review and separate revocation. Static synthetic specimen of the existing material; selector does not reproduce the application Radix runtime and controls do not grant access.",
-      "html": "<section class=\"ds-assistant-review\" aria-label=\"Synthetic assistant scope specimen\"><div class=\"ds-assistant-grant\"><div><strong>Synthetic assistant</strong><p class=\"ds-assistant-fine\">Active for seven days. Current and future Personal posts.</p></div><button class=\"ds-assistant-secondary\" type=\"button\">Turn off access</button></div><details class=\"ds-assistant-editor\" open><summary>Choose assistant access</summary><fieldset><legend>Library access</legend><select aria-label=\"Library access\"><option>Off</option><option>Personal</option><option>Business</option><option selected>Both (all posts)</option></select><p class=\"ds-assistant-fine\">Includes all current and future eligible posts in this library, including unfiled posts. Deleted posts and posts without access rights are never included.</p></fieldset><fieldset><legend>Allowed actions</legend><button class=\"ds-assistant-secondary\" type=\"button\">Select all actions</button><details><summary>Customize actions (1 selected)</summary><label class=\"ds-assistant-check\"><input type=\"checkbox\" checked><span>Read ideas in my chosen library scope</span></label></details></fieldset><h3>Review access for seven days</h3><p>All current and future eligible posts. 1 action and 0 project contexts selected.</p><p class=\"ds-assistant-fine\">No spending, coding, publication, repository code or chat history. Your assistant may retain content already shared in a conversation.</p><label class=\"ds-assistant-check\"><input type=\"checkbox\"><span>I approve this library scope, including future posts, and the selected context and actions for seven days. This replaces previous access.</span></label><button class=\"ds-assistant-save\" type=\"button\" disabled>Save reviewed access</button></details></section>",
-      "css": ".ds-assistant-review{color:var(--ink,#f4f4f4);font:14px/1.6 Inter,system-ui,sans-serif;overflow-wrap:anywhere}.ds-assistant-review p{color:var(--subtle,#b3bdb7);max-width:72ch}.ds-assistant-fine{font-size:.8rem}.ds-assistant-grant{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:16px 0;border-bottom:1px solid var(--line,#39453f)}.ds-assistant-editor{margin:20px 0}.ds-assistant-review fieldset{min-width:0;border:0;padding:0;margin:24px 0}.ds-assistant-review legend{font-weight:600;margin-bottom:12px}.ds-assistant-review summary{min-height:44px;padding:10px 0;cursor:pointer}.ds-assistant-review h3{font-size:1.05rem}.ds-assistant-secondary,.ds-assistant-save{min-height:44px;max-width:100%;padding:10px 17px;border:1px solid var(--line,#39453f);border-radius:10px;font:550 .87rem/1.6 Inter,system-ui,sans-serif;cursor:pointer;transition:background-color 140ms ease-out,border-color 140ms ease-out,color 140ms ease-out}.ds-assistant-secondary{background:transparent;color:inherit}.ds-assistant-secondary:hover:not(:disabled){background:var(--soft,#262626);border-color:#4a4a4a}.ds-assistant-save{background:#f4f4f4;color:#141414;border-color:#f4f4f4}.ds-assistant-save:hover:not(:disabled){background:#d8d8d8;border-color:#d8d8d8}.ds-assistant-review button:disabled{opacity:.45;cursor:not-allowed}.ds-assistant-review select{width:100%;min-height:44px;padding:10px 12px;border:1px solid #3d3d3d;border-radius:9px;background:#202020;color:inherit;font:14px/1.6 Inter,system-ui,sans-serif}.ds-assistant-check{display:flex;align-items:flex-start;gap:12px;min-height:44px;padding:10px 0;overflow-wrap:anywhere}.ds-assistant-check input{width:18px;height:18px;flex-shrink:0;margin-top:3px}.ds-assistant-review button:focus-visible,.ds-assistant-review summary:focus-visible,.ds-assistant-review select:focus-visible,.ds-assistant-review input:focus-visible{outline:2px solid #d4d4d4;outline-offset:3px}@media(prefers-reduced-motion:reduce){.ds-assistant-review button{transition:none}}"
-    },
-    {
-      "name": "Explore topic disclosure",
-      "kind": "custom",
-      "description": "Bounded native topic tree, the default among five Explore views. Static synthetic specimen; inspection does not load actual records.",
-      "html": "<section class=\"ds-explore-tree\"><details><summary><span><strong>Synthetic topic</strong><span class=\"ds-explore-meta\">2 posts / 2 current ideas</span></span></summary><button class=\"ds-explore-inspect\">Inspect topic</button><ul><li><button class=\"ds-explore-row\"><span><strong>Synthetic child topic</strong><span class=\"ds-explore-meta\">1 post / 1 current idea</span></span></button></li></ul></details><p class=\"ds-explore-meta\">Counts describe this page; overlapping topics are not independent corroboration.</p></section>",
-      "css": ".ds-explore-tree{color:var(--foreground,#f4f4f4);font:14px/1.6 Inter,system-ui,sans-serif}.ds-explore-tree summary,.ds-explore-row{display:flex;align-items:center;gap:16px;min-height:64px;padding:16px 8px;border:0;background:transparent;color:inherit;text-align:left;white-space:normal;cursor:pointer}.ds-explore-tree summary>span,.ds-explore-row>span{display:grid;gap:8px;min-width:0;overflow-wrap:anywhere}.ds-explore-meta{display:block;color:var(--muted-foreground,#b3bdb7);font-size:13px}.ds-explore-tree ul{list-style:none;margin:0 0 0 16px;padding:0 0 0 12px;border-left:1px solid var(--border,#39453f)}.ds-explore-row{width:100%}.ds-explore-inspect{min-height:44px;min-width:44px;padding:10px 16px;border:1px solid var(--border,#39453f);border-radius:8px;background:var(--card,#1d2421);color:inherit;font:600 14px/1.6 Inter,system-ui,sans-serif;cursor:pointer}.ds-explore-tree summary:hover,.ds-explore-row:hover{background:var(--muted,#262626)}.ds-explore-inspect:hover{border-color:var(--primary,#87dfc1)}.ds-explore-tree summary:focus-visible,.ds-explore-row:focus-visible,.ds-explore-inspect:focus-visible{outline:2px solid var(--ring,#87dfc1);outline-offset:3px}"
-    },
-    {
-      "name": "Explore connection representation",
-      "kind": "custom",
-      "description": "Network map is the default; readable list uses the same exact cited groups and full claims. Representation, recovery and disclosure controls retain 44px targets. Static synthetic specimen; application canvas evidence uses a native modal with focus return.",
-      "html": "<section class=\"ds-explore-representations\"><fieldset aria-label=\"Connection representation\"><button aria-pressed=\"false\">Readable list</button><button aria-pressed=\"true\">Network map</button></fieldset><p>Lines join a cited connection group to its supporting ideas. They do not establish causation.</p><div class=\"ds-explore-cited\"><strong>Work together</strong><span>2 ideas</span></div><details><summary>Full synthetic evidence</summary><p>Inspect the full claim and its exact source evidence in the application.</p></details></section>",
-      "css": ".ds-explore-representations{color:var(--foreground,#f4f4f4);font:14px/1.6 Inter,system-ui,sans-serif}.ds-explore-representations fieldset{display:flex;gap:8px;flex-wrap:wrap;padding:0;border:0;margin:16px 0 24px}.ds-explore-representations button{min-width:44px;min-height:44px;padding:10px 14px;border:1px solid var(--border,#39453f);border-radius:8px;color:inherit;background:var(--card,#1d2421);font:600 14px/1.6 Inter,system-ui,sans-serif;cursor:pointer}.ds-explore-representations button[aria-pressed=true]{color:var(--primary-foreground,#10251e);background:var(--primary,#87dfc1);border-color:var(--primary,#87dfc1)}.ds-explore-representations button:hover{border-color:var(--primary,#87dfc1)}.ds-explore-representations button:focus-visible,.ds-explore-representations summary:focus-visible{outline:2px solid var(--ring,#87dfc1);outline-offset:3px}.ds-explore-cited{padding:12px;border:1px solid var(--border,#39453f);border-radius:12px;background:var(--muted,#262626)}.ds-explore-cited strong,.ds-explore-cited span{display:block;font-size:14px;line-height:1.5}.ds-explore-cited strong{margin-bottom:8px}.ds-explore-representations summary{display:flex;align-items:center;min-height:44px;padding-block:10px;cursor:pointer}"
-    },
-    {
-      "name": "Cited circle network",
-      "kind": "custom",
-      "refersTo": "network-group",
-      "description": "Static synthetic specimen of complete native circle buttons; size records cited links, not quality. Application inspection opens full evidence with focus return.",
-      "html": "<section class=\"ds-circle-network\" aria-label=\"Synthetic cited group specimen\"><button class=\"ds-circle-idea\" aria-label=\"Inspect synthetic idea\">Synthetic cited idea</button><span aria-hidden=\"true\" class=\"ds-circle-link\"></span><button class=\"ds-circle-group\" aria-label=\"Inspect Useful combination: synthetic cited group\"><strong>Combine ideas</strong><span>2 ideas</span></button><p>Lines join exact cited groups to ideas. Read full claims in the readable list.</p></section>",
-      "css": ".ds-circle-network{display:flex;flex-wrap:wrap;align-items:center;gap:16px;color:var(--foreground,#f4f4f4);font:13px/1.3 Inter,system-ui,sans-serif}.ds-circle-network button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;flex-shrink:0;width:108px;height:108px;padding:15px;border:2px solid var(--primary,#87dfc1);border-radius:50%;font:inherit;white-space:normal;text-align:center;cursor:pointer}.ds-circle-idea{background:var(--primary,#87dfc1);color:var(--primary-foreground,#10251e)}.ds-circle-group{background:var(--panel,#1d2421);color:var(--primary,#87dfc1)}.ds-circle-link{width:32px;height:1.5px;background:var(--primary,#87dfc1)}.ds-circle-network button:hover{filter:brightness(1.12)}.ds-circle-network button:focus-visible{outline:3px solid var(--foreground,#f4f4f4);outline-offset:5px}.ds-circle-network p{flex-basis:100%;color:var(--subtle,#b3bdb7);font-size:13px;line-height:1.6}"
-    },
-    {
-      "name": "Saved topic branch node",
-      "kind": "button",
-      "description": "Native saved-topic button shared by branching diagram and readable tree. Static synthetic specimen; it does not load actual evidence.",
-      "html": "<button class=\"ds-topic-node\" aria-label=\"Open synthetic topic\"><strong>Synthetic topic</strong><span>2 posts · 2 current ideas</span></button>",
-      "css": ".ds-topic-node{display:flex;flex-direction:column;justify-content:center;gap:6px;width:208px;min-height:88px;max-height:100px;padding:12px;border:1px solid var(--primary,#87dfc1);border-radius:12px;background:var(--panel,#1d2421);color:var(--foreground,#f4f4f4);font:14px/1.35 Inter,system-ui,sans-serif;text-align:center;white-space:normal;cursor:pointer}.ds-topic-node strong{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}.ds-topic-node span{color:var(--subtle,#b3bdb7);font-size:12px}.ds-topic-node:hover{background:#283b33}.ds-topic-node:focus-visible{outline:2px solid var(--ring,#87dfc1);outline-offset:3px}"
+      "description": "Synthetic recorded Saved plan marker; the label alone grants no coding authority.",
+      "html": "<section class=\"ds-trail\"><h2>From saved post to change</h2><ol><li data-state=\"recorded\"><span class=\"ds-stage\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"m5 12 4 4L19 6\"/></svg></span><div><strong>Saved plan</strong><p>Synthetic immutable plan record</p></div></li></ol></section>",
+      "css": ".ds-trail{font:14px/1.6 Inter,system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif;padding:24px;border:1px solid var(--line,#dce5eb);border-radius:14px;background:var(--panel,#fff);color:var(--ink,#182e42)}.ds-trail h2{font-size:18px;font-weight:550;margin:0 0 20px}.ds-trail ol{padding:0;list-style:none}.ds-trail li{display:flex;gap:14px;position:relative;padding:0 0 24px}.ds-stage{display:grid;place-items:center;width:33px;height:33px;flex-shrink:0;border:1px solid transparent;border-radius:50%;background:var(--accent,#bce8da);color:var(--accent-ink,#134b40)}.ds-trail p{margin:4px 0 0;color:var(--subtle,#526578);font-size:13px}@media(prefers-reduced-motion:reduce){[class^=\"ds-\"]{transition:none;animation:none}}:host-context([data-motion=\"off\"]) [class^=\"ds-\"]{transition:none;animation:none}"
     }
   ],
   "narrative": {
+    "northStar": "Scroll's knowledge atlas",
+    "overview": "The app uses cool canvas, white reading surfaces, navy ink and teal selection. Its matching dark theme keeps the same hierarchy and original warm Scroll artwork. Quiet borders and compact icon-led cards let saved knowledge and the next permitted action lead. Device setting is the default appearance; Account offers Light and Dark overrides.\n\nThis is the owner-authorized October 9 application world, extracted from the built code. Its boundary is the Atlas shell, Home, Library, Projects, Account and capture. The public marketing world remains Scroll's charcoal studio. The original Scroll image is reused; this update introduces no shipping raster artwork. Product authority remains in [PRODUCT.md](PRODUCT.md), with the selected interaction scope in [the Atlas implementation contract](docs/design/ATLAS-IMPLEMENTATION-CONTRACT-20261009.md).",
+    "keyCharacteristics": [
+      "Cool light surfaces and matching dark surfaces with teal selection.",
+      "Original Scroll artwork and visible workspace scope.",
+      "Compact saved-topic branches and insight-owned evidence cards.",
+      "Five phone actions: Home, Library, Save, Projects, Account.",
+      "Short pointer-triggered motion with immediate keyboard actions and a still alternative.",
+      "Loaded-record statistics and explicitly recorded project trails."
+    ],
     "rules": [
       {
-        "name": "The Allowance Reading Rule",
-        "body": "Keep available and reserved numbers primary, the labeled native meter supplementary, unresolved holds explicit and recent-use coverage bounded.",
-        "section": "components"
-      },
-      {
-        "name": "The Review Return Rule",
-        "body": "When an operation requires fresh sign-in, retain the current application pathname and query in the existing error toast's recovery link. Keep the app-only server return-path guard. Recovery returns to the review location; it does not retry the failed operation or grant approval, access or spending authority.",
-        "section": "components"
-      },
-      {
-        "name": "The Reviewed Access Rule",
-        "body": "Keep the library scope, future inclusion, exact context and allowed actions reviewable before acknowledgment, with immediate revocation and operation-specific feedback.",
-        "section": "components"
-      },
-      {
-        "name": "Selected knowledge sharing",
-        "body": "Keep sharing in a native disclosure after private filing, with the shared Radix workspace choice, exact source version and seven-day duration visible before acknowledgment. Target, source version, saved grant version and replacement changes invalidate acknowledgment; closing clears loaded choices, grants and acknowledgment. Separate the action from saved grants with the scoped heading margin (28px above, 12px below). Recipient reading retains bounded rows, coverage and exact insight/revision citations. Local labeled synthetic captures fix-mobile-active-controls.png (390px), fix-desktop-active.png (1440px) and mobile-recipient-reading.png (390px) in .impeccable/review/knowledge-grants/ support a ship disposition for that spacing correction only; they do not establish real grants, second-account consent, provider/auth acceptance or production deployment.",
-        "section": "components"
-      },
-      {
-        "body": "Use mint for permitted studio actions and connections, amber for Scroll's warmth, and preserve retained neutral reading controls. Neither color proves success or benefit.",
-        "name": "The Meaningful Accent Rule",
+        "name": "The Recorded Meaning Rule",
+        "body": "Selection and connectors describe returned records; neither color nor a line establishes permission, independent corroboration or benefit.",
         "section": "colors"
       },
       {
-        "body": "Keep title, explanation and metadata distinct through scale, weight and neutral contrast; use concise sentence case labels instead of ornamental eyebrows.",
         "name": "The Reading Hierarchy Rule",
+        "body": "Keep title, explanation and metadata distinct through scale, weight and neutral contrast; use concise sentence case labels instead of ornamental eyebrows.",
         "section": "typography"
       },
       {
-        "body": "Interactive controls keep at least a 44px target; small type and icons do not justify a smaller hit area. Informational chips are not controls.",
         "name": "The Touch Target Rule",
+        "body": "Interactive controls keep at least a 44px target; small type and icons do not justify a smaller hit area. Informational chips are not controls.",
         "section": "layout"
-      },
-      {
-        "body": "Keep routine content flat; use floating depth for a menu or modal that temporarily interrupts the underlying task.",
-        "name": "The Flat Surface Rule",
-        "section": "elevation"
-      },
-      {
-        "body": "Keep the sampling and automatic-transcription caution visible for sampled audiovisual coverage while placing the retained full summary and detailed analysis notes in the disclosure.",
-        "name": "The Visible Limits Rule",
-        "section": "components"
-      },
-      {
-        "name": "The Dialog Choice Rule",
-        "body": "A modal's choice menu belongs inside its active native dialog; a visually visible menu must also accept pointer and keyboard selection. Outside dialogs the shared control retains its default portal. Appearance and token primitives are unchanged.",
-        "section": "components"
-      },
-      {
-        "name": "The Private Filing Rule",
-        "body": "Organization choices describe the owner's private views; they never imply sharing permission or analysis authority. Setup rows wrap on narrow screens while action labels remain on one line. Combined browsing requires explicit confirmed setup; turning it off fences earlier responses and clears visible results.",
-        "section": "components"
       },
       {
         "name": "The Cited Group Rule",
         "body": "Display a connection only when all of its exact source, generation, revision and insight references exist in current permitted evidence. A connection is an explained cited group; neither its line nor topic membership proves causation or agreement.",
-        "section": "components"
-      },
-      {
-        "name": "The Explore Coverage Rule",
-        "body": "Keep counts tied to the loaded page and explain overlap: shared topic membership is not independent corroboration. Show at most 40 loaded topics and 40 connection-map nodes. Topic overview bars use the twenty-idea evidence-page limit as full scale, not whole-topic size or benefit.",
         "section": "components"
       },
       {
@@ -743,26 +570,18 @@
         "section": "components"
       }
     ],
-    "donts": [
-      "Don't turn a bounded CTA sweep into a looping attention effect.",
-      "Don't fabricate thumbnails, totals, analysis completeness or customer outcomes.",
-      "Don't publish private reference screenshots or promote the local slice into full V1 acceptance."
-    ],
     "dos": [
-      "Do use charcoal, meaningful mint and warm original Scroll artwork.",
-      "Do keep Scroll present while allowing motion to stop.",
-      "Do keep workspace scope visible on phones.",
-      "Do preserve actual-state feedback, keyboard focus, 44px controls and explicit private-evidence permissions."
+      "**Do** use cool light and matching dark surfaces with theme-primary selection.",
+      "**Do** reuse original Scroll artwork and preserve visible phone workspace scope.",
+      "**Do** keep loading, empty, ready, success and error feedback tied to actual state.",
+      "**Do** preserve visible keyboard focus, 44px controls and live reduced-motion behavior.",
+      "**Do** keep evidence, scope and recorded-outcome limits explicit."
     ],
-    "keyCharacteristics": [
-      "Dark charcoal and green-gray surfaces with mint actions and amber artwork.",
-      "Original Scroll remains present in the normal shell and onboarding.",
-      "Readable rows, quiet borders and familiar controls.",
-      "Visible workspace scope on phones; accessible focus and generous targets.",
-      "Bounded local motion with a still alternative.",
-      "Cited circle networks, saved topic branches and defined loaded-record charts."
-    ],
-    "northStar": "Scroll's studio",
-    "overview": "VibeScroll uses green charcoal surfaces, meaningful mint actions and warm amber original artwork. Scroll is the owner's always-present guide: a soft folded-paper creature with expressive dark eyes, a curled tuft and mint bookmark. Familiar controls, readable rows and restrained framing keep the artwork approachable without competing with evidence. The owner pinned this world in the October 7 evolution request; no direction roll, seeded round or QUALITY BAR card is claimed. The first surface's composition stays in [the studio direction contract](docs/design/vibescroll-studio.md).\n\nContent, actual state and permitted actions establish hierarchy. Source icons identify media without inventing thumbnails. Panels remain subdued so titles, evidence and the next action carry attention. [PRODUCT.md](PRODUCT.md) records the product constraints; the four foundational documents remain the copy brief. This document does not change copy, establish benefit, or approve legal publication."
+    "donts": [
+      "**Don't** invent scope roots, parent links, exact totals, analysis completeness or benefit.",
+      "**Don't** make a pointer reveal delay keyboard reading or action.",
+      "**Don't** put a duplicate source enclosure around insight-owned cards.",
+      "**Don't** publish private reference screenshots or turn a scoped fix verdict into production or full V1 acceptance."
+    ]
   }
 }

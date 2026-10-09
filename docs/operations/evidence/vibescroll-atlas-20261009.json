@@ -1,0 +1,76 @@
+{
+  "observedAt": "2026-10-08T23:59:50.717208+00:00",
+  "status": "local candidate; release pending",
+  "baseCommit": "c8f6cee31a5381a10d79e88547fd7218f1e32b8f",
+  "branch": "feat/atlas-design-system",
+  "checks": {
+    "environment": "Windows, Node24.12.0, production build local3002",
+    "unitIntegration": {
+      "passed": 546,
+      "explicitExternalSkipped": 3
+    },
+    "authorizationPassed": 28,
+    "pythonPassed": [6, 6, 3],
+    "basicPolicyPassed": 5,
+    "lint": "passed",
+    "types": "passed",
+    "productionBuilds": ["marketing passed", "starter passed"],
+    "audit": {
+      "unresolved": 0,
+      "knownLocallyMitigated": ["GHSA-vfj7-8cjw-p6xm"],
+      "handlebarsPatched": "4.7.10"
+    },
+    "format": "passed after documentation normalization",
+    "redactedStagedSecrets": "passed, zero leaks in redacted Gitleaks8.30.1 staged diff scan"
+  },
+  "browser": {
+    "kind": "hydrated synthetic fixture and bounded authenticated local recovery test",
+    "cssWidths": [320, 390, 768, 1440, 1600],
+    "horizontalOverflow": false,
+    "native": [
+      "Tree/Folders",
+      "exact-card illustrative project link",
+      "theme/account",
+      "Save Enter/Escape focus",
+      "live reduced motion immediately opaque zero animations",
+      "route/body/back consistency"
+    ],
+    "accessLoss": "local injected workspace403 cleared private views and disabled Save; not real membership revocation",
+    "realLocalProductReads": "denied configured localhost origin; preserve origin boundary",
+    "limits": [
+      "physical-device motion unverified",
+      "independent comprehension unverified",
+      "dense forty-topic visual fixture unverified",
+      "actual deployed candidate reads pending"
+    ]
+  },
+  "review": {
+    "disposition": "ship",
+    "scope": "all eight original fixes resolved only",
+    "invalidCapture": "phone proposal reset to desktop metrics; replaced valid same-invocation390px capture",
+    "detector": "run once, zero primary, seven prior-token advisories reconciled intentional redesign",
+    "durableDocumentation": [
+      "PRODUCT.md",
+      "DESIGN.md",
+      ".impeccable/design.json"
+    ]
+  },
+  "spending": {
+    "newPaidProductJobs": 0,
+    "cumulativeAuthorizationEUR": 2,
+    "convexTeamEstimateUSD": 1.09,
+    "previousTeamEstimateUSD": 0.58,
+    "disableThresholdUSD": 15,
+    "taskAttribution": "unknown; delayed team accounting, no verified currency conversion or settled invoice",
+    "unknownHolds": "preserved"
+  },
+  "release": null,
+  "fullV1": "not claimed; independent/provider/lifecycle/commercial/recovery/invoice gates remain separate",
+  "hosting": {
+    "observedAt": "2026-10-09T00:01:33.906074+00:00",
+    "officialBrowserSettings": "Basic 2vCPU8GB selected, Disable on-demand concurrent builds selected",
+    "settingsChanged": false,
+    "cliRead": "existing CLI read403; official signed-in browser remains available"
+  },
+  "backendRelease": "pending same-source Convex bundle redeployment for patched dependency"
+}

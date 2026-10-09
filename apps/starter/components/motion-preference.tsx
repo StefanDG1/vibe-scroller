@@ -18,6 +18,23 @@ function snapshot() {
     return pageEnabled;
   }
 }
+function subscribeDeviceMotion(listener: () => void) {
+  const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+  query.addEventListener("change", listener);
+  return () => query.removeEventListener("change", listener);
+}
+function deviceMotionSnapshot() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+export function useInterfaceMotion() {
+  const enabled = useSyncExternalStore(subscribe, snapshot, () => true);
+  const reduced = useSyncExternalStore(
+    subscribeDeviceMotion,
+    deviceMotionSnapshot,
+    () => true,
+  );
+  return enabled && !reduced;
+}
 export function MotionPreference({ control = false }: { control?: boolean }) {
   const enabled = useSyncExternalStore(subscribe, snapshot, () => true);
   useEffect(() => {
