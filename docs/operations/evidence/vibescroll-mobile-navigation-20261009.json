@@ -49,7 +49,19 @@
     "backendDeployRequired": false
   },
   "release": {
-    "status": "pending exact-head CI, merge, immutable alpha and canonical authenticated verification"
+    "status": "verified canonical production at the recorded scope",
+    "pullRequest": 95,
+    "headCommit": "bae076a6096bb559a97e887e0c790153702a514c",
+    "applicationCommit": "e9a7b2b527e46fd9bc3bd23e06e46b19b364ed27",
+    "prVerify": 37918252823,
+    "mainVerify": 37918606260,
+    "versionRun": 37918606123,
+    "alphaRun": 37918728452,
+    "version": "0.1.0-alpha.20261009103606.ge9a7b2b527e4",
+    "vercelDeployment": "HLu9QfvpB2NMS9txGXw2PXc5m3tF",
+    "providerStatus": "Ready Production Current; canonical alias; source main e9a7b2b; observed duration41s",
+    "domain": "https://scroll.companynerve.com",
+    "documentationOnlyFollowUp": "ADR033 may skip deploying this receipt; serving application remains the separately identified application commit"
   },
   "review": {
     "freshFullDisposition": "fix",
@@ -61,5 +73,41 @@
     "physical phone usability/motion",
     "new independent tester",
     "other V1 external acceptance gates retained in implementation-status"
-  ]
+  ],
+  "production": {
+    "checkedAt": "2026-10-09T10:46:51.462042+00:00",
+    "command": "Get-Content private/mobile-navigation-production-final.py -Raw | browser-harness",
+    "environment": "Existing authenticated canonical owner session, bounded native browser interactions and read-only DOM assertions",
+    "requestedEqualsActualWidth": [320, 390, 412, 1440],
+    "documentOverflow": false,
+    "toolbarTreeFoldersGeometryEqual": true,
+    "oneLevelProductClick": true,
+    "navigationDOMPreservedAcrossRealEvidenceResponse": true,
+    "treeExpandedCards": 1,
+    "folderExpandedCards": 1,
+    "fullClaimMatchesAccessibleLabelBothViews": true,
+    "avatarObserved": "first-name initial; OAuth-picture delivery not tested",
+    "mascot": false,
+    "topAccount": false,
+    "version": "Alpha \u00b7 0.1.0-alpha.20261009103606.ge9a7b2b527e4",
+    "healthResponse": {
+      "status": "ok",
+      "service": "vibescroller",
+      "version": "0.1.0-alpha.20261009103606.ge9a7b2b527e4",
+      "commit": "e9a7b2b527e46fd9bc3bd23e06e46b19b364ed27"
+    },
+    "limits": "One authorized owner page; physical phone, independent comprehension and whole V1 acceptance unverified; exact proposal absent for chosen insight on its bounded page"
+  },
+  "productionTestCorrections": [
+    "Early sample preceded the real evidence RPC; retained as failure.",
+    "Paragraph-count assertion counted the legitimate More evaluations note; replaced by one-expanded-card and exact full-claim assertions.",
+    "Strict desktop scrollWidth equality incorrectly rejected1430 inside viewport1440 with a scrollbar; correct no-overflow assertion passed. Original failed samples retained privately."
+  ],
+  "billing": {
+    "preRefreshUpcomingUSD": 1.15,
+    "priorDailyUpcomingUSD": 1.12,
+    "disableThresholdUSD": 15,
+    "newPaidInvoiceObserved": false,
+    "limitation": "Team-wide rounded estimate only; refreshed invoice panel did not load fully. Task attribution, included credits, delayed accounting and EUR settlement remain unknown. No limit or hold changed."
+  }
 }
