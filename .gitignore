@@ -24,3 +24,6 @@ private/
 
 # Browser captures can contain private account and source information.
 .impeccable/review/
+
+# Local design reference measurements and comparison artifacts.
+.impeccable/build/

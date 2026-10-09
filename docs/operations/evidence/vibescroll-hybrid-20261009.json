@@ -1,0 +1,81 @@
+{
+  "scope": "Exact hybrid Library correction candidate",
+  "date": "2026-10-09",
+  "baseCommit": "714a272b46f872ac8e99b6e8191b62e7747ed272",
+  "branch": "fix/atlas-mockup-fidelity",
+  "productionUpdated": false,
+  "localChecks": {
+    "unitIntegrationPassed": 549,
+    "externalSkipped": 3,
+    "authorizationPassed": 28,
+    "pythonPassed": [6, 6, 3],
+    "basicBuildPolicyPassed": 5,
+    "productionBuildsPassed": ["marketing", "starter"],
+    "latestDisplayBuild": "passed",
+    "lint": "passed",
+    "types": "passed",
+    "format": "passed",
+    "documentationValidation": "225 documents and 12 skill snapshots",
+    "dependencyAudit": "zero unresolved; existing Braces advisory locally mitigated"
+  },
+  "browserScope": {
+    "environment": "local production build, synthetic fixture",
+    "cssWidths": [320, 390, 768, 1440],
+    "deviceDarkMode": true,
+    "nativeJourneys": [
+      "Tree and Folders",
+      "More insights",
+      "complete evidence on tap",
+      "Save and Escape focus",
+      "proposal Review reachable above phone navigation"
+    ],
+    "comparisonFrame": "512 CSS pixels mapped to 1024 by 1536 raster pixels; reference DPR unknown",
+    "mechanicalComparison": {
+      "score": 0.7813,
+      "verdict": "drift",
+      "gate": "FAIL"
+    },
+    "review": {
+      "disposition": "fix",
+      "resolvedFindings": [1, 2, 3, 5, 6],
+      "partialFindings": [4, 7],
+      "pending": "Owner direction on remaining switch/icon scale and exact comparison"
+    }
+  },
+  "dataChanges": {
+    "newInference": false,
+    "apiTokensUsedForCategorization": false,
+    "sourceClaimsRewritten": false,
+    "hierarchyBackfill": "not run",
+    "backendDeploy": "dry run only, additive leaf index, no deleted indexes"
+  },
+  "billing": {
+    "teamUpcomingUSD": 1.11,
+    "priorTeamUpcomingUSD": 1.09,
+    "disableThresholdUSD": 15,
+    "newPaidInvoice": false,
+    "taskAttribution": "unknown",
+    "eurSettlement": "unverified",
+    "ownerCumulativeNewSpendCeilingEUR": 2
+  },
+  "remaining": [
+    "Exact-commit CI",
+    "Final visual disposition",
+    "Compatible production backend and frontend release",
+    "Authorized bounded owner hierarchy backfill",
+    "Canonical domain/version verification",
+    "Existing independent and external V1 acceptance gates"
+  ],
+  "ownerRefinement": {
+    "treeInsights": "Vertical stacked rows; previous grid explicitly superseded",
+    "motion": "Existing Motion library240ms height/opacity; keyboard/reduced immediate",
+    "closedContent": "Immediately inert/aria-hidden; hidden connector removal",
+    "nativeProof": "Business collapse2descendant rows and evidence,0evidenceedges; reopen3running animations; reduced0; Pricing branch selected Business/Product/Pricing",
+    "finalWidths": [320, 390, 768, 1440],
+    "overflow": false,
+    "oldMechanicalComparison": "Historical grid failure; not rerun or claimed passed for owner-changed stack",
+    "currentReview": "ship: scored stacked layout, interactions and documentation only; not exact pixel or production/full-V1 acceptance",
+    "switchProof": "Pointer branch3 and Folders1 running animations; keyboard and reduced switch0",
+    "fullCheck": "549 tests,3 skips,auth28,Python6/6/3,Basic5,bothbuilds passed; entry-origin followup lint/types/starterbuild passed"
+  }
+}

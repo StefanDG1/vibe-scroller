@@ -11,6 +11,7 @@ export async function ProductPage({
   sort = "newest",
   sourceId,
   compactHome = false,
+  reviewDraftId,
   sharedSourceId,
   sharedGrantId,
 }: {
@@ -23,6 +24,7 @@ export async function ProductPage({
   sort?: string;
   sourceId?: string;
   compactHome?: boolean;
+  reviewDraftId?: string;
   sharedSourceId?: string;
   sharedGrantId?: string;
 }) {
@@ -43,6 +45,7 @@ export async function ProductPage({
   return (
     <Console
       compactHomePreview={compactHome}
+      initialReviewDraftId={reviewDraftId}
       key={`${org}:${sourceId ?? "workspace"}`}
       initialSource={
         "selectedSource" in initial ? initial.selectedSource : null

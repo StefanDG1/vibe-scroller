@@ -208,6 +208,7 @@ export function Console({
   initial,
   organizationId,
   initialView = "home",
+  initialReviewDraftId,
   initialSharedDraft = "",
   initialSearch = "",
   initialFilter = "",
@@ -223,6 +224,7 @@ export function Console({
   initial: Initial;
   organizationId: string;
   initialView?: string;
+  initialReviewDraftId?: string;
   initialSharedDraft?: string;
   initialSearch?: string;
   initialFilter?: string;
@@ -867,10 +869,11 @@ export function Console({
     syncRoute();
   }, [initialView, organizationId]);
   const [projectScanOpen, setProjectScanOpen] = useState(false);
-  const [projectEvidenceOpen, setProjectEvidenceOpen] = useState(false);
+  const [projectEvidenceOpen, setProjectEvidenceOpen] =
+    useState(!!initialReviewDraftId);
   const [projectEvidenceSection, setProjectEvidenceSection] = useState<
     "topics" | "ideas" | "issues"
-  >("topics");
+  >(initialReviewDraftId ? "issues" : "topics");
   const pointerInput = useRef(false);
   useEffect(() => {
     const pointer = () => {
@@ -1212,19 +1215,25 @@ export function Console({
               )}
               {view === "library" && (
                 <>
-                  {!data.privateLibrary && !demo && (
-                    <a
-                      className="button secondary"
-                      href={`/app/${organizationId}/shared`}
-                    >
-                      Knowledge shared with this workspace
-                    </a>
-                  )}
-                  <LibrarySections
-                    active={librarySection}
-                    onSelect={setLibrarySection}
-                    posts
-                  />
+                  <details
+                    className="library-secondary"
+                    open={librarySection !== "topics"}
+                  >
+                    <summary>Posts, insights and sharing</summary>
+                    {!data.privateLibrary && !demo && (
+                      <a
+                        className="button secondary"
+                        href={`/app/${organizationId}/shared`}
+                      >
+                        Knowledge shared with this workspace
+                      </a>
+                    )}
+                    <LibrarySections
+                      active={librarySection}
+                      onSelect={setLibrarySection}
+                      posts
+                    />
+                  </details>
                   <details
                     className="library-analysis-settings"
                     hidden={librarySection !== "posts"}
@@ -1764,6 +1773,7 @@ export function Console({
                     <KnowledgeLibrary
                       enabled={projectEvidenceOpen}
                       section={projectEvidenceSection}
+                      targetDraftId={initialReviewDraftId}
                       key={`project-knowledge:${organizationId}`}
                       organizationId={organizationId}
                       repositories={data.repositories}
@@ -2602,7 +2612,7 @@ export function Console({
             }}
           >
             <Plus size={20} aria-hidden="true" />
-            Save
+            <span>Save</span>
           </button>
           <button
             aria-current={view === "projects" ? "page" : undefined}

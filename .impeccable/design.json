@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-09T00:02:49.032785+00:00",
+  "generatedAt": "2026-10-09",
   "title": "Design System: VibeScroll Atlas",
   "extensions": {
     "colorMeta": {
@@ -430,13 +430,18 @@
       },
       {
         "name": "pointer-branch-entry",
-        "value": "180ms; opacity 0 to 1; translateY 6px to 0",
-        "purpose": "Motion for React pointer expansion only; keyboard and reduced-motion actions remain immediate."
+        "value": "240ms; height 0/auto; opacity 0/1; cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "Pointer-driven Tree branch/evidence opening and closing; hidden content immediately inert and aria-hidden. Keyboard and reduced-motion actions immediate."
       },
       {
         "name": "pointer-capture-entry",
         "value": "180ms; opacity 0 to 1; translateY 8px to 0",
         "purpose": "Motion for React pointer capture entry; live system/app suppression applies."
+      },
+      {
+        "name": "pointer-folder-entry",
+        "value": "200ms; opacity 0 to 1",
+        "purpose": "Pointer origin retained by stable LibraryExplore through keyed Atlas; keyboard and live reduced-motion/app-off entry immediate."
       }
     ],
     "breakpoints": [
@@ -456,7 +461,28 @@
         "name": "narrow-desktop-rail",
         "value": "1050px"
       }
-    ]
+    ],
+    "tonalRampPolicy": {
+      "intentional": true,
+      "source": "Synthetic OKLCH panel specimens; only canonical values are application tokens.",
+      "usage": "Eight dark-to-light steps retain each canonical token hue and chroma. These ramps are documentation swatches, not additional shipping CSS colors or an application palette change."
+    },
+    "hybridLibrary": {
+      "authority": "Owner-supplied exact Tree and expanded Folders compositions, October 9; private originals are not shipped.",
+      "source": [
+        "apps/starter/components/library-atlas.tsx",
+        "apps/starter/components/topic-diagram.tsx",
+        "apps/starter/components/library-explore.tsx",
+        "apps/starter/app/atlas.css"
+      ],
+      "geometry": "Runtime measured category, selected-leaf and proposal SVG paths; 1040px composition cap, 6.4% inset; constrained 53% Folder filing strip.",
+      "responsive": "The owner subsequently replaced the four-card Tree grid with a vertical stacked list like Folders. Tree now uses one column of horizontal insight rows with 44px icons, a 76px minimum row height, 15px claims clamped to two lines and 12px source metadata. Proposal icons are also 44px. On phones the Tree/Folders switch occupies 40% width with a 152px minimum. Tree initially reveals four rows and Folders six; More insights adds four or six, while Next insights page requests the next authorized page. Connected category nodes retain the current stepped layout and effective desktop minimum height of 46px. From 361px through 700px category roots have a 62px minimum, deeper nodes 56px, labels 14px and icons 26px; the heading bottom margin is 7px. The superseded phone icon-above-claim layout and two-column evidence grid remain in older CSS declarations but are overridden by the final stacked-row rules.",
+      "pagination": "Four initial stacked Tree rows or six Folders rows, explicit More insights and Next insights page.",
+      "boundary": "Filing is independent of server-authorized access scope; empty templates carry no evidence or grant.",
+      "verification": "The later owner-authorized stacked Tree and transition revision supersedes the four-card grid requirement. Five final stacked screenshots are valid. Native checks observed three running pointer animations after Pricing, one after switching to Folders, zero for keyboard Marketing and zero for reduced-motion Product. These counts verify the recorded native interaction states, not physical-device smoothness or independent comprehension. Final review for this revision remains pending. The 78% drift FAIL and hard veto under `.impeccable/review/diff/hero` are historical evidence for the preceding grid; they have not been rerun or passed for the owner-changed stack. Prior seven captures, full-evidence activation and 512px proposal placement retain their earlier revision scope. Hybrid production deployment and all independent, physical-device, provider/cost and full V1 gates remain pending.",
+      "compactEvidence": "Owner chose compact excerpts with full evidence on tap. First clause/prefix, 28-character/five-word budget, first word retained; ellipsis when shortened. Full claim unchanged in aria label, title and activated source pane; pane absent before activation. Demo rows show Example N with explicit synthetic banner and full source title on activation.",
+      "motion": "Tree evidence now renders inside TopicDiagram beneath its selected branch. Active branches toggle collapsed state; hidden descendants and evidence immediately receive inert and aria-hidden while pointer-driven height/opacity open and close transitions run for 240ms with cubic-bezier(0.22, 1, 0.36, 1). Keyboard and live reduced-motion/app-off actions are immediate. Outgoing stale evidence is not retained; measured edges skip collapsed rows and hidden trays. LibraryExplore captures pointer/key origin on its stable ancestor and passes animateEntry through the keyed Atlas into TopicDiagram, preserving stale/private reset keys. Incoming pointer branches use the 240ms height/opacity reveal; incoming Folders uses a 200ms fade. Keyboard and live reduced-motion/app-off entry remain immediate. Representation changes retain only current authorized evidence."
+    }
   },
   "components": [
     {
@@ -495,9 +521,9 @@
       "name": "Phone Save action",
       "kind": "button",
       "refersTo": "mobile-save",
-      "description": "The yellow center action opens capture; it is not a selected destination.",
+      "description": "Raised yellow 52px circular center phone action with label below; opens capture.",
       "html": "<button class=\"ds-save\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M12 5v14M5 12h14\"/></svg><span>Save</span></button>",
-      "css": ".ds-save{font:14px/1.6 Inter,system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif;transition:background-color 120ms ease-out,border-color 120ms ease-out;display:grid;justify-items:center;gap:4px;min-width:52px;min-height:44px;padding:8px;border:0;border-radius:16px;background:#f4cb68;color:#33270c;cursor:pointer}.ds-save:hover{background:#f4cb68}.ds-save:focus-visible{outline:2px solid var(--primary,#166b58);outline-offset:3px;}.ds-save:disabled{opacity:.45}@media(prefers-reduced-motion:reduce){[class^=\"ds-\"]{transition:none;animation:none}}:host-context([data-motion=\"off\"]) [class^=\"ds-\"]{transition:none;animation:none}"
+      "css": ".ds-save{font:14px/1.6 Inter,system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif;transition:background-color 120ms ease-out,border-color 120ms ease-out;display:grid;justify-items:center;gap:4px;width:52px;height:52px;min-height:52px;padding:0;position:relative;border:0;border-radius:50%;background:#f4cb68;color:#33270c;cursor:pointer}.ds-save>span{position:absolute;top:54px;color:var(--subtle,#526578)}.ds-save:hover{background:#f4cb68}.ds-save:focus-visible{outline:2px solid var(--primary,#166b58);outline-offset:3px;}.ds-save:disabled{opacity:.45}@media(prefers-reduced-motion:reduce){[class^=\"ds-\"]{transition:none;animation:none}}:host-context([data-motion=\"off\"]) [class^=\"ds-\"]{transition:none;animation:none}"
     },
     {
       "name": "State tag",
@@ -516,12 +542,12 @@
       "css": ".ds-insight{font:14px/1.6 Inter,system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif;display:grid;grid-template-columns:24px minmax(0,1fr);gap:8px;padding:12px;border:1px solid var(--line,#dce5eb);border-radius:12px;background:var(--panel,#fff);color:var(--ink,#182e42)}.ds-insight>svg{color:var(--primary,#166b58)}.ds-insight p{margin:0;font-size:14px;line-height:1.5}.ds-insight details{grid-column:2;font-size:12px}.ds-insight summary{min-height:44px;padding:8px 0;cursor:pointer}.ds-destination{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;padding:8px 0}.ds-destination>svg{margin-inline:auto;color:var(--primary,#166b58)}.ds-destination>a{transition:background-color 120ms ease-out,border-color 120ms ease-out;display:flex;align-items:center;padding:10px;border:1px solid var(--line,#dce5eb);border-radius:10px;color:var(--ink,#182e42)}.ds-destination span{color:var(--subtle,#526578)}.ds-destination>a:hover{background:var(--muted,#eaf0f4)}.ds-insight summary:focus-visible,.ds-destination>a:focus-visible{outline:2px solid var(--primary,#166b58);outline-offset:3px;}@media(prefers-reduced-motion:reduce){[class^=\"ds-\"]{transition:none;animation:none}}:host-context([data-motion=\"off\"]) [class^=\"ds-\"]{transition:none;animation:none}"
     },
     {
-      "name": "Saved topic node",
+      "name": "Hybrid category node",
       "kind": "custom",
-      "refersTo": "topic-node",
-      "description": "Synthetic selected saved topic; opening evidence is separate from expanding children.",
-      "html": "<div class=\"ds-node\" data-selected=\"true\"><button class=\"ds-node-open\"><span class=\"ds-node-icon\"><svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M6 3v12a6 6 0 0 0 6-6V6\"/><circle cx=\"6\" cy=\"18\" r=\"3\"/><circle cx=\"12\" cy=\"3\" r=\"3\"/></svg></span><strong>Synthetic topic</strong><span class=\"ds-node-count\">2 insights · 1 posts</span></button><button class=\"ds-expand\" aria-label=\"Expand synthetic topic\" aria-expanded=\"false\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"m6 9 6 6 6-6\"/></svg></button></div>",
-      "css": ".ds-node{font:14px/1.6 Inter,system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif;display:flex;align-items:center;max-width:320px;min-width:0;border:1px solid var(--line,#dce5eb);border-radius:16px;background:var(--panel,#fff);box-shadow:0 3px 12px rgb(18 46 66 / 4%)}.ds-node[data-selected=true]{border-color:var(--primary,#166b58);box-shadow:0 0 0 2px color-mix(in srgb,var(--primary,#166b58) 14%,transparent)}.ds-node-open{font:14px/1.6 Inter,system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif;transition:background-color 120ms ease-out,border-color 120ms ease-out;display:grid;grid-template-columns:34px minmax(0,1fr);gap:3px 10px;width:100%;min-height:76px;padding:14px;border:0;border-radius:16px;background:transparent;color:var(--ink,#182e42);text-align:left;cursor:pointer}.ds-node-open strong{font-size:14px;line-height:1.35;overflow-wrap:anywhere;align-self:center}.ds-node-icon{grid-row:span 2;display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:var(--muted,#eaf0f4);color:var(--primary,#166b58)}.ds-node-count{font-size:12px;line-height:1.4;color:var(--subtle,#526578)}.ds-expand{transition:background-color 120ms ease-out,border-color 120ms ease-out;min-width:44px;min-height:44px;border:0;background:transparent;color:var(--subtle,#526578);cursor:pointer}.ds-node button:hover{border-color:var(--primary,#166b58)}.ds-node button:focus-visible{outline:2px solid var(--primary,#166b58);outline-offset:3px;}@media(prefers-reduced-motion:reduce){[class^=\"ds-\"]{transition:none;animation:none}}:host-context([data-motion=\"off\"]) [class^=\"ds-\"]{transition:none;animation:none}"
+      "refersTo": "hybrid-category",
+      "description": "Synthetic compact horizontal filing category; selection describes records and grants no access. Desktop minimum 46px; deeper phone category minimum 56px from 361–700px; roots use 62px in the composed Tree.",
+      "html": "<button class=\"ds-hybrid-category\" aria-pressed=\"true\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M3 7h6l2-3h10v16H3z\"/></svg><strong>Synthetic category</strong></button>",
+      "css": ".ds-hybrid-category{display:flex;align-items:center;gap:6px;width:100%;min-height:46px;padding:8px;border:1px solid var(--line,#dce5eb);border-radius:9px;background:var(--canvas,#f5f8fa);color:var(--ink,#182e42);text-align:left;font:14px/1.25 Inter,system-ui,sans-serif;transition:background-color 120ms ease-out,border-color 120ms ease-out}.ds-hybrid-category strong{font-size:clamp(12px,1.8vw,23px);letter-spacing:-.015em}.ds-hybrid-category[aria-pressed=true]{border-color:var(--primary,#166b58);background:color-mix(in srgb,var(--primary,#166b58) 8%,var(--canvas,#f5f8fa))}.ds-hybrid-category svg{flex:none;color:var(--primary,#166b58)}.ds-hybrid-category:hover{border-color:var(--primary,#166b58)}.ds-hybrid-category:focus-visible{outline:2px solid var(--primary,#166b58);outline-offset:3px}@media(prefers-reduced-motion:reduce){.ds-hybrid-category{transition:none}}:host-context([data-motion=\"off\"]) .ds-hybrid-category{transition:none}@media(min-width:361px) and (max-width:700px){.ds-hybrid-category{min-height:56px}}@media(min-width:361px) and (max-width:700px){.ds-hybrid-category strong{font-size:14px}.ds-hybrid-category svg{width:26px;height:26px}}"
     },
     {
       "name": "Proposal recorded stage",
@@ -578,7 +604,7 @@
       "**Do** keep evidence, scope and recorded-outcome limits explicit."
     ],
     "donts": [
-      "**Don't** invent scope roots, parent links, exact totals, analysis completeness or benefit.",
+      "**Don't** turn filing templates into access scopes, invent parent links, exact totals, analysis completeness or benefit.",
       "**Don't** make a pointer reveal delay keyboard reading or action.",
       "**Don't** put a duplicate source enclosure around insight-owned cards.",
       "**Don't** publish private reference screenshots or turn a scoped fix verdict into production or full V1 acceptance."

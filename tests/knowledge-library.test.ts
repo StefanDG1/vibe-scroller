@@ -581,6 +581,10 @@ it("keeps full issue and idea pages current across repository changes and eviden
     }
   });
   const args = { organizationId: s.org };
+  const exact = await s.a.query(api.issues.list, { ...args, id });
+  expect(exact.items.map((draft) => draft._id)).toEqual([id]);
+  expect(exact.next).toBeNull();
+  await expect(s.b.query(api.issues.list, { ...args, id })).rejects.toThrow();
   const drafts = await s.a.query(api.issues.list, args);
   const ideas = await s.a.query(api.knowledge.evaluations, args);
   expect(drafts.items).toHaveLength(30);
@@ -608,6 +612,9 @@ it("keeps full issue and idea pages current across repository changes and eviden
   expect(
     (await s.a.query(api.issues.list, args)).items.every((d) => d.body === ""),
   ).toBe(true);
+  expect(
+    (await s.a.query(api.issues.list, { ...args, id })).items[0].body,
+  ).toBe("");
   expect(
     (await s.a.query(api.knowledge.evaluations, args)).items.every(
       (e) => !e.output && !e.inspected,

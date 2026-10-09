@@ -181,15 +181,24 @@ export const list = query({
   args: {
     organizationId: v.id("organizations"),
     cursor: v.optional(v.string()),
+    id: v.optional(v.id("issueDrafts")),
   },
   handler: async (ctx, a) => {
     ctx = knowledgeReadContext(ctx);
     await access(ctx, a.organizationId);
-    const page = await ctx.db
-      .query("issueDrafts")
-      .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
-      .order("desc")
-      .paginate({ cursor: a.cursor ?? null, numItems: 30 });
+    const exact = a.id ? await ctx.db.get(a.id) : null;
+    ensure(
+      !a.id || exact?.organizationId === a.organizationId,
+      "FORBIDDEN",
+      "Proposal unavailable.",
+    );
+    const page = a.id
+      ? { page: exact ? [exact] : [], isDone: true, continueCursor: "" }
+      : await ctx.db
+          .query("issueDrafts")
+          .withIndex("by_org", (q) => q.eq("organizationId", a.organizationId))
+          .order("desc")
+          .paginate({ cursor: a.cursor ?? null, numItems: 30 });
     const items = [];
     for (const d of page.page) {
       const attempts = await ctx.db

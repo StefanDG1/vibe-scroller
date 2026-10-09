@@ -41,6 +41,14 @@ typography:
   topic-title:
     fontSize: "14px"
     lineHeight: 1.35
+  library-headline:
+    fontSize: "clamp(27px, 6vw, 64px)"
+    fontWeight: 750
+    lineHeight: 1.1
+    letterSpacing: "-0.035em"
+  hybrid-title:
+    fontSize: "clamp(12px, 1.8vw, 23px)"
+    lineHeight: 1.25
   body:
     fontSize: "14px"
     lineHeight: 1.6
@@ -85,7 +93,7 @@ components:
   mobile-save:
     backgroundColor: "{colors.save}"
     textColor: "{colors.save-ink}"
-    rounded: "{rounded.node}"
+    rounded: "{rounded.circle}"
   field:
     backgroundColor: "{colors.panel}"
     textColor: "{colors.ink}"
@@ -114,6 +122,15 @@ components:
     rounded: "{rounded.node}"
     padding: "14px"
     height: "76px"
+  hybrid-category:
+    backgroundColor: "{colors.canvas}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.field}"
+    padding: "8px"
+  hybrid-tray:
+    backgroundColor: "{colors.panel}"
+    rounded: "{rounded.control}"
+    padding: "9px"
   insight-card:
     backgroundColor: "{colors.panel}"
     textColor: "{colors.ink}"
@@ -185,11 +202,13 @@ The frontmatter records the effective Atlas light palette and its dark counterpa
 
 ## Layout
 
-The inherited desktop shell keeps a 244px rail, 64px toolbar and main content capped at 1120px with 32px 40px 64px padding. The rail narrows at 1050px. The inherited phone shell activates at 720px; Atlas compaction applies at 700px. Phone navigation contains Home, Library, Save, Projects and Account in that order, with safe-area padding and workspace scope in the header. Save is an action rather than a destination.
+The inherited desktop shell keeps a 244px rail, 64px toolbar and main content capped at 1120px with 32px 40px 64px padding. The rail narrows at 1050px. The inherited phone shell activates at 720px; Atlas compaction applies at 700px. Phone navigation contains Home, Library, Save, Projects and Account in that order, with safe-area padding and workspace scope in the header. Save is an action rather than a destination. At 700px and below it is a raised 52px circle with its label below; the selected destination has a 34px underline.
 
-Library's inner explorer is full width with a 1180px cap. At 1000px and above, the tree and evidence use 0.9fr/1.2fr columns with a 28px gap; the tree sticks at 88px and scrolls within `calc(100dvh - 120px)`. Below that width they follow document flow. Roots have no invented sibling links. Exactly two children of a root use a horizontal parent bus; other and deeper children use a parent-side stem. Nodes have a 320px cap except where side-stem branches require available width. Topic opening and expansion are separate controls.
+The current Library hybrid uses a full-width composition capped at 1040px with 6.4% horizontal inset. Brand and search lead Library and its Tree/Folders switch. Tree places two compact horizontal category nodes per row, with successive selected-branch rows stepping inward. At 360px and below the steps use full width. Runtime SVG paths use measured node rectangles and rounded bends rather than the earlier CSS bus approximations. Folders uses indented category rows and inline evidence under the selected category. Its Personal/Business filing controls occupy a constrained strip beside the heading (53% width); they are separate from Library access view. The earlier 1180px explorer and sticky tree/evidence split remain in CSS for older representations, not this hybrid composition.
 
-On phones the branch gap reduces, node icons become 28px and topic buttons have a 102px minimum height. Expand controls retain 44px targets. Home puts the real next action above loaded-record statistics; its compact Scroll image is 64px on phones. Current knowledge is one bounded page. Source-to-proposal/run trace cards flow vertically. Projects use an auto-fitting grid with 340px minimum columns when space permits.
+The owner subsequently replaced the four-card Tree grid with a vertical stacked list like Folders. Tree now uses one column of horizontal insight rows with 44px icons, a 76px minimum row height, 15px claims clamped to two lines and 12px source metadata. Proposal icons are also 44px. On phones the Tree/Folders switch occupies 40% width with a 152px minimum. Tree initially reveals four rows and Folders six; More insights adds four or six, while Next insights page requests the next authorized page. Connected category nodes retain the current stepped layout and effective desktop minimum height of 46px. From 361px through 700px category roots have a 62px minimum, deeper nodes 56px, labels 14px and icons 26px; the heading bottom margin is 7px. The superseded phone icon-above-claim layout and two-column evidence grid remain in older CSS declarations but are overridden by the final stacked-row rules.
+
+Tree evidence now renders inside TopicDiagram beneath its selected branch. Active branches toggle collapsed state; hidden descendants and evidence immediately receive inert and aria-hidden while pointer-driven height/opacity open and close transitions run for 240ms with cubic-bezier(0.22, 1, 0.36, 1). Keyboard and live reduced-motion/app-off actions are immediate. Outgoing stale evidence is not retained; measured edges skip collapsed rows and hidden trays. LibraryExplore captures pointer/key origin on its stable ancestor and passes animateEntry through the keyed Atlas into TopicDiagram, preserving stale/private reset keys. Incoming pointer branches use the 240ms height/opacity reveal; incoming Folders uses a 200ms fade. Keyboard and live reduced-motion/app-off entry remain immediate. Representation changes retain only current authorized evidence.
 
 **The Touch Target Rule.** Interactive controls keep at least a 44px target; small type and icons do not justify a smaller hit area. Informational chips are not controls.
 
@@ -205,7 +224,7 @@ Thin borders and tonal surfaces establish depth. Topic nodes have a small ambien
 
 ## Shapes
 
-Soft rounded rectangles define the atlas: topic nodes use Node, insight cards use Insight, general panels use Panel, fields use Field and informational badges use Chip. Proposal-stage markers are 33px circles linked by a thin vertical stem. Original Scroll retains its warm paper silhouette and transparent asset; line icons identify media, navigation and recorded stages.
+Soft rounded rectangles define the atlas: the current hybrid categories, insight cells and proposal cards use Field corners (9px), and their shared tray uses Control corners (10px). Earlier topic nodes retain Node corners. General panels use Panel, fields use Field and informational badges use Chip. Proposal-stage markers are 33px circles linked by a thin vertical stem. Original Scroll retains its warm paper silhouette and transparent asset; line icons identify media, navigation and recorded stages.
 
 ## Components
 
@@ -231,9 +250,9 @@ The desktop rail uses subtle text, line icons and a muted selected/hover fill. P
 
 ### Saved topic atlas and insight links
 
-Tree is the default; Folders provides an expanded alternative over the same returned IDs and exact evidence. Overview comes first; remembered topic IDs restore only after the current authorized page returns them. Scope choices derive from the server, including Personal/Business only when actually returned; team libraries retain Workspace. Missing parents remain separate roots with an explanation.
+Tree is the default; Folders provides an expanded alternative over the same returned IDs and exact evidence. Remembered topic IDs restore only after the current authorized page returns them. Personal/Business roots are authored filing containers, independent of access scope. A missing counterpart can appear as an empty local filing template with no evidence, totals or grant. Library access view uses only server-returned permitted scopes; team libraries retain Workspace. Missing parents remain separate roots. The explicit deterministic category helper uses no model call and preserves saved manual layout versions.
 
-Each insight owns its on-demand project-links disclosure. The centered downward arrow leads to evaluations that match both source and insight; server currentness checks exclude stale generations and revisions. Empty or partial pages explain coverage. Native disclosures retain 44px targets. The app's existing advanced evidence representations remain reachable through disclosures.
+Activating an insight reveals Source evidence with the unchanged full claim, full source title and source link; the source pane is absent before activation. The owner chose compact excerpts with full evidence on tap. Demo rows abbreviate Synthetic example to Example while the explicit synthetic banner and source pane retain that context and full title. Current-topic project connections are read once per bounded reference set, then filtered by exact source and insight IDs; failed reads are cleared for explicit retry. Measured SVG stems join the selected leaf to its insight tray, and theme-primary curves terminate at actual recorded proposal cards. Review opens that proposal. The primary foreground is defined separately in light and dark themes. Change category remains a version-bound disclosure, and Library options retains access view, explicit organization and coverage. Empty or partial pages explain coverage. Native disclosures retain 44px targets; advanced evidence representations remain reachable.
 
 **The Cited Group Rule.** Display a connection only when all of its exact source, generation, revision and insight references exist in current permitted evidence. A connection is an explained cited group; neither its line nor topic membership proves causation or agreement.
 
@@ -247,9 +266,11 @@ Projects lead with selected projects and existing proposals. Setup and evidence 
 
 ### Motion
 
-Motion for React (14.0.0) reveals pointer-expanded branches over 180ms with opacity and a 6px vertical offset; capture uses opacity and an 8px offset over 180ms. Native keyboard entry is immediate. The live device reduced-motion preference and Interface motion switch suppress the effects. CSS button/link responses name their properties at 120ms ease-out. Inherited source-card and capture CSS entry animations are suppressed so the new reveal does not compound them. Scroll stays visible when motion is off. Existing bounded greeting, CTA and pending indicators remain governed by their preference and state checks.
+Tree evidence now renders inside TopicDiagram beneath its selected branch. Active branches toggle collapsed state; hidden descendants and evidence immediately receive inert and aria-hidden while pointer-driven height/opacity open and close transitions run for 240ms with cubic-bezier(0.22, 1, 0.36, 1). Keyboard and live reduced-motion/app-off actions are immediate. Outgoing stale evidence is not retained; measured edges skip collapsed rows and hidden trays. LibraryExplore captures pointer/key origin on its stable ancestor and passes animateEntry through the keyed Atlas into TopicDiagram, preserving stale/private reset keys. Incoming pointer branches use the 240ms height/opacity reveal; incoming Folders uses a 200ms fade. Keyboard and live reduced-motion/app-off entry remain immediate. Representation changes retain only current authorized evidence. Capture retains its 180ms opacity and 8px entry. CSS control responses remain 120ms ease-out; Scroll stays visible when motion is off.
 
 ### Candidate verification boundary
+
+The later owner-authorized stacked Tree and transition revision supersedes the four-card grid requirement. Five final stacked screenshots are valid. Native checks observed three running pointer animations after Pricing, one after switching to Folders, zero for keyboard Marketing and zero for reduced-motion Product. These counts verify the recorded native interaction states, not physical-device smoothness or independent comprehension. Final review for this revision remains pending. The 78% drift FAIL and hard veto under `.impeccable/review/diff/hero` are historical evidence for the preceding grid; they have not been rerun or passed for the owner-changed stack. Prior seven captures, full-evidence activation and 512px proposal placement retain their earlier revision scope. Hybrid production deployment and all independent, physical-device, provider/cost and full V1 gates remain pending.
 
 The October 9 reviewer scored all eight original fixes resolved in [the public Atlas evidence receipt](docs/operations/evidence/vibescroll-atlas-20261009.json). This covers the supplied candidate fix evidence, including hierarchy geometry, project-link geometry, source scopes, access-loss capture recovery, truthful trail labels, accessible surfaces, first-viewport density and visibility refresh. It is not a whole-surface audit, production release or full V1 acceptance. Real authenticated deployed-data acceptance, independent browser and physical-device testing, and provider/cost settlement remain separate.
 
@@ -297,7 +318,7 @@ Retain the existing dark overview, main-point cards and 44 px controls. The actu
 
 ### Don't:
 
-- **Don't** invent scope roots, parent links, exact totals, analysis completeness or benefit.
+- **Don't** turn filing templates into access scopes, invent parent links, exact totals, analysis completeness or benefit.
 - **Don't** make a pointer reveal delay keyboard reading or action.
 - **Don't** put a duplicate source enclosure around insight-owned cards.
 - **Don't** publish private reference screenshots or turn a scoped fix verdict into production or full V1 acceptance.

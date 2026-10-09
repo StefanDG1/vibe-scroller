@@ -30,6 +30,7 @@ export const knowledgeTables = {
     searchText: v.optional(v.string()),
     parentId: v.optional(v.id("knowledgeTopics")),
     layoutVersion: v.optional(v.number()),
+    autoCategory: v.optional(v.boolean()),
     pinned: v.boolean(),
     sourceCount: v.optional(v.number()),
     insightCount: v.optional(v.number()),
@@ -40,6 +41,12 @@ export const knowledgeTables = {
   })
     .index("by_org", ["organizationId"])
     .index("by_org_priority", ["organizationId", "pinned", "insightCount"])
+    .index("by_org_leaf", [
+      "organizationId",
+      "autoCategory",
+      "pinned",
+      "insightCount",
+    ])
     .index("by_key", ["organizationId", "key"])
     .searchIndex("search_name", {
       searchField: "name",

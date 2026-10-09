@@ -243,3 +243,7 @@ The owner requested a denser Library with an icon on each insight, efficient car
 ## F033: authorized atlas implementation, October 9
 
 The owner selected a branching Tree plus expanded Folders over the same evidence and authorized implementing the design plan. The [contract](../design/ATLAS-IMPLEMENTATION-CONTRACT-20261009.md) requires device theme, five mobile actions, icon-led evidence and truthful project progress. These are owner choices and implementation work, not independent usability or customer-outcome evidence. Keep the current audience, allowance, provider, privacy and exact work-approval boundaries. Loaded-record charts do not promise whole-library totals or measured benefit; a current project connection is not coding permission. Preserve earlier disagreements and external acceptance gates.
+
+## F034: exact hybrid correction and authored filing, October 9
+
+The owner rejected the released flat Atlas using actual phone screenshots and selected exact connected Tree and expanded Folders compositions. [ADR 096](../adr/096-exact-hybrid-library-and-authored-filing.md) records the correction and deterministic saved category defaults without model calls. Filing labels remain separate from access scopes; manual placements, corrected evidence and exact work authority remain protected. This is owner preference and engineering work, not independent comprehension, measured smoothness, Convex savings or customer benefit. Candidate checks and production results stay separately dated; audience, price, allowance and external gates remain unchanged.

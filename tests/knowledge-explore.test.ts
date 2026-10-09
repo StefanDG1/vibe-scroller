@@ -384,3 +384,99 @@ it("keeps manual hierarchy and aliases independent from analysis, rejects cycles
     await s.t.run((ctx) => ctx.db.query("reservations").collect()),
   ).toEqual([]);
 });
+
+it("persists idempotent authored hierarchy without paid work, preserves corrections and scopes ancestors through current leaves", async () => {
+  const s = await setup();
+  await s.t.run((ctx) =>
+    ctx.db.patch(s.args.topicId, { name: "Interface design" }),
+  );
+  const args = {
+    organizationId: s.args.organizationId,
+    topicIds: [s.args.topicId],
+  };
+  const beforeJobs = await s.t.run((ctx) =>
+    ctx.db.query("knowledgeJobs").collect(),
+  );
+  expect(
+    await s.owner.mutation(api.knowledgeExplore.autoOrganize, args),
+  ).toEqual({ changed: 1 });
+  expect(
+    await s.owner.mutation(api.knowledgeExplore.autoOrganize, args),
+  ).toEqual({ changed: 0 });
+  const listed = await s.owner.query(api.knowledgeExplore.topics, {
+    organizationId: args.organizationId,
+  });
+  const categories = listed.items.filter(
+    (t) => "autoCategory" in t && t.autoCategory,
+  );
+  expect(categories.map((t) => t.name).sort()).toEqual(["Business", "Product"]);
+  expect(categories.every((t) => t.ideas === 0 && t.posts === 0)).toBe(true);
+  const leaf = listed.items.find((t) => t.id === s.args.topicId)!;
+  expect(leaf.ideas).toBe(1);
+  expect(leaf.parentId).toBe(categories.find((t) => t.name === "Product")!.id);
+  expect(
+    await s.t.run((ctx) => ctx.db.query("reservations").collect()),
+  ).toEqual([]);
+  expect(
+    await s.t.run((ctx) => ctx.db.query("knowledgeJobs").collect()),
+  ).toEqual(beforeJobs);
+  await s.owner.mutation(api.knowledgeExplore.organize, {
+    topicId: s.args.topicId,
+    parentId: null,
+    aliases: [],
+    layoutVersion: leaf.layoutVersion,
+  });
+  expect(
+    await s.owner.mutation(api.knowledgeExplore.autoOrganize, args),
+  ).toEqual({ changed: 0 });
+  const corrected = await s.owner.query(api.knowledgeExplore.topics, {
+    organizationId: args.organizationId,
+  });
+  expect(corrected.items).toHaveLength(1);
+  expect(corrected.items[0].parentId).toBeUndefined();
+  await expect(
+    s.other.mutation(api.knowledgeExplore.autoOrganize, args),
+  ).rejects.toThrow();
+});
+it("hides authored ancestors when every descendant loses current source rights and blocks cross-tenant category writes", async () => {
+  const s = await setup();
+  await s.t.run((ctx) =>
+    ctx.db.patch(s.args.topicId, { name: "AI workflows" }),
+  );
+  await s.owner.mutation(api.knowledgeExplore.autoOrganize, {
+    organizationId: s.args.organizationId,
+    topicIds: [s.args.topicId],
+  });
+  expect(
+    (
+      await s.owner.query(api.knowledgeExplore.topics, {
+        organizationId: s.args.organizationId,
+      })
+    ).items.length,
+  ).toBeGreaterThan(1);
+  await s.t.run(async (ctx) => {
+    for (const sourceId of [s.personal.sourceId, s.business.sourceId]) {
+      await ctx.db.patch(sourceId, { rightsAttested: false });
+      await syncDashboardCard(
+        ctx,
+        "sources",
+        sourceId,
+        (await ctx.db.get(sourceId))!,
+      );
+    }
+  });
+  expect(
+    (
+      await s.owner.query(api.knowledgeExplore.topics, {
+        organizationId: s.args.organizationId,
+      })
+    ).items,
+  ).toEqual([]);
+  const foreign = await s.other.mutation(api.organizations.createPrivate, {});
+  await expect(
+    s.other.mutation(api.knowledgeExplore.autoOrganize, {
+      organizationId: foreign,
+      topicIds: [s.args.topicId],
+    }),
+  ).rejects.toThrow("FORBIDDEN");
+});
