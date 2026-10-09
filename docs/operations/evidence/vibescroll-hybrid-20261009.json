@@ -3,7 +3,7 @@
   "date": "2026-10-09",
   "baseCommit": "714a272b46f872ac8e99b6e8191b62e7747ed272",
   "branch": "fix/atlas-mockup-fidelity",
-  "productionUpdated": false,
+  "productionUpdated": true,
   "localChecks": {
     "unitIntegrationPassed": 549,
     "externalSkipped": 3,
@@ -46,12 +46,12 @@
     "newInference": false,
     "apiTokensUsedForCategorization": false,
     "sourceClaimsRewritten": false,
-    "hierarchyBackfill": "not run",
-    "backendDeploy": "dry run only, additive leaf index, no deleted indexes"
+    "hierarchyBackfill": "One bounded returned owner page filed through native app",
+    "backendDeploy": "Completed; additive index only"
   },
   "billing": {
-    "teamUpcomingUSD": 1.11,
-    "priorTeamUpcomingUSD": 1.09,
+    "teamUpcomingUSD": 1.12,
+    "priorTeamUpcomingUSD": 1.11,
     "disableThresholdUSD": 15,
     "newPaidInvoice": false,
     "taskAttribution": "unknown",
@@ -59,12 +59,8 @@
     "ownerCumulativeNewSpendCeilingEUR": 2
   },
   "remaining": [
-    "Exact-commit CI",
-    "Final visual disposition",
-    "Compatible production backend and frontend release",
-    "Authorized bounded owner hierarchy backfill",
-    "Canonical domain/version verification",
-    "Existing independent and external V1 acceptance gates"
+    "Existing independent and external V1 acceptance gates",
+    "Exact pixel reproduction unclaimed; old grid explicitly superseded"
   ],
   "ownerRefinement": {
     "treeInsights": "Vertical stacked rows; previous grid explicitly superseded",
@@ -77,5 +73,21 @@
     "currentReview": "ship: scored stacked layout, interactions and documentation only; not exact pixel or production/full-V1 acceptance",
     "switchProof": "Pointer branch3 and Folders1 running animations; keyboard and reduced switch0",
     "fullCheck": "549 tests,3 skips,auth28,Python6/6/3,Basic5,bothbuilds passed; entry-origin followup lint/types/starterbuild passed"
+  },
+  "release": {
+    "pullRequest": 93,
+    "head": "30966bbe96da97423c6337efaf095fd9190e8727",
+    "mergeCommit": "aacdc9ce237d82aab0ccf544c24c9c3342eab104",
+    "version": "0.1.0-alpha.20261009085602.gaacdc9ce237d",
+    "prVerify": 37907784965,
+    "mainVerify": 37908042863,
+    "versionRun": 37908042988,
+    "releaseRun": 37908201637,
+    "deployment": "4YYsv7A83XtZaK2zCgt1KRmftPGP",
+    "canonicalHealth": "200 exact version/commit",
+    "backend": "Compatible checked PR head deployed with typecheck/schema validation; one additive index; no deleted indexes",
+    "ownerFiling": "One bounded native organization action, unchanged displayed full claim labels; same-parent category save succeeded",
+    "browser": "Authenticated390/1440 Tree4rows/noerrors/nooverflow; Folders6rows/nooverflow; close/reopen/switch native proof",
+    "fullV1": "Not claimed"
   }
 }
