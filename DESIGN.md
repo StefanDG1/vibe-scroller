@@ -255,7 +255,7 @@ Thin borders and tonal surfaces establish depth. Earlier topic-node variants ret
 
 ## Shapes
 
-Soft rounded rectangles define the atlas. Current categories, insight rows, search, toolbar containers and More insights controls use Insight corners. Segmented toolbar buttons retain Field corners, and icon backgrounds retain Control corners. The 9/10/12px control radii are intentionally retained for operative density. Earlier topic-node variants retain Node corners; general panels use Panel and ordinary informational badges use Chip. Right-side open-proposal number bubbles use pill corners, a 24px height and at least 24px width. Proposal-stage markers and authenticated avatars are circles. The favicon supplies the app identity; line icons identify media, navigation and recorded stages.
+Soft rounded rectangles define the atlas. Current categories, insight rows, search, toolbar containers and More insights controls use Insight corners. Segmented toolbar buttons retain Field corners, and icon backgrounds retain Control corners. The 9/10/12px control radii are intentionally retained for operative density. Earlier topic-node variants retain Node corners; general panels use Panel and ordinary informational badges use Chip. Right-side open-proposal indicators reserve a 24px slot. One proposal uses a centered 12px solid teal dot; two or more use pill corners, a 24px height and at least 24px width. Proposal-stage markers and authenticated avatars are circles. The favicon supplies the app identity; line icons identify media, navigation and recorded stages.
 
 ## Components
 
@@ -267,7 +267,7 @@ Retained primary controls use the Legacy primary palette and medium weight (550)
 
 Status and tag badges use Muted with Ink and Chip corners. Small labels supplement readable state text. Synthetic records remain labeled; a badge never implies complete analysis.
 
-Open-proposal number bubbles use theme Teal with Panel text, pill corners and tabular numerals at 12px and weight 700. They sit on the right of insight cards and category nodes before the chevron. Show a numeric bubble only when every bounded proposal page is complete and exact; pending pages, unknown state, caps or malformed hierarchy withhold it. Deduplicate proposal IDs across citations and descendant categories rather than adding child counts. Zero has no bubble.
+Under ADR101, one open proposal uses a centered solid 12px theme Teal dot in a transparent 24px slot. Two or more use theme Teal with Panel text, pill corners and tabular numerals at 12px and weight 700. Accessible names always include the exact count. They sit on the right of insight cards and category nodes before the chevron. Show an indicator only when every bounded proposal page is complete and exact; pending pages, unknown state, caps or malformed hierarchy withhold it. Deduplicate proposal IDs across citations and descendant categories rather than adding child counts. Zero has no bubble.
 
 ### Cards / Containers
 
