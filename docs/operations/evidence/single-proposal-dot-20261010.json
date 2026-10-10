@@ -1,0 +1,58 @@
+{
+  "observedAt": "2026-10-10",
+  "applicationCommit": "3f446b5d96d86a2c1e48ba2e48eece54f091f014",
+  "candidate": "d8860067a070aeedfaba2e08f9dac754002e87cf",
+  "pullRequest": 103,
+  "ci": {
+    "candidateVerify": 38062459174,
+    "mainVerify": 38062617138,
+    "version": 38062617155,
+    "alpha": 38062717150,
+    "result": "success"
+  },
+  "version": "0.1.0-alpha.20261010151139.g3f446b5d96d8",
+  "deployment": {
+    "id": "dpl_ERk26APYMSjgu5pCa53FXSdr57qN",
+    "state": "READY",
+    "target": "production",
+    "canonicalAlias": "scroll.companynerve.com",
+    "health": {
+      "status": "ok",
+      "service": "vibescroller",
+      "version": "0.1.0-alpha.20261010151139.g3f446b5d96d8",
+      "commit": "3f446b5d96d86a2c1e48ba2e48eece54f091f014"
+    }
+  },
+  "local": {
+    "unitIntegration": 569,
+    "auth": 28,
+    "externalSkipped": 3,
+    "python": [6, 6, 3],
+    "basicPolicy": 5,
+    "validation": 230,
+    "lintTypesBothBuilds": "passed",
+    "dependencyAudit": "No unresolved findings; existing registry Braces advisory locally mitigated",
+    "stagedSecretFindings": 0
+  },
+  "productionMarkup": {
+    "status": 200,
+    "bubbles": [
+      {
+        "attributes": " data-single=\"false\" aria-label=\"3 open proposals\"",
+        "text": "3"
+      },
+      {
+        "attributes": " data-single=\"false\" aria-label=\"3 open proposals\"",
+        "text": "3"
+      },
+      {
+        "attributes": " data-single=\"true\" aria-label=\"1 open proposal\"",
+        "text": ""
+      }
+    ]
+  },
+  "nativeBrowser": "Pending Chrome remote-debugging consent; layout/theme/interaction/accessibility-tree acceptance not claimed",
+  "failure": "First full pnpm check timed out existing recovery callback test at 5000ms. Isolated five-test and full suite reruns passed without test or timeout changes.",
+  "scope": "Shared visual indicator only; no backend deployment, additional queries, inference, sandbox, permissions, cap or hold changes",
+  "documentationFollowup": "Documentation-only main may skip frontend deployment under ADR033; serving app version remains distinct"
+}
