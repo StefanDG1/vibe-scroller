@@ -1019,7 +1019,8 @@
   width: 100%;
   min-width: 0;
 }
-.hybrid-edges {
+.hybrid-edges,
+.hybrid-parent-stem {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -1027,12 +1028,17 @@
   overflow: hidden;
   pointer-events: none;
 }
-.hybrid-edges path {
+.hybrid-edges path,
+.hybrid-parent-stem path {
   fill: none;
   stroke: var(--subtle);
   stroke-width: 1.15;
   vector-effect: non-scaling-stroke;
   opacity: 0.7;
+}
+.hybrid-branch-content {
+  position: relative;
+  min-width: 0;
 }
 .hybrid-node-level {
   position: relative;
@@ -1702,17 +1708,6 @@
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: var(--panel);
-  background: var(--teal);
-}
-.hybrid-proposal-bubble[data-single="true"] {
-  padding: 0;
-  background: transparent;
-}
-.hybrid-proposal-bubble[data-single="true"]::after {
-  content: "";
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
   background: var(--teal);
 }
 .hybrid-node[data-has-bubble="true"] {

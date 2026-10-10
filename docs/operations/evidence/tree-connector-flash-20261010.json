@@ -1,0 +1,43 @@
+{
+  "recordedAt": "2026-10-10T16:08:15.593268+00:00",
+  "baseCommit": "23e5db10e221f4a64d43d56d527689891fd43a8c",
+  "scope": "Tree connector flashing and restoring numeral one",
+  "environment": "Windows Node 24; local production build; native Chrome with emulated viewports; labeled synthetic demo",
+  "baseline": "During closing, global path count fell from five to two at 21.1ms while height was 1102px and opacity 0.8277",
+  "after": "Branch-owned paths retain identity throughout native closing. Visible sibling branches retain paths and local geometry. Old branch reached zero height/opacity before replacement.",
+  "widths": [320, 390, 768, 1440],
+  "themes": ["light", "dark"],
+  "nativeChecks": [
+    "Closing path retention",
+    "Sequential sibling switching",
+    "Horizontal row scroll stem matches selected parent center",
+    "Keyboard Enter immediate collapse",
+    "Reduced-motion immediate collapse",
+    "Folders no overflow"
+  ],
+  "tests": {
+    "focused": 9,
+    "timeoutIsolatedRerun": 12,
+    "firstFullCheck": "569 passed, two existing 5000ms timeouts, three external skipped; retained unchanged",
+    "fullRerun": {
+      "command": "pnpm check",
+      "unitIntegration": 571,
+      "externalSkipped": 3,
+      "authentication": 28,
+      "python": [6, 6, 3],
+      "basicBuildPolicy": 5,
+      "validationLintTypesBothBuilds": "Passed"
+    },
+    "finalNumeral": "lint, typecheck, formatting and Starter production build passed"
+  },
+  "release": "Pending exact-head CI, merge and canonical verification",
+  "limitations": [
+    "Emulated Chrome viewports, not physical phone",
+    "No independent-user acceptance",
+    "No full-V1 or whole-mockup fidelity acceptance"
+  ],
+  "spending": "No inference, sandbox, purchase, cap or hold changes; cumulative EUR 2 remains",
+  "billing": "Verified team upcoming USD1.68 vs USD1.38; no new invoice, USD15 threshold unchanged; project attribution and EUR settlement unverified",
+  "numeralOne": "Final production build: native mobile Tree light and Folders dark both show 1, accessible count and 24px slot; captures opened",
+  "aggregation": "Distinct current totals unchanged; repeated child-link counting awaiting owner clarification"
+}
