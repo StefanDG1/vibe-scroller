@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useEffectEvent, useRef, useState } from "react";
+import { useEffectEvent, useLayoutEffect, useRef, useState } from "react";
 import {
   ChevronDown,
   ChevronRight,
@@ -22,6 +22,7 @@ import {
 } from "@/lib/topic-tree";
 import { ProposalBubble } from "./proposal-bubble";
 import { useInterfaceMotion } from "./motion-preference";
+import { measureTreeConnectors } from "@/lib/tree-connectors";
 type Topic = {
   id: string;
   name: string;
@@ -85,11 +86,6 @@ export function TopicDiagram({
   const animate = useInterfaceMotion();
   const duration = animate && pointer ? 0.22 : 0;
   const treeRef = useRef<HTMLElement>(null);
-  const [edges, setEdges] = useState({
-    width: 1,
-    height: 1,
-    paths: [] as string[],
-  });
   const start = visualId && records.has(visualId) ? visualId : root?.id;
   const candidate = start ? singleChildTarget(topics, start)?.id : undefined;
   const originalPath = topicPath(topics, candidate ?? "");
@@ -114,57 +110,22 @@ export function TopicDiagram({
     setCutDepth(Math.max(0, closedDepth));
     setPhase(closedDepth >= 0 ? "closed" : "open");
   });
-  useEffect(() => {
+  useLayoutEffect(() => {
     syncNavigation();
   }, [selectedId, filing, closedTopicId]);
-  useEffect(() => {
+  useLayoutEffect(() => {
     const tree = treeRef.current;
     if (!tree || representation !== "tree") return;
     let frame = 0;
     function measure() {
       if (!tree) return;
-      const bounds = tree.getBoundingClientRect();
-      const rows = [
-        ...tree.querySelectorAll<HTMLElement>(".hybrid-node-level"),
-      ];
-      const paths: string[] = [];
-      for (let i = 1; i < rows.length; i++) {
-        if (rows[i].closest('[aria-hidden="true"]')) continue;
-        const parent = rows[i - 1].querySelector<HTMLElement>(
-          '.hybrid-node[data-selected="true"]',
-        );
-        if (!parent) continue;
-        const p = parent.getBoundingClientRect(),
-          x = p.left + p.width / 2 - bounds.left,
-          y = p.bottom - bounds.top;
-        for (const child of rows[i].querySelectorAll<HTMLElement>(
-          ".hybrid-node-row > li > .hybrid-node",
-        )) {
-          const c = child.getBoundingClientRect(),
-            cx = c.left + c.width / 2 - bounds.left,
-            cy = c.top - bounds.top,
-            m = (y + cy) / 2;
-          paths.push(`M ${x} ${y} V ${m} H ${cx} V ${cy}`);
-        }
-      }
-      const evidence = tree.querySelector<HTMLElement>(".hybrid-evidence");
-      const selected = tree.querySelector<HTMLElement>(
-        `.hybrid-node[data-topic-id="${selectedId}"][data-selected="true"]`,
-      );
-      if (evidence && selected && !evidence.closest('[aria-hidden="true"]')) {
-        const p = selected.getBoundingClientRect(),
-          e = evidence.getBoundingClientRect();
-        const x = p.left + p.width / 2 - bounds.left,
-          y = p.bottom - bounds.top,
-          ex = e.left + e.width / 2 - bounds.left,
-          ey = e.top + 18 - bounds.top;
-        paths.push(`M ${x} ${y} V ${(y + ey) / 2} H ${ex} V ${ey}`);
-      }
-      setEdges({ width: bounds.width, height: bounds.height, paths });
+      measureTreeConnectors(tree);
     }
     const observer = new ResizeObserver(measure);
     observer.observe(tree);
-    for (const node of tree.querySelectorAll(".hybrid-node-level"))
+    for (const node of tree.querySelectorAll(
+      ".hybrid-node-level, .hybrid-branch-content",
+    ))
       observer.observe(node);
     const scroll = () => {
       cancelAnimationFrame(frame);
@@ -317,6 +278,14 @@ export function TopicDiagram({
     return (
       <div className="hybrid-tree-level">
         <div className="hybrid-node-level" data-depth={depth}>
+          <motion.svg
+            className="hybrid-parent-stem"
+            data-connector-parent={chosen?.id}
+            initial={false}
+            animate={{ opacity: expanded ? 1 : 0 }}
+            transition={{ duration, ease: [0.22, 1, 0.36, 1] }}
+            aria-hidden="true"
+          />
           <ul
             className="hybrid-node-row"
             aria-label={
@@ -339,7 +308,12 @@ export function TopicDiagram({
             if (depth === cutDepth) finish();
           }}
         >
-          <div>
+          <div className="hybrid-branch-content">
+            <svg
+              className="hybrid-edges"
+              data-connector-parent={chosen?.id}
+              aria-hidden="true"
+            />
             {chosen?.children.length
               ? treeLevel(chosen.children, depth + 1)
               : null}
@@ -355,15 +329,6 @@ export function TopicDiagram({
       className="hybrid-topic-tree"
       aria-label="Topic branching diagram"
     >
-      <svg
-        className="hybrid-edges"
-        viewBox={`0 0 ${edges.width} ${edges.height}`}
-        aria-hidden="true"
-      >
-        {edges.paths.map((d, i) => (
-          <path key={i} d={d} />
-        ))}
-      </svg>
       {treeLevel(roots, 0)}
     </section>
   );
